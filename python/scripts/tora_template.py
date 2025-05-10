@@ -1,407 +1,524 @@
-#!/usr/bin/env python3
 """
-Tora Training Template
+Hugging Face Training Template with Tora Integration
+This template provides a structured approach to training Hugging Face models
+with Tora experiment tracking. It's organized into three main functions:
+1. load_dataset: Handles dataset loading and preprocessing
+2. load_model: Loads and configures the model and tokenizer
+3. train: Handles the training process with Tora integration
+The template can be adapted for various NLP tasks by modifying the task-specific parts.
+"""
 
-This template provides a standardized structure for creating new training scripts with
-Tora integration for experiment tracking. Customize the sections as needed for your specific
-model and dataset.
-"""
+import os
 
 import time
-import numpy as np
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from sklearn.metrics import (
-    accuracy_score,
-    confusion_matrix,
-    precision_recall_fscore_support,
-)
-from tora import Tora
-from torch.utils.data import DataLoader
 
-# Additional imports based on your specific needs
-# from torchvision import datasets, transforms, models
-# from transformers import AutoModelForSequenceClassification, AutoTokenizer
+import argparse
+
+import numpy as np
+
+import torch
+
+from tora import Tora
+
+from transformers import (
+    AutoModelForSequenceClassification,
+    AutoModelForMaskedLM,
+    AutoTokenizer,
+    DataCollatorWithPadding,
+    DataCollatorForLanguageModeling,
+    Trainer,
+    TrainingArguments,
+    TrainerCallback,
+)
+
+from datasets import load_dataset
+
+import evaluate
+
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 
 def safe_value(value):
-    """Convert values to a format suitable for Tora logging, handling edge cases."""
     if isinstance(value, (int, float)):
         if np.isnan(value) or np.isinf(value):
             return 0.0
+
         return float(value)
+
     elif isinstance(value, bool):
         return int(value)
+
     elif isinstance(value, str):
         return None
+
     else:
         try:
             return float(value)
+
         except (ValueError, TypeError):
             return None
 
 
 def log_metric(client, name, value, step):
-    """Log a metric to Tora after ensuring it's a valid value."""
     value = safe_value(value)
+
     if value is not None:
         client.log(name=name, value=value, step=step)
 
 
-# ===== MODEL DEFINITION =====
-class YourModel(nn.Module):
-    """Define your model architecture here."""
+class ToraCallback(TrainerCallback):
+    def __init__(self, tora_client):
+        self.tora = tora_client
 
-    def __init__(self, input_dim, hidden_dim, output_dim, dropout_rate=0.2):
-        super(YourModel, self).__init__()
-        # Define model layers
-        self.layer1 = nn.Linear(input_dim, hidden_dim)
-        self.activation = nn.ReLU()
-        self.dropout = nn.Dropout(dropout_rate)
-        self.layer2 = nn.Linear(hidden_dim, output_dim)
+    def on_log(self, args, state, control, logs=None, **kwargs):
+        if logs is None:
+            return
 
-    def forward(self, x):
-        # Define forward pass
-        x = self.layer1(x)
-        x = self.activation(x)
-        x = self.dropout(x)
-        x = self.layer2(x)
-        return x
+        loss = logs.get("loss")
 
+        if loss is not None:
+            log_metric(self.tora, "train_loss", loss, state.global_step)
 
-# ===== DATASET HANDLING =====
-def load_dataset():
-    """
-    Load and prepare your dataset.
-    Returns train, validation, and test datasets.
-    """
-    # Example implementation (modify as needed):
-    # train_dataset = datasets.MNIST("data", train=True, download=True, transform=transform)
-    # train_size = int(0.8 * len(train_dataset))
-    # val_size = len(train_dataset) - train_size
-    # train_set, val_set = torch.utils.data.random_split(train_dataset, [train_size, val_size])
-    # test_dataset = datasets.MNIST("data", train=False, transform=transform)
+        lr = logs.get("learning_rate")
 
-    # Replace with your dataset loading logic
-    train_set = None
-    val_set = None
-    test_dataset = None
+        if lr is not None:
+            log_metric(self.tora, "learning_rate", lr, state.global_step)
 
-    return train_set, val_set, test_dataset
+    def on_evaluate(self, args, state, control, metrics=None, **kwargs):
+        if metrics is None:
+            return
+
+        for key, value in metrics.items():
+            if key.startswith("eval_"):
+                log_metric(self.tora, key, value, state.global_step)
 
 
-# ===== TRAINING FUNCTIONS =====
-def train_epoch(model, device, train_loader, optimizer, criterion, epoch, tora):
-    """Train for one epoch and log metrics to Tora."""
-    model.train()
-    running_loss = 0.0
-    correct = 0
-    total = 0
-    start_time = time.time()
+def load_dataset(config):
+    print(f"Loading dataset: {config['dataset_name']}")
 
-    for batch_idx, (data, target) in enumerate(train_loader):
-        data, target = data.to(device), target.to(device)
-        optimizer.zero_grad()
+    dataset = load_dataset(config["dataset_name"])
 
-        try:
-            # Forward pass
-            output = model(data)
-            loss = criterion(output, target)
+    text_field, label_field = config.get("text_field"), config.get("label_field")
 
-            # Backward pass and optimization
-            loss.backward()
-            optimizer.step()
+    if not text_field:
+        for field in ["text", "sentence", "content"]:
+            if field in dataset["train"].features:
+                text_field = field
 
-            # Track metrics
-            running_loss += loss.item() * data.size(0)
-            _, predicted = output.max(1)
-            total += target.size(0)
-            correct += predicted.eq(target).sum().item()
+                break
 
-            # Print progress
-            if batch_idx % 50 == 0:
-                print(
-                    f"Train Epoch: {epoch} [{batch_idx * len(data)}/{len(train_loader.dataset)}"
-                    f" ({100.0 * batch_idx / len(train_loader):.0f}%)]\tLoss: {loss.item():.6f}"
-                )
-        except Exception as e:
-            print(f"Error in batch {batch_idx}: {str(e)}")
+    if config["task_type"] == "classification" and not label_field:
+        for field in ["label", "sentiment", "class"]:
+            if field in dataset["train"].features:
+                label_field = field
 
-    # Calculate and log epoch metrics
-    epoch_loss = running_loss / max(total, 1)
-    accuracy = 100.0 * correct / max(total, 1)
-    epoch_time = time.time() - start_time
+                break
 
-    log_metric(tora, "train_loss", epoch_loss, epoch)
-    log_metric(tora, "train_accuracy", accuracy, epoch)
-    log_metric(tora, "epoch_time", epoch_time, epoch)
+    if not text_field:
+        raise ValueError("Could not identify text field. Please specify it manually.")
 
-    return epoch_loss, accuracy
+    if config["task_type"] == "classification" and not label_field:
+        raise ValueError("Could not identify label field. Please specify it manually.")
 
+    print(f"Using text field: {text_field}")
 
-def validate(model, device, test_loader, criterion, epoch, tora, split="val"):
-    """Evaluate model on validation/test data and log metrics to Tora."""
-    model.eval()
-    test_loss = 0
-    all_targets = []
-    all_predictions = []
+    if label_field:
+        print(f"Using label field: {label_field}")
 
-    with torch.no_grad():
-        for data, target in test_loader:
-            data, target = data.to(device), target.to(device)
-            output = model(data)
-            test_loss += criterion(output, target).item() * data.size(0)
-            pred = output.argmax(dim=1)
-            all_targets.extend(target.cpu().numpy())
-            all_predictions.extend(pred.cpu().numpy())
+    tokenizer = AutoTokenizer.from_pretrained(config["model_name"])
 
-    dataset_size = len(test_loader.dataset)
-    test_loss = test_loss / max(dataset_size, 1)
+    if config["task_type"] == "mlm":
 
-    try:
-        accuracy = accuracy_score(all_targets, all_predictions) * 100
-        precision, recall, f1, _ = precision_recall_fscore_support(
-            all_targets, all_predictions, average="weighted", zero_division=0
-        )
-    except:
-        accuracy, precision, recall, f1 = 0, 0, 0, 0
-
-    # Log metrics with appropriate prefix
-    prefix = "val" if split == "val" else "test"
-    log_metric(tora, f"{prefix}_loss", test_loss, epoch)
-    log_metric(tora, f"{prefix}_accuracy", accuracy, epoch)
-    log_metric(tora, f"{prefix}_precision", precision * 100, epoch)
-    log_metric(tora, f"{prefix}_recall", recall * 100, epoch)
-    log_metric(tora, f"{prefix}_f1", f1 * 100, epoch)
-
-    print(
-        f"\n{split.capitalize()} set: Average loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%, F1: {f1 * 100:.2f}%\n"
-    )
-
-    return test_loss, accuracy, precision, recall, f1
-
-
-def log_per_class_metrics(model, device, data_loader, class_names, tora, epoch):
-    """Log detailed per-class metrics to Tora."""
-    all_targets = []
-    all_predictions = []
-    model.eval()
-
-    # Collect predictions
-    with torch.no_grad():
-        for data, target in data_loader:
-            data, target = data.to(device), target.to(device)
-            output = model(data)
-            pred = output.argmax(dim=1)
-            all_targets.extend(target.cpu().numpy())
-            all_predictions.extend(pred.cpu().numpy())
-
-    try:
-        cm = confusion_matrix(all_targets, all_predictions)
-        num_classes = len(class_names) if class_names else cm.shape[0]
-
-        # Calculate metrics for each class
-        for class_idx in range(num_classes):
-            true_positives = cm[class_idx, class_idx]
-            false_positives = cm[:, class_idx].sum() - true_positives
-            false_negatives = cm[class_idx, :].sum() - true_positives
-
-            denominator_p = max(true_positives + false_positives, 1)
-            denominator_r = max(true_positives + false_negatives, 1)
-
-            class_precision = true_positives / denominator_p
-            class_recall = true_positives / denominator_r
-
-            if class_precision + class_recall > 0:
-                class_f1 = (
-                    2
-                    * (class_precision * class_recall)
-                    / (class_precision + class_recall)
-                )
-            else:
-                class_f1 = 0
-
-            # Get class name (if available) or use index
-            class_name = class_names[class_idx] if class_names else str(class_idx)
-
-            # Log metrics
-            log_metric(
-                tora, f"class_{class_name}_precision", class_precision * 100, epoch
+        def tokenize_function(examples):
+            return tokenizer(
+                examples[text_field],
+                truncation=True,
+                max_length=config["max_length"],
+                padding="max_length",
+                return_special_tokens_mask=True,
             )
-            log_metric(tora, f"class_{class_name}_recall", class_recall * 100, epoch)
-            log_metric(tora, f"class_{class_name}_f1", class_f1 * 100, epoch)
-    except Exception as e:
-        print(f"Error calculating per-class metrics: {str(e)}")
 
+        remove_columns = [text_field]
 
-# ===== MAIN FUNCTION =====
-def main():
-    # ===== HYPERPARAMETERS =====
-    hyperparams = {
-        # Basic training parameters
-        "batch_size": 32,
-        "epochs": 10,
-        "lr": 0.001,
-        "weight_decay": 5e-4,
-        # Model architecture parameters
-        "input_dim": 784,  # Example for MNIST
-        "hidden_dim": 128,
-        "output_dim": 10,  # Number of classes
-        "dropout_rate": 0.2,
-        # Optimizer parameters
-        "optimizer": "SGD",  # "SGD" or "Adam"
-        "momentum": 0.9,
-        "nesterov": True,
-        "dampening": 0,
-        "beta1": 0.9,
-        "beta2": 0.999,
-        "eps": 1e-8,
-        # Scheduler parameters
-        "scheduler": "cosine",  # "cosine", "linear", "step", etc.
-        "step_size": 5,  # For StepLR
-        "gamma": 0.1,  # For StepLR
-    }
+        if label_field:
+            remove_columns.append(label_field)
 
-    # ===== DEVICE SETUP =====
-    if torch.cuda.is_available():
-        device = torch.device("cuda")
-    elif torch.backends.mps.is_available():
-        device = torch.device("mps")
     else:
-        device = torch.device("cpu")
-    hyperparams["device"] = str(device)
 
-    # ===== DATA LOADING =====
-    train_set, val_set, test_dataset = load_dataset()
+        def tokenize_function(examples):
+            return tokenizer(
+                examples[text_field],
+                truncation=True,
+                max_length=config["max_length"],
+                padding="max_length",
+            )
 
-    # Create data loaders
-    train_loader = DataLoader(
-        train_set, batch_size=hyperparams["batch_size"], shuffle=True
+        remove_columns = [text_field]
+
+    tokenized_datasets = dataset.map(
+        tokenize_function,
+        batched=True,
+        remove_columns=remove_columns,
+        desc="Tokenizing dataset",
     )
-    val_loader = DataLoader(val_set, batch_size=hyperparams["batch_size"])
-    test_loader = DataLoader(test_dataset, batch_size=hyperparams["batch_size"])
 
-    # ===== MODEL CREATION =====
-    model = YourModel(
-        input_dim=hyperparams["input_dim"],
-        hidden_dim=hyperparams["hidden_dim"],
-        output_dim=hyperparams["output_dim"],
-        dropout_rate=hyperparams["dropout_rate"],
-    ).to(device)
+    if "train" in tokenized_datasets and "validation" in tokenized_datasets:
+        train_dataset = tokenized_datasets["train"]
 
-    # Count model parameters
+        val_dataset = tokenized_datasets["validation"]
+
+    elif "train" in tokenized_datasets and "test" in tokenized_datasets:
+        train_size = int(0.9 * len(tokenized_datasets["train"]))
+
+        val_size = len(tokenized_datasets["train"]) - train_size
+
+        splits = tokenized_datasets["train"].train_test_split(
+            train_size=train_size, test_size=val_size, seed=config["seed"]
+        )
+
+        train_dataset = splits["train"]
+
+        val_dataset = splits["test"]
+
+    else:
+        train_size = int(0.9 * len(tokenized_datasets["train"]))
+
+        val_size = len(tokenized_datasets["train"]) - train_size
+
+        splits = tokenized_datasets["train"].train_test_split(
+            train_size=train_size, test_size=val_size, seed=config["seed"]
+        )
+
+        train_dataset = splits["train"]
+
+        val_dataset = splits["test"]
+
+    test_dataset = tokenized_datasets.get("test", val_dataset)
+
+    num_labels = None
+
+    if config["task_type"] == "classification" and label_field:
+        label_names = getattr(dataset["train"].features[label_field], "names", None)
+
+        if label_names:
+            num_labels = len(label_names)
+
+        else:
+            num_labels = int(max(dataset["train"][label_field])) + 1
+
+    return train_dataset, val_dataset, test_dataset, num_labels, text_field, label_field
+
+
+def load_model(config, num_labels=None):
+    print(f"Loading model: {config['model_name']}")
+
+    tokenizer = AutoTokenizer.from_pretrained(config["model_name"])
+
+    if config["task_type"] == "mlm":
+        model = AutoModelForMaskedLM.from_pretrained(config["model_name"])
+
+        data_collator = DataCollatorForLanguageModeling(
+            tokenizer=tokenizer,
+            mlm=True,
+            mlm_probability=config.get("mlm_probability", 0.15),
+        )
+
+    elif config["task_type"] == "classification":
+        model = AutoModelForSequenceClassification.from_pretrained(
+            config["model_name"],
+            num_labels=num_labels,
+        )
+
+        data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+
+    else:
+        raise ValueError(f"Unsupported task type: {config['task_type']}")
+
     model_params = sum(p.numel() for p in model.parameters())
 
-    # Update hyperparams with model info
-    hyperparams.update(
+    print(f"Model has {model_params:,} parameters")
+
+    return model, tokenizer, data_collator
+
+
+def train(
+    config,
+    model,
+    tokenizer,
+    data_collator,
+    train_dataset,
+    val_dataset,
+    test_dataset=None,
+):
+    os.makedirs(config["output_dir"], exist_ok=True)
+
+    config.update(
         {
-            "model": "YourModel",
-            "model_parameters": model_params,
-            "dataset": "YourDataset",
-            "train_samples": len(train_set),
-            "val_samples": len(val_set),
-            "test_samples": len(test_dataset),
-            "criterion": "CrossEntropyLoss",
+            "train_samples": len(train_dataset),
+            "val_samples": len(val_dataset),
+            "test_samples": len(test_dataset)
+            if test_dataset is not None
+            else len(val_dataset),
+            "model_parameters": sum(p.numel() for p in model.parameters()),
         }
     )
 
-    # ===== TORA EXPERIMENT SETUP =====
     tora = Tora.create_experiment(
-        name="Your_Experiment_Name",
-        description="Description of your model and experiment",
-        hyperparams=hyperparams,
-        tags=["tag1", "tag2", "tag3"],  # Replace with relevant tags
+        name=config["experiment_name"],
+        description=config["experiment_description"],
+        hyperparams=config,
+        tags=config.get("tags", []),
     )
 
-    # ===== TRAINING SETUP =====
-    criterion = nn.CrossEntropyLoss()
+    if config["task_type"] == "classification":
 
-    # Configure optimizer based on hyperparameters
-    if hyperparams["optimizer"] == "SGD":
-        optimizer = optim.SGD(
-            model.parameters(),
-            lr=hyperparams["lr"],
-            momentum=hyperparams["momentum"],
-            weight_decay=hyperparams["weight_decay"],
-            nesterov=hyperparams["nesterov"],
-            dampening=hyperparams["dampening"],
-        )
-    elif hyperparams["optimizer"] == "Adam":
-        optimizer = optim.Adam(
-            model.parameters(),
-            lr=hyperparams["lr"],
-            weight_decay=hyperparams["weight_decay"],
-            betas=(hyperparams["beta1"], hyperparams["beta2"]),
-            eps=hyperparams["eps"],
-        )
+        def compute_metrics(pred):
+            labels = pred.label_ids
+
+            preds = pred.predictions.argmax(-1)
+
+            accuracy = accuracy_score(labels, preds)
+
+            precision = precision_score(
+                labels, preds, average="weighted", zero_division=0
+            )
+
+            recall = recall_score(labels, preds, average="weighted", zero_division=0)
+
+            f1 = f1_score(labels, preds, average="weighted", zero_division=0)
+
+            return {
+                "accuracy": accuracy,
+                "precision": precision,
+                "recall": recall,
+                "f1": f1,
+            }
+
+    elif config["task_type"] == "mlm":
+        perplexity = evaluate.load("perplexity")
+
+        def compute_metrics(eval_pred):
+            result = {}
+
+            try:
+                result["perplexity"] = perplexity.compute(
+                    predictions=eval_pred.predictions, model_id=config["model_name"]
+                )["perplexity"]
+
+            except Exception as e:
+                print(f"Error computing perplexity: {str(e)}")
+
+                result["perplexity"] = 0.0
+
+            return result
+
     else:
-        optimizer = optim.SGD(model.parameters(), lr=hyperparams["lr"])
+        compute_metrics = None
 
-    # Configure learning rate scheduler
-    if hyperparams["scheduler"] == "cosine":
-        scheduler = optim.lr_scheduler.CosineAnnealingLR(
-            optimizer, T_max=hyperparams["epochs"]
-        )
-    elif hyperparams["scheduler"] == "step":
-        scheduler = optim.lr_scheduler.StepLR(
-            optimizer, step_size=hyperparams["step_size"], gamma=hyperparams["gamma"]
-        )
+    training_args = TrainingArguments(
+        output_dir=config["output_dir"],
+        overwrite_output_dir=True,
+        num_train_epochs=config["epochs"],
+        per_device_train_batch_size=config["batch_size"],
+        per_device_eval_batch_size=config["eval_batch_size"],
+        eval_strategy="steps",
+        eval_steps=config["eval_steps"],
+        logging_dir=f"{config['output_dir']}/logs",
+        logging_steps=config["logging_steps"],
+        save_steps=config["save_steps"],
+        save_total_limit=2,
+        seed=config["seed"],
+        data_seed=config["seed"],
+        learning_rate=config["lr"],
+        weight_decay=config["weight_decay"],
+        warmup_steps=config["warmup_steps"],
+        load_best_model_at_end=True,
+        metric_for_best_model="eval_loss",
+        report_to="none",
+    )
+
+    tora_callback = ToraCallback(tora_client=tora)
+
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        data_collator=data_collator,
+        train_dataset=train_dataset,
+        eval_dataset=val_dataset,
+        compute_metrics=compute_metrics,
+        callbacks=[tora_callback],
+    )
+
+    print(f"Starting training with {config['epochs']} epochs...")
+
+    start_time = time.time()
+
+    train_result = trainer.train()
+
+    training_time = time.time() - start_time
+
+    train_metrics = train_result.metrics
+
+    trainer.log_metrics("train", train_metrics)
+
+    trainer.save_metrics("train", train_metrics)
+
+    trainer.save_state()
+
+    log_metric(tora, "total_training_time", training_time, trainer.state.global_step)
+
+    print("Performing final evaluation...")
+
+    if test_dataset is not None:
+        eval_results = trainer.evaluate(test_dataset)
+
     else:
-        scheduler = None
+        eval_results = trainer.evaluate(val_dataset)
 
-    # Variables to track best model
-    best_val_acc = 0
-    best_model_path = "best_model.pt"
+    trainer.log_metrics("eval", eval_results)
 
-    # ===== TRAINING LOOP =====
-    for epoch in range(1, hyperparams["epochs"] + 1):
-        # Log learning rate
-        log_metric(tora, "learning_rate", optimizer.param_groups[0]["lr"], epoch)
+    trainer.save_metrics("eval", eval_results)
 
-        # Train
-        train_loss, train_acc = train_epoch(
-            model, device, train_loader, optimizer, criterion, epoch, tora
-        )
+    for key, value in eval_results.items():
+        log_metric(tora, f"final_{key}", value, trainer.state.global_step)
 
-        # Validate
-        val_loss, val_acc, val_prec, val_rec, val_f1 = validate(
-            model, device, val_loader, criterion, epoch, tora, split="val"
-        )
+    final_model_dir = f"{config['output_dir']}/final_model"
 
-        # Save best model
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
-            torch.save(model.state_dict(), best_model_path)
-            print(f"Best model saved with validation accuracy: {best_val_acc:.2f}%")
+    trainer.save_model(final_model_dir)
 
-        # Step scheduler if defined
-        if scheduler:
-            scheduler.step()
+    tokenizer.save_pretrained(final_model_dir)
 
-    # ===== FINAL EVALUATION =====
-    # Load best model for final evaluation
-    model.load_state_dict(torch.load(best_model_path))
+    print("\nTraining completed!")
 
-    # Evaluate on test set
-    test_loss, test_acc, test_prec, test_rec, test_f1 = validate(
-        model, device, test_loader, criterion, hyperparams["epochs"], tora, split="test"
-    )
+    print(f"Model saved to: {final_model_dir}")
 
-    # Log final metrics
-    log_metric(tora, "final_test_accuracy", test_acc, hyperparams["epochs"])
-    log_metric(tora, "final_test_precision", test_prec * 100, hyperparams["epochs"])
-    log_metric(tora, "final_test_recall", test_rec * 100, hyperparams["epochs"])
-    log_metric(tora, "final_test_f1", test_f1 * 100, hyperparams["epochs"])
+    if config["task_type"] == "classification":
+        print(f"Final accuracy: {eval_results.get('eval_accuracy', 'N/A')}")
 
-    # Log per-class metrics
-    class_names = ["class1", "class2", "class3"]  # Replace with your class names
-    log_per_class_metrics(
-        model, device, test_loader, class_names, tora, hyperparams["epochs"]
-    )
+        print(f"Final F1 score: {eval_results.get('eval_f1', 'N/A')}")
 
-    # Shutdown Tora client
+    elif config["task_type"] == "mlm":
+        print(f"Final perplexity: {eval_results.get('eval_perplexity', 'N/A')}")
+
+    print(f"Total training time: {training_time:.2f} seconds")
+
     tora.shutdown()
+
+    return trainer, model, tokenizer
+
+
+def setup_device_and_seed(seed):
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+
+        torch.cuda.manual_seed_all(seed)
+
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+
+    else:
+        device = torch.device("cpu")
+
+    torch.manual_seed(seed)
+
+    np.random.seed(seed)
+
+    return device
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Hugging Face training with Tora integration"
+    )
+
+    parser.add_argument(
+        "--task_type",
+        type=str,
+        default="classification",
+        choices=["classification", "mlm"],
+        help="Task type: classification or mlm",
+    )
+
+    parser.add_argument(
+        "--dataset_name",
+        type=str,
+        default="imdb",
+        help="Dataset name (from Hugging Face datasets)",
+    )
+
+    parser.add_argument(
+        "--model_name",
+        type=str,
+        default="distilbert-base-uncased",
+        help="Model name (from Hugging Face models)",
+    )
+
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        default="results/model",
+        help="Output directory for model and logs",
+    )
+
+    parser.add_argument(
+        "--batch_size", type=int, default=16, help="Training batch size"
+    )
+
+    parser.add_argument(
+        "--epochs", type=int, default=3, help="Number of training epochs"
+    )
+
+    parser.add_argument(
+        "--seed", type=int, default=42, help="Random seed for reproducibility"
+    )
+
+    args = parser.parse_args()
+
+    config = {
+        "model_name": args.model_name,
+        "dataset_name": args.dataset_name,
+        "task_type": args.task_type,
+        "text_field": None,
+        "label_field": None,
+        "max_length": 512,
+        "batch_size": args.batch_size,
+        "eval_batch_size": args.batch_size * 2,
+        "epochs": args.epochs,
+        "lr": 5e-5,
+        "weight_decay": 0.01,
+        "seed": args.seed,
+        "logging_steps": 500,
+        "eval_steps": 1000,
+        "save_steps": 2000,
+        "warmup_steps": 500,
+        "mlm_probability": 0.15,
+        "experiment_name": f"{args.task_type.upper()}_{args.model_name.split('/')[-1]}_{args.dataset_name}",
+        "experiment_description": f"Training {args.model_name} on {args.dataset_name} for {args.task_type}",
+        "tags": ["huggingface", args.task_type, "nlp"],
+        "output_dir": args.output_dir,
+    }
+
+    device = setup_device_and_seed(config["seed"])
+
+    config["device"] = str(device)
+
+    train_dataset, val_dataset, test_dataset, num_labels, text_field, label_field = (
+        load_dataset(config)
+    )
+
+    model, tokenizer, data_collator = load_model(config, num_labels)
+
+    trainer, model, tokenizer = train(
+        config,
+        model,
+        tokenizer,
+        data_collator,
+        train_dataset,
+        val_dataset,
+        test_dataset,
+    )
+
+    return trainer, model, tokenizer
 
 
 if __name__ == "__main__":
