@@ -1,35 +1,50 @@
 import argparse
 
+
 import logging
+
 
 import time
 
+
 import os
+
 
 import numpy as np
 
+
 import nltk
+
 
 from nltk.stem import WordNetLemmatizer
 
+
 from nltk.tokenize import word_tokenize
+
 
 from nltk.corpus import stopwords
 
+
 from sklearn.feature_extraction.text import CountVectorizer
+
 
 from sklearn.decomposition import LatentDirichletAllocation
 
+
 from sklearn.datasets import fetch_20newsgroups
+
 
 from tora import Tora
 
 
 nltk.download("punkt")
 
+
 nltk.download("punkt_tab")
 
+
 nltk.download("wordnet")
+
 
 nltk.download("stopwords")
 

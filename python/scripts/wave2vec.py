@@ -1,28 +1,32 @@
-"""
-Speech-to-Text Training Script with Tora Tracking
-This script fine-tunes a Wav2Vec2 model on the Common Voice English dataset
-using Hugging Face Transformers (v4+) and Datasets (>=2.0), with experiment tracking via Tora.
-"""
-
 import time
+
 
 import numpy as np
 
+
 import torch
+
 
 import torch.optim as optim
 
+
 from tora import Tora
+
 
 from torch.utils.data import DataLoader
 
+
 from datasets import load_dataset
+
 
 import evaluate
 
+
 from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
 
+
 from dataclasses import dataclass
+
 
 from typing import List, Dict, Union
 

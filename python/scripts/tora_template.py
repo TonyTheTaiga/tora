@@ -1,24 +1,20 @@
-"""
-Hugging Face Training Template with Tora Integration
-This template provides a structured approach to training Hugging Face models
-with Tora experiment tracking. It's organized into three main functions:
-1. load_dataset: Handles dataset loading and preprocessing
-2. load_model: Loads and configures the model and tokenizer
-3. train: Handles the training process with Tora integration
-The template can be adapted for various NLP tasks by modifying the task-specific parts.
-"""
-
 import os
+
 
 import time
 
+
 import argparse
+
 
 import numpy as np
 
+
 import torch
 
+
 from tora import Tora
+
 
 from transformers import (
     AutoModelForSequenceClassification,
@@ -31,9 +27,12 @@ from transformers import (
     TrainerCallback,
 )
 
+
 from datasets import load_dataset
 
+
 import evaluate
+
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 

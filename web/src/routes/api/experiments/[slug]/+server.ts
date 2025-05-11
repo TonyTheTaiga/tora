@@ -2,10 +2,11 @@ import { json } from "@sveltejs/kit";
 import {
   getExperiment,
   updateExperiment,
-  createReference,
 } from "$lib/server/database";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "$lib/server/database.types";
 
-export async function GET({ params: { slug } }: { params: { slug: string } }) {
+export async function GET({ params: { slug }, locals: { supabase } }: { params: { slug: string }, locals: { supabase: SupabaseClient<Database> } }) {
   const experiment = await getExperiment(slug);
   return json(experiment);
 }
