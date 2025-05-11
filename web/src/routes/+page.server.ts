@@ -17,6 +17,19 @@ interface FormDataResult {
   [key: string]: any;
 }
 
+export const load: PageServerLoad = async ({ fetch }) => {
+  const response = await fetch(API_ROUTES.GET_EXPERIMENTS);
+  const rawData = await response.json();
+  const experiments = rawData.map(mapExperimentData);
+  return { experiments };
+};
+
+export const actions: Actions = {
+  create: async ({ request, fetch }) => handleCreate(request, fetch),
+  delete: async ({ request, fetch }) => handleDelete(request, fetch),
+  update: async ({ request, fetch }) => handleUpdate(request, fetch),
+};
+
 function mapExperimentData(exp: any): Experiment {
   return {
     id: exp.id,
@@ -64,13 +77,6 @@ function parseFormData(formData: FormData): FormDataResult {
     tags: result.tags.filter(Boolean),
   };
 }
-
-export const load: PageServerLoad = async ({ fetch }) => {
-  const response = await fetch(API_ROUTES.GET_EXPERIMENTS);
-  const rawData = await response.json();
-  const experiments = rawData.map(mapExperimentData);
-  return { experiments };
-};
 
 async function handleCreate(request: Request, fetch: Function) {
   const form = await request.formData();
@@ -177,9 +183,3 @@ async function handleUpdate(request: Request, fetch: Function) {
     message: "Experiment updated successfully!",
   };
 }
-
-export const actions: Actions = {
-  create: async ({ request, fetch }) => handleCreate(request, fetch),
-  delete: async ({ request, fetch }) => handleDelete(request, fetch),
-  update: async ({ request, fetch }) => handleUpdate(request, fetch),
-};

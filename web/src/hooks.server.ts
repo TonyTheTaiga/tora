@@ -8,6 +8,8 @@ import {
 } from "$env/static/public";
 
 const supabase: Handle = async ({ event, resolve }) => {
+  console.log("all cookies", event.cookies.getAll());
+
   /**
    * Creates a Supabase client specific to this server request.
    *
@@ -43,7 +45,7 @@ const supabase: Handle = async ({ event, resolve }) => {
       data: { session },
     } = await event.locals.supabase.auth.getSession();
     if (!session) {
-      console.log("session not found");
+      console.log("hook.server.ts::get sessions failed");
       return { session: null, user: null };
     }
 
@@ -53,12 +55,10 @@ const supabase: Handle = async ({ event, resolve }) => {
     } = await event.locals.supabase.auth.getUser();
     if (error) {
       // JWT validation has failed
-      console.log("jwt validation has failed");
+      console.log("hook.server.ts::jwt validation has failed", error.message);
       return { session: null, user: null };
     }
 
-    console.log(`session ${session}`);
-    console.log(`user ${user}`);
     return { session, user };
   };
 
@@ -85,7 +85,6 @@ const authGuard: Handle = async ({ event, resolve }) => {
   if (event.locals.session && event.url.pathname === "/auth") {
     redirect(303, "/private");
   }
-
   return resolve(event);
 };
 

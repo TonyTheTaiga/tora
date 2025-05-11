@@ -1,17 +1,20 @@
 <div class="flex items-center justify-center min-h-screen">
   <form
-    class="text-ctp-text w-full max-w-md bg-ctp-crust p-8 rounded shadow"
+    class="text-ctp-text max-w-md p-8 rounded bg-ctp-base flex flex-col space-y-2"
     method="POST"
     action="?/signup"
   >
     <label>
       Email
-      <input name="email" type="email" />
+      <input name="email" type="email" class="bg-ctp-mantle px-2" />
     </label>
     <label>
       Password
-      <input name="password" type="password" />
+      <input name="password" type="password" class="bg-ctp-mantle px-2" />
     </label>
-    <button>Sign up</button>
+    <div>
+      <button>Sign up</button>
+      <button formaction="?/signin">Sign In</button>
+    </div>
   </form>
 </div>
