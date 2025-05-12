@@ -26,10 +26,12 @@ export async function GET({ url }: { url: URL }) {
       system,
       messages: [{ role: "user", content: user }],
       max_tokens: 21_333,
-      temperature: 0.6
+      temperature: 0.6,
     });
-    const textItem = msg.content.find(item => item.type === "text");
-    const raw = textItem ? textItem.text : JSON.stringify({ error: "invalid model response" });
+    const textItem = msg.content.find((item) => item.type === "text");
+    const raw = textItem
+      ? textItem.text
+      : JSON.stringify({ error: "invalid model response" });
     const parsed = parseOutput(raw);
     return new Response(JSON.stringify(parsed), {
       headers: { "Content-Type": "application/json" },

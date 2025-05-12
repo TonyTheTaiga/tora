@@ -108,5 +108,7 @@ pyrightconfig.json
 /python/scripts/*
 !/python/scripts/*.py
 
+**/CLAUDE.md
+
 # Special cases
 !web/src/lib

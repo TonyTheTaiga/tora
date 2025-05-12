@@ -17,6 +17,19 @@ interface FormDataResult {
   [key: string]: any;
 }
 
+export const load: PageServerLoad = async ({ fetch }) => {
+  const response = await fetch(API_ROUTES.GET_EXPERIMENTS);
+  const rawData = await response.json();
+  const experiments = rawData.map(mapExperimentData);
+  return { experiments };
+};
+
+export const actions: Actions = {
+  create: async ({ request, fetch }) => handleCreate(request, fetch),
+  delete: async ({ request, fetch }) => handleDelete(request, fetch),
+  update: async ({ request, fetch }) => handleUpdate(request, fetch),
+};
+
 function mapExperimentData(exp: any): Experiment {
   return {
     id: exp.id,
@@ -64,13 +77,6 @@ function parseFormData(formData: FormData): FormDataResult {
     tags: result.tags.filter(Boolean),
   };
 }
-
-export const load: PageServerLoad = async ({ fetch }) => {
-  const response = await fetch(API_ROUTES.GET_EXPERIMENTS);
-  const rawData = await response.json();
-  const experiments = rawData.map(mapExperimentData);
-  return { experiments };
-};
 
 async function handleCreate(request: Request, fetch: Function) {
   const form = await request.formData();
@@ -141,6 +147,7 @@ async function handleUpdate(request: Request, fetch: Function) {
     "experiment-id": id,
     "experiment-name": name,
     "experiment-description": description,
+    "reference-id": referenceId,
     tags,
   } = parseFormData(form);
 
@@ -157,14 +164,22 @@ async function handleUpdate(request: Request, fetch: Function) {
     return fail(500, { message: "Failed to update experiment" });
   }
 
+  if (referenceId) {
+    const referenceResponse = await fetch(
+      API_ROUTES.CREATE_REFERENCE.replace("[slug]", id),
+      {
+        method: "POST",
+        body: JSON.stringify({ referenceId }),
+      },
+    );
+
+    if (!referenceResponse.ok) {
+      return fail(500, { message: "Failed to create reference" });
+    }
+  }
+
   return {
     success: true,
     message: "Experiment updated successfully!",
   };
 }
-
-export const actions: Actions = {
-  create: async ({ request, fetch }) => handleCreate(request, fetch),
-  delete: async ({ request, fetch }) => handleDelete(request, fetch),
-  update: async ({ request, fetch }) => handleUpdate(request, fetch),
-};

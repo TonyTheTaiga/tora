@@ -20,9 +20,9 @@ class Tora:
     def __init__(
         self,
         experiment_id: str,
-        description: str,
-        hyperparams: dict[str, str | int | float],
-        tags: list[str],
+        description: str | None = None,
+        hyperparams: dict[str, str | int | float] | None = None,
+        tags: list[str] | None = None,
         server_url: str = TORA_BASE_URL,
         max_buffer_len: int = 25,
     ):
@@ -38,9 +38,9 @@ class Tora:
     def create_experiment(
         cls,
         name: str,
-        description: str,
-        hyperparams: dict[str, str | int | float],
-        tags: list[str],
+        description: str | None = None,
+        hyperparams: dict[str, str | int | float] | None = None,
+        tags: list[str] | None = None,
         server_url: str = TORA_BASE_URL,
     ):
         data = {}

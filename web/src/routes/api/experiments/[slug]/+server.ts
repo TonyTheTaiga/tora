@@ -1,7 +1,15 @@
 import { json } from "@sveltejs/kit";
 import { getExperiment, updateExperiment } from "$lib/server/database";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "$lib/server/database.types";
 
-export async function GET({ params: { slug } }: { params: { slug: string } }) {
+export async function GET({
+  params: { slug },
+  locals: { supabase },
+}: {
+  params: { slug: string };
+  locals: { supabase: SupabaseClient<Database> };
+}) {
   const experiment = await getExperiment(slug);
   return json(experiment);
 }
@@ -19,6 +27,7 @@ export async function POST({
     description: data.description,
     tags: data.tags,
   });
+
   return new Response(
     JSON.stringify({ message: "Experiment updated successfully" }),
     {

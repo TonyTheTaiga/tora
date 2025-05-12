@@ -1,11 +1,90 @@
 <script lang="ts">
-  import { X, Save, TagIcon, Plus } from "lucide-svelte";
+  import { X, Save, TagIcon, Plus, Link } from "lucide-svelte";
   import { enhance } from "$app/forms";
+  import type { Experiment } from "$lib/types";
 
   let { experiment = $bindable(), editMode = $bindable() } = $props();
 
   let addingNewTag = $state(false);
   let tag = $state<string | null>(null);
+  let reference = $state<Experiment | null>(null);
+  let searchInput = $state<string>("");
+  const charList: string[] = [];
+  let selectedIndex = $state<number>(-1);
+  let searchResults = $state<Experiment[]>([]);
+
+  async function getExperiments(query: string | null) {
+    let url = `/api/experiments`;
+    if (query) {
+      url += `?startwith=${encodeURIComponent(query)}`;
+    }
+
+    await fetch(url, { method: "GET" })
+      .then((res) => res.json())
+      .then((data) => {
+        searchResults = data as Experiment[];
+      });
+  }
+
+  async function handleKeyDown(event: KeyboardEvent) {
+    const input = event.target as HTMLInputElement;
+
+    if (searchResults.length > 0) {
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        selectedIndex = Math.min(selectedIndex + 1, searchResults.length - 1);
+        return;
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        selectedIndex = Math.max(selectedIndex - 1, 0);
+        return;
+      } else if (event.key === "Enter" && selectedIndex >= 0) {
+        event.preventDefault();
+        reference = searchResults[selectedIndex];
+        selectedIndex = -1;
+        resetSearch();
+        return;
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        searchResults = [];
+        selectedIndex = -1;
+        return;
+      }
+    }
+
+    if (event.key === "Backspace") {
+      const { selectionStart, selectionEnd } = input;
+
+      if (selectionStart !== null && selectionEnd !== null) {
+        const deleteCount =
+          selectionStart !== selectionEnd ? selectionEnd - selectionStart : 1;
+        const deleteIndex =
+          selectionStart !== selectionEnd ? selectionStart : selectionStart - 1;
+
+        if (deleteIndex >= 0) charList.splice(deleteIndex, deleteCount);
+      } else {
+        charList.pop();
+      }
+    } else if (/^[a-z0-9]$/i.test(event.key)) {
+      charList.push(event.key);
+    }
+
+    if (charList.length && charList.length > 0) {
+      await getExperiments(charList.join(""));
+      selectedIndex = -1;
+    } else if (charList.length === 0) {
+      searchResults = [];
+      selectedIndex = -1;
+    }
+  }
+
+  function resetSearch() {
+    searchResults = [];
+    while (charList.length > 0) {
+      charList.pop();
+    }
+    searchInput = "";
+  }
 
   function addTag(e: KeyboardEvent | MouseEvent) {
     e.preventDefault();
@@ -28,9 +107,7 @@
     <div
       class="px-6 py-4 border-b border-ctp-surface0 flex justify-between items-center"
     >
-      <h2
-        class="text-xl font-medium text-ctp-text flex items-center gap-2"
-      >
+      <h2 class="text-xl font-medium text-ctp-text flex items-center gap-2">
         <Save size={18} class="text-ctp-mauve" />
         Edit Experiment
       </h2>
@@ -72,7 +149,7 @@
           <div class="space-y-2">
             <label
               class="text-sm font-medium text-ctp-subtext0"
-              for="name">Experiment Name</label
+              for="experiment-name">Experiment Name</label
             >
             <input
               id="experiment-name"
@@ -81,6 +158,7 @@
               class="w-full px-4 py-3 bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-mauve transition-all placeholder-ctp-overlay0 shadow-sm"
               placeholder="Enter experiment name"
               value={experiment.name}
+              required
             />
           </div>
 
@@ -88,7 +166,7 @@
           <div class="space-y-2">
             <label
               class="text-sm font-medium text-ctp-subtext0"
-              for="description"
+              for="experiment-description"
             >
               Description
             </label>
@@ -99,6 +177,7 @@
               class="w-full px-4 py-3 bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue transition-all resize-none placeholder-ctp-overlay0 shadow-sm"
               placeholder="Briefly describe this experiment"
               value={experiment.description}
+              required
             ></textarea>
           </div>
         </div>
@@ -109,9 +188,7 @@
             class="flex items-center gap-3 pb-2 border-b border-ctp-surface0"
           >
             <TagIcon size={18} class="text-ctp-pink" />
-            <h3 class="text-xl font-medium text-ctp-text">
-              Tags
-            </h3>
+            <h3 class="text-xl font-medium text-ctp-text">Tags</h3>
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
@@ -166,6 +243,74 @@
         </div>
 
         <!-- Reference -->
+        <div class="space-y-4">
+          {#if reference}
+            <input
+              class="hidden"
+              name="reference-id"
+              bind:value={reference.id}
+            />
+          {/if}
+
+          <div
+            class="flex items-center gap-3 pb-2 border-b border-ctp-surface0"
+          >
+            <Link size={18} class="text-ctp-lavender" />
+            <h3 class="text-xl font-medium text-ctp-text">References</h3>
+          </div>
+
+          <div>
+            {#if reference}
+              <span
+                class="inline-flex items-center px-3 py-1.5 text-sm rounded-lg bg-ctp-lavender/10 text-ctp-lavender border-0"
+              >
+                {reference.name}
+                <button
+                  type="button"
+                  class="text-ctp-lavender/70 hover:text-ctp-red transition-colors ml-2"
+                  onclick={() => (reference = null)}
+                  aria-label="Remove reference"
+                >
+                  <X size={14} />
+                </button>
+              </span>
+            {/if}
+          </div>
+
+          <div class="flex flex-col space-y-2 relative">
+            <div>
+              <input
+                id="search-input"
+                bind:value={searchInput}
+                placeholder="Search for references..."
+                class="w-full px-4 py-3 bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-lavender transition-all placeholder-ctp-overlay0 shadow-sm"
+                onkeydown={async (event) => await handleKeyDown(event)}
+              />
+            </div>
+            {#if searchResults.length > 0}
+              <div
+                class="absolute top-full left-0 right-0 z-10 mt-1 p-2 border-0 bg-ctp-base rounded-lg shadow-xl max-h-60 overflow-y-auto"
+              >
+                <ul class="flex flex-col">
+                  {#each searchResults as experiment, index}
+                    <button
+                      class="{selectedIndex === index
+                        ? 'bg-ctp-lavender/10 text-ctp-lavender'
+                        : ''} hover:bg-ctp-lavender/10 text-left px-3 py-2 rounded-lg text-ctp-text hover:text-ctp-lavender transition-colors"
+                      onclick={(e) => {
+                        e.preventDefault();
+                        reference = experiment;
+                        resetSearch();
+                      }}
+                    >
+                      {experiment.name}
+                    </button>
+                  {/each}
+                </ul>
+              </div>
+            {/if}
+          </div>
+        </div>
 
         <!-- Footer -->
         <div

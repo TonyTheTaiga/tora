@@ -134,6 +134,7 @@
           type="text"
           class="w-full px-4 py-3 bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-mauve transition-all placeholder-ctp-overlay0 shadow-sm"
           placeholder="Enter experiment name"
+          required
         />
       </div>
 
@@ -150,6 +151,7 @@
           rows="3"
           class="w-full px-4 py-3 bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue transition-all resize-none placeholder-ctp-overlay0 shadow-sm"
           placeholder="Briefly describe this experiment"
+          required
         ></textarea>
       </div>
     </div>

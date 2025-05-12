@@ -16,6 +16,8 @@
     Eye,
     EyeClosed,
     Sparkle,
+    ClipboardCheck,
+    Copy,
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
   import EditExperimentModal from "./edit-experiment-modal.svelte";
@@ -33,6 +35,7 @@
   let editMode = $state<boolean>(false);
   let recommendations = $state<Record<string, HPRecommendation> | null>(null);
   let activeRecommendation = $state<string | null>(null);
+  let idCopied = $state<boolean>(false);
   $inspect(experiment.availableMetrics);
 </script>
 
@@ -43,30 +46,43 @@
 <article class="bg-ctp-base overflow-hidden shadow-lg">
   <!-- Header with actions -->
   <header
-    class="p-4 bg-ctp-mantle border-b border-ctp-surface0 flex justify-between items-center"
+    class="p-4 bg-ctp-mantle border-b border-ctp-surface0 flex flex-col md:flex-row justify-between items-center"
   >
-    <h2 class="flex space-x-4">
-      <span class="text-xl font-semibold text-ctp-text">
-        {experiment.name}
-      </span>
+    <h2>
       <span
         role="button"
         tabindex="0"
-        class="text-sm text-ctp-subtext0 content-center cursor-pointer hover:text-ctp-text hover:underline"
+        class="text-xl font-semibold content-center cursor-pointer transition-all duration-150 flex items-center gap-2"
+        class:text-ctp-green={idCopied}
+        class:text-ctp-text={!idCopied}
         onclick={() => {
           navigator.clipboard.writeText(experiment.id);
+          idCopied = true;
+          setTimeout(() => {
+            idCopied = false;
+          }, 800);
         }}
         onkeydown={(e) => {
           if (e.key === "Enter" || e.key === " ") e.currentTarget.click();
         }}
         title="Click to copy ID"
       >
-        {experiment.id}
+        {#if idCopied}
+          <span class="flex items-center">
+            <ClipboardCheck size={20} class="mr-1 animate-bounce" />
+            ID Copied
+          </span>
+        {:else}
+          <span class="flex items-center">
+            {experiment.name}
+            <Copy size={14} class="ml-1 opacity-30" />
+          </span>
+        {/if}
       </span>
     </h2>
     <div class="flex items-center gap-3">
       <button
-        class="p-1.5 text-ctp-subtext0 hover:text-ctp-subtext0 transition-transform active:rotate-90"
+        class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-transform active:rotate-90"
         onclick={async () => {
           const response = await fetch(
             `/api/ai/analysis?experimentId=${experiment.id}`,

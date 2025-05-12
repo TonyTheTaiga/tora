@@ -41,9 +41,7 @@
       class="flex flex-col items-center justify-center p-12 text-center bg-ctp-mantle rounded-lg border border-ctp-surface1"
     >
       <Cpu size={40} className="text-ctp-overlay0 mb-4" strokeWidth={1.5} />
-      <h3 class="text-lg font-medium text-ctp-text mb-2">
-        No experiments yet
-      </h3>
+      <h3 class="text-lg font-medium text-ctp-text mb-2">No experiments yet</h3>
       <p class="text-ctp-subtext0 max-w-md">
         Create your first experiment to start tracking metrics and see them
         displayed here.
