@@ -28,6 +28,7 @@ export async function POST({ request, locals: { user } }) {
     let description = data["description"];
     let hyperparams = data["hyperparams"];
     let tags = data["tags"];
+    let visibility = data["visibility"] || "PRIVATE";
 
     if (typeof hyperparams === "string") {
       try {
@@ -43,6 +44,7 @@ export async function POST({ request, locals: { user } }) {
       description,
       hyperparams,
       tags,
+      visibility,
     );
     return json({ success: true, experiment: experiment });
 

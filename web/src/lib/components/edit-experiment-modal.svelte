@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { X, Save, TagIcon, Plus, Link } from "lucide-svelte";
+  import { X, Save, TagIcon, Plus, Link, Globe, Lock } from "lucide-svelte";
+  import type { Visibility } from "$lib/types";
   import { enhance } from "$app/forms";
   import type { Experiment } from "$lib/types";
 
@@ -131,6 +132,7 @@
         use:enhance={({ formElement, formData, action, cancel, submitter }) => {
           experiment.name = formData.get("experiment-name");
           experiment.description = formData.get("experiment-description");
+          experiment.visibility = formData.get("visibility") as Visibility;
           return async ({ result, update }) => {
             editMode = !editMode;
           };
@@ -179,6 +181,56 @@
               value={experiment.description}
               required
             ></textarea>
+          </div>
+
+          <!-- Visibility Setting -->
+          <div class="space-y-2 pt-4">
+            <label id="edit-visibility-label" class="text-sm font-medium text-ctp-subtext0">Visibility</label>
+            <input
+              type="hidden"
+              id="edit-visibility-input"
+              name="visibility"
+              value={experiment.visibility || 'PRIVATE'}
+              aria-labelledby="edit-visibility-label"
+            />
+
+            <div class="flex gap-3" role="radiogroup" aria-labelledby="edit-visibility-label">
+              <button
+                type="button"
+                id="edit-visibility-public"
+                role="radio"
+                aria-checked={experiment.visibility === "PUBLIC"}
+                class={"flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors " +
+                  (experiment.visibility === "PUBLIC"
+                    ? "bg-ctp-green/20 text-ctp-green border border-ctp-green/30"
+                    : "bg-ctp-surface0/50 text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text")}
+                onclick={() => experiment.visibility = "PUBLIC"}
+              >
+                <Globe size={16} />
+                <span>Public</span>
+              </button>
+
+              <button
+                type="button"
+                id="edit-visibility-private"
+                role="radio"
+                aria-checked={experiment.visibility === "PRIVATE" || !experiment.visibility}
+                class={"flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors " +
+                  (experiment.visibility === "PRIVATE" || !experiment.visibility
+                    ? "bg-ctp-red/20 text-ctp-red border border-ctp-red/30"
+                    : "bg-ctp-surface0/50 text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text")}
+                onclick={() => experiment.visibility = "PRIVATE"}
+              >
+                <Lock size={16} />
+                <span>Private</span>
+              </button>
+            </div>
+
+            <p class="text-xs text-ctp-subtext0 mt-1" id="edit-visibility-description">
+              {experiment.visibility === "PUBLIC"
+                ? "Public experiments are visible to everyone"
+                : "Private experiments are only visible to you"}
+            </p>
           </div>
         </div>
 

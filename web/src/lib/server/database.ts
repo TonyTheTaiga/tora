@@ -27,6 +27,7 @@ export class DatabaseClient {
     description: string,
     hyperparams: HyperParam[],
     tags: string[],
+    visibility: string = "PRIVATE",
   ): Promise<Experiment> {
     const { data, error } = await DatabaseClient.getInstance()
       .from("experiment")
@@ -35,6 +36,7 @@ export class DatabaseClient {
         description,
         hyperparams: hyperparams as unknown as Json[],
         tags,
+        visibility,
       })
       .select()
       .single();
@@ -52,6 +54,7 @@ export class DatabaseClient {
       hyperparams: data.hyperparams as unknown as HyperParam[],
       createdAt: new Date(data.created_at),
       tags: data.tags,
+      visibility: data.visibility,
     };
   }
 
@@ -78,6 +81,7 @@ export class DatabaseClient {
         hyperparams: exp.hyperparams as unknown as HyperParam[],
         createdAt: new Date(exp.created_at),
         tags: exp.tags,
+        visibility: exp.visibility,
         availableMetrics: [...new Set(exp.metric.map((m) => m.name))],
       }),
     );
@@ -106,6 +110,7 @@ export class DatabaseClient {
       createdAt: new Date(data.created_at),
       availableMetrics: [...new Set(data.metric.map((m) => m.name))],
       tags: data.tags,
+      visibility: data.visibility,
     };
   }
 
@@ -133,6 +138,7 @@ export class DatabaseClient {
         createdAt: new Date(data.created_at),
         availableMetrics: [...new Set(data.metric.map((m) => m.name))],
         tags: data.tags,
+        visibility: data.visibility,
       },
       metrics: data.metric as Metric[],
     };
@@ -252,6 +258,7 @@ export class DatabaseClient {
       hyperparams: item.hyperparams as unknown as HyperParam[],
       tags: item.tags,
       createdAt: new Date(item.created_at),
+      visibility: item.visibility,
     }));
   }
 }

@@ -26,6 +26,7 @@ export async function POST({
     name: data.name,
     description: data.description,
     tags: data.tags,
+    visibility: data.visibility,
   });
 
   return new Response(

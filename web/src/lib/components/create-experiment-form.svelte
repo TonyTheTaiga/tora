@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { HyperParam, Experiment } from "../types";
+  import type { HyperParam, Experiment, Visibility } from "../types";
   import {
     Plus,
     X,
@@ -7,6 +7,8 @@
     Settings,
     Beaker,
     Link,
+    Globe,
+    Lock,
   } from "lucide-svelte";
 
   let {
@@ -19,6 +21,7 @@
   let addingNewTag = $state<boolean>(false);
   let tag = $state<string | null>(null);
   let tags = $state<string[]>([]);
+  let visibility = $state<Visibility>("PRIVATE");
 
   function addTag() {
     if (tag) {
@@ -153,6 +156,67 @@
           placeholder="Briefly describe this experiment"
           required
         ></textarea>
+      </div>
+
+      <!-- Visibility Setting -->
+      <div class="space-y-2 pt-4">
+        <label
+          id="create-visibility-label"
+          class="text-sm font-medium text-ctp-subtext0"
+          for="visibility">Visibility</label
+        >
+        <input
+          type="hidden"
+          id="create-visibility-input"
+          name="visibility"
+          value={visibility}
+          aria-labelledby="create-visibility-label"
+        />
+
+        <div
+          class="flex gap-3"
+          role="radiogroup"
+          aria-labelledby="create-visibility-label"
+        >
+          <button
+            type="button"
+            id="create-visibility-public"
+            role="radio"
+            aria-checked={visibility === "PUBLIC"}
+            class={"flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors " +
+              (visibility === "PUBLIC"
+                ? "bg-ctp-green/20 text-ctp-green border border-ctp-green/30"
+                : "bg-ctp-surface0/50 text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text")}
+            onclick={() => (visibility = "PUBLIC")}
+          >
+            <Globe size={16} />
+            <span>Public</span>
+          </button>
+
+          <button
+            type="button"
+            id="create-visibility-private"
+            role="radio"
+            aria-checked={visibility === "PRIVATE"}
+            class={"flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors " +
+              (visibility === "PRIVATE"
+                ? "bg-ctp-red/20 text-ctp-red border border-ctp-red/30"
+                : "bg-ctp-surface0/50 text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text")}
+            onclick={() => (visibility = "PRIVATE")}
+          >
+            <Lock size={16} />
+            <span>Private</span>
+          </button>
+        </div>
+
+        <p
+          class="text-xs text-ctp-subtext0 mt-1"
+          id="create-visibility-description"
+        >
+          {visibility === "PUBLIC"
+            ? "Public experiments are visible to everyone"
+            : "Private experiments are only visible to you"}
+        </p>
       </div>
     </div>
 

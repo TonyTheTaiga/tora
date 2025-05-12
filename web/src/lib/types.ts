@@ -5,6 +5,8 @@ export interface ExperimentAndMetrics {
   metrics: Metric[];
 }
 
+export type Visibility = "PUBLIC" | "PRIVATE";
+
 export interface Experiment {
   id: string;
   name: string;
@@ -13,6 +15,7 @@ export interface Experiment {
   hyperparams?: HyperParam[] | null;
   tags?: string[] | null;
   createdAt: Date;
+  visibility?: Visibility;
 }
 
 export interface Metric {

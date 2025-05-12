@@ -47,6 +47,7 @@ export type Database = {
           id: string
           name: string
           tags: string[] | null
+          visibility: Database["public"]["Enums"]["visibility"]
         }
         Insert: {
           created_at?: string
@@ -55,6 +56,7 @@ export type Database = {
           id?: string
           name: string
           tags?: string[] | null
+          visibility?: Database["public"]["Enums"]["visibility"]
         }
         Update: {
           created_at?: string
@@ -63,6 +65,7 @@ export type Database = {
           id?: string
           name?: string
           tags?: string[] | null
+          visibility?: Database["public"]["Enums"]["visibility"]
         }
         Relationships: []
       }
@@ -183,11 +186,12 @@ export type Database = {
           id: string
           name: string
           tags: string[] | null
+          visibility: Database["public"]["Enums"]["visibility"]
         }[]
       }
     }
     Enums: {
-      [_ in never]: never
+      visibility: "PUBLIC" | "PRIVATE"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -302,6 +306,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      visibility: ["PUBLIC", "PRIVATE"],
+    },
   },
 } as const

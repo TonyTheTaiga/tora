@@ -84,6 +84,7 @@ async function handleCreate(request: Request, fetch: Function) {
     "experiment-name": name,
     "experiment-description": description,
     "reference-id": referenceId,
+    visibility,
     hyperparams,
     tags,
   } = parseFormData(form);
@@ -94,7 +95,7 @@ async function handleCreate(request: Request, fetch: Function) {
 
   const response = await fetch(API_ROUTES.CREATE_EXPERIMENT, {
     method: "POST",
-    body: JSON.stringify({ name, description, hyperparams, tags }),
+    body: JSON.stringify({ name, description, hyperparams, tags, visibility }),
   });
 
   if (!response.ok) {
@@ -148,6 +149,7 @@ async function handleUpdate(request: Request, fetch: Function) {
     "experiment-name": name,
     "experiment-description": description,
     "reference-id": referenceId,
+    visibility,
     tags,
   } = parseFormData(form);
 
@@ -157,7 +159,7 @@ async function handleUpdate(request: Request, fetch: Function) {
 
   const response = await fetch(`/api/experiments/${id}`, {
     method: "POST",
-    body: JSON.stringify({ name, description, tags }),
+    body: JSON.stringify({ name, description, visibility, tags }),
   });
 
   if (!response.ok) {
