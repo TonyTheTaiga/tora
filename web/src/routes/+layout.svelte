@@ -22,18 +22,21 @@
 
 <header>
   <nav
-    class="px-6 py-4 flex flex-row justify-between bg-ctp-mantle border-b border-ctp-surface0"
+    class="px-6 py-4 flex flex-row justify-between items-center bg-ctp-mantle border-b border-ctp-surface0"
   >
-    <div class="w-32 lg:w-42 text-ctp-mauve fill-current">
+    <button
+      class="w-32 lg:w-42 text-ctp-mauve fill-current"
+      onclick={() => goto("/")}
+    >
       <Logo />
-    </div>
+    </button>
     {#if session}
       <button class="text-ctp-flamingo">
         <CircleUserRound size={32} />
       </button>
     {:else}
       <button
-        class="border border-ctp-blue rounded-md text-ctp-text w-28"
+        class="border border-ctp-blue rounded-md text-ctp-text w-28 h-8"
         onclick={() => goto("/auth")}
       >
         Sign Up
