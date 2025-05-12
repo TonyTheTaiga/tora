@@ -1,9 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import {
-  PUBLIC_SUPABASE_URL,
-  PUBLIC_SUPABASE_ANON_KEY,
-} from "$env/static/public";
 import type { Database, Json } from "./database.types";
 import type {
   Experiment,
@@ -12,17 +7,18 @@ import type {
   Metric,
 } from "$lib/types";
 
-class DatabaseClient {
+export class DatabaseClient {
   private static instance: SupabaseClient<Database>;
 
   private static getInstance(): SupabaseClient<Database> {
     if (!this.instance) {
-      this.instance = createClient<Database>(
-        PUBLIC_SUPABASE_URL,
-        PUBLIC_SUPABASE_ANON_KEY,
-      );
+      throw new Error("DB client not set. Did you forget to set it?")
     }
     return this.instance;
+  }
+
+  static setInstance(instance: SupabaseClient<Database>) {
+    this.instance = instance;
   }
 
   static async createExperiment(
@@ -270,3 +266,8 @@ export const {
   createReference,
   getReferenceChain,
 } = DatabaseClient;
+
+
+export function setInstance(instance: SupabaseClient<Database>) {
+  return DatabaseClient.setInstance(instance);
+}

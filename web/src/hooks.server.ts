@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
+import { DatabaseClient } from "$lib/server/database";
 
 import {
   PUBLIC_SUPABASE_URL,
@@ -8,8 +9,6 @@ import {
 } from "$env/static/public";
 
 const supabase: Handle = async ({ event, resolve }) => {
-  console.log("all cookies", event.cookies.getAll());
-
   /**
    * Creates a Supabase client specific to this server request.
    *
@@ -35,6 +34,9 @@ const supabase: Handle = async ({ event, resolve }) => {
     },
   );
 
+  // lol
+  DatabaseClient.setInstance(event.locals.supabase);
+
   /**
    * Unlike `supabase.auth.getSession()`, which returns the session _without_
    * validating the JWT, this function also calls `getUser()` to validate the
@@ -45,7 +47,6 @@ const supabase: Handle = async ({ event, resolve }) => {
       data: { session },
     } = await event.locals.supabase.auth.getSession();
     if (!session) {
-      console.log("hook.server.ts::get sessions failed");
       return { session: null, user: null };
     }
 
@@ -55,7 +56,6 @@ const supabase: Handle = async ({ event, resolve }) => {
     } = await event.locals.supabase.auth.getUser();
     if (error) {
       // JWT validation has failed
-      console.log("hook.server.ts::jwt validation has failed", error.message);
       return { session: null, user: null };
     }
 

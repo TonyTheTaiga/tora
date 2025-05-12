@@ -11,7 +11,6 @@
   onMount(() => {
     const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
       if (newSession?.expires_at !== session?.expires_at) {
-        console.log("invalidating supabase:auth");
         invalidate("supabase:auth");
       }
     });
