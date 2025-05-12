@@ -22,6 +22,7 @@ export class DatabaseClient {
   }
 
   static async createExperiment(
+    userId: string,
     name: string,
     description: string,
     hyperparams: HyperParam[],
@@ -41,6 +42,8 @@ export class DatabaseClient {
     if (error || !data) {
       throw new Error(`Failed to create experiment: ${error?.message}`);
     }
+
+    await DatabaseClient.getInstance().from("user_experiments").insert({ user_id: userId, experiment_id: data.id, role: "OWNER" }).select();
 
     return {
       id: data.id,
@@ -267,7 +270,3 @@ export const {
   getReferenceChain,
 } = DatabaseClient;
 
-
-export function setInstance(instance: SupabaseClient<Database>) {
-  return DatabaseClient.setInstance(instance);
-}

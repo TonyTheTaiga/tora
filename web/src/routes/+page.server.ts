@@ -5,7 +5,7 @@ import type { Experiment, HyperParam } from "$lib/types";
 
 const API_ROUTES = {
   GET_EXPERIMENTS: "/api/experiments",
-  CREATE_EXPERIMENT: "/api/experiments/create",
+  CREATE_EXPERIMENT: "/api/experiments",
   DELETE_EXPERIMENT: "/api/experiments/delete",
   UPDATE_EXPERIMENT: "/api/experiments/update",
   CREATE_REFERENCE: "/api/experiments/[slug]/ref",

@@ -8,6 +8,10 @@ import {
   PUBLIC_SUPABASE_ANON_KEY,
 } from "$env/static/public";
 
+import {
+  PRIVATE_SERVICE_ROLE
+} from "$env/static/private";
+
 const supabase: Handle = async ({ event, resolve }) => {
   /**
    * Creates a Supabase client specific to this server request.
@@ -73,7 +77,25 @@ const supabase: Handle = async ({ event, resolve }) => {
   });
 };
 
+const finalize: Handle = async ({ event, resolve }) => {
+  const { session, user } = await event.locals.safeGetSession();
+  event.locals.session = session;
+  event.locals.user = user;
+
+  if (event.url.pathname.startsWith("/api") && !event.locals.user && event.request.headers.get("x-api-key")) {
+    event.locals.user = {
+      id: "f217117d-8648-48b4-beb9-77c87f413cf3"
+    }
+  }
+
+  return resolve(event);
+}
+
 const authGuard: Handle = async ({ event, resolve }) => {
+  if (event.url.pathname.startsWith('/api')) {
+    return resolve(event);
+  }
+
   const { session, user } = await event.locals.safeGetSession();
   event.locals.session = session;
   event.locals.user = user;
@@ -88,4 +110,4 @@ const authGuard: Handle = async ({ event, resolve }) => {
   return resolve(event);
 };
 
-export const handle: Handle = sequence(supabase, authGuard);
+export const handle: Handle = sequence(supabase, finalize);

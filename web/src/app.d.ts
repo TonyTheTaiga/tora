@@ -14,7 +14,7 @@ declare global {
         user: User | null;
       }>;
       session: Session | null;
-      user: User | null;
+      user: User | { id: string } | null;
     }
     interface PageData {
       session: Session | null;
@@ -24,4 +24,4 @@ declare global {
   }
 }
 
-export {};
+export { };
