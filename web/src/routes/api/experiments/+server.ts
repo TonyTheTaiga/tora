@@ -3,10 +3,11 @@ import { getExperiments, createExperiment } from "$lib/server/database.js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "$lib/server/database.types";
 
-export async function GET({ url, locals: { supabase } }: { url: URL, locals: { supabase: SupabaseClient<Database> } }) {
+export async function GET({ url, locals }: { url: URL, locals: { supabase: SupabaseClient<Database>, user: { id: string } | null } }) {
   const name_filter = url.searchParams.get("startwith") || "";
   try {
-    const experiments = await getExperiments(name_filter);
+    const userId = locals.user?.id;
+    const experiments = await getExperiments(name_filter, userId);
     return json(experiments);
   } catch (err) {
     if (err instanceof Error) {

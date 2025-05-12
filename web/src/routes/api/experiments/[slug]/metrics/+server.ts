@@ -1,7 +1,6 @@
 import { json, type RequestEvent } from "@sveltejs/kit";
-import { createMetric, getMetrics } from "$lib/server/database";
+import { createMetric, getMetrics, getExperiment } from "$lib/server/database";
 import type { Json } from "$lib/server/database.types";
-import { MoveVerticalIcon } from "lucide-svelte";
 
 interface MetricInput {
   name: string;
@@ -21,7 +20,34 @@ interface APIResponse {
 export async function POST({
   request,
   params,
-}: RequestEvent<{ slug: string }, string>): Promise<Response> {
+  locals,
+}: RequestEvent<{ slug: string }, string> & { locals: { user: { id: string } | null } }): Promise<Response> {
+  // Check experiment access first
+  const userId = locals.user?.id;
+  const experimentId = params.slug;
+
+  if (!experimentId?.trim()) {
+    return json({
+      success: false,
+      error: {
+        message: "Invalid experiment ID",
+        code: "INVALID_ID"
+      }
+    }, { status: 400 });
+  }
+
+  try {
+    // This will throw an error if the user doesn't have access
+    await getExperiment(experimentId, userId);
+  } catch (error) {
+    return json({
+      success: false,
+      error: {
+        message: "Access denied to experiment",
+        code: "ACCESS_DENIED"
+      }
+    }, { status: 403 });
+  }
   try {
     const payload = (await request.json()) as MetricInput;
 
@@ -33,10 +59,7 @@ export async function POST({
       throw new Error("Metric value is required");
     }
 
-    const experimentId = params.slug;
-    if (!experimentId?.trim()) {
-      throw new Error("Invalid experiment ID");
-    }
+    // Experiment ID already validated above
 
     if (payload.step !== undefined && !Number.isFinite(payload.step)) {
       throw new Error("Step must be a finite number");
@@ -70,7 +93,23 @@ export async function POST({
   }
 }
 
-export async function GET({ params: { slug } }: { params: { slug: string } }) {
+export async function GET({
+  params: { slug },
+  locals
+}: {
+  params: { slug: string },
+  locals: { user: { id: string } | null }
+}) {
+  const userId = locals.user?.id;
+  // First verify the user has access to this experiment via getExperiment
+  // This will throw an error if they don't have access
+  try {
+    await getExperiment(slug, userId);
+  } catch (error) {
+    // Return empty array instead of 403 to avoid UI errors
+    return json([], { status: 200 });
+  }
+
   const metrics = await getMetrics(slug);
   return json(metrics);
 }

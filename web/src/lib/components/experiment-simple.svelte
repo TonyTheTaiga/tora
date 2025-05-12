@@ -30,19 +30,25 @@
     <div class="flex flx-col space-x-2">
       <button
         onclick={async () => {
-          if (highlighted.at(-1) === experiment.id) {
+          if (highlighted.includes(experiment.id)) {
             highlighted = [];
           } else {
-            const response = await fetch(
-              `/api/experiments/${experiment.id}/ref`,
-            );
-            const data = (await response.json()) as string[];
-            highlighted = data;
+            try {
+              const response = await fetch(
+                `/api/experiments/${experiment.id}/ref`,
+              );
+              if (!response.ok) {
+                return;
+              }
+              const data = await response.json();
+              highlighted = [...data, experiment.id];
+            } catch (err) {}
           }
         }}
         class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+        title="Show experiment chain"
       >
-        {#if highlighted.at(-1) === experiment.id}
+        {#if highlighted.includes(experiment.id)}
           <EyeClosed size={16} />
         {:else}
           <Eye size={16} />

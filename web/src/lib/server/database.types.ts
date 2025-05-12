@@ -177,6 +177,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_experiment_access: {
+        Args: { experiment_id: string; user_id: string }
+        Returns: {
+          has_access: boolean
+        }[]
+      }
       get_experiment_chain: {
         Args: { target_experiment_id: string }
         Returns: {
