@@ -3,13 +3,6 @@
   import {
     User,
     Calendar,
-    BookOpen,
-    Beaker,
-    Users,
-    Star,
-    ChartLine,
-    Clock,
-    Tag,
     Key,
     Plus,
     Copy,
@@ -99,103 +92,121 @@
   });
 </script>
 
-<div class="container">
-  <div class="bg-ctp-mantle rounded-lg p-6 mb-6 border border-ctp-surface0">
-    <div class="flex items-center gap-4">
+<div class="w-full">
+  <div class="bg-ctp-mantle rounded-lg p-6 border border-ctp-surface0">
+    <!-- User Profile Section -->
+    <div class="flex items-center gap-4 border-b border-ctp-surface0 pb-6 mb-6">
       <div class="p-3 bg-ctp-surface0 rounded-full text-ctp-lavender">
         <User size={40} />
       </div>
-      <div>
-        <h1 class="text-2xl font-medium text-ctp-text">{user.name}</h1>
-        <p class="text-ctp-subtext0">@{user.username}</p>
-        <div class="flex items-center gap-1.5 mt-1 text-xs text-ctp-subtext1">
-          <Calendar size={14} />
-          <span>Member since {user.joinedDate}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="bg-ctp-mantle rounded-lg p-6 mt-6 border border-ctp-surface0">
-    <div class="flex items-center gap-2 mb-4 text-ctp-peach">
-      <Key size={20} />
-      <h2 class="font-medium text-ctp-text">API Keys</h2>
-    </div>
-    <form
-      class="mb-6"
-      onsubmit={(e) => {
-        e.preventDefault();
-        generateNewKey();
-      }}
-    >
-      <div class="flex flex-col sm:flex-row gap-3">
-        <input
-          type="text"
-          bind:value={newKeyName}
-          placeholder="Key name (e.g. Training Pipeline)"
-          class="flex-grow bg-ctp-crust border border-ctp-surface0 rounded-md px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue"
-          required
-        />
-        <button
-          type="submit"
-          class="bg-ctp-surface0 hover:bg-ctp-surface1 text-ctp-text py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-colors"
+      <div class="flex-grow">
+        <div
+          class="flex flex-col md:flex-row md:items-center md:justify-between"
         >
-          <Plus size={16} />
-          <span>Create</span>
-        </button>
-      </div>
-
-      {#if error}
-        <div class="mt-3 text-ctp-red text-sm flex items-center gap-2">
-          <AlertCircle size={16} />
-          <span>{error}</span>
-        </div>
-      {/if}
-    </form>
-    {#if user.apiKeys.length === 0}
-      <div
-        class="text-ctp-subtext0 text-center py-4 border border-dashed border-ctp-surface0 rounded-md"
-      >
-        No API keys yet!
-      </div>
-    {:else}
-      <div class="space-y-4">
-        {#each user.apiKeys as key}
-          <div class="border border-ctp-surface0 rounded-lg bg-ctp-crust p-4">
-            <div class="flex justify-between items-start mb-2">
-              <div>
-                <h3 class="font-medium text-ctp-text">{key.name}</h3>
-                <div class="text-xs text-ctp-subtext0 mt-1">
-                  <span class="font-mono">{key.prefix}••••••••••••••••</span>
-                </div>
-              </div>
-              <button
-                onclick={() => deleteKey(key.id)}
-                class="text-ctp-subtext0 hover:text-ctp-red p-1.5 transition-colors"
-                aria-label="Delete key"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
+          <div>
+            <h1 class="text-2xl font-medium text-ctp-text">{user.name}</h1>
+            <p class="text-ctp-subtext0">@{user.username}</p>
             <div
-              class="text-xs text-ctp-subtext0 flex justify-between mt-3 pt-2 border-t border-ctp-surface0"
+              class="flex items-center gap-1.5 mt-1 text-xs text-ctp-subtext1"
             >
-              <span
-                >Created: {new Date(key.createdAt).toLocaleDateString()}</span
-              >
-              {#if key.lastUsed}
-                <span
-                  >Last used: {new Date(
-                    key.lastUsed,
-                  ).toLocaleDateString()}</span
-                >
-              {:else}
-                <span>Never used</span>
-              {/if}
+              <Calendar size={14} />
+              <span>Member since {user.joinedDate}</span>
             </div>
           </div>
-        {/each}
+
+          {#if user.email}
+            <div class="mt-2 md:mt-0 text-ctp-subtext0 text-sm">
+              <span>{user.email}</span>
+            </div>
+          {/if}
+        </div>
       </div>
-    {/if}
+    </div>
+
+    <div>
+      <div class="flex items-center gap-2 mb-4 text-ctp-peach">
+        <Key size={20} />
+        <h2 class="font-medium text-ctp-text">API Keys</h2>
+      </div>
+
+      <form
+        class="mb-6"
+        onsubmit={(e) => {
+          e.preventDefault();
+          generateNewKey();
+        }}
+      >
+        <div class="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            bind:value={newKeyName}
+            placeholder="Key name (e.g. Training Pipeline)"
+            class="flex-grow bg-ctp-crust border border-ctp-surface0 rounded-md px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue"
+            required
+          />
+          <button
+            type="submit"
+            class="bg-ctp-mauve hover:bg-ctp-lavender text-ctp-crust py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-colors font-medium"
+          >
+            <Plus size={16} />
+            <span>Create</span>
+          </button>
+        </div>
+
+        {#if error}
+          <div class="mt-3 text-ctp-red text-sm flex items-center gap-2">
+            <AlertCircle size={16} />
+            <span>{error}</span>
+          </div>
+        {/if}
+      </form>
+
+      {#if user.apiKeys.length === 0}
+        <div
+          class="text-ctp-subtext0 text-center py-4 border border-dashed border-ctp-surface0 rounded-md"
+        >
+          No API keys yet. Create one to integrate with external tools.
+        </div>
+      {:else}
+        <div class="space-y-4">
+          {#each user.apiKeys as key}
+            <div class="border border-ctp-surface0 rounded-lg bg-ctp-crust p-4">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <h3 class="font-medium text-ctp-text">{key.name}</h3>
+                  <div class="text-xs text-ctp-subtext0 mt-1">
+                    <span class="font-mono">{key.prefix}••••••••••••••••</span>
+                  </div>
+                </div>
+                <button
+                  onclick={() => deleteKey(key.id)}
+                  class="text-ctp-subtext0 hover:text-ctp-red p-1.5 transition-colors"
+                  aria-label="Delete key"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+              <div
+                class="text-xs text-ctp-subtext0 flex justify-between mt-3 pt-2 border-t border-ctp-surface0"
+              >
+                <span
+                  >Created: {new Date(key.createdAt).toLocaleDateString()}</span
+                >
+                {#if key.lastUsed}
+                  <span
+                    >Last used: {new Date(
+                      key.lastUsed,
+                    ).toLocaleDateString()}</span
+                  >
+                {:else}
+                  <span>Never used</span>
+                {/if}
+              </div>
+            </div>
+          {/each}
+        </div>
+      {/if}
+    </div>
   </div>
 </div>
 
@@ -205,7 +216,7 @@
     transition:fade
   >
     <div
-      class="bg-ctp-base border border-ctp-surface0 rounded-lg max-w-md w-full mx-4 p-6"
+      class="bg-ctp-base border border-ctp-surface0 rounded-lg max-w-md w-full mx-4 p-6 shadow-xl"
     >
       <div class="text-ctp-green mb-4 flex items-center gap-2">
         <CheckCircle size={24} />
@@ -217,7 +228,7 @@
       </p>
 
       <div
-        class="bg-ctp-crust border border-ctp-surface0 rounded-md p-3 font-mono text-ctp-text mb-6 flex items-center justify-between"
+        class="bg-ctp-crust border border-ctp-surface0 rounded-md p-3 font-mono text-ctp-text mb-6 flex items-center justify-between overflow-x-auto"
       >
         <div class="truncate">{showNewKeyValue}</div>
         <button
@@ -239,7 +250,7 @@
             showNewKeyModal = false;
             showNewKeyValue = "";
           }}
-          class="bg-ctp-surface0 hover:bg-ctp-surface1 text-ctp-text px-4 py-2 rounded-md transition-colors"
+          class="bg-ctp-surface0 hover:bg-ctp-surface1 text-ctp-text px-4 py-2 rounded-md transition-colors font-medium"
         >
           Close
         </button>

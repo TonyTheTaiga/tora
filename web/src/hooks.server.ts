@@ -103,7 +103,8 @@ const finalize: Handle = async ({ event, resolve }) => {
           await event.locals.supabase
             .from('api_keys')
             .update({ last_used: new Date().toISOString() })
-            .eq('key_hash', keyHash);
+            .eq('key_hash', keyHash)
+            .eq('revoked', false);
         }
       }
     } catch (err) {

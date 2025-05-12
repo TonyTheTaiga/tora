@@ -17,7 +17,7 @@ export const GET: RequestHandler = async ({ locals }) => {
   try {
     const { data, error: dbError } = await DatabaseClient.getInstance()
       .from('api_keys')
-      .select('id, created_at, revoked')
+      .select('id, name, created_at, last_used, revoked')
       .eq('user_id', locals.user.id)
       .eq('revoked', false)
       .order('created_at', { ascending: false });
@@ -30,8 +30,9 @@ export const GET: RequestHandler = async ({ locals }) => {
     const keys = data.map(key => ({
       id: key.id,
       prefix: 'tosk_',
-      name: `API Key ${key.id.substring(0, 8)}`,
+      name: key.name,
       createdAt: key.created_at,
+      lastUsed: key.last_used,
       revoked: key.revoked
     }));
 
@@ -69,6 +70,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       .from('api_keys')
       .insert({
         key_hash: keyHash,
+        name: body.name,
         user_id: locals.user.id,
         revoked: false
       })

@@ -15,6 +15,7 @@ export type Database = {
           id: string
           key_hash: string
           last_used: string
+          name: string
           revoked: boolean
           user_id: string | null
         }
@@ -23,6 +24,7 @@ export type Database = {
           id?: string
           key_hash: string
           last_used?: string
+          name: string
           revoked?: boolean
           user_id?: string | null
         }
@@ -31,6 +33,7 @@ export type Database = {
           id?: string
           key_hash?: string
           last_used?: string
+          name?: string
           revoked?: boolean
           user_id?: string | null
         }

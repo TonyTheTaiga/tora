@@ -48,6 +48,6 @@
   </nav>
 </header>
 
-<main class="m-4">
+<main class="m-4 w-full max-w-7xl mx-auto">
   {@render children()}
 </main>
