@@ -94,7 +94,6 @@
 
 <div class="w-full">
   <div class="bg-ctp-mantle rounded-lg p-6 border border-ctp-surface0">
-    <!-- User Profile Section -->
     <div class="flex items-center gap-4 border-b border-ctp-surface0 pb-6 mb-6">
       <div class="p-3 bg-ctp-surface0 rounded-full text-ctp-lavender">
         <User size={40} />
@@ -104,7 +103,6 @@
           class="flex flex-col md:flex-row md:items-center md:justify-between"
         >
           <div>
-            <h1 class="text-2xl font-medium text-ctp-text">{user.name}</h1>
             <p class="text-ctp-subtext0">@{user.username}</p>
             <div
               class="flex items-center gap-1.5 mt-1 text-xs text-ctp-subtext1"
@@ -113,12 +111,6 @@
               <span>Member since {user.joinedDate}</span>
             </div>
           </div>
-
-          {#if user.email}
-            <div class="mt-2 md:mt-0 text-ctp-subtext0 text-sm">
-              <span>{user.email}</span>
-            </div>
-          {/if}
         </div>
       </div>
     </div>
