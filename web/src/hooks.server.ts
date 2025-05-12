@@ -8,9 +8,6 @@ import {
   PUBLIC_SUPABASE_ANON_KEY,
 } from "$env/static/public";
 
-import {
-  PRIVATE_SERVICE_ROLE
-} from "$env/static/private";
 
 const supabase: Handle = async ({ event, resolve }) => {
   /**
@@ -82,9 +79,35 @@ const finalize: Handle = async ({ event, resolve }) => {
   event.locals.session = session;
   event.locals.user = user;
 
+  // Handle API key authentication
   if (event.url.pathname.startsWith("/api") && !event.locals.user && event.request.headers.get("x-api-key")) {
-    event.locals.user = {
-      id: "f217117d-8648-48b4-beb9-77c87f413cf3"
+    const apiKey = event.request.headers.get("x-api-key");
+
+    try {
+      if (apiKey) {
+        const { createHash } = await import('crypto');
+        const keyHash = createHash('sha256').update(apiKey).digest('hex');
+        const { data: keyData, error: keyError } = await event.locals.supabase
+          .from('api_keys')
+          .select('user_id')
+          .eq('key_hash', keyHash)
+          .eq('revoked', false)
+          .single();
+
+        if (keyData && keyData.user_id) {
+          event.locals.user = {
+            id: keyData.user_id
+          };
+
+          // Update last_used timestamp
+          await event.locals.supabase
+            .from('api_keys')
+            .update({ last_used: new Date().toISOString() })
+            .eq('key_hash', keyHash);
+        }
+      }
+    } catch (err) {
+      console.error('Error validating API key:', err instanceof Error ? err.message : err);
     }
   }
 

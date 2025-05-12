@@ -31,12 +31,15 @@
       <Logo />
     </button>
     {#if session}
-      <button class="text-ctp-flamingo">
+      <button
+        class="text-ctp-flamingo"
+        onclick={() => goto(`/users/${session.user.id}`)}
+      >
         <CircleUserRound size={32} />
       </button>
     {:else}
       <button
-        class="border border-ctp-blue rounded-md text-ctp-text w-28 h-8"
+        class="border border-ctp-blue rounded-md text-ctp-text w-28 h-10"
         onclick={() => goto("/auth")}
       >
         Sign Up
@@ -45,6 +48,6 @@
   </nav>
 </header>
 
-<main class="m-4 h-full">
+<main class="m-4">
   {@render children()}
 </main>

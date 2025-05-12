@@ -10,7 +10,7 @@ import type {
 export class DatabaseClient {
   private static instance: SupabaseClient<Database>;
 
-  private static getInstance(): SupabaseClient<Database> {
+  static getInstance(): SupabaseClient<Database> {
     if (!this.instance) {
       throw new Error("DB client not set. Did you forget to set it?")
     }

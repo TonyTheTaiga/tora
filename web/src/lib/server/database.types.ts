@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      api_keys: {
+        Row: {
+          created_at: string
+          id: string
+          key_hash: string
+          last_used: string
+          revoked: boolean
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key_hash: string
+          last_used?: string
+          revoked?: boolean
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key_hash?: string
+          last_used?: string
+          revoked?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       experiment: {
         Row: {
           created_at: string
