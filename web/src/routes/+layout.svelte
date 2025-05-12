@@ -3,6 +3,7 @@
   import { invalidate } from "$app/navigation";
   import { onMount } from "svelte";
   import Logo from "$lib/components/logo.svelte";
+  import { CircleUserRound } from "lucide-svelte";
   import { goto } from "$app/navigation";
 
   let { data, children } = $props();
@@ -21,20 +22,32 @@
 
 <header>
   <nav
-    class="px-6 py-4 flex flex-row justify-between bg-ctp-mantle border-b border-ctp-surface0"
+    class="px-6 py-4 flex flex-row justify-between items-center bg-ctp-mantle border-b border-ctp-surface0"
   >
-    <div class="w-32 lg:w-42 text-ctp-mauve fill-current">
-      <Logo />
-    </div>
     <button
-      class="border border-ctp-blue rounded-md text-ctp-text w-28"
-      onclick={() => goto("/auth")}
+      class="w-32 lg:w-42 text-ctp-mauve fill-current"
+      onclick={() => goto("/")}
     >
-      Sign Up
+      <Logo />
     </button>
+    {#if session}
+      <button
+        class="text-ctp-flamingo"
+        onclick={() => goto(`/users/${session.user.id}`)}
+      >
+        <CircleUserRound size={32} />
+      </button>
+    {:else}
+      <button
+        class="border border-ctp-blue rounded-md text-ctp-text w-28 h-10"
+        onclick={() => goto("/auth")}
+      >
+        Sign Up
+      </button>
+    {/if}
   </nav>
 </header>
 
-<main class="m-4 h-full">
+<main class="w-full p-4">
   {@render children()}
 </main>

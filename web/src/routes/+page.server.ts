@@ -5,7 +5,7 @@ import type { Experiment, HyperParam } from "$lib/types";
 
 const API_ROUTES = {
   GET_EXPERIMENTS: "/api/experiments",
-  CREATE_EXPERIMENT: "/api/experiments/create",
+  CREATE_EXPERIMENT: "/api/experiments",
   DELETE_EXPERIMENT: "/api/experiments/delete",
   UPDATE_EXPERIMENT: "/api/experiments/update",
   CREATE_REFERENCE: "/api/experiments/[slug]/ref",
@@ -84,6 +84,7 @@ async function handleCreate(request: Request, fetch: Function) {
     "experiment-name": name,
     "experiment-description": description,
     "reference-id": referenceId,
+    visibility,
     hyperparams,
     tags,
   } = parseFormData(form);
@@ -94,7 +95,7 @@ async function handleCreate(request: Request, fetch: Function) {
 
   const response = await fetch(API_ROUTES.CREATE_EXPERIMENT, {
     method: "POST",
-    body: JSON.stringify({ name, description, hyperparams, tags }),
+    body: JSON.stringify({ name, description, hyperparams, tags, visibility }),
   });
 
   if (!response.ok) {
@@ -148,6 +149,7 @@ async function handleUpdate(request: Request, fetch: Function) {
     "experiment-name": name,
     "experiment-description": description,
     "reference-id": referenceId,
+    visibility,
     tags,
   } = parseFormData(form);
 
@@ -157,7 +159,7 @@ async function handleUpdate(request: Request, fetch: Function) {
 
   const response = await fetch(`/api/experiments/${id}`, {
     method: "POST",
-    body: JSON.stringify({ name, description, tags }),
+    body: JSON.stringify({ name, description, visibility, tags }),
   });
 
   if (!response.ok) {

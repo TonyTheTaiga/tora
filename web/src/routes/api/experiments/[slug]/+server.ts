@@ -5,12 +5,14 @@ import type { Database } from "$lib/server/database.types";
 
 export async function GET({
   params: { slug },
-  locals: { supabase },
+  locals,
 }: {
   params: { slug: string };
-  locals: { supabase: SupabaseClient<Database> };
+  locals: { supabase: SupabaseClient<Database>, user: { id: string } | null };
 }) {
-  const experiment = await getExperiment(slug);
+  // Pass the userId to getExperiment if user is logged in
+  const userId = locals.user?.id;
+  const experiment = await getExperiment(slug, userId);
   return json(experiment);
 }
 
@@ -26,6 +28,7 @@ export async function POST({
     name: data.name,
     description: data.description,
     tags: data.tags,
+    visibility: data.visibility,
   });
 
   return new Response(

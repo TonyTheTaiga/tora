@@ -1,5 +1,5 @@
 import { json, type RequestEvent } from "@sveltejs/kit";
-import { batchCreateMetric } from "$lib/server/database";
+import { batchCreateMetric, getExperiment } from "$lib/server/database";
 import type { Json } from "$lib/server/database.types";
 
 interface MetricInput {
@@ -18,7 +18,25 @@ interface APIError {
 export async function POST({
   request,
   params,
-}: RequestEvent<{ slug: string }, string>): Promise<Response> {
+  locals,
+}: RequestEvent<{ slug: string }, string> & { locals: { user: { id: string } | null } }): Promise<Response> {
+  // Check experiment access first
+  const userId = locals.user?.id;
+  const experimentId = params.slug;
+
+  if (!experimentId?.trim()) {
+    throw new Error("Invalid experiment ID");
+  }
+
+  try {
+    // This will throw an error if the user doesn't have access
+    await getExperiment(experimentId, userId);
+  } catch (error) {
+    return json({
+      message: "Access denied to experiment",
+      code: "ACCESS_DENIED"
+    }, { status: 403 });
+  }
   try {
     const metrics = (await request.json()) as MetricInput[];
     if (!Array.isArray(metrics)) {

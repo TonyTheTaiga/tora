@@ -5,12 +5,13 @@ import type {
   ExperimentAndMetrics,
   HyperParam,
   Metric,
+  Visibility,
 } from "$lib/types";
 
 export class DatabaseClient {
   private static instance: SupabaseClient<Database>;
 
-  private static getInstance(): SupabaseClient<Database> {
+  static getInstance(): SupabaseClient<Database> {
     if (!this.instance) {
       throw new Error("DB client not set. Did you forget to set it?")
     }
@@ -22,10 +23,12 @@ export class DatabaseClient {
   }
 
   static async createExperiment(
+    userId: string,
     name: string,
     description: string,
     hyperparams: HyperParam[],
     tags: string[],
+    visibility: Visibility = "PRIVATE",
   ): Promise<Experiment> {
     const { data, error } = await DatabaseClient.getInstance()
       .from("experiment")
@@ -34,6 +37,7 @@ export class DatabaseClient {
         description,
         hyperparams: hyperparams as unknown as Json[],
         tags,
+        visibility,
       })
       .select()
       .single();
@@ -42,6 +46,8 @@ export class DatabaseClient {
       throw new Error(`Failed to create experiment: ${error?.message}`);
     }
 
+    await DatabaseClient.getInstance().from("user_experiments").insert({ user_id: userId, experiment_id: data.id, role: "OWNER" }).select();
+
     return {
       id: data.id,
       name: data.name,
@@ -49,40 +55,147 @@ export class DatabaseClient {
       hyperparams: data.hyperparams as unknown as HyperParam[],
       createdAt: new Date(data.created_at),
       tags: data.tags,
+      visibility: data.visibility,
     };
   }
 
-  static async getExperiments(query: string | null): Promise<Experiment[]> {
+  static async getExperiments(query: string | null, userId?: string): Promise<Experiment[]> {
     if (!query) {
       query = "";
     }
 
-    const { data, error } = await DatabaseClient.getInstance()
-      .from("experiment")
-      .select("*, metric (name)")
-      .ilike("name", `%${query}%`)
-      .order("created_at", { ascending: false });
+    let data: any[] = [];
+    let error: any = null;
+
+    // Anonymous users can only see PUBLIC experiments
+    if (!userId) {
+      const result = await DatabaseClient.getInstance()
+        .from("experiment")
+        .select("*, metric (name)")
+        .ilike("name", `%${query}%`)
+        .eq("visibility", "PUBLIC")
+        .order("created_at", { ascending: false });
+
+      data = result.data || [];
+      error = result.error;
+    } else {
+      // Logged-in users can see:
+      // 1. Public experiments
+      // 2. Their own experiments (OWNER, COLLABORATOR)
+
+      // 1. Get public experiments
+      const publicExperimentsQuery = DatabaseClient.getInstance()
+        .from("experiment")
+        .select("*, metric (name)")
+        .eq("visibility", "PUBLIC")
+        .ilike("name", `%${query}%`)
+        .order("created_at", { ascending: false });
+
+      // 2. Get experiments where user is a collaborator or owner
+      const userExperimentsQuery = DatabaseClient.getInstance()
+        .from("experiment")
+        .select("*, metric (name), user_experiments!inner (user_id, role)")
+        .ilike("name", `%${query}%`)
+        .eq("user_experiments.user_id", userId)
+        .order("created_at", { ascending: false });
+
+      // 3. Run both queries
+      const [publicResults, userResults] = await Promise.all([
+        publicExperimentsQuery,
+        userExperimentsQuery
+      ]);
+
+      // 4. Combine the results
+      data = [];
+
+      if (!publicResults.error && publicResults.data) {
+        data = [...publicResults.data];
+      }
+
+      if (!userResults.error && userResults.data) {
+        data = [...data, ...userResults.data];
+      }
+
+      error = publicResults.error || userResults.error;
+    }
 
     if (error) {
       throw new Error(`Failed to get experiments: ${error.message}`);
     }
 
-    const result = data.map(
-      (exp): Experiment => ({
-        id: exp.id,
-        name: exp.name,
-        description: exp.description,
-        hyperparams: exp.hyperparams as unknown as HyperParam[],
-        createdAt: new Date(exp.created_at),
-        tags: exp.tags,
-        availableMetrics: [...new Set(exp.metric.map((m) => m.name))],
-      }),
-    );
+    // Post-process to deduplicate (an experiment might appear multiple times if the user has multiple roles)
+    const seenExperiments = new Set<string>();
+    const result = data
+      .filter(exp => {
+        if (seenExperiments.has(exp.id)) return false;
+        seenExperiments.add(exp.id);
+        return true;
+      })
+      .map(
+        (exp): Experiment => ({
+          id: exp.id,
+          name: exp.name,
+          description: exp.description,
+          hyperparams: exp.hyperparams as unknown as HyperParam[],
+          createdAt: new Date(exp.created_at),
+          tags: exp.tags,
+          visibility: exp.visibility,
+          availableMetrics: [...new Set((exp.metric || []).map((m) => m.name))],
+        }),
+      );
 
     return result;
   }
 
-  static async getExperiment(id: string): Promise<Experiment> {
+  /**
+   * Check if a user has access to an experiment.
+   * Anonymous users can only access PUBLIC experiments.
+   * Logged-in users can access their own experiments and PUBLIC experiments.
+   */
+  static async checkExperimentAccess(id: string, userId?: string): Promise<void> {
+    // Anonymous users can only access PUBLIC experiments
+    if (!userId) {
+      const { data: visibilityCheck, error: visibilityError } = await DatabaseClient.getInstance()
+        .from("experiment")
+        .select("visibility")
+        .eq("id", id)
+        .single();
+
+      if (visibilityError || !visibilityCheck) {
+        throw new Error(`Failed to get experiment with ID ${id}: ${visibilityError?.message}`);
+      }
+
+      if (visibilityCheck.visibility !== "PUBLIC") {
+        throw new Error(`Access denied to experiment with ID ${id}`);
+      }
+    } else {
+      // Check if the user has access to this experiment (either it's PUBLIC or they have a role)
+      const { count, error: accessError } = await DatabaseClient.getInstance()
+        .from("user_experiments")
+        .select("*", { count: "exact", head: true })
+        .eq("experiment_id", id)
+        .eq("user_id", userId);
+
+      const { data: visibilityCheck, error: visibilityError } = await DatabaseClient.getInstance()
+        .from("experiment")
+        .select("visibility")
+        .eq("id", id)
+        .single();
+
+      if (visibilityError || !visibilityCheck) {
+        throw new Error(`Failed to get experiment with ID ${id}: ${visibilityError?.message}`);
+      }
+
+      if (visibilityCheck.visibility !== "PUBLIC" && (!count || count === 0)) {
+        throw new Error(`Access denied to experiment with ID ${id}`);
+      }
+    }
+  }
+
+  static async getExperiment(id: string, userId?: string): Promise<Experiment> {
+    // First check access permissions
+    await this.checkExperimentAccess(id, userId);
+
     const { data, error } = await DatabaseClient.getInstance()
       .from("experiment")
       .select("*, metric (name)")
@@ -101,14 +214,19 @@ export class DatabaseClient {
       description: data.description,
       hyperparams: data.hyperparams as unknown as HyperParam[],
       createdAt: new Date(data.created_at),
-      availableMetrics: [...new Set(data.metric.map((m) => m.name))],
+      availableMetrics: [...new Set((data.metric || []).map((m) => m.name))],
       tags: data.tags,
+      visibility: data.visibility,
     };
   }
 
   static async getExperimentAndMetrics(
     id: string,
+    userId?: string,
   ): Promise<ExperimentAndMetrics> {
+    // First check access permissions
+    await this.checkExperimentAccess(id, userId);
+
     const { data, error } = await DatabaseClient.getInstance()
       .from("experiment")
       .select("*, metric (*)")
@@ -128,8 +246,9 @@ export class DatabaseClient {
         description: data.description,
         hyperparams: data.hyperparams as unknown as HyperParam[],
         createdAt: new Date(data.created_at),
-        availableMetrics: [...new Set(data.metric.map((m) => m.name))],
+        availableMetrics: [...new Set((data.metric || []).map((m) => m.name))],
         tags: data.tags,
+        visibility: data.visibility,
       },
       metrics: data.metric as Metric[],
     };
@@ -249,6 +368,7 @@ export class DatabaseClient {
       hyperparams: item.hyperparams as unknown as HyperParam[],
       tags: item.tags,
       createdAt: new Date(item.created_at),
+      visibility: item.visibility,
     }));
   }
 }
@@ -266,8 +386,3 @@ export const {
   createReference,
   getReferenceChain,
 } = DatabaseClient;
-
-
-export function setInstance(instance: SupabaseClient<Database>) {
-  return DatabaseClient.setInstance(instance);
-}
