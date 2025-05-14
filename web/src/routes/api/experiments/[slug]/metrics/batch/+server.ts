@@ -32,6 +32,7 @@ export async function POST({
     // This will throw an error if the user doesn't have access
     await getExperiment(experimentId, userId);
   } catch (error) {
+    console.log(error);
     return json({
       message: "Access denied to experiment",
       code: "ACCESS_DENIED"

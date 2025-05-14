@@ -32,7 +32,13 @@ class Tora:
         self.tags = tags
         self._max_buffer_len = max_buffer_len
         self._buffer = []
-        self._http_client = httpx.Client(base_url=server_url)
+        self._http_client = httpx.Client(
+            base_url=server_url,
+            headers={
+                "x-api-key": "tosk_f1477fb04daa14c007a2fa5159306df98d8891bb9eb37e05",
+                "Content-Type": "application/json",
+            },
+        )
 
     @classmethod
     def create_experiment(
@@ -56,11 +62,19 @@ class Tora:
             data["tags"] = tags
 
         req = httpx.post(
-            server_url + "/experiments/create",
+            server_url + "/experiments",
             json=data,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "x-api-key": "tosk_f1477fb04daa14c007a2fa5159306df98d8891bb9eb37e05",
+            },
         )
-        req.raise_for_status()
+        try:
+            req.raise_for_status()
+        except Exception as e:
+            print(req.json())
+            raise e
+
         return cls(
             req.json()["experiment"]["id"],
             description,
@@ -95,7 +109,6 @@ class Tora:
     def _write_logs(self):
         req = self._http_client.post(
             f"/experiments/{self._experiment_id}/metrics/batch",
-            headers={"Content-Type": "application/json"},
             json=self._buffer,
             timeout=120,
         )
