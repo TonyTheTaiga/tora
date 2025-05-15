@@ -17,10 +17,11 @@ interface FormDataResult {
   [key: string]: any;
 }
 
-export const load: PageServerLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch, locals }) => {
+  const { session } = await locals.safeGetSession();
   const response = await fetch(API_ROUTES.GET_EXPERIMENTS);
   const experiments = await response.json();
-  return { experiments };
+  return { experiments, session };
 };
 
 export const actions: Actions = {
