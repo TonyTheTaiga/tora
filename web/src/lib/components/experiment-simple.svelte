@@ -23,7 +23,7 @@
   } = $props();
 </script>
 
-<article class="p-4">
+<article class="p-4 flex flex-col h-full">
   <!-- Header -->
   <div class="flex justify-between items-center mb-3">
     <h3 class="font-medium text-lg text-ctp-text truncate pr-4">
