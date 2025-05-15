@@ -11,6 +11,9 @@
 
 <section>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Slot for prepending content (used for new experiment card) -->
+    <slot name="prepend" />
+    
     {#each experiments as experiment, idx (experiment.id)}
       <div
         class="
@@ -36,7 +39,7 @@
     {/each}
   </div>
 
-  {#if experiments.length === 0}
+  {#if experiments.length === 0 && !$$slots.prepend}
     <div
       class="flex flex-col items-center justify-center p-12 text-center bg-ctp-mantle rounded-lg border border-ctp-surface1"
     >
