@@ -5,7 +5,6 @@
   import type { Experiment } from "$lib/types";
 
   let { experiment = $bindable(), editMode = $bindable() } = $props();
-
   let addingNewTag = $state(false);
   let tag = $state<string | null>(null);
   let reference = $state<Experiment | null>(null);
@@ -194,7 +193,7 @@
               type="hidden"
               id="edit-visibility-input"
               name="visibility"
-              value={experiment.visibility || "PRIVATE"}
+              value={experiment.visibility}
               aria-labelledby="edit-visibility-label"
             />
 

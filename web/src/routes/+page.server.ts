@@ -24,12 +24,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
   return { experiments };
 };
 
-export const actions: Actions = {
-  create: async ({ request, fetch }) => handleCreate(request, fetch),
-  delete: async ({ request, fetch }) => handleDelete(request, fetch),
-  update: async ({ request, fetch }) => handleUpdate(request, fetch),
-};
-
 function mapExperimentData(exp: any): Experiment {
   return {
     id: exp.id,
@@ -41,6 +35,13 @@ function mapExperimentData(exp: any): Experiment {
     tags: exp.tags,
   };
 }
+
+export const actions: Actions = {
+  create: async ({ request, fetch }) => handleCreate(request, fetch),
+  delete: async ({ request, fetch }) => handleDelete(request, fetch),
+  update: async ({ request, fetch }) => handleUpdate(request, fetch),
+};
+
 
 function parseFormData(formData: FormData): FormDataResult {
   const obj = Object.fromEntries(formData);

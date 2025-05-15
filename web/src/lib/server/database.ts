@@ -123,27 +123,32 @@ export class DatabaseClient {
       throw new Error(`Failed to get experiments: ${error.message}`);
     }
 
-    // Post-process to deduplicate (an experiment might appear multiple times if the user has multiple roles)
     const seenExperiments = new Set<string>();
     const result = data
+      .sort((a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
       .filter(exp => {
         if (seenExperiments.has(exp.id)) return false;
         seenExperiments.add(exp.id);
         return true;
       })
-      .map(
-        (exp): Experiment => ({
-          id: exp.id,
-          name: exp.name,
-          description: exp.description,
-          hyperparams: exp.hyperparams as unknown as HyperParam[],
-          createdAt: new Date(exp.created_at),
-          tags: exp.tags,
-          visibility: exp.visibility,
-          availableMetrics: [...new Set((exp.metric || []).map((m) => m.name))],
-        }),
-      );
-
+      .map((exp): Experiment => ({
+        id: exp.id,
+        name: exp.name,
+        description: exp.description,
+        hyperparams: exp.hyperparams as unknown as HyperParam[],
+        createdAt: new Date(exp.created_at),
+        tags: exp.tags,
+        visibility: exp.visibility,
+        availableMetrics: Array.from(
+          new Set(
+            ((exp.metric ?? []) as { name: string }[]).map(
+              (m) => m.name
+            )
+          )
+        ),
+      }));
     return result;
   }
 
@@ -169,7 +174,6 @@ export class DatabaseClient {
         throw new Error(`Access denied to experiment with ID ${id}`);
       }
     } else {
-      // Check if the user has access to this experiment (either it's PUBLIC or they have a role)
       const { count, error: accessError } = await DatabaseClient.getInstance()
         .from("user_experiments")
         .select("*", { count: "exact", head: true })
@@ -194,7 +198,7 @@ export class DatabaseClient {
 
   static async getExperiment(id: string, userId?: string): Promise<Experiment> {
     // First check access permissions
-    await DatabaseClient.checkExperimentAccess(id, userId);
+    // await DatabaseClient.checkExperimentAccess(id, userId);
 
     const { data, error } = await DatabaseClient.getInstance()
       .from("experiment")
@@ -225,7 +229,7 @@ export class DatabaseClient {
     userId?: string,
   ): Promise<ExperimentAndMetrics> {
     // First check access permissions
-    await DatabaseClient.checkExperimentAccess(id, userId);
+    // await DatabaseClient.checkExperimentAccess(id, userId);
 
     const { data, error } = await DatabaseClient.getInstance()
       .from("experiment")

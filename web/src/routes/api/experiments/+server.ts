@@ -1,5 +1,5 @@
 import { json, error } from "@sveltejs/kit";
-import { getExperiments, createExperiment } from "$lib/server/database.js";
+import { getExperiments, createExperiment } from "$lib/server/database";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "$lib/server/database.types";
 

@@ -32,6 +32,8 @@
     highlighted: string[];
   } = $props();
 
+  $inspect(experiment);
+
   let editMode = $state<boolean>(false);
   let recommendations = $state<Record<string, HPRecommendation> | null>(null);
   let activeRecommendation = $state<string | null>(null);
