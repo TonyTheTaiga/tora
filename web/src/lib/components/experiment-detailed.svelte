@@ -263,7 +263,4 @@
       <InteractiveChart {experiment} />
     </div>
   {/if}
-
-  <!-- AI Analysis section -->
-  <!-- <ExperimentAiAnalysis {experiment} bind:aiSuggestions /> -->
 </article>
