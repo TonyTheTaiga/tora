@@ -8,6 +8,8 @@
     Eye,
     EyeClosed,
     X,
+    Globe,
+    GlobeLock,
   } from "lucide-svelte";
 
   let {
@@ -28,6 +30,17 @@
       {experiment.name}
     </h3>
     <div class="flex flx-col space-x-2">
+      <div
+        class="p-1.5"
+        class:text-ctp-green={experiment.visibility === "PUBLIC"}
+        class:text-ctp-red={experiment.visibility === "PRIVATE"}
+      >
+        {#if experiment.visibility === "PUBLIC"}
+          <Globe size={16} />
+        {:else}
+          <GlobeLock size={16} />
+        {/if}
+      </div>
       <button
         onclick={async () => {
           if (highlighted.includes(experiment.id)) {
