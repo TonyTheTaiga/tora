@@ -11,6 +11,7 @@
     Globe,
     GlobeLock,
   } from "lucide-svelte";
+  import Card from "./card.svelte";
 
   let {
     experiment,
@@ -23,7 +24,7 @@
   } = $props();
 </script>
 
-<article class="p-4 flex flex-col h-full">
+<Card border="none" height={"240"}>
   <!-- Header -->
   <div class="flex justify-between items-center mb-3">
     <h3 class="font-medium text-lg text-ctp-text truncate pr-4">
@@ -143,4 +144,5 @@
       </time>
     {/if}
   </div>
-</article>
+</Card>
+

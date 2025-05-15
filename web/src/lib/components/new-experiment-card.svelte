@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Plus, UserRound } from "lucide-svelte";
+  import Card from "./card.svelte";
 
   let {
     isUserSignedIn = $bindable(),
@@ -10,11 +11,11 @@
   } = $props();
 </script>
 
-<article
-  class="p-4 rounded-lg hover:bg-ctp-surface0 transition-colors border border-dashed border-ctp-subtext0"
->
+<Card border="dashed" borderColor="ctp-subtext0" height={"240"}>
   {#if isUserSignedIn}
-    <div class="flex flex-col items-center justify-center py-8 text-center">
+    <div
+      class="flex flex-col items-center justify-center py-8 text-center h-full"
+    >
       <div
         class="w-10 h-10 flex items-center justify-center rounded-full border border-dashed border-ctp-mauve text-ctp-mauve mb-3"
       >
@@ -34,7 +35,9 @@
       </button>
     </div>
   {:else}
-    <div class="flex flex-col items-center justify-center py-8 text-center">
+    <div
+      class="flex flex-col items-center justify-center py-8 text-center h-full"
+    >
       <div
         class="w-10 h-10 flex items-center justify-center rounded-full border border-dashed border-ctp-blue text-ctp-blue mb-3"
       >
@@ -54,4 +57,5 @@
       </a>
     </div>
   {/if}
-</article>
+</Card>
+
