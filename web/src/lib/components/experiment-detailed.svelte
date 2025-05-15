@@ -35,7 +35,7 @@
   $inspect(experiment);
 
   let editMode = $state<boolean>(false);
-  let recommendations = $state<Record<string, HPRecommendation> | null>(null);
+  let recommendations = $state<Record<string, HPRecommendation>>({});
   let activeRecommendation = $state<string | null>(null);
   let idCopied = $state<boolean>(false);
   $inspect(experiment.availableMetrics);
@@ -216,9 +216,10 @@
             {#if recommendations && recommendations[param.key]}
               <button
                 class="items-center pl-2"
-                onclick={() =>
-                  (activeRecommendation =
-                    recommendations[param.key].recommendation)}
+                onclick={() => {
+                  activeRecommendation =
+                    recommendations[param.key].recommendation;
+                }}
                 aria-label="Show recommendation"
               >
                 <Info

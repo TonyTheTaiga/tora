@@ -1,7 +1,7 @@
 import type { Actions } from "./$types";
 import type { PageServerLoad } from "./$types";
 import { fail, redirect } from "@sveltejs/kit";
-import type { Experiment, HyperParam } from "$lib/types";
+import type { HyperParam } from "$lib/types";
 
 const API_ROUTES = {
   GET_EXPERIMENTS: "/api/experiments",
@@ -19,22 +19,9 @@ interface FormDataResult {
 
 export const load: PageServerLoad = async ({ fetch }) => {
   const response = await fetch(API_ROUTES.GET_EXPERIMENTS);
-  const rawData = await response.json();
-  const experiments = rawData.map(mapExperimentData);
+  const experiments = await response.json();
   return { experiments };
 };
-
-function mapExperimentData(exp: any): Experiment {
-  return {
-    id: exp.id,
-    name: exp.name,
-    description: exp.description,
-    hyperparams: exp.hyperparams,
-    createdAt: new Date(exp.createdAt),
-    availableMetrics: exp.availableMetrics ?? undefined,
-    tags: exp.tags,
-  };
-}
 
 export const actions: Actions = {
   create: async ({ request, fetch }) => handleCreate(request, fetch),
