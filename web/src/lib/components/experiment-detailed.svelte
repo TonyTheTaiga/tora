@@ -32,13 +32,10 @@
     highlighted: string[];
   } = $props();
 
-  $inspect(experiment);
-
   let editMode = $state<boolean>(false);
   let recommendations = $state<Record<string, HPRecommendation>>({});
   let activeRecommendation = $state<string | null>(null);
   let idCopied = $state<boolean>(false);
-  $inspect(experiment.availableMetrics);
 </script>
 
 {#if editMode}
