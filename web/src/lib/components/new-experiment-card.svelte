@@ -4,14 +4,14 @@
 
   let {
     isUserSignedIn = $bindable(),
-    openModal = $bindable(),
+    isOpen = $bindable(),
   }: {
     isUserSignedIn: boolean;
-    openModal: () => void;
+    isOpen: boolean;
   } = $props();
 </script>
 
-<Card border="dashed" borderColor="ctp-subtext0" height={"240"}>
+<Card border="dashed" borderColor="ctp-subtext0">
   {#if isUserSignedIn}
     <div
       class="flex flex-col items-center justify-center py-8 text-center h-full"
@@ -28,7 +28,9 @@
         Start tracking a new experiment with metrics and parameters.
       </p>
       <button
-        onclick={openModal}
+        onclick={() => {
+          isOpen = true;
+        }}
         class="px-3 py-1 rounded-md border border-ctp-mauve text-ctp-mauve hover:bg-ctp-mauve hover:text-ctp-crust transition-colors font-medium text-sm"
       >
         Create
@@ -58,4 +60,3 @@
     </div>
   {/if}
 </Card>
-

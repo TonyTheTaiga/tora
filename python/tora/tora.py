@@ -66,13 +66,12 @@ class Tora:
             json=data,
             headers={
                 "Content-Type": "application/json",
-                "x-api-key": "tosk_f1477fb04daa14c007a2fa5159306df98d8891bb9eb37e05",
+                "x-api-key": "tosk_d836a61a1ae212f7ad72b7e70588027c25c0c162c905ee1c",
             },
         )
         try:
             req.raise_for_status()
         except Exception as e:
-            print(req.json())
             raise e
 
         return cls(

@@ -355,8 +355,6 @@ if __name__ == "__main__":
 
         scheduler.step()
 
-    model.load_state_dict(torch.load("best_mnist_model.pt"))
-
     test_loss, test_acc, test_prec, test_rec, test_f1 = validate(
         model, device, test_loader, criterion, epochs, tora, split="test"
     )

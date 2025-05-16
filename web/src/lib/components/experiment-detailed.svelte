@@ -43,7 +43,9 @@
   <EditExperimentModal bind:experiment bind:editMode />
 {/if}
 
-<article class="bg-ctp-base overflow-hidden shadow-lg">
+<article 
+  class="bg-ctp-base overflow-hidden shadow-lg rounded-lg border border-ctp-surface1 md:col-span-2 lg:col-span-4 row-span-2 order-first {highlighted.length > 0 && !highlighted.includes(experiment.id) ? 'opacity-40' : ''}"
+>
   <!-- Header with actions -->
   <header
     class="p-4 bg-ctp-mantle border-b border-ctp-surface0 flex flex-col md:flex-row justify-between items-center"

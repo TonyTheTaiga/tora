@@ -25,7 +25,13 @@
   } = $props();
 </script>
 
-<Card border="none" height={"240"}>
+<Card
+  border="none"
+  background="bg-ctp-mantle"
+  opacity={highlighted.length > 0 && !highlighted.includes(experiment.id)
+    ? "40"
+    : "100"}
+>
   <!-- Header -->
   <div class="flex justify-between items-center mb-3">
     <h3 class="font-medium text-lg text-ctp-text truncate pr-4">

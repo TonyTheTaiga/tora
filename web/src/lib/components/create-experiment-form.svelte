@@ -12,9 +12,9 @@
   } from "lucide-svelte";
 
   let {
-    toggleIsOpen,
+    isOpen = $bindable(),
   }: {
-    toggleIsOpen: () => void;
+    isOpen: boolean;
   } = $props();
 
   let hyperparams = $state<HyperParam[]>([]);
@@ -398,7 +398,9 @@
   <!-- Action Buttons -->
   <div class="flex justify-end gap-3 pt-6 mt-2 border-t border-ctp-surface0">
     <button
-      onclick={toggleIsOpen}
+      onclick={() => {
+        isOpen = !isOpen;
+      }}
       type="button"
       class="inline-flex items-center justify-center px-5 py-2.5 font-medium rounded-lg bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"
     >

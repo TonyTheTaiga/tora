@@ -1,11 +1,10 @@
 <script lang="ts">
   import CreateExperimentForm from "./create-experiment-form.svelte";
-  import { X } from "lucide-svelte";
 
   let {
-    toggleIsOpen,
+    isOpen = $bindable(),
   }: {
-    toggleIsOpen: () => void;
+    isOpen: boolean;
   } = $props();
 </script>
 
@@ -16,6 +15,6 @@
   <div
     class="bg-ctp-mantle w-full max-w-xl rounded-xl border border-ctp-surface0 shadow-2xl overflow-hidden"
   >
-    <CreateExperimentForm {toggleIsOpen} />
+    <CreateExperimentForm bind:isOpen />
   </div>
 </div>
