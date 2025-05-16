@@ -28,8 +28,11 @@
 <Card
   background="bg-ctp-mantle"
   opacity={highlighted.length > 0 && !highlighted.includes(experiment.id)
-    ? "40"
-    : "100"}
+    ? "opacity-40"
+    : "opacity-100"}
+  hover={highlighted.length > 0 && !highlighted.includes(experiment.id)
+    ? false
+    : true}
 >
   <!-- Header -->
   <div class="flex justify-between items-center mb-3">
