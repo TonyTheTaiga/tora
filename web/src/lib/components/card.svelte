@@ -15,7 +15,7 @@
     {`${background}`} 
     {`${opacity}`}
     {hover ? 'hover:bg-ctp-surface0 transition-colors' : ''}
-    {border !== 'none' ? `border border-${border} border-${borderColor}` : ''}
+    {border !== 'none' ? `border-2 border-${border} border-${borderColor}` : ''}
   "
 >
   {@render children()}

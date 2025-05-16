@@ -22,7 +22,7 @@
 
 <header>
   <nav
-    class="px-6 py-4 flex flex-row justify-between items-center bg-ctp-mantle border-b border-ctp-surface0"
+    class="px-4 py-4 flex flex-row justify-between items-center bg-ctp-mantle border-b border-ctp-surface0"
   >
     <button
       class="w-32 lg:w-42 text-ctp-mauve fill-current"
@@ -48,6 +48,6 @@
   </nav>
 </header>
 
-<main class="w-full p-4">
+<main class="p-4 h-full w-full">
   {@render children()}
 </main>

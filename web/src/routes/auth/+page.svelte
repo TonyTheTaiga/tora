@@ -1,4 +1,4 @@
-<div class="flex items-center justify-center min-h-screen">
+<div class="flex items-center justify-center">
   <form
     class="text-ctp-text max-w-md p-8 rounded bg-ctp-base flex flex-col space-y-2"
     method="POST"
@@ -33,4 +33,3 @@
     </div>
   </form>
 </div>
-
