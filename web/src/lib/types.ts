@@ -12,7 +12,7 @@ export interface Experiment {
   user_id: string;
   name: string;
   description?: string | null;
-  availableMetrics?: string[] | null;
+  availableMetrics: string[];
   hyperparams?: HyperParam[] | null;
   tags?: string[] | null;
   createdAt: Date;
