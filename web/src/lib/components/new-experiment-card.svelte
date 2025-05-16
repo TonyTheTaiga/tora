@@ -16,7 +16,7 @@
     <div
       class="w-10 h-10 flex items-center justify-center rounded-full border border-dashed border-ctp-mauve text-ctp-mauve mb-3"
     >
-      <Plus size={20} />
+      <Plus size={18} />
     </div>
     <h3 class="text-base font-medium text-ctp-subtext0 mb-1">New Experiment</h3>
     <p class="text-sm text-ctp-subtext0 mb-3 max-w-xs">
@@ -34,7 +34,7 @@
     <div
       class="w-10 h-10 flex items-center justify-center rounded-full border border-dashed border-ctp-blue text-ctp-blue mb-3"
     >
-      <UserRound size={20} />
+      <UserRound size={18} />
     </div>
     <h3 class="text-base font-medium text-ctp-subtext0 mb-1">
       Create an Account
