@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import type { Experiment } from "$lib/types";
   import ExperimentSimple from "./experiment-simple.svelte";
   import ExperimentDetailed from "./experiment-detailed.svelte";
@@ -6,7 +7,7 @@
   const {
     experiments = $bindable(),
     children,
-  }: { experiments: Experiment[]; children } = $props();
+  }: { experiments: Experiment[]; children: Snippet } = $props();
   let selectedId = $state<string | null>(null);
   let highlighted = $state<string[]>([]);
 </script>
