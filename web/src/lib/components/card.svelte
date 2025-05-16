@@ -11,7 +11,7 @@
 
 <article
   class="
-    p-4 rounded-lg flex flex-col
+    p-4 rounded-lg
     {`${background}`} 
     {`${opacity}`}
     {hover ? 'hover:bg-ctp-surface0 transition-colors' : ''}
