@@ -3,6 +3,7 @@
   import type { Visibility } from "$lib/types";
   import { enhance } from "$app/forms";
   import type { Experiment } from "$lib/types";
+  import { onMount, onDestroy } from "svelte";
 
   let { experiment = $bindable(), editMode = $bindable() } = $props();
   let addingNewTag = $state(false);
@@ -12,6 +13,14 @@
   const charList: string[] = [];
   let selectedIndex = $state<number>(-1);
   let searchResults = $state<Experiment[]>([]);
+
+  onMount(() => {
+    document.body.classList.add("overflow-hidden");
+  });
+
+  onDestroy(() => {
+    document.body.classList.remove("overflow-hidden");
+  });
 
   async function getExperiments(query: string | null) {
     let url = `/api/experiments`;

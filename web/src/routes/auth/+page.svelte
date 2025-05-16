@@ -1,9 +1,9 @@
-<div class="flex items-center justify-center min-h-screen">
+<div class="flex items-center justify-center">
   <form
     class="text-ctp-text max-w-md p-8 rounded bg-ctp-base flex flex-col space-y-2"
     method="POST"
-    action="?/signup"
     autocomplete="on"
+    action="?/login"
     name="login-form"
   >
     <label>
@@ -28,9 +28,8 @@
       />
     </label>
     <div>
-      <button type="submit">Sign up</button>
-      <button type="submit" formaction="?/signin">Sign In</button>
+      <button type="submit" formaction="?/signup">Sign up</button>
+      <button type="submit">Sign In</button>
     </div>
   </form>
 </div>
-

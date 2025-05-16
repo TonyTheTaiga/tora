@@ -26,7 +26,6 @@
 </script>
 
 <Card
-  border="none"
   background="bg-ctp-mantle"
   opacity={highlighted.length > 0 && !highlighted.includes(experiment.id)
     ? "40"

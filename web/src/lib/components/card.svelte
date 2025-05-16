@@ -11,11 +11,11 @@
 
 <article
   class="
-    p-4 rounded-lg flex flex-col
+    p-4 h-[200px] rounded-lg
     {`${background}`} 
     {`${opacity}`}
     {hover ? 'hover:bg-ctp-surface0 transition-colors' : ''}
-    {border !== 'none' ? `border border-${border} border-${borderColor}` : ''}
+    {border !== 'none' ? `border-2 border-${border} border-${borderColor}` : ''}
   "
 >
   {@render children()}

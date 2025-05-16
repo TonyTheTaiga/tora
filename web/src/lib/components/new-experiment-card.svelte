@@ -14,49 +14,39 @@
 <Card border="dashed" borderColor="ctp-subtext0">
   {#if isUserSignedIn}
     <div
-      class="flex flex-col items-center justify-center py-8 text-center h-full"
+      class="w-10 h-10 flex items-center justify-center rounded-full border border-dashed border-ctp-mauve text-ctp-mauve mb-3"
     >
-      <div
-        class="w-10 h-10 flex items-center justify-center rounded-full border border-dashed border-ctp-mauve text-ctp-mauve mb-3"
-      >
-        <Plus size={20} />
-      </div>
-      <h3 class="text-base font-medium text-ctp-subtext0 mb-1">
-        New Experiment
-      </h3>
-      <p class="text-sm text-ctp-subtext0 mb-3 max-w-xs">
-        Start tracking a new experiment with metrics and parameters.
-      </p>
-      <button
-        onclick={() => {
-          isOpen = true;
-        }}
-        class="px-3 py-1 rounded-md border border-ctp-mauve text-ctp-mauve hover:bg-ctp-mauve hover:text-ctp-crust transition-colors font-medium text-sm"
-      >
-        Create
-      </button>
+      <Plus size={18} />
     </div>
+    <h3 class="text-base font-medium text-ctp-subtext0 mb-1">New Experiment</h3>
+    <p class="text-sm text-ctp-subtext0 mb-3 max-w-xs">
+      Start tracking a new experiment with metrics and parameters.
+    </p>
+    <button
+      onclick={() => {
+        isOpen = true;
+      }}
+      class="px-3 py-1 rounded-md border border-ctp-mauve text-ctp-mauve hover:bg-ctp-mauve hover:text-ctp-crust transition-colors font-medium text-sm"
+    >
+      Create
+    </button>
   {:else}
     <div
-      class="flex flex-col items-center justify-center py-8 text-center h-full"
+      class="w-10 h-10 flex items-center justify-center rounded-full border border-dashed border-ctp-blue text-ctp-blue mb-3"
     >
-      <div
-        class="w-10 h-10 flex items-center justify-center rounded-full border border-dashed border-ctp-blue text-ctp-blue mb-3"
-      >
-        <UserRound size={20} />
-      </div>
-      <h3 class="text-base font-medium text-ctp-subtext0 mb-1">
-        Create an Account
-      </h3>
-      <p class="text-sm text-ctp-subtext0 mb-3 max-w-xs">
-        Sign up to start tracking your experiments and metrics.
-      </p>
-      <a
-        href="/auth"
-        class="px-3 py-1 rounded-md border border-ctp-blue text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-colors font-medium text-sm"
-      >
-        Sign Up / Login
-      </a>
+      <UserRound size={18} />
     </div>
+    <h3 class="text-base font-medium text-ctp-subtext0 mb-1">
+      Create an Account
+    </h3>
+    <p class="text-sm text-ctp-subtext0 mb-3 max-w-xs">
+      Sign up to start tracking your experiments and metrics.
+    </p>
+    <a
+      href="/auth"
+      class="px-3 py-1 rounded-md border border-ctp-blue text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-colors font-medium text-sm"
+    >
+      Sign Up / Login
+    </a>
   {/if}
 </Card>
