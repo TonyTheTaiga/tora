@@ -8,11 +8,24 @@
   >
     <label>
       Email
-      <input name="email" type="email" class="bg-ctp-mantle px-2" autocomplete="username email" />
+      <input
+        name="email"
+        type="email"
+        class="bg-ctp-mantle px-2"
+        autocomplete="email"
+        required
+      />
     </label>
     <label>
       Password
-      <input name="password" type="password" class="bg-ctp-mantle px-2" autocomplete="current-password" />
+      <input
+        name="password"
+        type="password"
+        minlength="6"
+        class="bg-ctp-mantle px-2"
+        autocomplete="current-password"
+        required
+      />
     </label>
     <div>
       <button type="submit">Sign up</button>
@@ -20,3 +33,4 @@
     </div>
   </form>
 </div>
+

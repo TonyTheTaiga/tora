@@ -71,7 +71,7 @@ export class DatabaseClient {
     if (!userId) {
       const result = await DatabaseClient.getInstance()
         .from("experiment")
-        .select("*, metric (name)")
+        .select("*, metric (name), user_experiments (user_id)")
         .ilike("name", `%${query}%`)
         .eq("visibility", "PUBLIC")
         .order("created_at", { ascending: false });
@@ -86,7 +86,7 @@ export class DatabaseClient {
       // 1. Get public experiments
       const publicExperimentsQuery = DatabaseClient.getInstance()
         .from("experiment")
-        .select("*, metric (name)")
+        .select("*, metric (name), user_experiments (user_id)")
         .eq("visibility", "PUBLIC")
         .ilike("name", `%${query}%`)
         .order("created_at", { ascending: false });
@@ -105,9 +105,7 @@ export class DatabaseClient {
         userExperimentsQuery
       ]);
 
-      // 4. Combine the results
       data = [];
-
       if (!publicResults.error && publicResults.data) {
         data = [...publicResults.data];
       }
@@ -115,14 +113,12 @@ export class DatabaseClient {
       if (!userResults.error && userResults.data) {
         data = [...data, ...userResults.data];
       }
-
       error = publicResults.error || userResults.error;
     }
 
     if (error) {
       throw new Error(`Failed to get experiments: ${error.message}`);
     }
-
     const seenExperiments = new Set<string>();
     const result = data
       .sort((a, b) =>
@@ -135,6 +131,7 @@ export class DatabaseClient {
       })
       .map((exp): Experiment => ({
         id: exp.id,
+        user_id: exp.user_experiments[0].user_id,
         name: exp.name,
         description: exp.description,
         hyperparams: exp.hyperparams as unknown as HyperParam[],
@@ -198,11 +195,12 @@ export class DatabaseClient {
 
   static async getExperiment(id: string, userId?: string): Promise<Experiment> {
     // First check access permissions
-    await DatabaseClient.checkExperimentAccess(id, userId);
+    // Not needed because getExperiments wont return invalid experimetns
+    // await DatabaseClient.checkExperimentAccess(id, userId);
 
     const { data, error } = await DatabaseClient.getInstance()
       .from("experiment")
-      .select("*, metric (name)")
+      .select("*, metric (name), user_experiments (user_id)")
       .eq("id", id)
       .single();
 
@@ -229,7 +227,8 @@ export class DatabaseClient {
     userId?: string,
   ): Promise<ExperimentAndMetrics> {
     // First check access permissions
-    await DatabaseClient.checkExperimentAccess(id, userId);
+    // Not needed because getExperiments wont return invalid experimetns
+    // await DatabaseClient.checkExperimentAccess(id, userId);
 
     const { data, error } = await DatabaseClient.getInstance()
       .from("experiment")

@@ -21,6 +21,7 @@
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
   import EditExperimentModal from "./edit-experiment-modal.svelte";
+  import { page } from "$app/state";
 
   let {
     experiment = $bindable(),
@@ -80,26 +81,28 @@
       </span>
     </h2>
     <div class="flex items-center gap-3">
-      <button
-        class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-transform active:rotate-90"
-        onclick={async () => {
-          const response = await fetch(
-            `/api/ai/analysis?experimentId=${experiment.id}`,
-          );
-          const data = (await response.json()) as ExperimentAnalysis;
-          recommendations = data.hyperparameter_recommendations;
-        }}
-      >
-        <Sparkle size={16} />
-      </button>
-      <button
-        onclick={() => {
-          editMode = true;
-        }}
-        class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
-      >
-        <Pencil size={16} />
-      </button>
+      {#if page.data.user && page.data.user.id === experiment.user_id}
+        <button
+          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-transform active:rotate-90"
+          onclick={async () => {
+            const response = await fetch(
+              `/api/ai/analysis?experimentId=${experiment.id}`,
+            );
+            const data = (await response.json()) as ExperimentAnalysis;
+            recommendations = data.hyperparameter_recommendations;
+          }}
+        >
+          <Sparkle size={16} />
+        </button>
+        <button
+          onclick={() => {
+            editMode = true;
+          }}
+          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+        >
+          <Pencil size={16} />
+        </button>
+      {/if}
       <button
         onclick={async () => {
           if (highlighted.includes(experiment.id)) {
@@ -126,16 +129,18 @@
           <Eye size={16} />
         {/if}
       </button>
-      <form method="POST" action="?/delete" class="flex items-center">
-        <input type="hidden" name="id" value={experiment.id} />
-        <button
-          type="submit"
-          class="p-1.5 text-ctp-subtext0 hover:text-ctp-red"
-          aria-label="Delete"
-        >
-          <X size={16} />
-        </button>
-      </form>
+      {#if page.data.user && page.data.user.id === experiment.user_id}
+        <form method="POST" action="?/delete" class="flex items-center">
+          <input type="hidden" name="id" value={experiment.id} />
+          <button
+            type="submit"
+            class="p-1.5 text-ctp-subtext0 hover:text-ctp-red"
+            aria-label="Delete"
+          >
+            <X size={16} />
+          </button>
+        </form>
+      {/if}
       <button
         onclick={() => {
           if (selectedId === experiment.id) {

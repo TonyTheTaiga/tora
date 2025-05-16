@@ -12,6 +12,7 @@
     GlobeLock,
   } from "lucide-svelte";
   import Card from "./card.svelte";
+  import { page } from "$app/state";
 
   let {
     experiment,
@@ -68,16 +69,18 @@
           <Eye size={16} />
         {/if}
       </button>
-      <form method="POST" action="?/delete" class="flex items-center">
-        <input type="hidden" name="id" value={experiment.id} />
-        <button
-          type="submit"
-          class="p-1.5 text-ctp-subtext0 hover:text-ctp-red"
-          aria-label="Delete"
-        >
-          <X size={16} />
-        </button>
-      </form>
+      {#if page.data.user && page.data.user.id === experiment.user_id}
+        <form method="POST" action="?/delete" class="flex items-center">
+          <input type="hidden" name="id" value={experiment.id} />
+          <button
+            type="submit"
+            class="p-1.5 text-ctp-subtext0 hover:text-ctp-red"
+            aria-label="Delete"
+          >
+            <X size={16} />
+          </button>
+        </form>
+      {/if}
       <button
         onclick={() => {
           if (selectedId === experiment.id) {
@@ -145,4 +148,3 @@
     {/if}
   </div>
 </Card>
-

@@ -9,6 +9,7 @@ export type Visibility = "PUBLIC" | "PRIVATE";
 
 export interface Experiment {
   id: string;
+  user_id: string;
   name: string;
   description?: string | null;
   availableMetrics?: string[] | null;

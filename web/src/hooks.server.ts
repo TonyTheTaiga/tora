@@ -82,7 +82,6 @@ const finalize: Handle = async ({ event, resolve }) => {
   // Handle API key authentication
   if (event.url.pathname.startsWith("/api") && !event.locals.user && event.request.headers.get("x-api-key")) {
     const apiKey = event.request.headers.get("x-api-key");
-    console.log(apiKey);
 
     try {
       if (apiKey) {
