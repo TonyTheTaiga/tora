@@ -1,11 +1,20 @@
 <script lang="ts">
   import CreateExperimentForm from "./create-experiment-form.svelte";
+  import { onMount, onDestroy } from "svelte";
 
   let {
     isOpen = $bindable(),
   }: {
     isOpen: boolean;
   } = $props();
+
+  onMount(() => {
+    document.body.classList.add("overflow-hidden");
+  });
+
+  onDestroy(() => {
+    document.body.classList.remove("overflow-hidden");
+  });
 </script>
 
 <div
