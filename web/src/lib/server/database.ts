@@ -88,7 +88,6 @@ export class DatabaseClient {
         .ilike("name", `%${query}%`)
         .order("created_at", { ascending: false });
 
-      // 2. Get experiments where user is a collaborator or owner
       const userExperimentsQuery = DatabaseClient.getInstance()
         .from("experiment")
         .select("*, metric (name), user_experiments!inner (user_id, role)")
@@ -96,23 +95,19 @@ export class DatabaseClient {
         .eq("user_experiments.user_id", userId)
         .order("created_at", { ascending: false });
 
-      // 3. Run both queries
       const [publicResults, userResults] = await Promise.all([
         publicExperimentsQuery,
         userExperimentsQuery
       ]);
-
       data = [];
       if (!publicResults.error && publicResults.data) {
         data = [...publicResults.data];
       }
-
       if (!userResults.error && userResults.data) {
         data = [...data, ...userResults.data];
       }
       error = publicResults.error || userResults.error;
     }
-
     if (error) {
       throw new Error(`Failed to get experiments: ${error.message}`);
     }
@@ -147,7 +142,6 @@ export class DatabaseClient {
   }
 
   static async checkExperimentAccess(id: string, userId?: string): Promise<void> {
-    // Anonymous users can only access PUBLIC experiments
     if (!userId) {
       const { data: visibilityCheck, error: visibilityError } = await DatabaseClient.getInstance()
         .from("experiment")
