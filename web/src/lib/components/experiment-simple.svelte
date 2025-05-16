@@ -113,17 +113,15 @@
   {/if}
 
   <!-- Metrics indicator -->
-  {#if experiment.availableMetrics && experiment.availableMetrics.length > 0}
-    <div class="flex items-center gap-1.5 text-ctp-subtext1 text-xs mb-3">
-      <ChartLine size={14} />
-      <span
-        >{experiment.availableMetrics.length} metric{experiment.availableMetrics
-          .length !== 1
-          ? "s"
-          : ""} available</span
-      >
-    </div>
-  {/if}
+  <div class="flex items-center gap-1.5 text-ctp-subtext1 text-xs mb-3">
+    <ChartLine size={14} />
+    <span
+      >{experiment.availableMetrics.length} metric{experiment.availableMetrics
+        .length !== 1
+        ? "s"
+        : ""} available</span
+    >
+  </div>
 
   <!-- Footer info -->
   <div
