@@ -48,11 +48,14 @@ export class DatabaseClient {
 
     await DatabaseClient.getInstance().from("user_experiments").insert({ user_id: userId, experiment_id: data.id, role: "OWNER" }).select();
 
+
     return {
       id: data.id,
+      user_id: userId,
       name: data.name,
       description: data.description,
-      hyperparams: data.hyperparams as unknown as HyperParam[],
+      hyperparams: hyperparams,
+      availableMetrics: [],
       createdAt: new Date(data.created_at),
       tags: data.tags,
       visibility: data.visibility,
