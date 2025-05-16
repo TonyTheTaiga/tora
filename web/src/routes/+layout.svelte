@@ -3,7 +3,7 @@
   import { invalidate } from "$app/navigation";
   import { onMount } from "svelte";
   import Logo from "$lib/components/logo.svelte";
-  import { CircleUserRound } from "lucide-svelte";
+  import { CircleUserRound, LogOut, Bean } from "lucide-svelte";
   import { goto } from "$app/navigation";
 
   let { data, children } = $props();
@@ -31,18 +31,32 @@
       <Logo />
     </button>
     {#if session}
-      <button
-        class="text-ctp-flamingo"
-        onclick={() => goto(`/users/${session.user.id}`)}
-      >
-        <CircleUserRound size={32} />
-      </button>
+      <div class="flex items-center gap-4">
+        <button
+          class="flex items-center gap-2 px-3 py-1.5 border border-ctp-blue rounded-md text-ctp-blue hover:bg-ctp-lavender hover:text-ctp-crust transition-colors"
+          onclick={() => goto(`/users/${session.user.id}`)}
+        >
+          <CircleUserRound size={18} />
+          <span>Profile</span>
+        </button>
+        <form action="/auth?/logout" method="POST">
+          <button
+            type="submit"
+            class="flex items-center gap-2 px-3 py-1.5 border border-ctp-red rounded-md text-ctp-red hover:bg-ctp-red hover:text-ctp-crust transition-colors"
+            aria-label="Log out"
+          >
+            <LogOut size={18} />
+            <span>Sign Out</span>
+          </button>
+        </form>
+      </div>
     {:else}
       <button
-        class="border border-ctp-blue rounded-md text-ctp-text w-28 h-10"
+        class="flex items-center gap-2 px-3 py-1.5 border border-ctp-blue rounded-md text-ctp-blue hover:bg-ctp-lavender hover:text-ctp-crust transition-colors"
         onclick={() => goto("/auth")}
       >
-        Sign Up
+        <Bean size={18} />
+        <span>Sign Up</span>
       </button>
     {/if}
   </nav>
