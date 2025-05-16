@@ -198,7 +198,7 @@ export class DatabaseClient {
 
   static async getExperiment(id: string, userId?: string): Promise<Experiment> {
     // First check access permissions
-    // await DatabaseClient.checkExperimentAccess(id, userId);
+    await DatabaseClient.checkExperimentAccess(id, userId);
 
     const { data, error } = await DatabaseClient.getInstance()
       .from("experiment")
@@ -229,7 +229,7 @@ export class DatabaseClient {
     userId?: string,
   ): Promise<ExperimentAndMetrics> {
     // First check access permissions
-    // await DatabaseClient.checkExperimentAccess(id, userId);
+    await DatabaseClient.checkExperimentAccess(id, userId);
 
     const { data, error } = await DatabaseClient.getInstance()
       .from("experiment")

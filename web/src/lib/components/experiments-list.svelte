@@ -2,18 +2,19 @@
   import type { Experiment } from "$lib/types";
   import ExperimentSimple from "./experiment-simple.svelte";
   import ExperimentDetailed from "./experiment-detailed.svelte";
-  import { Cpu } from "lucide-svelte";
 
-  const { experiments = $bindable() }: { experiments: Experiment[] } = $props();
+  const {
+    experiments = $bindable(),
+    children,
+  }: { experiments: Experiment[]; children } = $props();
   let selectedId = $state<string | null>(null);
   let highlighted = $state<string[]>([]);
 </script>
 
 <section>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-    <!-- Slot for prepending content (used for new experiment card) -->
-    <slot name="prepend" />
-    
+    {@render children()}
+
     {#each experiments as experiment, idx (experiment.id)}
       <div
         class="
@@ -38,17 +39,4 @@
       </div>
     {/each}
   </div>
-
-  {#if experiments.length === 0 && !$$slots.prepend}
-    <div
-      class="flex flex-col items-center justify-center p-12 text-center bg-ctp-mantle rounded-lg border border-ctp-surface1"
-    >
-      <Cpu size={40} className="text-ctp-overlay0 mb-4" strokeWidth={1.5} />
-      <h3 class="text-lg font-medium text-ctp-text mb-2">No experiments yet</h3>
-      <p class="text-ctp-subtext0 max-w-md">
-        Create your first experiment to start tracking metrics and see them
-        displayed here.
-      </p>
-    </div>
-  {/if}
 </section>

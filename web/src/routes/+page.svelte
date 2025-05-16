@@ -13,7 +13,7 @@
   function toggleIsOpen() {
     isOpen = !isOpen;
   }
-  
+
   function openModal() {
     isOpen = true;
   }
@@ -25,10 +25,6 @@
 
 <div class="flex flex-col space-y-4">
   <ExperimentsList bind:experiments>
-    <NewExperimentCard 
-      bind:isUserSignedIn 
-      openModal={openModal} 
-      slot="prepend"
-    />
+    <NewExperimentCard bind:isUserSignedIn {openModal} />
   </ExperimentsList>
 </div>
