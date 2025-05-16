@@ -70,7 +70,6 @@ export class DatabaseClient {
     let data: any[] = [];
     let error: any = null;
 
-    // Anonymous users can only see PUBLIC experiments
     if (!userId) {
       const result = await DatabaseClient.getInstance()
         .from("experiment")
@@ -82,11 +81,6 @@ export class DatabaseClient {
       data = result.data || [];
       error = result.error;
     } else {
-      // Logged-in users can see:
-      // 1. Public experiments
-      // 2. Their own experiments (OWNER, COLLABORATOR)
-
-      // 1. Get public experiments
       const publicExperimentsQuery = DatabaseClient.getInstance()
         .from("experiment")
         .select("*, metric (name), user_experiments (user_id)")
@@ -137,7 +131,7 @@ export class DatabaseClient {
         user_id: exp.user_experiments[0].user_id,
         name: exp.name,
         description: exp.description,
-        hyperparams: exp.hyperparams as unknown as HyperParam[],
+        hyperparams: exp.hyperparams,
         createdAt: new Date(exp.created_at),
         tags: exp.tags,
         visibility: exp.visibility,
@@ -152,11 +146,6 @@ export class DatabaseClient {
     return result;
   }
 
-  /**
-   * Check if a user has access to an experiment.
-   * Anonymous users can only access PUBLIC experiments.
-   * Logged-in users can access their own experiments and PUBLIC experiments.
-   */
   static async checkExperimentAccess(id: string, userId?: string): Promise<void> {
     // Anonymous users can only access PUBLIC experiments
     if (!userId) {
@@ -197,7 +186,6 @@ export class DatabaseClient {
   }
 
   static async getExperiment(id: string, userId?: string): Promise<Experiment> {
-    // First check access permissions
     // Not needed because getExperiments wont return invalid experimetns
     // await DatabaseClient.checkExperimentAccess(id, userId);
 
@@ -215,6 +203,7 @@ export class DatabaseClient {
 
     return {
       id: data.id,
+      user_id: userId,
       name: data.name,
       description: data.description,
       hyperparams: data.hyperparams as unknown as HyperParam[],
@@ -229,7 +218,6 @@ export class DatabaseClient {
     id: string,
     userId?: string,
   ): Promise<ExperimentAndMetrics> {
-    // First check access permissions
     // Not needed because getExperiments wont return invalid experimetns
     // await DatabaseClient.checkExperimentAccess(id, userId);
 
@@ -248,6 +236,7 @@ export class DatabaseClient {
     return {
       experiment: {
         id: data.id,
+        user_id: userId,
         name: data.name,
         description: data.description,
         hyperparams: data.hyperparams as unknown as HyperParam[],
@@ -369,9 +358,11 @@ export class DatabaseClient {
     }
     return data.map((item) => ({
       id: item.id,
+      user_id: undefined,
       name: item.name,
       description: item.description,
       hyperparams: item.hyperparams as unknown as HyperParam[],
+      availableMetrics: [],
       tags: item.tags,
       createdAt: new Date(item.created_at),
       visibility: item.visibility,
