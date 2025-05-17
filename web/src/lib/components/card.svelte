@@ -3,7 +3,7 @@
     hover = true,
     border = "none",
     borderColor = "ctp-subtext0",
-    background = "bg-ctp-dark",
+    background = "bg-ctp-crust", // Changed from non-standard bg-ctp-dark to standard bg-ctp-crust
     opacity = "opacity-100",
     children,
   } = $props();

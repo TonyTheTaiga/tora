@@ -36,7 +36,7 @@
     <div class="flex items-center">
       {#if session}
         <button
-          class="flex items-center gap-1.5 px-3 py-1.5 border border-ctp-blue rounded-md text-ctp-blue hover:bg-ctp-lavender hover:text-ctp-crust transition-colors"
+          class="flex items-center gap-1.5 px-3 py-1.5 border border-ctp-blue rounded-md text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-colors"
           onclick={() => goto(`/users/${session.user.id}`)}
           aria-label="Profile"
           title="View profile"
@@ -47,7 +47,7 @@
         </button>
       {:else}
         <button
-          class="flex items-center gap-1.5 px-3 py-1.5 border border-ctp-blue rounded-md text-ctp-blue hover:bg-ctp-lavender hover:text-ctp-crust transition-colors"
+          class="flex items-center gap-1.5 px-3 py-1.5 border border-ctp-blue rounded-md text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-colors"
           onclick={() => goto("/auth")}
           aria-label="Sign up or log in"
         >

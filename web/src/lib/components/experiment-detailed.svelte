@@ -308,7 +308,7 @@
           <div class="flex gap-1 flex-nowrap sm:flex-wrap">
             {#each experiment.tags as tag}
               <span
-                class="whitespace-nowrap inline-flex items-center px-1.5 py-0.5 text-xs bg-ctp-surface0/50 text-ctp-mauve rounded-full"
+                class="whitespace-nowrap inline-flex items-center px-1.5 py-0.5 text-xs bg-ctp-surface0/50 text-ctp-blue rounded-full"
               >
                 {tag}
               </span>

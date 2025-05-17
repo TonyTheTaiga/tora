@@ -243,7 +243,7 @@
           <!-- Tags Section -->
           <details>
             <summary class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5">
-              <TagIcon size={16} class="text-ctp-pink" />
+              <TagIcon size={16} class="text-ctp-blue" />
               <span class="text-sm font-medium">Tags</span>
             </summary>
             <div class="pt-2 pl-6">
@@ -251,12 +251,12 @@
                 {#each experiment.tags as tag, i}
                   <input type="hidden" value={tag} name="tags.{i}" />
                   <span
-                    class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-ctp-mauve/10 text-ctp-mauve border-0 group"
+                    class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-ctp-blue/10 text-ctp-blue border-0 group"
                   >
                     {tag}
                     <button
                       type="button"
-                      class="text-ctp-mauve/70 hover:text-ctp-red transition-colors ml-1.5"
+                      class="text-ctp-blue/70 hover:text-ctp-red transition-colors ml-1.5"
                       onclick={() => experiment.tags.splice(i, 1)}
                       aria-label="Remove tag"
                     >
@@ -270,14 +270,14 @@
                     <input
                       type="text"
                       bind:value={tag}
-                      class="w-40 px-2 py-1.5 text-sm bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-mauve transition-all placeholder-ctp-overlay0 shadow-sm"
+                      class="w-40 px-2 py-1.5 text-sm bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue transition-all placeholder-ctp-overlay0 shadow-sm"
                       placeholder="New tag"
                       onkeydown={addTag}
                     />
                     <button
                       type="button"
                       onclick={addTag}
-                      class="p-1.5 rounded-full text-ctp-mauve hover:bg-ctp-mauve/10 transition-all"
+                      class="p-1.5 rounded-full text-ctp-blue hover:bg-ctp-blue/10 transition-all"
                     >
                       <Plus size={14} />
                     </button>
@@ -289,7 +289,7 @@
                       e.preventDefault();
                       addingNewTag = true;
                     }}
-                    class="inline-flex items-center gap-1 py-0.5 px-2 text-xs rounded-full bg-transparent text-ctp-mauve border border-dashed border-ctp-mauve/50 hover:bg-ctp-mauve/10 transition-all"
+                    class="inline-flex items-center gap-1 py-0.5 px-2 text-xs rounded-full bg-transparent text-ctp-blue border border-dashed border-ctp-blue/50 hover:bg-ctp-blue/10 transition-all"
                   >
                     <Plus size={12} />
                     Add Tag
