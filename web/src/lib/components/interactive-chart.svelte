@@ -1,12 +1,25 @@
 <script lang="ts">
   import type { Experiment, Metric } from "$lib/types";
   import Chart from "chart.js/auto";
-  import { ChartLine } from "lucide-svelte";
+  import { ChartLine, Plus, EyeOff } from "lucide-svelte";
 
   let chartInstance: Chart | null = null;
   let chartCanvas: HTMLCanvasElement | null = $state(null);
   let { experiment }: { experiment: Experiment } = $props();
   let isLoading: boolean = $state(false);
+  let selectedMetrics = $state<string[]>([]);
+  let metricsData = $state<
+    Record<string, { steps: number[]; values: number[] }>
+  >({});
+
+  const COLORS = [
+    { border: "#74c7ec", bg: "rgba(116, 199, 236, 0.15)", point: "#b4befe" }, // sapphire
+    { border: "#f5c2e7", bg: "rgba(245, 194, 231, 0.15)", point: "#f38ba8" }, // pink
+    { border: "#a6e3a1", bg: "rgba(166, 227, 161, 0.15)", point: "#94e2d5" }, // green
+    { border: "#fab387", bg: "rgba(250, 179, 135, 0.15)", point: "#f9e2af" }, // peach
+    { border: "#cba6f7", bg: "rgba(203, 166, 247, 0.15)", point: "#89b4fa" }, // mauve
+    { border: "#f38ba8", bg: "rgba(243, 139, 168, 0.15)", point: "#eba0ac" }, // red
+  ];
 
   async function loadMetrics() {
     try {
@@ -31,41 +44,61 @@
     }
   }
 
-  function createChart(label: string, x: number[], y: number[]) {
+  function updateChart() {
     destroyChart();
-    if (!chartCanvas) return;
+    if (!chartCanvas || selectedMetrics.length === 0) return;
 
     try {
+      const datasets = selectedMetrics.map((metric, index) => {
+        const colorIndex = index % COLORS.length;
+        const color = COLORS[colorIndex];
+        const steps = metricsData[metric]?.steps || [];
+        const values = metricsData[metric]?.values || [];
+        const dataPoints = steps.map((step, i) => ({ x: step, y: values[i] }));
+
+        return {
+          label: metric,
+          data: dataPoints,
+          borderColor: color.border,
+          backgroundColor: color.bg,
+          fill: false,
+          pointBackgroundColor: color.point,
+          pointBorderColor: "#181825" /* mantle */,
+          pointHoverBackgroundColor: "#cba6f7" /* mauve */,
+          pointHoverBorderColor: "#1e1e2e" /* base */,
+          borderWidth: 2,
+          tension: 0.3,
+          pointRadius: 3,
+        };
+      });
       chartInstance = new Chart(chartCanvas, {
         type: "line",
         data: {
-          labels: x,
-          datasets: [
-            {
-              label,
-              data: y,
-              borderColor: "#74c7ec" /* sapphire */,
-              backgroundColor: "rgba(116, 199, 236, 0.15)",
-              fill: true,
-              pointBackgroundColor: "#b4befe" /* lavender */,
-              pointBorderColor: "#181825" /* mantle */,
-              pointHoverBackgroundColor: "#cba6f7" /* mauve */,
-              pointHoverBorderColor: "#1e1e2e" /* base */,
-            },
-          ],
+          datasets: datasets,
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          parsing: false, // Disable parsing as we use {x,y} format
+          normalized: true,
           interaction: {
             mode: "nearest",
             intersect: false,
             axis: "x",
-            includeInvisible: true,
           },
           plugins: {
             legend: {
-              display: false,
+              display: true,
+              position: "top",
+              labels: {
+                color: "#cdd6f4" /* text */,
+                usePointStyle: true,
+                pointStyle: "circle",
+                padding: 15,
+                font: {
+                  size: 11,
+                },
+              },
             },
             tooltip: {
               backgroundColor: "#11111b" /* crust */,
@@ -76,16 +109,15 @@
               caretPadding: 10,
               callbacks: {
                 title: function (tooltipItems) {
-                  return `Step ${tooltipItems[0].label}`;
-                },
-                label: function (context) {
-                  return `${context.dataset.label}: ${context.formattedValue}`;
+                  return `Step ${tooltipItems[0].parsed.x}`;
                 },
               },
             },
           },
           scales: {
             x: {
+              type: "linear",
+              position: "bottom",
               title: {
                 display: true,
                 text: "Step",
@@ -99,9 +131,11 @@
               },
             },
             y: {
+              type: "linear",
+              position: "left",
               title: {
                 display: true,
-                text: label,
+                text: "Value",
                 color: "#cdd6f4" /* text */,
               },
               ticks: {
@@ -119,53 +153,83 @@
     }
   }
 
-  let selectedMetric: string | null = $state(null);
-  async function setSelectedMetric(metric: string) {
-    selectedMetric = metric;
+  async function toggleMetric(metric: string) {
     isLoading = true;
 
     try {
-      const metrics = (await loadMetrics()) as Metric[];
-      const loss = Object.groupBy(metrics, ({ name }) => name);
-      const chart_targets = loss[metric];
+      if (selectedMetrics.includes(metric)) {
+        selectedMetrics = selectedMetrics.filter((m) => m !== metric);
+      } else {
+        selectedMetrics = [...selectedMetrics, metric];
+        if (!metricsData[metric]) {
+          const metrics = (await loadMetrics()) as Metric[];
+          const metricsByName = Object.groupBy(metrics, ({ name }) => name);
+          const chart_targets = metricsByName[metric];
+          if (chart_targets && chart_targets.length > 0) {
+            chart_targets.sort((a, b) => (a.step ?? 0) - (b.step ?? 0));
+            const steps = chart_targets.map((l, index) =>
+              l.step !== undefined ? l.step : index,
+            );
+            const values = chart_targets.map((l) =>
+              typeof l.value === "number" ? l.value : parseFloat(l.value) || 0,
+            );
 
-      if (chart_targets && chart_targets.length > 0) {
-        chart_targets.sort((a, b) => (a.step ?? 0) - (b.step ?? 0));
-        const steps = chart_targets.map((l, index) =>
-          l.step !== undefined ? l.step : index,
-        );
-        const values = chart_targets.map((l) =>
-          typeof l.value === "number" ? l.value : parseFloat(l.value) || 0,
-        );
-        createChart(metric, steps, values);
+            metricsData[metric] = { steps, values };
+          }
+        }
       }
+
+      updateChart();
     } catch (error) {
-      console.error("Error displaying chart:", error);
+      console.error("Error toggling metric:", error);
     } finally {
       isLoading = false;
     }
+  }
+
+  function resetChart() {
+    selectedMetrics = [];
+    metricsData = {};
+    destroyChart();
   }
 </script>
 
 <div class="p-5 space-y-4">
   {#if experiment.availableMetrics && experiment.availableMetrics.length > 0}
+    <div class="flex justify-between items-center mb-2">
+      <h3 class="text-sm font-medium text-ctp-subtext0">Available Metrics</h3>
+      {#if selectedMetrics.length > 0}
+        <button
+          class="px-2 py-1 text-xs text-ctp-red border border-ctp-red rounded hover:bg-ctp-red/10 transition-colors"
+          onclick={resetChart}
+        >
+          Clear All
+        </button>
+      {/if}
+    </div>
+
     <div class="flex flex-wrap gap-2 mb-4">
       {#each experiment.availableMetrics as metric}
         <button
-          class={`py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${
-            selectedMetric === metric
+          class={`flex items-center gap-1.5 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${
+            selectedMetrics.includes(metric)
               ? "bg-ctp-mauve text-ctp-crust hover:bg-ctp-lavender"
               : "bg-ctp-surface0 text-ctp-text border border-ctp-surface1 hover:bg-ctp-blue hover:text-ctp-crust hover:border-ctp-blue"
           }`}
-          onclick={() => setSelectedMetric(metric)}
+          onclick={() => toggleMetric(metric)}
         >
+          {#if selectedMetrics.includes(metric)}
+            <EyeOff size={14} />
+          {:else}
+            <Plus size={14} />
+          {/if}
           {metric}
         </button>
       {/each}
     </div>
   {/if}
 
-  {#if selectedMetric}
+  {#if selectedMetrics.length > 0}
     <div
       class="relative h-80 w-full rounded-md border border-ctp-surface1 bg-ctp-mantle overflow-hidden shadow-md"
     >
@@ -186,7 +250,7 @@
     >
       <ChartLine size={32} class="text-ctp-overlay0 mb-4" />
       <p class="text-ctp-subtext0 text-sm text-center max-w-md">
-        Select a metric from above to view the chart data
+        Select metrics from above to view and compare chart data
       </p>
     </div>
   {/if}
