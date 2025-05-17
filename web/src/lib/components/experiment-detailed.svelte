@@ -44,7 +44,7 @@
 {/if}
 
 <article
-  class="bg-ctp-base overflow-hidden shadow-lg rounded-lg md:col-span-2 lg:col-span-4 row-span-2 order-first {highlighted.length >
+  class="bg-ctp-base overflow-hidden shadow-lg rounded-lg md:col-span-2 lg:col-span-full row-span-2 order-first {highlighted.length >
     0 && !highlighted.includes(experiment.id)
     ? 'opacity-40'
     : ''}"
