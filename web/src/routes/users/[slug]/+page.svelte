@@ -9,6 +9,7 @@
     Trash2,
     CheckCircle,
     AlertCircle,
+    LogOut,
   } from "lucide-svelte";
   import { browser } from "$app/environment";
   import { fade } from "svelte/transition";
@@ -94,15 +95,13 @@
 
 <div class="w-full">
   <div class="bg-ctp-mantle rounded-lg p-6 border border-ctp-surface0">
-    <div class="flex items-center gap-4 border-b border-ctp-surface0 pb-6 mb-6">
-      <div class="p-3 bg-ctp-surface0 rounded-full text-ctp-lavender">
-        <User size={40} />
-      </div>
-      <div class="flex-grow">
-        <div
-          class="flex flex-col md:flex-row md:items-center md:justify-between"
-        >
-          <div>
+    <div class="flex flex-col sm:flex-row gap-4 border-b border-ctp-surface0 pb-6 mb-6">
+      <div class="flex items-center gap-4">
+        <div class="p-3 bg-ctp-surface0 rounded-full text-ctp-lavender">
+          <User size={40} />
+        </div>
+        <div class="flex-grow">
+          <div class="flex flex-col">
             <p class="text-ctp-subtext0">@{user.username}</p>
             <div
               class="flex items-center gap-1.5 mt-1 text-xs text-ctp-subtext1"
@@ -112,6 +111,20 @@
             </div>
           </div>
         </div>
+      </div>
+      
+      <!-- Logout button -->
+      <div class="mt-3 sm:mt-0 sm:ml-auto">
+        <form action="/auth?/logout" method="POST">
+          <button
+            type="submit"
+            class="w-full sm:w-auto flex items-center gap-2 px-3 py-1.5 border border-ctp-red rounded-md text-ctp-red hover:bg-ctp-red hover:text-ctp-crust transition-colors"
+            aria-label="Sign out"
+          >
+            <LogOut size={16} />
+            <span>Sign Out</span>
+          </button>
+        </form>
       </div>
     </div>
 
