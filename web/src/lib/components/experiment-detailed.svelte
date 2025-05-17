@@ -51,127 +51,248 @@
 >
   <!-- Header with actions -->
   <header
-    class="px-4 py-3 bg-ctp-mantle border-b border-ctp-surface0 flex md:flex-row justify-between items-center"
+    class="px-3 sm:px-4 py-3 bg-ctp-mantle border-b border-ctp-surface0"
   >
-    <h2>
-      <span
-        role="button"
-        tabindex="0"
-        class="text-lg font-medium content-center cursor-pointer transition-all duration-150 flex items-center gap-1.5"
-        class:text-ctp-green={idCopied}
-        class:text-ctp-text={!idCopied}
-        onclick={() => {
-          navigator.clipboard.writeText(experiment.id);
-          idCopied = true;
-          setTimeout(() => {
-            idCopied = false;
-          }, 800);
-        }}
-        onkeydown={(e) => {
-          if (e.key === "Enter" || e.key === " ") e.currentTarget.click();
-        }}
-        title="Click to copy ID"
-      >
-        {#if idCopied}
-          <span class="flex items-center">
-            <ClipboardCheck size={18} class="mr-1 animate-bounce" />
-            ID Copied
-          </span>
-        {:else}
-          <span class="flex items-center">
-            {experiment.name}
-            <Copy size={14} class="ml-1 opacity-30" />
-          </span>
-        {/if}
-      </span>
-    </h2>
-    <div class="flex items-center gap-2">
-      {#if page.data.user && page.data.user.id === experiment.user_id}
-        <button
-          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-transform active:rotate-90"
-          onclick={async () => {
-            const response = await fetch(
-              `/api/ai/analysis?experimentId=${experiment.id}`,
-            );
-            const data = (await response.json()) as ExperimentAnalysis;
-            recommendations = data.hyperparameter_recommendations;
-          }}
-          title="Get AI recommendations"
-        >
-          <Sparkle size={16} />
-        </button>
-        <button
+    <!-- Mobile header (flex column) -->
+    <div class="flex flex-col sm:hidden w-full gap-2">
+      <!-- Title row -->
+      <h2 class="truncate">
+        <span
+          role="button"
+          tabindex="0"
+          class="text-base font-medium cursor-pointer transition-all duration-150 flex items-center gap-1.5"
+          class:text-ctp-green={idCopied}
+          class:text-ctp-text={!idCopied}
           onclick={() => {
-            editMode = true;
+            navigator.clipboard.writeText(experiment.id);
+            idCopied = true;
+            setTimeout(() => {
+              idCopied = false;
+            }, 800);
+          }}
+          onkeydown={(e) => {
+            if (e.key === "Enter" || e.key === " ") e.currentTarget.click();
+          }}
+          title="Click to copy ID"
+        >
+          {#if idCopied}
+            <span class="flex items-center">
+              <ClipboardCheck size={16} class="mr-1 animate-bounce" />
+              ID Copied
+            </span>
+          {:else}
+            <span class="flex items-center">
+              {experiment.name}
+              <Copy size={12} class="ml-1 opacity-30 flex-shrink-0" />
+            </span>
+          {/if}
+        </span>
+      </h2>
+      
+      <!-- Actions row -->
+      <div class="flex items-center justify-end gap-2">
+        {#if page.data.user && page.data.user.id === experiment.user_id}
+          <button
+            class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-transform active:rotate-90"
+            onclick={async () => {
+              const response = await fetch(
+                `/api/ai/analysis?experimentId=${experiment.id}`,
+              );
+              const data = (await response.json()) as ExperimentAnalysis;
+              recommendations = data.hyperparameter_recommendations;
+            }}
+            title="Get AI recommendations"
+          >
+            <Sparkle size={16} />
+          </button>
+          <button
+            onclick={() => {
+              editMode = true;
+            }}
+            class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+            title="Edit experiment"
+          >
+            <Pencil size={16} />
+          </button>
+        {/if}
+        <button
+          onclick={async () => {
+            if (highlighted.includes(experiment.id)) {
+              highlighted = [];
+            } else {
+              try {
+                const response = await fetch(
+                  `/api/experiments/${experiment.id}/ref`,
+                );
+                if (!response.ok) {
+                  return;
+                }
+                const data = await response.json();
+                highlighted = [...data, experiment.id];
+              } catch (err) {}
+            }
           }}
           class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
-          title="Edit experiment"
+          title="Show experiment chain"
         >
-          <Pencil size={16} />
+          {#if highlighted.includes(experiment.id)}
+            <EyeClosed size={16} />
+          {:else}
+            <Eye size={16} />
+          {/if}
         </button>
-      {/if}
-      <button
-        onclick={async () => {
-          if (highlighted.includes(experiment.id)) {
-            highlighted = [];
-          } else {
-            try {
-              const response = await fetch(
-                `/api/experiments/${experiment.id}/ref`,
-              );
-              if (!response.ok) {
-                return;
-              }
-              const data = await response.json();
-              highlighted = [...data, experiment.id];
-            } catch (err) {}
-          }
-        }}
-        class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
-        title="Show experiment chain"
-      >
-        {#if highlighted.includes(experiment.id)}
-          <EyeClosed size={16} />
-        {:else}
-          <Eye size={16} />
+        {#if page.data.user && page.data.user.id === experiment.user_id}
+          <form method="POST" action="?/delete" class="flex items-center">
+            <input type="hidden" name="id" value={experiment.id} />
+            <button
+              type="submit"
+              class="p-1.5 text-ctp-subtext0 hover:text-ctp-red"
+              aria-label="Delete"
+              title="Delete experiment"
+            >
+              <X size={16} />
+            </button>
+          </form>
         {/if}
-      </button>
-      {#if page.data.user && page.data.user.id === experiment.user_id}
-        <form method="POST" action="?/delete" class="flex items-center">
-          <input type="hidden" name="id" value={experiment.id} />
+        <button
+          onclick={() => {
+            if (selectedId === experiment.id) {
+              selectedId = null;
+            } else {
+              selectedId = experiment.id;
+            }
+          }}
+          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+          aria-label="Minimize"
+          title="Minimize"
+        >
+          <Minimize2 size={16} />
+        </button>
+      </div>
+    </div>
+    
+    <!-- Desktop/Tablet header (flex row) -->
+    <div class="hidden sm:flex sm:flex-row justify-between items-center">
+      <h2 class="max-w-[70%]">
+        <span
+          role="button"
+          tabindex="0"
+          class="text-lg font-medium cursor-pointer transition-all duration-150 flex items-center gap-1.5"
+          class:text-ctp-green={idCopied}
+          class:text-ctp-text={!idCopied}
+          onclick={() => {
+            navigator.clipboard.writeText(experiment.id);
+            idCopied = true;
+            setTimeout(() => {
+              idCopied = false;
+            }, 800);
+          }}
+          onkeydown={(e) => {
+            if (e.key === "Enter" || e.key === " ") e.currentTarget.click();
+          }}
+          title="Click to copy ID"
+        >
+          {#if idCopied}
+            <span class="flex items-center">
+              <ClipboardCheck size={18} class="mr-1 animate-bounce" />
+              ID Copied
+            </span>
+          {:else}
+            <span class="flex items-center truncate">
+              <span class="truncate">{experiment.name}</span>
+              <Copy size={14} class="ml-1 opacity-30 flex-shrink-0" />
+            </span>
+          {/if}
+        </span>
+      </h2>
+      <div class="flex items-center gap-2">
+        {#if page.data.user && page.data.user.id === experiment.user_id}
           <button
-            type="submit"
-            class="p-1.5 text-ctp-subtext0 hover:text-ctp-red"
-            aria-label="Delete"
-            title="Delete experiment"
+            class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-transform active:rotate-90"
+            onclick={async () => {
+              const response = await fetch(
+                `/api/ai/analysis?experimentId=${experiment.id}`,
+              );
+              const data = (await response.json()) as ExperimentAnalysis;
+              recommendations = data.hyperparameter_recommendations;
+            }}
+            title="Get AI recommendations"
           >
-            <X size={16} />
+            <Sparkle size={16} />
           </button>
-        </form>
-      {/if}
-      <button
-        onclick={() => {
-          if (selectedId === experiment.id) {
-            selectedId = null;
-          } else {
-            selectedId = experiment.id;
-          }
-        }}
-        class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
-        aria-label="Minimize"
-        title="Minimize"
-      >
-        <Minimize2 size={16} />
-      </button>
+          <button
+            onclick={() => {
+              editMode = true;
+            }}
+            class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+            title="Edit experiment"
+          >
+            <Pencil size={16} />
+          </button>
+        {/if}
+        <button
+          onclick={async () => {
+            if (highlighted.includes(experiment.id)) {
+              highlighted = [];
+            } else {
+              try {
+                const response = await fetch(
+                  `/api/experiments/${experiment.id}/ref`,
+                );
+                if (!response.ok) {
+                  return;
+                }
+                const data = await response.json();
+                highlighted = [...data, experiment.id];
+              } catch (err) {}
+            }
+          }}
+          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+          title="Show experiment chain"
+        >
+          {#if highlighted.includes(experiment.id)}
+            <EyeClosed size={16} />
+          {:else}
+            <Eye size={16} />
+          {/if}
+        </button>
+        {#if page.data.user && page.data.user.id === experiment.user_id}
+          <form method="POST" action="?/delete" class="flex items-center">
+            <input type="hidden" name="id" value={experiment.id} />
+            <button
+              type="submit"
+              class="p-1.5 text-ctp-subtext0 hover:text-ctp-red"
+              aria-label="Delete"
+              title="Delete experiment"
+            >
+              <X size={16} />
+            </button>
+          </form>
+        {/if}
+        <button
+          onclick={() => {
+            if (selectedId === experiment.id) {
+              selectedId = null;
+            } else {
+              selectedId = experiment.id;
+            }
+          }}
+          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+          aria-label="Minimize"
+          title="Minimize"
+        >
+          <Minimize2 size={16} />
+        </button>
+      </div>
     </div>
   </header>
 
   <!-- Content Area -->
-  <div class="px-4 py-3 flex flex-col gap-3">
+  <div class="px-2 sm:px-4 py-3 flex flex-col gap-3">
     <!-- Metadata section -->
-    <div class="flex items-center gap-4 text-ctp-subtext0 text-xs">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-ctp-subtext0 text-xs">
       <div class="flex items-center gap-1">
-        <Clock size={14} />
+        <Clock size={14} class="flex-shrink-0" />
         <time>
           {new Date(experiment.createdAt).toLocaleDateString("en-US", {
             year: "numeric",
@@ -182,22 +303,24 @@
       </div>
 
       {#if experiment.tags && experiment.tags.length > 0}
-        <div class="flex items-center gap-1 flex-wrap">
-          <Tag size={14} />
-          {#each experiment.tags as tag}
-            <span
-              class="inline-flex items-center px-1.5 py-0.5 text-xs bg-ctp-surface0/50 text-ctp-mauve rounded-full"
-            >
-              {tag}
-            </span>
-          {/each}
+        <div class="flex items-center gap-1 overflow-x-auto sm:flex-wrap pb-1 sm:pb-0">
+          <Tag size={14} class="flex-shrink-0" />
+          <div class="flex gap-1 flex-nowrap sm:flex-wrap">
+            {#each experiment.tags as tag}
+              <span
+                class="whitespace-nowrap inline-flex items-center px-1.5 py-0.5 text-xs bg-ctp-surface0/50 text-ctp-mauve rounded-full"
+              >
+                {tag}
+              </span>
+            {/each}
+          </div>
         </div>
       {/if}
     </div>
 
     {#if experiment.description}
       <p
-        class="text-ctp-text text-sm py-1.5 border-l-2 border-ctp-mauve pl-3 mt-1 max-w-prose leading-relaxed"
+        class="text-ctp-text text-sm py-1.5 border-l-2 border-ctp-mauve pl-3 mt-1 leading-relaxed"
       >
         {experiment.description}
       </p>
@@ -207,23 +330,23 @@
     {#if experiment.hyperparams}
       <details class="mt-2">
         <summary class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5">
-          <Settings size={16} class="text-ctp-mauve" />
+          <Settings size={16} class="text-ctp-mauve flex-shrink-0" />
           <span class="text-sm font-medium">Parameters</span>
         </summary>
-        <div class="pt-2 pl-2">
+        <div class="pt-2">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {#each experiment.hyperparams as param}
-              <div class="flex items-center bg-ctp-mantle p-2 rounded-md">
-                <span class="text-xs font-medium text-ctp-subtext1"
+              <div class="flex items-center bg-ctp-mantle p-2 rounded-md overflow-hidden">
+                <span class="text-xs font-medium text-ctp-subtext1 truncate max-w-[40%]"
                   >{param.key}</span
                 >
                 <div class="flex-grow"></div>
-                <span class="text-xs text-ctp-text px-2 py-0.5 bg-ctp-surface0 rounded-sm"
+                <span class="text-xs text-ctp-text px-2 py-0.5 bg-ctp-surface0 rounded-sm truncate max-w-[40%]"
                   >{param.value}</span
                 >
                 {#if recommendations && recommendations[param.key]}
                   <button
-                    class="items-center pl-1.5"
+                    class="flex-shrink-0 pl-1.5"
                     onclick={() => {
                       activeRecommendation =
                         recommendations[param.key].recommendation;
@@ -271,8 +394,11 @@
           <ChartLine size={16} class="text-ctp-blue" />
           <span class="text-sm font-medium">Metrics</span>
         </summary>
-        <div class="pt-2">
-          <InteractiveChart {experiment} />
+        <!-- Full width chart container -->
+        <div class="pt-2 -mx-2 sm:-mx-4">
+          <div class="px-1 sm:px-2 w-full overflow-x-auto">
+            <InteractiveChart {experiment} />
+          </div>
         </div>
       </details>
     {/if}

@@ -194,13 +194,13 @@
   }
 </script>
 
-<div class="p-5 space-y-4">
+<div class="p-3 sm:p-4 space-y-4 w-full">
   {#if experiment.availableMetrics && experiment.availableMetrics.length > 0}
-    <div class="flex justify-between items-center mb-2">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
       <h3 class="text-sm font-medium text-ctp-subtext0">Available Metrics</h3>
       {#if selectedMetrics.length > 0}
         <button
-          class="px-2 py-1 text-xs text-ctp-red border border-ctp-red rounded hover:bg-ctp-red/10 transition-colors"
+          class="self-end sm:self-auto px-2 py-1 text-xs text-ctp-red border border-ctp-red rounded hover:bg-ctp-red/10 transition-colors"
           onclick={resetChart}
         >
           Clear All
@@ -208,10 +208,10 @@
       {/if}
     </div>
 
-    <div class="flex flex-wrap gap-2 mb-4">
+    <div class="flex flex-wrap gap-2 mb-4 max-w-full overflow-x-auto pb-1">
       {#each experiment.availableMetrics as metric}
         <button
-          class={`flex items-center gap-1.5 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${
+          class={`flex items-center gap-1.5 py-1 sm:py-1.5 px-2 sm:px-3 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
             selectedMetrics.includes(metric)
               ? "bg-ctp-mauve text-ctp-crust hover:bg-ctp-lavender"
               : "bg-ctp-surface0 text-ctp-text border border-ctp-surface1 hover:bg-ctp-blue hover:text-ctp-crust hover:border-ctp-blue"
@@ -219,9 +219,11 @@
           onclick={() => toggleMetric(metric)}
         >
           {#if selectedMetrics.includes(metric)}
-            <EyeOff size={14} />
+            <EyeOff size={12} class="sm:hidden" />
+            <EyeOff size={14} class="hidden sm:inline" />
           {:else}
-            <Plus size={14} />
+            <Plus size={12} class="sm:hidden" />
+            <Plus size={14} class="hidden sm:inline" />
           {/if}
           {metric}
         </button>
@@ -231,7 +233,7 @@
 
   {#if selectedMetrics.length > 0}
     <div
-      class="relative h-80 w-full rounded-md border border-ctp-surface1 bg-ctp-mantle overflow-hidden shadow-md"
+      class="relative h-60 sm:h-80 w-full rounded-md border border-ctp-surface1 bg-ctp-mantle overflow-hidden shadow-md"
     >
       {#if isLoading}
         <div
@@ -240,16 +242,16 @@
           <div class="animate-pulse text-[#89dceb]">Loading data...</div>
         </div>
       {/if}
-      <div class="absolute inset-0 p-4">
+      <div class="absolute inset-0 p-2 sm:p-4">
         <canvas bind:this={chartCanvas}></canvas>
       </div>
     </div>
   {:else if experiment.availableMetrics && experiment.availableMetrics.length > 0}
     <div
-      class="flex flex-col items-center justify-center h-80 w-full rounded-md border border-ctp-surface1 bg-ctp-mantle p-8"
+      class="flex flex-col items-center justify-center h-60 sm:h-80 w-full rounded-md border border-ctp-surface1 bg-ctp-mantle p-4 sm:p-8"
     >
-      <ChartLine size={32} class="text-ctp-overlay0 mb-4" />
-      <p class="text-ctp-subtext0 text-sm text-center max-w-md">
+      <ChartLine size={24} class="text-ctp-overlay0 mb-3 sm:mb-4 sm:text-3xl" />
+      <p class="text-ctp-subtext0 text-xs sm:text-sm text-center max-w-md">
         Select metrics from above to view and compare chart data
       </p>
     </div>
