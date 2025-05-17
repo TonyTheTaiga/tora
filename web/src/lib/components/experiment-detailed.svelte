@@ -50,9 +50,7 @@
     : ''}"
 >
   <!-- Header with actions -->
-  <header
-    class="px-3 sm:px-4 py-3 bg-ctp-mantle border-b border-ctp-surface0"
-  >
+  <header class="px-3 sm:px-4 py-3 bg-ctp-mantle border-b border-ctp-surface0">
     <!-- Mobile header (flex column) -->
     <div class="flex flex-col sm:hidden w-full gap-2">
       <!-- Title row -->
@@ -88,7 +86,7 @@
           {/if}
         </span>
       </h2>
-      
+
       <!-- Actions row -->
       <div class="flex items-center justify-end gap-2">
         {#if page.data.user && page.data.user.id === experiment.user_id}
@@ -170,7 +168,7 @@
         </button>
       </div>
     </div>
-    
+
     <!-- Desktop/Tablet header (flex row) -->
     <div class="hidden sm:flex sm:flex-row justify-between items-center">
       <h2 class="max-w-[70%]">
@@ -290,7 +288,9 @@
   <!-- Content Area -->
   <div class="px-2 sm:px-4 py-3 flex flex-col gap-3">
     <!-- Metadata section -->
-    <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-ctp-subtext0 text-xs">
+    <div
+      class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-ctp-subtext0 text-xs"
+    >
       <div class="flex items-center gap-1">
         <Clock size={14} class="flex-shrink-0" />
         <time>
@@ -303,7 +303,9 @@
       </div>
 
       {#if experiment.tags && experiment.tags.length > 0}
-        <div class="flex items-center gap-1 overflow-x-auto sm:flex-wrap pb-1 sm:pb-0">
+        <div
+          class="flex items-center gap-1 overflow-x-auto sm:flex-wrap pb-1 sm:pb-0"
+        >
           <Tag size={14} class="flex-shrink-0" />
           <div class="flex gap-1 flex-nowrap sm:flex-wrap">
             {#each experiment.tags as tag}
@@ -329,19 +331,25 @@
     <!-- Parameters section -->
     {#if experiment.hyperparams}
       <details class="mt-2">
-        <summary class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5">
+        <summary
+          class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
+        >
           <Settings size={16} class="text-ctp-mauve flex-shrink-0" />
           <span class="text-sm font-medium">Parameters</span>
         </summary>
         <div class="pt-2">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {#each experiment.hyperparams as param}
-              <div class="flex items-center bg-ctp-mantle p-2 rounded-md overflow-hidden">
-                <span class="text-xs font-medium text-ctp-subtext1 truncate max-w-[40%]"
+              <div
+                class="flex items-center bg-ctp-mantle p-2 rounded-md overflow-hidden"
+              >
+                <span
+                  class="text-xs font-medium text-ctp-subtext1 truncate max-w-[40%]"
                   >{param.key}</span
                 >
                 <div class="flex-grow"></div>
-                <span class="text-xs text-ctp-text px-2 py-0.5 bg-ctp-surface0 rounded-sm truncate max-w-[40%]"
+                <span
+                  class="text-xs text-ctp-text px-2 py-0.5 bg-ctp-surface0 rounded-sm truncate max-w-[40%]"
                   >{param.value}</span
                 >
                 {#if recommendations && recommendations[param.key]}
@@ -390,7 +398,9 @@
     <!-- Metrics section -->
     {#if experiment.availableMetrics && experiment.availableMetrics.length > 0}
       <details class="mt-1" open>
-        <summary class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5">
+        <summary
+          class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
+        >
           <ChartLine size={16} class="text-ctp-blue" />
           <span class="text-sm font-medium">Metrics</span>
         </summary>

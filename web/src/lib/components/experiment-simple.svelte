@@ -122,13 +122,13 @@
       <div class="flex items-center gap-1 text-ctp-subtext1 text-xs">
         <ChartLine size={12} />
         <span
-          >{experiment.availableMetrics.length} metric{experiment.availableMetrics
-            .length !== 1
+          >{experiment.availableMetrics.length} metric{experiment
+            .availableMetrics.length !== 1
             ? "s"
             : ""}</span
         >
       </div>
-      
+
       <!-- Spacer that grows to push footer to bottom -->
       <div class="flex-grow"></div>
     </div>
@@ -142,11 +142,15 @@
         <div class="flex items-center gap-1 text-xs text-ctp-subtext0">
           <Tag size={10} />
           {#each experiment.tags.slice(0, 2) as tag, i}
-            <span class="px-1.5 py-0.5 bg-ctp-surface0/50 text-ctp-lavender rounded-full text-[10px]">
+            <span
+              class="px-1.5 py-0.5 bg-ctp-surface0/50 text-ctp-lavender rounded-full text-[10px]"
+            >
               {tag}
             </span>
             {#if i === 0 && experiment.tags.length > 2}
-              <span class="text-ctp-subtext0 text-[10px]">+{experiment.tags.length - 1}</span>
+              <span class="text-ctp-subtext0 text-[10px]"
+                >+{experiment.tags.length - 1}</span
+              >
             {/if}
           {/each}
         </div>

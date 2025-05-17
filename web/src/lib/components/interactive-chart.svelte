@@ -196,7 +196,9 @@
 
 <div class="p-3 sm:p-4 space-y-4 w-full">
   {#if experiment.availableMetrics && experiment.availableMetrics.length > 0}
-    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
+    <div
+      class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2"
+    >
       <h3 class="text-sm font-medium text-ctp-subtext0">Available Metrics</h3>
       {#if selectedMetrics.length > 0}
         <button

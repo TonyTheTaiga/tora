@@ -22,18 +22,20 @@
           <Plus size={16} />
         </div>
       </div>
-      
+
       <!-- Content (grows to fill space) -->
       <div class="flex-grow flex flex-col">
-        <h3 class="text-sm font-medium text-ctp-subtext0 mb-1">New Experiment</h3>
+        <h3 class="text-sm font-medium text-ctp-subtext0 mb-1">
+          New Experiment
+        </h3>
         <p class="text-xs text-ctp-subtext0 leading-relaxed">
           Start tracking a new experiment with metrics and parameters.
         </p>
-        
+
         <!-- Spacer that grows to push button to bottom -->
         <div class="flex-grow"></div>
       </div>
-      
+
       <!-- Footer -->
       <div class="mt-2">
         <button
@@ -54,7 +56,7 @@
           <UserRound size={16} />
         </div>
       </div>
-      
+
       <!-- Content (grows to fill space) -->
       <div class="flex-grow flex flex-col">
         <h3 class="text-sm font-medium text-ctp-subtext0 mb-1">
@@ -63,11 +65,11 @@
         <p class="text-xs text-ctp-subtext0 leading-relaxed">
           Sign up to start tracking your experiments and metrics.
         </p>
-        
+
         <!-- Spacer that grows to push button to bottom -->
         <div class="flex-grow"></div>
       </div>
-      
+
       <!-- Footer -->
       <div class="mt-2">
         <a

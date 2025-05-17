@@ -95,7 +95,9 @@
 
 <div class="w-full">
   <div class="bg-ctp-mantle rounded-lg p-6 border border-ctp-surface0">
-    <div class="flex flex-col sm:flex-row gap-4 border-b border-ctp-surface0 pb-6 mb-6">
+    <div
+      class="flex flex-col sm:flex-row gap-4 border-b border-ctp-surface0 pb-6 mb-6"
+    >
       <div class="flex items-center gap-4">
         <div class="p-3 bg-ctp-surface0 rounded-full text-ctp-lavender">
           <User size={40} />
@@ -112,7 +114,7 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Logout button -->
       <div class="mt-3 sm:mt-0 sm:ml-auto">
         <form action="/auth?/logout" method="POST">

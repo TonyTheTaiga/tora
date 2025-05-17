@@ -127,13 +127,15 @@
   <div
     class="w-full max-w-xl rounded-xl border border-ctp-surface0 shadow-2xl overflow-auto max-h-[90vh] bg-ctp-mantle"
   >
-    <div class="flex items-center justify-between px-6 py-4 border-b border-ctp-surface0">
+    <div
+      class="flex items-center justify-between px-6 py-4 border-b border-ctp-surface0"
+    >
       <div class="flex items-center gap-2">
         <Beaker size={18} class="text-ctp-mauve" />
         <h3 class="text-xl font-medium text-ctp-text">New Experiment</h3>
       </div>
       <button
-        onclick={() => isOpen = false}
+        onclick={() => (isOpen = false)}
         type="button"
         class="p-1.5 text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/10 rounded-full transition-all"
       >
@@ -233,7 +235,9 @@
         <div class="flex flex-col gap-4 mt-2">
           <!-- Tags Section -->
           <details>
-            <summary class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5">
+            <summary
+              class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
+            >
               <TagIcon size={16} class="text-ctp-blue" />
               <span class="text-sm font-medium">Tags</span>
             </summary>
@@ -300,7 +304,9 @@
 
           <!-- Parameters Section -->
           <details>
-            <summary class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5">
+            <summary
+              class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
+            >
               <Settings size={16} class="text-ctp-sapphire" />
               <span class="text-sm font-medium">Parameters</span>
             </summary>
@@ -345,7 +351,9 @@
 
           <!-- References Section -->
           <details>
-            <summary class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5">
+            <summary
+              class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
+            >
               <Link size={16} class="text-ctp-lavender" />
               <span class="text-sm font-medium">References</span>
             </summary>
