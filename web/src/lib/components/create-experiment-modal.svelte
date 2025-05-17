@@ -110,7 +110,7 @@
     }
     searchInput = "";
   }
-  
+
   onMount(() => {
     document.body.classList.add("overflow-hidden");
   });
@@ -127,15 +127,13 @@
   <div
     class="w-full max-w-xl rounded-xl border border-ctp-surface0 shadow-2xl overflow-auto max-h-[90vh] bg-ctp-mantle"
   >
-    <form
-      method="POST"
-      action="?/create"
-      class="flex flex-col gap-8 p-6"
-    >
+    <form method="POST" action="?/create" class="flex flex-col gap-8 p-6">
       <div class="flex flex-col gap-8">
         <!-- Basic Information Section -->
         <div class="space-y-5">
-          <div class="flex items-center gap-3 pb-2 border-b border-ctp-surface0">
+          <div
+            class="flex items-center gap-3 pb-2 border-b border-ctp-surface0"
+          >
             <Beaker size={18} class="text-ctp-mauve" />
             <h3 class="text-xl font-medium text-ctp-text">Basic Information</h3>
           </div>
@@ -238,7 +236,9 @@
 
         <!-- Tags Section -->
         <div class="space-y-4">
-          <div class="flex items-center gap-3 pb-2 border-b border-ctp-surface0">
+          <div
+            class="flex items-center gap-3 pb-2 border-b border-ctp-surface0"
+          >
             <TagIcon size={18} class="text-ctp-pink" />
             <h3 class="text-xl font-medium text-ctp-text">Tags</h3>
           </div>
@@ -304,7 +304,9 @@
 
         <!-- Hyperparameters Section -->
         <div class="space-y-4">
-          <div class="flex items-center gap-3 pb-2 border-b border-ctp-surface0">
+          <div
+            class="flex items-center gap-3 pb-2 border-b border-ctp-surface0"
+          >
             <Settings size={18} class="text-ctp-sapphire" />
             <h3 class="text-xl font-medium text-ctp-text">Parameters</h3>
           </div>
@@ -349,10 +351,16 @@
         <!-- References -->
         <div class="space-y-4">
           {#if reference}
-            <input class="hidden" name="reference-id" bind:value={reference.id} />
+            <input
+              class="hidden"
+              name="reference-id"
+              bind:value={reference.id}
+            />
           {/if}
 
-          <div class="flex items-center gap-3 pb-2 border-b border-ctp-surface0">
+          <div
+            class="flex items-center gap-3 pb-2 border-b border-ctp-surface0"
+          >
             <Link size={18} class="text-ctp-lavender" />
             <h3 class="text-xl font-medium text-ctp-text">References</h3>
           </div>
@@ -412,7 +420,9 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex justify-end gap-3 pt-6 mt-2 border-t border-ctp-surface0">
+      <div
+        class="flex justify-end gap-3 pt-6 mt-2 border-t border-ctp-surface0"
+      >
         <button
           onclick={() => {
             isOpen = !isOpen;

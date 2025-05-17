@@ -8,7 +8,7 @@ export async function GET({
   locals,
 }: {
   params: { slug: string };
-  locals: { supabase: SupabaseClient<Database>, user: { id: string } | null };
+  locals: { supabase: SupabaseClient<Database>; user: { id: string } | null };
 }) {
   // Pass the userId to getExperiment if user is logged in
   const userId = locals.user?.id;

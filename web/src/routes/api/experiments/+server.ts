@@ -3,7 +3,13 @@ import { getExperiments, createExperiment } from "$lib/server/database";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "$lib/server/database.types";
 
-export async function GET({ url, locals }: { url: URL, locals: { supabase: SupabaseClient<Database>, user: { id: string } | null } }) {
+export async function GET({
+  url,
+  locals,
+}: {
+  url: URL;
+  locals: { supabase: SupabaseClient<Database>; user: { id: string } | null };
+}) {
   const name_filter = url.searchParams.get("startwith") || "";
   try {
     const userId = locals.user?.id;
@@ -20,7 +26,10 @@ export async function GET({ url, locals }: { url: URL, locals: { supabase: Supab
 
 export async function POST({ request, locals: { user } }) {
   if (!user) {
-    return json({ error: "Cannot create a experiment for anonymous user" }, { status: 500 });
+    return json(
+      { error: "Cannot create a experiment for anonymous user" },
+      { status: 500 },
+    );
   }
 
   try {
@@ -48,7 +57,6 @@ export async function POST({ request, locals: { user } }) {
       visibility,
     );
     return json({ success: true, experiment: experiment });
-
   } catch (error: unknown) {
     return json(
       {

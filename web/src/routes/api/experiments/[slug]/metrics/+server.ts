@@ -21,32 +21,40 @@ export async function POST({
   request,
   params,
   locals,
-}: RequestEvent<{ slug: string }, string> & { locals: { user: { id: string } | null } }): Promise<Response> {
+}: RequestEvent<{ slug: string }, string> & {
+  locals: { user: { id: string } | null };
+}): Promise<Response> {
   // Check experiment access first
   const userId = locals.user?.id;
   const experimentId = params.slug;
 
   if (!experimentId?.trim()) {
-    return json({
-      success: false,
-      error: {
-        message: "Invalid experiment ID",
-        code: "INVALID_ID"
-      }
-    }, { status: 400 });
+    return json(
+      {
+        success: false,
+        error: {
+          message: "Invalid experiment ID",
+          code: "INVALID_ID",
+        },
+      },
+      { status: 400 },
+    );
   }
 
   try {
     // This will throw an error if the user doesn't have access
     await getExperiment(experimentId, userId);
   } catch (error) {
-    return json({
-      success: false,
-      error: {
-        message: "Access denied to experiment",
-        code: "ACCESS_DENIED"
-      }
-    }, { status: 403 });
+    return json(
+      {
+        success: false,
+        error: {
+          message: "Access denied to experiment",
+          code: "ACCESS_DENIED",
+        },
+      },
+      { status: 403 },
+    );
   }
   try {
     const payload = (await request.json()) as MetricInput;
@@ -95,10 +103,10 @@ export async function POST({
 
 export async function GET({
   params: { slug },
-  locals
+  locals,
 }: {
-  params: { slug: string },
-  locals: { user: { id: string } | null }
+  params: { slug: string };
+  locals: { user: { id: string } | null };
 }) {
   const userId = locals.user?.id;
   // First verify the user has access to this experiment via getExperiment

@@ -19,7 +19,9 @@ export async function POST({
   request,
   params,
   locals,
-}: RequestEvent<{ slug: string }, string> & { locals: { user: { id: string } | null } }): Promise<Response> {
+}: RequestEvent<{ slug: string }, string> & {
+  locals: { user: { id: string } | null };
+}): Promise<Response> {
   // Check experiment access first
   const userId = locals.user?.id;
   const experimentId = params.slug;
@@ -32,10 +34,13 @@ export async function POST({
     // This will throw an error if the user doesn't have access
     await getExperiment(experimentId, userId);
   } catch (error) {
-    return json({
-      message: "Access denied to experiment",
-      code: "ACCESS_DENIED"
-    }, { status: 403 });
+    return json(
+      {
+        message: "Access denied to experiment",
+        code: "ACCESS_DENIED",
+      },
+      { status: 403 },
+    );
   }
   try {
     const metrics = (await request.json()) as MetricInput[];

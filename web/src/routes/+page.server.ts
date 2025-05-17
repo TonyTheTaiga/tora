@@ -30,7 +30,6 @@ export const actions: Actions = {
   update: async ({ request, fetch }) => handleUpdate(request, fetch),
 };
 
-
 function parseFormData(formData: FormData): FormDataResult {
   const obj = Object.fromEntries(formData);
   const result: FormDataResult = {

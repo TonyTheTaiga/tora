@@ -88,7 +88,7 @@
   };
 
   onMount(() => {
-    console.log("User profile mounted:", user);
+    // console.log("User profile mounted:", user);
   });
 </script>
 

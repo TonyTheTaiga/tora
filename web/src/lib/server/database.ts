@@ -13,7 +13,7 @@ export class DatabaseClient {
 
   static getInstance(): SupabaseClient<Database> {
     if (!this.instance) {
-      throw new Error("DB client not set. Did you forget to set it?")
+      throw new Error("DB client not set. Did you forget to set it?");
     }
     return this.instance;
   }
@@ -46,8 +46,10 @@ export class DatabaseClient {
       throw new Error(`Failed to create experiment: ${error?.message}`);
     }
 
-    await DatabaseClient.getInstance().from("user_experiments").insert({ user_id: userId, experiment_id: data.id, role: "OWNER" }).select();
-
+    await DatabaseClient.getInstance()
+      .from("user_experiments")
+      .insert({ user_id: userId, experiment_id: data.id, role: "OWNER" })
+      .select();
 
     return {
       id: data.id,
@@ -62,7 +64,10 @@ export class DatabaseClient {
     };
   }
 
-  static async getExperiments(query: string | null, userId?: string): Promise<Experiment[]> {
+  static async getExperiments(
+    query: string | null,
+    userId?: string,
+  ): Promise<Experiment[]> {
     if (!query) {
       query = "";
     }
@@ -97,7 +102,7 @@ export class DatabaseClient {
 
       const [publicResults, userResults] = await Promise.all([
         publicExperimentsQuery,
-        userExperimentsQuery
+        userExperimentsQuery,
       ]);
       data = [];
       if (!publicResults.error && publicResults.data) {
@@ -113,44 +118,51 @@ export class DatabaseClient {
     }
     const seenExperiments = new Set<string>();
     const result = data
-      .sort((a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      .sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       )
-      .filter(exp => {
+      .filter((exp) => {
         if (seenExperiments.has(exp.id)) return false;
         seenExperiments.add(exp.id);
         return true;
       })
-      .map((exp): Experiment => ({
-        id: exp.id,
-        user_id: exp.user_experiments[0].user_id,
-        name: exp.name,
-        description: exp.description,
-        hyperparams: exp.hyperparams,
-        createdAt: new Date(exp.created_at),
-        tags: exp.tags,
-        visibility: exp.visibility,
-        availableMetrics: Array.from(
-          new Set(
-            ((exp.metric ?? []) as { name: string }[]).map(
-              (m) => m.name
-            )
-          )
-        ),
-      }));
+      .map(
+        (exp): Experiment => ({
+          id: exp.id,
+          user_id: exp.user_experiments[0].user_id,
+          name: exp.name,
+          description: exp.description,
+          hyperparams: exp.hyperparams,
+          createdAt: new Date(exp.created_at),
+          tags: exp.tags,
+          visibility: exp.visibility,
+          availableMetrics: Array.from(
+            new Set(
+              ((exp.metric ?? []) as { name: string }[]).map((m) => m.name),
+            ),
+          ),
+        }),
+      );
     return result;
   }
 
-  static async checkExperimentAccess(id: string, userId?: string): Promise<void> {
+  static async checkExperimentAccess(
+    id: string,
+    userId?: string,
+  ): Promise<void> {
     if (!userId) {
-      const { data: visibilityCheck, error: visibilityError } = await DatabaseClient.getInstance()
-        .from("experiment")
-        .select("visibility")
-        .eq("id", id)
-        .single();
+      const { data: visibilityCheck, error: visibilityError } =
+        await DatabaseClient.getInstance()
+          .from("experiment")
+          .select("visibility")
+          .eq("id", id)
+          .single();
 
       if (visibilityError || !visibilityCheck) {
-        throw new Error(`Failed to get experiment with ID ${id}: ${visibilityError?.message}`);
+        throw new Error(
+          `Failed to get experiment with ID ${id}: ${visibilityError?.message}`,
+        );
       }
 
       if (visibilityCheck.visibility !== "PUBLIC") {
@@ -163,14 +175,17 @@ export class DatabaseClient {
         .eq("experiment_id", id)
         .eq("user_id", userId);
 
-      const { data: visibilityCheck, error: visibilityError } = await DatabaseClient.getInstance()
-        .from("experiment")
-        .select("visibility")
-        .eq("id", id)
-        .single();
+      const { data: visibilityCheck, error: visibilityError } =
+        await DatabaseClient.getInstance()
+          .from("experiment")
+          .select("visibility")
+          .eq("id", id)
+          .single();
 
       if (visibilityError || !visibilityCheck) {
-        throw new Error(`Failed to get experiment with ID ${id}: ${visibilityError?.message}`);
+        throw new Error(
+          `Failed to get experiment with ID ${id}: ${visibilityError?.message}`,
+        );
       }
 
       if (visibilityCheck.visibility !== "PUBLIC" && (!count || count === 0)) {
@@ -363,7 +378,6 @@ export class DatabaseClient {
     }));
   }
 }
-
 
 export const {
   createExperiment,
