@@ -15,12 +15,12 @@
   let currentTheme = $state<"light" | "dark">("dark");
 
   const darkColors = [
-    { border: "#74c7ec", bg: "rgba(116, 199, 236, 0.15)", point: "#b4befe" },
-    { border: "#f5c2e7", bg: "rgba(245, 194, 231, 0.15)", point: "#f38ba8" },
-    { border: "#a6e3a1", bg: "rgba(166, 227, 161, 0.15)", point: "#94e2d5" },
-    { border: "#fab387", bg: "rgba(250, 179, 135, 0.15)", point: "#f9e2af" },
-    { border: "#cba6f7", bg: "rgba(203, 166, 247, 0.15)", point: "#89b4fa" },
-    { border: "#f38ba8", bg: "rgba(243, 139, 168, 0.15)", point: "#eba0ac" },
+    { border: "#7dc4e4", bg: "rgba(125, 196, 228, 0.15)", point: "#b7bdf8" },
+    { border: "#f5bde6", bg: "rgba(245, 189, 230, 0.15)", point: "#ed8796" },
+    { border: "#a6da95", bg: "rgba(166, 218, 149, 0.15)", point: "#8bd5ca" },
+    { border: "#f5a97f", bg: "rgba(245, 169, 127, 0.15)", point: "#eed49f" },
+    { border: "#c6a0f6", bg: "rgba(198, 160, 246, 0.15)", point: "#8aadf4" },
+    { border: "#ed8796", bg: "rgba(237, 135, 150, 0.15)", point: "#ee99a0" },
   ];
 
   const lightColors = [
@@ -37,12 +37,12 @@
   }
 
   const darkThemeUI = {
-    text: "#cdd6f4",
-    crust: "#11111b",
-    mantle: "#181825",
-    base: "#1e1e2e",
-    overlay0: "#6c7086",
-    gridLines: "rgba(180, 190, 254, 0.08)",
+    text: "#cad3f5",
+    crust: "#181926",
+    mantle: "#1e2030",
+    base: "#24273a",
+    overlay0: "#6e738d",
+    gridLines: "rgba(183, 189, 248, 0.08)",
   };
 
   const lightThemeUI = {
@@ -146,7 +146,7 @@
           fill: false,
           pointBackgroundColor: color.point,
           pointBorderColor: ui.mantle,
-          pointHoverBackgroundColor: currentTheme === "dark" ? "#cba6f7" : "#8839ef",
+          pointHoverBackgroundColor: currentTheme === "dark" ? "#c6a0f6" : "#8839ef",
           pointHoverBorderColor: ui.base,
           borderWidth: 2,
           tension: 0.3,
@@ -185,7 +185,7 @@
             },
             tooltip: {
               backgroundColor: ui.crust,
-              titleColor: currentTheme === "dark" ? "#74c7ec" : "#209fb5",
+              titleColor: currentTheme === "dark" ? "#7dc4e4" : "#209fb5",
               bodyColor: ui.text,
               borderColor: ui.overlay0,
               position: "nearest",
@@ -327,7 +327,7 @@
         <div
           class="absolute inset-0 flex items-center justify-center bg-ctp-mantle/80 backdrop-blur-sm z-10"
         >
-          <div class="animate-pulse text-[#89dceb]">Loading data...</div>
+          <div class="animate-pulse text-[#91d7e3]">Loading data...</div>
         </div>
       {/if}
       <div class="absolute inset-0 p-2 sm:p-4">
