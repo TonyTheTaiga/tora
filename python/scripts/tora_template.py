@@ -1,246 +1,194 @@
+import argparse
 import os
-
-
 import time
 
-
-import argparse
-
-
+import evaluate
 import numpy as np
-
-
 import torch
-
-
+from datasets import load_dataset
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from tora import Tora
-
-
 from transformers import (
-    AutoModelForSequenceClassification,
     AutoModelForMaskedLM,
+    AutoModelForSequenceClassification,
     AutoTokenizer,
-    DataCollatorWithPadding,
     DataCollatorForLanguageModeling,
+    DataCollatorWithPadding,
     Trainer,
-    TrainingArguments,
     TrainerCallback,
+    TrainingArguments,
 )
 
 
-from datasets import load_dataset
-
-
-import evaluate
-
-
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-
-
 def safe_value(value):
+    """
+    Convert a value to a safe float or int, handling NaN, inf, bool, and non-numeric values.
+    """
     if isinstance(value, (int, float)):
         if np.isnan(value) or np.isinf(value):
             return 0.0
-
         return float(value)
-
-    elif isinstance(value, bool):
+    if isinstance(value, bool):
         return int(value)
-
-    elif isinstance(value, str):
+    if isinstance(value, str):
         return None
-
-    else:
-        try:
-            return float(value)
-
-        except (ValueError, TypeError):
-            return None
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return None
 
 
 def log_metric(client, name, value, step):
+    """
+    Safely log a metric value to the Tora client.
+    """
     value = safe_value(value)
-
     if value is not None:
         client.log(name=name, value=value, step=step)
 
 
 class ToraCallback(TrainerCallback):
+    """
+    Hugging Face Trainer callback to log metrics to Tora.
+    """
+
     def __init__(self, tora_client):
         self.tora = tora_client
 
     def on_log(self, args, state, control, logs=None, **kwargs):
-        if logs is None:
+        """
+        Log training loss and learning rate on each step.
+        """
+        if not logs:
             return
-
-        loss = logs.get("loss")
-
-        if loss is not None:
-            log_metric(self.tora, "train_loss", loss, state.global_step)
-
-        lr = logs.get("learning_rate")
-
-        if lr is not None:
-            log_metric(self.tora, "learning_rate", lr, state.global_step)
+        if "loss" in logs:
+            log_metric(self.tora, "train_loss", logs["loss"], state.global_step)
+        if "learning_rate" in logs:
+            log_metric(
+                self.tora, "learning_rate", logs["learning_rate"], state.global_step
+            )
 
     def on_evaluate(self, args, state, control, metrics=None, **kwargs):
-        if metrics is None:
+        """
+        Log evaluation metrics prefixed with 'eval_'.
+        """
+        if not metrics:
             return
-
         for key, value in metrics.items():
             if key.startswith("eval_"):
                 log_metric(self.tora, key, value, state.global_step)
 
 
-def load_dataset(config):
-    print(f"Loading dataset: {config['dataset_name']}")
+def load_and_tokenize_dataset(config):
+    """
+    Load a Hugging Face dataset and tokenize based on task type.
 
+    Returns:
+        train_dataset, val_dataset, test_dataset, num_labels, text_field, label_field
+    """
+    print(f"Loading dataset: {config['dataset_name']}")
     dataset = load_dataset(config["dataset_name"])
 
-    text_field, label_field = config.get("text_field"), config.get("label_field")
-
+    text_field = config.get("text_field")
+    label_field = config.get("label_field")
     if not text_field:
-        for field in ["text", "sentence", "content"]:
+        for field in ("text", "sentence", "content"):
             if field in dataset["train"].features:
                 text_field = field
-
                 break
-
     if config["task_type"] == "classification" and not label_field:
-        for field in ["label", "sentiment", "class"]:
+        for field in ("label", "sentiment", "class"):
             if field in dataset["train"].features:
                 label_field = field
-
                 break
 
     if not text_field:
-        raise ValueError("Could not identify text field. Please specify it manually.")
-
+        raise ValueError("Text field not found; specify with --text_field")
     if config["task_type"] == "classification" and not label_field:
-        raise ValueError("Could not identify label field. Please specify it manually.")
+        raise ValueError("Label field not found; specify with --label_field")
 
     print(f"Using text field: {text_field}")
-
     if label_field:
         print(f"Using label field: {label_field}")
 
     tokenizer = AutoTokenizer.from_pretrained(config["model_name"])
 
-    if config["task_type"] == "mlm":
+    def tokenize_mlm(examples):
+        return tokenizer(
+            examples[text_field],
+            truncation=True,
+            max_length=config["max_length"],
+            padding="max_length",
+            return_special_tokens_mask=True,
+        )
 
-        def tokenize_function(examples):
-            return tokenizer(
-                examples[text_field],
-                truncation=True,
-                max_length=config["max_length"],
-                padding="max_length",
-                return_special_tokens_mask=True,
-            )
+    def tokenize_clf(examples):
+        return tokenizer(
+            examples[text_field],
+            truncation=True,
+            max_length=config["max_length"],
+            padding="max_length",
+        )
 
-        remove_columns = [text_field]
+    tokenize_fn = tokenize_mlm if config["task_type"] == "mlm" else tokenize_clf
+    remove_cols = [text_field] + ([label_field] if label_field else [])
 
-        if label_field:
-            remove_columns.append(label_field)
-
-    else:
-
-        def tokenize_function(examples):
-            return tokenizer(
-                examples[text_field],
-                truncation=True,
-                max_length=config["max_length"],
-                padding="max_length",
-            )
-
-        remove_columns = [text_field]
-
-    tokenized_datasets = dataset.map(
-        tokenize_function,
+    tokenized = dataset.map(
+        tokenize_fn,
         batched=True,
-        remove_columns=remove_columns,
+        remove_columns=remove_cols,
         desc="Tokenizing dataset",
     )
 
-    if "train" in tokenized_datasets and "validation" in tokenized_datasets:
-        train_dataset = tokenized_datasets["train"]
-
-        val_dataset = tokenized_datasets["validation"]
-
-    elif "train" in tokenized_datasets and "test" in tokenized_datasets:
-        train_size = int(0.9 * len(tokenized_datasets["train"]))
-
-        val_size = len(tokenized_datasets["train"]) - train_size
-
-        splits = tokenized_datasets["train"].train_test_split(
-            train_size=train_size, test_size=val_size, seed=config["seed"]
-        )
-
-        train_dataset = splits["train"]
-
-        val_dataset = splits["test"]
-
+    if "validation" in tokenized:
+        train_ds = tokenized["train"]
+        val_ds = tokenized["validation"]
     else:
-        train_size = int(0.9 * len(tokenized_datasets["train"]))
+        splits = tokenized["train"].train_test_split(test_size=0.1, seed=config["seed"])
+        train_ds, val_ds = splits["train"], splits["test"]
 
-        val_size = len(tokenized_datasets["train"]) - train_size
-
-        splits = tokenized_datasets["train"].train_test_split(
-            train_size=train_size, test_size=val_size, seed=config["seed"]
-        )
-
-        train_dataset = splits["train"]
-
-        val_dataset = splits["test"]
-
-    test_dataset = tokenized_datasets.get("test", val_dataset)
+    test_ds = tokenized.get("test", val_ds)
 
     num_labels = None
+    if config["task_type"] == "classification":
+        feat = dataset["train"].features[label_field]
+        label_names = getattr(feat, "names", None)
+        num_labels = (
+            len(label_names) if label_names else max(dataset["train"][label_field]) + 1
+        )
 
-    if config["task_type"] == "classification" and label_field:
-        label_names = getattr(dataset["train"].features[label_field], "names", None)
-
-        if label_names:
-            num_labels = len(label_names)
-
-        else:
-            num_labels = int(max(dataset["train"][label_field])) + 1
-
-    return train_dataset, val_dataset, test_dataset, num_labels, text_field, label_field
+    return train_ds, val_ds, test_ds, num_labels, text_field, label_field
 
 
-def load_model(config, num_labels=None):
+def load_model_and_collator(config, num_labels=None):
+    """
+    Load a Hugging Face model and appropriate data collator.
+
+    Returns:
+        model, tokenizer, data_collator
+    """
     print(f"Loading model: {config['model_name']}")
-
     tokenizer = AutoTokenizer.from_pretrained(config["model_name"])
 
     if config["task_type"] == "mlm":
         model = AutoModelForMaskedLM.from_pretrained(config["model_name"])
-
-        data_collator = DataCollatorForLanguageModeling(
+        collator = DataCollatorForLanguageModeling(
             tokenizer=tokenizer,
             mlm=True,
             mlm_probability=config.get("mlm_probability", 0.15),
         )
-
-    elif config["task_type"] == "classification":
-        model = AutoModelForSequenceClassification.from_pretrained(
-            config["model_name"],
-            num_labels=num_labels,
-        )
-
-        data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
-
     else:
-        raise ValueError(f"Unsupported task type: {config['task_type']}")
+        model = AutoModelForSequenceClassification.from_pretrained(
+            config["model_name"], num_labels=num_labels
+        )
+        collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
-    model_params = sum(p.numel() for p in model.parameters())
-
-    print(f"Model has {model_params:,} parameters")
-
-    return model, tokenizer, data_collator
+    total_params = sum(p.numel() for p in model.parameters())
+    print(f"Model parameters: {total_params:,}")
+    return model, tokenizer, collator
 
 
-def train(
+def train_and_evaluate(
     config,
     model,
     tokenizer,
@@ -249,15 +197,18 @@ def train(
     val_dataset,
     test_dataset=None,
 ):
-    os.makedirs(config["output_dir"], exist_ok=True)
+    """
+    Train and evaluate the model using Hugging Face Trainer with Tora logging.
 
+    Returns:
+        trainer, model, tokenizer
+    """
+    os.makedirs(config["output_dir"], exist_ok=True)
     config.update(
         {
             "train_samples": len(train_dataset),
             "val_samples": len(val_dataset),
-            "test_samples": len(test_dataset)
-            if test_dataset is not None
-            else len(val_dataset),
+            "test_samples": len(test_dataset) if test_dataset else len(val_dataset),
             "model_parameters": sum(p.numel() for p in model.parameters()),
         }
     )
@@ -273,46 +224,29 @@ def train(
 
         def compute_metrics(pred):
             labels = pred.label_ids
-
             preds = pred.predictions.argmax(-1)
-
-            accuracy = accuracy_score(labels, preds)
-
-            precision = precision_score(
-                labels, preds, average="weighted", zero_division=0
-            )
-
-            recall = recall_score(labels, preds, average="weighted", zero_division=0)
-
-            f1 = f1_score(labels, preds, average="weighted", zero_division=0)
-
             return {
-                "accuracy": accuracy,
-                "precision": precision,
-                "recall": recall,
-                "f1": f1,
+                "accuracy": accuracy_score(labels, preds),
+                "precision": precision_score(
+                    labels, preds, average="weighted", zero_division=0
+                ),
+                "recall": recall_score(
+                    labels, preds, average="weighted", zero_division=0
+                ),
+                "f1": f1_score(labels, preds, average="weighted", zero_division=0),
             }
-
-    elif config["task_type"] == "mlm":
+    else:
         perplexity = evaluate.load("perplexity")
 
-        def compute_metrics(eval_pred):
-            result = {}
-
+        def compute_metrics(pred):
             try:
-                result["perplexity"] = perplexity.compute(
-                    predictions=eval_pred.predictions, model_id=config["model_name"]
-                )["perplexity"]
-
+                res = perplexity.compute(
+                    predictions=pred.predictions, model_id=config["model_name"]
+                )
+                return {"perplexity": res.get("perplexity", 0.0)}
             except Exception as e:
-                print(f"Error computing perplexity: {str(e)}")
-
-                result["perplexity"] = 0.0
-
-            return result
-
-    else:
-        compute_metrics = None
+                print(f"Perplexity error: {e}")
+                return {"perplexity": 0.0}
 
     training_args = TrainingArguments(
         output_dir=config["output_dir"],
@@ -322,12 +256,11 @@ def train(
         per_device_eval_batch_size=config["eval_batch_size"],
         eval_strategy="steps",
         eval_steps=config["eval_steps"],
-        logging_dir=f"{config['output_dir']}/logs",
+        logging_dir=os.path.join(config["output_dir"], "logs"),
         logging_steps=config["logging_steps"],
         save_steps=config["save_steps"],
         save_total_limit=2,
         seed=config["seed"],
-        data_seed=config["seed"],
         learning_rate=config["lr"],
         weight_decay=config["weight_decay"],
         warmup_steps=config["warmup_steps"],
@@ -336,8 +269,6 @@ def train(
         report_to="none",
     )
 
-    tora_callback = ToraCallback(tora_client=tora)
-
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -345,140 +276,80 @@ def train(
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
         compute_metrics=compute_metrics,
-        callbacks=[tora_callback],
+        callbacks=[ToraCallback(tora_client=tora)],
     )
 
-    print(f"Starting training with {config['epochs']} epochs...")
+    print(f"Training for {config['epochs']} epochs...")
+    start = time.time()
+    result = trainer.train()
+    training_time = time.time() - start
 
-    start_time = time.time()
-
-    train_result = trainer.train()
-
-    training_time = time.time() - start_time
-
-    train_metrics = train_result.metrics
-
-    trainer.log_metrics("train", train_metrics)
-
-    trainer.save_metrics("train", train_metrics)
-
+    trainer.log_metrics("train", result.metrics)
+    trainer.save_metrics("train", result.metrics)
     trainer.save_state()
-
     log_metric(tora, "total_training_time", training_time, trainer.state.global_step)
 
-    print("Performing final evaluation...")
-
-    if test_dataset is not None:
-        eval_results = trainer.evaluate(test_dataset)
-
-    else:
-        eval_results = trainer.evaluate(val_dataset)
-
+    print("Final evaluation...")
+    eval_ds = test_dataset or val_dataset
+    eval_results = trainer.evaluate(eval_ds)
     trainer.log_metrics("eval", eval_results)
-
     trainer.save_metrics("eval", eval_results)
 
-    for key, value in eval_results.items():
-        log_metric(tora, f"final_{key}", value, trainer.state.global_step)
+    for key, val in eval_results.items():
+        log_metric(tora, f"final_{key}", val, trainer.state.global_step)
 
-    final_model_dir = f"{config['output_dir']}/final_model"
+    final_dir = os.path.join(config["output_dir"], "final_model")
+    trainer.save_model(final_dir)
+    tokenizer.save_pretrained(final_dir)
 
-    trainer.save_model(final_model_dir)
-
-    tokenizer.save_pretrained(final_model_dir)
-
-    print("\nTraining completed!")
-
-    print(f"Model saved to: {final_model_dir}")
-
+    print("Training complete!")
+    print(f"Model saved to {final_dir}")
     if config["task_type"] == "classification":
-        print(f"Final accuracy: {eval_results.get('eval_accuracy', 'N/A')}")
-
-        print(f"Final F1 score: {eval_results.get('eval_f1', 'N/A')}")
-
-    elif config["task_type"] == "mlm":
-        print(f"Final perplexity: {eval_results.get('eval_perplexity', 'N/A')}")
-
-    print(f"Total training time: {training_time:.2f} seconds")
-
+        print(
+            f"Accuracy: {eval_results.get('eval_accuracy')}  F1: {eval_results.get('eval_f1')}"
+        )
+    else:
+        print(f"Perplexity: {eval_results.get('eval_perplexity')}")
+    print(f"Total time: {training_time:.2f}s")
     tora.shutdown()
-
     return trainer, model, tokenizer
 
 
 def setup_device_and_seed(seed):
+    """
+    Configure device (GPU/TPU/CPU) and set random seeds.
+    """
     if torch.cuda.is_available():
         device = torch.device("cuda")
-
         torch.cuda.manual_seed_all(seed)
-
     elif torch.backends.mps.is_available():
         device = torch.device("mps")
-
     else:
         device = torch.device("cpu")
-
     torch.manual_seed(seed)
-
     np.random.seed(seed)
-
     return device
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Hugging Face training with Tora integration"
+        description="Train transformer models with Tora integration"
     )
-
     parser.add_argument(
-        "--task_type",
-        type=str,
-        default="classification",
-        choices=["classification", "mlm"],
-        help="Task type: classification or mlm",
+        "--task_type", choices=["classification", "mlm"], default="classification"
     )
-
-    parser.add_argument(
-        "--dataset_name",
-        type=str,
-        default="imdb",
-        help="Dataset name (from Hugging Face datasets)",
-    )
-
-    parser.add_argument(
-        "--model_name",
-        type=str,
-        default="distilbert-base-uncased",
-        help="Model name (from Hugging Face models)",
-    )
-
-    parser.add_argument(
-        "--output_dir",
-        type=str,
-        default="results/model",
-        help="Output directory for model and logs",
-    )
-
-    parser.add_argument(
-        "--batch_size", type=int, default=16, help="Training batch size"
-    )
-
-    parser.add_argument(
-        "--epochs", type=int, default=3, help="Number of training epochs"
-    )
-
-    parser.add_argument(
-        "--seed", type=int, default=42, help="Random seed for reproducibility"
-    )
-
+    parser.add_argument("--dataset_name", default="imdb")
+    parser.add_argument("--model_name", default="distilbert-base-uncased")
+    parser.add_argument("--output_dir", default="results/model")
+    parser.add_argument("--batch_size", type=int, default=16)
+    parser.add_argument("--epochs", type=int, default=3)
+    parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
     config = {
-        "model_name": args.model_name,
-        "dataset_name": args.dataset_name,
         "task_type": args.task_type,
-        "text_field": None,
-        "label_field": None,
+        "dataset_name": args.dataset_name,
+        "model_name": args.model_name,
         "max_length": 512,
         "batch_size": args.batch_size,
         "eval_batch_size": args.batch_size * 2,
@@ -492,32 +363,17 @@ def main():
         "warmup_steps": 500,
         "mlm_probability": 0.15,
         "experiment_name": f"{args.task_type.upper()}_{args.model_name.split('/')[-1]}_{args.dataset_name}",
-        "experiment_description": f"Training {args.model_name} on {args.dataset_name} for {args.task_type}",
+        "experiment_description": f"Training {args.model_name} on {args.dataset_name} ({args.task_type})",
         "tags": ["huggingface", args.task_type, "nlp"],
         "output_dir": args.output_dir,
     }
 
     device = setup_device_and_seed(config["seed"])
-
     config["device"] = str(device)
 
-    train_dataset, val_dataset, test_dataset, num_labels, text_field, label_field = (
-        load_dataset(config)
-    )
-
-    model, tokenizer, data_collator = load_model(config, num_labels)
-
-    trainer, model, tokenizer = train(
-        config,
-        model,
-        tokenizer,
-        data_collator,
-        train_dataset,
-        val_dataset,
-        test_dataset,
-    )
-
-    return trainer, model, tokenizer
+    train_ds, val_ds, test_ds, num_labels, _, _ = load_and_tokenize_dataset(config)
+    model, tokenizer, collator = load_model_and_collator(config, num_labels)
+    train_and_evaluate(config, model, tokenizer, collator, train_ds, val_ds, test_ds)
 
 
 if __name__ == "__main__":
