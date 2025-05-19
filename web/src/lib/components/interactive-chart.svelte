@@ -2,6 +2,7 @@
   import type { Experiment, Metric } from "$lib/types";
   import Chart from "chart.js/auto";
   import { ChartLine, Plus, EyeOff } from "lucide-svelte";
+  import { onMount, onDestroy } from "svelte";
 
   let chartInstance: Chart | null = null;
   let chartCanvas: HTMLCanvasElement | null = $state(null);
@@ -11,8 +12,10 @@
   let metricsData = $state<
     Record<string, { steps: number[]; values: number[] }>
   >({});
+  let currentTheme = $state<"light" | "dark">("dark");
 
-  const COLORS = [
+  // Catppuccin colors
+  const darkColors = [
     { border: "#74c7ec", bg: "rgba(116, 199, 236, 0.15)", point: "#b4befe" }, // sapphire
     { border: "#f5c2e7", bg: "rgba(245, 194, 231, 0.15)", point: "#f38ba8" }, // pink
     { border: "#a6e3a1", bg: "rgba(166, 227, 161, 0.15)", point: "#94e2d5" }, // green
@@ -20,6 +23,88 @@
     { border: "#cba6f7", bg: "rgba(203, 166, 247, 0.15)", point: "#89b4fa" }, // mauve
     { border: "#f38ba8", bg: "rgba(243, 139, 168, 0.15)", point: "#eba0ac" }, // red
   ];
+
+  const lightColors = [
+    { border: "#209fb5", bg: "rgba(32, 159, 181, 0.15)", point: "#7287fd" }, // sapphire
+    { border: "#ea76cb", bg: "rgba(234, 118, 203, 0.15)", point: "#d20f39" }, // pink
+    { border: "#40a02b", bg: "rgba(64, 160, 43, 0.15)", point: "#179299" }, // green
+    { border: "#fe640b", bg: "rgba(254, 100, 11, 0.15)", point: "#df8e1d" }, // peach
+    { border: "#8839ef", bg: "rgba(136, 57, 239, 0.15)", point: "#1e66f5" }, // mauve
+    { border: "#d20f39", bg: "rgba(210, 15, 57, 0.15)", point: "#e64553" }, // red
+  ];
+
+  function getThemeColors() {
+    return currentTheme === "dark" ? darkColors : lightColors;
+  }
+
+  // Theme UI values for dark mode
+  const darkThemeUI = {
+    text: "#cdd6f4",
+    crust: "#11111b",
+    mantle: "#181825",
+    base: "#1e1e2e",
+    overlay0: "#6c7086",
+    gridLines: "rgba(180, 190, 254, 0.08)",
+  };
+
+  // Theme UI values for light mode
+  const lightThemeUI = {
+    text: "#4c4f69",
+    crust: "#dce0e8",
+    mantle: "#e6e9ef",
+    base: "#eff1f5",
+    overlay0: "#9ca0b0",
+    gridLines: "rgba(114, 135, 253, 0.08)",
+  };
+
+  function getThemeUI() {
+    return currentTheme === "dark" ? darkThemeUI : lightThemeUI;
+  }
+
+  onMount(() => {
+    // Check for theme
+    updateTheme();
+    
+    // Listen for theme changes
+    window.addEventListener("storage", handleStorageChange);
+    
+    // Observe class changes on the document element
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.attributeName === "class" &&
+          mutation.target === document.documentElement
+        ) {
+          updateTheme();
+        }
+      });
+    });
+    
+    observer.observe(document.documentElement, { attributes: true });
+    
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  });
+
+  onDestroy(() => {
+    destroyChart();
+  });
+
+  function handleStorageChange(event: StorageEvent) {
+    if (event.key === "theme") {
+      updateTheme();
+    }
+  }
+
+  function updateTheme() {
+    const isDark = document.documentElement.classList.contains("dark");
+    currentTheme = isDark ? "dark" : "light";
+    if (chartInstance) {
+      updateChart();
+    }
+  }
 
   async function loadMetrics() {
     try {
@@ -49,9 +134,12 @@
     if (!chartCanvas || selectedMetrics.length === 0) return;
 
     try {
+      const colors = getThemeColors();
+      const ui = getThemeUI();
+      
       const datasets = selectedMetrics.map((metric, index) => {
-        const colorIndex = index % COLORS.length;
-        const color = COLORS[colorIndex];
+        const colorIndex = index % colors.length;
+        const color = colors[colorIndex];
         const steps = metricsData[metric]?.steps || [];
         const values = metricsData[metric]?.values || [];
         const dataPoints = steps.map((step, i) => ({ x: step, y: values[i] }));
@@ -63,14 +151,15 @@
           backgroundColor: color.bg,
           fill: false,
           pointBackgroundColor: color.point,
-          pointBorderColor: "#181825" /* mantle */,
-          pointHoverBackgroundColor: "#cba6f7" /* mauve */,
-          pointHoverBorderColor: "#1e1e2e" /* base */,
+          pointBorderColor: ui.mantle,
+          pointHoverBackgroundColor: currentTheme === "dark" ? "#cba6f7" : "#8839ef",
+          pointHoverBorderColor: ui.base,
           borderWidth: 2,
           tension: 0.3,
           pointRadius: 3,
         };
       });
+      
       chartInstance = new Chart(chartCanvas, {
         type: "line",
         data: {
@@ -91,7 +180,7 @@
               display: true,
               position: "top",
               labels: {
-                color: "#cdd6f4" /* text */,
+                color: ui.text,
                 usePointStyle: true,
                 pointStyle: "circle",
                 padding: 15,
@@ -101,10 +190,10 @@
               },
             },
             tooltip: {
-              backgroundColor: "#11111b" /* crust */,
-              titleColor: "#74c7ec" /* sapphire */,
-              bodyColor: "#cdd6f4" /* text */,
-              borderColor: "#6c7086" /* overlay0 */,
+              backgroundColor: ui.crust,
+              titleColor: currentTheme === "dark" ? "#74c7ec" : "#209fb5",
+              bodyColor: ui.text,
+              borderColor: ui.overlay0,
               position: "nearest",
               caretPadding: 10,
               callbacks: {
@@ -121,13 +210,13 @@
               title: {
                 display: true,
                 text: "Step",
-                color: "#cdd6f4" /* text */,
+                color: ui.text,
               },
               ticks: {
-                color: "#cdd6f4" /* text */,
+                color: ui.text,
               },
               grid: {
-                color: "rgba(180, 190, 254, 0.08)",
+                color: ui.gridLines,
               },
             },
             y: {
@@ -136,13 +225,13 @@
               title: {
                 display: true,
                 text: "Value",
-                color: "#cdd6f4" /* text */,
+                color: ui.text,
               },
               ticks: {
-                color: "#cdd6f4" /* text */,
+                color: ui.text,
               },
               grid: {
-                color: "rgba(180, 190, 254, 0.08)",
+                color: ui.gridLines,
               },
             },
           },
