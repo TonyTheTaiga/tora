@@ -1,6 +1,6 @@
 <script lang="ts">
   import { LogIn, User, Lock, Mail } from "lucide-svelte";
-  let signUp = $state(false);
+  let signUp = $state(true);
 </script>
 
 <div class="flex items-center justify-center min-h-[80vh]">
