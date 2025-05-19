@@ -15,37 +15,149 @@
     /* Removing non-standard color in favor of standard Catppuccin colors */
     /* --color-dark: #0a0a0f; */
 
-    /* Catppuccin Mocha palette - Background colors */
-    --color-ctp-base: #1e1e2e;
-    --color-ctp-mantle: #181825;
-    --color-ctp-crust: #11111b;
-    --color-ctp-surface0: #313244;
-    --color-ctp-surface1: #45475a;
-    --color-ctp-surface2: #585b70;
-    --color-ctp-overlay0: #6c7086;
-    --color-ctp-overlay1: #7f849c;
-    --color-ctp-overlay2: #9399b2;
-    --color-ctp-text: #cdd6f4;
-    --color-ctp-subtext0: #a6adc8;
-    --color-ctp-subtext1: #bac2de;
-    --color-ctp-lavender: #b4befe;
-    --color-ctp-blue: #89b4fa;
-    --color-ctp-sapphire: #74c7ec;
-    --color-ctp-sky: #89dceb;
-    --color-ctp-teal: #94e2d5;
-    --color-ctp-green: #a6e3a1;
-    --color-ctp-yellow: #f9e2af;
-    --color-ctp-peach: #fab387;
-    --color-ctp-maroon: #eba0ac;
-    --color-ctp-red: #f38ba8;
-    --color-ctp-mauve: #cba6f7;
-    --color-ctp-pink: #f5c2e7;
-    --color-ctp-flamingo: #f2cdcd;
-    --color-ctp-rosewater: #f5e0dc;
+    /* Catppuccin Mocha palette (Dark theme) */
+    --color-dark-ctp-base: #1e1e2e;
+    --color-dark-ctp-mantle: #181825;
+    --color-dark-ctp-crust: #11111b;
+    --color-dark-ctp-surface0: #313244;
+    --color-dark-ctp-surface1: #45475a;
+    --color-dark-ctp-surface2: #585b70;
+    --color-dark-ctp-overlay0: #6c7086;
+    --color-dark-ctp-overlay1: #7f849c;
+    --color-dark-ctp-overlay2: #9399b2;
+    --color-dark-ctp-text: #cdd6f4;
+    --color-dark-ctp-subtext0: #a6adc8;
+    --color-dark-ctp-subtext1: #bac2de;
+    --color-dark-ctp-lavender: #b4befe;
+    --color-dark-ctp-blue: #89b4fa;
+    --color-dark-ctp-sapphire: #74c7ec;
+    --color-dark-ctp-sky: #89dceb;
+    --color-dark-ctp-teal: #94e2d5;
+    --color-dark-ctp-green: #a6e3a1;
+    --color-dark-ctp-yellow: #f9e2af;
+    --color-dark-ctp-peach: #fab387;
+    --color-dark-ctp-maroon: #eba0ac;
+    --color-dark-ctp-red: #f38ba8;
+    --color-dark-ctp-mauve: #cba6f7;
+    --color-dark-ctp-pink: #f5c2e7;
+    --color-dark-ctp-flamingo: #f2cdcd;
+    --color-dark-ctp-rosewater: #f5e0dc;
+    
+    /* Catppuccin Latte palette (Light theme) */
+    --color-light-ctp-base: #eff1f5;
+    --color-light-ctp-mantle: #e6e9ef;
+    --color-light-ctp-crust: #dce0e8;
+    --color-light-ctp-surface0: #ccd0da;
+    --color-light-ctp-surface1: #bcc0cc;
+    --color-light-ctp-surface2: #acb0be;
+    --color-light-ctp-overlay0: #9ca0b0;
+    --color-light-ctp-overlay1: #8c8fa1;
+    --color-light-ctp-overlay2: #7c7f93;
+    --color-light-ctp-text: #4c4f69;
+    --color-light-ctp-subtext0: #6c6f85;
+    --color-light-ctp-subtext1: #5c5f77;
+    --color-light-ctp-lavender: #7287fd;
+    --color-light-ctp-blue: #1e66f5;
+    --color-light-ctp-sapphire: #209fb5;
+    --color-light-ctp-sky: #04a5e5;
+    --color-light-ctp-teal: #179299;
+    --color-light-ctp-green: #40a02b;
+    --color-light-ctp-yellow: #df8e1d;
+    --color-light-ctp-peach: #fe640b;
+    --color-light-ctp-maroon: #e64553;
+    --color-light-ctp-red: #d20f39;
+    --color-light-ctp-mauve: #8839ef;
+    --color-light-ctp-pink: #ea76cb;
+    --color-light-ctp-flamingo: #dd7878;
+    --color-light-ctp-rosewater: #dc8a78;
+    
+    /* Default theme variables (will be overridden by .light or .dark classes) */
+    --color-ctp-base: var(--color-dark-ctp-base);
+    --color-ctp-mantle: var(--color-dark-ctp-mantle);
+    --color-ctp-crust: var(--color-dark-ctp-crust);
+    --color-ctp-surface0: var(--color-dark-ctp-surface0);
+    --color-ctp-surface1: var(--color-dark-ctp-surface1);
+    --color-ctp-surface2: var(--color-dark-ctp-surface2);
+    --color-ctp-overlay0: var(--color-dark-ctp-overlay0);
+    --color-ctp-overlay1: var(--color-dark-ctp-overlay1);
+    --color-ctp-overlay2: var(--color-dark-ctp-overlay2);
+    --color-ctp-text: var(--color-dark-ctp-text);
+    --color-ctp-subtext0: var(--color-dark-ctp-subtext0);
+    --color-ctp-subtext1: var(--color-dark-ctp-subtext1);
+    --color-ctp-lavender: var(--color-dark-ctp-lavender);
+    --color-ctp-blue: var(--color-dark-ctp-blue);
+    --color-ctp-sapphire: var(--color-dark-ctp-sapphire);
+    --color-ctp-sky: var(--color-dark-ctp-sky);
+    --color-ctp-teal: var(--color-dark-ctp-teal);
+    --color-ctp-green: var(--color-dark-ctp-green);
+    --color-ctp-yellow: var(--color-dark-ctp-yellow);
+    --color-ctp-peach: var(--color-dark-ctp-peach);
+    --color-ctp-maroon: var(--color-dark-ctp-maroon);
+    --color-ctp-red: var(--color-dark-ctp-red);
+    --color-ctp-mauve: var(--color-dark-ctp-mauve);
+    --color-ctp-pink: var(--color-dark-ctp-pink);
+    --color-ctp-flamingo: var(--color-dark-ctp-flamingo);
+    --color-ctp-rosewater: var(--color-dark-ctp-rosewater);
   }
 
   .dark {
     --color-gray-200: #374151;
+    --color-ctp-base: var(--color-dark-ctp-base);
+    --color-ctp-mantle: var(--color-dark-ctp-mantle);
+    --color-ctp-crust: var(--color-dark-ctp-crust);
+    --color-ctp-surface0: var(--color-dark-ctp-surface0);
+    --color-ctp-surface1: var(--color-dark-ctp-surface1);
+    --color-ctp-surface2: var(--color-dark-ctp-surface2);
+    --color-ctp-overlay0: var(--color-dark-ctp-overlay0);
+    --color-ctp-overlay1: var(--color-dark-ctp-overlay1);
+    --color-ctp-overlay2: var(--color-dark-ctp-overlay2);
+    --color-ctp-text: var(--color-dark-ctp-text);
+    --color-ctp-subtext0: var(--color-dark-ctp-subtext0);
+    --color-ctp-subtext1: var(--color-dark-ctp-subtext1);
+    --color-ctp-lavender: var(--color-dark-ctp-lavender);
+    --color-ctp-blue: var(--color-dark-ctp-blue);
+    --color-ctp-sapphire: var(--color-dark-ctp-sapphire);
+    --color-ctp-sky: var(--color-dark-ctp-sky);
+    --color-ctp-teal: var(--color-dark-ctp-teal);
+    --color-ctp-green: var(--color-dark-ctp-green);
+    --color-ctp-yellow: var(--color-dark-ctp-yellow);
+    --color-ctp-peach: var(--color-dark-ctp-peach);
+    --color-ctp-maroon: var(--color-dark-ctp-maroon);
+    --color-ctp-red: var(--color-dark-ctp-red);
+    --color-ctp-mauve: var(--color-dark-ctp-mauve);
+    --color-ctp-pink: var(--color-dark-ctp-pink);
+    --color-ctp-flamingo: var(--color-dark-ctp-flamingo);
+    --color-ctp-rosewater: var(--color-dark-ctp-rosewater);
+  }
+  
+  .light {
+    --color-gray-200: #e5e7eb;
+    --color-ctp-base: var(--color-light-ctp-base);
+    --color-ctp-mantle: var(--color-light-ctp-mantle);
+    --color-ctp-crust: var(--color-light-ctp-crust);
+    --color-ctp-surface0: var(--color-light-ctp-surface0);
+    --color-ctp-surface1: var(--color-light-ctp-surface1);
+    --color-ctp-surface2: var(--color-light-ctp-surface2);
+    --color-ctp-overlay0: var(--color-light-ctp-overlay0);
+    --color-ctp-overlay1: var(--color-light-ctp-overlay1);
+    --color-ctp-overlay2: var(--color-light-ctp-overlay2);
+    --color-ctp-text: var(--color-light-ctp-text);
+    --color-ctp-subtext0: var(--color-light-ctp-subtext0);
+    --color-ctp-subtext1: var(--color-light-ctp-subtext1);
+    --color-ctp-lavender: var(--color-light-ctp-lavender);
+    --color-ctp-blue: var(--color-light-ctp-blue);
+    --color-ctp-sapphire: var(--color-light-ctp-sapphire);
+    --color-ctp-sky: var(--color-light-ctp-sky);
+    --color-ctp-teal: var(--color-light-ctp-teal);
+    --color-ctp-green: var(--color-light-ctp-green);
+    --color-ctp-yellow: var(--color-light-ctp-yellow);
+    --color-ctp-peach: var(--color-light-ctp-peach);
+    --color-ctp-maroon: var(--color-light-ctp-maroon);
+    --color-ctp-red: var(--color-light-ctp-red);
+    --color-ctp-mauve: var(--color-light-ctp-mauve);
+    --color-ctp-pink: var(--color-light-ctp-pink);
+    --color-ctp-flamingo: var(--color-light-ctp-flamingo);
+    --color-ctp-rosewater: var(--color-light-ctp-rosewater);
   }
 
   button {

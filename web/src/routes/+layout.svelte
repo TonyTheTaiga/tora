@@ -3,6 +3,7 @@
   import { invalidate } from "$app/navigation";
   import { onMount } from "svelte";
   import Logo from "$lib/components/logo.svelte";
+  import ThemeToggle from "$lib/components/theme-toggle.svelte";
   import { CircleUserRound, Bean } from "lucide-svelte";
   import { goto } from "$app/navigation";
 
@@ -32,8 +33,12 @@
       <Logo />
     </button>
 
-    <!-- Right side auth actions -->
-    <div class="flex items-center">
+    <!-- Right side actions -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Theme toggle -->
+      <ThemeToggle />
+      
+      <!-- Auth actions -->
       {#if session}
         <button
           class="flex items-center gap-1.5 px-3 py-1.5 border border-ctp-blue rounded-md text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-colors"
