@@ -14,30 +14,28 @@
   >({});
   let currentTheme = $state<"light" | "dark">("dark");
 
-  // Catppuccin colors
   const darkColors = [
-    { border: "#74c7ec", bg: "rgba(116, 199, 236, 0.15)", point: "#b4befe" }, // sapphire
-    { border: "#f5c2e7", bg: "rgba(245, 194, 231, 0.15)", point: "#f38ba8" }, // pink
-    { border: "#a6e3a1", bg: "rgba(166, 227, 161, 0.15)", point: "#94e2d5" }, // green
-    { border: "#fab387", bg: "rgba(250, 179, 135, 0.15)", point: "#f9e2af" }, // peach
-    { border: "#cba6f7", bg: "rgba(203, 166, 247, 0.15)", point: "#89b4fa" }, // mauve
-    { border: "#f38ba8", bg: "rgba(243, 139, 168, 0.15)", point: "#eba0ac" }, // red
+    { border: "#74c7ec", bg: "rgba(116, 199, 236, 0.15)", point: "#b4befe" },
+    { border: "#f5c2e7", bg: "rgba(245, 194, 231, 0.15)", point: "#f38ba8" },
+    { border: "#a6e3a1", bg: "rgba(166, 227, 161, 0.15)", point: "#94e2d5" },
+    { border: "#fab387", bg: "rgba(250, 179, 135, 0.15)", point: "#f9e2af" },
+    { border: "#cba6f7", bg: "rgba(203, 166, 247, 0.15)", point: "#89b4fa" },
+    { border: "#f38ba8", bg: "rgba(243, 139, 168, 0.15)", point: "#eba0ac" },
   ];
 
   const lightColors = [
-    { border: "#209fb5", bg: "rgba(32, 159, 181, 0.15)", point: "#7287fd" }, // sapphire
-    { border: "#ea76cb", bg: "rgba(234, 118, 203, 0.15)", point: "#d20f39" }, // pink
-    { border: "#40a02b", bg: "rgba(64, 160, 43, 0.15)", point: "#179299" }, // green
-    { border: "#fe640b", bg: "rgba(254, 100, 11, 0.15)", point: "#df8e1d" }, // peach
-    { border: "#8839ef", bg: "rgba(136, 57, 239, 0.15)", point: "#1e66f5" }, // mauve
-    { border: "#d20f39", bg: "rgba(210, 15, 57, 0.15)", point: "#e64553" }, // red
+    { border: "#209fb5", bg: "rgba(32, 159, 181, 0.15)", point: "#7287fd" },
+    { border: "#ea76cb", bg: "rgba(234, 118, 203, 0.15)", point: "#d20f39" },
+    { border: "#40a02b", bg: "rgba(64, 160, 43, 0.15)", point: "#179299" },
+    { border: "#fe640b", bg: "rgba(254, 100, 11, 0.15)", point: "#df8e1d" },
+    { border: "#8839ef", bg: "rgba(136, 57, 239, 0.15)", point: "#1e66f5" },
+    { border: "#d20f39", bg: "rgba(210, 15, 57, 0.15)", point: "#e64553" },
   ];
 
   function getThemeColors() {
     return currentTheme === "dark" ? darkColors : lightColors;
   }
 
-  // Theme UI values for dark mode
   const darkThemeUI = {
     text: "#cdd6f4",
     crust: "#11111b",
@@ -47,7 +45,6 @@
     gridLines: "rgba(180, 190, 254, 0.08)",
   };
 
-  // Theme UI values for light mode
   const lightThemeUI = {
     text: "#4c4f69",
     crust: "#dce0e8",
@@ -62,13 +59,10 @@
   }
 
   onMount(() => {
-    // Check for theme
     updateTheme();
     
-    // Listen for theme changes
     window.addEventListener("storage", handleStorageChange);
     
-    // Observe class changes on the document element
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (
@@ -168,7 +162,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          parsing: false, // Disable parsing as we use {x,y} format
+          parsing: false,
           normalized: true,
           interaction: {
             mode: "nearest",
@@ -284,6 +278,7 @@
 </script>
 
 <div class="p-3 sm:p-4 space-y-4 w-full">
+  <!-- Available Metrics Header Section -->
   {#if experiment.availableMetrics && experiment.availableMetrics.length > 0}
     <div
       class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2"
@@ -299,6 +294,7 @@
       {/if}
     </div>
 
+    <!-- Available Metrics Selection Buttons -->
     <div class="flex flex-wrap gap-2 mb-4 max-w-full overflow-x-auto pb-1">
       {#each experiment.availableMetrics as metric}
         <button
@@ -322,6 +318,7 @@
     </div>
   {/if}
 
+  <!-- Chart Display Section -->
   {#if selectedMetrics.length > 0}
     <div
       class="relative h-60 sm:h-80 w-full rounded-md border border-ctp-surface1 bg-ctp-mantle overflow-hidden shadow-md"
@@ -337,6 +334,7 @@
         <canvas bind:this={chartCanvas}></canvas>
       </div>
     </div>
+  <!-- Empty State -->
   {:else if experiment.availableMetrics && experiment.availableMetrics.length > 0}
     <div
       class="flex flex-col items-center justify-center h-60 sm:h-80 w-full rounded-md border border-ctp-surface1 bg-ctp-mantle p-4 sm:p-8"
