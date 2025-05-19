@@ -18,6 +18,7 @@
     Sparkle,
     ClipboardCheck,
     Copy,
+    ChevronDown,
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
   import EditExperimentModal from "./edit-experiment-modal.svelte";
@@ -336,6 +337,7 @@
         >
           <Settings size={16} class="text-ctp-mauve flex-shrink-0" />
           <span class="text-sm font-medium">Parameters</span>
+          <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
         </summary>
         <div class="pt-2">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -403,6 +405,7 @@
         >
           <ChartLine size={16} class="text-ctp-blue" />
           <span class="text-sm font-medium">Metrics</span>
+          <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
         </summary>
         <!-- Full width chart container -->
         <div class="pt-2 -mx-2 sm:-mx-4">

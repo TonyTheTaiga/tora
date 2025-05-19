@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { X, Save, TagIcon, Plus, Link, Globe, Lock } from "lucide-svelte";
+  import { X, Save, TagIcon, Plus, Link, Globe, Lock, ChevronDown } from "lucide-svelte";
   import type { Visibility } from "$lib/types";
   import { enhance } from "$app/forms";
   import type { Experiment } from "$lib/types";
@@ -249,6 +249,7 @@
             >
               <TagIcon size={16} class="text-ctp-blue" />
               <span class="text-sm font-medium">Tags</span>
+              <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
             </summary>
             <div class="pt-2 pl-6">
               <div class="flex flex-wrap items-center gap-2">
@@ -310,6 +311,7 @@
             >
               <Link size={16} class="text-ctp-lavender" />
               <span class="text-sm font-medium">References</span>
+              <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
             </summary>
             <div class="pt-2 pl-6">
               {#if reference}

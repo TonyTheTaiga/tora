@@ -9,6 +9,7 @@
     Link,
     Globe,
     Lock,
+    ChevronDown,
   } from "lucide-svelte";
   import { onMount, onDestroy } from "svelte";
 
@@ -240,6 +241,7 @@
             >
               <TagIcon size={16} class="text-ctp-blue" />
               <span class="text-sm font-medium">Tags</span>
+              <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
             </summary>
             <div class="pt-2 pl-6">
               <div class="flex flex-wrap items-center gap-2">
@@ -309,6 +311,7 @@
             >
               <Settings size={16} class="text-ctp-sapphire" />
               <span class="text-sm font-medium">Parameters</span>
+              <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
             </summary>
             <div class="pt-2 pl-6">
               <div class="space-y-3">
@@ -356,6 +359,7 @@
             >
               <Link size={16} class="text-ctp-lavender" />
               <span class="text-sm font-medium">References</span>
+              <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
             </summary>
             <div class="pt-2 pl-6">
               {#if reference}
