@@ -37,7 +37,7 @@
     <div class="flex items-center gap-2 sm:gap-3">
       <!-- Theme toggle -->
       <ThemeToggle />
-      
+
       <!-- Auth actions -->
       {#if session}
         <button

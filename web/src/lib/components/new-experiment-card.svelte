@@ -63,7 +63,8 @@
           Create an Account
         </h3>
         <p class="text-xs text-ctp-subtext0 leading-relaxed">
-          Sign up to start tracking your experiments and metrics.
+          Sign up to start tracking your experiments and metrics or browse
+          public experiments.
         </p>
 
         <!-- Spacer that grows to push button to bottom -->
