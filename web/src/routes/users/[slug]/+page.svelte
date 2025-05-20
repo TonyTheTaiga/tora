@@ -52,7 +52,7 @@
 
       showNewKeyValue = data.key.key;
       showNewKeyModal = true;
-      invalidateAll();
+      // invalidateAll();
     } catch (err) {
       console.error("Error creating API key:", err);
       error = err instanceof Error ? err.message : "Failed to create API key";
@@ -81,7 +81,7 @@
       if (!response.ok) {
         throw new Error("Failed to delete API key");
       }
-      invalidateAll();
+      // invalidateAll();
     } catch (err) {
       console.error("Error deleting API key:", err);
       error = err instanceof Error ? err.message : "Failed to delete API key";
@@ -93,7 +93,7 @@
   });
 </script>
 
-<div class="w-full">
+<div class="w-full p-4">
   <div class="bg-ctp-mantle rounded-lg p-6 border border-ctp-surface0">
     <div
       class="flex flex-col sm:flex-row gap-4 border-b border-ctp-surface0 pb-6 mb-6"

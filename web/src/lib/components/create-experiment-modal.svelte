@@ -401,7 +401,7 @@
                 />
                 {#if searchResults.length > 0}
                   <div
-                    class="absolute top-full left-0 right-0 z-10 mt-1 p-2 border-0 bg-ctp-base rounded-lg shadow-xl max-h-40 overflow-y-auto"
+                    class="absolute top-full left-0 right-0 z-30 mt-1 p-2 border-0 bg-ctp-base rounded-lg shadow-xl max-h-40 overflow-y-auto"
                   >
                     <ul class="flex flex-col">
                       {#each searchResults as experiment, index}

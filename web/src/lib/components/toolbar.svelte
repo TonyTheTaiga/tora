@@ -38,7 +38,6 @@
     let newX = e.clientX - offset.x;
     let newY = e.clientY - offset.y;
 
-    // clamp to parent bounds
     newX = Math.max(
       parentRect.left,
       Math.min(newX, parentRect.right - toolbarEl.offsetWidth),
@@ -71,6 +70,7 @@
   });
 
   onDestroy(() => {
+    if (!browser) return;
     window.removeEventListener("pointermove", handlePointerMove);
     window.removeEventListener("pointerup", handlePointerUp);
   });
@@ -78,7 +78,7 @@
 
 <div
   id="toolbar"
-  class="fixed flex flex-row items-center gap-1 p-0.5 bg-ctp-surface1 border border-ctp-surface2 rounded-lg shadow-md"
+  class="fixed flex flex-row items-center gap-1 p-0.5 bg-ctp-surface1 border border-ctp-surface2 rounded-lg shadow-md z-40"
   style="top: {pos.y}px; left: {pos.x}px; opacity: 0.85;"
 >
   <button
@@ -117,4 +117,3 @@
     <RefreshCw size={16} />
   </button>
 </div>
-
