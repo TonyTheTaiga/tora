@@ -13,7 +13,7 @@
   import type { Experiment } from "$lib/types";
   import { onMount, onDestroy } from "svelte";
 
-  let { experiment = $bindable(), editMode = $bindable() } = $props();
+  let { experiment = $bindable() } = $props();
 
   let experimentCopy = $state<Experiment>({
     id: experiment.id,
@@ -180,7 +180,7 @@
       </div>
       <button
         onclick={() => {
-          editMode = false;
+          selectedIndex = null;
         }}
         type="button"
         class="p-1.5 text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/10 rounded-full transition-all"
@@ -201,9 +201,9 @@
             experiment.name = experimentCopy.name;
             experiment.description = experimentCopy.description;
             experiment.visibility = experimentCopy.visibility;
-            experiment.tags = [...experimentCopy.tags];
+            experiment.tags = [...experiment.tags];
           }
-          editMode = false;
+          experiment = null;
         };
       }}
     >
@@ -444,7 +444,7 @@
       >
         <button
           onclick={() => {
-            editMode = false;
+            experiment = null;
           }}
           type="button"
           class="inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"

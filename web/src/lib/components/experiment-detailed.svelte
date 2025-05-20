@@ -30,23 +30,20 @@
     highlighted = $bindable(),
     selectedForDelete = $bindable(),
     recentlyMinimized = $bindable(),
+    selectedForEdit = $bindable(),
   }: {
     experiment: Experiment;
     selectedId: string | null;
     highlighted: string[];
     selectedForDelete: Experiment | null;
     recentlyMinimized: string | null;
+    selectedForEdit: Experiment | null;
   } = $props();
 
-  let editMode = $state<boolean>(false);
   let recommendations = $state<Record<string, HPRecommendation>>({});
   let activeRecommendation = $state<string | null>(null);
   let idCopied = $state<boolean>(false);
 </script>
-
-{#if editMode}
-  <EditExperimentModal bind:experiment bind:editMode />
-{/if}
 
 <article
   class="bg-ctp-base overflow-hidden shadow-lg rounded-lg {highlighted.length >
@@ -110,7 +107,7 @@
           </button>
           <button
             onclick={() => {
-              editMode = true;
+              selectedForEdit = experiment;
             }}
             class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
             title="Edit experiment"
@@ -244,7 +241,7 @@
           </button>
           <button
             onclick={() => {
-              editMode = true;
+              selectedForEdit = experiment;
             }}
             class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
             title="Edit experiment"

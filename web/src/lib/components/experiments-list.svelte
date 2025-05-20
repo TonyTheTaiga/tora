@@ -4,18 +4,27 @@
   import ExperimentSimple from "./experiment-simple.svelte";
   import ExperimentDetailed from "./experiment-detailed.svelte";
   import DeleteConfirmationModal from "./delete-confirmation-modal.svelte";
+  import EditExperimentModal from "./edit-experiment-modal.svelte";
+
   import { page } from "$app/state";
 
-  let isUserSignedIn: boolean = $state(!!page.data.session);
   let {
     experiments = $bindable(),
     isOpen = $bindable(),
   }: { experiments: Experiment[]; isOpen: boolean } = $props();
+  let isUserSignedIn: boolean = $state(!!page.data.session);
   let selectedId = $state<string | null>(null);
   let highlighted = $state<string[]>([]);
   let selectedForDelete = $state<Experiment | null>(null);
+  let selectedForEdit = $state<Experiment | null>(null);
   let recentlyMinimized = $state<string | null>(null);
 </script>
+
+<DeleteConfirmationModal bind:experiment={selectedForDelete} bind:experiments />
+
+{#if selectedForEdit}
+  <EditExperimentModal bind:experiment={selectedForEdit} />
+{/if}
 
 <div
   class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 [&>*:has(.expanded-experiment)]:md:col-span-2 [&>*:has(.expanded-experiment)]:lg:col-span-3"
@@ -52,14 +61,13 @@
             bind:experiment={experiments[idx]}
             bind:selectedForDelete
             bind:recentlyMinimized
+            bind:selectedForEdit
           />
         </div>
       {/if}
     </div>
   {/each}
 </div>
-
-<DeleteConfirmationModal bind:experiment={selectedForDelete} bind:experiments />
 
 <style>
   @keyframes shadow-glow {
