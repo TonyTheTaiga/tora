@@ -29,11 +29,13 @@
     selectedId = $bindable(),
     highlighted = $bindable(),
     selectedForDelete = $bindable(),
+    recentlyMinimized = $bindable(),
   }: {
     experiment: Experiment;
     selectedId: string | null;
     highlighted: string[];
     selectedForDelete: Experiment | null;
+    recentlyMinimized: string | null;
   } = $props();
 
   let editMode = $state<boolean>(false);
@@ -47,7 +49,7 @@
 {/if}
 
 <article
-  class="bg-ctp-base overflow-hidden shadow-lg rounded-lg md:col-span-2 lg:col-span-full row-span-2 order-first {highlighted.length >
+  class="bg-ctp-base overflow-hidden shadow-lg rounded-lg {highlighted.length >
     0 && !highlighted.includes(experiment.id)
     ? 'opacity-40'
     : ''}"
@@ -159,11 +161,25 @@
         {/if}
         <button
           onclick={() => {
-            if (selectedId === experiment.id) {
-              selectedId = null;
-            } else {
-              selectedId = experiment.id;
-            }
+            const currentId = experiment.id;
+            // Set recently minimized to highlight the card
+            recentlyMinimized = currentId;
+
+            // First collapse
+            selectedId = null;
+
+            // Then scroll to the card's position
+            setTimeout(() => {
+              const element = document.getElementById(
+                `experiment-${currentId}`,
+              );
+              if (element) {
+                element.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+              }
+            }, 10);
           }}
           class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
           aria-label="Minimize"
@@ -276,11 +292,25 @@
         {/if}
         <button
           onclick={() => {
-            if (selectedId === experiment.id) {
-              selectedId = null;
-            } else {
-              selectedId = experiment.id;
-            }
+            const currentId = experiment.id;
+            // Set recently minimized to highlight the card
+            recentlyMinimized = currentId;
+
+            // First collapse
+            selectedId = null;
+
+            // Then scroll to the card's position
+            setTimeout(() => {
+              const element = document.getElementById(
+                `experiment-${currentId}`,
+              );
+              if (element) {
+                element.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+              }
+            }, 10);
           }}
           class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
           aria-label="Minimize"
@@ -423,3 +453,21 @@
     {/if}
   </div>
 </article>
+
+<style>
+  /* Animation for card expansion */
+  @keyframes expand {
+    from {
+      opacity: 0.4;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  :global(.animate-expand) {
+    animation: expand 0.3s ease-out forwards;
+  }
+</style>

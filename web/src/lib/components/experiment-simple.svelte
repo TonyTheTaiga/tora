@@ -18,11 +18,13 @@
     selectedId = $bindable(),
     highlighted = $bindable(),
     selectedForDelete = $bindable(),
+    recentlyMinimized = $bindable(),
   }: {
     experiment: Experiment;
     selectedId: string | null;
     highlighted: string[];
     selectedForDelete: Experiment | null;
+    recentlyMinimized: string | null;
   } = $props();
 </script>
 
@@ -33,7 +35,7 @@
     : "opacity-100"}
   hover={highlighted.length > 0 && !highlighted.includes(experiment.id)
     ? false
-    : true}
+    : false}
 >
   <div class="flex flex-col h-full">
     <!-- Header -->
@@ -103,10 +105,34 @@
       tabindex="0"
       onclick={() => {
         selectedId = experiment.id;
+        // Allow DOM to update before scrolling
+        setTimeout(() => {
+          const element = document.getElementById(
+            `experiment-${experiment.id}`,
+          );
+          if (element) {
+            element.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+        }, 10);
       }}
       onkeydown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           selectedId = experiment.id;
+          // Allow DOM to update before scrolling
+          setTimeout(() => {
+            const element = document.getElementById(
+              `experiment-${experiment.id}`,
+            );
+            if (element) {
+              element.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
+          }, 10);
         }
       }}
       aria-label="View experiment details"
