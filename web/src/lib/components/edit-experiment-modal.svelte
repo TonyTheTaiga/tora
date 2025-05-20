@@ -9,12 +9,26 @@
     Lock,
     ChevronDown,
   } from "lucide-svelte";
-  import type { Visibility } from "$lib/types";
   import { enhance } from "$app/forms";
   import type { Experiment } from "$lib/types";
   import { onMount, onDestroy } from "svelte";
 
   let { experiment = $bindable(), editMode = $bindable() } = $props();
+
+  let experimentCopy = $state<Experiment>({
+    id: experiment.id,
+    name: experiment.name,
+    description: experiment.description,
+    visibility: experiment.visibility,
+    tags: [...experiment.tags],
+    availableMetrics: experiment.availableMetrics
+      ? [...experiment.availableMetrics]
+      : [],
+    hyperparams: experiment.hyperparams ? [...experiment.hyperparams] : [],
+    createdAt: experiment.createdAt,
+    user_id: experiment.user_id,
+  });
+
   let addingNewTag = $state(false);
   let tag = $state<string | null>(null);
   let reference = $state<Experiment | null>(null);
@@ -25,39 +39,30 @@
 
   onMount(async () => {
     document.body.classList.add("overflow-hidden");
-    
-    // Fetch existing reference when editing an experiment
+
     try {
-      // Reset reference
       reference = null;
-      
-      // First, check for directly referenced experiments from this experiment
-      // by looking for outgoing references where this experiment is the source
-      try {
-        // This would be a call to get all experiments referenced BY this experiment
-        // We would need a specific API for this, but for now we'll use the chain API
-        const response = await fetch(`/api/experiments/${experiment.id}/ref`);
-        if (response.ok) {
-          const referenceIds = await response.json();
-          
-          // Filter out self-references 
-          const referencesToLoad = referenceIds.filter(id => id !== experiment.id);
-          
-          // Since we want to enforce only one reference, just use the first one
-          if (referencesToLoad.length > 0) {
-            try {
-              // Get the referenced experiment details
-              const refResponse = await fetch(`/api/experiments/${referencesToLoad[0]}`);
-              if (refResponse.ok) {
-                reference = await refResponse.json();
-              }
-            } catch (refError) {
-              console.error("Failed to load referenced experiment:", refError);
+      const response = await fetch(`/api/experiments/${experiment.id}/ref`);
+      if (response.ok) {
+        const referenceIds = await response.json();
+        // Filter out self-references
+        const referencesToLoad = referenceIds.filter(
+          (id: String) => id !== experiment.id,
+        );
+
+        // Since we want to enforce only one reference, just use the first one
+        if (referencesToLoad.length > 0) {
+          try {
+            const refResponse = await fetch(
+              `/api/experiments/${referencesToLoad[0]}`,
+            );
+            if (refResponse.ok) {
+              reference = await refResponse.json();
             }
+          } catch (refError) {
+            console.error("Failed to load referenced experiment:", refError);
           }
         }
-      } catch (error) {
-        console.error("Failed to load reference:", error);
       }
     } catch (error) {
       console.error("Failed to load reference chain:", error);
@@ -77,8 +82,9 @@
     await fetch(url, { method: "GET" })
       .then((res) => res.json())
       .then((data) => {
-        // Filter out the current experiment from search results to prevent self-referencing
-        searchResults = (data as Experiment[]).filter(exp => exp.id !== experiment.id);
+        searchResults = (data as Experiment[]).filter(
+          (exp) => exp.id !== experiment.id,
+        );
       });
   }
 
@@ -145,7 +151,7 @@
   function addTag(e: KeyboardEvent | MouseEvent) {
     e.preventDefault();
     if (tag && tag !== "") {
-      experiment.tags.push(tag);
+      experimentCopy.tags.push(tag);
       tag = null;
     }
   }
@@ -168,10 +174,14 @@
     >
       <div class="flex items-center gap-2">
         <Save size={18} class="text-ctp-mauve" />
-        <h2 id="modal-title" class="text-xl font-medium text-ctp-text">Edit Experiment</h2>
+        <h2 id="modal-title" class="text-xl font-medium text-ctp-text">
+          Edit Experiment
+        </h2>
       </div>
       <button
-        onclick={() => (editMode = false)}
+        onclick={() => {
+          editMode = false;
+        }}
         type="button"
         class="p-1.5 text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/10 rounded-full transition-all"
       >
@@ -185,11 +195,15 @@
       action="?/update"
       class="flex flex-col gap-4 p-5"
       use:enhance={({ formElement, formData, action, cancel, submitter }) => {
-        experiment.name = formData.get("experiment-name");
-        experiment.description = formData.get("experiment-description");
-        experiment.visibility = formData.get("visibility") as Visibility;
         return async ({ result, update }) => {
-          editMode = !editMode;
+          if (result.type === "success" || result.type === "redirect") {
+            // Copy values from experimentCopy to the original experiment
+            experiment.name = experimentCopy.name;
+            experiment.description = experimentCopy.description;
+            experiment.visibility = experimentCopy.visibility;
+            experiment.tags = [...experimentCopy.tags];
+          }
+          editMode = false;
         };
       }}
     >
@@ -197,7 +211,7 @@
         class="hidden"
         id="experiment-id"
         name="experiment-id"
-        value={experiment.id}
+        value={experimentCopy.id}
       />
 
       <div class="flex flex-col gap-5">
@@ -213,7 +227,7 @@
             type="text"
             class="w-full px-3 py-2 bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-mauve transition-all placeholder-ctp-overlay0 shadow-sm"
             placeholder="Enter experiment name"
-            value={experiment.name}
+            bind:value={experimentCopy.name}
             required
           />
         </div>
@@ -232,7 +246,7 @@
             rows="2"
             class="w-full px-3 py-2 bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue transition-all resize-none placeholder-ctp-overlay0 shadow-sm"
             placeholder="Briefly describe this experiment"
-            value={experiment.description}
+            bind:value={experimentCopy.description}
             required
           ></textarea>
         </div>
@@ -248,7 +262,7 @@
             type="hidden"
             id="edit-visibility-input"
             name="visibility"
-            value={experiment.visibility}
+            bind:value={experimentCopy.visibility}
             aria-labelledby="edit-visibility-label"
           />
 
@@ -261,12 +275,12 @@
               type="button"
               id="edit-visibility-public"
               role="radio"
-              aria-checked={experiment.visibility === "PUBLIC"}
+              aria-checked={experimentCopy.visibility === "PUBLIC"}
               class={"flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors " +
-                (experiment.visibility === "PUBLIC"
+                (experimentCopy.visibility === "PUBLIC"
                   ? "bg-ctp-green/20 text-ctp-green border border-ctp-green/30"
                   : "bg-ctp-surface0/50 text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text")}
-              onclick={() => (experiment.visibility = "PUBLIC")}
+              onclick={() => (experimentCopy.visibility = "PUBLIC")}
             >
               <Globe size={14} />
               <span>Public</span>
@@ -276,13 +290,14 @@
               type="button"
               id="edit-visibility-private"
               role="radio"
-              aria-checked={experiment.visibility === "PRIVATE" ||
-                !experiment.visibility}
+              aria-checked={experimentCopy.visibility === "PRIVATE" ||
+                !experimentCopy.visibility}
               class={"flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors " +
-                (experiment.visibility === "PRIVATE" || !experiment.visibility
+                (experimentCopy.visibility === "PRIVATE" ||
+                !experimentCopy.visibility
                   ? "bg-ctp-red/20 text-ctp-red border border-ctp-red/30"
                   : "bg-ctp-surface0/50 text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text")}
-              onclick={() => (experiment.visibility = "PRIVATE")}
+              onclick={() => (experimentCopy.visibility = "PRIVATE")}
             >
               <Lock size={14} />
               <span>Private</span>
@@ -303,7 +318,7 @@
             </summary>
             <div class="pt-2 pl-6">
               <div class="flex flex-wrap items-center gap-2">
-                {#each experiment.tags as tag, i}
+                {#each experimentCopy.tags as tag, i}
                   <input type="hidden" value={tag} name="tags.{i}" />
                   <span
                     class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-ctp-blue/10 text-ctp-blue border-0 group"
@@ -312,7 +327,7 @@
                     <button
                       type="button"
                       class="text-ctp-blue/70 hover:text-ctp-red transition-colors ml-1.5"
-                      onclick={() => experiment.tags.splice(i, 1)}
+                      onclick={() => experimentCopy.tags.splice(i, 1)}
                       aria-label="Remove tag"
                     >
                       <X size={12} />
@@ -429,7 +444,7 @@
       >
         <button
           onclick={() => {
-            editMode = !editMode;
+            editMode = false;
           }}
           type="button"
           class="inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"
