@@ -13,10 +13,23 @@
 
   let isDeleting = $state(false);
 
-  $effect(() => {
-    if (experiment && typeof document !== 'undefined') {
+  onMount(() => {
+    if (experiment && typeof document !== "undefined") {
       document.body.classList.add("overflow-hidden");
-      return () => document.body.classList.remove("overflow-hidden");
+    }
+  });
+
+  onDestroy(() => {
+    if (typeof document !== "undefined") {
+      document.body.classList.remove("overflow-hidden");
+    }
+  });
+
+  $effect(() => {
+    if (experiment && typeof document !== "undefined") {
+      document.body.classList.add("overflow-hidden");
+    } else if (typeof document !== "undefined") {
+      document.body.classList.remove("overflow-hidden");
     }
   });
 
@@ -52,45 +65,40 @@
 </script>
 
 {#if experiment}
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <!-- Backdrop -->
+  <div
+    class="fixed inset-0 bg-ctp-crust/80 backdrop-blur-md
+         flex items-center justify-center p-2 sm:p-4 z-50 overflow-hidden"
+  >
+    <!-- MODAL CONTAINER -->
     <div
-      class="absolute inset-0 bg-ctp-crust opacity-80"
-      onclick={closeModal}
-      onkeydown={(e) => e.key === "Escape" && closeModal()}
-      role="presentation"
-    ></div>
-
-    <!-- Modal -->
-    <div
-      class="bg-ctp-base border border-ctp-surface0 rounded-lg shadow-xl max-w-md w-full z-10"
+      class="bg-ctp-mantle w-full max-w-md rounded-xl border border-ctp-surface0 shadow-2xl overflow-auto max-h-[90vh]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <!-- Header -->
+      <!-- HEADER -->
       <div
-        class="flex items-center justify-between p-4 border-b border-ctp-surface0"
+        class="flex items-center justify-between px-6 py-4 border-b border-ctp-surface0"
       >
-        <h2
-          id="modal-title"
-          class="flex items-center gap-2 text-lg font-medium text-ctp-text"
-        >
+        <div class="flex items-center gap-2">
           <AlertTriangle size={18} class="text-ctp-red" />
-          Delete Experiment?
-        </h2>
+          <h2 id="modal-title" class="text-xl font-medium text-ctp-text">
+            Delete Experiment?
+          </h2>
+        </div>
         <button
-          class="p-1 text-ctp-subtext0 hover:text-ctp-text rounded-md focus:outline-none focus:ring-2 focus:ring-ctp-mauve"
           onclick={closeModal}
+          type="button"
           disabled={isDeleting}
+          class="p-1.5 text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/10 rounded-full transition-all"
           aria-label="Close"
         >
           <X size={18} />
         </button>
       </div>
 
-      <!-- Content -->
-      <div class="p-4">
+      <!-- CONTENT -->
+      <div class="p-5">
         <div class="bg-ctp-red/10 border border-ctp-red/30 rounded-md p-3 mb-4">
           <p class="text-sm text-ctp-text">
             Are you sure you want to delete <strong>{experiment.name}</strong>?
@@ -102,21 +110,23 @@
         </div>
       </div>
 
-      <!-- Footer -->
-      <div class="flex justify-end gap-3 p-4 border-t border-ctp-surface0">
+      <!-- FOOTER -->
+      <div
+        class="flex justify-end gap-3 pt-4 px-5 pb-5 border-t border-ctp-surface0"
+      >
         <button
-          type="button"
-          class="px-4 py-2 text-sm bg-ctp-surface0 text-ctp-text rounded-md hover:bg-ctp-surface1 focus:outline-none focus:ring-2 focus:ring-ctp-mauve"
           onclick={closeModal}
+          type="button"
           disabled={isDeleting}
+          class="inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"
         >
           Cancel
         </button>
         <button
           type="button"
-          class="px-4 py-2 text-sm bg-ctp-red text-ctp-base rounded-md hover:bg-ctp-red/90 focus:outline-none focus:ring-2 focus:ring-ctp-red"
           onclick={deleteExperiment}
           disabled={isDeleting}
+          class="inline-flex items-center justify-center gap-2 px-4 py-2 font-medium rounded-lg bg-ctp-red text-ctp-base hover:bg-ctp-red/90 hover:shadow-lg transition-all"
         >
           {#if isDeleting}
             <div class="flex items-center gap-2">

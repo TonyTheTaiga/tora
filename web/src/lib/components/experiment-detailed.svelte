@@ -260,17 +260,19 @@
           {/if}
         </button>
         {#if page.data.user && page.data.user.id === experiment.user_id}
-          <form method="POST" action="?/delete" class="flex items-center">
-            <input type="hidden" name="id" value={experiment.id} />
-            <button
-              type="submit"
-              class="p-1.5 text-ctp-subtext0 hover:text-ctp-red"
-              aria-label="Delete"
-              title="Delete experiment"
-            >
-              <X size={16} />
-            </button>
-          </form>
+          <input type="hidden" name="id" value={experiment.id} />
+          <button
+            type="button"
+            class="p-1.5 text-ctp-subtext0 hover:text-ctp-red"
+            aria-label="Delete"
+            title="Delete experiment"
+            onclick={(e) => {
+              e.stopPropagation();
+              selectedForDelete = experiment;
+            }}
+          >
+            <X size={16} />
+          </button>
         {/if}
         <button
           onclick={() => {

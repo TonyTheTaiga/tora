@@ -60,9 +60,9 @@
 
   onMount(() => {
     updateTheme();
-    
+
     window.addEventListener("storage", handleStorageChange);
-    
+
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (
@@ -73,9 +73,9 @@
         }
       });
     });
-    
+
     observer.observe(document.documentElement, { attributes: true });
-    
+
     return () => {
       observer.disconnect();
       window.removeEventListener("storage", handleStorageChange);
@@ -130,7 +130,7 @@
     try {
       const colors = getThemeColors();
       const ui = getThemeUI();
-      
+
       const datasets = selectedMetrics.map((metric, index) => {
         const colorIndex = index % colors.length;
         const color = colors[colorIndex];
@@ -146,14 +146,15 @@
           fill: false,
           pointBackgroundColor: color.point,
           pointBorderColor: ui.mantle,
-          pointHoverBackgroundColor: currentTheme === "dark" ? "#c6a0f6" : "#8839ef",
+          pointHoverBackgroundColor:
+            currentTheme === "dark" ? "#c6a0f6" : "#8839ef",
           pointHoverBorderColor: ui.base,
           borderWidth: 2,
           tension: 0.3,
           pointRadius: 3,
         };
       });
-      
+
       chartInstance = new Chart(chartCanvas, {
         type: "line",
         data: {
@@ -334,7 +335,7 @@
         <canvas bind:this={chartCanvas}></canvas>
       </div>
     </div>
-  <!-- Empty State -->
+    <!-- Empty State -->
   {:else if experiment.availableMetrics && experiment.availableMetrics.length > 0}
     <div
       class="flex flex-col items-center justify-center h-60 sm:h-80 w-full rounded-md border border-ctp-surface1 bg-ctp-mantle p-4 sm:p-8"

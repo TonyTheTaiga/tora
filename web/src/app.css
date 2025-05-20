@@ -42,7 +42,7 @@
     --color-dark-ctp-pink: #f5bde6;
     --color-dark-ctp-flamingo: #f0c6c6;
     --color-dark-ctp-rosewater: #f4dbd6;
-    
+
     /* Catppuccin Latte palette (Light theme) */
     --color-light-ctp-base: #eff1f5;
     --color-light-ctp-mantle: #e6e9ef;
@@ -70,7 +70,7 @@
     --color-light-ctp-pink: #ea76cb;
     --color-light-ctp-flamingo: #dd7878;
     --color-light-ctp-rosewater: #dc8a78;
-    
+
     /* Default theme variables (will be overridden by .light or .dark classes) */
     --color-ctp-base: var(--color-dark-ctp-base);
     --color-ctp-mantle: var(--color-dark-ctp-mantle);
@@ -129,7 +129,7 @@
     --color-ctp-flamingo: var(--color-dark-ctp-flamingo);
     --color-ctp-rosewater: var(--color-dark-ctp-rosewater);
   }
-  
+
   .light {
     --color-gray-200: #e5e7eb;
     --color-ctp-base: var(--color-light-ctp-base);

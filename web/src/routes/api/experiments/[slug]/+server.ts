@@ -1,5 +1,9 @@
 import { json } from "@sveltejs/kit";
-import { getExperiment, updateExperiment, deleteExperiment } from "$lib/server/database";
+import {
+  getExperiment,
+  updateExperiment,
+  deleteExperiment,
+} from "$lib/server/database";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "$lib/server/database.types";
 
@@ -49,7 +53,7 @@ export async function DELETE({
 }) {
   // We could add authorization check here if needed
   await deleteExperiment(slug);
-  
+
   return new Response(
     JSON.stringify({ message: "Experiment deleted successfully" }),
     {
