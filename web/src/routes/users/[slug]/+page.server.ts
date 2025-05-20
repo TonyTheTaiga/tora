@@ -30,11 +30,11 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
       slug,
       user: {
         id: locals.user.id,
-        email: locals.user.email,
-        name: locals.user.user_metadata?.full_name || "User",
+        email: 'email' in locals.user ? locals.user.email : '',
+        name: 'user_metadata' in locals.user && locals.user.user_metadata?.full_name || "User",
         username:
-          locals.user.user_metadata?.username ||
-          locals.user.email?.split("@")[0] ||
+          ('user_metadata' in locals.user && locals.user.user_metadata?.username) ||
+          ('email' in locals.user && locals.user.email?.split("@")[0]) ||
           "user",
         apiKeys,
       },

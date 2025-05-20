@@ -88,7 +88,7 @@
     <div class="p-5">
       <div class="bg-ctp-red/10 border border-ctp-red/30 rounded-md p-3 mb-4">
         <p class="text-sm text-ctp-text">
-          Are you sure you want to delete <strong>{experiment.name}</strong>?
+          Are you sure you want to delete <strong>{experiment?.name}</strong>?
         </p>
         <p class="text-sm text-ctp-subtext0 mt-2">
           This action is permanent and cannot be undone. All experiment data,

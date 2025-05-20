@@ -1,13 +1,13 @@
-<script>
+<script lang="ts">
   import { onMount } from "svelte";
   import { Moon, Sun } from "lucide-svelte";
 
-  let theme = "dark";
+  let theme: "dark" | "light" = "dark";
 
   onMount(() => {
     // Check for saved theme preference or use device preference
     const savedTheme = localStorage.getItem("theme");
-    if (savedTheme) {
+    if (savedTheme && (savedTheme === "dark" || savedTheme === "light")) {
       theme = savedTheme;
       applyTheme(theme);
     } else {
@@ -26,7 +26,7 @@
     localStorage.setItem("theme", theme);
   }
 
-  function applyTheme(newTheme) {
+  function applyTheme(newTheme: "dark" | "light") {
     if (newTheme === "dark") {
       document.documentElement.classList.remove("light");
       document.documentElement.classList.add("dark");

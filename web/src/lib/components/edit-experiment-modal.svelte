@@ -20,7 +20,7 @@
     name: experiment.name,
     description: experiment.description,
     visibility: experiment.visibility,
-    tags: [...experiment.tags],
+    tags: experiment.tags ? [...experiment.tags] : [],
     availableMetrics: experiment.availableMetrics
       ? [...experiment.availableMetrics]
       : [],
@@ -151,6 +151,9 @@
   function addTag(e: KeyboardEvent | MouseEvent) {
     e.preventDefault();
     if (tag && tag !== "") {
+      if (!experimentCopy.tags) {
+        experimentCopy.tags = [];
+      }
       experimentCopy.tags.push(tag);
       tag = null;
     }
@@ -318,22 +321,24 @@
             </summary>
             <div class="pt-2 pl-6">
               <div class="flex flex-wrap items-center gap-2">
-                {#each experimentCopy.tags as tag, i}
-                  <input type="hidden" value={tag} name="tags.{i}" />
-                  <span
-                    class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-ctp-blue/10 text-ctp-blue border-0 group"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      class="text-ctp-blue/70 hover:text-ctp-red transition-colors ml-1.5"
-                      onclick={() => experimentCopy.tags.splice(i, 1)}
-                      aria-label="Remove tag"
+                {#if experimentCopy.tags && experimentCopy.tags.length > 0}
+                  {#each experimentCopy.tags as tag, i}
+                    <input type="hidden" value={tag} name="tags.{i}" />
+                    <span
+                      class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-ctp-blue/10 text-ctp-blue border-0 group"
                     >
-                      <X size={12} />
-                    </button>
-                  </span>
-                {/each}
+                      {tag}
+                      <button
+                        type="button"
+                        class="text-ctp-blue/70 hover:text-ctp-red transition-colors ml-1.5"
+                        onclick={() => experimentCopy.tags?.splice(i, 1)}
+                        aria-label="Remove tag"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  {/each}
+                {/if}
 
                 {#if addingNewTag}
                   <div class="flex items-center gap-1">
