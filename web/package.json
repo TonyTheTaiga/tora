@@ -12,17 +12,17 @@
     "start": "node build",
     "lint": "prettier --check .",
     "format": "prettier --write .",
-    "gen-db-types": "supabase gen types typescript --project-id hecctslcfhdrpnwovwbc > src/lib/server/database.types.ts"
+    "sup": "supabase gen types typescript --project-id hecctslcfhdrpnwovwbc > src/lib/server/database.types.ts"
   },
   "devDependencies": {
     "@sveltejs/adapter-node": "^5.2.12",
-    "@sveltejs/kit": "^2.21.0",
+    "@sveltejs/kit": "^2.21.1",
     "@sveltejs/vite-plugin-svelte": "^4.0.4",
     "@tailwindcss/postcss": "^4.1.7",
     "postcss": "^8.5.3",
     "prettier": "3.4.2",
     "prettier-plugin-svelte": "^3.4.0",
-    "svelte": "^5.30.1",
+    "svelte": "^5.32.0",
     "svelte-check": "^4.2.1",
     "tailwindcss": "^4.1.7",
     "typescript": "^5.8.3",
@@ -31,12 +31,12 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@supabase/ssr": "^0.6.1",
-    "@supabase/supabase-js": "^2.49.4",
+    "@supabase/supabase-js": "^2.49.7",
     "@tailwindcss/vite": "^4.1.7",
     "chart.js": "^4.4.9",
     "lucide-svelte": "^0.469.0",
-    "marked": "^15.0.11",
-    "zod": "^3.24.4",
+    "marked": "^15.0.12",
+    "zod": "^3.25.7",
     "zod-to-json-schema": "^3.24.5"
   },
   "pnpm": {

@@ -137,7 +137,9 @@
     >
       <div class="flex items-center gap-2">
         <Beaker size={18} class="text-ctp-mauve" />
-        <h3 id="modal-title" class="text-xl font-medium text-ctp-text">New Experiment</h3>
+        <h3 id="modal-title" class="text-xl font-medium text-ctp-text">
+          New Experiment
+        </h3>
       </div>
       <button
         onclick={() => (isOpen = false)}

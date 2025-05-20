@@ -59,7 +59,9 @@
           />
         </div>
       {:else}
-        <div class="expanded-experiment h-full animate-expand will-change-opacity-transform">
+        <div
+          class="expanded-experiment h-full animate-expand will-change-opacity-transform"
+        >
           <ExperimentDetailed
             bind:selectedId
             bind:highlighted
@@ -93,7 +95,7 @@
       transform: scale(1);
     }
   }
-  
+
   .will-change-opacity-transform {
     will-change: opacity, transform;
   }

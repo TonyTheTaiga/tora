@@ -90,14 +90,14 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "experiment_references_from_experiment_fkey";
-            columns: ["from_experiment"];
+            foreignKeyName: "experiment_references_to_experiment_fkey";
+            columns: ["to_experiment"];
             isOneToOne: false;
             referencedRelation: "experiment";
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "experiment_references_to_experiment_fkey";
+            foreignKeyName: "experiment_references_to_experiment_fkey1";
             columns: ["to_experiment"];
             isOneToOne: false;
             referencedRelation: "experiment";

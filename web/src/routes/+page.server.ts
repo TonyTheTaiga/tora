@@ -155,20 +155,21 @@ async function handleUpdate(request: Request, fetch: Function) {
   // Handle reference update - first get current references
   const refResponse = await fetch(`/api/experiments/${id}/ref`);
   const currentRefs = await refResponse.json();
-  
+
   // If we have a new reference ID to set
   if (referenceId) {
     // Remove any existing references first (enforce one reference maximum)
     if (currentRefs.length > 0) {
       for (const refId of currentRefs) {
-        if (refId !== id) { // Skip self-references in case they exist
+        if (refId !== id) {
+          // Skip self-references in case they exist
           await fetch(`/api/experiments/${id}/ref/${refId}`, {
             method: "DELETE",
           });
         }
       }
     }
-    
+
     // Create the new reference
     const referenceResponse = await fetch(
       API_ROUTES.CREATE_REFERENCE.replace("[slug]", id),
@@ -181,11 +182,12 @@ async function handleUpdate(request: Request, fetch: Function) {
     if (!referenceResponse.ok) {
       return fail(500, { message: "Failed to create reference" });
     }
-  } 
+  }
   // If we don't have a reference ID but had references before, remove them all
   else if (currentRefs.length > 0) {
     for (const refId of currentRefs) {
-      if (refId !== id) { // Skip self-references in case they exist
+      if (refId !== id) {
+        // Skip self-references in case they exist
         await fetch(`/api/experiments/${id}/ref/${refId}`, {
           method: "DELETE",
         });
