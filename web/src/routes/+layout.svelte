@@ -6,6 +6,7 @@
   import ThemeToggle from "$lib/components/theme-toggle.svelte";
   import { CircleUserRound, Bean } from "lucide-svelte";
   import { goto } from "$app/navigation";
+  import Toolbar from "$lib/components/toolbar.svelte";
 
   let { data, children } = $props();
   let { session, supabase } = $derived(data);
@@ -65,6 +66,7 @@
   </nav>
 </header>
 
-<main class="p-4 h-full w-full">
+<main class="h-full w-full">
+  <Toolbar />
   {@render children()}
 </main>
