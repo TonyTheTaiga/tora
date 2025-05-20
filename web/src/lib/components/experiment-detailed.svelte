@@ -164,22 +164,25 @@
             const currentId = experiment.id;
             // Set recently minimized to highlight the card
             recentlyMinimized = currentId;
-
-            // First collapse
-            selectedId = null;
-
-            // Then scroll to the card's position
-            setTimeout(() => {
-              const element = document.getElementById(
-                `experiment-${currentId}`,
-              );
-              if (element) {
-                element.scrollIntoView({
-                  behavior: "smooth",
-                  block: "center",
-                });
-              }
-            }, 10);
+            
+            // Use requestAnimationFrame for smoother animation
+            requestAnimationFrame(() => {
+              // First collapse
+              selectedId = null;
+              
+              // Then scroll to the card's position
+              requestAnimationFrame(() => {
+                const element = document.getElementById(
+                  `experiment-${currentId}`,
+                );
+                if (element) {
+                  element.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                }
+              });
+            });
           }}
           class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
           aria-label="Minimize"
@@ -298,22 +301,25 @@
             const currentId = experiment.id;
             // Set recently minimized to highlight the card
             recentlyMinimized = currentId;
-
-            // First collapse
-            selectedId = null;
-
-            // Then scroll to the card's position
-            setTimeout(() => {
-              const element = document.getElementById(
-                `experiment-${currentId}`,
-              );
-              if (element) {
-                element.scrollIntoView({
-                  behavior: "smooth",
-                  block: "center",
-                });
-              }
-            }, 10);
+            
+            // Use requestAnimationFrame for smoother animation
+            requestAnimationFrame(() => {
+              // First collapse
+              selectedId = null;
+              
+              // Then scroll to the card's position
+              requestAnimationFrame(() => {
+                const element = document.getElementById(
+                  `experiment-${currentId}`,
+                );
+                if (element) {
+                  element.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                }
+              });
+            });
           }}
           class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
           aria-label="Minimize"
@@ -471,6 +477,7 @@
   }
 
   :global(.animate-expand) {
-    animation: expand 0.3s ease-out forwards;
+    animation: expand 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
   }
 </style>
