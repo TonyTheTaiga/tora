@@ -20,7 +20,12 @@
   let recentlyMinimized = $state<string | null>(null);
 </script>
 
-<DeleteConfirmationModal bind:experiment={selectedForDelete} bind:experiments />
+{#if selectedForDelete}
+  <DeleteConfirmationModal
+    bind:experiment={selectedForDelete}
+    bind:experiments
+  />
+{/if}
 
 {#if selectedForEdit}
   <EditExperimentModal bind:experiment={selectedForEdit} />
