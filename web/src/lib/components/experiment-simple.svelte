@@ -34,14 +34,33 @@
     ? false
     : true}
 >
-  <!-- Content wrapper with flex column and full height -->
-  <div class="flex flex-col h-full">
+  <!-- Content wrapper with flex column and full height and clickable -->
+  <div 
+    class="flex flex-col h-full cursor-pointer"
+    role="button"
+    tabindex="0"
+    onclick={() => {
+      selectedId = experiment.id;
+    }}
+    onkeydown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        selectedId = experiment.id;
+      }
+    }}
+    aria-label="View experiment details"
+  >
     <!-- Header -->
     <div class="flex justify-between items-center mb-2">
       <h3 class="font-medium text-base text-ctp-text truncate pr-3">
         {experiment.name}
       </h3>
-      <div class="flex items-center gap-1">
+      <div 
+        class="flex items-center gap-1" 
+        onclick={(e) => e.stopPropagation()} 
+        onkeydown={(e) => e.stopPropagation()}
+        role="group"
+        aria-label="Experiment actions"
+      >
         <div
           class="p-1"
           class:text-ctp-green={experiment.visibility === "PUBLIC"}
@@ -92,20 +111,6 @@
             </button>
           </form>
         {/if}
-        <button
-          onclick={() => {
-            if (selectedId === experiment.id) {
-              selectedId = null;
-            } else {
-              selectedId = experiment.id;
-            }
-          }}
-          class="p-1 text-ctp-subtext0 hover:text-ctp-text"
-          aria-label="Expand details"
-          title="Expand details"
-        >
-          <Maximize2 size={14} />
-        </button>
       </div>
     </div>
 

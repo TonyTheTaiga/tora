@@ -69,7 +69,7 @@ def download_and_extract_imagenette(data_dir: str, url: str):
 
 def get_data_loaders(data_dir: str, batch_size: int):
     """
-    Prepare train, validation, and test DataLoaders for Imagenette.
+    Prepare train, validation, and test DataLoaders for Imagenette and return class names.
     """
     train_transform = transforms.Compose(
         [
@@ -91,9 +91,11 @@ def get_data_loaders(data_dir: str, batch_size: int):
     train_dir = os.path.join(data_dir, "train")
     val_dir = os.path.join(data_dir, "val")
 
+    # Load full train dataset and test dataset
     full_train = datasets.ImageFolder(train_dir, transform=train_transform)
     test_dataset = datasets.ImageFolder(val_dir, transform=val_transform)
 
+    # Split full train into train and validation
     train_size = int(0.8 * len(full_train))
     val_size = len(full_train) - train_size
     train_set, val_set = torch.utils.data.random_split(
@@ -106,7 +108,8 @@ def get_data_loaders(data_dir: str, batch_size: int):
     val_loader = DataLoader(val_set, batch_size=batch_size, num_workers=4)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, num_workers=4)
 
-    return train_loader, val_loader, test_loader, train_dataset.classes
+    # Return loaders and class names from the training folder
+    return train_loader, val_loader, test_loader, full_train.classes
 
 
 def train_epoch(model, device, loader, optimizer, criterion, epoch, tora):
