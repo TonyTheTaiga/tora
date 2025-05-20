@@ -3,6 +3,7 @@ import {
   createReference,
   getReferenceChain,
   getExperiment,
+  deleteReference,
 } from "$lib/server/database";
 
 export async function GET({

@@ -355,6 +355,20 @@ export class DatabaseClient {
     }
   }
 
+  static async deleteReference(fromExperiment: string, toExperiment: string) {
+    const { error } = await DatabaseClient.getInstance()
+      .from("experiment_references")
+      .delete()
+      .match({
+        from_experiment: fromExperiment,
+        to_experiment: toExperiment,
+      });
+
+    if (error) {
+      throw new Error(`Failed to delete reference: ${error.message}`);
+    }
+  }
+
   static async getReferenceChain(
     experimentUuid: string,
   ): Promise<Experiment[]> {
@@ -387,8 +401,9 @@ export const {
   deleteExperiment,
   updateExperiment,
   getMetrics,
+  createReference,
+  deleteReference,
+  getReferenceChain,
   createMetric,
   batchCreateMetric,
-  createReference,
-  getReferenceChain,
 } = DatabaseClient;

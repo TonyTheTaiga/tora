@@ -23,8 +23,26 @@
   let selectedIndex = $state<number>(-1);
   let searchResults = $state<Experiment[]>([]);
 
-  onMount(() => {
+  onMount(async () => {
     document.body.classList.add("overflow-hidden");
+    
+    // Fetch existing reference when editing an experiment
+    try {
+      const response = await fetch(`/api/experiments/${experiment.id}/ref`);
+      if (response.ok) {
+        const referenceIds = await response.json();
+        // Since we want to enforce only one reference, we'll just use the first one
+        if (referenceIds.length > 0 && referenceIds[0] !== experiment.id) {
+          // Get the referenced experiment details
+          const refResponse = await fetch(`/api/experiments/${referenceIds[0]}`);
+          if (refResponse.ok) {
+            reference = await refResponse.json();
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load reference:", error);
+    }
   });
 
   onDestroy(() => {

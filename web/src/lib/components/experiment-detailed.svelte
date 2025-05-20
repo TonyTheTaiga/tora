@@ -131,7 +131,9 @@
                   return;
                 }
                 const data = await response.json();
-                highlighted = [...data, experiment.id];
+                // Ensure we don't add duplicate IDs
+                const uniqueIds = [...new Set([...data, experiment.id])];
+                highlighted = uniqueIds;
               } catch (err) {}
             }
           }}
@@ -262,7 +264,9 @@
                   return;
                 }
                 const data = await response.json();
-                highlighted = [...data, experiment.id];
+                // Ensure we don't add duplicate IDs
+                const uniqueIds = [...new Set([...data, experiment.id])];
+                highlighted = uniqueIds;
               } catch (err) {}
             }
           }}
