@@ -25,6 +25,7 @@
     }
   });
 
+  // Use an effect to add/remove the overflow-hidden class based on whether the modal is open
   $effect(() => {
     if (experiment && typeof document !== "undefined") {
       document.body.classList.add("overflow-hidden");

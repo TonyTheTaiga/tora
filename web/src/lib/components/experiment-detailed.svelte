@@ -131,7 +131,8 @@
                   return;
                 }
                 const data = await response.json();
-                // Ensure we don't add duplicate IDs
+                // Ensure we don't add duplicate IDs and add the current experiment ID
+                // This will show all experiments in the reference chain including the current one
                 const uniqueIds = [...new Set([...data, experiment.id])];
                 highlighted = uniqueIds;
               } catch (err) {}
@@ -264,7 +265,8 @@
                   return;
                 }
                 const data = await response.json();
-                // Ensure we don't add duplicate IDs
+                // Ensure we don't add duplicate IDs and add the current experiment ID
+                // This will show all experiments in the reference chain including the current one
                 const uniqueIds = [...new Set([...data, experiment.id])];
                 highlighted = uniqueIds;
               } catch (err) {}

@@ -28,20 +28,39 @@
     
     // Fetch existing reference when editing an experiment
     try {
-      const response = await fetch(`/api/experiments/${experiment.id}/ref`);
-      if (response.ok) {
-        const referenceIds = await response.json();
-        // Since we want to enforce only one reference, we'll just use the first one
-        if (referenceIds.length > 0 && referenceIds[0] !== experiment.id) {
-          // Get the referenced experiment details
-          const refResponse = await fetch(`/api/experiments/${referenceIds[0]}`);
-          if (refResponse.ok) {
-            reference = await refResponse.json();
+      // Reset reference
+      reference = null;
+      
+      // First, check for directly referenced experiments from this experiment
+      // by looking for outgoing references where this experiment is the source
+      try {
+        // This would be a call to get all experiments referenced BY this experiment
+        // We would need a specific API for this, but for now we'll use the chain API
+        const response = await fetch(`/api/experiments/${experiment.id}/ref`);
+        if (response.ok) {
+          const referenceIds = await response.json();
+          
+          // Filter out self-references 
+          const referencesToLoad = referenceIds.filter(id => id !== experiment.id);
+          
+          // Since we want to enforce only one reference, just use the first one
+          if (referencesToLoad.length > 0) {
+            try {
+              // Get the referenced experiment details
+              const refResponse = await fetch(`/api/experiments/${referencesToLoad[0]}`);
+              if (refResponse.ok) {
+                reference = await refResponse.json();
+              }
+            } catch (refError) {
+              console.error("Failed to load referenced experiment:", refError);
+            }
           }
         }
+      } catch (error) {
+        console.error("Failed to load reference:", error);
       }
     } catch (error) {
-      console.error("Failed to load reference:", error);
+      console.error("Failed to load reference chain:", error);
     }
   });
 
@@ -58,7 +77,8 @@
     await fetch(url, { method: "GET" })
       .then((res) => res.json())
       .then((data) => {
-        searchResults = data as Experiment[];
+        // Filter out the current experiment from search results to prevent self-referencing
+        searchResults = (data as Experiment[]).filter(exp => exp.id !== experiment.id);
       });
   }
 
@@ -138,6 +158,9 @@
   <!-- MODAL CONTAINER -->
   <div
     class="bg-ctp-mantle w-full max-w-xl rounded-xl border border-ctp-surface0 shadow-2xl overflow-auto max-h-[90vh]"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
   >
     <!-- HEADER -->
     <div
@@ -145,7 +168,7 @@
     >
       <div class="flex items-center gap-2">
         <Save size={18} class="text-ctp-mauve" />
-        <h2 class="text-xl font-medium text-ctp-text">Edit Experiment</h2>
+        <h2 id="modal-title" class="text-xl font-medium text-ctp-text">Edit Experiment</h2>
       </div>
       <button
         onclick={() => (editMode = false)}
@@ -351,7 +374,7 @@
                   <span
                     class="inline-flex items-center px-2 py-1 text-xs rounded-lg bg-ctp-lavender/10 text-ctp-lavender border-0"
                   >
-                    {reference.name}
+                    <span title="Referenced experiment">{reference.name}</span>
                     <button
                       type="button"
                       class="text-ctp-lavender/70 hover:text-ctp-red transition-colors ml-1.5"

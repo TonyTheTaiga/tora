@@ -48,6 +48,7 @@
     await fetch(url, { method: "GET" })
       .then((res) => res.json())
       .then((data) => {
+        // We don't need to filter in the create modal since there's no self-reference to worry about
         searchResults = data as Experiment[];
       });
   }
@@ -122,18 +123,21 @@
 </script>
 
 <div
-  class="fixed inset-0 backdrop-blur-md
+  class="fixed inset-0 bg-ctp-crust/80 backdrop-blur-md
          flex items-center justify-center p-2 sm:p-4 z-50 overflow-hidden"
 >
   <div
     class="w-full max-w-xl rounded-xl border border-ctp-surface0 shadow-2xl overflow-auto max-h-[90vh] bg-ctp-mantle"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
   >
     <div
       class="flex items-center justify-between px-6 py-4 border-b border-ctp-surface0"
     >
       <div class="flex items-center gap-2">
         <Beaker size={18} class="text-ctp-mauve" />
-        <h3 class="text-xl font-medium text-ctp-text">New Experiment</h3>
+        <h3 id="modal-title" class="text-xl font-medium text-ctp-text">New Experiment</h3>
       </div>
       <button
         onclick={() => (isOpen = false)}
@@ -372,7 +376,7 @@
                   <span
                     class="inline-flex items-center px-2 py-1 text-xs rounded-lg bg-ctp-lavender/10 text-ctp-lavender border-0"
                   >
-                    {reference.name}
+                    <span title="Referenced experiment">{reference.name}</span>
                     <button
                       type="button"
                       class="text-ctp-lavender/70 hover:text-ctp-red transition-colors ml-1.5"
