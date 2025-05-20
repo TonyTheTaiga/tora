@@ -3,6 +3,7 @@
   import ExperimentsList from "$lib/components/experiments-list.svelte";
   import type { Experiment } from "$lib/types";
   import type { PageData } from "./$types";
+  import Toolbar from "$lib/components/toolbar.svelte";
 
   let { data }: { data: PageData } = $props();
   let experiments: Experiment[] = $state(data.experiments);
@@ -13,4 +14,5 @@
   <CreateExperimentModal bind:isOpen />
 {/if}
 
+<Toolbar />
 <ExperimentsList bind:experiments bind:isOpen></ExperimentsList>

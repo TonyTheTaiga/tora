@@ -52,7 +52,7 @@
 
       showNewKeyValue = data.key.key;
       showNewKeyModal = true;
-      invalidateAll();
+      // invalidateAll();
     } catch (err) {
       console.error("Error creating API key:", err);
       error = err instanceof Error ? err.message : "Failed to create API key";
@@ -81,7 +81,7 @@
       if (!response.ok) {
         throw new Error("Failed to delete API key");
       }
-      invalidateAll();
+      // invalidateAll();
     } catch (err) {
       console.error("Error deleting API key:", err);
       error = err instanceof Error ? err.message : "Failed to delete API key";
