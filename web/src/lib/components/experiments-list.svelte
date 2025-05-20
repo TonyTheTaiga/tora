@@ -106,4 +106,20 @@
     overflow: hidden;
     will-change: transform, box-shadow;
   }
+
+  @keyframes expand {
+    from {
+      opacity: 0.4;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-expand {
+    animation: expand 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
+  }
 </style>

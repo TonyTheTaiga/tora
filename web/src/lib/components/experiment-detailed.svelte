@@ -21,7 +21,6 @@
     ChevronDown,
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
-  import EditExperimentModal from "./edit-experiment-modal.svelte";
   import { page } from "$app/state";
 
   let {
@@ -462,22 +461,3 @@
     {/if}
   </div>
 </article>
-
-<style>
-  /* Animation for card expansion */
-  @keyframes expand {
-    from {
-      opacity: 0.4;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  :global(.animate-expand) {
-    animation: expand 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    will-change: transform, opacity;
-  }
-</style>
