@@ -93,7 +93,7 @@
   });
 </script>
 
-<div class="w-full p-4">
+<div class="w-full">
   <div class="bg-ctp-mantle rounded-lg p-6 border border-ctp-surface0">
     <div
       class="flex flex-col sm:flex-row gap-4 border-b border-ctp-surface0 pb-6 mb-6"

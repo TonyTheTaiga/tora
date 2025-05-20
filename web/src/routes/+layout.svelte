@@ -65,6 +65,6 @@
   </nav>
 </header>
 
-<main class="h-full w-full">
+<main class="h-svh w-svw p-4">
   {@render children()}
 </main>
