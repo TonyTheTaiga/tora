@@ -6,7 +6,6 @@ import type { HyperParam } from "$lib/types";
 const API_ROUTES = {
   GET_EXPERIMENTS: "/api/experiments",
   CREATE_EXPERIMENT: "/api/experiments",
-  DELETE_EXPERIMENT: "/api/experiments/delete",
   UPDATE_EXPERIMENT: "/api/experiments/update",
   CREATE_REFERENCE: "/api/experiments/[slug]/ref",
 } as const;
@@ -118,9 +117,8 @@ async function handleDelete(request: Request, fetch: Function) {
     return fail(400, { message: "ID is required" });
   }
 
-  const response = await fetch(API_ROUTES.DELETE_EXPERIMENT, {
-    method: "POST",
-    body: JSON.stringify({ id }),
+  const response = await fetch(`/api/experiments/${id}`, {
+    method: "DELETE",
   });
 
   if (!response.ok) {

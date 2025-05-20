@@ -1,5 +1,14 @@
 <script lang="ts">
-  import { X, Save, TagIcon, Plus, Link, Globe, Lock, ChevronDown } from "lucide-svelte";
+  import {
+    X,
+    Save,
+    TagIcon,
+    Plus,
+    Link,
+    Globe,
+    Lock,
+    ChevronDown,
+  } from "lucide-svelte";
   import type { Visibility } from "$lib/types";
   import { enhance } from "$app/forms";
   import type { Experiment } from "$lib/types";

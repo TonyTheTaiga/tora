@@ -1,44 +1,40 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
   import { AlertTriangle, X, Loader2 } from "lucide-svelte";
-  import { createEventDispatcher, onMount, onDestroy } from "svelte";
+  import { onMount, onDestroy } from "svelte";
 
   let {
-    experiment,
-    showModal = $bindable(),
+    experiment = $bindable(),
+    experiments = $bindable(),
   }: {
-    experiment: Experiment;
-    showModal: boolean;
+    experiment: Experiment | null;
+    experiments: Experiment[];
   } = $props();
 
   let isDeleting = $state(false);
-  const dispatch = createEventDispatcher();
 
   $effect(() => {
-    if (showModal) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
+    if (experiment && typeof document !== 'undefined') {
+      document.body.classList.add("overflow-hidden");
+      return () => document.body.classList.remove("overflow-hidden");
     }
   });
 
-  onDestroy(() => {
-    document.body.style.overflow = "auto";
-  });
-
   async function deleteExperiment() {
-    if (isDeleting) return;
+    if (isDeleting || !experiment) return;
 
     isDeleting = true;
 
     try {
-      const response = await fetch(`/api/experiments/delete/${experiment.id}`, {
+      const response = await fetch(`/api/experiments/${experiment.id}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
-        showModal = false;
-        dispatch("deleted", { id: experiment.id });
+        // Remove the experiment from the experiments array
+        const experimentId = experiment.id;
+        experiments = experiments.filter((exp) => exp.id !== experimentId);
+        experiment = null;
       } else {
         console.error("Failed to delete experiment");
       }
@@ -51,17 +47,18 @@
 
   function closeModal() {
     if (isDeleting) return;
-    showModal = false;
+    experiment = null;
   }
 </script>
 
-{#if showModal}
+{#if experiment}
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
     <!-- Backdrop -->
     <div
       class="absolute inset-0 bg-ctp-crust opacity-80"
       onclick={closeModal}
       onkeydown={(e) => e.key === "Escape" && closeModal()}
+      role="presentation"
     ></div>
 
     <!-- Modal -->
