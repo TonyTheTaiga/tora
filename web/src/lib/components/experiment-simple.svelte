@@ -34,33 +34,13 @@
     ? false
     : true}
 >
-  <!-- Content wrapper with flex column and full height and clickable -->
-  <div 
-    class="flex flex-col h-full cursor-pointer"
-    role="button"
-    tabindex="0"
-    onclick={() => {
-      selectedId = experiment.id;
-    }}
-    onkeydown={(e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        selectedId = experiment.id;
-      }
-    }}
-    aria-label="View experiment details"
-  >
+  <div class="flex flex-col h-full">
     <!-- Header -->
     <div class="flex justify-between items-center mb-2">
       <h3 class="font-medium text-base text-ctp-text truncate pr-3">
         {experiment.name}
       </h3>
-      <div 
-        class="flex items-center gap-1" 
-        onclick={(e) => e.stopPropagation()} 
-        onkeydown={(e) => e.stopPropagation()}
-        role="group"
-        aria-label="Experiment actions"
-      >
+      <div class="flex items-center gap-1">
         <div
           class="p-1"
           class:text-ctp-green={experiment.visibility === "PUBLIC"}
@@ -115,7 +95,20 @@
     </div>
 
     <!-- Middle content (grows to fill space) -->
-    <div class="flex-grow flex flex-col">
+    <div
+      class="flex-grow flex flex-col cursor-pointer"
+      role="button"
+      tabindex="0"
+      onclick={() => {
+        selectedId = experiment.id;
+      }}
+      onkeydown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          selectedId = experiment.id;
+        }
+      }}
+      aria-label="View experiment details"
+    >
       <!-- Description -->
       {#if experiment.description}
         <p class="text-ctp-subtext0 text-xs leading-relaxed mb-3 line-clamp-2">
