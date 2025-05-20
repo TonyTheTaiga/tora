@@ -14,7 +14,6 @@
     p-4 h-[200px] rounded-lg
     {`${background}`} 
     {`${opacity}`}
-    {hover ? 'hover:bg-ctp-surface0 transition-colors' : ''}
     {border !== 'none' ? `border-2 border-${border} border-${borderColor}` : ''}
   "
 >

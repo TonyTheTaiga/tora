@@ -43,7 +43,8 @@
     >
       {#if selectedId !== experiment.id}
         <div
-          class={recentlyMinimized === experiment.id ? "shadow-highlight" : ""}
+          class="hover:border rounded-lg
+          {recentlyMinimized === experiment.id ? 'shadow-highlight' : ''}"
           onanimationend={() => {
             if (recentlyMinimized === experiment.id) {
               recentlyMinimized = null;
@@ -102,7 +103,6 @@
 
   .shadow-highlight {
     animation: shadow-glow 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    border-radius: 0.5rem; /* Matches rounded-lg */
     overflow: hidden;
     will-change: transform, box-shadow;
   }

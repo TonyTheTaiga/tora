@@ -33,9 +33,7 @@
   opacity={highlighted.length > 0 && !highlighted.includes(experiment.id)
     ? "opacity-40"
     : "opacity-100"}
-  hover={highlighted.length > 0 && !highlighted.includes(experiment.id)
-    ? false
-    : false}
+  hover={true}
 >
   <div class="flex flex-col h-full">
     <!-- Header -->
