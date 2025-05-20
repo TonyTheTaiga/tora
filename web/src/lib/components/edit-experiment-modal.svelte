@@ -180,7 +180,7 @@
       </div>
       <button
         onclick={() => {
-          selectedIndex = null;
+          experiment = null;
         }}
         type="button"
         class="p-1.5 text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/10 rounded-full transition-all"
