@@ -81,7 +81,7 @@ export async function POST({
       value: payload.value,
       step: payload.step,
       metadata: payload.metadata,
-      created_at: new Date().toISOString() // Set current date as ISO string
+      created_at: new Date().toISOString(), // Set current date as ISO string
     } as Metric);
 
     return json({
