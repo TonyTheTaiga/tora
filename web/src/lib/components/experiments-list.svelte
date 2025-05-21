@@ -23,11 +23,11 @@
   let highlighted = $state<string[]>([]);
 </script>
 
-<div class="grid grid-cols-1 gap-4">
+<div class="grid grid-cols-1 gap-4 w-full">
   <NewExperimentCard bind:isUserSignedIn bind:createNewExperimentFlag />
 
   {#each experiments as experiment, idx (experiment.id)}
-    <div class="h-full">
+    <div class="h-full w-full">
       <ExperimentDetailed
         bind:selectedExperiment
         bind:highlighted

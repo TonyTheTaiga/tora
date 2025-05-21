@@ -5,7 +5,6 @@
     HPRecommendation,
   } from "$lib/types";
   import {
-    Minimize2,
     X,
     Clock,
     Tag,
@@ -40,10 +39,6 @@
   let recommendations = $state<Record<string, HPRecommendation>>({});
   let activeRecommendation = $state<string | null>(null);
   let idCopied = $state<boolean>(false);
-
-  function minimize() {
-    selectedExperiment = null;
-  }
 </script>
 
 <article
@@ -160,14 +155,6 @@
             <X size={16} />
           </button>
         {/if}
-        <button
-          onclick={minimize}
-          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
-          aria-label="Minimize"
-          title="Minimize"
-        >
-          <Minimize2 size={16} />
-        </button>
       </div>
     </div>
 
@@ -274,14 +261,6 @@
             <X size={16} />
           </button>
         {/if}
-        <button
-          onclick={minimize}
-          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
-          aria-label="Minimize"
-          title="Minimize"
-        >
-          <Minimize2 size={16} />
-        </button>
       </div>
     </div>
   </header>

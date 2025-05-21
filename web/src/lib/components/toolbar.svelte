@@ -25,7 +25,10 @@
     class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-colors"
     title="Minimize active experiment"
     onclick={() => {
-      selectedExperiment = null;
+      const detailsElements = document.querySelectorAll("details");
+      detailsElements.forEach((details) => {
+        details.removeAttribute("open");
+      });
     }}
   >
     <Minimize2 size={16} />
