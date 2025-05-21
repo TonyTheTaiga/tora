@@ -1,14 +1,15 @@
 <script lang="ts">
   import { Plus, UserRound } from "lucide-svelte";
   import Card from "./card.svelte";
+  import { page } from "$app/state";
 
   let {
-    isUserSignedIn = $bindable(),
     createNewExperimentFlag = $bindable(),
   }: {
-    isUserSignedIn: boolean;
     createNewExperimentFlag: boolean;
   } = $props();
+
+  let isUserSignedIn: boolean = $state(!!page.data.session);
 </script>
 
 <Card border="dashed" borderColor="ctp-subtext0">
@@ -66,9 +67,6 @@
           Sign up to start tracking your experiments and metrics or browse
           public experiments.
         </p>
-
-        <!-- Spacer that grows to push button to bottom -->
-        <div class="flex-grow"></div>
       </div>
 
       <!-- Footer -->
