@@ -60,20 +60,6 @@
               top: newScrollY,
               behavior: "smooth",
             });
-
-            // Add highlight class to the minimized card
-            const minimizedElement = document.getElementById(
-              `minimized-${currentId}`,
-            );
-            if (minimizedElement) {
-              minimizedElement.classList.add("shadow-highlight", "focus-ring");
-              setTimeout(() => {
-                minimizedElement.classList.remove(
-                  "shadow-highlight",
-                  "focus-ring",
-                );
-              }, 2000);
-            }
           }
         });
       }

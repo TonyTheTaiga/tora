@@ -28,14 +28,12 @@
     selectedExperiment = $bindable(),
     highlighted = $bindable(),
     selectedForDelete = $bindable(),
-    recentlyMinimized = $bindable(),
     selectedForEdit = $bindable(),
   }: {
     experiment: Experiment;
     selectedExperiment: Experiment | null;
     highlighted: string[];
     selectedForDelete: Experiment | null;
-    recentlyMinimized: string | null;
     selectedForEdit: Experiment | null;
   } = $props();
 
@@ -45,7 +43,6 @@
 
   function minimize() {
     const currentId = experiment.id;
-    recentlyMinimized = currentId;
 
     // Get current viewport scroll position and element position
     const scrollY = window.scrollY;
