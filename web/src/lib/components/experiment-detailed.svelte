@@ -19,6 +19,7 @@
     Copy,
     ChevronDown,
     ChevronLeft,
+    Minimize2,
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
   import { page } from "$app/state";
@@ -44,15 +45,10 @@
   let isOpenMetrics = $state<boolean>(false);
 </script>
 
-<article
-  class="bg-ctp-base overflow-hidden shadow-lg rounded-lg {highlighted.length >
-    0 && !highlighted.includes(experiment.id)
-    ? 'opacity-40'
-    : ''}"
->
+<article class="h-full">
   <!-- Header with actions -->
   <header class="px-3 sm:px-4 py-3 bg-ctp-mantle border-b border-ctp-surface0">
-    <!-- Mobile header (flex column) -->
+    <!-- Mobile header -->
     <div class="flex flex-col sm:hidden w-full gap-2">
       <!-- Title row -->
       <h2 class="truncate">
@@ -127,8 +123,6 @@
                   return;
                 }
                 const data = await response.json();
-                // Ensure we don't add duplicate IDs and add the current experiment ID
-                // This will show all experiments in the reference chain including the current one
                 const uniqueIds = [...new Set([...data, experiment.id])];
                 highlighted = uniqueIds;
               } catch (err) {}
@@ -144,7 +138,6 @@
           {/if}
         </button>
         {#if page.data.user && page.data.user.id === experiment.user_id}
-          <input type="hidden" name="id" value={experiment.id} />
           <button
             type="button"
             class="p-1.5 text-ctp-subtext0 hover:text-ctp-red"
@@ -158,10 +151,18 @@
             <X size={16} />
           </button>
         {/if}
+        <button
+          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+          onclick={() => {
+            selectedExperiment = null;
+          }}
+        >
+          <Minimize2 size={16} />
+        </button>
       </div>
     </div>
 
-    <!-- Desktop/Tablet header (flex row) -->
+    <!-- Desktop/Tablet header -->
     <div class="hidden sm:flex sm:flex-row justify-between items-center">
       <h2 class="max-w-[70%]">
         <span
@@ -233,8 +234,6 @@
                   return;
                 }
                 const data = await response.json();
-                // Ensure we don't add duplicate IDs and add the current experiment ID
-                // This will show all experiments in the reference chain including the current one
                 const uniqueIds = [...new Set([...data, experiment.id])];
                 highlighted = uniqueIds;
               } catch (err) {}
@@ -250,7 +249,6 @@
           {/if}
         </button>
         {#if page.data.user && page.data.user.id === experiment.user_id}
-          <input type="hidden" name="id" value={experiment.id} />
           <button
             type="button"
             class="p-1.5 text-ctp-subtext0 hover:text-ctp-red"
@@ -264,6 +262,14 @@
             <X size={16} />
           </button>
         {/if}
+        <button
+          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+          onclick={() => {
+            selectedExperiment = null;
+          }}
+        >
+          <Minimize2 size={16} />
+        </button>
       </div>
     </div>
   </header>
@@ -338,9 +344,8 @@
                   class="text-xs font-medium text-ctp-subtext1 truncate max-w-[40%]"
                   >{param.key}</span
                 >
-                <div class="flex-grow"></div>
                 <span
-                  class="text-xs text-ctp-text px-2 py-0.5 bg-ctp-surface0 rounded-sm truncate max-w-[40%]"
+                  class="ml-auto text-xs text-ctp-text px-2 py-0.5 bg-ctp-surface0 rounded-sm truncate max-w-[40%]"
                   >{param.value}</span
                 >
                 {#if recommendations && recommendations[param.key]}
@@ -403,7 +408,6 @@
             <ChevronLeft size={16} class="ml-auto text-ctp-subtext0" />
           {/if}
         </summary>
-        <!-- Full width chart container -->
         <div class="pt-2 -mx-2 sm:-mx-4">
           <div class="px-1 sm:px-2 w-full overflow-x-auto">
             <InteractiveChart {experiment} />
