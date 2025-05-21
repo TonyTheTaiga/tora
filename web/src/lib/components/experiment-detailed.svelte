@@ -293,15 +293,9 @@
         <button
           onclick={() => {
             const currentId = experiment.id;
-            // Set recently minimized to highlight the card
             recentlyMinimized = currentId;
-
-            // Use requestAnimationFrame for smoother animation
             requestAnimationFrame(() => {
-              // First collapse
               selectedExperiment = null;
-
-              // Then scroll to the card's position
               requestAnimationFrame(() => {
                 const element = document.getElementById(
                   `experiment-${currentId}`,

@@ -18,13 +18,11 @@
     selectedExperiment = $bindable(),
     highlighted = $bindable(),
     selectedForDelete = $bindable(),
-    recentlyMinimized = $bindable(),
   }: {
     experiment: Experiment;
     selectedExperiment: Experiment | null;
     highlighted: string[];
     selectedForDelete: Experiment | null;
-    recentlyMinimized: string | null;
   } = $props();
 </script>
 

@@ -48,7 +48,6 @@
             bind:selectedExperiment
             bind:highlighted
             bind:selectedForDelete
-            bind:recentlyMinimized
             {experiment}
           />
         </div>
