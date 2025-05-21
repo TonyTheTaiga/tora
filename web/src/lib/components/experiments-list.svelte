@@ -27,27 +27,14 @@
   <NewExperimentCard bind:isUserSignedIn bind:createNewExperimentFlag />
 
   {#each experiments as experiment, idx (experiment.id)}
-    <div id={`experiment-${experiment.id}`}>
-      {#if !selectedExperiment || selectedExperiment.id !== experiment.id}
-        <div class="hover:border rounded-lg">
-          <ExperimentSimple
-            bind:selectedExperiment
-            bind:highlighted
-            bind:selectedForDelete
-            {experiment}
-          />
-        </div>
-      {:else}
-        <div class="h-full">
-          <ExperimentDetailed
-            bind:selectedExperiment
-            bind:highlighted
-            bind:experiment={experiments[idx]}
-            bind:selectedForDelete
-            bind:selectedForEdit
-          />
-        </div>
-      {/if}
+    <div class="h-full">
+      <ExperimentDetailed
+        bind:selectedExperiment
+        bind:highlighted
+        bind:experiment={experiments[idx]}
+        bind:selectedForDelete
+        bind:selectedForEdit
+      />
     </div>
   {/each}
 </div>

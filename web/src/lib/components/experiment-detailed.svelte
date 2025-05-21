@@ -399,7 +399,7 @@
 
     <!-- Metrics section -->
     {#if experiment.availableMetrics && experiment.availableMetrics.length > 0}
-      <details class="mt-1" open>
+      <details class="mt-1">
         <summary
           class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
         >
