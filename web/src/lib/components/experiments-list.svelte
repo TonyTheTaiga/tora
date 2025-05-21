@@ -36,8 +36,9 @@
     >
       {#if !selectedExperiment || selectedExperiment.id !== experiment.id}
         <div
+          id={`minimized-${experiment.id}`}
           class="hover:border rounded-lg
-          {recentlyMinimized === experiment.id ? 'shadow-highlight' : ''}"
+          {recentlyMinimized === experiment.id ? 'shadow-highlight focus-ring' : ''}"
           onanimationend={() => {
             if (recentlyMinimized === experiment.id) {
               recentlyMinimized = null;
@@ -74,18 +75,27 @@
     0% {
       box-shadow: 0 0 0px 0px rgba(183, 189, 248, 0);
       transform: scale(1);
+      outline: 2px solid transparent;
     }
     15% {
+      box-shadow: 0 0 16px 6px rgba(183, 189, 248, 0.6);
+      transform: scale(1.015);
+      outline: 2px solid rgba(183, 189, 248, 0.8);
+    }
+    40% {
       box-shadow: 0 0 12px 4px rgba(183, 189, 248, 0.5);
       transform: scale(1.01);
+      outline: 2px solid rgba(183, 189, 248, 0.6);
     }
-    60% {
+    70% {
       box-shadow: 0 0 8px 2px rgba(183, 189, 248, 0.3);
       transform: scale(1.005);
+      outline: 1px solid rgba(183, 189, 248, 0.3);
     }
     100% {
       box-shadow: 0 0 0px 0px rgba(183, 189, 248, 0);
       transform: scale(1);
+      outline: 0px solid transparent;
     }
   }
 
@@ -94,9 +104,16 @@
   }
 
   .shadow-highlight {
-    animation: shadow-glow 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: shadow-glow 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     overflow: hidden;
-    will-change: transform, box-shadow;
+    will-change: transform, box-shadow, outline;
+    z-index: 10;
+    position: relative;
+  }
+  
+  .focus-ring {
+    outline-offset: 2px;
+    border-radius: 6px;
   }
 
   @keyframes expand {

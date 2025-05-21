@@ -42,6 +42,45 @@
   let recommendations = $state<Record<string, HPRecommendation>>({});
   let activeRecommendation = $state<string | null>(null);
   let idCopied = $state<boolean>(false);
+
+  function minimize() {
+    const currentId = experiment.id;
+    recentlyMinimized = currentId;
+
+    // Get current viewport scroll position and element position
+    const scrollY = window.scrollY;
+    const currentElement = document.getElementById(`experiment-${currentId}`);
+    const currentRect = currentElement?.getBoundingClientRect();
+
+    // Calculate the element's absolute position
+    const absoluteTop = currentRect ? currentRect.top + scrollY : null;
+
+    requestAnimationFrame(() => {
+      selectedExperiment = null;
+
+      // Wait for DOM to update after minimizing
+      requestAnimationFrame(() => {
+        const element = document.getElementById(`experiment-${currentId}`);
+        if (element && absoluteTop !== null) {
+          // Get the new position of the minimized element
+          const newRect = element.getBoundingClientRect();
+
+          // Calculate new scroll position to keep relative viewport position
+          const newScrollY =
+            newRect.top +
+            window.scrollY -
+            window.innerHeight / 2 +
+            newRect.height / 2;
+
+          // Scroll to the calculated position
+          window.scrollTo({
+            top: newScrollY,
+            behavior: "smooth",
+          });
+        }
+      });
+    });
+  }
 </script>
 
 <article
@@ -159,25 +198,7 @@
           </button>
         {/if}
         <button
-          onclick={() => {
-            const currentId = experiment.id;
-            recentlyMinimized = currentId;
-
-            requestAnimationFrame(() => {
-              selectedExperiment = null;
-              requestAnimationFrame(() => {
-                const element = document.getElementById(
-                  `experiment-${currentId}`,
-                );
-                if (element) {
-                  element.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                  });
-                }
-              });
-            });
-          }}
+          onclick={minimize}
           class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
           aria-label="Minimize"
           title="Minimize"
@@ -291,24 +312,7 @@
           </button>
         {/if}
         <button
-          onclick={() => {
-            const currentId = experiment.id;
-            recentlyMinimized = currentId;
-            requestAnimationFrame(() => {
-              selectedExperiment = null;
-              requestAnimationFrame(() => {
-                const element = document.getElementById(
-                  `experiment-${currentId}`,
-                );
-                if (element) {
-                  element.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                  });
-                }
-              });
-            });
-          }}
+          onclick={minimize}
           class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
           aria-label="Minimize"
           title="Minimize"
