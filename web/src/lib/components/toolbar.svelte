@@ -18,7 +18,12 @@
     flex flex-row items-center gap-1
     bg-ctp-surface1 border border-ctp-surface2
     rounded-lg shadow-md z-40
-    opacity-85
+    sm:scale-120
+    sm:opacity-100
+    md:scale-120
+    md:opacity-100
+    lg:scale-110 lg:hover:scale-140 lg:transition-transform lg:duration-300
+    lg:opacity-80 lg:hover:opacity-100
   "
 >
   <button
