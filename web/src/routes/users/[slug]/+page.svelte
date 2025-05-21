@@ -93,8 +93,8 @@
   });
 </script>
 
-<div class="w-full">
-  <div class="bg-ctp-mantle rounded-lg p-6 border border-ctp-surface0">
+<div class="w-full max-w-5xl mx-auto">
+  <div class="bg-ctp-mantle rounded-lg shadow-sm p-6 border border-ctp-surface0">
     <div
       class="flex flex-col sm:flex-row gap-4 border-b border-ctp-surface0 pb-6 mb-6"
     >
@@ -120,7 +120,7 @@
         <form action="/auth?/logout" method="POST">
           <button
             type="submit"
-            class="w-full sm:w-auto flex items-center gap-2 px-3 py-1.5 border border-ctp-red rounded-md text-ctp-red hover:bg-ctp-red hover:text-ctp-crust transition-colors"
+            class="w-full sm:w-auto flex items-center gap-2 px-3 py-1.5 border border-ctp-red rounded-md text-ctp-red hover:bg-ctp-red hover:text-ctp-crust transition-colors font-medium text-sm"
             aria-label="Sign out"
           >
             <LogOut size={16} />
@@ -131,9 +131,9 @@
     </div>
 
     <div>
-      <div class="flex items-center gap-2 mb-4 text-ctp-peach">
-        <Key size={20} />
-        <h2 class="font-medium text-ctp-text">API Keys</h2>
+      <div class="flex items-center gap-2 mb-4">
+        <Key size={20} class="text-ctp-peach" />
+        <h2 class="font-medium text-ctp-text text-lg">API Keys</h2>
       </div>
 
       <form
@@ -148,12 +148,12 @@
             type="text"
             bind:value={newKeyName}
             placeholder="Key name (e.g. Training Pipeline)"
-            class="flex-grow bg-ctp-crust border border-ctp-surface0 rounded-md px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue"
+            class="flex-grow bg-ctp-crust border border-ctp-surface0 rounded-md px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue focus:ring-1 focus:ring-ctp-blue/30"
             required
           />
           <button
             type="submit"
-            class="bg-ctp-mauve hover:bg-ctp-lavender text-ctp-crust py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-colors font-medium"
+            class="flex items-center gap-1.5 px-3 py-1.5 border border-ctp-blue rounded-md text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-colors font-medium text-sm"
           >
             <Plus size={16} />
             <span>Create</span>
@@ -170,14 +170,14 @@
 
       {#if user.apiKeys.length === 0}
         <div
-          class="text-ctp-subtext0 text-center py-4 border border-dashed border-ctp-surface0 rounded-md"
+          class="text-ctp-subtext0 text-center py-6 border border-dashed border-ctp-surface0 rounded-md bg-ctp-surface0/20"
         >
           No API keys yet. Create one to integrate with external tools.
         </div>
       {:else}
         <div class="space-y-4">
           {#each user.apiKeys as key}
-            <div class="border border-ctp-surface0 rounded-lg bg-ctp-crust p-4">
+            <div class="border border-ctp-surface0 rounded-lg bg-ctp-crust p-4 hover:border-ctp-surface1 transition-colors">
               <div class="flex justify-between items-start mb-2">
                 <div>
                   <h3 class="font-medium text-ctp-text">{key.name}</h3>
@@ -187,7 +187,7 @@
                 </div>
                 <button
                   onclick={() => deleteKey(key.id)}
-                  class="text-ctp-subtext0 hover:text-ctp-red p-1.5 transition-colors"
+                  class="text-ctp-subtext0 hover:text-ctp-red p-1.5 transition-colors rounded-full hover:bg-ctp-surface0/50"
                   aria-label="Delete key"
                 >
                   <Trash2 size={16} />
@@ -219,7 +219,7 @@
 
 {#if showNewKeyModal}
   <div
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm"
     transition:fade
   >
     <div
@@ -240,7 +240,7 @@
         <div class="truncate">{showNewKeyValue}</div>
         <button
           onclick={() => copyToClipboard(showNewKeyValue)}
-          class="text-ctp-subtext0 hover:text-ctp-blue ml-2"
+          class="text-ctp-subtext0 hover:text-ctp-blue ml-2 p-1 rounded-full hover:bg-ctp-surface0/50 transition-colors"
           aria-label="Copy to clipboard"
         >
           {#if copied}
@@ -257,7 +257,7 @@
             showNewKeyModal = false;
             showNewKeyValue = "";
           }}
-          class="bg-ctp-surface0 hover:bg-ctp-surface1 text-ctp-text px-4 py-2 rounded-md transition-colors font-medium"
+          class="bg-ctp-surface0 hover:bg-ctp-surface1 text-ctp-text px-4 py-2 rounded-md transition-colors font-medium text-sm"
         >
           Close
         </button>
