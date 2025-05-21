@@ -18,6 +18,7 @@
     ClipboardCheck,
     Copy,
     ChevronDown,
+    ChevronLeft,
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
   import { page } from "$app/state";
@@ -39,6 +40,8 @@
   let recommendations = $state<Record<string, HPRecommendation>>({});
   let activeRecommendation = $state<string | null>(null);
   let idCopied = $state<boolean>(false);
+  let isOpenHyperparams = $state<boolean>(false);
+  let isOpenMetrics = $state<boolean>(false);
 </script>
 
 <article
@@ -313,10 +316,17 @@
       <details class="mt-2">
         <summary
           class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
+          onclick={() => {
+            isOpenHyperparams = !isOpenHyperparams;
+          }}
         >
           <Settings size={16} class="text-ctp-mauve flex-shrink-0" />
           <span class="text-sm font-medium">Parameters</span>
-          <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
+          {#if isOpenHyperparams}
+            <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
+          {:else}
+            <ChevronLeft size={16} class="ml-auto text-ctp-subtext0" />
+          {/if}
         </summary>
         <div class="pt-2">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -381,10 +391,17 @@
       <details class="mt-1">
         <summary
           class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
+          onclick={() => {
+            isOpenMetrics = !isOpenMetrics;
+          }}
         >
           <ChartLine size={16} class="text-ctp-blue" />
           <span class="text-sm font-medium">Metrics</span>
-          <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
+          {#if isOpenMetrics}
+            <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
+          {:else}
+            <ChevronLeft size={16} class="ml-auto text-ctp-subtext0" />
+          {/if}
         </summary>
         <!-- Full width chart container -->
         <div class="pt-2 -mx-2 sm:-mx-4">
