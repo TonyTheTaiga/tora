@@ -1,12 +1,12 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
   import {
+    X,
     Tag,
     Clock,
     ChartLine,
     Eye,
     EyeClosed,
-    X,
     Globe,
     GlobeLock,
   } from "lucide-svelte";
@@ -15,13 +15,13 @@
 
   let {
     experiment,
-    selectedId = $bindable(),
+    selectedExperiment = $bindable(),
     highlighted = $bindable(),
     selectedForDelete = $bindable(),
     recentlyMinimized = $bindable(),
   }: {
     experiment: Experiment;
-    selectedId: string | null;
+    selectedExperiment: Experiment | null;
     highlighted: string[];
     selectedForDelete: Experiment | null;
     recentlyMinimized: string | null;
@@ -102,7 +102,7 @@
       role="button"
       tabindex="0"
       onclick={() => {
-        selectedId = experiment.id;
+        selectedExperiment = experiment;
         // Allow DOM to update before scrolling
         setTimeout(() => {
           const element = document.getElementById(
@@ -118,7 +118,7 @@
       }}
       onkeydown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
-          selectedId = experiment.id;
+          selectedExperiment = experiment;
           // Allow DOM to update before scrolling
           setTimeout(() => {
             const element = document.getElementById(

@@ -3,7 +3,6 @@
   import NewExperimentCard from "./new-experiment-card.svelte";
   import ExperimentSimple from "./experiment-simple.svelte";
   import ExperimentDetailed from "./experiment-detailed.svelte";
-
   import { page } from "$app/state";
 
   let {
@@ -11,14 +10,16 @@
     createNewExperimentFlag = $bindable(),
     selectedForEdit = $bindable(),
     selectedForDelete = $bindable(),
+    selectedExperiment = $bindable(),
   }: {
     experiments: Experiment[];
     createNewExperimentFlag: boolean;
     selectedForDelete: Experiment | null;
     selectedForEdit: Experiment | null;
+    selectedExperiment: Experiment | null;
   } = $props();
+
   let isUserSignedIn: boolean = $state(!!page.data.session);
-  let selectedId = $state<string | null>(null);
   let highlighted = $state<string[]>([]);
   let recentlyMinimized = $state<string | null>(null);
 </script>
@@ -31,9 +32,9 @@
   {#each experiments as experiment, idx (experiment.id)}
     <div
       id={`experiment-${experiment.id}`}
-      class={`transition-all duration-400 ease-in-out transform ${selectedId === experiment.id ? "h-full" : ""}`}
+      class={`transition-all duration-400 ease-in-out transform ${selectedExperiment && selectedExperiment.id === experiment.id ? "h-full" : ""}`}
     >
-      {#if selectedId !== experiment.id}
+      {#if !selectedExperiment || selectedExperiment.id !== experiment.id}
         <div
           class="hover:border rounded-lg
           {recentlyMinimized === experiment.id ? 'shadow-highlight' : ''}"
@@ -44,7 +45,7 @@
           }}
         >
           <ExperimentSimple
-            bind:selectedId
+            bind:selectedExperiment
             bind:highlighted
             bind:selectedForDelete
             bind:recentlyMinimized
@@ -56,7 +57,7 @@
           class="expanded-experiment h-full animate-expand will-change-opacity-transform"
         >
           <ExperimentDetailed
-            bind:selectedId
+            bind:selectedExperiment
             bind:highlighted
             bind:experiment={experiments[idx]}
             bind:selectedForDelete

@@ -12,6 +12,7 @@
   let createNewExperimentFlag: boolean = $state(false);
   let selectedForDelete: Experiment | null = $state(null);
   let selectedForEdit: Experiment | null = $state(null);
+  let selectedExperiment: Experiment | null = $state(null);
 </script>
 
 {#if createNewExperimentFlag}
@@ -29,11 +30,12 @@
   <EditExperimentModal bind:experiment={selectedForEdit} />
 {/if}
 
-<Toolbar />
+<Toolbar bind:selectedExperiment />
 
 <ExperimentsList
   bind:experiments
   bind:createNewExperimentFlag
   bind:selectedForEdit
   bind:selectedForDelete
+  bind:selectedExperiment
 ></ExperimentsList>

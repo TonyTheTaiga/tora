@@ -25,14 +25,14 @@
 
   let {
     experiment = $bindable(),
-    selectedId = $bindable(),
+    selectedExperiment = $bindable(),
     highlighted = $bindable(),
     selectedForDelete = $bindable(),
     recentlyMinimized = $bindable(),
     selectedForEdit = $bindable(),
   }: {
     experiment: Experiment;
-    selectedId: string | null;
+    selectedExperiment: Experiment | null;
     highlighted: string[];
     selectedForDelete: Experiment | null;
     recentlyMinimized: string | null;
@@ -161,15 +161,10 @@
         <button
           onclick={() => {
             const currentId = experiment.id;
-            // Set recently minimized to highlight the card
             recentlyMinimized = currentId;
 
-            // Use requestAnimationFrame for smoother animation
             requestAnimationFrame(() => {
-              // First collapse
-              selectedId = null;
-
-              // Then scroll to the card's position
+              selectedExperiment = null;
               requestAnimationFrame(() => {
                 const element = document.getElementById(
                   `experiment-${currentId}`,
@@ -304,7 +299,7 @@
             // Use requestAnimationFrame for smoother animation
             requestAnimationFrame(() => {
               // First collapse
-              selectedId = null;
+              selectedExperiment = null;
 
               // Then scroll to the card's position
               requestAnimationFrame(() => {

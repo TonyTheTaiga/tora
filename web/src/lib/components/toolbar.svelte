@@ -1,11 +1,11 @@
 <script lang="ts">
-  import {
-    GripVertical,
-    Minimize2,
-    Eye,
-    Sparkle,
-    RefreshCw,
-  } from "lucide-svelte";
+  import type { Experiment } from "$lib/types";
+  import { Minimize2, Eye, Sparkle, RefreshCw } from "lucide-svelte";
+  import { goto } from "$app/navigation";
+
+  let {
+    selectedExperiment = $bindable(),
+  }: { selectedExperiment: Experiment | null } = $props();
 </script>
 
 <div
@@ -22,16 +22,13 @@
   "
 >
   <button
-    id="grabber"
-    class="flex items-center justify-center cursor-move select-none p-1.5 text-ctp-subtext0 hover:text-ctp-text"
-    aria-label="Drag handle"
-  >
-    <GripVertical size={16} />
-  </button>
-
-  <button
     class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-colors"
     title="Minimize active experiment"
+    onclick={() => {
+      if (selectedExperiment) {
+        selectedExperiment = null;
+      }
+    }}
   >
     <Minimize2 size={16} />
   </button>
@@ -53,6 +50,9 @@
   <button
     class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-transform hover:rotate-180 duration-300"
     title="Refresh experiments"
+    onclick={() => {
+      goto("/");
+    }}
   >
     <RefreshCw size={16} />
   </button>
