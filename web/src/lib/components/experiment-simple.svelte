@@ -86,37 +86,17 @@
     </div>
   </div>
 
-  <!-- Middle content (grows to fill space) -->
+  <!-- Main -->
   <div
     class="flex-grow flex flex-col cursor-pointer"
     role="button"
     tabindex="0"
     onclick={() => {
       selectedExperiment = experiment;
-      setTimeout(() => {
-        const element = document.getElementById(`experiment-${experiment.id}`);
-        if (element) {
-          element.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }
-      }, 10);
     }}
     onkeydown={(e) => {
       if (e.key === "Enter" || e.key === " ") {
         selectedExperiment = experiment;
-        setTimeout(() => {
-          const element = document.getElementById(
-            `experiment-${experiment.id}`,
-          );
-          if (element) {
-            element.scrollIntoView({
-              behavior: "smooth",
-              block: "center",
-            });
-          }
-        }, 10);
       }
     }}
     aria-label="View experiment details"
@@ -138,7 +118,7 @@
     </div>
   </div>
 
-  <!-- Footer info -->
+  <!-- Footer -->
   <div
     class="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-ctp-surface0"
   >

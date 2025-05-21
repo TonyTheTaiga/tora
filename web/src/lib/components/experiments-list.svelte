@@ -4,6 +4,7 @@
   import ExperimentSimple from "./experiment-simple.svelte";
   import ExperimentDetailed from "./experiment-detailed.svelte";
   import { page } from "$app/state";
+  import type { Attachment } from "svelte/attachments";
 
   let {
     experiments = $bindable(),
@@ -20,6 +21,15 @@
   } = $props();
 
   let highlighted = $state<string[]>([]);
+
+  const focusOnExpandAttatchment: Attachment = (element) => {
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+
+    return () => {};
+  };
 </script>
 
 <div
@@ -53,6 +63,7 @@
             {highlighted.length > 0 && !highlighted.includes(experiment.id)
             ? 'opacity-40'
             : ''}"
+          {@attach focusOnExpandAttatchment}
         >
           <ExperimentDetailed
             bind:selectedExperiment
