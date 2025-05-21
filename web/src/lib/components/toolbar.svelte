@@ -25,44 +25,7 @@
     class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-colors"
     title="Minimize active experiment"
     onclick={() => {
-      if (selectedExperiment) {
-        const currentId = selectedExperiment.id;
-
-        // Get current viewport scroll position and element position
-        const scrollY = window.scrollY;
-        const currentElement = document.getElementById(
-          `experiment-${currentId}`,
-        );
-        const currentRect = currentElement?.getBoundingClientRect();
-
-        // Calculate the element's absolute position
-        const absoluteTop = currentRect ? currentRect.top + scrollY : null;
-
-        // First minimize the experiment
-        selectedExperiment = null;
-
-        // Then after the DOM updates, scroll to the minimized card
-        requestAnimationFrame(() => {
-          const element = document.getElementById(`experiment-${currentId}`);
-          if (element && absoluteTop !== null) {
-            // Get the new position of the minimized element
-            const newRect = element.getBoundingClientRect();
-
-            // Calculate new scroll position to keep relative viewport position
-            const newScrollY =
-              newRect.top +
-              window.scrollY -
-              window.innerHeight / 2 +
-              newRect.height / 2;
-
-            // Scroll to the calculated position
-            window.scrollTo({
-              top: newScrollY,
-              behavior: "smooth",
-            });
-          }
-        });
-      }
+      selectedExperiment = null;
     }}
   >
     <Minimize2 size={16} />

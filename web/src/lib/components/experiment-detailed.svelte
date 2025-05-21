@@ -42,41 +42,7 @@
   let idCopied = $state<boolean>(false);
 
   function minimize() {
-    const currentId = experiment.id;
-
-    // Get current viewport scroll position and element position
-    const scrollY = window.scrollY;
-    const currentElement = document.getElementById(`experiment-${currentId}`);
-    const currentRect = currentElement?.getBoundingClientRect();
-
-    // Calculate the element's absolute position
-    const absoluteTop = currentRect ? currentRect.top + scrollY : null;
-
-    requestAnimationFrame(() => {
-      selectedExperiment = null;
-
-      // Wait for DOM to update after minimizing
-      requestAnimationFrame(() => {
-        const element = document.getElementById(`experiment-${currentId}`);
-        if (element && absoluteTop !== null) {
-          // Get the new position of the minimized element
-          const newRect = element.getBoundingClientRect();
-
-          // Calculate new scroll position to keep relative viewport position
-          const newScrollY =
-            newRect.top +
-            window.scrollY -
-            window.innerHeight / 2 +
-            newRect.height / 2;
-
-          // Scroll to the calculated position
-          window.scrollTo({
-            top: newScrollY,
-            behavior: "smooth",
-          });
-        }
-      });
-    });
+    selectedExperiment = null;
   }
 </script>
 

@@ -23,9 +23,7 @@
   let highlighted = $state<string[]>([]);
 </script>
 
-<div
-  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 [&>*:has(.expanded-experiment)]:md:col-span-2 [&>*:has(.expanded-experiment)]:lg:col-span-3"
->
+<div class="grid grid-cols-1 gap-4">
   <NewExperimentCard bind:isUserSignedIn bind:createNewExperimentFlag />
 
   {#each experiments as experiment, idx (experiment.id)}
@@ -40,7 +38,7 @@
           />
         </div>
       {:else}
-        <div class="expanded-experiment h-full animate-expand">
+        <div class="h-full">
           <ExperimentDetailed
             bind:selectedExperiment
             bind:highlighted
@@ -53,21 +51,3 @@
     </div>
   {/each}
 </div>
-
-<style>
-  @keyframes expand {
-    from {
-      opacity: 0.4;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  .animate-expand {
-    animation: expand 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    will-change: transform, opacity;
-  }
-</style>
