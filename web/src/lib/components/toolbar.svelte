@@ -12,7 +12,7 @@
   id="toolbar"
   class="
     fixed
-    bottom-4
+    bottom-12
     left-1/2
     transform -translate-x-1/2
     flex flex-row items-center gap-1
