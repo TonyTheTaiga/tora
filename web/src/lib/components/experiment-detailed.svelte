@@ -19,6 +19,7 @@
     Copy,
     ChevronDown,
     ChevronLeft,
+    Minimize2,
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
   import { page } from "$app/state";
@@ -45,8 +46,8 @@
 </script>
 
 <article
-  class="bg-ctp-base overflow-hidden shadow-lg rounded-lg {highlighted.length >
-    0 && !highlighted.includes(experiment.id)
+  class="bg-ctp-base shadow-lg rounded-lg
+  {highlighted.length > 0 && !highlighted.includes(experiment.id)
     ? 'opacity-40'
     : ''}"
 >
@@ -158,6 +159,14 @@
             <X size={16} />
           </button>
         {/if}
+        <button
+          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+          onclick={() => {
+            selectedExperiment = null;
+          }}
+        >
+          <Minimize2 size={16} />
+        </button>
       </div>
     </div>
 
@@ -264,6 +273,14 @@
             <X size={16} />
           </button>
         {/if}
+        <button
+          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+          onclick={() => {
+            selectedExperiment = null;
+          }}
+        >
+          <Minimize2 size={16} />
+        </button>
       </div>
     </div>
   </header>
