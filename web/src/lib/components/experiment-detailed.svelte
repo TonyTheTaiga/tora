@@ -45,7 +45,7 @@
   let isOpenMetrics = $state<boolean>(false);
 </script>
 
-<article class="bg-ctp-base shadow-lg">
+<article class="bg-ctp-base">
   <!-- Header with actions -->
   <header class="px-3 sm:px-4 py-3 bg-ctp-mantle border-b border-ctp-surface0">
     <!-- Mobile header (flex column) -->

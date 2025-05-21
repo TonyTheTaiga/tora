@@ -31,7 +31,7 @@
     <div id={`experiment-${experiment.id}`}>
       {#if !selectedExperiment || selectedExperiment.id !== experiment.id}
         <div
-          class="hover:border rounded-lg
+          class="rounded-lg
             {highlighted.length > 0 && !highlighted.includes(experiment.id)
             ? 'opacity-40'
             : ''}"
