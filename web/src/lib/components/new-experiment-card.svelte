@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Plus, UserRound } from "lucide-svelte";
-  import Card from "./card.svelte";
   import { page } from "$app/state";
 
   let {
@@ -12,7 +11,7 @@
   let isUserSignedIn: boolean = $state(!!page.data.session);
 </script>
 
-<Card border="dashed" borderColor="ctp-subtext0">
+<article class="h-full">
   <div class="flex flex-col h-full">
     {#if isUserSignedIn}
       <!-- Header -->
@@ -80,4 +79,4 @@
       </div>
     {/if}
   </div>
-</Card>
+</article>
