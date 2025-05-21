@@ -4,10 +4,10 @@
 
   let {
     isUserSignedIn = $bindable(),
-    isOpen = $bindable(),
+    createNewExperimentFlag = $bindable(),
   }: {
     isUserSignedIn: boolean;
-    isOpen: boolean;
+    createNewExperimentFlag: boolean;
   } = $props();
 </script>
 
@@ -40,7 +40,7 @@
       <div class="mt-2">
         <button
           onclick={() => {
-            isOpen = true;
+            createNewExperimentFlag = true;
           }}
           class="px-2.5 py-1 rounded-md border border-ctp-mauve text-ctp-mauve hover:bg-ctp-mauve hover:text-ctp-crust transition-colors font-medium text-xs"
         >

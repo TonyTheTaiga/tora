@@ -14,9 +14,9 @@
   import { onMount, onDestroy } from "svelte";
 
   let {
-    isOpen = $bindable(),
+    createNewExperimentFlag = $bindable(),
   }: {
-    isOpen: boolean;
+    createNewExperimentFlag: boolean;
   } = $props();
 
   let hyperparams = $state<HyperParam[]>([]);
@@ -142,7 +142,7 @@
         </h3>
       </div>
       <button
-        onclick={() => (isOpen = false)}
+        onclick={() => (createNewExperimentFlag = false)}
         type="button"
         class="p-1.5 text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/10 rounded-full transition-all"
       >
@@ -433,7 +433,7 @@
       >
         <button
           onclick={() => {
-            isOpen = !isOpen;
+            createNewExperimentFlag = !createNewExperimentFlag;
           }}
           type="button"
           class="inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"

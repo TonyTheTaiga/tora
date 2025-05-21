@@ -3,38 +3,30 @@
   import NewExperimentCard from "./new-experiment-card.svelte";
   import ExperimentSimple from "./experiment-simple.svelte";
   import ExperimentDetailed from "./experiment-detailed.svelte";
-  import DeleteConfirmationModal from "./delete-confirmation-modal.svelte";
-  import EditExperimentModal from "./edit-experiment-modal.svelte";
 
   import { page } from "$app/state";
 
   let {
     experiments = $bindable(),
-    isOpen = $bindable(),
-  }: { experiments: Experiment[]; isOpen: boolean } = $props();
+    createNewExperimentFlag = $bindable(),
+    selectedForEdit = $bindable(),
+    selectedForDelete = $bindable(),
+  }: {
+    experiments: Experiment[];
+    createNewExperimentFlag: boolean;
+    selectedForDelete: Experiment | null;
+    selectedForEdit: Experiment | null;
+  } = $props();
   let isUserSignedIn: boolean = $state(!!page.data.session);
   let selectedId = $state<string | null>(null);
   let highlighted = $state<string[]>([]);
-  let selectedForDelete = $state<Experiment | null>(null);
-  let selectedForEdit = $state<Experiment | null>(null);
   let recentlyMinimized = $state<string | null>(null);
 </script>
-
-{#if selectedForDelete}
-  <DeleteConfirmationModal
-    bind:experiment={selectedForDelete}
-    bind:experiments
-  />
-{/if}
-
-{#if selectedForEdit}
-  <EditExperimentModal bind:experiment={selectedForEdit} />
-{/if}
 
 <div
   class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 [&>*:has(.expanded-experiment)]:md:col-span-2 [&>*:has(.expanded-experiment)]:lg:col-span-3"
 >
-  <NewExperimentCard bind:isUserSignedIn bind:isOpen />
+  <NewExperimentCard bind:isUserSignedIn bind:createNewExperimentFlag />
 
   {#each experiments as experiment, idx (experiment.id)}
     <div
