@@ -26,13 +26,7 @@
   } = $props();
 </script>
 
-<Card
-  background="bg-ctp-mantle"
-  opacity={highlighted.length > 0 && !highlighted.includes(experiment.id)
-    ? "opacity-40"
-    : "opacity-100"}
-  hover={false}
->
+<Card background="bg-ctp-mantle" hover={false}>
   <div class="flex flex-col h-full">
     <!-- Header -->
     <div class="flex justify-between items-center mb-2">

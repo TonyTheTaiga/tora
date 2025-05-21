@@ -30,7 +30,12 @@
   {#each experiments as experiment, idx (experiment.id)}
     <div id={`experiment-${experiment.id}`}>
       {#if !selectedExperiment || selectedExperiment.id !== experiment.id}
-        <div class="hover:border rounded-lg">
+        <div
+          class="hover:border rounded-lg
+            {highlighted.length > 0 && !highlighted.includes(experiment.id)
+            ? 'opacity-40'
+            : ''}"
+        >
           <ExperimentSimple
             bind:selectedExperiment
             bind:highlighted
@@ -39,7 +44,12 @@
           />
         </div>
       {:else}
-        <div class="expanded-experiment">
+        <div
+          class="expanded-experiment rounded-lg
+            {highlighted.length > 0 && !highlighted.includes(experiment.id)
+            ? 'opacity-40'
+            : ''}"
+        >
           <ExperimentDetailed
             bind:selectedExperiment
             bind:highlighted

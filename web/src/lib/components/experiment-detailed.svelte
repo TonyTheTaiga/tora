@@ -45,12 +45,7 @@
   let isOpenMetrics = $state<boolean>(false);
 </script>
 
-<article
-  class="bg-ctp-base shadow-lg rounded-lg
-  {highlighted.length > 0 && !highlighted.includes(experiment.id)
-    ? 'opacity-40'
-    : ''}"
->
+<article class="bg-ctp-base shadow-lg">
   <!-- Header with actions -->
   <header class="px-3 sm:px-4 py-3 bg-ctp-mantle border-b border-ctp-surface0">
     <!-- Mobile header (flex column) -->
