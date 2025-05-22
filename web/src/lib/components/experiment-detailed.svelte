@@ -308,15 +308,21 @@
         </div>
       {/if}
     </div>
-
     {#if experiment.description}
       <p
-        class="text-ctp-text text-sm py-1.5 border-l-2 border-ctp-mauve pl-3 mt-1 leading-relaxed"
+        class="
+          text-ctp-text
+          text-xs sm:text-sm
+          leading-relaxed
+          border-l-2 border-ctp-mauve
+          pl-3 py-1.5 mt-1
+          break-words
+          sm:break-normal
+        "
       >
         {experiment.description}
       </p>
     {/if}
-
     <!-- Parameters section -->
     {#if experiment.hyperparams}
       <details class="mt-2">
