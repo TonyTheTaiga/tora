@@ -1,13 +1,21 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
-  import { Minimize2, Eye, Sparkle, RefreshCw, Plus } from "lucide-svelte";
+  import {
+    Minimize2,
+    Eye,
+    Sparkle,
+    RefreshCw,
+    Plus,
+    User,
+  } from "lucide-svelte";
+  import ThemeToggle from "./theme-toggle.svelte";
   import { goto } from "$app/navigation";
+  import { page } from "$app/state";
 
-  let {
-    selectedExperiment = $bindable(),
-    isOpenCreate = $bindable(),
-  }: { selectedExperiment: Experiment | null; isOpenCreate: boolean } =
+  let { selectedExperiment = $bindable(), isOpenCreate = $bindable() } =
     $props();
+
+  let { session } = $derived(page.data);
 </script>
 
 <div
@@ -21,14 +29,15 @@
     bg-ctp-surface1 border border-ctp-surface2
     rounded-lg shadow-md z-40
     sm:scale-100 sm:opacity-100
-    md:scale-110 md:hover:scale-140 md:transition-transform md:duration-300
+    md:scale-120 md:hover:scale-140 md:transition-transform md:duration-300
     md:opacity-80 md:hover:opacity-100
-    lg:scale-110 lg:hover:scale-140 lg:transition-transform lg:duration-300
+    lg:scale-140 lg:hover:scale-160 lg:transition-transform lg:duration-300
     lg:opacity-80 lg:hover:opacity-100
   "
 >
   <button
     class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-colors"
+    title="Create a new experiment"
     onclick={() => {
       isOpenCreate = true;
     }}
@@ -36,27 +45,17 @@
     <Plus size={16} />
   </button>
 
-  <button
-    class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-colors"
-    title="Toggle experiment highlighting"
-  >
-    <Eye size={16} />
-  </button>
+  <ThemeToggle />
 
-  <button
-    class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-transform active:rotate-90"
-    title="Get AI recommendations"
-  >
-    <Sparkle size={16} />
-  </button>
-
-  <button
-    class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-transform hover:rotate-180 duration-300"
-    title="Refresh experiments"
-    onclick={() => {
-      goto("/");
-    }}
-  >
-    <RefreshCw size={16} />
-  </button>
+  {#if session && session.user}
+    <button
+      class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+      title="Go to user profile"
+      onclick={() => {
+        goto(`/users/${session.user.id}`);
+      }}
+    >
+      <User size={16} />
+    </button>
+  {/if}
 </div>

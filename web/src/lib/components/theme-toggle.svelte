@@ -39,15 +39,15 @@
 
 <button
   on:click={toggleTheme}
-  class="flex items-center justify-center w-9 h-9 rounded-md text-ctp-text hover:bg-ctp-surface0 transition-colors"
+  class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
   aria-label={theme === "dark"
     ? "Switch to light theme"
     : "Switch to dark theme"}
   title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
 >
   {#if theme === "dark"}
-    <Sun size={20} />
+    <Sun size={16} />
   {:else}
-    <Moon size={20} />
+    <Moon size={16} />
   {/if}
 </button>

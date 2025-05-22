@@ -35,12 +35,6 @@
 <div
   class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 [&>*:has(.expanded-experiment)]:md:col-span-2 [&>*:has(.expanded-experiment)]:lg:col-span-3"
 >
-  <div
-    class="h-[200px] rounded-lg bg-ctp-crust border-2 border-dashed border-ctp-subtext0 p-4"
-  >
-    <NewExperimentCard bind:createNewExperimentFlag />
-  </div>
-
   {#each experiments as experiment, idx (experiment.id)}
     <div id={`experiment-${experiment.id}`}>
       {#if !selectedExperiment || selectedExperiment.id !== experiment.id}
