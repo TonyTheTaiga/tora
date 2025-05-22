@@ -1,11 +1,13 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
-  import { Minimize2, Eye, Sparkle, RefreshCw } from "lucide-svelte";
+  import { Minimize2, Eye, Sparkle, RefreshCw, Plus } from "lucide-svelte";
   import { goto } from "$app/navigation";
 
   let {
     selectedExperiment = $bindable(),
-  }: { selectedExperiment: Experiment | null } = $props();
+    isOpenCreate = $bindable(),
+  }: { selectedExperiment: Experiment | null; isOpenCreate: boolean } =
+    $props();
 </script>
 
 <div
@@ -28,15 +30,11 @@
 >
   <button
     class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-colors"
-    title="Minimize active experiment"
     onclick={() => {
-      const detailsElements = document.querySelectorAll("details");
-      detailsElements.forEach((details) => {
-        details.removeAttribute("open");
-      });
+      isOpenCreate = true;
     }}
   >
-    <Minimize2 size={16} />
+    <Plus size={16} />
   </button>
 
   <button

@@ -12,35 +12,44 @@
 
   let { data }: { data: PageData } = $props();
   let experiments: Experiment[] = $state(data.experiments);
-  let createNewExperimentFlag: boolean = $state(false);
-  let selectedForDelete: Experiment | null = $state(null);
-  let selectedForEdit: Experiment | null = $state(null);
-  let selectedExperiment: Experiment | null = $state(null);
+
+  let modalState = $state({
+    createExperiment: false,
+    selectedForDelete: null as Experiment | null,
+    selectedForEdit: null as Experiment | null,
+    selectedExperiment: null as Experiment | null,
+  });
 </script>
 
 {#if page.data.user}
-  {#if createNewExperimentFlag}
-    <CreateExperimentModal bind:createNewExperimentFlag />
+  {#if modalState.createExperiment}
+    <CreateExperimentModal
+      bind:createNewExperimentFlag={modalState.createExperiment}
+    />
   {/if}
 
-  {#if selectedForDelete}
+  {#if modalState.selectedForDelete}
     <DeleteConfirmationModal
-      bind:experiment={selectedForDelete}
+      bind:experiment={modalState.selectedForDelete}
       bind:experiments
     />
   {/if}
 
-  {#if selectedForEdit}
-    <EditExperimentModal bind:experiment={selectedForEdit} />
+  {#if modalState.selectedForEdit}
+    <EditExperimentModal bind:experiment={modalState.selectedForEdit} />
   {/if}
 
-  <Toolbar bind:selectedExperiment />
+  <Toolbar
+    bind:selectedExperiment={modalState.selectedExperiment}
+    bind:isOpenCreate={modalState.createExperiment}
+  />
+
   <ExperimentsList
     bind:experiments
-    bind:createNewExperimentFlag
-    bind:selectedForEdit
-    bind:selectedForDelete
-    bind:selectedExperiment
+    bind:createNewExperimentFlag={modalState.createExperiment}
+    bind:selectedForEdit={modalState.selectedForEdit}
+    bind:selectedForDelete={modalState.selectedForDelete}
+    bind:selectedExperiment={modalState.selectedExperiment}
   ></ExperimentsList>
 {:else}
   <div class="flex items-center justify-center h-full">
