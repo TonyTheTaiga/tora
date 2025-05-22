@@ -112,8 +112,10 @@
     <div class="flex items-center gap-1 text-ctp-subtext1 text-xs">
       <ChartLine size={12} />
       <span>
-        {experiment.availableMetrics.length} metric
-        {experiment.availableMetrics.length !== 1 ? "s" : ""}
+        {experiment.availableMetrics.length} metric{experiment.availableMetrics
+          .length !== 1
+          ? "s"
+          : ""}
       </span>
     </div>
   </div>
