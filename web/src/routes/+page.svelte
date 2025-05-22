@@ -47,8 +47,8 @@
     <div
       class="rounded-lg bg-ctp-crust border-2 border-dashed border-ctp-subtext0 p-4"
     >
-      <article class="flex flex-col h-48 w-48">
-        <div class="mb-2">
+      <article class="flex flex-col h-42 w-48">
+        <div class="pb-2">
           <div
             class="w-8 h-8 flex items-center justify-center rounded-full border border-dashed border-ctp-blue text-ctp-blue"
           >
@@ -68,7 +68,7 @@
         </div>
 
         <!-- Footer -->
-        <div class="mt-auto">
+        <div class="pt-auto">
           <a
             href="/auth"
             class="px-2.5 py-1 rounded-md border border-ctp-blue text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-colors font-medium text-xs"

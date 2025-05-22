@@ -88,13 +88,13 @@
     }
   };
 
-  onMount(() => {
-    // console.log("User profile mounted:", user);
-  });
+  onMount(() => {});
 </script>
 
-<div class="w-full max-w-5xl mx-auto">
-  <div class="bg-ctp-mantle rounded-lg shadow-sm p-6 border border-ctp-surface0">
+<div class="h-full w-full flex justify-center items-center">
+  <div
+    class="bg-ctp-mantle rounded-lg shadow-sm p-6 border border-ctp-surface0"
+  >
     <div
       class="flex flex-col sm:flex-row gap-4 border-b border-ctp-surface0 pb-6 mb-6"
     >
@@ -147,7 +147,7 @@
           <input
             type="text"
             bind:value={newKeyName}
-            placeholder="Key name (e.g. Training Pipeline)"
+            placeholder="Key name"
             class="flex-grow bg-ctp-crust border border-ctp-surface0 rounded-md px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue focus:ring-1 focus:ring-ctp-blue/30"
             required
           />
@@ -177,7 +177,9 @@
       {:else}
         <div class="space-y-4">
           {#each user.apiKeys as key}
-            <div class="border border-ctp-surface0 rounded-lg bg-ctp-crust p-4 hover:border-ctp-surface1 transition-colors">
+            <div
+              class="border border-ctp-surface0 rounded-lg bg-ctp-crust p-4 hover:border-ctp-surface1 transition-colors"
+            >
               <div class="flex justify-between items-start mb-2">
                 <div>
                   <h3 class="font-medium text-ctp-text">{key.name}</h3>
