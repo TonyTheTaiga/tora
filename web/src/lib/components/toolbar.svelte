@@ -20,10 +20,9 @@
     flex flex-row items-center gap-1
     bg-ctp-surface1 border border-ctp-surface2
     rounded-lg shadow-md z-40
-    sm:scale-120
-    sm:opacity-100
-    md:scale-120
-    md:opacity-100
+    sm:scale-100 sm:opacity-100
+    md:scale-110 md:hover:scale-140 md:transition-transform md:duration-300
+    md:opacity-80 md:hover:opacity-100
     lg:scale-110 lg:hover:scale-140 lg:transition-transform lg:duration-300
     lg:opacity-80 lg:hover:opacity-100
   "
