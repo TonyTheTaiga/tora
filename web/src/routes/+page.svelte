@@ -6,6 +6,7 @@
   import Toolbar from "$lib/components/toolbar.svelte";
   import DeleteConfirmationModal from "$lib/components/delete-confirmation-modal.svelte";
   import EditExperimentModal from "$lib/components/edit-experiment-modal.svelte";
+  import { page } from "$app/state";
 
   let { data }: { data: PageData } = $props();
   let experiments: Experiment[] = $state(data.experiments);
@@ -30,7 +31,9 @@
   <EditExperimentModal bind:experiment={selectedForEdit} />
 {/if}
 
-<Toolbar bind:selectedExperiment />
+{#if page.data.user}
+  <Toolbar bind:selectedExperiment />
+{/if}
 
 <ExperimentsList
   bind:experiments
