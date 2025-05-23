@@ -47,6 +47,7 @@
     flex flex-row items-center gap-1
     bg-ctp-surface1 border border-ctp-surface2
     rounded-lg shadow-md z-40
+    overflow-hidden
     sm:scale-100 sm:opacity-100
     md:scale-120 md:hover:scale-140 md:transition-transform md:duration-300
     md:opacity-80 md:hover:opacity-100
@@ -55,7 +56,7 @@
   "
 >
   <button
-    class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-colors"
+    class="p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
     title="Create a new experiment"
     onclick={() => {
       isOpenCreate = true;
@@ -74,7 +75,7 @@
 
   {#if session && session.user}
     <button
-      class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+      class="p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
       title="Go to user profile"
       onclick={() => {
         goto(`/users/${session.user.id}`);
