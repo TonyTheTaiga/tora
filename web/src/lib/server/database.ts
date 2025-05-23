@@ -6,6 +6,7 @@ import type {
   HyperParam,
   Metric,
   Visibility,
+  Workspace
 } from "$lib/types";
 
 export class DatabaseClient {
@@ -389,6 +390,22 @@ export class DatabaseClient {
       tags: item.tags,
       createdAt: new Date(item.created_at),
       visibility: item.visibility,
+    }));
+  }
+
+  static async getWorkspaces(): Promise<Workspace[]> {
+    const { data, error } = await DatabaseClient.getInstance().from('workspace').select("*")
+
+    if (error) {
+      throw new Error(`Failed to get references: ${error.message}`);
+    }
+
+    return data.map((item) => ({
+      id: item.id,
+      user_id: item.user_id,
+      name: item.name,
+      description: item.description,
+      created_at: new Date(item.created_at)
     }));
   }
 }
