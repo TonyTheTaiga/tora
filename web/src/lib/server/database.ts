@@ -408,6 +408,31 @@ export class DatabaseClient {
       created_at: new Date(item.created_at)
     }));
   }
+
+  static async createWorkspace(name: string, description: string | null, user_id: string): Promise<Workspace> {
+    const { data, error } = await DatabaseClient.getInstance().from('workspace')
+      .insert({
+        name,
+        description,
+        user_id
+      })
+      .select()
+      .single();
+
+
+    if (error) {
+      throw new Error(`Failed to create workspace {error.message}`)
+    }
+
+    return {
+      id: data.id,
+      user_id: data.user_id,
+      name: data.name,
+      description: data.description,
+      created_at: new Date(data.created_at)
+    }
+  }
+
 }
 
 export const {
@@ -423,4 +448,6 @@ export const {
   getReferenceChain,
   createMetric,
   batchCreateMetric,
+  getWorkspaces,
+  createWorkspace
 } = DatabaseClient;
