@@ -26,10 +26,7 @@
     class="px-4 sm:px-6 py-3 sm:py-4 flex flex-row justify-between items-center bg-ctp-mantle border-b border-ctp-surface0"
   >
     <!-- Logo -->
-    <button
-      class="w-28 sm:w-32 lg:w-40 text-ctp-mauve fill-current"
-      onclick={() => goto("/")}
-    >
+    <button class="w-32 text-ctp-mauve fill-current" onclick={() => goto("/")}>
       <Logo />
     </button>
 
