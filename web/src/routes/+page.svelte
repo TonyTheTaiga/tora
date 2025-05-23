@@ -6,7 +6,6 @@
   import Toolbar from "$lib/components/toolbar.svelte";
   import DeleteConfirmationModal from "$lib/components/delete-confirmation-modal.svelte";
   import EditExperimentModal from "$lib/components/edit-experiment-modal.svelte";
-  import NewExperimentCard from "$lib/components/new-experiment-card.svelte";
   import { page } from "$app/state";
   import { UserRound } from "lucide-svelte";
 
