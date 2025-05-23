@@ -11,6 +11,7 @@
 
   let { data }: { data: PageData } = $props();
   let experiments: Experiment[] = $state(data.experiments);
+  let hasExperiments: boolean = $derived(experiments.length > 0);
 
   let modalState = $state({
     createExperiment: false,
@@ -41,6 +42,7 @@
   <Toolbar
     bind:selectedExperiment={modalState.selectedExperiment}
     bind:isOpenCreate={modalState.createExperiment}
+    {hasExperiments}
   />
 
   <ExperimentsList

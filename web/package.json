@@ -36,6 +36,7 @@
     "chart.js": "^4.4.9",
     "lucide-svelte": "^0.469.0",
     "marked": "^15.0.12",
+    "tippy.js": "^6.3.7",
     "zod": "^3.25.7",
     "zod-to-json-schema": "^3.24.5"
   },
