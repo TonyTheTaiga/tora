@@ -17,8 +17,8 @@
     return (element) => {
       if (check()) {
         const tippyInstance = tippy(element, {
-          content: `<div>No experiments yet! <strong>Ready to start? Tap here!</strong> and kick things off!</div>
-<div style="text-align: center;"><svg class="arrow-down" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 16l-6-6h12l-6 6z"/></svg></div>`,
+          content: `${content}
+                    <div style="text-align: center;"><svg class="arrow-down" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 16l-6-6h12l-6 6z"/></svg></div>`,
           allowHTML: true,
           trigger: "manual",
           hideOnClick: false,
@@ -62,7 +62,7 @@
       isOpenCreate = true;
     }}
     {@attach tooltip(
-      "Click this button to create your first experiment",
+      "<div>No experiments yet! <strong>Ready to start? Tap here!</strong> and kick things off!</div>",
       () => {
         return hasExperiments === false;
       },
