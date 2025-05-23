@@ -17,7 +17,7 @@
     return (element) => {
       if (check()) {
         const tippyInstance = tippy(element, {
-          content: `<div>${content}</div><div style="text-align: center;"><svg class="arrow-down" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 16l-6-6h12l-6 6z"/></svg></div>`,
+          content: `<div>${content}</div><div style="text-align: center;"><svg class="arrow-down" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 16l-6-6h12l-6 6z"/></svg></div>`,
           allowHTML: true,
           trigger: "manual",
           hideOnClick: true,
@@ -29,7 +29,7 @@
           arrow: true,
           offset: [0, 10],
           maxWidth: 200,
-          zIndex: 9999,
+          zIndex: 35,
         });
         return tippyInstance.destroy;
       }
@@ -60,7 +60,7 @@
       isOpenCreate = true;
     }}
     {@attach tooltip(
-      "🎯 Start your journey! Create your first experiment",
+      "Click this button to create your first experiment",
       () => {
         return hasExperiments === false;
       },
@@ -86,10 +86,10 @@
 
 <style>
   :global(.tippy-box[data-theme~="catppuccin-guide"]) {
-    background-color: var(--color-ctp-surface0);
+    background-color: var(--color-ctp-surface1);
     border: 1px solid var(--color-ctp-surface2);
     border-radius: 0.5rem;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     backdrop-filter: blur(8px);
     animation:
       tooltipFloat 3s ease-in-out infinite,
@@ -114,7 +114,7 @@
   }
 
   :global(.tippy-box[data-theme~="catppuccin-guide"] .tippy-arrow) {
-    color: var(--color-ctp-surface0);
+    color: var(--color-ctp-surface1);
   }
 
   :global(.tippy-box[data-theme~="catppuccin-guide"] .tippy-arrow::before) {
@@ -147,10 +147,10 @@
   @keyframes tooltipGlow {
     0%,
     100% {
-      box-shadow: 0 0 5px rgba(138, 173, 244, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     }
     50% {
-      box-shadow: 0 0 20px rgba(138, 173, 244, 0.6);
+      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.25);
     }
   }
 
