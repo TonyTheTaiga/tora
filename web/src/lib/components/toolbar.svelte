@@ -55,7 +55,7 @@
   "
 >
   <button
-    class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-colors"
+    class="p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
     title="Create a new experiment"
     onclick={() => {
       isOpenCreate = true;
@@ -74,7 +74,7 @@
 
   {#if session && session.user}
     <button
-      class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+      class="p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2"
       title="Go to user profile"
       onclick={() => {
         goto(`/users/${session.user.id}`);
