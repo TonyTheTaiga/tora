@@ -5,13 +5,11 @@
   let theme: "dark" | "light" = "dark";
 
   onMount(() => {
-    // Check for saved theme preference or use device preference
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme && (savedTheme === "dark" || savedTheme === "light")) {
       theme = savedTheme;
       applyTheme(theme);
     } else {
-      // Use device preference if no saved theme
       const prefersDark = window.matchMedia(
         "(prefers-color-scheme: dark)",
       ).matches;
