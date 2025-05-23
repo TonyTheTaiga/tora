@@ -39,7 +39,7 @@
 
 <button
   on:click={toggleTheme}
-  class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
+  class="p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
   aria-label={theme === "dark"
     ? "Switch to light theme"
     : "Switch to dark theme"}
