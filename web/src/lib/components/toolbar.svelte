@@ -90,7 +90,9 @@
     background-color: var(--color-ctp-surface1);
     border: 1px solid var(--color-ctp-surface2);
     border-radius: 0.5rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
     backdrop-filter: blur(8px);
     animation:
       tooltipFloat 3s ease-in-out infinite,
@@ -152,10 +154,14 @@
   @keyframes tooltipGlow {
     0%,
     100% {
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
     50% {
-      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.25);
+      box-shadow:
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
   }
 
