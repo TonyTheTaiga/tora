@@ -21,7 +21,7 @@
 <div style="text-align: center;"><svg class="arrow-down" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 16l-6-6h12l-6 6z"/></svg></div>`,
           allowHTML: true,
           trigger: "manual",
-          hideOnClick: true,
+          hideOnClick: false,
           showOnCreate: true,
           theme: "tooltip-theme",
           animation: "scale",
