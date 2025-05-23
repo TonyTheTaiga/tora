@@ -86,6 +86,17 @@
 </div>
 
 <style>
+  :global(.tippy-box[data-theme~="tooltip-theme"]) {
+    background-color: var(--color-ctp-surface1);
+    border: 1px solid var(--color-ctp-surface2);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(8px);
+    animation:
+      tooltipFloat 3s ease-in-out infinite,
+      tooltipGlow 3s ease-in-out infinite;
+  }
+
   :global(.tippy-box[data-theme~="tooltip-theme"] .tippy-content) {
     color: var(--color-ctp-text);
     font-size: 0.875rem;
