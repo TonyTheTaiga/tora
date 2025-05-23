@@ -23,7 +23,7 @@
           trigger: "manual",
           hideOnClick: true,
           showOnCreate: true,
-          theme: "catppuccin-guide",
+          theme: "tooltip-theme",
           animation: "scale",
           duration: [200, 150],
           placement: "top",
@@ -86,18 +86,7 @@
 </div>
 
 <style>
-  :global(.tippy-box[data-theme~="catppuccin-guide"]) {
-    background-color: var(--color-ctp-surface1);
-    border: 1px solid var(--color-ctp-surface2);
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(8px);
-    animation:
-      tooltipFloat 3s ease-in-out infinite,
-      tooltipGlow 3s ease-in-out infinite;
-  }
-
-  :global(.tippy-box[data-theme~="catppuccin-guide"] .tippy-content) {
+  :global(.tippy-box[data-theme~="tooltip-theme"] .tippy-content) {
     color: var(--color-ctp-text);
     font-size: 0.875rem;
     line-height: 1.4;
@@ -109,20 +98,24 @@
     gap: 0.5rem;
   }
 
-  :global(.tippy-box[data-theme~="catppuccin-guide"] .arrow-down) {
+  :global(.tippy-box[data-theme~="tooltip-theme"] .arrow-down) {
     color: var(--color-ctp-blue);
     animation: arrowPulse 1.5s ease-in-out infinite;
   }
 
-  :global(.tippy-box[data-theme~="catppuccin-guide"] .tippy-arrow) {
-    color: var(--color-ctp-surface1);
+  :global(.tippy-box[data-theme~="tooltip-theme"] .tippy-arrow) {
+    color: var(
+      --color-ctp-surface1
+    ); /* Matches toolbar background for the arrow */
   }
 
-  :global(.tippy-box[data-theme~="catppuccin-guide"] .tippy-arrow::before) {
-    border-color: var(--color-ctp-surface2);
+  :global(.tippy-box[data-theme~="tooltip-theme"] .tippy-arrow::before) {
+    border-color: var(
+      --color-ctp-surface2
+    ); /* Matches toolbar border for the arrow */
   }
 
-  :global(.tippy-box[data-theme~="catppuccin-guide"]::before) {
+  :global(.tippy-box[data-theme~="tooltip-theme"]::before) {
     content: "";
     position: absolute;
     top: -1px;
