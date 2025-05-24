@@ -1,6 +1,7 @@
 <script lang="ts">
   import { ChevronDown, Plus, Briefcase } from "lucide-svelte";
   import type { Workspace } from "$lib/types";
+  import { enhance } from "$app/forms";
 
   let {
     currentWorkspace = $bindable(),
@@ -37,7 +38,7 @@
         </div>
 
         {#each workspaces as workspace}
-          <form method="POST" action="/?/switchWorkspace" class="block">
+          <form method="POST" action="/?/switchWorkspace" use:enhance>
             <input type="hidden" name="workspaceId" value={workspace.id} />
             <button
               type="submit"

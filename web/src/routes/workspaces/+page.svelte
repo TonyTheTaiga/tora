@@ -83,7 +83,7 @@
         </p>
       </div>
     {:else}
-      {#each workspaces as workspace, idx}
+      {#each workspaces as workspace}
         <form method="POST" action="/?/switchWorkspace" use:enhance>
           <input type="hidden" name="workspaceId" value={workspace.id} />
           <button
