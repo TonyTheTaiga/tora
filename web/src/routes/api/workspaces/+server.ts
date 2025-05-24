@@ -1,8 +1,12 @@
 import { json, error } from "@sveltejs/kit";
 import { getWorkspaces, createWorkspace } from "$lib/server/database";
 
-export async function GET() {
-  const workspaces = await getWorkspaces();
+export async function GET({ locals: { user } }) {
+  if (!user) {
+    return json([]);
+  }
+
+  const workspaces = await getWorkspaces(user.id);
   return json(workspaces);
 }
 

@@ -1,12 +1,42 @@
+import type { Workspace } from "$lib/types";
 import type { LayoutServerLoad } from "./$types";
+import {
+  getWorkspaces,
+  getOrCreateDefaultWorkspace,
+} from "$lib/server/database";
 
-export const load: LayoutServerLoad = async ({
-  locals: { safeGetSession },
-  cookies,
-}) => {
-  const { session } = await safeGetSession();
+export const load: LayoutServerLoad = async ({ locals, cookies }) => {
+  const { session, user } = await locals.safeGetSession();
+
+  let currentWorkspace: Workspace | null = null;
+  let userWorkspaces: Workspace[] = [];
+
+  if (user) {
+    userWorkspaces = await getWorkspaces(user.id);
+    const workspaceId = cookies.get("current_workspace");
+
+    if (workspaceId) {
+      currentWorkspace = userWorkspaces.find((w) => w.id === workspaceId);
+    }
+
+    if (!currentWorkspace) {
+      currentWorkspace = await getOrCreateDefaultWorkspace(user.id);
+      cookies.set("current_workspace", currentWorkspace.id, {
+        path: "/",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 30,
+      });
+
+      userWorkspaces = await getWorkspaces(user.id);
+    }
+  }
+
   return {
     session,
     cookies: cookies.getAll(),
+    currentWorkspace,
+    userWorkspaces,
   };
 };

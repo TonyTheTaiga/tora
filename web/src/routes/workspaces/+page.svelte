@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Plus } from "lucide-svelte";
+  import { Plus, ArrowLeft, Briefcase } from "lucide-svelte";
   import { enhance, applyAction } from "$app/forms";
+  import { goto, invalidateAll } from "$app/navigation";
 
   let { data } = $props();
   let workspaces = $state(data.workspaces);
@@ -13,7 +14,16 @@
 
 <div class="flex flex-col h-full bg-ctp-base text-ctp-text">
   <div class="border-b border-ctp-surface0 p-4">
-    <h1 class="text-2xl font-semibold text-ctp-mauve">Workspaces</h1>
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-semibold text-ctp-mauve">Workspaces</h1>
+      <button
+        onclick={() => goto("/")}
+        class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-text transition-colors"
+      >
+        <ArrowLeft size={16} />
+        <span class="text-sm">Back to experiments</span>
+      </button>
+    </div>
   </div>
   <div class="p-4">
     <form
@@ -21,13 +31,16 @@
       action="/api/workspaces"
       class="flex flex-col text-ctp-text space-y-4 p-4"
       use:enhance={({ formData }) => {
+        creating = true;
         return async ({ result, update }) => {
           creating = false;
           inputData.name = "";
           inputData.description = "";
-          workspaces.push(result);
+          if (result.type === "success" && result.data) {
+            // Refresh the page to get updated workspace list
+            await invalidateAll();
+          }
           await update();
-          await applyAction(result);
         };
       }}
     >
@@ -65,10 +78,44 @@
   </div>
 
   <div class="flex-1 p-4 space-y-3">
-    {#each workspaces as workspace, idx}
-      <div class="flex flex-col bg-ctp-surface0 p-3 rounded-md shadow">
-        <h3 class="text-ctp-text font-semibold">{workspace.name}</h3>
+    {#if workspaces.length === 0}
+      <div class="text-center py-8">
+        <Briefcase size={48} class="mx-auto text-ctp-surface2 mb-4" />
+        <p class="text-ctp-subtext0">
+          No workspaces yet. Create your first workspace above!
+        </p>
       </div>
-    {/each}
+    {:else}
+      {#each workspaces as workspace, idx}
+        <form method="POST" action="/?/switchWorkspace" use:enhance>
+          <input type="hidden" name="workspaceId" value={workspace.id} />
+          <button
+            type="submit"
+            class="w-full flex flex-col bg-ctp-surface0 p-4 rounded-md shadow hover:bg-ctp-surface1 transition-colors cursor-pointer text-left"
+          >
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <h3 class="text-ctp-text font-semibold flex items-center gap-2">
+                  <Briefcase size={16} class="text-ctp-mauve" />
+                  {workspace.name}
+                </h3>
+                {#if workspace.description}
+                  <p class="text-ctp-subtext0 text-sm mt-1">
+                    {workspace.description}
+                  </p>
+                {/if}
+              </div>
+              {#if data.currentWorkspace?.id === workspace.id}
+                <span
+                  class="text-xs bg-ctp-blue text-ctp-base px-2 py-1 rounded"
+                >
+                  Current
+                </span>
+              {/if}
+            </div>
+          </button>
+        </form>
+      {/each}
+    {/if}
   </div>
 </div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plus, User } from "lucide-svelte";
+  import { Plus, User, Briefcase } from "lucide-svelte";
   import ThemeToggle from "./theme-toggle.svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
@@ -74,6 +74,16 @@
   <ThemeToggle />
 
   {#if session && session.user}
+    <button
+      class="p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
+      title="Manage workspaces"
+      onclick={() => {
+        goto("/workspaces");
+      }}
+    >
+      <Briefcase size={16} />
+    </button>
+
     <button
       class="p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
       title="Go to user profile"

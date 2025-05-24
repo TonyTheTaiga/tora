@@ -78,7 +78,6 @@ const finalize: Handle = async ({ event, resolve }) => {
   event.locals.session = session;
   event.locals.user = user;
 
-  // Handle API key authentication
   if (
     event.url.pathname.startsWith("/api") &&
     !event.locals.user &&
@@ -101,8 +100,6 @@ const finalize: Handle = async ({ event, resolve }) => {
           event.locals.user = {
             id: keyData.user_id,
           };
-
-          // Update last_used timestamp
           await event.locals.supabase
             .from("api_keys")
             .update({ last_used: new Date().toISOString() })

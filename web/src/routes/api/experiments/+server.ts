@@ -11,9 +11,11 @@ export async function GET({
   locals: { supabase: SupabaseClient<Database>; user: { id: string } | null };
 }) {
   const name_filter = url.searchParams.get("startwith") || "";
+  const workspace_id = url.searchParams.get("workspace") || undefined;
+
   try {
     const userId = locals.user?.id;
-    const experiments = await getExperiments(name_filter, userId);
+    const experiments = await getExperiments(name_filter, userId, workspace_id);
     return json(experiments);
   } catch (err) {
     if (err instanceof Error) {
@@ -24,7 +26,7 @@ export async function GET({
   }
 }
 
-export async function POST({ request, locals: { user } }) {
+export async function POST({ request, locals: { user }, cookies }) {
   if (!user) {
     return json(
       { error: "Cannot create a experiment for anonymous user" },
@@ -39,6 +41,7 @@ export async function POST({ request, locals: { user } }) {
     let hyperparams = data["hyperparams"];
     let tags = data["tags"];
     let visibility = data["visibility"] || "PRIVATE";
+    let workspaceId = data["workspaceId"] || cookies.get("current_workspace");
 
     if (typeof hyperparams === "string") {
       try {
@@ -55,6 +58,7 @@ export async function POST({ request, locals: { user } }) {
       hyperparams,
       tags,
       visibility,
+      workspaceId,
     );
     return json({ success: true, experiment: experiment });
   } catch (error: unknown) {

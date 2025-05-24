@@ -196,6 +196,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      workspace_experiments: {
+        Row: {
+          experiment_id: string;
+          workspace_id: string;
+        };
+        Insert: {
+          experiment_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          experiment_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "workspace_experiments_experiment_id_fkey";
+            columns: ["experiment_id"];
+            isOneToOne: false;
+            referencedRelation: "experiment";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "workspace_experiments_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspace";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
