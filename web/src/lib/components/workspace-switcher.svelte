@@ -13,7 +13,7 @@
 </script>
 
 <div class="workspace-switcher relative">
-  <details class="group">
+  <details id="workspaceDropdown" class="group">
     <summary
       class="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-md border border-ctp-surface0 bg-ctp-crust hover:bg-ctp-surface0 transition-colors text-sm cursor-pointer list-none"
     >
@@ -38,7 +38,18 @@
         </div>
 
         {#each workspaces as workspace}
-          <form method="POST" action="/?/switchWorkspace" use:enhance>
+          <form
+            method="POST"
+            action="/?/switchWorkspace"
+            use:enhance={() => {
+              return async ({ result, update }) => {
+                await update();
+                const detailsElement =
+                  document.getElementById("workspaceDropdown");
+                detailsElement?.removeAttribute("open");
+              };
+            }}
+          >
             <input type="hidden" name="workspaceId" value={workspace.id} />
             <button
               type="submit"
