@@ -14,20 +14,20 @@
 <div class="workspace-switcher relative">
   <details class="group">
     <summary
-      class="flex items-center gap-2 px-3 py-1.5 rounded-md border border-ctp-surface0 bg-ctp-crust hover:bg-ctp-surface0 transition-colors text-sm cursor-pointer list-none"
+      class="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-md border border-ctp-surface0 bg-ctp-crust hover:bg-ctp-surface0 transition-colors text-sm cursor-pointer list-none"
     >
-      <Briefcase size={16} class="text-ctp-mauve" />
-      <span class="text-ctp-text font-medium">
+      <Briefcase size={16} class="text-ctp-mauve flex-shrink-0" />
+      <span class="text-ctp-text font-medium truncate min-w-0">
         {currentWorkspace?.name || "Select Workspace"}
       </span>
       <ChevronDown
         size={14}
-        class="text-ctp-subtext0 transition-transform group-open:rotate-180"
+        class="text-ctp-subtext0 transition-transform group-open:rotate-180 flex-shrink-0"
       />
     </summary>
 
     <div
-      class="absolute top-full mt-1 right-0 w-64 bg-ctp-mantle border border-ctp-surface0 rounded-md shadow-lg z-50 max-h-80 overflow-y-auto"
+      class="absolute top-full mt-1 right-0 w-64 sm:w-72 md:w-80 max-w-[calc(100vw-1rem)] bg-ctp-mantle border border-ctp-surface0 rounded-md shadow-lg z-50 max-h-80 overflow-y-auto"
     >
       <div class="p-2 space-y-2">
         <div
@@ -47,10 +47,12 @@
                 : ''}"
             >
               <Briefcase size={14} class="text-ctp-mauve" />
-              <div class="flex-1">
-                <div class="text-sm text-ctp-text">{workspace.name}</div>
+              <div class="flex-1 min-w-0">
+                <div class="text-sm text-ctp-text truncate">
+                  {workspace.name}
+                </div>
                 {#if workspace.description}
-                  <div class="text-xs text-ctp-subtext0">
+                  <div class="text-xs text-ctp-subtext0 truncate">
                     {workspace.description}
                   </div>
                 {/if}

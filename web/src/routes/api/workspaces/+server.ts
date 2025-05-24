@@ -11,7 +11,6 @@ export async function GET({ locals: { user } }) {
 }
 
 export async function POST({ request, locals: { user } }) {
-  console.log("creating workspace for user", user);
   if (!user) {
     return error(500, {
       message: "Cannot create a experiment for anonymous user",
