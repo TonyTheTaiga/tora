@@ -19,13 +19,13 @@ interface FormDataResult {
 export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   const { session } = await locals.safeGetSession();
   const { currentWorkspace } = await parent();
-  
+
   // Build URL with workspace filter if available
   const apiUrl = new URL(API_ROUTES.GET_EXPERIMENTS, url.origin);
   if (currentWorkspace) {
     apiUrl.searchParams.set("workspace", currentWorkspace.id);
   }
-  
+
   const response = await fetch(apiUrl.toString());
   const experiments = await response.json();
   return { experiments, session };
@@ -36,13 +36,17 @@ export const actions: Actions = {
   delete: async ({ request, fetch }) => handleDelete(request, fetch),
   update: async ({ request, fetch }) => handleUpdate(request, fetch),
   switchWorkspace: async ({ request, cookies }) => {
+    console.log("🔄 Switch workspace action called");
     const formData = await request.formData();
     const workspaceId = formData.get("workspaceId");
+    console.log("📝 Workspace ID from form:", workspaceId);
 
     if (!workspaceId || typeof workspaceId !== "string") {
+      console.log("❌ Invalid workspace ID");
       return fail(400, { message: "Workspace ID is required" });
     }
 
+    console.log("🍪 Setting cookie for workspace:", workspaceId);
     cookies.set("current_workspace", workspaceId, {
       path: "/",
       httpOnly: true,
@@ -51,6 +55,7 @@ export const actions: Actions = {
       maxAge: 60 * 60 * 24 * 30, // 30 days
     });
 
+    console.log("🔄 Redirecting to /");
     throw redirect(303, "/");
   },
 };
