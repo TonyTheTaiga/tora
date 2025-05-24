@@ -36,10 +36,7 @@
           creating = false;
           inputData.name = "";
           inputData.description = "";
-          if (result.type === "success" && result.data) {
-            // Refresh the page to get updated workspace list
-            await invalidateAll();
-          }
+          workspaces.push(result);
           await update();
         };
       }}
