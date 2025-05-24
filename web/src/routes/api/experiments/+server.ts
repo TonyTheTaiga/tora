@@ -1,5 +1,9 @@
 import { json, error } from "@sveltejs/kit";
-import { getExperiments, createExperiment } from "$lib/server/database";
+import {
+  getExperiments,
+  createExperiment,
+  getOrCreateDefaultWorkspace,
+} from "$lib/server/database";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "$lib/server/database.types";
 
@@ -42,6 +46,11 @@ export async function POST({ request, locals: { user }, cookies }) {
     let tags = data["tags"];
     let visibility = data["visibility"] || "PRIVATE";
     let workspaceId = data["workspaceId"] || cookies.get("current_workspace");
+
+    if (workspaceId === "API_DEFAULT") {
+      const workspace = await getOrCreateDefaultWorkspace(user.id);
+      workspaceId = workspace.id;
+    }
 
     if (typeof hyperparams === "string") {
       try {
