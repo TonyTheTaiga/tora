@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { Plus, ArrowLeft, Briefcase, Copy, ClipboardCheck } from "lucide-svelte";
+  import {
+    Plus,
+    ArrowLeft,
+    Briefcase,
+    Copy,
+    ClipboardCheck,
+  } from "lucide-svelte";
   import { enhance, applyAction } from "$app/forms";
   import { goto, invalidateAll } from "$app/navigation";
 
@@ -55,7 +61,10 @@
         }}
       >
         <div class="space-y-1.5">
-          <label class="text-sm font-medium text-ctp-subtext0" for="workspace-name">
+          <label
+            class="text-sm font-medium text-ctp-subtext0"
+            for="workspace-name"
+          >
             Name
           </label>
           <input
@@ -69,7 +78,10 @@
           />
         </div>
         <div class="space-y-1.5">
-          <label class="text-sm font-medium text-ctp-subtext0" for="workspace-description">
+          <label
+            class="text-sm font-medium text-ctp-subtext0"
+            for="workspace-description"
+          >
             Description
           </label>
           <input
@@ -104,11 +116,15 @@
     {:else}
       {#each workspaces as workspace}
         {#if data.currentWorkspace?.id === workspace.id}
-          <div class="bg-ctp-mantle rounded-xl border border-ctp-surface0 shadow-lg">
+          <div
+            class="bg-ctp-mantle rounded-xl border border-ctp-surface0 shadow-lg"
+          >
             <div class="flex flex-col p-5">
               <div class="flex items-start justify-between">
                 <div class="flex-1">
-                  <h3 class="text-ctp-text font-semibold flex items-center gap-2">
+                  <h3
+                    class="text-ctp-text font-semibold flex items-center gap-2"
+                  >
                     <Briefcase size={16} class="text-ctp-mauve" />
                     {workspace.name}
                   </h3>
@@ -118,7 +134,8 @@
                       type="button"
                       class="text-xs font-mono transition-all duration-150 flex items-center gap-1 hover:bg-ctp-surface0 px-2 py-1 rounded"
                       class:text-ctp-green={copiedWorkspaceId === workspace.id}
-                      class:text-ctp-subtext1={copiedWorkspaceId !== workspace.id}
+                      class:text-ctp-subtext1={copiedWorkspaceId !==
+                        workspace.id}
                       onclick={() => copyWorkspaceId(workspace.id)}
                       title="Click to copy workspace ID"
                     >
@@ -157,7 +174,9 @@
               <div class="flex flex-col p-5 text-left">
                 <div class="flex items-start justify-between">
                   <div class="flex-1">
-                    <h3 class="text-ctp-text font-semibold flex items-center gap-2">
+                    <h3
+                      class="text-ctp-text font-semibold flex items-center gap-2"
+                    >
                       <Briefcase size={16} class="text-ctp-mauve" />
                       {workspace.name}
                     </h3>
