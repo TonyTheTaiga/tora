@@ -16,17 +16,16 @@ interface FormDataResult {
   [key: string]: any;
 }
 
-export const load: PageServerLoad = async ({
-  fetch,
-  locals: { safeGetSession, currentWorkspace },
-  parent,
-  url,
-}) => {
-  const { session } = await safeGetSession();
+export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
+  const { session } = await locals.safeGetSession();
+  const { currentWorkspace } = await parent();
+  
+  // Build URL with workspace filter if available
   const apiUrl = new URL(API_ROUTES.GET_EXPERIMENTS, url.origin);
   if (currentWorkspace) {
     apiUrl.searchParams.set("workspace", currentWorkspace.id);
   }
+  
   const response = await fetch(apiUrl.toString());
   const experiments = await response.json();
   return { experiments, session };

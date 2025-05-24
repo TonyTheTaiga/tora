@@ -16,7 +16,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
     const workspaceId = cookies.get("current_workspace");
 
     if (workspaceId) {
-      currentWorkspace = userWorkspaces.find((w) => w.id === workspaceId);
+      currentWorkspace = userWorkspaces.find((w) => w.id === workspaceId) || null;
     }
 
     if (!currentWorkspace) {
