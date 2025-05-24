@@ -10,7 +10,7 @@
   import { UserRound } from "lucide-svelte";
 
   let { data }: { data: PageData } = $props();
-  let experiments: Experiment[] = $state(data.experiments);
+  let experiments: Experiment[] = $derived(data.experiments);
   let hasExperiments: boolean = $derived(experiments.length > 0);
 
   let modalState = $state({
