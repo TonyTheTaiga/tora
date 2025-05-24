@@ -25,7 +25,6 @@
           creating = false;
           inputData.name = "";
           inputData.description = "";
-          console.log("result", result);
           workspaces.push(result);
           await update();
           await applyAction(result);
@@ -52,7 +51,11 @@
           class="bg-ctp-surface0 border border-ctp-surface2 text-ctp-text placeholder-ctp-subtext0 p-2 rounded-md focus:border-ctp-blue focus:ring-1 focus:ring-ctp-blue w-full"
         />
       </label>
-      <button type="submit" disabled={creating} class="bg-ctp-blue text-ctp-base px-4 py-2 rounded-md hover:bg-ctp-sapphire focus:outline-none focus:ring-2 focus:ring-ctp-blue focus:ring-opacity-50 flex items-center justify-center space-x-2 self-start">
+      <button
+        type="submit"
+        disabled={creating}
+        class="bg-ctp-blue text-ctp-base px-4 py-2 rounded-md hover:bg-ctp-sapphire focus:outline-none focus:ring-2 focus:ring-ctp-blue focus:ring-opacity-50 flex items-center justify-center space-x-2 self-start"
+      >
         <div class="flex flex-row items-center space-x-2">
           <Plus size={16}></Plus>
           <span>Create Workspace</span>

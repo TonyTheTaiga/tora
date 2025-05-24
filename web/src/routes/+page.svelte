@@ -45,6 +45,10 @@
     {hasExperiments}
   />
 
+  <div>
+    {experiments.length} Experiments
+  </div>
+
   <ExperimentsList
     bind:experiments
     bind:createNewExperimentFlag={modalState.createExperiment}
