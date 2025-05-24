@@ -3,6 +3,7 @@
   import type { Workspace } from "$lib/types";
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
+  import { onMount } from "svelte";
 
   let {
     currentWorkspace = $bindable(),
@@ -11,9 +12,23 @@
     currentWorkspace: Workspace | null;
     workspaces: Workspace[];
   } = $props();
+
+  let dropdownRef: HTMLElement;
+
+  onMount(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef && !dropdownRef.contains(event.target as Node)) {
+        const detailsElement = document.getElementById("workspaceDropdown");
+        detailsElement?.removeAttribute("open");
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  });
 </script>
 
-<div class="workspace-switcher relative">
+<div class="workspace-switcher relative" bind:this={dropdownRef}>
   <details id="workspaceDropdown" class="group">
     <summary
       class="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-md border border-ctp-surface0 bg-ctp-crust hover:bg-ctp-surface0 transition-colors text-sm cursor-pointer list-none"
