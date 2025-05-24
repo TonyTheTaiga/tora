@@ -62,7 +62,7 @@
         <div class="border-t border-ctp-surface0 mt-2 pt-2">
           <a
             href="/workspaces"
-            class="w-full text-left px-2 py-1.5 rounded hover:bg-ctp-surface0 transition-colors flex items-center gap-2 text-ctp-blue block"
+            class="w-full text-left px-2 py-1.5 rounded hover:bg-ctp-surface0 transition-colors flex items-center gap-2 text-ctp-blue"
           >
             <Plus size={14} />
             <span class="text-sm">Manage Workspaces</span>
