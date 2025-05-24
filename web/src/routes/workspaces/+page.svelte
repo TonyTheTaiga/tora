@@ -103,61 +103,81 @@
       </div>
     {:else}
       {#each workspaces as workspace}
-        <div class="bg-ctp-mantle rounded-xl border border-ctp-surface0 shadow-lg">
-          <div class="flex flex-col p-5">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <h3 class="text-ctp-text font-semibold flex items-center gap-2">
-                  <Briefcase size={16} class="text-ctp-mauve" />
-                  {workspace.name}
-                </h3>
-                <div class="flex items-center gap-2 mt-1">
-                  <span class="text-ctp-subtext1 text-xs">ID:</span>
-                  <button
-                    type="button"
-                    class="text-xs font-mono transition-all duration-150 flex items-center gap-1 hover:bg-ctp-surface0 px-2 py-1 rounded"
-                    class:text-ctp-green={copiedWorkspaceId === workspace.id}
-                    class:text-ctp-subtext1={copiedWorkspaceId !== workspace.id}
-                    onclick={() => copyWorkspaceId(workspace.id)}
-                    title="Click to copy workspace ID"
-                  >
-                    {#if copiedWorkspaceId === workspace.id}
-                      <ClipboardCheck size={12} class="animate-bounce" />
-                      Copied!
-                    {:else}
-                      {workspace.id}
-                      <Copy size={10} class="opacity-50" />
-                    {/if}
-                  </button>
+        {#if data.currentWorkspace?.id === workspace.id}
+          <div class="bg-ctp-mantle rounded-xl border border-ctp-surface0 shadow-lg">
+            <div class="flex flex-col p-5">
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <h3 class="text-ctp-text font-semibold flex items-center gap-2">
+                    <Briefcase size={16} class="text-ctp-mauve" />
+                    {workspace.name}
+                  </h3>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="text-ctp-subtext1 text-xs">ID:</span>
+                    <button
+                      type="button"
+                      class="text-xs font-mono transition-all duration-150 flex items-center gap-1 hover:bg-ctp-surface0 px-2 py-1 rounded"
+                      class:text-ctp-green={copiedWorkspaceId === workspace.id}
+                      class:text-ctp-subtext1={copiedWorkspaceId !== workspace.id}
+                      onclick={() => copyWorkspaceId(workspace.id)}
+                      title="Click to copy workspace ID"
+                    >
+                      {#if copiedWorkspaceId === workspace.id}
+                        <ClipboardCheck size={12} class="animate-bounce" />
+                        Copied!
+                      {:else}
+                        {workspace.id}
+                        <Copy size={10} class="opacity-50" />
+                      {/if}
+                    </button>
+                  </div>
+                  {#if workspace.description}
+                    <p class="text-ctp-subtext0 text-sm mt-2">
+                      {workspace.description}
+                    </p>
+                  {/if}
                 </div>
-                {#if workspace.description}
-                  <p class="text-ctp-subtext0 text-sm mt-2">
-                    {workspace.description}
-                  </p>
-                {/if}
-              </div>
-              <div class="flex items-center gap-2">
-                {#if data.currentWorkspace?.id === workspace.id}
+                <div class="flex items-center gap-2">
                   <span
                     class="text-xs bg-ctp-blue text-ctp-base px-2 py-1 rounded font-medium"
                   >
                     Current
                   </span>
-                {:else}
-                  <form method="POST" action="/?/switchWorkspace" use:enhance>
-                    <input type="hidden" name="workspaceId" value={workspace.id} />
-                    <button
-                      type="submit"
-                      class="px-3 py-1.5 text-sm font-medium rounded-lg bg-ctp-blue text-ctp-base hover:bg-ctp-sapphire transition-colors"
-                    >
-                      Switch
-                    </button>
-                  </form>
-                {/if}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        {:else}
+          <form method="POST" action="/?/switchWorkspace" use:enhance>
+            <input type="hidden" name="workspaceId" value={workspace.id} />
+            <button
+              type="submit"
+              class="w-full bg-ctp-mantle rounded-xl border border-ctp-surface0 shadow-lg hover:shadow-xl hover:bg-ctp-surface0 transition-all"
+            >
+              <div class="flex flex-col p-5 text-left">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <h3 class="text-ctp-text font-semibold flex items-center gap-2">
+                      <Briefcase size={16} class="text-ctp-mauve" />
+                      {workspace.name}
+                    </h3>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-ctp-subtext1 text-xs">ID:</span>
+                      <span class="text-xs font-mono text-ctp-subtext1">
+                        {workspace.id}
+                      </span>
+                    </div>
+                    {#if workspace.description}
+                      <p class="text-ctp-subtext0 text-sm mt-2">
+                        {workspace.description}
+                      </p>
+                    {/if}
+                  </div>
+                </div>
+              </div>
+            </button>
+          </form>
+        {/if}
       {/each}
     {/if}
   </div>
