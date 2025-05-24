@@ -6,7 +6,7 @@ import type {
   HyperParam,
   Metric,
   Visibility,
-  Workspace
+  Workspace,
 } from "$lib/types";
 
 export class DatabaseClient {
@@ -394,7 +394,9 @@ export class DatabaseClient {
   }
 
   static async getWorkspaces(): Promise<Workspace[]> {
-    const { data, error } = await DatabaseClient.getInstance().from('workspace').select("*")
+    const { data, error } = await DatabaseClient.getInstance()
+      .from("workspace")
+      .select("*");
 
     if (error) {
       throw new Error(`Failed to get references: ${error.message}`);
@@ -405,23 +407,29 @@ export class DatabaseClient {
       user_id: item.user_id,
       name: item.name,
       description: item.description,
-      created_at: new Date(item.created_at)
+      created_at: new Date(item.created_at),
     }));
   }
 
-  static async createWorkspace(name: string, description: string | null, user_id: string): Promise<Workspace> {
-    const { data, error } = await DatabaseClient.getInstance().from('workspace')
+  static async createWorkspace(
+    name: string,
+    description: string | null,
+    user_id: string,
+  ): Promise<Workspace> {
+    const { data, error } = await DatabaseClient.getInstance()
+      .from("workspace")
       .insert({
-        name,
-        description,
-        user_id
+        name: name,
+        description: description,
+        user_id: user_id,
       })
       .select()
       .single();
 
+    console.log(error);
 
     if (error) {
-      throw new Error(`Failed to create workspace {error.message}`)
+      throw new Error(`Failed to create workspace {error.message}`);
     }
 
     return {
@@ -429,10 +437,9 @@ export class DatabaseClient {
       user_id: data.user_id,
       name: data.name,
       description: data.description,
-      created_at: new Date(data.created_at)
-    }
+      created_at: new Date(data.created_at),
+    };
   }
-
 }
 
 export const {
@@ -449,5 +456,5 @@ export const {
   createMetric,
   batchCreateMetric,
   getWorkspaces,
-  createWorkspace
+  createWorkspace,
 } = DatabaseClient;

@@ -46,11 +46,10 @@ export interface ExperimentAnalysis {
   hyperparameter_recommendations: Record<string, HPRecommendation>;
 }
 
-
 export interface Workspace {
-  id: string,
-  user_id: string,
-  name: string,
-  description: string | null,
-  created_at: Date
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  created_at: Date;
 }

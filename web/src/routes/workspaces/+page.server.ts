@@ -1,8 +1,12 @@
-import type { PageServerLoad } from "./$types";
+import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
   const { session } = await locals.safeGetSession();
-  const response = await fetch('/api/workspaces')
+  const response = await fetch("/api/workspaces");
   const workspaces = await response.json();
   return { workspaces, session };
+};
+
+export const actions: Actions = {
+  create: async ({ request, fetch }) => {},
 };
