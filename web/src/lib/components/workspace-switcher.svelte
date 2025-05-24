@@ -2,6 +2,7 @@
   import { ChevronDown, Plus, Briefcase } from "lucide-svelte";
   import type { Workspace } from "$lib/types";
   import { enhance } from "$app/forms";
+  import { goto } from "$app/navigation";
 
   let {
     currentWorkspace = $bindable(),
@@ -74,13 +75,19 @@
         {/each}
 
         <div class="border-t border-ctp-surface0 mt-2 pt-2">
-          <a
-            href="/workspaces"
+          <button
+            type="button"
             class="w-full text-left px-2 py-1.5 rounded hover:bg-ctp-surface0 transition-colors flex items-center gap-2 text-ctp-blue"
+            onclick={() => {
+              const detailsElement =
+                document.getElementById("workspaceDropdown");
+              detailsElement?.removeAttribute("open");
+              goto("/workspaces");
+            }}
           >
             <Plus size={14} />
             <span class="text-sm">Manage Workspaces</span>
-          </a>
+          </button>
         </div>
       </div>
     </div>
