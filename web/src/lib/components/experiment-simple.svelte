@@ -81,18 +81,20 @@
       </div>
     </div>
   </div>
-
-  <!-- MIDDLE: Key Metrics -->
-  <div class="mb-2 flex flex-col gap-1">
+  <div class="mb-2 text-xs"> <!-- Base text size for this section -->
     {#if experiment.keyMetrics && experiment.keyMetrics.length > 0}
-      {#each experiment.keyMetrics as metric (metric.name)}
-        <div class="text-xs flex justify-between items-center">
-          <span class="text-ctp-subtext1 truncate pr-1">{metric.name}:</span>
-          <span class="font-medium text-ctp-text ml-1 truncate">{metric.value}</span>
-        </div>
-      {/each}
+      <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5" title="Key Metrics"> <!-- Grid container with tooltip -->
+        {#each experiment.keyMetrics as metric (metric.name)}
+          <span class="text-ctp-subtext1 truncate text-right" title={metric.name}>
+            {metric.name}:
+          </span>
+          <span class="font-medium text-ctp-text truncate" title={String(metric.value)}>
+            {metric.value}
+          </span>
+        {/each}
+      </div>
     {:else}
-      <p class="text-ctp-overlay0 text-xs italic">No key metrics.</p> <!-- Adjusted placeholder text -->
+      <p class="text-ctp-overlay0 text-xs italic">No key metrics.</p>
     {/if}
   </div>
 
