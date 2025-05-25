@@ -1,7 +1,7 @@
 import type { Actions } from "./$types";
 import type { PageServerLoad } from "./$types";
 import { fail, redirect } from "@sveltejs/kit";
-import type { HyperParam } from "$lib/types";
+import type { HyperParam, Experiment, Metric } from "$lib/types"; // Added Metric and Experiment here
 
 const API_ROUTES = {
   GET_EXPERIMENTS: "/api/experiments",
@@ -27,7 +27,64 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   }
 
   const response = await fetch(apiUrl.toString());
-  const experiments = await response.json();
+  if (!response.ok) {
+    // Handle case where fetching experiments itself fails
+    console.error(`Failed to fetch experiments: ${response.status} ${response.statusText}`);
+    return { experiments: [], session, error: "Failed to load experiments." };
+  }
+
+  let experiments: Experiment[] = await response.json();
+
+  // Populate keyMetrics for each experiment
+  if (experiments && experiments.length > 0) {
+    const experimentsWithKeyMetrics = await Promise.all(
+      experiments.map(async (exp) => {
+        try {
+          const metricsResponse = await fetch(`/api/experiments/${exp.id}/metrics`);
+          if (!metricsResponse.ok) {
+            console.warn(`Failed to fetch metrics for experiment ${exp.id}: ${metricsResponse.status}`);
+            return { ...exp, keyMetrics: [] }; // Return experiment with empty keyMetrics on error
+          }
+          const rawMetrics: Metric[] = await metricsResponse.json();
+
+          if (!rawMetrics || rawMetrics.length === 0) {
+            return { ...exp, keyMetrics: [] };
+          }
+
+          // Sort metrics by created_at descending (most recent first)
+          // Ensure created_at is treated as a Date for proper sorting
+          const sortedMetrics = rawMetrics.sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+
+          const latestDistinctMetrics: Array<{ name: string; value: string | number }> = [];
+          const distinctNames = new Set<string>();
+
+          for (const metric of sortedMetrics) {
+            if (!distinctNames.has(metric.name)) {
+              distinctNames.add(metric.name);
+              latestDistinctMetrics.push({
+                name: metric.name,
+                // Value formatting might be needed if it's not already a string/number as desired
+                // For now, assume metric.value is directly usable.
+                // If metric.value can be other types, ensure conversion or appropriate handling.
+                value: typeof metric.value === 'number' ? parseFloat(metric.value.toFixed(4)) : metric.value,
+              });
+              if (latestDistinctMetrics.length >= 2) {
+                break; // Stop after finding 2 distinct metrics
+              }
+            }
+          }
+          return { ...exp, keyMetrics: latestDistinctMetrics };
+        } catch (error) {
+          console.error(`Error processing metrics for experiment ${exp.id}:`, error);
+          return { ...exp, keyMetrics: [] }; // Return with empty keyMetrics on processing error
+        }
+      })
+    );
+    experiments = experimentsWithKeyMetrics;
+  }
+
   return { experiments, session };
 };
 
