@@ -466,16 +466,14 @@ export class DatabaseClient {
   }
 
   static async getOrCreateDefaultWorkspace(userId: string): Promise<Workspace> {
-    // Check if user already has workspaces
     const workspaces = await DatabaseClient.getWorkspaces(userId);
 
     if (workspaces.length > 0) {
       return workspaces[0];
     }
 
-    // Create default workspace
     return await DatabaseClient.createWorkspace(
-      "Personal Workspace",
+      "Default",
       "Your default workspace for experiments",
       userId,
     );
