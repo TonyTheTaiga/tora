@@ -119,38 +119,31 @@
     <!-- Mobile header -->
     <div class="flex flex-col sm:hidden w-full gap-2">
       <!-- Title row -->
-      <h2 class="truncate">
-        <span
-          role="button"
-          tabindex="0"
-          class="text-base font-medium cursor-pointer transition-all duration-150 flex items-center gap-1.5 px-2 py-1 rounded-md { (idCopyAnimated && idCopied) ? 'bg-ctp-green/20' : '' }"
-          class:text-ctp-green={idCopied}
-          class:text-ctp-text={!idCopied}
-          onclick={() => {
-            navigator.clipboard.writeText(experiment.id);
-            idCopied = true;
-            idCopyAnimated = true;
-            setTimeout(() => { idCopied = false; }, 800);
-            setTimeout(() => { idCopyAnimated = false; }, 300);
-          }}
-          onkeydown={(e) => {
-            if (e.key === "Enter" || e.key === " ") e.currentTarget.click();
-          }}
-          title="Click to copy ID"
-        >
-          {#if idCopied}
-            <span class="flex items-center">
-              <ClipboardCheck size={16} class="mr-1 transition-transform duration-150 {idCopyAnimated ? 'scale-125' : (idCopied ? 'animate-bounce' : '')}" />
-              ID Copied
-            </span>
-          {:else}
-            <span class="flex items-center">
+      <div class="flex items-center justify-between"> <!-- Wrapper for name and button -->
+          <h2 class="text-base font-medium text-ctp-text truncate pr-2" title={experiment.name}>
               {experiment.name}
-              <Copy size={12} class="ml-1 opacity-30 flex-shrink-0" />
-            </span>
-          {/if}
-        </span>
-      </h2>
+          </h2>
+          <button
+              type="button"
+              aria-label="Copy Experiment ID"
+              title={idCopied ? "ID Copied!" : "Copy Experiment ID"}
+              class="flex items-center p-1 rounded-md text-ctp-subtext0 transition-colors hover:bg-ctp-surface0 hover:text-ctp-text active:bg-ctp-surface1 group flex-shrink-0"
+              onclick={() => {
+                navigator.clipboard.writeText(experiment.id);
+                idCopied = true;
+                idCopyAnimated = true;
+                setTimeout(() => { idCopied = false; }, 800);
+                setTimeout(() => { idCopyAnimated = false; }, 300);
+              }}
+          >
+              {#if idCopied}
+                  <ClipboardCheck size={14} class="text-ctp-green transition-transform duration-150 {idCopyAnimated ? 'scale-125' : 'animate-bounce'}"/>
+                  <span class="text-xs text-ctp-green ml-1">Copied!</span>
+              {:else}
+                  <Copy size={14} />
+              {/if}
+          </button>
+      </div>
 
       <!-- Actions row -->
       <div class="flex items-center justify-end gap-2">
@@ -232,13 +225,15 @@
 
     <!-- Desktop/Tablet header -->
     <div class="hidden sm:flex sm:flex-row justify-between items-center">
-      <h2 class="max-w-[70%]">
-        <span
-          role="button"
-          tabindex="0"
-          class="text-lg font-medium cursor-pointer transition-all duration-150 flex items-center gap-1.5 px-2 py-1 rounded-md { (idCopyAnimated && idCopied) ? 'bg-ctp-green/20' : '' }"
-          class:text-ctp-green={idCopied}
-          class:text-ctp-text={!idCopied}
+      <div class="flex items-center gap-2 flex-grow min-w-0 mr-4"> <!-- Parent div for name and button -->
+        <h2 class="text-lg font-medium text-ctp-text truncate" title={experiment.name}>
+          {experiment.name}
+        </h2>
+        <button
+          type="button"
+          aria-label="Copy Experiment ID"
+          title={idCopied ? "ID Copied!" : "Copy Experiment ID"}
+          class="flex items-center p-1.5 rounded-md text-ctp-subtext0 transition-colors hover:bg-ctp-surface0 hover:text-ctp-text active:bg-ctp-surface1 group flex-shrink-0"
           onclick={() => {
             navigator.clipboard.writeText(experiment.id);
             idCopied = true;
@@ -246,24 +241,18 @@
             setTimeout(() => { idCopied = false; }, 800);
             setTimeout(() => { idCopyAnimated = false; }, 300);
           }}
-          onkeydown={(e) => {
-            if (e.key === "Enter" || e.key === " ") e.currentTarget.click();
-          }}
-          title="Click to copy ID"
         >
           {#if idCopied}
-            <span class="flex items-center">
-              <ClipboardCheck size={18} class="mr-1 transition-transform duration-150 {idCopyAnimated ? 'scale-125' : (idCopied ? 'animate-bounce' : '')}" />
-              ID Copied
-            </span>
+            <ClipboardCheck
+              size={16}
+              class="text-ctp-green transition-transform duration-150 {idCopyAnimated ? 'scale-125' : 'animate-bounce'}"
+            />
+            <span class="text-xs text-ctp-green ml-1.5">Copied!</span>
           {:else}
-            <span class="flex items-center truncate">
-              <span class="truncate">{experiment.name}</span>
-              <Copy size={14} class="ml-1 opacity-30 flex-shrink-0" />
-            </span>
+            <Copy size={16} />
           {/if}
-        </span>
-      </h2>
+        </button>
+      </div>
       <div class="flex items-center gap-2">
         {#if page.data.user && page.data.user.id === experiment.user_id}
           <button
