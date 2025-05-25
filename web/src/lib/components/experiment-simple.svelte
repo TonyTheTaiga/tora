@@ -14,12 +14,12 @@
 
   let {
     experiment,
-    // selectedExperiment = $bindable(), // This prop is not used in the provided simple template, assuming it's for click handling handled by parent
+    selectedExperiment = $bindable(), // This prop is now uncommented and bindable
     highlighted = $bindable(),
     selectedForDelete = $bindable(),
   }: {
     experiment: Experiment; // Assumes Experiment type now includes status and keyMetrics
-    // selectedExperiment: Experiment | null;
+    selectedExperiment: Experiment | null; // Type for the bindable prop
     highlighted: string[];
     selectedForDelete: Experiment | null;
   } = $props();
@@ -125,7 +125,7 @@
     <!-- Actions & Date -->
     <div class="flex items-center gap-1 text-ctp-subtext0 flex-shrink-0">
       <button
-        on:click={async (e) => { // Changed to on:click
+        onclick={async (e) => { // Changed to onclick
           e.stopPropagation(); // Prevent card click
           if (highlighted.includes(experiment.id)) {
             highlighted = [];
@@ -160,7 +160,7 @@
           class="p-1 rounded-md hover:text-ctp-red hover:bg-ctp-red/10 transition-all"
           aria-label="Delete"
           title="Delete experiment"
-          on:click={(e) => { // Changed to on:click
+          onclick={(e) => { // Changed to onclick
             e.stopPropagation(); // Prevent card click
             selectedForDelete = experiment;
           }}

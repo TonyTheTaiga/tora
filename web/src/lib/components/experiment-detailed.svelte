@@ -361,7 +361,7 @@
       <!-- Experiment Status Display -->
       {#if experiment.status}
         <div class="flex items-center gap-1">
-          <CircleDot size={14} class="flex-shrink-0 {currentStatusColor.replace('bg-', 'text-')}" /> {/* Use text color for icon */}
+          <CircleDot size={14} class={"flex-shrink-0 " + currentStatusColor.replace('bg-', 'text-')} />
           <span class="font-medium {currentStatusColor.replace('bg-', 'text-')}">{currentStatusTooltip}</span>
         </div>
       {/if}
@@ -490,7 +490,7 @@
             <button
               class="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-md text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
               onclick={toggleMetricsDisplay}
-              disabled={metricsLoading && !showMetricsTable} /* Disable only when initially loading table */
+              disabled={metricsLoading && !showMetricsTable}
             >
               {#if showMetricsTable}
                 <ChartLine size={14} /> Show Chart
