@@ -81,8 +81,6 @@
       </div>
     </div>
   </div>
-
-  <!-- MIDDLE: Key Metrics -->
   <div class="mb-2 text-xs"> <!-- Base text size for this section -->
     {#if experiment.keyMetrics && experiment.keyMetrics.length > 0}
       <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5" title="Key Metrics"> <!-- Grid container with tooltip -->
