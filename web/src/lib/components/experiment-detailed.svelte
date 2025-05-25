@@ -141,6 +141,7 @@
                   <span class="text-xs text-ctp-green ml-1">Copied!</span>
               {:else}
                   <Copy size={14} />
+                  <span class="text-xs text-ctp-subtext0 ml-1 group-hover:text-ctp-text transition-colors duration-150">Copy ID</span>
               {/if}
           </button>
       </div>
@@ -250,6 +251,7 @@
             <span class="text-xs text-ctp-green ml-1.5">Copied!</span>
           {:else}
             <Copy size={16} />
+            <span class="text-xs text-ctp-subtext0 ml-1.5 group-hover:text-ctp-text transition-colors duration-150">Copy ID</span>
           {/if}
         </button>
       </div>
