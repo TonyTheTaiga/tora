@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+:root {
+  font-family: Inter, sans-serif;
+  font-feature-settings:
+    "liga" 1,
+    "calt" 1; /* fix for Chrome */
+}
+@supports (font-variation-settings: normal) {
+  :root {
+    font-family: InterVariable, sans-serif;
+  }
+}
+
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
@@ -11,9 +23,6 @@
 @layer base {
   @theme {
     --color-gray-200: #e5e7eb;
-
-    /* Removing non-standard color in favor of standard Catppuccin colors */
-    /* --color-dark: #0a0a0f; */
 
     /* Catppuccin Macchiato palette (Dark theme) */
     --color-dark-ctp-base: #24273a;
