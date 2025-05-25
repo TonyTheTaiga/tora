@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plus, User } from "lucide-svelte";
+  import { Plus, User, Briefcase } from "lucide-svelte";
   import ThemeToggle from "./theme-toggle.svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
@@ -41,22 +41,24 @@
 <div
   class="
     fixed
-    bottom-12
-    left-1/2
+    bottom-4 sm:bottom-12
+    left-[50vw]
     transform -translate-x-1/2
     flex flex-row items-center gap-1
     bg-ctp-surface1 border border-ctp-surface2
     rounded-lg shadow-md z-40
     overflow-hidden
+    scale-90 opacity-100
     sm:scale-100 sm:opacity-100
-    md:scale-120 md:hover:scale-140 md:transition-transform md:duration-300
+    md:scale-110 md:hover:scale-120 md:transition-transform md:duration-300
     md:opacity-80 md:hover:opacity-100
-    lg:scale-140 lg:hover:scale-160 lg:transition-transform lg:duration-300
+    lg:scale-120 lg:hover:scale-130 lg:transition-transform lg:duration-300
     lg:opacity-80 lg:hover:opacity-100
+    max-w-[calc(100vw-2rem)]
   "
 >
   <button
-    class="p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
+    class="p-1 sm:p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
     title="Create a new experiment"
     onclick={() => {
       isOpenCreate = true;
@@ -68,20 +70,30 @@
       },
     )}
   >
-    <Plus size={16} />
+    <Plus size={16} class="sm:size-4" />
   </button>
 
   <ThemeToggle />
 
   {#if session && session.user}
     <button
-      class="p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
+      class="p-1 sm:p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
+      title="Manage workspaces"
+      onclick={() => {
+        goto("/workspaces");
+      }}
+    >
+      <Briefcase size={16} class="sm:size-4" />
+    </button>
+
+    <button
+      class="p-1 sm:p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
       title="Go to user profile"
       onclick={() => {
         goto(`/users/${session.user.id}`);
       }}
     >
-      <User size={16} />
+      <User size={16} class="sm:size-4" />
     </button>
   {/if}
 </div>
@@ -102,14 +114,22 @@
 
   :global(.tippy-box[data-theme~="tooltip-theme"] .tippy-content) {
     color: var(--color-ctp-text);
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     line-height: 1.4;
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 0.75rem;
     font-weight: 500;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.25rem;
+  }
+
+  @media (min-width: 640px) {
+    :global(.tippy-box[data-theme~="tooltip-theme"] .tippy-content) {
+      font-size: 0.875rem;
+      padding: 0.75rem 1rem;
+      gap: 0.5rem;
+    }
   }
 
   :global(.tippy-box[data-theme~="tooltip-theme"] .arrow-down) {

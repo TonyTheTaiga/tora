@@ -25,17 +25,20 @@
   } = $props();
 </script>
 
-<article class="flex flex-col h-full">
+<article class="flex flex-col h-full group">
   <!-- Header -->
-  <div class="flex justify-between items-center mb-2">
-    <h3 class="font-medium text-base text-ctp-text truncate pr-3">
+  <div class="flex justify-between items-center mb-3">
+    <h3
+      class="font-semibold text-sm text-ctp-text truncate pr-2 group-hover:text-ctp-blue transition-colors"
+    >
       {experiment.name}
     </h3>
-    <div class="flex items-center gap-1">
+    <div class="flex items-center gap-0.5">
       <div
-        class="p-1"
-        class:text-ctp-green={experiment.visibility === "PUBLIC"}
-        class:text-ctp-red={experiment.visibility === "PRIVATE"}
+        class="p-1 rounded-md transition-colors {experiment.visibility ===
+        'PUBLIC'
+          ? 'text-ctp-green hover:bg-ctp-green/10'
+          : 'text-ctp-red hover:bg-ctp-red/10'}"
       >
         {#if experiment.visibility === "PUBLIC"}
           <Globe size={14} />
@@ -60,7 +63,7 @@
             } catch (err) {}
           }
         }}
-        class="p-1 text-ctp-subtext0 hover:text-ctp-text"
+        class="p-1 rounded-md text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-all"
         title="Show experiment chain"
       >
         {#if highlighted.includes(experiment.id)}
@@ -72,7 +75,7 @@
       {#if page.data.user && page.data.user.id === experiment.user_id}
         <button
           type="button"
-          class="p-1 text-ctp-subtext0 hover:text-ctp-red"
+          class="p-1 rounded-md text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/10 transition-all"
           aria-label="Delete"
           title="Delete experiment"
           onclick={(e) => {
@@ -87,31 +90,20 @@
   </div>
 
   <!-- Main -->
-  <div
-    class="flex-grow flex flex-col cursor-pointer"
-    role="button"
-    tabindex="0"
-    onclick={() => {
-      selectedExperiment = experiment;
-    }}
-    onkeydown={(e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        selectedExperiment = experiment;
-      }
-    }}
-    aria-label="View experiment details"
-  >
+  <div class="flex-grow flex flex-col">
     <!-- Description -->
     {#if experiment.description}
       <p class="text-ctp-subtext0 text-xs leading-relaxed mb-3 line-clamp-2">
         {experiment.description}
       </p>
+    {:else}
+      <p class="text-ctp-overlay0 text-xs italic mb-3">No description</p>
     {/if}
 
     <!-- Metrics indicator -->
-    <div class="flex items-center gap-1 text-ctp-subtext1 text-xs">
+    <div class="flex items-center gap-1.5 text-ctp-subtext1 text-xs">
       <ChartLine size={12} />
-      <span>
+      <span class="font-medium">
         {experiment.availableMetrics.length} metric{experiment.availableMetrics
           .length !== 1
           ? "s"
@@ -122,30 +114,32 @@
 
   <!-- Footer -->
   <div
-    class="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-ctp-surface0"
+    class="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-ctp-surface0/50"
   >
     <!-- Tags -->
     {#if experiment.tags && experiment.tags.length > 0}
       <div class="flex items-center gap-1 text-xs text-ctp-subtext0">
-        <Tag size={10} />
+        <Tag size={10} class="text-ctp-overlay0" />
         {#each experiment.tags.slice(0, 2) as tag, i}
           <span
-            class="px-1.5 py-0.5 bg-ctp-surface0/50 text-ctp-lavender rounded-full text-[10px]"
+            class="px-1.5 py-0.5 bg-ctp-lavender/10 text-ctp-lavender rounded-full text-[10px] font-medium"
           >
             {tag}
           </span>
           {#if i === 0 && experiment.tags.length > 2}
-            <span class="text-ctp-subtext0 text-[10px]"
+            <span class="text-ctp-overlay0 text-[10px]"
               >+{experiment.tags.length - 1}</span
             >
           {/if}
         {/each}
       </div>
+    {:else}
+      <div></div>
     {/if}
 
     <!-- Created At -->
     {#if experiment?.createdAt}
-      <time class="flex items-center gap-0.5 text-[10px] text-ctp-subtext0">
+      <time class="flex items-center gap-1 text-[10px] text-ctp-overlay0">
         <Clock size={10} />
         {new Date(experiment.createdAt).toLocaleDateString("en-US", {
           month: "short",

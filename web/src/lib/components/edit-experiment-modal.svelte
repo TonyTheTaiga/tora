@@ -311,13 +311,16 @@
         <!-- Collapsible Sections -->
         <div class="flex flex-col gap-4 mt-2">
           <!-- Tags Section -->
-          <details>
+          <details class="group">
             <summary
               class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
             >
               <TagIcon size={16} class="text-ctp-blue" />
               <span class="text-sm font-medium">Tags</span>
-              <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
+              <ChevronDown
+                size={16}
+                class="ml-auto text-ctp-subtext0 group-open:rotate-180"
+              />
             </summary>
             <div class="pt-2 pl-6">
               <div class="flex flex-wrap items-center gap-2">
@@ -375,13 +378,16 @@
           </details>
 
           <!-- References Section -->
-          <details>
+          <details class="group">
             <summary
               class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
             >
               <Link size={16} class="text-ctp-lavender" />
               <span class="text-sm font-medium">References</span>
-              <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
+              <ChevronDown
+                size={16}
+                class="ml-auto text-ctp-subtext0 group-open:rotate-180"
+              />
             </summary>
             <div class="pt-2 pl-6">
               {#if reference}

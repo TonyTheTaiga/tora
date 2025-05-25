@@ -39,10 +39,21 @@
     <div id={`experiment-${experiment.id}`}>
       {#if !selectedExperiment || selectedExperiment.id !== experiment.id}
         <div
-          class="rounded-lg bg-ctp-mantle overflow-hidden h-[200px] p-4
+          class="rounded-lg bg-ctp-mantle overflow-hidden h-[200px] p-4 hover:bg-ctp-surface0 transition-colors cursor-pointer
             {highlighted.length > 0 && !highlighted.includes(experiment.id)
             ? 'opacity-40'
             : ''}"
+          role="button"
+          tabindex="0"
+          onclick={() => {
+            selectedExperiment = experiment;
+          }}
+          onkeydown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              selectedExperiment = experiment;
+            }
+          }}
         >
           <ExperimentSimple
             bind:selectedExperiment

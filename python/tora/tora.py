@@ -20,6 +20,7 @@ class Tora:
     def __init__(
         self,
         experiment_id: str,
+        workspace_id: str,
         description: str | None = None,
         hyperparams: dict[str, str | int | float] | None = None,
         tags: list[str] | None = None,
@@ -27,6 +28,7 @@ class Tora:
         max_buffer_len: int = 25,
     ):
         self._experiment_id = experiment_id
+        self._workspace_id = workspace_id
         self.description = description
         self.hyperparams = hyperparams
         self.tags = tags
@@ -47,11 +49,14 @@ class Tora:
         description: str | None = None,
         hyperparams: dict[str, str | int | float] | None = None,
         tags: list[str] | None = None,
+        workspace_id: str = "API_DEFAULT",
         server_url: str = TORA_BASE_URL,
     ):
         data = {}
 
         data["name"] = name
+        data["workspaceId"] = workspace_id
+
         if description:
             data["description"] = description
 
@@ -75,10 +80,11 @@ class Tora:
             raise e
 
         return cls(
-            req.json()["experiment"]["id"],
-            description,
-            hyperparams,
-            tags,
+            experiment_id=req.json()["experiment"]["id"],
+            workspace_id=workspace_id,
+            description=description,
+            hyperparams=hyperparams,
+            tags=tags,
             server_url=server_url,
         )
 
@@ -92,11 +98,14 @@ class Tora:
         req.raise_for_status()
         data = req.json()
         experiment_id = data["id"]
+        workspace_id = data["workspace_id"]
         description = data["description"]
         hyperparams = hp_from_tora_format(data["hyperparams"])
         tags = data["tags"]
 
-        return cls(experiment_id, description, hyperparams, tags, server_url)
+        return cls(
+            experiment_id, workspace_id, description, hyperparams, tags, server_url
+        )
 
     def log(self, name, value, step: int | None = None, metadata: dict | None = None):
         self._buffer.append(

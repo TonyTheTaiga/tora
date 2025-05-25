@@ -18,7 +18,6 @@
     ClipboardCheck,
     Copy,
     ChevronDown,
-    ChevronLeft,
     Minimize2,
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
@@ -41,8 +40,6 @@
   let recommendations = $state<Record<string, HPRecommendation>>({});
   let activeRecommendation = $state<string | null>(null);
   let idCopied = $state<boolean>(false);
-  let isOpenHyperparams = $state<boolean>(false);
-  let isOpenMetrics = $state<boolean>(false);
 </script>
 
 <article class="h-full">
@@ -324,21 +321,17 @@
       </p>
     {/if}
     <!-- Parameters section -->
-    {#if experiment.hyperparams}
-      <details class="mt-2">
+    {#if experiment.hyperparams && experiment.hyperparams.length > 0}
+      <details class="mt-2 group">
         <summary
           class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
-          onclick={() => {
-            isOpenHyperparams = !isOpenHyperparams;
-          }}
         >
           <Settings size={16} class="text-ctp-mauve flex-shrink-0" />
-          <span class="text-sm font-medium">Parameters</span>
-          {#if isOpenHyperparams}
-            <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
-          {:else}
-            <ChevronLeft size={16} class="ml-auto text-ctp-subtext0" />
-          {/if}
+          <span class="text-sm font-medium">Hyperparameters</span>
+          <ChevronDown
+            size={16}
+            class="ml-auto text-ctp-subtext0 group-open:rotate-180"
+          />
         </summary>
         <div class="pt-2">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -399,20 +392,16 @@
 
     <!-- Metrics section -->
     {#if experiment.availableMetrics && experiment.availableMetrics.length > 0}
-      <details class="mt-1">
+      <details class="mt-1 group">
         <summary
           class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
-          onclick={() => {
-            isOpenMetrics = !isOpenMetrics;
-          }}
         >
           <ChartLine size={16} class="text-ctp-blue" />
           <span class="text-sm font-medium">Metrics</span>
-          {#if isOpenMetrics}
-            <ChevronDown size={16} class="ml-auto text-ctp-subtext0" />
-          {:else}
-            <ChevronLeft size={16} class="ml-auto text-ctp-subtext0" />
-          {/if}
+          <ChevronDown
+            size={16}
+            class="ml-auto text-ctp-subtext0 group-open:rotate-180"
+          />
         </summary>
         <div class="pt-2 -mx-2 sm:-mx-4">
           <div class="px-1 sm:px-2 w-full overflow-x-auto">

@@ -172,6 +172,60 @@ export type Database = {
           },
         ];
       };
+      workspace: {
+        Row: {
+          created_at: string;
+          description: string | null;
+          id: string;
+          name: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          name: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          name?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      workspace_experiments: {
+        Row: {
+          experiment_id: string;
+          workspace_id: string;
+        };
+        Insert: {
+          experiment_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          experiment_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "workspace_experiments_experiment_id_fkey";
+            columns: ["experiment_id"];
+            isOneToOne: false;
+            referencedRelation: "experiment";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "workspace_experiments_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspace";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;

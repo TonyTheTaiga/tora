@@ -6,6 +6,7 @@ import type {
   HyperParam,
   Metric,
   Visibility,
+  Workspace,
 } from "$lib/types";
 
 export class DatabaseClient {
@@ -29,6 +30,7 @@ export class DatabaseClient {
     hyperparams: HyperParam[],
     tags: string[],
     visibility: Visibility = "PRIVATE",
+    workspaceId?: string,
   ): Promise<Experiment> {
     const { data, error } = await DatabaseClient.getInstance()
       .from("experiment")
@@ -51,6 +53,13 @@ export class DatabaseClient {
       .insert({ user_id: userId, experiment_id: data.id, role: "OWNER" })
       .select();
 
+    // Link experiment to workspace if provided
+    if (workspaceId) {
+      await DatabaseClient.getInstance()
+        .from("workspace_experiments")
+        .insert({ workspace_id: workspaceId, experiment_id: data.id });
+    }
+
     return {
       id: data.id,
       user_id: userId,
@@ -67,6 +76,7 @@ export class DatabaseClient {
   static async getExperiments(
     query: string | null,
     userId?: string,
+    workspaceId?: string,
   ): Promise<Experiment[]> {
     if (!query) {
       query = "";
@@ -81,6 +91,19 @@ export class DatabaseClient {
         .select("*, metric (name), user_experiments (user_id)")
         .ilike("name", `%${query}%`)
         .eq("visibility", "PUBLIC")
+        .order("created_at", { ascending: false });
+
+      data = result.data || [];
+      error = result.error;
+    } else if (workspaceId) {
+      // Get experiments for a specific workspace
+      const result = await DatabaseClient.getInstance()
+        .from("experiment")
+        .select(
+          "*, metric (name), user_experiments (user_id), workspace_experiments!inner (workspace_id)",
+        )
+        .ilike("name", `%${query}%`)
+        .eq("workspace_experiments.workspace_id", workspaceId)
         .order("created_at", { ascending: false });
 
       data = result.data || [];
@@ -391,6 +414,72 @@ export class DatabaseClient {
       visibility: item.visibility,
     }));
   }
+
+  static async getWorkspaces(userId?: string): Promise<Workspace[]> {
+    let query = DatabaseClient.getInstance().from("workspace").select("*");
+
+    if (userId) {
+      query = query.eq("user_id", userId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw new Error(`Failed to get workspaces: ${error.message}`);
+    }
+
+    return data.map((item) => ({
+      id: item.id,
+      user_id: item.user_id,
+      name: item.name,
+      description: item.description,
+      created_at: new Date(item.created_at),
+    }));
+  }
+
+  static async createWorkspace(
+    name: string,
+    description: string | null,
+    user_id: string,
+  ): Promise<Workspace> {
+    const { data, error } = await DatabaseClient.getInstance()
+      .from("workspace")
+      .insert({
+        name: name,
+        description: description,
+        user_id: user_id,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create workspace: ${error.message}`);
+    }
+
+    return {
+      id: data.id,
+      user_id: data.user_id,
+      name: data.name,
+      description: data.description,
+      created_at: new Date(data.created_at),
+    };
+  }
+
+  static async getOrCreateDefaultWorkspace(userId: string): Promise<Workspace> {
+    // Check if user already has workspaces
+    const workspaces = await DatabaseClient.getWorkspaces(userId);
+
+    if (workspaces.length > 0) {
+      return workspaces[0];
+    }
+
+    // Create default workspace
+    return await DatabaseClient.createWorkspace(
+      "Personal Workspace",
+      "Your default workspace for experiments",
+      userId,
+    );
+  }
 }
 
 export const {
@@ -406,4 +495,7 @@ export const {
   getReferenceChain,
   createMetric,
   batchCreateMetric,
+  getWorkspaces,
+  createWorkspace,
+  getOrCreateDefaultWorkspace,
 } = DatabaseClient;

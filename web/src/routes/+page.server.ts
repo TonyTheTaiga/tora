@@ -16,9 +16,17 @@ interface FormDataResult {
   [key: string]: any;
 }
 
-export const load: PageServerLoad = async ({ fetch, locals }) => {
+export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   const { session } = await locals.safeGetSession();
-  const response = await fetch(API_ROUTES.GET_EXPERIMENTS);
+  const { currentWorkspace } = await parent();
+
+  // Build URL with workspace filter if available
+  const apiUrl = new URL(API_ROUTES.GET_EXPERIMENTS, url.origin);
+  if (currentWorkspace) {
+    apiUrl.searchParams.set("workspace", currentWorkspace.id);
+  }
+
+  const response = await fetch(apiUrl.toString());
   const experiments = await response.json();
   return { experiments, session };
 };
@@ -27,6 +35,24 @@ export const actions: Actions = {
   create: async ({ request, fetch }) => handleCreate(request, fetch),
   delete: async ({ request, fetch }) => handleDelete(request, fetch),
   update: async ({ request, fetch }) => handleUpdate(request, fetch),
+  switchWorkspace: async ({ request, cookies }) => {
+    const formData = await request.formData();
+    const workspaceId = formData.get("workspaceId");
+
+    if (!workspaceId || typeof workspaceId !== "string") {
+      return fail(400, { message: "Workspace ID is required" });
+    }
+
+    cookies.set("current_workspace", workspaceId, {
+      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+    });
+
+    return redirect(303, "/");
+  },
 };
 
 function parseFormData(formData: FormData): FormDataResult {
@@ -152,17 +178,13 @@ async function handleUpdate(request: Request, fetch: Function) {
     return fail(500, { message: "Failed to update experiment" });
   }
 
-  // Handle reference update - first get current references
   const refResponse = await fetch(`/api/experiments/${id}/ref`);
   const currentRefs = await refResponse.json();
 
-  // If we have a new reference ID to set
   if (referenceId) {
-    // Remove any existing references first (enforce one reference maximum)
     if (currentRefs.length > 0) {
       for (const refId of currentRefs) {
         if (refId !== id) {
-          // Skip self-references in case they exist
           await fetch(`/api/experiments/${id}/ref/${refId}`, {
             method: "DELETE",
           });
@@ -170,7 +192,6 @@ async function handleUpdate(request: Request, fetch: Function) {
       }
     }
 
-    // Create the new reference
     const referenceResponse = await fetch(
       API_ROUTES.CREATE_REFERENCE.replace("[slug]", id),
       {
@@ -182,12 +203,9 @@ async function handleUpdate(request: Request, fetch: Function) {
     if (!referenceResponse.ok) {
       return fail(500, { message: "Failed to create reference" });
     }
-  }
-  // If we don't have a reference ID but had references before, remove them all
-  else if (currentRefs.length > 0) {
+  } else if (currentRefs.length > 0) {
     for (const refId of currentRefs) {
       if (refId !== id) {
-        // Skip self-references in case they exist
         await fetch(`/api/experiments/${id}/ref/${refId}`, {
           method: "DELETE",
         });
