@@ -123,10 +123,9 @@
         <span
           role="button"
           tabindex="0"
-          class="text-base font-medium cursor-pointer transition-all duration-150 flex items-center gap-1.5 px-2 py-1 rounded-md" // Added px-2 py-1 rounded-md
+          class="text-base font-medium cursor-pointer transition-all duration-150 flex items-center gap-1.5 px-2 py-1 rounded-md { (idCopyAnimated && idCopied) ? 'bg-ctp-green/20' : '' }"
           class:text-ctp-green={idCopied}
           class:text-ctp-text={!idCopied}
-          class:bg-ctp-green/20={idCopyAnimated && idCopied} // Added background flash class
           onclick={() => {
             navigator.clipboard.writeText(experiment.id);
             idCopied = true;
@@ -237,10 +236,9 @@
         <span
           role="button"
           tabindex="0"
-          class="text-lg font-medium cursor-pointer transition-all duration-150 flex items-center gap-1.5 px-2 py-1 rounded-md" // Added px-2 py-1 rounded-md
+          class="text-lg font-medium cursor-pointer transition-all duration-150 flex items-center gap-1.5 px-2 py-1 rounded-md { (idCopyAnimated && idCopied) ? 'bg-ctp-green/20' : '' }"
           class:text-ctp-green={idCopied}
           class:text-ctp-text={!idCopied}
-          class:bg-ctp-green/20={idCopyAnimated && idCopied} // Added background flash class
           onclick={() => {
             navigator.clipboard.writeText(experiment.id);
             idCopied = true;
