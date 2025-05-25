@@ -22,8 +22,8 @@
     ChevronDown,
     CircleDot,
     Minimize2,
-    Table2,    // Add this
-    Loader2,   // Add this
+    Table2, // Add this
+    Loader2, // Add this
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
   import { page } from "$app/state";
@@ -83,18 +83,24 @@
     } else {
       // Currently showing chart, switch to table view
       // Fetch data only if it hasn't been fetched yet, or if there was a previous error and no data currently displayed
-      if (rawMetrics.length === 0 || (metricsError && rawMetrics.length === 0)) {
+      if (
+        rawMetrics.length === 0 ||
+        (metricsError && rawMetrics.length === 0)
+      ) {
         metricsLoading = true;
         metricsError = null;
         try {
-          const response = await fetch(`/api/experiments/${experiment.id}/metrics`);
+          const response = await fetch(
+            `/api/experiments/${experiment.id}/metrics`,
+          );
           if (!response.ok) {
             throw new Error(`Failed to fetch metrics: ${response.statusText}`);
           }
           const data = await response.json();
           rawMetrics = data as Metric[]; // Assuming API returns Metric[]
           if (rawMetrics.length === 0) {
-            metricsError = "No raw metric data points found for this experiment.";
+            metricsError =
+              "No raw metric data points found for this experiment.";
           }
         } catch (err) {
           if (err instanceof Error) {
@@ -359,12 +365,12 @@
       </div>
 
       <!-- Experiment Status Display -->
-      {#if experiment.status}
+      <!-- {#if experiment.status}
         <div class="flex items-center gap-1">
           <CircleDot size={14} class={"flex-shrink-0 " + currentStatusColor.replace('bg-', 'text-')} />
           <span class="font-medium {currentStatusColor.replace('bg-', 'text-')}">{currentStatusTooltip}</span>
         </div>
-      {/if}
+      {/if} -->
 
       {#if experiment.tags && experiment.tags.length > 0}
         <div
@@ -414,40 +420,53 @@
         <div class="pt-2">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {#each experiment.hyperparams as param (param.key)}
-              <div class="flex items-center bg-ctp-mantle p-2 rounded-md overflow-hidden gap-1.5">
-                <span class="text-xs font-medium text-ctp-subtext1 truncate shrink" title={param.key}>{param.key}</span>
-                <span class="ml-auto text-xs text-ctp-text px-2 py-0.5 bg-ctp-surface0 rounded-sm truncate shrink" title={String(param.value)}>{param.value}</span>
+              <div
+                class="flex items-center bg-ctp-mantle p-2 rounded-md overflow-hidden gap-1.5"
+              >
+                <span
+                  class="text-xs font-medium text-ctp-subtext1 truncate shrink"
+                  title={param.key}>{param.key}</span
+                >
+                <span
+                  class="ml-auto text-xs text-ctp-text px-2 py-0.5 bg-ctp-surface0 rounded-sm truncate shrink"
+                  title={String(param.value)}>{param.value}</span
+                >
                 <div class="flex items-center flex-shrink-0">
-                    {#if recommendations && recommendations[param.key]}
-                      <button
-                        class="p-0.5 rounded-sm text-ctp-subtext0 hover:text-ctp-lavender"
-                        onclick={() => { activeRecommendation = recommendations[param.key].recommendation; }}
-                        aria-label="Show recommendation"
-                        title="Show AI recommendation"
-                      >
-                        <Info size={14} />
-                      </button>
-                    {/if}
+                  {#if recommendations && recommendations[param.key]}
                     <button
-                      class="p-0.5 rounded-sm text-ctp-subtext0 hover:text-ctp-blue"
-                      title="Copy {param.key}: {param.value}"
-                      aria-label="Copy hyperparameter {param.key}"
+                      class="p-0.5 rounded-sm text-ctp-subtext0 hover:text-ctp-lavender"
                       onclick={() => {
-                        navigator.clipboard.writeText(`${param.key}: ${param.value}`);
-                        copiedParamKey = param.key;
-                        setTimeout(() => {
-                          if (copiedParamKey === param.key) {
-                            copiedParamKey = null;
-                          }
-                        }, 1500); // Reset after 1.5 seconds
+                        activeRecommendation =
+                          recommendations[param.key].recommendation;
                       }}
+                      aria-label="Show recommendation"
+                      title="Show AI recommendation"
                     >
-                      {#if copiedParamKey === param.key}
-                        <ClipboardCheck size={14} class="text-ctp-green" />
-                      {:else}
-                        <Copy size={14} />
-                      {/if}
+                      <Info size={14} />
                     </button>
+                  {/if}
+                  <button
+                    class="p-0.5 rounded-sm text-ctp-subtext0 hover:text-ctp-blue"
+                    title="Copy {param.key}: {param.value}"
+                    aria-label="Copy hyperparameter {param.key}"
+                    onclick={() => {
+                      navigator.clipboard.writeText(
+                        `${param.key}: ${param.value}`,
+                      );
+                      copiedParamKey = param.key;
+                      setTimeout(() => {
+                        if (copiedParamKey === param.key) {
+                          copiedParamKey = null;
+                        }
+                      }, 1500); // Reset after 1.5 seconds
+                    }}
+                  >
+                    {#if copiedParamKey === param.key}
+                      <ClipboardCheck size={14} class="text-ctp-green" />
+                    {:else}
+                      <Copy size={14} />
+                    {/if}
+                  </button>
                 </div>
               </div>
             {/each}
@@ -479,10 +498,15 @@
     <!-- Metrics section -->
     {#if experiment.availableMetrics && experiment.availableMetrics.length > 0}
       <details class="mt-1 group">
-        <summary class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5">
+        <summary
+          class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
+        >
           <ChartLine size={16} class="text-ctp-blue" />
           <span class="text-sm font-medium">Metrics</span>
-          <ChevronDown size={16} class="ml-auto text-ctp-subtext0 group-open:rotate-180" />
+          <ChevronDown
+            size={16}
+            class="ml-auto text-ctp-subtext0 group-open:rotate-180"
+          />
         </summary>
         <div class="pt-2">
           <!-- Toggle Button -->
@@ -497,7 +521,8 @@
               {:else}
                 <Table2 size={14} /> Show Raw Data Table
               {/if}
-              {#if metricsLoading && !showMetricsTable} <!-- Show loader on button only when initially loading table -->
+              {#if metricsLoading && !showMetricsTable}
+                <!-- Show loader on button only when initially loading table -->
                 <Loader2 size={14} class="animate-spin ml-1" />
               {/if}
             </button>
@@ -508,29 +533,55 @@
             {#if metricsLoading}
               <div class="flex justify-center items-center p-4 min-h-[100px]">
                 <Loader2 size={20} class="animate-spin text-ctp-subtext0" />
-                <span class="ml-2 text-ctp-subtext0 text-sm">Loading metrics...</span>
+                <span class="ml-2 text-ctp-subtext0 text-sm"
+                  >Loading metrics...</span
+                >
               </div>
             {:else if metricsError}
-              <p class="text-xs text-ctp-red bg-ctp-red/10 p-3 rounded-md">{metricsError}</p>
+              <p class="text-xs text-ctp-red bg-ctp-red/10 p-3 rounded-md">
+                {metricsError}
+              </p>
             {:else if rawMetrics.length > 0}
-              <div class="overflow-x-auto max-h-96 border border-ctp-surface0 rounded-md bg-ctp-base">
+              <div
+                class="overflow-x-auto max-h-96 border border-ctp-surface0 rounded-md bg-ctp-base"
+              >
                 <table class="w-full text-xs text-left">
                   <thead class="bg-ctp-mantle sticky top-0 z-10">
                     <tr>
                       <th class="p-2 font-medium text-ctp-subtext1">Name</th>
                       <th class="p-2 font-medium text-ctp-subtext1">Value</th>
                       <th class="p-2 font-medium text-ctp-subtext1">Step</th>
-                      <th class="p-2 font-medium text-ctp-subtext1">Timestamp</th>
+                      <th class="p-2 font-medium text-ctp-subtext1"
+                        >Timestamp</th
+                      >
                     </tr>
                   </thead>
                   <tbody>
                     {#each rawMetrics as metric (metric.id)}
-                      <tr class="border-t border-ctp-surface0 hover:bg-ctp-surface0/50">
-                        <td class="p-2 text-ctp-text truncate max-w-xs" title={metric.name}>{metric.name}</td>
-                        <td class="p-2 text-ctp-text" title={String(metric.value)}>{typeof metric.value === 'number' ? metric.value.toFixed(4) : metric.value}</td>
-                        <td class="p-2 text-ctp-text">{metric.step ?? '-'}</td>
+                      <tr
+                        class="border-t border-ctp-surface0 hover:bg-ctp-surface0/50"
+                      >
+                        <td
+                          class="p-2 text-ctp-text truncate max-w-xs"
+                          title={metric.name}>{metric.name}</td
+                        >
+                        <td
+                          class="p-2 text-ctp-text"
+                          title={String(metric.value)}
+                          >{typeof metric.value === "number"
+                            ? metric.value.toFixed(4)
+                            : metric.value}</td
+                        >
+                        <td class="p-2 text-ctp-text">{metric.step ?? "-"}</td>
                         <td class="p-2 text-ctp-text whitespace-nowrap">
-                          {new Date(metric.created_at).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })}
+                          {new Date(metric.created_at).toLocaleString([], {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })}
                         </td>
                       </tr>
                     {/each}
@@ -538,7 +589,10 @@
                 </table>
               </div>
             {:else}
-              <p class="text-xs text-ctp-overlay1 p-3 rounded-md">No metric data available to display in table. This might also indicate an issue if metrics were expected.</p>
+              <p class="text-xs text-ctp-overlay1 p-3 rounded-md">
+                No metric data available to display in table. This might also
+                indicate an issue if metrics were expected.
+              </p>
             {/if}
           {:else}
             <!-- Original Chart Display -->
