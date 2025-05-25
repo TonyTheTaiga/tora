@@ -42,7 +42,7 @@
   class="
     fixed
     bottom-4 sm:bottom-12
-    left-1/2
+    left-[50vw]
     transform -translate-x-1/2
     flex flex-row items-center gap-1
     bg-ctp-surface1 border border-ctp-surface2
