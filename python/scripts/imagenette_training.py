@@ -221,6 +221,7 @@ def main():
 
     hyperparams.update({"model": "ResNet34", "num_classes": num_classes})
     tora = Tora.create_experiment(
+        workspace_id="84679cc3-dae5-40c7-91f3-10de46123765",
         name="Imagenette_ResNet34",
         description="ResNet34 on Imagenette-320",
         hyperparams=hyperparams,

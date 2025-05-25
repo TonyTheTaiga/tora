@@ -30,7 +30,7 @@
 <div class="flex flex-col h-full bg-ctp-base text-ctp-text">
   <div class="border-b border-ctp-surface0 p-4">
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-semibold text-ctp-mauve">Workspaces</h1>
+      <h1 class="text-2xl font-semibold text-ctp-text">Workspaces</h1>
       <button
         onclick={() => goto("/")}
         class="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-text transition-colors"
