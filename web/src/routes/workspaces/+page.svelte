@@ -182,7 +182,7 @@
                     </h3>
                     <div class="flex items-center gap-2 mt-1">
                       <span class="text-ctp-subtext1 text-xs">ID:</span>
-                      <span class="text-xs font-mono text-ctp-subtext1">
+  <span class="text-xs font-mono text-ctp-subtext1 px-2 py-1 rounded">
                         {workspace.id}
                       </span>
                     </div>
