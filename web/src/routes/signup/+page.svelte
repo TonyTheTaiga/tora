@@ -20,7 +20,7 @@
       <form
         method="POST"
         autocomplete="on"
-        action="?/signup"
+        action=""
         name="login-form"
         class="p-6 space-y-5"
       >

@@ -22,18 +22,19 @@
   <div class="flex justify-end w-full p-2">
     <div class="w-1/3 flex flex-col">
       <p class="text-base leading-relaxed">
-        You build models. You seek breakthroughs. That's the work.
+        Your experiments deserve <span class="font-bold">clarity</span>, not
+        chaos.
       </p>
       <p class="text-base leading-relaxed mt-4">
-        But often, the process is filled with noise: experiment tracking,
-        scattered details, the friction that pulls you from true insight.
+        TORA streamlines experiment tracking, <span class="font-bold"
+          >just three simple lines of Python.</span
+        >
       </p>
-      <p class="text-base leading-relaxed mt-2 font-bold">
-        Quiet the noise. Amplify insight. In three lines of code.
+      <p class="text-base leading-relaxed mt-4 font-bold">
+        Less noise. More insight. Immediate impact.
       </p>
-      <p class="text-base leading-relaxed mt-4">
-        Suddenly, your experiments are clear. Your focus, sharp. The essential
-        truths of your work emerge, naturally.
+      <p class="text-base leading-relaxed mt-2">
+        With distractions gone, your best work emerges naturally.
       </p>
       <button
         class="pt-8 text-start"
@@ -42,7 +43,7 @@
       >
         <span
           class="p-2 rounded-lg bg-ctp-blue/20 hover:bg-ctp-blue transition-colors"
-          >Find Your Focus →</span
+          >Start Seeing Clearly →</span
         >
       </button>
     </div>
@@ -51,20 +52,20 @@
   <div class="flex-1 py-4">
     <div class="flex flex-row space-x-8 p-2">
       {@render FeatureCard(
-        "Pure Connection.",
-        "Three lines of Python. TORA meets your workflow, any framework. No forced structures, just a direct line from your code to clarity.",
+        "Instant Setup",
+        "Integrate effortlessly with three lines of Python—minimal disruption, maximum clarity.",
       )}
       {@render FeatureCard(
-        "The Essential Story.",
-        "Your data, presented with honesty. Clean visualizations, direct comparisons. See the true narrative of your experiments, without distraction.",
+        "Focused Insights",
+        "Clear visualizations and direct comparisons ensure you see what truly matters.",
       )}
       {@render FeatureCard(
-        "Intuitive Guidance.",
-        "AI that serves your intuition. Gentle suggestions to explore and refine. Discover optimal paths, letting your model's unique voice emerge.",
+        "Intuitive Support",
+        "AI-powered suggestions gently guide your experiments toward optimal outcomes.",
       )}
       {@render FeatureCard(
-        "Shared Resonance.",
-        "Unite your team around the core work. Clear experiment histories, shared context. Build together with genuine understanding. Reproducibility, naturally.",
+        "Seamless Collaboration",
+        "Share experiments effortlessly. Unified context leads to natural teamwork and reproducibility.",
       )}
     </div>
   </div>
@@ -76,27 +77,23 @@
       TORA
     </h1>
     <p class="text-base leading-relaxed">
-      You build models. You seek breakthroughs. That's the work.
+      Your experiments deserve clarity, not chaos.
     </p>
     <p class="text-base leading-relaxed mt-4">
-      But often, the process is filled with noise: experiment tracking,
-      scattered details, the friction that pulls you from true insight.
+      TORA streamlines experiment tracking, <span class="font-bold"
+        >just three simple lines of Python.</span
+      >
     </p>
-    <p class="text-base leading-relaxed mt-4">
-      TORA helps you find the **signal**.
+    <p class="text-base leading-relaxed mt-4 font-bold">
+      Less noise. More insight. Immediate impact.
     </p>
-    <p class="text-base leading-relaxed mt-2 font-bold">
-      Quiet the noise. Amplify insight. In three lines of code.
+    <p class="text-base leading-relaxed mt-2">
+      With distractions gone, your best work emerges naturally.
     </p>
-    <p class="text-base leading-relaxed mt-4">
-      Suddenly, your experiments are clear. Your focus, sharp. The essential
-      truths of your work emerge, naturally.
-    </p>
-    <p class="text-base leading-relaxed mt-4">TORA. Get back to building.</p>
     <button type="button" onclick={() => goto("/signup")}>
       <span
         class="p-2 rounded-lg bg-ctp-blue/20 hover:bg-ctp-blue transition-colors"
-        >Find Your Focus →</span
+        >Start Seeing Clearly →</span
       >
     </button>
   </div>
@@ -104,20 +101,20 @@
   <div class="flex-1 py-4">
     <div class="flex flex-col space-y-6">
       {@render FeatureCard(
-        "Pure Connection.",
-        "Three lines of Python. TORA meets your workflow, any framework. No forced structures, just a direct line from your code to clarity.",
+        "Instant Setup",
+        "Integrate effortlessly with three lines of Python—minimal disruption, maximum clarity.",
       )}
       {@render FeatureCard(
-        "The Essential Story.",
-        "Your data, presented with honesty. Clean visualizations, direct comparisons. See the true narrative of your experiments, without distraction.",
+        "Focused Insights",
+        "Clear visualizations and direct comparisons ensure you see what truly matters.",
       )}
       {@render FeatureCard(
-        "Intuitive Guidance.",
-        "AI that serves your intuition. Gentle suggestions to explore and refine. Discover optimal paths, letting your model's unique voice emerge.",
+        "Intuitive Support",
+        "AI-powered suggestions gently guide your experiments toward optimal outcomes.",
       )}
       {@render FeatureCard(
-        "Shared Resonance.",
-        "Unite your team around the core work. Clear experiment histories, shared context. Build together with genuine understanding. Reproducibility, naturally.",
+        "Seamless Collaboration",
+        "Share experiments effortlessly. Unified context leads to natural teamwork and reproducibility.",
       )}
     </div>
   </div>
