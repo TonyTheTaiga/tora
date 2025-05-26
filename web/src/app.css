@@ -24,33 +24,33 @@
   @theme {
     --color-gray-200: #e5e7eb;
 
-    /* Catppuccin Macchiato palette (Dark theme) */
-    --color-dark-ctp-base: #24273a;
-    --color-dark-ctp-mantle: #1e2030;
-    --color-dark-ctp-crust: #181926;
-    --color-dark-ctp-surface0: #363a4f;
-    --color-dark-ctp-surface1: #494d64;
-    --color-dark-ctp-surface2: #5b6078;
-    --color-dark-ctp-overlay0: #6e738d;
-    --color-dark-ctp-overlay1: #8087a2;
-    --color-dark-ctp-overlay2: #939ab7;
-    --color-dark-ctp-text: #cad3f5;
-    --color-dark-ctp-subtext0: #a5adcb;
-    --color-dark-ctp-subtext1: #b8c0e0;
-    --color-dark-ctp-lavender: #b7bdf8;
-    --color-dark-ctp-blue: #8aadf4;
-    --color-dark-ctp-sapphire: #7dc4e4;
-    --color-dark-ctp-sky: #91d7e3;
-    --color-dark-ctp-teal: #8bd5ca;
-    --color-dark-ctp-green: #a6da95;
-    --color-dark-ctp-yellow: #eed49f;
-    --color-dark-ctp-peach: #f5a97f;
-    --color-dark-ctp-maroon: #ee99a0;
-    --color-dark-ctp-red: #ed8796;
-    --color-dark-ctp-mauve: #c6a0f6;
-    --color-dark-ctp-pink: #f5bde6;
-    --color-dark-ctp-flamingo: #f0c6c6;
-    --color-dark-ctp-rosewater: #f4dbd6;
+    /* Catppuccin Mocha palette (Dark theme) */
+    --color-dark-ctp-base: #1e1e2e;
+    --color-dark-ctp-mantle: #181825;
+    --color-dark-ctp-crust: #11111b;
+    --color-dark-ctp-surface0: #313244;
+    --color-dark-ctp-surface1: #45475a;
+    --color-dark-ctp-surface2: #585b70;
+    --color-dark-ctp-overlay0: #6c7086;
+    --color-dark-ctp-overlay1: #7f849c;
+    --color-dark-ctp-overlay2: #9399b2;
+    --color-dark-ctp-text: #cdd6f4;
+    --color-dark-ctp-subtext0: #a6adc8;
+    --color-dark-ctp-subtext1: #bac2de;
+    --color-dark-ctp-lavender: #b4befe;
+    --color-dark-ctp-blue: #89b4fa;
+    --color-dark-ctp-sapphire: #74c7ec;
+    --color-dark-ctp-sky: #89dceb;
+    --color-dark-ctp-teal: #94e2d5;
+    --color-dark-ctp-green: #a6e3a1;
+    --color-dark-ctp-yellow: #f9e2af;
+    --color-dark-ctp-peach: #fab387;
+    --color-dark-ctp-maroon: #eba0ac;
+    --color-dark-ctp-red: #f38ba8;
+    --color-dark-ctp-mauve: #cba6f7;
+    --color-dark-ctp-pink: #f5c2e7;
+    --color-dark-ctp-flamingo: #f2cdcd;
+    --color-dark-ctp-rosewater: #f5e0dc;
 
     /* Catppuccin Latte palette (Light theme) */
     --color-light-ctp-base: #eff1f5;
