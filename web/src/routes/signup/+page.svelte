@@ -101,7 +101,7 @@
             goto("/login");
           }}
         >
-          Sign Up
+          Log In
         </button>
       </div>
     </div>
