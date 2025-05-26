@@ -6,7 +6,9 @@
   <div class="grid grid-cols-3 grid-rows-2 w-full flex-auto">
     <!-- 1) Top-left: (2/3) -->
     <div class="col-span-2 flex items-end justify-start text-start">
-      <h1 class="font-extrabold leading-none text-[clamp(8rem,18vw,32rem)]">TORA</h1>
+      <h1 class="font-extrabold leading-none text-[clamp(8rem,18vw,32rem)]">
+        TORA
+      </h1>
     </div>
 
     <!-- 2) Top-right: empty cell (1/3) -->
@@ -24,7 +26,8 @@
         elit quisque faucibus.
       </p>
       <button class="mt-4 text-start">
-        <span class="p-2 rounded-lg bg-ctp-blue/20 hover:bg-ctp-blue transition-colors"
+        <span
+          class="p-2 rounded-lg bg-ctp-blue/20 hover:bg-ctp-blue transition-colors"
           >Create Experiment</span
         >
       </button>
