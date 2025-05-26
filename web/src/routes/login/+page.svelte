@@ -1,5 +1,6 @@
 <script lang="ts">
   import { LogIn, User, Lock, Mail } from "lucide-svelte";
+  import { goto } from "$app/navigation";
 </script>
 
 <div class="flex items-center justify-center h-full">
@@ -96,6 +97,9 @@
         <button
           type="button"
           class="inline-flex items-center justify-center px-5 py-2.5 font-medium rounded-lg bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"
+          onclick={() => {
+            goto("/signup");
+          }}
         >
           Sign Up
         </button>
