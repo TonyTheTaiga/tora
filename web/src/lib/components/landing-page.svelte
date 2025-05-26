@@ -2,7 +2,17 @@
   import { UserRound } from "lucide-svelte";
 </script>
 
-<section class="flex flex-col h-full p-8 mx-auto text-ctp-text">
+{#snippet FeatureCard(title: String, content: String)}
+  <div class="border border-ctp-overlay0/50 rounded-lg p-4">
+    <span class="font-bold">{title}</span>
+    <br />
+    <span class="italic">
+      {content}
+    </span>
+  </div>
+{/snippet}
+
+<section class="flex flex-col h-full p-8 mx-auto text-ctp-text/90">
   <div class="grid grid-cols-3 grid-rows-2 w-full flex-auto">
     <!-- 1) Top-left: (2/3) -->
     <div class="col-span-2 flex items-end justify-start text-start">
@@ -28,32 +38,29 @@
       <button class="mt-4 text-start">
         <span
           class="p-2 rounded-lg bg-ctp-blue/20 hover:bg-ctp-blue transition-colors"
-          >Create Experiment</span
+          >Get Started -></span
         >
       </button>
     </div>
   </div>
   <div class="flex-1">
     <div class="flex flex-row space-x-8">
-      <div>
-        Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet
-        consectetur adipiscing elit quisque faucibus.
-      </div>
-
-      <div>
-        Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet
-        consectetur adipiscing elit quisque faucibus.
-      </div>
-
-      <div>
-        Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet
-        consectetur adipiscing elit quisque faucibus.
-      </div>
-
-      <div>
-        Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet
-        consectetur adipiscing elit quisque faucibus.
-      </div>
+      {@render FeatureCard(
+        "Feature 1",
+        "Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet consectetur adipiscing elit quisque faucibus.",
+      )}
+      {@render FeatureCard(
+        "Feature 2",
+        "Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet consectetur adipiscing elit quisque faucibus.",
+      )}
+      {@render FeatureCard(
+        "Feature 3",
+        "Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet consectetur adipiscing elit quisque faucibus.",
+      )}
+      {@render FeatureCard(
+        "Feature 4",
+        "Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet consectetur adipiscing elit quisque faucibus.",
+      )}
     </div>
   </div>
 </section>
