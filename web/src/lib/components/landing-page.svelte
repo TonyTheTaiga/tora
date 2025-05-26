@@ -2,39 +2,55 @@
   import { UserRound } from "lucide-svelte";
 </script>
 
-<div class="flex items-center justify-center h-full">
-  <div
-    class="rounded-lg bg-ctp-crust border-2 border-dashed border-ctp-subtext0 p-4"
-  >
-    <article class="flex flex-col h-42 w-48">
-      <div class="pb-2">
-        <div
-          class="w-8 h-8 flex items-center justify-center rounded-full border border-dashed border-ctp-blue text-ctp-blue"
-        >
-          <UserRound size={16} />
-        </div>
-      </div>
+<section class="flex flex-col h-full p-8 mx-auto text-ctp-text">
+  <div class="grid grid-cols-3 grid-rows-2 w-full flex-auto">
+    <!-- 1) Top-left: Tora spans cols 1 & 2 = 2/3 -->
+    <div class="col-span-2 flex items-end justify-start text-start">
+      <h1 class="font-extrabold leading-none text-[18.5cqw]">TORA</h1>
+    </div>
 
-      <!-- Content -->
-      <div class="flex-grow flex flex-col">
-        <h3 class="text-sm font-medium text-ctp-subtext0 mb-1">
-          Create an Account
-        </h3>
-        <p class="text-xs text-ctp-subtext0 leading-relaxed">
-          Sign up to start tracking your experiments and metrics or browse
-          public experiments.
-        </p>
-      </div>
+    <!-- 2) Top-right: empty cell (1/3) -->
+    <div></div>
 
-      <!-- Footer -->
-      <div class="pt-auto">
-        <a
-          href="/auth"
-          class="px-2.5 py-1 rounded-md border border-ctp-blue text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-colors font-medium text-xs"
+    <!-- 3) Bottom-left: empty cell (1/3) -->
+    <div class="col-span-2"></div>
+
+    <!-- 4) Bottom-right: copy spans cols 2 & 3 = 2/3 -->
+    <div class="flex flex-col">
+      <p class="text-base leading-relaxed">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dolor sit amet
+        consectetur adipiscing elit quisque faucibus. Lorem ipsum dolor sit
+        amet, consectetur adipiscing elit. Dolor sit amet consectetur adipiscing
+        elit quisque faucibus.
+      </p>
+      <button class="mt-4 text-start">
+        <span class="p-2 rounded-lg bg-ctp-blue/20 hover:bg-ctp-blue"
+          >Create Experiment</span
         >
-          Sign Up / Login
-        </a>
-      </div>
-    </article>
+      </button>
+    </div>
   </div>
-</div>
+  <div class="flex-1">
+    <div class="flex flex-row space-x-8">
+      <div>
+        Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet
+        consectetur adipiscing elit quisque faucibus.
+      </div>
+
+      <div>
+        Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet
+        consectetur adipiscing elit quisque faucibus.
+      </div>
+
+      <div>
+        Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet
+        consectetur adipiscing elit quisque faucibus.
+      </div>
+
+      <div>
+        Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet
+        consectetur adipiscing elit quisque faucibus.
+      </div>
+    </div>
+  </div>
+</section>
