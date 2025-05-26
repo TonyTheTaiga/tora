@@ -23,10 +23,10 @@
   <div class="flex justify-end w-full p-2">
     <div class="w-1/3 flex flex-col">
       <p class="text-base leading-relaxed">
-        The ML experiment tracking platform that gets out of your way. Add just
-        3 lines to your Python code and unlock powerful experiment management,
-        interactive visualizations, and AI-powered insights. Perfect for ML
-        teams who want enterprise capabilities without the complexity.
+        Experiment tracking simplified. Add just 3 lines of Python and
+        supercharge your workflow with sleek visualizations, smart AI-driven
+        insights, and frictionless collaboration. Built for teams who prefer
+        results over complexity.
       </p>
       <button
         class="pt-8 text-start"
@@ -35,7 +35,7 @@
       >
         <span
           class="p-2 rounded-lg bg-ctp-blue/20 hover:bg-ctp-blue transition-colors"
-          >Get Started -></span
+          >Start Tracking →</span
         >
       </button>
     </div>
@@ -44,20 +44,20 @@
   <div class="flex-1 py-4">
     <div class="flex flex-row space-x-8 p-2">
       {@render FeatureCard(
-        "Zero-Friction Integration",
-        "Add experiment tracking to any ML script with just 3 lines of code. Works with PyTorch, TensorFlow, scikit-learn, and any Python ML framework.",
+        "Instant Integration",
+        "Transform your ML scripts in seconds. Just 3 lines of code for instant compatibility with PyTorch, TensorFlow, scikit-learn, and more.",
       )}
       {@render FeatureCard(
-        "Interactive Visualizations",
-        "Beautiful charts and real-time metric tracking. Compare experiments side-by-side with powerful filtering and analysis tools.",
+        "Dynamic Visuals",
+        "Experience real-time, interactive charts. Effortlessly track, compare, and analyze experiments in a beautifully intuitive dashboard.",
       )}
       {@render FeatureCard(
-        "AI-Powered Insights",
-        "Get intelligent hyperparameter recommendations and optimization suggestions to improve your model performance automatically.",
+        "Smart AI Guidance",
+        "Leverage AI-driven recommendations to optimize hyperparameters and boost model performance automatically.",
       )}
       {@render FeatureCard(
-        "Team Collaboration",
-        "Shared workspaces, experiment comparison across team members, and role-based access control for seamless ML team collaboration.",
+        "Unified Collaboration",
+        "Collaborate seamlessly with shared workspaces, detailed experiment comparisons, and secure role-based access control.",
       )}
     </div>
   </div>
@@ -71,15 +71,15 @@
       TORA
     </h1>
     <p class="text-base leading-relaxed">
-      The ML experiment tracking platform that gets out of your way. Add just 3
-      lines to your Python code and unlock powerful experiment management,
-      interactive visualizations, and AI-powered insights. Perfect for ML teams
-      who want enterprise capabilities without the complexity.
+      Experiment tracking simplified. Add just 3 lines of Python and supercharge
+      your workflow with sleek visualizations, smart AI-driven insights, and
+      frictionless collaboration. Built for teams who prefer results over
+      complexity.
     </p>
     <button type="button" onclick={() => goto("/signup")}>
       <span
         class="p-2 rounded-lg bg-ctp-blue/20 hover:bg-ctp-blue transition-colors"
-        >Get Started -></span
+        >Start Tracking →</span
       >
     </button>
   </div>
@@ -88,20 +88,20 @@
   <div class="flex-1 py-4">
     <div class="flex flex-col space-y-6">
       {@render FeatureCard(
-        "Zero-Friction Integration",
-        "Add experiment tracking to any ML script with just 3 lines of code. Works with PyTorch, TensorFlow, scikit-learn, and any Python ML framework.",
+        "Instant Integration",
+        "Transform your ML scripts in seconds. Just 3 lines of code for instant compatibility with PyTorch, TensorFlow, scikit-learn, and more.",
       )}
       {@render FeatureCard(
-        "Interactive Visualizations",
-        "Beautiful charts and real-time metric tracking. Compare experiments side-by-side with powerful filtering and analysis tools.",
+        "Dynamic Visuals",
+        "Experience real-time, interactive charts. Effortlessly track, compare, and analyze experiments in a beautifully intuitive dashboard.",
       )}
       {@render FeatureCard(
-        "AI-Powered Insights",
-        "Get intelligent hyperparameter recommendations and optimization suggestions to improve your model performance automatically.",
+        "Smart AI Guidance",
+        "Leverage AI-driven recommendations to optimize hyperparameters and boost model performance automatically.",
       )}
       {@render FeatureCard(
-        "Team Collaboration",
-        "Shared workspaces, experiment comparison across team members, and role-based access control for seamless ML team collaboration.",
+        "Unified Collaboration",
+        "Collaborate seamlessly with shared workspaces, detailed experiment comparisons, and secure role-based access control.",
       )}
     </div>
   </div>
