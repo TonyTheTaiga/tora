@@ -7,7 +7,8 @@
   import { goto } from "$app/navigation";
 
   let { data, children } = $props();
-  let { supabase, session, currentWorkspace, userWorkspaces } = $derived(data);
+  let { supabase, session, user, currentWorkspace, userWorkspaces } =
+    $derived(data);
 
   onMount(() => {
     const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
@@ -21,19 +22,27 @@
 </script>
 
 <header class="sticky top-0 z-30">
-  <nav
-    class="px-4 sm:px-6 py-3 sm:py-4 flex flex-row justify-between items-center bg-ctp-mantle border-b border-ctp-surface0"
-  >
-    <!-- Logo -->
-    <button class="w-32 text-ctp-mauve fill-current" onclick={() => goto("/")}>
-      <Logo />
-    </button>
-    <div class="flex items-center gap-2 sm:gap-3">
-      {#if session && currentWorkspace}
-        <WorkspaceSwitcher bind:currentWorkspace workspaces={userWorkspaces} />
-      {/if}
-    </div>
-  </nav>
+  {#if user}
+    <nav
+      class="px-4 sm:px-6 py-3 sm:py-4 flex flex-row justify-between items-center bg-ctp-mantle border-b border-ctp-surface0"
+    >
+      <!-- Logo -->
+      <button
+        class="w-32 text-ctp-mauve fill-current"
+        onclick={() => goto("/")}
+      >
+        <Logo />
+      </button>
+      <div class="flex items-center gap-2 sm:gap-3">
+        {#if session && currentWorkspace}
+          <WorkspaceSwitcher
+            bind:currentWorkspace
+            workspaces={userWorkspaces}
+          />
+        {/if}
+      </div>
+    </nav>
+  {/if}
 </header>
 
 <main class="flex-1 w-full p-4">
