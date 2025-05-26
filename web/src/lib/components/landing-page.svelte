@@ -3,10 +3,12 @@
 </script>
 
 {#snippet FeatureCard(title: String, content: String)}
-  <div class="border border-ctp-overlay0/50 rounded-lg p-4">
-    <span class="font-bold">{title}</span>
+  <div
+    class="border border-ctp-overlay0/50 rounded-lg p-4 bg-gradient-to-br from-ctp-surface0/30 to-ctp-surface1/20 hover:from-ctp-surface0/50 hover:to-ctp-surface1/30 transition-all duration-300"
+  >
+    <span class="font-bold text-ctp-lavender">{title}</span>
     <br />
-    <span class="italic">
+    <span class="italic text-ctp-subtext0">
       {content}
     </span>
   </div>
@@ -14,7 +16,9 @@
 
 <section class="hidden md:flex flex-col h-full w-full text-ctp-text/90">
   <div class="flex-none w-full p-2">
-    <span class="font-extrabold leading-none text-[clamp(8rem,20vw,32rem)]">
+    <span
+      class="font-extrabold leading-none text-[clamp(8rem,20vw,32rem)] bg-gradient-to-r from-ctp-blue via-ctp-mauve to-ctp-pink bg-clip-text text-transparent"
+    >
       TORA
     </span>
   </div>
@@ -30,7 +34,7 @@
           >just three simple lines of Python.</span
         >
       </p>
-      <p class="text-base leading-relaxed mt-4 font-bold">
+      <p class="text-base leading-relaxed mt-4 font-bold text-ctp-sapphire">
         Less noise. More insight. Immediate impact.
       </p>
       <p class="text-base leading-relaxed mt-2">
@@ -42,7 +46,7 @@
         onclick={() => goto("/signup")}
       >
         <span
-          class="p-2 rounded-lg bg-ctp-blue/20 hover:bg-ctp-blue transition-colors"
+          class="p-2 rounded-lg bg-gradient-to-r from-ctp-blue/20 to-ctp-mauve/20 hover:from-ctp-blue hover:to-ctp-mauve transition-all duration-300 hover:text-ctp-crust font-medium"
           >Start Seeing Clearly →</span
         >
       </button>
@@ -73,18 +77,21 @@
 
 <section class="md:hidden flex flex-col h-full w-full text-ctp-text/90 px-4">
   <div class="flex flex-col space-y-8 pt-4">
-    <h1 class="font-extrabold leading-none text-[clamp(6rem,30vw,14rem)]">
+    <h1
+      class="font-extrabold leading-none text-[clamp(6rem,30vw,14rem)] bg-gradient-to-r from-ctp-blue via-ctp-mauve to-ctp-pink bg-clip-text text-transparent"
+    >
       TORA
     </h1>
     <p class="text-base leading-relaxed">
-      Your experiments deserve clarity, not chaos.
+      Your experiments deserve <span class="font-bold">clarity</span>, not
+      chaos.
     </p>
     <p class="text-base leading-relaxed mt-4">
       TORA streamlines experiment tracking, <span class="font-bold"
         >just three simple lines of Python.</span
       >
     </p>
-    <p class="text-base leading-relaxed mt-4 font-bold">
+    <p class="text-base leading-relaxed mt-4 font-bold text-ctp-sapphire">
       Less noise. More insight. Immediate impact.
     </p>
     <p class="text-base leading-relaxed mt-2">
@@ -92,7 +99,7 @@
     </p>
     <button type="button" onclick={() => goto("/signup")}>
       <span
-        class="p-2 rounded-lg bg-ctp-blue/20 hover:bg-ctp-blue transition-colors"
+        class="p-2 rounded-lg bg-gradient-to-r from-ctp-blue/20 to-ctp-mauve/20 hover:from-ctp-blue hover:to-ctp-mauve transition-all duration-300 hover:text-ctp-crust font-medium"
         >Start Seeing Clearly →</span
       >
     </button>
