@@ -1,6 +1,4 @@
-<script lang="ts">
-  import { UserRound } from "lucide-svelte";
-</script>
+<script lang="ts"></script>
 
 {#snippet FeatureCard(title: String, content: String)}
   <div class="border border-ctp-overlay0/50 rounded-lg p-4">
