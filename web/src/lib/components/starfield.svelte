@@ -76,16 +76,12 @@
     private cometIdCounter = 0;
     private lastCometTime = 0;
 
-    // High-fidelity 8-bit color palette
+    // Subtle warm palette with gentle yellow and orange tints
     private readonly STAR_COLORS: readonly [number, number, number][] = [
-      [166, 227, 161], // ctp-green - distant stars
-      [137, 180, 250], // ctp-blue - common stars  
-      [203, 166, 247], // ctp-mauve - medium stars
-      [245, 169, 184], // ctp-pink - bright stars
-      [249, 226, 175], // ctp-yellow - hot stars
-      [243, 139, 168], // ctp-red - red giants
-      [205, 214, 244], // ctp-text - white dwarfs
-      [186, 194, 222], // ctp-subtext1 - dim stars
+      [245, 240, 225], // warm white - most stars
+      [255, 245, 215], // subtle yellow-white
+      [255, 235, 195], // gentle yellow
+      [255, 215, 175], // soft orange accent - rare
     ] as const;
 
     constructor(p: import('p5')) {
@@ -181,25 +177,25 @@
           type = StarType.DISTANT;
           size = Math.random() < 0.7 ? StarSize.TINY : StarSize.SMALL;
           maxBrightness = 80 + Math.random() * 60 + (centerProximity * 40); // Gentler brightness
-          colorIndex = Math.floor(Math.random() * this.STAR_COLORS.length);
+          colorIndex = Math.random() < 0.8 ? 0 : 1; // Mostly warm white
           shape = Math.random() < 0.7 ? StarShape.CIRCLE : StarShape.DIAMOND;
         } else if (starTypeRoll < 0.7) {
           type = StarType.MEDIUM;
           size = Math.random() < 0.5 ? StarSize.SMALL : StarSize.MEDIUM;
           maxBrightness = 100 + Math.random() * 70 + (centerProximity * 50);
-          colorIndex = Math.floor(Math.random() * 6);
+          colorIndex = Math.random() < 0.7 ? 0 : (Math.random() < 0.7 ? 1 : 2);
           shape = this.getRandomShape(false);
         } else if (starTypeRoll < 0.9) {
           type = StarType.BRIGHT;
           size = Math.random() < 0.3 ? StarSize.MEDIUM : StarSize.LARGE;
           maxBrightness = 140 + Math.random() * 65 + (centerProximity * 30);
-          colorIndex = Math.floor(Math.random() * 4);
+          colorIndex = Math.random() < 0.6 ? 0 : (Math.random() < 0.5 ? 2 : 3);
           shape = this.getRandomShape(true);
         } else {
           type = StarType.SUPERBRIGHT;
           size = Math.random() < 0.4 ? StarSize.LARGE : StarSize.MASSIVE;
           maxBrightness = 180 + Math.random() * 45 + (centerProximity * 30);
-          colorIndex = Math.floor(Math.random() * 3);
+          colorIndex = Math.random() < 0.5 ? 2 : 3; // Gentle yellow/orange for brightest
           shape = Math.random() < 0.5 ? StarShape.STAR : StarShape.TWINKLE;
         }
       } else {
@@ -208,25 +204,25 @@
           type = StarType.DISTANT;
           size = Math.random() < 0.8 ? StarSize.TINY : StarSize.SMALL;
           maxBrightness = 60 + Math.random() * 50; // Softer max brightness
-          colorIndex = Math.floor(Math.random() * this.STAR_COLORS.length);
+          colorIndex = Math.random() < 0.9 ? 0 : 1; // Almost all warm white
           shape = Math.random() < 0.8 ? StarShape.CIRCLE : StarShape.DIAMOND;
         } else if (starTypeRoll < 0.85) {
           type = StarType.MEDIUM;
           size = Math.random() < 0.6 ? StarSize.SMALL : StarSize.MEDIUM;
           maxBrightness = 90 + Math.random() * 60;
-          colorIndex = Math.floor(Math.random() * 6);
+          colorIndex = Math.random() < 0.8 ? 0 : 1;
           shape = this.getRandomShape(false);
         } else if (starTypeRoll < 0.97) {
           type = StarType.BRIGHT;
           size = Math.random() < 0.4 ? StarSize.MEDIUM : StarSize.LARGE;
           maxBrightness = 120 + Math.random() * 55;
-          colorIndex = Math.floor(Math.random() * 4);
+          colorIndex = Math.random() < 0.7 ? 0 : 2; // Occasional gentle yellow
           shape = this.getRandomShape(true);
         } else {
           type = StarType.SUPERBRIGHT;
           size = Math.random() < 0.5 ? StarSize.LARGE : StarSize.MASSIVE;
           maxBrightness = 160 + Math.random() * 40;
-          colorIndex = Math.floor(Math.random() * 3);
+          colorIndex = Math.random() < 0.4 ? 2 : 3; // Rare warm orange accents
           shape = Math.random() < 0.6 ? StarShape.STAR : StarShape.TWINKLE;
         }
       }
@@ -337,7 +333,7 @@
         speed: 0.3 + Math.random() * 0.4, // 0.3-0.7 - slow, peaceful movement
         tailLength: 40 + Math.random() * 60, // 40-100 pixel tail
         brightness: 150 + Math.random() * 105, // 150-255
-        color: this.STAR_COLORS[Math.floor(Math.random() * 4)], // Use brighter colors
+        color: this.STAR_COLORS[Math.random() < 0.6 ? 0 : (Math.random() < 0.7 ? 2 : 3)], // Mostly warm white, occasional yellow/orange
         progress: 0,
         active: true
       };
