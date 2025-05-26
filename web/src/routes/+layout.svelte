@@ -4,6 +4,7 @@
   import { onMount } from "svelte";
   import Logo from "$lib/components/logo.svelte";
   import WorkspaceSwitcher from "$lib/components/workspace-switcher.svelte";
+  import LandingPage from "$lib/components/landing-page.svelte";
   import { goto } from "$app/navigation";
 
   let { data, children } = $props();
@@ -21,8 +22,8 @@
   });
 </script>
 
-<header class="sticky top-0 z-30">
-  {#if user}
+{#if user}
+  <header class="sticky top-0 z-30">
     <nav
       class="px-4 sm:px-6 py-3 sm:py-4 flex flex-row justify-between items-center bg-ctp-mantle border-b border-ctp-surface0"
     >
@@ -42,9 +43,10 @@
         {/if}
       </div>
     </nav>
-  {/if}
-</header>
-
-<main class="flex-1 w-full p-4">
-  {@render children()}
-</main>
+  </header>
+  <main class="flex-1 w-full p-4">
+    {@render children()}
+  </main>
+{:else}
+  <LandingPage />
+{/if}

@@ -14,48 +14,45 @@
 
 <section class="flex flex-col h-full w-full text-ctp-text/90">
   <!-- Desktop Layout -->
-  <div class="hidden md:grid grid-cols-3 grid-rows-2 w-full flex-auto p-2">
-    <!-- 1) Top-left: (2/3) -->
-    <div class="col-span-2 flex items-end justify-start text-start">
-      <h1 class="font-extrabold leading-none text-[clamp(8rem,18vw,32rem)]">
+  <div class="hidden md:flex flex-col w-full p-2">
+    <!-- Top section with TORA title -->
+    <div>
+      <span class="font-extrabold leading-none text-[clamp(8rem,18vw,32rem)]">
         TORA
-      </h1>
+      </span>
     </div>
 
-    <!-- 2) Top-right: empty cell (1/3) -->
-    <div></div>
-
-    <!-- 3) Bottom-left: empty cell (2/3) -->
-    <div class="col-span-2"></div>
-
-    <!-- 4) Bottom-right: (1/3) -->
-    <div class="flex flex-col">
-      <p class="text-base leading-relaxed">
-        The ML experiment tracking platform that gets out of your way. Add just
-        3 lines to your Python code and unlock powerful experiment management,
-        interactive visualizations, and AI-powered insights. Perfect for ML
-        teams who want enterprise capabilities without the complexity.
-      </p>
-      <button
-        class="mt-4 text-start"
-        type="button"
-        onclick={() => {
-          goto("/signup");
-        }}
-      >
-        <span
-          class="p-2 rounded-lg bg-ctp-blue/20 hover:bg-ctp-blue transition-colors"
-          >Get Started -></span
+    <!-- Bottom section with description -->
+    <div class="flex justify-end">
+      <div class="w-1/3 flex flex-col">
+        <p class="text-base leading-relaxed">
+          The ML experiment tracking platform that gets out of your way. Add
+          just 3 lines to your Python code and unlock powerful experiment
+          management, interactive visualizations, and AI-powered insights.
+          Perfect for ML teams who want enterprise capabilities without the
+          complexity.
+        </p>
+        <button
+          class="pt-8 text-start"
+          type="button"
+          onclick={() => {
+            goto("/signup");
+          }}
         >
-      </button>
+          <span
+            class="p-2 rounded-lg bg-ctp-blue/20 hover:bg-ctp-blue transition-colors"
+            >Get Started -></span
+          >
+        </button>
+      </div>
     </div>
   </div>
 
   <!-- Mobile Layout -->
   <div class="md:hidden flex flex-col space-y-8 flex-auto px-4">
     <!-- Title -->
-    <div class="text-center overflow-hidden">
-      <h1 class="font-extrabold leading-none text-[clamp(6rem,26vw,14rem)]">
+    <div>
+      <h1 class="font-extrabold leading-none text-[clamp(6rem,30vw,14rem)]">
         TORA
       </h1>
     </div>
@@ -85,7 +82,7 @@
   </div>
 
   <!-- Features Section -->
-  <div class="flex-1 mt-8">
+  <div class="flex-1">
     <!-- Desktop: horizontal layout -->
     <div class="hidden md:flex flex-row space-x-8 p-2">
       {@render FeatureCard(
