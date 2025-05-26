@@ -16,8 +16,8 @@
   <!-- Desktop Layout -->
   <div class="hidden md:flex flex-col w-full p-2">
     <!-- Top section with TORA title -->
-    <div>
-      <span class="font-extrabold leading-none text-[clamp(8rem,18vw,32rem)]">
+    <div class="flex items-end text-end">
+      <span class="font-extrabold leading-none text-[clamp(8rem,20vw,32rem)]">
         TORA
       </span>
     </div>
@@ -58,14 +58,14 @@
     </div>
 
     <!-- Description and CTA -->
-    <div class="flex flex-col space-y-6">
+    <div class="flex flex-col space-y-4">
       <p class="text-base leading-relaxed text-left">
         The ML experiment tracking platform that gets out of your way. Add just
         3 lines to your Python code and unlock powerful experiment management,
         interactive visualizations, and AI-powered insights. Perfect for ML
         teams who want enterprise capabilities without the complexity.
       </p>
-      <div class="text-left">
+      <div>
         <button
           type="button"
           onclick={() => {
@@ -73,7 +73,7 @@
           }}
         >
           <span
-            class="p-3 rounded-lg bg-ctp-blue/20 hover:bg-ctp-blue transition-colors"
+            class="p-2 rounded-lg bg-ctp-blue/20 hover:bg-ctp-blue transition-colors"
             >Get Started -></span
           >
         </button>
@@ -82,7 +82,7 @@
   </div>
 
   <!-- Features Section -->
-  <div class="flex-1">
+  <div class="flex-1 py-4">
     <!-- Desktop: horizontal layout -->
     <div class="hidden md:flex flex-row space-x-8 p-2">
       {@render FeatureCard(
