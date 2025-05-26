@@ -117,7 +117,7 @@
 
       <!-- Logout button -->
       <div class="mt-3 sm:mt-0 sm:ml-auto">
-        <form action="/auth?/logout" method="POST">
+        <form action="/logout" method="POST">
           <button
             type="submit"
             class="w-full sm:w-auto flex items-center gap-2 px-3 py-1.5 border border-ctp-red rounded-md text-ctp-red hover:bg-ctp-red hover:text-ctp-crust transition-colors font-medium text-sm"
