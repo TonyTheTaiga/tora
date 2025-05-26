@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import Starfield from "./starfield.svelte";
 </script>
 
 {#snippet FeatureCard(title: String, content: String)}
@@ -14,8 +15,10 @@
   </div>
 {/snippet}
 
-<section class="hidden md:flex flex-col h-full w-full text-ctp-text/90">
-  <div class="flex-none w-full p-2">
+<Starfield />
+
+<section class="hidden md:flex flex-col h-full w-full text-ctp-text/90 relative">
+  <div class="flex-none w-full p-2 relative">
     <span
       class="font-extrabold leading-none text-[clamp(8rem,20vw,32rem)] bg-gradient-to-r from-ctp-blue via-ctp-mauve to-ctp-pink bg-clip-text text-transparent"
     >
@@ -23,8 +26,8 @@
     </span>
   </div>
 
-  <div class="flex justify-end w-full p-2">
-    <div class="w-1/3 flex flex-col">
+  <div class="flex justify-end w-full p-2 relative">
+    <div class="w-1/3 flex flex-col relative z-10">
       <p class="text-base leading-relaxed">
         Your experiments deserve <span class="font-bold">clarity</span>, not
         chaos.
