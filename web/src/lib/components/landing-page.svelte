@@ -17,7 +17,9 @@
 
 <Starfield />
 
-<section class="hidden md:flex flex-col h-full w-full text-ctp-text/90 relative">
+<section
+  class="hidden md:flex flex-col h-full w-full text-ctp-text/90 relative"
+>
   <div class="flex-none w-full p-2 relative">
     <span
       class="font-extrabold leading-none text-[clamp(8rem,20vw,32rem)] bg-gradient-to-r from-ctp-blue via-ctp-mauve to-ctp-pink bg-clip-text text-transparent"
