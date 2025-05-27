@@ -9,23 +9,117 @@ Tora is a tool designed to help you manage and track your machine learning exper
 
 The primary benefit of Tora is to provide a streamlined way to keep track of your ML experimentation workflow, making it easier to compare results, reproduce experiments, and manage your projects.
 
-## Features
+## Capabilities
 
-### Python Client (`tora.py`)
+Tora provides a comprehensive ML experiment management platform with the following capabilities:
 
-* **Experiment Creation**: Easily create new experiments using `create_experiment()`.
-* **Metric Logging**: Log metrics (name, value, step) with `log()`, including support for buffered logging.
-* **Graceful Shutdown**: Ensure all buffered logs are sent with `shutdown()`.
-* **Hyperparameter Tracking**: Log hyperparameters for your experiments.
-* **Tagging**: Add tags to experiments for better organization and filtering.
+### 🐍 Python Client Library (`tora.py`)
 
-### Web Application (Svelte Frontend & API)
+**Core Experiment Management:**
+* **Simple Integration**: Add experiment tracking with just 3 lines of code to any Python ML script
+* **Framework Agnostic**: Works seamlessly with PyTorch, TensorFlow, scikit-learn, and any Python ML framework
+* **Experiment Creation**: Create new experiments with `create_experiment()` including name, description, and metadata
+* **Hyperparameter Tracking**: Automatically serialize and log model configurations, training parameters, and settings
+* **Metric Logging**: Log any numeric metric with `log()` including support for step numbers and custom metadata
+* **Buffered Logging**: Efficient batch metric submission with configurable buffer sizes (default: 25 metrics)
+* **Graceful Shutdown**: Ensure all buffered data is sent with `shutdown()` for reliable data persistence
+* **Error Handling**: Built-in resilience with safe failure modes and network error recovery
+* **Lightweight**: Minimal dependencies (just `httpx`) for fast installation and minimal overhead
 
-* **Experiment Dashboard**: View a comprehensive list of all your experiments.
-* **Experiment Management**: Create, update, and delete experiments through an intuitive user interface.
-* **User Authentication**: Secure access to your experiment data.
-* **Metric Visualization**: Visualize logged metrics to understand experiment performance (details to be expanded).
-* **Experiment Comparison**: Compare different experiments to analyze results and identify best performing models (potentially using a reference experiment system).
+**Advanced Features:**
+* **Experiment References**: Link experiments together to track model iterations and hyperparameter sweeps
+* **Flexible Metadata**: Attach custom JSON metadata to experiments for rich context
+* **Real-time Streaming**: Live metric updates during model training
+* **Configurable Endpoints**: Override server URLs for custom deployments
+
+### 🌐 Web Application (Modern Svelte Frontend)
+
+**Experiment Management Interface:**
+* **Interactive Dashboard**: Modern, responsive interface with dark/light theme support
+* **Experiment CRUD**: Create, read, update, delete experiments with intuitive forms
+* **Advanced Filtering**: Search and filter experiments by name, tags, date, performance metrics
+* **Experiment Details**: Comprehensive view of hyperparameters, metrics, and metadata
+* **Bulk Operations**: Multi-select for batch experiment management
+
+**Data Visualization & Analysis:**
+* **Interactive Charts**: Chart.js-powered visualizations with zoom, pan, and multi-metric plotting
+* **Real-time Updates**: Live metric streaming during active training runs
+* **Metric Comparison**: Side-by-side comparison of multiple experiments with synchronized axes
+* **Performance Tables**: Detailed tabular view of all logged metrics with sorting and filtering
+* **Chart Customization**: Toggle between different chart types and metric combinations
+* **Export Capabilities**: Download charts and data for external analysis
+
+**Collaboration & Organization:**
+* **Multi-user Workspaces**: Shared environments for team collaboration with role-based access
+* **User Authentication**: Secure login/signup with Supabase Auth integration
+* **Experiment Sharing**: Public/private experiment visibility controls
+* **Team Management**: Invite collaborators and manage workspace permissions
+* **Activity Tracking**: Audit logs of experiment modifications and access
+
+**AI-Powered Intelligence:**
+* **Hyperparameter Optimization**: AI-driven recommendations for parameter tuning
+* **Performance Analysis**: Automated insights into experiment performance patterns
+* **Anomaly Detection**: Identify unusual training behaviors and potential issues
+* **Trend Analysis**: Understand performance evolution across experiment iterations
+
+### 🏗️ Technical Infrastructure
+
+**Backend & Database:**
+* **Supabase Integration**: PostgreSQL database with real-time subscriptions
+* **RESTful API**: Comprehensive API endpoints for all experiment operations
+* **Authentication & Authorization**: Secure JWT-based auth with row-level security
+* **Real-time Sync**: Live updates across all connected clients
+* **Scalable Architecture**: Cloud-ready deployment with Google Cloud Platform support
+
+**API Capabilities:**
+* **Experiment Endpoints**: Full CRUD operations for experiments and metadata
+* **Metrics Management**: Batch metric ingestion with efficient storage
+* **User Management**: Account creation, authentication, and workspace management
+* **Reference System**: Link and track experiment relationships
+* **AI Analysis**: Integration endpoints for intelligent recommendations
+
+**Deployment & Operations:**
+* **Cloud Deployment**: Ready-to-deploy configurations for GCP App Engine
+* **Docker Support**: Containerized deployment options
+* **Environment Management**: Comprehensive configuration via environment variables
+* **Migration System**: Database schema versioning with Supabase migrations
+* **Monitoring**: Built-in logging and error tracking capabilities
+
+### 📊 Example Use Cases Supported
+
+**Computer Vision:**
+* Image classification with ResNet architectures (Imagenette dataset example)
+* Transfer learning experiments with pre-trained models
+* Custom CNN architectures for specialized vision tasks
+
+**Natural Language Processing:**
+* Text classification with transformer models
+* Topic modeling with LDA and advanced techniques
+* Document embedding and similarity analysis
+
+**Traditional Machine Learning:**
+* MNIST digit classification with various algorithms
+* Logistic regression with hyperparameter optimization
+* Recommendation systems with collaborative filtering
+
+**Deep Learning Research:**
+* Custom model architectures and ablation studies
+* Hyperparameter sweeps with automated tracking
+* Multi-metric optimization experiments
+
+**Production ML Workflows:**
+* Model performance monitoring across versions
+* A/B testing of different model configurations
+* Reproducible experiment pipelines with version control
+
+### 🎯 Key Differentiators
+
+* **Zero Learning Curve**: Integrate into existing workflows without changing code structure
+* **Enterprise-Ready**: Scalable architecture with team collaboration features
+* **AI-Enhanced**: Intelligent insights beyond basic metric tracking
+* **Open Source**: Transparent, customizable, and community-driven development
+* **Modern Stack**: Built with cutting-edge technologies (Svelte, TypeScript, Supabase)
+* **Real-time Everything**: Live updates, streaming metrics, and instant collaboration
 
 ## Project Structure
 

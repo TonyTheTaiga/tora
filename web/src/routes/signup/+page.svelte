@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { LogIn, User, Lock, Mail } from "lucide-svelte";
-  let signUp = $state(true);
+  import { goto } from "$app/navigation";
+  import { User, Mail, Lock, LogIn } from "lucide-svelte";
 </script>
 
-<div class="flex items-center justify-center min-h-[80vh]">
+<div class="flex items-center justify-center h-full">
   <div class="w-full max-w-md">
     <div
       class="bg-ctp-mantle shadow-lg rounded-xl overflow-hidden border border-ctp-surface0"
@@ -13,16 +13,14 @@
         class="px-6 py-4 border-b border-ctp-surface0 flex items-center gap-2"
       >
         <User size={20} class="text-ctp-mauve" />
-        <h2 class="text-xl font-medium text-ctp-text">
-          {signUp ? "Create Account" : "Sign In"}
-        </h2>
+        <h2 class="text-xl font-medium text-ctp-text">Create Account</h2>
       </div>
 
       <!-- Form -->
       <form
         method="POST"
         autocomplete="on"
-        action={signUp ? "?/signup" : "?/login"}
+        action=""
         name="login-form"
         class="p-6 space-y-5"
       >
@@ -71,12 +69,10 @@
               name="password"
               type="password"
               minlength="6"
-              autocomplete={signUp ? "new-password" : "current-password"}
+              autocomplete="new-password"
               required
               class="w-full pl-10 pr-4 py-3 bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-mauve transition-all placeholder-ctp-overlay0 shadow-sm"
-              placeholder={signUp
-                ? "Create a strong password"
-                : "Enter your password"}
+              placeholder="Create a strong password"
             />
           </div>
         </div>
@@ -88,7 +84,7 @@
             class="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-ctp-blue to-ctp-mauve py-3 px-4 text-ctp-crust font-medium hover:shadow-lg transition-all"
           >
             <LogIn size={18} />
-            {signUp ? "Create Account" : "Sign In"}
+            Create Account
           </button>
         </div>
       </form>
@@ -97,15 +93,15 @@
       <div
         class="flex justify-end gap-3 pt-2 pb-6 px-6 border-t border-ctp-surface0"
       >
-        <p class="text-sm text-ctp-subtext0 pt-3">
-          {signUp ? "Already have an account?" : "Don't have an account?"}
-        </p>
+        <p class="text-sm text-ctp-subtext0 pt-3">Already Have an Account?</p>
         <button
           type="button"
           class="inline-flex items-center justify-center px-5 py-2.5 font-medium rounded-lg bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"
-          onclick={() => (signUp = !signUp)}
+          onclick={() => {
+            goto("/login");
+          }}
         >
-          {signUp ? "Sign In" : "Sign Up"}
+          Log In
         </button>
       </div>
     </div>

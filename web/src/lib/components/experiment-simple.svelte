@@ -71,7 +71,7 @@
         'PUBLIC'
           ? 'text-ctp-green hover:bg-ctp-green/10'
           : 'text-ctp-red hover:bg-ctp-red/10'}"
-        title={experiment.visibility === 'PUBLIC' ? 'Public' : 'Private'}
+        title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
       >
         {#if experiment.visibility === "PUBLIC"}
           <Globe size={14} />
@@ -81,14 +81,25 @@
       </div>
     </div>
   </div>
-  <div class="mb-2 text-xs"> <!-- Base text size for this section -->
+  <div class="mb-2 text-xs">
+    <!-- Base text size for this section -->
     {#if experiment.keyMetrics && experiment.keyMetrics.length > 0}
-      <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5" title="Key Metrics"> <!-- Grid container with tooltip -->
+      <div
+        class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5"
+        title="Key Metrics"
+      >
+        <!-- Grid container with tooltip -->
         {#each experiment.keyMetrics as metric (metric.name)}
-          <span class="text-ctp-subtext1 truncate text-right" title={metric.name}>
+          <span
+            class="text-ctp-subtext1 truncate text-right"
+            title={metric.name}
+          >
             {metric.name}:
           </span>
-          <span class="font-medium text-ctp-text truncate" title={String(metric.value)}>
+          <span
+            class="font-medium text-ctp-text truncate"
+            title={String(metric.value)}
+          >
             {metric.value}
           </span>
         {/each}
@@ -121,13 +132,15 @@
           {/each}
         </div>
       {:else}
-        <div class="h-[18px]"></div> <!-- Placeholder to maintain height consistency if no tags -->
+        <div class="h-[18px]"></div>
+        <!-- Placeholder to maintain height consistency if no tags -->
       {/if}
     </div>
     <!-- Actions & Date -->
     <div class="flex items-center gap-1 text-ctp-subtext0 flex-shrink-0">
       <button
-        onclick={async (e) => { // Changed to onclick
+        onclick={async (e) => {
+          // Changed to onclick
           e.stopPropagation(); // Prevent card click
           if (highlighted.includes(experiment.id)) {
             highlighted = [];
@@ -162,7 +175,8 @@
           class="p-1 rounded-md hover:text-ctp-red hover:bg-ctp-red/10 transition-all"
           aria-label="Delete"
           title="Delete experiment"
-          onclick={(e) => { // Changed to onclick
+          onclick={(e) => {
+            // Changed to onclick
             e.stopPropagation(); // Prevent card click
             selectedForDelete = experiment;
           }}
@@ -171,7 +185,9 @@
         </button>
       {/if}
       {#if experiment?.createdAt}
-        <time class="flex items-center gap-1 text-[10px] text-ctp-overlay0 ml-0.5 whitespace-nowrap">
+        <time
+          class="flex items-center gap-1 text-[10px] text-ctp-overlay0 ml-0.5 whitespace-nowrap"
+        >
           <Clock size={10} />
           {new Date(experiment.createdAt).toLocaleDateString("en-US", {
             month: "short",

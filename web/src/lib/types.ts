@@ -7,7 +7,12 @@ export interface ExperimentAndMetrics {
 
 export type Visibility = "PUBLIC" | "PRIVATE";
 
-export type ExperimentStatus = "COMPLETED" | "RUNNING" | "FAILED" | "DRAFT" | "OTHER";
+export type ExperimentStatus =
+  | "COMPLETED"
+  | "RUNNING"
+  | "FAILED"
+  | "DRAFT"
+  | "OTHER";
 
 export interface Experiment {
   id: string;

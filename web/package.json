@@ -19,6 +19,7 @@
     "@sveltejs/kit": "^2.21.1",
     "@sveltejs/vite-plugin-svelte": "^4.0.4",
     "@tailwindcss/postcss": "^4.1.7",
+    "@types/p5": "^1.7.6",
     "postcss": "^8.5.3",
     "prettier": "3.4.2",
     "prettier-plugin-svelte": "^3.4.0",
@@ -36,6 +37,7 @@
     "chart.js": "^4.4.9",
     "lucide-svelte": "^0.469.0",
     "marked": "^15.0.12",
+    "p5": "^2.0.2",
     "tippy.js": "^6.3.7",
     "zod": "^3.25.7",
     "zod-to-json-schema": "^3.24.5"

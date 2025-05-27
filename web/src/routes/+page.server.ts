@@ -29,7 +29,9 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   const response = await fetch(apiUrl.toString());
   if (!response.ok) {
     // Handle case where fetching experiments itself fails
-    console.error(`Failed to fetch experiments: ${response.status} ${response.statusText}`);
+    console.error(
+      `Failed to fetch experiments: ${response.status} ${response.statusText}`,
+    );
     return { experiments: [], session, error: "Failed to load experiments." };
   }
 
@@ -40,9 +42,13 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
     const experimentsWithKeyMetrics = await Promise.all(
       experiments.map(async (exp) => {
         try {
-          const metricsResponse = await fetch(`/api/experiments/${exp.id}/metrics`);
+          const metricsResponse = await fetch(
+            `/api/experiments/${exp.id}/metrics`,
+          );
           if (!metricsResponse.ok) {
-            console.warn(`Failed to fetch metrics for experiment ${exp.id}: ${metricsResponse.status}`);
+            console.warn(
+              `Failed to fetch metrics for experiment ${exp.id}: ${metricsResponse.status}`,
+            );
             return { ...exp, keyMetrics: [] }; // Return experiment with empty keyMetrics on error
           }
           const rawMetrics: Metric[] = await metricsResponse.json();
@@ -54,10 +60,15 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
           // Sort metrics by created_at descending (most recent first)
           // Ensure created_at is treated as a Date for proper sorting
           const sortedMetrics = rawMetrics.sort(
-            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime(),
           );
 
-          const latestDistinctMetrics: Array<{ name: string; value: string | number }> = [];
+          const latestDistinctMetrics: Array<{
+            name: string;
+            value: string | number;
+          }> = [];
           const distinctNames = new Set<string>();
 
           for (const metric of sortedMetrics) {
@@ -68,7 +79,10 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
                 // Value formatting might be needed if it's not already a string/number as desired
                 // For now, assume metric.value is directly usable.
                 // If metric.value can be other types, ensure conversion or appropriate handling.
-                value: typeof metric.value === 'number' ? parseFloat(metric.value.toFixed(4)) : metric.value,
+                value:
+                  typeof metric.value === "number"
+                    ? parseFloat(metric.value.toFixed(4))
+                    : metric.value,
               });
               if (latestDistinctMetrics.length >= 2) {
                 break; // Stop after finding 2 distinct metrics
@@ -77,10 +91,13 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
           }
           return { ...exp, keyMetrics: latestDistinctMetrics };
         } catch (error) {
-          console.error(`Error processing metrics for experiment ${exp.id}:`, error);
+          console.error(
+            `Error processing metrics for experiment ${exp.id}:`,
+            error,
+          );
           return { ...exp, keyMetrics: [] }; // Return with empty keyMetrics on processing error
         }
-      })
+      }),
     );
     experiments = experimentsWithKeyMetrics;
   }

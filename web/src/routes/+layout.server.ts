@@ -22,6 +22,8 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 
     if (!currentWorkspace) {
       currentWorkspace = await getOrCreateDefaultWorkspace(user.id);
+      userWorkspaces.push(currentWorkspace);
+
       cookies.set("current_workspace", currentWorkspace.id, {
         path: "/",
         httpOnly: true,
@@ -29,7 +31,6 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
         sameSite: "lax",
         maxAge: 60 * 60 * 24 * 30,
       });
-      userWorkspaces = await getWorkspaces(user.id);
     }
   }
   return {
