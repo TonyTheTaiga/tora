@@ -58,7 +58,7 @@
     </div>
   </div>
 
-  <div class="flex-1 py-4">
+  <div class="flex-1 pt-16">
     <div class="flex flex-row space-x-8 p-2">
       {@render FeatureCard(
         "Instant Setup",
@@ -110,7 +110,7 @@
     </button>
   </div>
 
-  <div class="flex-1 py-4">
+  <div class="flex-1 pt-16">
     <div class="flex flex-col space-y-6">
       {@render FeatureCard(
         "Instant Setup",
