@@ -1,15 +1,15 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import type p5 from "p5"; // Import p5 type for better intellisense
+  import type p5 from "p5";
+
 
   let starfieldContainer: HTMLDivElement;
   let p5Instance: p5 | null = null;
 
-  // --- Enums and Constants ---
   const StarType = {
     DISTANT: "distant",
-    MEDIUM: "medium",
-    BRIGHT: "bright",
+    MEDIUM: "bright",
+    BRIGHT: "brighter",
     SUPERBRIGHT: "superbright",
   } as const;
 
@@ -35,52 +35,320 @@
 
   type StarShape = (typeof StarShape)[keyof typeof StarShape];
 
-  // Subtle warm palette with gentle yellow and orange tints
   const STAR_COLORS: readonly [number, number, number][] = [
-    [245, 240, 225], // warm white - most stars
-    [255, 245, 215], // subtle yellow-white
-    [255, 235, 195], // gentle yellow
-    [255, 215, 175], // soft orange accent - rare
+    [245, 240, 225],
+    [255, 245, 215],
+    [255, 235, 195],
+    [255, 215, 175],
+    [170, 205, 255],
+    [255, 180, 150]
   ] as const;
 
-  // --- Interfaces (still useful for properties, but now within classes) ---
-  interface IStar {
-    readonly id: number;
-    x: number;
-    y: number;
-    size: StarSize;
-    brightness: number;
-    readonly maxBrightness: number;
-    readonly flickerSpeed: number;
-    readonly flickerOffset: number; // For sine wave
-    readonly noiseOffset: number; // For Perlin noise
-    readonly color: readonly [number, number, number];
-    readonly type: StarType;
-    readonly shape: StarShape;
-    twinklePhase: number;
-    pulsePhase: number;
-    isStatic?: boolean; // New: to determine if it should be pre-rendered
+  interface RealStarData {
+    id: number;
+    name: string;
+    ra: number;
+    dec: number;
+    mag: number;
+    spectralType: string;
   }
 
-  interface IComet {
-    readonly id: number;
-    x: number;
-    y: number;
-    readonly startX: number;
-    readonly startY: number;
-    readonly endX: number;
-    readonly endY: number;
-    readonly speed: number;
-    readonly tailLength: number;
-    readonly brightness: number;
-    readonly color: readonly [number, number, number];
-    progress: number;
-    active: boolean;
-  }
+  const BRIGHT_STARS_CATALOG: RealStarData[] = [
+    {
+      id: 1,
+      name: "Sirius",
+      ra: 101.287,
+      dec: -16.716,
+      mag: -1.46,
+      spectralType: "A1V",
+    },
+    {
+      id: 2,
+      name: "Canopus",
+      ra: 96.643,
+      dec: -52.695,
+      mag: -0.74,
+      spectralType: "F0Ib",
+    },
+    {
+      id: 3,
+      name: "Arcturus",
+      ra: 212.083,
+      dec: 19.182,
+      mag: -0.05,
+      spectralType: "K1.5III",
+    },
+    {
+      id: 4,
+      name: "Vega",
+      ra: 279.235,
+      dec: 38.783,
+      mag: 0.03,
+      spectralType: "A0V",
+    },
+    {
+      id: 5,
+      name: "Capella",
+      ra: 79.172,
+      dec: 45.998,
+      mag: 0.08,
+      spectralType: "G8III",
+    },
+    {
+      id: 6,
+      name: "Rigel",
+      ra: 77.587,
+      dec: -8.201,
+      mag: 0.13,
+      spectralType: "B8Ia",
+    },
+    {
+      id: 7,
+      name: "Procyon",
+      ra: 114.823,
+      dec: 5.225,
+      mag: 0.34,
+      spectralType: "F5IV-V",
+    },
+    {
+      id: 8,
+      name: "Achernar",
+      ra: 22.871,
+      dec: -57.237,
+      mag: 0.46,
+      spectralType: "B6Vep",
+    },
+    {
+      id: 9,
+      name: "Betelgeuse",
+      ra: 88.792,
+      dec: 7.407,
+      mag: 0.5,
+      spectralType: "M1-2Ia-Iab",
+    },
+    {
+      id: 10,
+      name: "Altair",
+      ra: 309.789,
+      dec: 8.869,
+      mag: 0.77,
+      spectralType: "A7V",
+    },
+    {
+      id: 11,
+      name: "Aldebaran",
+      ra: 67.876,
+      dec: 16.509,
+      mag: 0.85,
+      spectralType: "K5III",
+    },
+    {
+      id: 12,
+      name: "Antares",
+      ra: 247.351,
+      dec: -26.431,
+      mag: 1.06,
+      spectralType: "M1.5Iab-b",
+    },
+    {
+      id: 13,
+      name: "Spica",
+      ra: 204.423,
+      dec: -11.161,
+      mag: 1.04,
+      spectralType: "B1V",
+    },
+    {
+      id: 14,
+      name: "Pollux",
+      ra: 116.326,
+      dec: 28.026,
+      mag: 1.15,
+      spectralType: "K0IIIb",
+    },
+    {
+      id: 15,
+      name: "Fomalhaut",
+      ra: 344.407,
+      dec: -29.627,
+      mag: 1.16,
+      spectralType: "A3V",
+    },
+    {
+      id: 16,
+      name: "Deneb",
+      ra: 309.288,
+      dec: 45.28,
+      mag: 1.25,
+      spectralType: "A2Ia",
+    },
+    {
+      id: 17,
+      name: "Regulus",
+      ra: 152.091,
+      dec: 11.967,
+      mag: 1.35,
+      spectralType: "B7V",
+    },
+    {
+      id: 18,
+      name: "Adhara",
+      ra: 105.109,
+      dec: -28.98,
+      mag: 1.5,
+      spectralType: "B2Iab",
+    },
+    {
+      id: 19,
+      name: "Castor",
+      ra: 110.37,
+      dec: 31.888,
+      mag: 1.58,
+      spectralType: "A1V",
+    },
+    {
+      id: 20,
+      name: "Gacrux",
+      ra: 182.203,
+      dec: -57.147,
+      mag: 1.63,
+      spectralType: "M3.5III",
+    },
+    {
+      id: 21,
+      name: "Shaula",
+      ra: 260.672,
+      dec: -37.1,
+      mag: 1.63,
+      spectralType: "B1.5V",
+    },
+    {
+      id: 22,
+      name: "Bellatrix",
+      ra: 81.336,
+      dec: 6.35,
+      mag: 1.64,
+      spectralType: "B2III",
+    },
+    {
+      id: 23,
+      name: "Elnath",
+      ra: 77.014,
+      dec: 28.629,
+      mag: 1.65,
+      spectralType: "B7III",
+    },
+    {
+      id: 24,
+      name: "Miaplacidus",
+      ra: 139.117,
+      dec: -69.646,
+      mag: 1.67,
+      spectralType: "A1III",
+    },
+    {
+      id: 25,
+      name: "Alnilam",
+      ra: 84.664,
+      dec: -1.2,
+      mag: 1.69,
+      spectralType: "B0Ia",
+    },
+    {
+      id: 26,
+      name: "Alnair",
+      ra: 326.687,
+      dec: -46.863,
+      mag: 1.7,
+      spectralType: "B7V",
+    },
+    {
+      id: 27,
+      name: "Alioth",
+      ra: 195.42,
+      dec: 55.959,
+      mag: 1.76,
+      spectralType: "A1IIIp",
+    },
+    {
+      id: 28,
+      name: "Dubhe",
+      ra: 165.75,
+      dec: 61.699,
+      mag: 1.79,
+      spectralType: "K0III",
+    },
+    {
+      id: 29,
+      name: "Mirfak",
+      ra: 49.33,
+      dec: 49.866,
+      mag: 1.8,
+      spectralType: "F5Ib",
+    },
+    {
+      id: 30,
+      name: "Wezen",
+      ra: 107.037,
+      dec: -26.059,
+      mag: 1.83,
+      spectralType: "F8Ia",
+    },
+    {
+      id: 31,
+      name: "Kaus Australis",
+      ra: 276.992,
+      dec: -34.331,
+      mag: 1.85,
+      spectralType: "B9.5III",
+    },
+    {
+      id: 32,
+      name: "Alkaid",
+      ra: 206.94,
+      dec: 49.317,
+      mag: 1.86,
+      spectralType: "B3V",
+    },
+    {
+      id: 33,
+      name: "Sargas",
+      ra: 244.305,
+      dec: -45.305,
+      mag: 1.87,
+      spectralType: "F1II",
+    },
+    {
+      id: 34,
+      name: "Avior",
+      ra: 122.954,
+      dec: -59.39,
+      mag: 1.89,
+      spectralType: "K3II/III",
+    },
+    {
+      id: 35,
+      name: "Kochab",
+      ra: 228.618,
+      dec: 74.004,
+      mag: 2.07,
+      spectralType: "K4III",
+    },
+    {
+      id: 36,
+      name: "Polaris",
+      ra: 37.954,
+      dec: 89.264,
+      mag: 1.98,
+      spectralType: "F7Ib-II",
+    },
+  ];
 
-  // --- Helper Functions (moved from StarField class) ---
+  const NEW_YORK_LAT = 40.7128;
+  const NEW_YORK_LON = -74.006;
 
-  // Box-Muller transform for normal distribution
+  const NYC_MAGNITUDE_CUTOFF = 3.5;
+
   function normalRandom(): number {
     let u = 0,
       v = 0;
@@ -89,7 +357,6 @@
     return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
   }
 
-  // Easing function for comets
   function easeInOutQuad(t: number): number {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
   }
@@ -111,23 +378,47 @@
   }
 
   function calculateFlickerSpeed(type: StarType): number {
-    // Much slower, peaceful flicker rates
     switch (type) {
       case StarType.DISTANT:
-        return 0.2 + Math.random() * 0.4; // 0.2-0.6 Hz - very slow
+        return 0.2 + Math.random() * 0.4;
       case StarType.MEDIUM:
-        return 0.15 + Math.random() * 0.35; // 0.15-0.5 Hz - gentle
+        return 0.15 + Math.random() * 0.35;
       case StarType.BRIGHT:
-        return 0.1 + Math.random() * 0.3; // 0.1-0.4 Hz - calm
+        return 0.1 + Math.random() * 0.3;
       case StarType.SUPERBRIGHT:
-        return 0.08 + Math.random() * 0.25; // 0.08-0.33 Hz - serene
+        return 0.08 + Math.random() * 0.25;
       default:
         return 0.2;
     }
   }
 
-  // --- Star Class ---
-  class Star implements IStar {
+  function determineStarColorFromSpectralType(
+    spectralType: string,
+  ): readonly [number, number, number] {
+    if (!spectralType) return STAR_COLORS[0];
+
+    const typeChar = spectralType.charAt(0).toUpperCase();
+    switch (typeChar) {
+      case "O":
+        return STAR_COLORS[4]; // Blue-white
+      case "B":
+        return STAR_COLORS[4]; // Bluish-white
+      case "A":
+        return STAR_COLORS[0]; // White (warm white from palette)
+      case "F":
+        return STAR_COLORS[1]; // Yellow-white (subtle yellow-white)
+      case "G":
+        return STAR_COLORS[2]; // Yellowish (gentle yellow)
+      case "K":
+        return STAR_COLORS[3]; // Orange-red (soft orange accent)
+      case "M":
+        return STAR_COLORS[5]; // Red
+      default:
+        return STAR_COLORS[0]; // Default to warm white
+    }
+  }
+
+  class Star {
     readonly id: number;
     x: number;
     y: number;
@@ -135,82 +426,95 @@
     brightness: number;
     readonly maxBrightness: number;
     readonly flickerSpeed: number;
-    readonly flickerOffset: number;
     readonly noiseOffset: number;
     readonly color: readonly [number, number, number];
     readonly type: StarType;
     readonly shape: StarShape;
     twinklePhase: number;
     pulsePhase: number;
-    isStatic: boolean; // Stars that are static won't update brightness
+    isStatic: boolean;
 
-    private p: p5; // p5 instance passed to each star for drawing
+    private p: p5;
+    readonly name: string;
+    readonly mag: number;
+    readonly ra: number;
+    readonly dec: number;
 
     constructor(
       p: p5,
-      props: Omit<IStar, "brightness" | "twinklePhase" | "pulsePhase"> & {
+      props: {
+        id: number;
+        name: string;
+        ra: number;
+        dec: number;
+        mag: number;
+        x: number;
+        y: number;
+        size: StarSize;
+        maxBrightness: number;
+        flickerSpeed: number;
+        noiseOffset: number;
+        color: readonly [number, number, number];
+        type: StarType;
+        shape: StarShape;
         isStatic: boolean;
       },
     ) {
       this.p = p;
       this.id = props.id;
+      this.name = props.name;
+      this.ra = props.ra;
+      this.dec = props.dec;
+      this.mag = props.mag;
       this.x = props.x;
       this.y = props.y;
       this.size = props.size;
       this.maxBrightness = props.maxBrightness;
       this.flickerSpeed = props.flickerSpeed;
-      this.flickerOffset = props.flickerOffset;
       this.noiseOffset = props.noiseOffset;
       this.color = props.color;
       this.type = props.type;
       this.shape = props.shape;
       this.isStatic = props.isStatic;
-      this.brightness = this.maxBrightness * (0.5 + Math.random() * 0.5); // Start at 50-100% brightness
+      this.brightness = this.maxBrightness * (0.5 + Math.random() * 0.5);
       this.twinklePhase = Math.random() * this.p.TWO_PI;
       this.pulsePhase = Math.random() * this.p.TWO_PI;
     }
 
     update(time: number, deltaTime: number): void {
-      if (this.isStatic) return; // No need to update brightness for static stars
+      if (this.isStatic) return;
 
-      // Primary gentle Perlin noise flicker for organic feel
       const noiseVal = this.p.noise(
         time * this.flickerSpeed * 0.1 + this.noiseOffset,
       );
-      // Map noise (0-1) to a flicker range (-1 to 1)
       const primaryFlicker = this.p.map(noiseVal, 0, 1, -1, 1);
 
-      // Gentle pulse effect for larger stars
       this.pulsePhase += deltaTime * this.flickerSpeed * 0.5;
       const pulseIntensity =
         this.size >= StarSize.MEDIUM ? Math.sin(this.pulsePhase) * 0.15 : 0;
 
-      // Combine effects
       const combinedFlicker = primaryFlicker + pulseIntensity;
-      // Normalize combined flicker to a 20-100% range of maxBrightness
       const normalizedFlicker = this.p.constrain(
         (combinedFlicker + 1) * 0.5,
         0.2,
         1,
       );
 
-      // Apply gentle brightness variation for peaceful effect
       let brightnessModifier = 1;
       switch (this.type) {
         case StarType.DISTANT:
-          brightnessModifier = 0.6 + normalizedFlicker * 0.4; // 60-100% - stable
+          brightnessModifier = 0.6 + normalizedFlicker * 0.4;
           break;
         case StarType.MEDIUM:
-          brightnessModifier = 0.5 + normalizedFlicker * 0.5; // 50-100% - gentle
+          brightnessModifier = 0.5 + normalizedFlicker * 0.5;
           break;
         case StarType.BRIGHT:
-          brightnessModifier = 0.4 + normalizedFlicker * 0.6; // 40-100% - noticeable
+          brightnessModifier = 0.4 + normalizedFlicker * 0.6;
           break;
         case StarType.SUPERBRIGHT:
-          brightnessModifier = 0.6 + normalizedFlicker * 0.4; // 60-100% - steady beacon
+          brightnessModifier = 0.6 + normalizedFlicker * 0.4;
           break;
       }
-
       this.brightness = this.maxBrightness * brightnessModifier;
     }
 
@@ -221,7 +525,6 @@
       const size = this.size;
       const halfSize = Math.floor(size / 2);
 
-      // Main star body with shape variety
       this.p.fill(r, g, b, this.brightness);
       this.p.noStroke();
 
@@ -229,7 +532,6 @@
         case StarShape.CIRCLE:
           this.p.circle(this.x, this.y, size);
           break;
-
         case StarShape.DIAMOND:
           this.p.beginShape();
           this.p.vertex(this.x, this.y - halfSize);
@@ -238,21 +540,16 @@
           this.p.vertex(this.x - halfSize, this.y);
           this.p.endShape(this.p.CLOSE);
           break;
-
         case StarShape.PLUS:
           this.p.rect(pixelX - halfSize, pixelY - 0.5, size, 1);
           this.p.rect(pixelX - 0.5, pixelY - halfSize, 1, size);
           break;
-
         case StarShape.STAR:
           this.drawStarShape(this.x, this.y, size * 0.6, size * 0.3);
           break;
-
         case StarShape.TWINKLE:
-          // Main cross
           this.p.rect(pixelX - halfSize, pixelY - 0.5, size, 1);
           this.p.rect(pixelX - 0.5, pixelY - halfSize, 1, size);
-          // Diagonal crosses
           const diagonalLength = size * 0.7;
           this.p.stroke(r, g, b, this.brightness);
           this.p.strokeWeight(1);
@@ -272,22 +569,20 @@
           break;
       }
 
-      // Add gentle glow for larger stars using additive blending
       if (this.size >= StarSize.MEDIUM && this.brightness > 120) {
         this.p.blendMode(this.p.ADD);
         const glowIntensity = this.brightness * 0.2;
         this.p.fill(r, g, b, glowIntensity);
         this.p.circle(this.x, this.y, size * 2);
-        this.p.blendMode(this.p.BLEND); // Revert
+        this.p.blendMode(this.p.BLEND);
       }
 
-      // Add soft outer glow for superbright stars using additive blending
       if (this.type === StarType.SUPERBRIGHT && this.brightness > 140) {
         this.p.blendMode(this.p.ADD);
         const outerGlow = this.brightness * 0.1;
         this.p.fill(r, g, b, outerGlow);
         this.p.circle(this.x, this.y, size * 3);
-        this.p.blendMode(this.p.BLEND); // Revert
+        this.p.blendMode(this.p.BLEND);
       }
     }
 
@@ -310,8 +605,7 @@
     }
   }
 
-  // --- Comet Class ---
-  class Comet implements IComet {
+  class Comet {
     readonly id: number;
     x: number;
     y: number;
@@ -328,7 +622,7 @@
 
     private p: p5;
 
-    constructor(p: p5, props: Omit<IComet, "x" | "y" | "progress" | "active">) {
+    constructor(p: p5, props: Omit<Comet, "p" | "x" | "y" | "progress" | "active" | "update" | "render">) {
       this.p = p;
       this.id = props.id;
       this.startX = props.startX;
@@ -363,14 +657,12 @@
     render(): void {
       const [r, g, b] = this.color;
 
-      // Calculate tail direction
       const dx = this.endX - this.startX;
       const dy = this.endY - this.startY;
       const distance = Math.sqrt(dx * dx + dy * dy);
       const tailX = -(dx / distance) * this.tailLength;
       const tailY = -(dy / distance) * this.tailLength;
 
-      // Draw tail with gradient
       const segments = 8;
       for (let i = 0; i < segments; i++) {
         const t = i / segments;
@@ -388,242 +680,227 @@
         this.p.line(x1, y1, x2, y2);
       }
 
-      // Draw comet head with additive blending for extra glow
       this.p.blendMode(this.p.ADD);
       this.p.noStroke();
       this.p.fill(r, g, b, this.brightness);
       this.p.circle(this.x, this.y, 4);
 
-      // Bright center
       this.p.fill(255, 255, 255, this.brightness * 0.8);
       this.p.circle(this.x, this.y, 2);
-      this.p.blendMode(this.p.BLEND); // Revert
+      this.p.blendMode(this.p.BLEND);
     }
   }
 
-  // --- StarField Manager Class ---
   class StarField {
+    private p: p5;
     private stars: Star[] = [];
     private comets: Comet[] = [];
     private time = 0;
-    private p: p5;
     private starIdCounter = 0;
     private cometIdCounter = 0;
     private lastCometTime = 0;
-    private staticStarsBuffer: p5.Graphics | null = null; // New: for pre-rendering static stars
-
-    private readonly TARGET_STARS = 400; // Aim for this many stars
-    private readonly MIN_STARS = 150;
-    private readonly MAX_STARS = 700;
+    private staticStarsBuffer: p5.Graphics | null = null;
 
     constructor(p: p5) {
       this.p = p;
-      this.generateStarField();
+      this.generateRealStarField();
     }
 
-    private generateStarField(): void {
+    private generateRealStarField(): void {
       this.stars = [];
       this.comets = [];
       this.starIdCounter = 0;
       this.cometIdCounter = 0;
 
-      const screenArea = this.p.windowWidth * this.p.windowHeight;
-      // Adjust target stars based on screen size, but within min/max
-      const effectiveTargetStars = this.p.constrain(
-        Math.floor(this.TARGET_STARS * (screenArea / (1920 * 1080))), // Scale by a common desktop resolution
-        this.MIN_STARS,
-        this.MAX_STARS,
-      );
-
       console.log(
-        `Generating peaceful starfield for ${this.p.windowWidth}x${this.p.windowHeight}. Targeting ${effectiveTargetStars} stars.`,
+        `Generating real starfield for New York (${NEW_YORK_LAT}, ${NEW_YORK_LON})`,
       );
 
-      // Generate background stars
-      const numBackgroundStars = Math.floor(effectiveTargetStars * 0.7); // 70% background
-      for (let i = 0; i < numBackgroundStars; i++) {
-        this.stars.push(this.createStar(false)); // Not a cluster star
+      const now = new Date();
+      const jd = 2440587.5 + (now.getTime() / 86400000);
+      const utc = now.getTime() / 1000 / 3600;
+      const lst = (utc / 24 + NEW_YORK_LON / 360) % 1 * 24;
+
+      for (const starData of BRIGHT_STARS_CATALOG) {
+        if (starData.mag > NYC_MAGNITUDE_CUTOFF) {
+          continue;
+        }
+
+        const hourAngle = (lst * 15 - starData.ra + 360) % 360;
+        
+        const sinAlt = Math.sin(starData.dec * Math.PI / 180) * Math.sin(NEW_YORK_LAT * Math.PI / 180) +
+                      Math.cos(starData.dec * Math.PI / 180) * Math.cos(NEW_YORK_LAT * Math.PI / 180) * Math.cos(hourAngle * Math.PI / 180);
+        const altitude = Math.asin(sinAlt) * 180 / Math.PI;
+        
+        if (altitude < 0) {
+          continue;
+        }
+        
+        const cosA = (Math.sin(starData.dec * Math.PI / 180) - Math.sin(altitude * Math.PI / 180) * Math.sin(NEW_YORK_LAT * Math.PI / 180)) /
+                     (Math.cos(altitude * Math.PI / 180) * Math.cos(NEW_YORK_LAT * Math.PI / 180));
+        let azimuth = Math.acos(Math.max(-1, Math.min(1, cosA))) * 180 / Math.PI;
+        if (Math.sin(hourAngle * Math.PI / 180) > 0) {
+          azimuth = 360 - azimuth;
+        }
+
+        const screenCoords = this.projectHorizonToScreen(azimuth, altitude);
+
+        const size = this.mapMagnitudeToSize(starData.mag);
+        const maxBrightness = this.mapMagnitudeToBrightness(starData.mag);
+        const type = this.determineStarTypeFromMagnitude(starData.mag);
+        const color = determineStarColorFromSpectralType(starData.spectralType);
+
+        const isStatic = starData.mag >= 2.0;
+
+        this.stars.push(
+          new Star(this.p, {
+            id: this.starIdCounter++,
+            name: starData.name,
+            ra: starData.ra,
+            dec: starData.dec,
+            mag: starData.mag,
+            x: screenCoords.x,
+            y: screenCoords.y,
+            size,
+            maxBrightness,
+            flickerSpeed: calculateFlickerSpeed(type),
+            noiseOffset: Math.random() * 1000,
+            color,
+            type,
+            shape: getRandomShape(!isStatic),
+            isStatic,
+          }),
+        );
       }
 
-      // Generate fewer, softer star clusters
-      this.generateStarClusters(effectiveTargetStars * 0.3); // 30% cluster stars
+      const minStarsDesired = 100;
+      if (this.stars.length < minStarsDesired) {
+        const numExtraStars = minStarsDesired - this.stars.length;
+        for (let i = 0; i < numExtraStars; i++) {
+          const x = Math.random() * this.p.windowWidth;
+          const y = Math.random() * this.p.windowHeight;
+          this.stars.push(
+            new Star(this.p, {
+              id: this.starIdCounter++,
+              name: "Distant Star",
+              ra: 0,
+              dec: 0,
+              mag: 5.0 + Math.random(),
+              x,
+              y,
+              size: StarSize.TINY,
+              maxBrightness: this.mapMagnitudeToBrightness(
+                5.5 + Math.random() * 0.5,
+              ),
+              flickerSpeed: calculateFlickerSpeed(StarType.DISTANT),
+              noiseOffset: Math.random() * 1000,
+              color: STAR_COLORS[0],
+              type: StarType.DISTANT,
+              shape: StarShape.CIRCLE,
+              isStatic: true,
+            }),
+          );
+        }
+      }
 
-      // Sort stars by brightness for optimal rendering order (dimmest first)
       this.stars.sort((a, b) => a.maxBrightness - b.maxBrightness);
 
-      // Pre-render static stars to a buffer
       this.renderStaticStarsToBuffer();
 
-      console.log(`Total stars generated: ${this.stars.length}`);
+      console.log(`Visible real stars loaded: ${this.stars.length}`);
       console.log("Star distribution:", this.getStarTypes());
+    }
+
+    private projectHorizonToScreen(
+      azimuthDegrees: number,
+      altitudeDegrees: number,
+    ): { x: number; y: number } {
+      const viewWidth = this.p.windowWidth;
+      const viewHeight = this.p.windowHeight;
+
+      let mappedAzimuth = azimuthDegrees;
+
+      const fovY = 90;
+      const fovX = 180;
+      const y = this.p.map(
+        altitudeDegrees,
+        0,
+        90,
+        viewHeight * 0.8,
+        viewHeight * 0.1,
+      );
+
+      let azDiff = azimuthDegrees - 0;
+      if (azDiff > 180) azDiff -= 360;
+      if (azDiff < -180) azDiff += 360;
+
+      const visibleAzRange = 120;
+      const x = this.p.map(
+        azDiff,
+        -visibleAzRange / 2,
+        visibleAzRange / 2,
+        0,
+        viewWidth,
+      );
+
+      return {
+        x: x,
+        y: y,
+      };
+    }
+
+    private mapMagnitudeToSize(mag: number): StarSize {
+      if (mag < -0.5) return StarSize.MASSIVE;
+      if (mag < 0.5) return StarSize.LARGE;
+      if (mag < 1.5) return StarSize.MEDIUM;
+      if (mag < 2.5) return StarSize.SMALL;
+      return StarSize.TINY;
+    }
+
+    private mapMagnitudeToBrightness(mag: number): number {
+      const maxMag = NYC_MAGNITUDE_CUTOFF;
+      const minMag = -1.5;
+
+      const constrainedMag = this.p.constrain(mag, minMag, maxMag);
+      return this.p.map(constrainedMag, maxMag, minMag, 50, 255);
+    }
+
+    private determineStarTypeFromMagnitude(mag: number): StarType {
+      if (mag < 0) return StarType.SUPERBRIGHT;
+      if (mag < 1.0) return StarType.BRIGHT;
+      if (mag < 2.5) return StarType.MEDIUM;
+      return StarType.DISTANT;
     }
 
     private renderStaticStarsToBuffer(): void {
       if (this.staticStarsBuffer) {
-        this.staticStarsBuffer.remove(); // Remove previous buffer if exists
+        this.staticStarsBuffer.remove();
       }
       this.staticStarsBuffer = this.p.createGraphics(
         this.p.windowWidth,
         this.p.windowHeight,
       );
 
-      this.staticStarsBuffer.clear(); // Clear the buffer
+      this.staticStarsBuffer.clear();
       this.staticStarsBuffer.noStroke();
 
       for (const star of this.stars) {
         if (star.isStatic) {
           const [r, g, b] = star.color;
           this.staticStarsBuffer.fill(r, g, b, star.brightness);
-          this.staticStarsBuffer.circle(star.x, star.y, star.size); // Static stars are simple circles
+          this.staticStarsBuffer.circle(star.x, star.y, star.size);
         }
       }
       console.log("Static stars pre-rendered to buffer.");
     }
 
-    private generateStarClusters(numClusterStars: number): void {
-      const numClusters = Math.floor(Math.random() * 2) + 1; // 1-2 clusters for calmer feel
-
-      for (let cluster = 0; cluster < numClusters; cluster++) {
-        const centerX = Math.random() * this.p.windowWidth;
-        const centerY = Math.random() * this.p.windowHeight;
-        const clusterRadius = 60 + Math.random() * 100; // Smaller, gentler clusters
-        const clusterDensity = Math.floor(
-          (numClusterStars / numClusters) * (0.8 + Math.random() * 0.4),
-        ); // Distribute cluster stars
-
-        console.log(
-          `Peaceful cluster ${cluster + 1}: center(${Math.floor(centerX)}, ${Math.floor(centerY)}), radius: ${Math.floor(clusterRadius)}, stars: ${clusterDensity}`,
-        );
-
-        for (let i = 0; i < clusterDensity; i++) {
-          const angle = Math.random() * this.p.TWO_PI;
-          const distance = normalRandom() * clusterRadius * 0.7;
-
-          const x = centerX + Math.cos(angle) * distance;
-          const y = centerY + Math.sin(angle) * distance;
-
-          if (
-            x >= 0 &&
-            x < this.p.windowWidth &&
-            y >= 0 &&
-            y < this.p.windowHeight
-          ) {
-            this.stars.push(
-              this.createStar(true, x, y, distance, clusterRadius),
-            );
-          }
-        }
-      }
-    }
-
-    private createStar(
-      isClusterStar: boolean,
-      x?: number,
-      y?: number,
-      distanceFromCenter?: number,
-      clusterRadius?: number,
-    ): Star {
-      const starX = x !== undefined ? x : Math.random() * this.p.windowWidth;
-      const starY = y !== undefined ? y : Math.random() * this.p.windowHeight;
-
-      const starTypeRoll = Math.random();
-      let type: StarType;
-      let size: StarSize;
-      let maxBrightness: number;
-      let colorIndex: number;
-      let shape: StarShape;
-      let isStatic: boolean;
-
-      if (isClusterStar) {
-        const centerProximity = 1 - distanceFromCenter! / clusterRadius!;
-
-        if (starTypeRoll < 0.4) {
-          type = StarType.DISTANT;
-          size = Math.random() < 0.7 ? StarSize.TINY : StarSize.SMALL;
-          maxBrightness = 80 + Math.random() * 60 + centerProximity * 40;
-          colorIndex = Math.random() < 0.8 ? 0 : 1;
-          shape = Math.random() < 0.7 ? StarShape.CIRCLE : StarShape.DIAMOND;
-          isStatic = true; // Distant cluster stars can be static
-        } else if (starTypeRoll < 0.7) {
-          type = StarType.MEDIUM;
-          size = Math.random() < 0.5 ? StarSize.SMALL : StarSize.MEDIUM;
-          maxBrightness = 100 + Math.random() * 70 + centerProximity * 50;
-          colorIndex = Math.random() < 0.7 ? 0 : Math.random() < 0.7 ? 1 : 2;
-          shape = getRandomShape(false);
-          isStatic = false;
-        } else if (starTypeRoll < 0.9) {
-          type = StarType.BRIGHT;
-          size = Math.random() < 0.3 ? StarSize.MEDIUM : StarSize.LARGE;
-          maxBrightness = 140 + Math.random() * 65 + centerProximity * 30;
-          colorIndex = Math.random() < 0.6 ? 0 : Math.random() < 0.5 ? 2 : 3;
-          shape = getRandomShape(true);
-          isStatic = false;
-        } else {
-          type = StarType.SUPERBRIGHT;
-          size = Math.random() < 0.4 ? StarSize.LARGE : StarSize.MASSIVE;
-          maxBrightness = 180 + Math.random() * 45 + centerProximity * 30;
-          colorIndex = Math.random() < 0.5 ? 2 : 3;
-          shape = Math.random() < 0.5 ? StarShape.STAR : StarShape.TWINKLE;
-          isStatic = false;
-        }
-      } else {
-        // Background field stars
-        if (starTypeRoll < 0.65) {
-          type = StarType.DISTANT;
-          size = Math.random() < 0.8 ? StarSize.TINY : StarSize.SMALL;
-          maxBrightness = 60 + Math.random() * 50;
-          colorIndex = Math.random() < 0.9 ? 0 : 1;
-          shape = Math.random() < 0.8 ? StarShape.CIRCLE : StarShape.DIAMOND;
-          isStatic = true; // Most distant stars are static
-        } else if (starTypeRoll < 0.85) {
-          type = StarType.MEDIUM;
-          size = Math.random() < 0.6 ? StarSize.SMALL : StarSize.MEDIUM;
-          maxBrightness = 90 + Math.random() * 60;
-          colorIndex = Math.random() < 0.8 ? 0 : 1;
-          shape = getRandomShape(false);
-          isStatic = false;
-        } else if (starTypeRoll < 0.97) {
-          type = StarType.BRIGHT;
-          size = Math.random() < 0.4 ? StarSize.MEDIUM : StarSize.LARGE;
-          maxBrightness = 120 + Math.random() * 55;
-          colorIndex = Math.random() < 0.7 ? 0 : 2;
-          shape = getRandomShape(true);
-          isStatic = false;
-        } else {
-          type = StarType.SUPERBRIGHT;
-          size = Math.random() < 0.5 ? StarSize.LARGE : StarSize.MASSIVE;
-          maxBrightness = 160 + Math.random() * 40;
-          colorIndex = Math.random() < 0.4 ? 2 : 3;
-          shape = Math.random() < 0.6 ? StarShape.STAR : StarShape.TWINKLE;
-          isStatic = false;
-        }
-      }
-
-      return new Star(this.p, {
-        id: this.starIdCounter++,
-        x: starX,
-        y: starY,
-        size,
-        maxBrightness,
-        flickerSpeed: calculateFlickerSpeed(type),
-        flickerOffset: Math.random() * this.p.TWO_PI,
-        noiseOffset: Math.random() * 1000, // Unique noise offset for each star
-        color: STAR_COLORS[colorIndex],
-        type,
-        shape,
-        isStatic, // Assign the static property
-      });
-    }
-
     public update(deltaTime: number): void {
       this.time += deltaTime;
 
-      // Update non-static stars
       for (const star of this.stars) {
         star.update(this.time, deltaTime);
       }
 
-      // Update comets
       for (let i = this.comets.length - 1; i >= 0; i--) {
         const comet = this.comets[i];
         comet.update(deltaTime);
@@ -632,43 +909,45 @@
         }
       }
 
-      // Occasionally spawn new comets (less frequent, peaceful)
+      if (this.time % 60 < deltaTime) {
+        console.log("Recalculating real star positions...");
+        this.generateRealStarField();
+      }
+
       if (this.time - this.lastCometTime > 15 + Math.random() * 25) {
-        // Every 15-40 seconds
         this.spawnComet();
         this.lastCometTime = this.time;
       }
     }
 
     private spawnComet(): void {
-      const edge = Math.floor(Math.random() * 4); // 0=top, 1=right, 2=bottom, 3=left
+      const edge = Math.floor(Math.random() * 4);
       let startX, startY, endX, endY;
 
-      // Define entry and exit points for more controlled trajectories
       switch (edge) {
-        case 0: // Top edge to bottom-right or bottom-left
-          startX = Math.random() * this.p.width * 0.8 + this.p.width * 0.1; // Start in middle 80% of top
+        case 0:
+          startX = Math.random() * this.p.width * 0.8 + this.p.width * 0.1;
           startY = -50;
-          endX = Math.random() < 0.5 ? this.p.width + 50 : -50; // Either off right or off left
+          endX = startX + (Math.random() - 0.5) * this.p.width * 0.5;
           endY = this.p.height + 50;
           break;
-        case 1: // Right edge to bottom-left or top-left
+        case 1:
           startX = this.p.width + 50;
           startY = Math.random() * this.p.height * 0.8 + this.p.height * 0.1;
           endX = -50;
-          endY = Math.random() < 0.5 ? this.p.height + 50 : -50;
+          endY = startY + (Math.random() - 0.5) * this.p.height * 0.5;
           break;
-        case 2: // Bottom edge to top-right or top-left
+        case 2:
           startX = Math.random() * this.p.width * 0.8 + this.p.width * 0.1;
           startY = this.p.height + 50;
-          endX = Math.random() < 0.5 ? this.p.width + 50 : -50;
+          endX = startX + (Math.random() - 0.5) * this.p.width * 0.5;
           endY = -50;
           break;
-        default: // Left edge to top-right or bottom-right
+        default:
           startX = -50;
           startY = Math.random() * this.p.height * 0.8 + this.p.height * 0.1;
           endX = this.p.width + 50;
-          endY = Math.random() < 0.5 ? this.p.height + 50 : -50;
+          endY = startY + (Math.random() - 0.5) * this.p.height * 0.5;
           break;
       }
 
@@ -678,10 +957,10 @@
         startY,
         endX,
         endY,
-        speed: 0.2 + Math.random() * 0.3, // Slower: 0.2-0.5
-        tailLength: 50 + Math.random() * 80, // 50-130 pixel tail
-        brightness: 180 + Math.random() * 75, // 180-255
-        color: STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)], // Random from all defined colors
+        speed: 0.2 + Math.random() * 0.3,
+        tailLength: 50 + Math.random() * 80,
+        brightness: 180 + Math.random() * 75,
+        color: STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)],
       });
 
       this.comets.push(comet);
@@ -689,21 +968,18 @@
     }
 
     public render(): void {
-      this.p.clear(); // Clear canvas each frame
+      this.p.clear();
 
-      // Draw the pre-rendered static star layer first
       if (this.staticStarsBuffer) {
         this.p.image(this.staticStarsBuffer, 0, 0);
       }
 
-      // Render non-static stars (which update every frame)
       for (const star of this.stars) {
         if (!star.isStatic) {
           star.render();
         }
       }
 
-      // Render comets on top
       for (const comet of this.comets) {
         if (comet.active) {
           comet.render();
@@ -713,7 +989,7 @@
 
     public resize(width: number, height: number): void {
       console.log(`Resizing starfield to ${width}x${height}`);
-      this.generateStarField(); // Re-generate stars and buffer on resize
+      this.generateRealStarField();
     }
 
     public getStarCount(): number {
@@ -733,7 +1009,6 @@
 
   onMount(async () => {
     try {
-      // Dynamic import of p5.js
       const p5Module = await import("p5");
       const p5 = p5Module.default;
       console.log("p5.js loaded for starfield");
@@ -757,7 +1032,6 @@
 
         p.draw = () => {
           const currentTime = p.millis();
-          // deltaTime in seconds for consistent frame rate independence
           const deltaTime = (currentTime - lastFrameTime) / 1000;
           lastFrameTime = currentTime;
 
@@ -791,18 +1065,15 @@
 ></div>
 
 <style>
-  /* Ensure the container fills the viewport */
   .fixed {
     position: fixed;
   }
-
   .inset-0 {
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
   }
-
   .pointer-events-none {
     pointer-events: none;
   }

@@ -22,7 +22,7 @@
 >
   <div class="flex-none w-full p-2 relative">
     <span
-      class="font-extrabold leading-none text-[clamp(8rem,20vw,32rem)] bg-gradient-to-r from-ctp-blue via-ctp-mauve to-ctp-pink bg-clip-text text-transparent"
+      class="font-extrabold leading-none text-[clamp(8rem,20vw,32rem)] text-ctp-text"
     >
       TORA
     </span>
@@ -83,7 +83,7 @@
 <section class="md:hidden flex flex-col h-full w-full text-ctp-text/90 px-4">
   <div class="flex flex-col space-y-8 pt-4">
     <h1
-      class="font-extrabold leading-none text-[clamp(6rem,30vw,14rem)] bg-gradient-to-r from-ctp-blue via-ctp-mauve to-ctp-pink bg-clip-text text-transparent"
+      class="font-extrabold leading-none text-[clamp(6rem,30vw,14rem)] text-ctp-text"
     >
       TORA
     </h1>
