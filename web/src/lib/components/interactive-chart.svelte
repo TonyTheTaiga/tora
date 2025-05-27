@@ -14,13 +14,13 @@
   >({});
   let currentTheme = $state<"light" | "dark">("dark");
 
-  const darkColors = [
-    { border: "#7dc4e4", bg: "rgba(125, 196, 228, 0.15)", point: "#b7bdf8" },
-    { border: "#f5bde6", bg: "rgba(245, 189, 230, 0.15)", point: "#ed8796" },
-    { border: "#a6da95", bg: "rgba(166, 218, 149, 0.15)", point: "#8bd5ca" },
-    { border: "#f5a97f", bg: "rgba(245, 169, 127, 0.15)", point: "#eed49f" },
-    { border: "#c6a0f6", bg: "rgba(198, 160, 246, 0.15)", point: "#8aadf4" },
-    { border: "#ed8796", bg: "rgba(237, 135, 150, 0.15)", point: "#ee99a0" },
+  const darkColors = [ // Updated to Mocha palette
+    { border: "#74c7ec", bg: "rgba(116, 199, 236, 0.15)", point: "#b4befe" }, // Sapphire, Lavender
+    { border: "#f5c2e7", bg: "rgba(245, 194, 231, 0.15)", point: "#f38ba8" }, // Pink, Red
+    { border: "#a6e3a1", bg: "rgba(166, 227, 161, 0.15)", point: "#94e2d5" }, // Green, Teal
+    { border: "#fab387", bg: "rgba(250, 179, 135, 0.15)", point: "#f9e2af" }, // Peach, Yellow
+    { border: "#cba6f7", bg: "rgba(203, 166, 247, 0.15)", point: "#89b4fa" }, // Mauve, Blue
+    { border: "#f38ba8", bg: "rgba(243, 139, 168, 0.15)", point: "#eba0ac" }, // Red, Maroon
   ];
 
   const lightColors = [
@@ -36,13 +36,15 @@
     return currentTheme === "dark" ? darkColors : lightColors;
   }
 
-  const darkThemeUI = {
-    text: "#cad3f5",
-    crust: "#181926",
-    mantle: "#1e2030",
-    base: "#24273a",
-    overlay0: "#6e738d",
-    gridLines: "rgba(183, 189, 248, 0.08)",
+  const darkThemeUI = { // Updated to Mocha palette
+    text: "#cdd6f4",
+    crust: "#11111b",
+    mantle: "#181825",
+    base: "#1e1e2e",
+    overlay0: "#6c7086",
+    gridLines: "rgba(180, 190, 254, 0.08)", // Mocha Lavender with alpha
+    mauve: "#cba6f7", 
+    sapphire: "#74c7ec",
   };
 
   const lightThemeUI = {
@@ -51,7 +53,9 @@
     mantle: "#e6e9ef",
     base: "#eff1f5",
     overlay0: "#9ca0b0",
-    gridLines: "rgba(114, 135, 253, 0.08)",
+    gridLines: "rgba(114, 135, 253, 0.08)", // Latte Lavender with alpha
+    mauve: "#8839ef",
+    sapphire: "#209fb5",
   };
 
   function getThemeUI() {
@@ -146,8 +150,7 @@
           fill: false,
           pointBackgroundColor: color.point,
           pointBorderColor: ui.mantle,
-          pointHoverBackgroundColor:
-            currentTheme === "dark" ? "#c6a0f6" : "#8839ef",
+          pointHoverBackgroundColor: ui.mauve,
           pointHoverBorderColor: ui.base,
           borderWidth: 2,
           tension: 0.3,
@@ -186,7 +189,7 @@
             },
             tooltip: {
               backgroundColor: ui.crust,
-              titleColor: currentTheme === "dark" ? "#7dc4e4" : "#209fb5",
+              titleColor: ui.sapphire,
               bodyColor: ui.text,
               borderColor: ui.overlay0,
               position: "nearest",
@@ -328,7 +331,7 @@
         <div
           class="absolute inset-0 flex items-center justify-center bg-ctp-mantle/80 backdrop-blur-sm z-10"
         >
-          <div class="animate-pulse text-[#91d7e3]">Loading data...</div>
+          <div class="animate-pulse text-ctp-sky">Loading data...</div>
         </div>
       {/if}
       <div class="absolute inset-0 p-2 sm:p-4">
