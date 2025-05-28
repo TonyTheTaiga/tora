@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import type p5 from "p5";
-
+  import { BRIGHT_STARS_CATALOG } from "./star-catalog";
 
   let starfieldContainer: HTMLDivElement;
   let p5Instance: p5 | null = null;
@@ -16,11 +16,11 @@
   type StarType = (typeof StarType)[keyof typeof StarType];
 
   const StarSize = {
-    TINY: 1,
-    SMALL: 2,
-    MEDIUM: 3,
-    LARGE: 4,
-    MASSIVE: 5,
+    TINY: 2,
+    SMALL: 3,
+    MEDIUM: 4,
+    LARGE: 5,
+    MASSIVE: 6,
   } as const;
 
   type StarSize = (typeof StarSize)[keyof typeof StarSize];
@@ -41,321 +41,12 @@
     [255, 235, 195],
     [255, 215, 175],
     [170, 205, 255],
-    [255, 180, 150]
+    [255, 180, 150],
   ] as const;
-
-  interface RealStarData {
-    id: number;
-    name: string;
-    ra: number;
-    dec: number;
-    mag: number;
-    spectralType: string;
-  }
-
-  const BRIGHT_STARS_CATALOG: RealStarData[] = [
-    {
-      id: 1,
-      name: "Sirius",
-      ra: 101.287,
-      dec: -16.716,
-      mag: -1.46,
-      spectralType: "A1V",
-    },
-    {
-      id: 2,
-      name: "Canopus",
-      ra: 96.643,
-      dec: -52.695,
-      mag: -0.74,
-      spectralType: "F0Ib",
-    },
-    {
-      id: 3,
-      name: "Arcturus",
-      ra: 212.083,
-      dec: 19.182,
-      mag: -0.05,
-      spectralType: "K1.5III",
-    },
-    {
-      id: 4,
-      name: "Vega",
-      ra: 279.235,
-      dec: 38.783,
-      mag: 0.03,
-      spectralType: "A0V",
-    },
-    {
-      id: 5,
-      name: "Capella",
-      ra: 79.172,
-      dec: 45.998,
-      mag: 0.08,
-      spectralType: "G8III",
-    },
-    {
-      id: 6,
-      name: "Rigel",
-      ra: 77.587,
-      dec: -8.201,
-      mag: 0.13,
-      spectralType: "B8Ia",
-    },
-    {
-      id: 7,
-      name: "Procyon",
-      ra: 114.823,
-      dec: 5.225,
-      mag: 0.34,
-      spectralType: "F5IV-V",
-    },
-    {
-      id: 8,
-      name: "Achernar",
-      ra: 22.871,
-      dec: -57.237,
-      mag: 0.46,
-      spectralType: "B6Vep",
-    },
-    {
-      id: 9,
-      name: "Betelgeuse",
-      ra: 88.792,
-      dec: 7.407,
-      mag: 0.5,
-      spectralType: "M1-2Ia-Iab",
-    },
-    {
-      id: 10,
-      name: "Altair",
-      ra: 309.789,
-      dec: 8.869,
-      mag: 0.77,
-      spectralType: "A7V",
-    },
-    {
-      id: 11,
-      name: "Aldebaran",
-      ra: 67.876,
-      dec: 16.509,
-      mag: 0.85,
-      spectralType: "K5III",
-    },
-    {
-      id: 12,
-      name: "Antares",
-      ra: 247.351,
-      dec: -26.431,
-      mag: 1.06,
-      spectralType: "M1.5Iab-b",
-    },
-    {
-      id: 13,
-      name: "Spica",
-      ra: 204.423,
-      dec: -11.161,
-      mag: 1.04,
-      spectralType: "B1V",
-    },
-    {
-      id: 14,
-      name: "Pollux",
-      ra: 116.326,
-      dec: 28.026,
-      mag: 1.15,
-      spectralType: "K0IIIb",
-    },
-    {
-      id: 15,
-      name: "Fomalhaut",
-      ra: 344.407,
-      dec: -29.627,
-      mag: 1.16,
-      spectralType: "A3V",
-    },
-    {
-      id: 16,
-      name: "Deneb",
-      ra: 309.288,
-      dec: 45.28,
-      mag: 1.25,
-      spectralType: "A2Ia",
-    },
-    {
-      id: 17,
-      name: "Regulus",
-      ra: 152.091,
-      dec: 11.967,
-      mag: 1.35,
-      spectralType: "B7V",
-    },
-    {
-      id: 18,
-      name: "Adhara",
-      ra: 105.109,
-      dec: -28.98,
-      mag: 1.5,
-      spectralType: "B2Iab",
-    },
-    {
-      id: 19,
-      name: "Castor",
-      ra: 110.37,
-      dec: 31.888,
-      mag: 1.58,
-      spectralType: "A1V",
-    },
-    {
-      id: 20,
-      name: "Gacrux",
-      ra: 182.203,
-      dec: -57.147,
-      mag: 1.63,
-      spectralType: "M3.5III",
-    },
-    {
-      id: 21,
-      name: "Shaula",
-      ra: 260.672,
-      dec: -37.1,
-      mag: 1.63,
-      spectralType: "B1.5V",
-    },
-    {
-      id: 22,
-      name: "Bellatrix",
-      ra: 81.336,
-      dec: 6.35,
-      mag: 1.64,
-      spectralType: "B2III",
-    },
-    {
-      id: 23,
-      name: "Elnath",
-      ra: 77.014,
-      dec: 28.629,
-      mag: 1.65,
-      spectralType: "B7III",
-    },
-    {
-      id: 24,
-      name: "Miaplacidus",
-      ra: 139.117,
-      dec: -69.646,
-      mag: 1.67,
-      spectralType: "A1III",
-    },
-    {
-      id: 25,
-      name: "Alnilam",
-      ra: 84.664,
-      dec: -1.2,
-      mag: 1.69,
-      spectralType: "B0Ia",
-    },
-    {
-      id: 26,
-      name: "Alnair",
-      ra: 326.687,
-      dec: -46.863,
-      mag: 1.7,
-      spectralType: "B7V",
-    },
-    {
-      id: 27,
-      name: "Alioth",
-      ra: 195.42,
-      dec: 55.959,
-      mag: 1.76,
-      spectralType: "A1IIIp",
-    },
-    {
-      id: 28,
-      name: "Dubhe",
-      ra: 165.75,
-      dec: 61.699,
-      mag: 1.79,
-      spectralType: "K0III",
-    },
-    {
-      id: 29,
-      name: "Mirfak",
-      ra: 49.33,
-      dec: 49.866,
-      mag: 1.8,
-      spectralType: "F5Ib",
-    },
-    {
-      id: 30,
-      name: "Wezen",
-      ra: 107.037,
-      dec: -26.059,
-      mag: 1.83,
-      spectralType: "F8Ia",
-    },
-    {
-      id: 31,
-      name: "Kaus Australis",
-      ra: 276.992,
-      dec: -34.331,
-      mag: 1.85,
-      spectralType: "B9.5III",
-    },
-    {
-      id: 32,
-      name: "Alkaid",
-      ra: 206.94,
-      dec: 49.317,
-      mag: 1.86,
-      spectralType: "B3V",
-    },
-    {
-      id: 33,
-      name: "Sargas",
-      ra: 244.305,
-      dec: -45.305,
-      mag: 1.87,
-      spectralType: "F1II",
-    },
-    {
-      id: 34,
-      name: "Avior",
-      ra: 122.954,
-      dec: -59.39,
-      mag: 1.89,
-      spectralType: "K3II/III",
-    },
-    {
-      id: 35,
-      name: "Kochab",
-      ra: 228.618,
-      dec: 74.004,
-      mag: 2.07,
-      spectralType: "K4III",
-    },
-    {
-      id: 36,
-      name: "Polaris",
-      ra: 37.954,
-      dec: 89.264,
-      mag: 1.98,
-      spectralType: "F7Ib-II",
-    },
-  ];
 
   const NEW_YORK_LAT = 40.7128;
   const NEW_YORK_LON = -74.006;
-
-  const NYC_MAGNITUDE_CUTOFF = 3.5;
-
-  function normalRandom(): number {
-    let u = 0,
-      v = 0;
-    while (u === 0) u = Math.random();
-    while (v === 0) v = Math.random();
-    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-  }
+  const NYC_MAGNITUDE_CUTOFF = 4.5;
 
   function easeInOutQuad(t: number): number {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
@@ -400,21 +91,21 @@
     const typeChar = spectralType.charAt(0).toUpperCase();
     switch (typeChar) {
       case "O":
-        return STAR_COLORS[4]; // Blue-white
+        return STAR_COLORS[4];
       case "B":
-        return STAR_COLORS[4]; // Bluish-white
+        return STAR_COLORS[4];
       case "A":
-        return STAR_COLORS[0]; // White (warm white from palette)
+        return STAR_COLORS[0];
       case "F":
-        return STAR_COLORS[1]; // Yellow-white (subtle yellow-white)
+        return STAR_COLORS[1];
       case "G":
-        return STAR_COLORS[2]; // Yellowish (gentle yellow)
+        return STAR_COLORS[2];
       case "K":
-        return STAR_COLORS[3]; // Orange-red (soft orange accent)
+        return STAR_COLORS[3];
       case "M":
-        return STAR_COLORS[5]; // Red
+        return STAR_COLORS[5];
       default:
-        return STAR_COLORS[0]; // Default to warm white
+        return STAR_COLORS[0];
     }
   }
 
@@ -476,9 +167,14 @@
       this.type = props.type;
       this.shape = props.shape;
       this.isStatic = props.isStatic;
-      this.brightness = this.maxBrightness * (0.5 + Math.random() * 0.5);
       this.twinklePhase = Math.random() * this.p.TWO_PI;
       this.pulsePhase = Math.random() * this.p.TWO_PI;
+
+      if (this.isStatic) {
+        this.brightness = this.maxBrightness;
+      } else {
+        this.brightness = this.maxBrightness * (0.5 + Math.random() * 0.5);
+      }
     }
 
     update(time: number, deltaTime: number): void {
@@ -622,7 +318,13 @@
 
     private p: p5;
 
-    constructor(p: p5, props: Omit<Comet, "p" | "x" | "y" | "progress" | "active" | "update" | "render">) {
+    constructor(
+      p: p5,
+      props: Omit<
+        Comet,
+        "p" | "x" | "y" | "progress" | "active" | "update" | "render"
+      >,
+    ) {
       this.p = p;
       this.id = props.id;
       this.startX = props.startX;
@@ -717,9 +419,9 @@
       );
 
       const now = new Date();
-      const jd = 2440587.5 + (now.getTime() / 86400000);
+      const jd = 2440587.5 + now.getTime() / 86400000;
       const utc = now.getTime() / 1000 / 3600;
-      const lst = (utc / 24 + NEW_YORK_LON / 360) % 1 * 24;
+      const lst = ((utc / 24 + NEW_YORK_LON / 360) % 1) * 24;
 
       for (const starData of BRIGHT_STARS_CATALOG) {
         if (starData.mag > NYC_MAGNITUDE_CUTOFF) {
@@ -727,19 +429,28 @@
         }
 
         const hourAngle = (lst * 15 - starData.ra + 360) % 360;
-        
-        const sinAlt = Math.sin(starData.dec * Math.PI / 180) * Math.sin(NEW_YORK_LAT * Math.PI / 180) +
-                      Math.cos(starData.dec * Math.PI / 180) * Math.cos(NEW_YORK_LAT * Math.PI / 180) * Math.cos(hourAngle * Math.PI / 180);
-        const altitude = Math.asin(sinAlt) * 180 / Math.PI;
-        
+
+        const sinAlt =
+          Math.sin((starData.dec * Math.PI) / 180) *
+            Math.sin((NEW_YORK_LAT * Math.PI) / 180) +
+          Math.cos((starData.dec * Math.PI) / 180) *
+            Math.cos((NEW_YORK_LAT * Math.PI) / 180) *
+            Math.cos((hourAngle * Math.PI) / 180);
+        const altitude = (Math.asin(sinAlt) * 180) / Math.PI;
+
         if (altitude < 0) {
           continue;
         }
-        
-        const cosA = (Math.sin(starData.dec * Math.PI / 180) - Math.sin(altitude * Math.PI / 180) * Math.sin(NEW_YORK_LAT * Math.PI / 180)) /
-                     (Math.cos(altitude * Math.PI / 180) * Math.cos(NEW_YORK_LAT * Math.PI / 180));
-        let azimuth = Math.acos(Math.max(-1, Math.min(1, cosA))) * 180 / Math.PI;
-        if (Math.sin(hourAngle * Math.PI / 180) > 0) {
+
+        const cosA =
+          (Math.sin((starData.dec * Math.PI) / 180) -
+            Math.sin((altitude * Math.PI) / 180) *
+              Math.sin((NEW_YORK_LAT * Math.PI) / 180)) /
+          (Math.cos((altitude * Math.PI) / 180) *
+            Math.cos((NEW_YORK_LAT * Math.PI) / 180));
+        let azimuth =
+          (Math.acos(Math.max(-1, Math.min(1, cosA))) * 180) / Math.PI;
+        if (Math.sin((hourAngle * Math.PI) / 180) > 0) {
           azimuth = 360 - azimuth;
         }
 
@@ -773,7 +484,7 @@
         );
       }
 
-      const minStarsDesired = 100;
+      const minStarsDesired = 350;
       if (this.stars.length < minStarsDesired) {
         const numExtraStars = minStarsDesired - this.stars.length;
         for (let i = 0; i < numExtraStars; i++) {
@@ -862,7 +573,7 @@
       const minMag = -1.5;
 
       const constrainedMag = this.p.constrain(mag, minMag, maxMag);
-      return this.p.map(constrainedMag, maxMag, minMag, 50, 255);
+      return this.p.map(constrainedMag, maxMag, minMag, 80, 255);
     }
 
     private determineStarTypeFromMagnitude(mag: number): StarType {
