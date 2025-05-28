@@ -1,9 +1,9 @@
 export interface RealStarData {
   id: number;
   name: string;
-  ra: number;
-  dec: number;
-  mag: number;
+  ra: number; // Right Ascension in decimal degrees
+  dec: number; // Declination in decimal degrees
+  mag: number; // Visual Magnitude
   spectralType: string;
 }
 
@@ -15,14 +15,6 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: -16.716,
     mag: -1.46,
     spectralType: "A1V",
-  },
-  {
-    id: 2,
-    name: "Canopus",
-    ra: 96.643,
-    dec: -52.695,
-    mag: -0.74,
-    spectralType: "F0Ib",
   },
   {
     id: 3,
@@ -39,7 +31,7 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: 38.783,
     mag: 0.03,
     spectralType: "A0V",
-  },
+  }, // Visible in the early evening, setting in the WNW.
   {
     id: 5,
     name: "Capella",
@@ -65,28 +57,12 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     spectralType: "F5IV-V",
   },
   {
-    id: 8,
-    name: "Achernar",
-    ra: 22.871,
-    dec: -57.237,
-    mag: 0.46,
-    spectralType: "B6Vep",
-  },
-  {
     id: 9,
     name: "Betelgeuse",
     ra: 88.792,
     dec: 7.407,
     mag: 0.5,
     spectralType: "M1-2Ia-Iab",
-  },
-  {
-    id: 10,
-    name: "Altair",
-    ra: 309.789,
-    dec: 8.869,
-    mag: 0.77,
-    spectralType: "A7V",
   },
   {
     id: 11,
@@ -103,7 +79,7 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: -26.431,
     mag: 1.06,
     spectralType: "M1.5Iab-b",
-  },
+  }, // Visible in the pre-dawn sky, rising in the SE.
   {
     id: 13,
     name: "Spica",
@@ -111,7 +87,7 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: -11.161,
     mag: 1.04,
     spectralType: "B1V",
-  },
+  }, // Rises after midnight.
   {
     id: 14,
     name: "Pollux",
@@ -127,15 +103,7 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: -29.627,
     mag: 1.16,
     spectralType: "A3V",
-  },
-  {
-    id: 16,
-    name: "Deneb",
-    ra: 309.288,
-    dec: 45.28,
-    mag: 1.25,
-    spectralType: "A2Ia",
-  },
+  }, // Visible in the evening sky in the south.
   {
     id: 17,
     name: "Regulus",
@@ -143,7 +111,7 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: 11.967,
     mag: 1.35,
     spectralType: "B7V",
-  },
+  }, // Rises mid-evening.
   {
     id: 18,
     name: "Adhara",
@@ -161,21 +129,13 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     spectralType: "A1V",
   },
   {
-    id: 20,
-    name: "Gacrux",
-    ra: 182.203,
-    dec: -57.147,
-    mag: 1.63,
-    spectralType: "M3.5III",
-  },
-  {
     id: 21,
     name: "Shaula",
     ra: 260.672,
     dec: -37.1,
     mag: 1.63,
     spectralType: "B1.5V",
-  },
+  }, // Visible in the pre-dawn sky, rising in the SE.
   {
     id: 22,
     name: "Bellatrix",
@@ -193,14 +153,6 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     spectralType: "B7III",
   },
   {
-    id: 24,
-    name: "Miaplacidus",
-    ra: 139.117,
-    dec: -69.646,
-    mag: 1.67,
-    spectralType: "A1III",
-  },
-  {
     id: 25,
     name: "Alnilam",
     ra: 84.664,
@@ -215,7 +167,7 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: -46.863,
     mag: 1.7,
     spectralType: "B7V",
-  },
+  }, // Visible in the early evening in the S/SSW.
   {
     id: 27,
     name: "Alioth",
@@ -223,7 +175,7 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: 55.959,
     mag: 1.76,
     spectralType: "A1IIIp",
-  },
+  }, // Circumpolar from NYC.
   {
     id: 28,
     name: "Dubhe",
@@ -231,7 +183,7 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: 61.699,
     mag: 1.79,
     spectralType: "K0III",
-  },
+  }, // Circumpolar from NYC.
   {
     id: 29,
     name: "Mirfak",
@@ -239,7 +191,7 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: 49.866,
     mag: 1.8,
     spectralType: "F5Ib",
-  },
+  }, // Circumpolar (or very nearly) from NYC.
   {
     id: 30,
     name: "Wezen",
@@ -255,7 +207,7 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: -34.331,
     mag: 1.85,
     spectralType: "B9.5III",
-  },
+  }, // Visible in the early evening, setting in the WSW.
   {
     id: 32,
     name: "Alkaid",
@@ -263,7 +215,7 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: 49.317,
     mag: 1.86,
     spectralType: "B3V",
-  },
+  }, // High northern declination, effectively circumpolar from NYC.
   {
     id: 33,
     name: "Sargas",
@@ -271,15 +223,7 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: -45.305,
     mag: 1.87,
     spectralType: "F1II",
-  },
-  {
-    id: 34,
-    name: "Avior",
-    ra: 122.954,
-    dec: -59.39,
-    mag: 1.89,
-    spectralType: "K3II/III",
-  },
+  }, // Visible in the pre-dawn sky, rising in the SE.
   {
     id: 35,
     name: "Kochab",
@@ -287,7 +231,7 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: 74.004,
     mag: 2.07,
     spectralType: "K4III",
-  },
+  }, // Circumpolar from NYC.
   {
     id: 36,
     name: "Polaris",
@@ -295,5 +239,5 @@ export const BRIGHT_STARS_CATALOG: RealStarData[] = [
     dec: 89.264,
     mag: 1.98,
     spectralType: "F7Ib-II",
-  },
+  }, // Circumpolar from NYC (the North Star).
 ];
