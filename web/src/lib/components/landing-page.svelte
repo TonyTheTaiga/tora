@@ -54,8 +54,7 @@
       </button>
     </div>
   </div>
-
-  <div class="flex-1 pt-16">
+  <div class="flex-1 pt-20">
     <div class="flex flex-row space-x-8 p-2">
       {@render FeatureCard(
         "Instant Integration",
@@ -106,7 +105,7 @@
     </div>
   </div>
 
-  <div class="flex-1 pt-16">
+  <div class="flex-1 pt-10">
     <div class="flex flex-col space-y-6">
       {@render FeatureCard(
         "Instant Integration",
