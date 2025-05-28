@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import Starfield from "./starfield.svelte";
+  import Logo from "./logo.svelte"; // Import the Logo component
 </script>
 
 {#snippet FeatureCard(title: String, content: String)}
@@ -22,11 +23,11 @@
 >
   <div class="h-2/3 flex flex-col">
     <div class="flex-none p-2">
-      <span
-        class="font-extrabold leading-none text-[clamp(8rem,20vw,32rem)] text-transparent bg-clip-text bg-gradient-to-r from-ctp-text to-ctp-lavender"
+      <div
+        class="w-[clamp(31rem,68vw,73rem)] fill-ctp-blue/80"
       >
-        TORA
-      </span>
+        <Logo />
+      </div>
     </div>
 
     <div class="flex-1 flex justify-end p-2">
@@ -78,11 +79,11 @@
 <!-- Mobile Version -->
 <section class="md:hidden flex flex-col h-full w-full text-ctp-text/95 px-4">
   <div class="flex flex-col space-y-8 pt-4">
-    <h1
-      class="font-extrabold leading-none text-[clamp(6rem,30vw,14rem)] text-transparent bg-clip-text bg-gradient-to-r from-ctp-text to-ctp-lavender"
+    <div
+      class="w-[clamp(16rem,85vw,32rem)] fill-ctp-blue/80" 
     >
-      TORA
-    </h1>
+      <Logo />
+    </div>
     <div class="p-4 rounded-lg bg-ctp-crust/10">
       <p class="text-base leading-relaxed">Tired of the old way?</p>
       <p class="text-base leading-relaxed mt-2">Tora changes everything.</p>
