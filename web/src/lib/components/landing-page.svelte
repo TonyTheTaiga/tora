@@ -18,6 +18,7 @@
 
 <Starfield />
 
+<!-- Desktop Version -->
 <section
   class="hidden md:flex flex-col h-full w-full text-ctp-text/95"
 >
@@ -32,13 +33,13 @@
 
     <div class="flex-1 flex justify-end p-2">
       <div class="w-1/3 flex flex-col z-10 p-4">
-        <p class="text-base leading-relaxed">Tired of the old way?</p>
-        <p class="text-base leading-relaxed mt-2">Tora changes everything.</p>
+        <p class="text-base leading-relaxed">The path of complexity ends here.</p>
+        <p class="text-base leading-relaxed mt-2">Tora. The blade that reveals truth in data.</p>
         <p class="text-base leading-relaxed mt-2 font-bold text-ctp-sapphire">
-          More discovery. Less busywork.
+          Three lines of code. Unsheathe its power.
         </p>
         <p class="text-base leading-relaxed mt-2">
-          It’s time for a breakthrough.
+          Master your model. Discover Tora.
         </p>
         <button
           class="pt-4 text-start"
@@ -80,18 +81,18 @@
 <section class="md:hidden flex flex-col h-full w-full text-ctp-text/95 px-4">
   <div class="flex flex-col space-y-8 pt-4">
     <div
-      class="w-[clamp(16rem,85vw,32rem)] fill-ctp-blue/80" 
+      class="w-[clamp(16rem,85vw,32rem)] fill-ctp-blue/80"
     >
       <Logo />
     </div>
     <div class="p-4 rounded-lg bg-ctp-crust/10">
-      <p class="text-base leading-relaxed">Tired of the old way?</p>
-      <p class="text-base leading-relaxed mt-2">Tora changes everything.</p>
+      <p class="text-base leading-relaxed">The path of complexity ends here.</p>
+      <p class="text-base leading-relaxed mt-2">Tora. The blade that reveals truth in data.</p>
       <p class="text-base leading-relaxed mt-2 font-bold text-ctp-sapphire">
-        More discovery. Less busywork.
+        Three lines of code. Unsheathe its power.
       </p>
       <p class="text-base leading-relaxed mt-2">
-        It’s time for a breakthrough.
+        Master your model. Discover Tora.
       </p>
       <button type="button" onclick={() => goto("/signup")} class="mt-4">
         <span
