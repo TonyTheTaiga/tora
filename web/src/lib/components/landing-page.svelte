@@ -108,7 +108,7 @@
     </div>
 
     <div class="flex-1 flex justify-end p-2">
-      <div class="w-1/3 flex flex-col z-10 p-4">
+      <div class="w-1/3 flex flex-col z-10 p-4 opacity-75 bg-gradient-to-br from-ctp-blue/5 to-ctp-mauve/5 rounded-lg shadow-lg justify-center">
         <p class="text-base leading-relaxed">{activeCopy.line1}</p>
         <p class="text-base leading-relaxed mt-2">{activeCopy.line2}</p>
         <p class="text-base leading-relaxed mt-2 font-bold text-ctp-sapphire">
