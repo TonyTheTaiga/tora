@@ -17,11 +17,11 @@
   type StarType = (typeof StarType)[keyof typeof StarType];
 
   const StarSize = {
-    TINY: 1,
-    SMALL: 2,
-    MEDIUM: 3,
-    LARGE: 4,
-    MASSIVE: 5,
+    TINY: 2,
+    SMALL: 3,
+    MEDIUM: 4,
+    LARGE: 5,
+    MASSIVE: 6,
   } as const;
 
   type StarSize = (typeof StarSize)[keyof typeof StarSize];
@@ -470,7 +470,7 @@
         );
       }
 
-      const minStarsDesired = 200;
+      const minStarsDesired = 350;
       if (this.stars.length < minStarsDesired) {
         const numExtraStars = minStarsDesired - this.stars.length;
         for (let i = 0; i < numExtraStars; i++) {
