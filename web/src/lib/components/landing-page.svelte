@@ -74,7 +74,7 @@
   </div>
 {/snippet}
 
-<div class="absolute top-4 right-4 z-20 flex items-center space-x-2">
+<div class="absolute top-4 left-4 z-20 flex items-center space-x-2">
   <button
     type="button"
     onclick={toggleLang}
