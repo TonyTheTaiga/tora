@@ -5,7 +5,7 @@
 
 {#snippet FeatureCard(title: String, content: String)}
   <div
-    class="opacity-75 backdrop-blur-md border border-ctp-overlay0/40 rounded-lg bg-gradient-to-br from-ctp-surface0/20 to-ctp-surface1/10 hover:from-ctp-surface0/40 hover:to-ctp-surface1/20 hover:border-ctp-lavender/30 transition-all duration-500 p-4 shadow-lg shadow-ctp-overlay0/10"
+    class="opacity-75 backdrop-blur-md border border-ctp-overlay0/40 rounded-lg bg-gradient-to-br from-ctp-surface0/20 to-ctp-surface1/10 hover:from-ctp-surface0/40 hover:to-ctp-surface1/20 hover:border-ctp-lavender/30 hover:opacity-90 hover:scale-105 hover:shadow-xl transition-all duration-300 ease-out p-4 shadow-md shadow-ctp-overlay0/10"
   >
     <span class="font-bold text-ctp-lavender">{title}</span>
     <br />
@@ -31,28 +31,25 @@
   <div class="flex justify-end w-full p-2 relative">
     <div class="w-1/3 flex flex-col relative z-10 backdrop-blur-sm p-4 rounded-lg bg-ctp-crust/10">
       <p class="text-base leading-relaxed">
-        Your experiments deserve <span class="font-bold text-ctp-lavender">clarity</span>, not
-        chaos.
-      </p>
-      <p class="text-base leading-relaxed mt-4">
-        TORA streamlines experiment tracking, <span class="font-bold text-ctp-blue"
-          >just three simple lines of Python.</span
-        >
-      </p>
-      <p class="text-base leading-relaxed mt-4 font-bold text-ctp-sapphire">
-        Less noise. More insight. Immediate impact.
+        Tired of the old way?
       </p>
       <p class="text-base leading-relaxed mt-2">
-        With distractions gone, your best work emerges naturally.
+        Tora changes everything.
+      </p>
+      <p class="text-base leading-relaxed mt-2 font-bold text-ctp-sapphire">
+        More discovery. Less busywork.
+      </p>
+      <p class="text-base leading-relaxed mt-2">
+        It’s time for a breakthrough.
       </p>
       <button
-        class="pt-8 text-start"
+        class="pt-4 text-start"
         type="button"
         onclick={() => goto("/signup")}
       >
         <span
-          class="p-2 rounded-lg bg-gradient-to-r from-ctp-blue/20 to-ctp-mauve/20 hover:from-ctp-blue hover:to-ctp-mauve transition-all duration-500 hover:text-ctp-crust font-medium border border-ctp-overlay0/30 hover:border-ctp-lavender/50 shadow-md"
-          >Start Seeing Clearly →</span
+          class="p-2 rounded-lg bg-gradient-to-r from-ctp-blue/20 to-ctp-mauve/20 hover:from-ctp-blue hover:to-ctp-mauve hover:scale-105 hover:shadow-lg transition-all duration-300 ease-out hover:text-ctp-crust font-medium border border-ctp-overlay0/30 hover:border-ctp-lavender/50 shadow-md"
+          >Get Started →</span
         >
       </button>
     </div>
@@ -61,20 +58,20 @@
   <div class="flex-1 pt-16">
     <div class="flex flex-row space-x-8 p-2">
       {@render FeatureCard(
-        "Instant Setup",
-        "Integrate effortlessly with three lines of Python—minimal disruption, maximum clarity.",
+        "Instant Integration",
+        "Effortless setup. Start seeing results in seconds.",
       )}
       {@render FeatureCard(
-        "Focused Insights",
-        "Clear visualizations and direct comparisons ensure you see what truly matters.",
+        "Insightful Visualization",
+        "Watch your experiments come to life with simple, beautiful charts.",
       )}
       {@render FeatureCard(
-        "Intuitive Support",
-        "AI-powered suggestions gently guide your experiments toward optimal outcomes.",
+        "AI That Thinks With You",
+        "Tora’s AI delivers insights, not just data. So you can make smarter decisions, faster.",
       )}
       {@render FeatureCard(
-        "Seamless Collaboration",
-        "Share experiments effortlessly. Unified context leads to natural teamwork and reproducibility.",
+        "Effortless Teamwork",
+        "Work together, share results, and keep everyone on the same page.",
       )}
     </div>
   </div>
@@ -89,24 +86,21 @@
     </h1>
     <div class="backdrop-blur-sm p-4 rounded-lg bg-ctp-crust/10">
       <p class="text-base leading-relaxed">
-        Your experiments deserve <span class="font-bold text-ctp-lavender">clarity</span>, not
-        chaos.
-      </p>
-      <p class="text-base leading-relaxed mt-4">
-        TORA streamlines experiment tracking, <span class="font-bold text-ctp-blue"
-          >just three simple lines of Python.</span
-        >
-      </p>
-      <p class="text-base leading-relaxed mt-4 font-bold text-ctp-sapphire">
-        Less noise. More insight. Immediate impact.
+        Tired of the old way?
       </p>
       <p class="text-base leading-relaxed mt-2">
-        With distractions gone, your best work emerges naturally.
+        Tora changes everything.
       </p>
-      <button type="button" onclick={() => goto("/signup")} class="mt-6">
+      <p class="text-base leading-relaxed mt-2 font-bold text-ctp-sapphire">
+        More discovery. Less busywork.
+      </p>
+      <p class="text-base leading-relaxed mt-2">
+        It’s time for a breakthrough.
+      </p>
+      <button type="button" onclick={() => goto("/signup")} class="mt-4">
         <span
-          class="p-2 rounded-lg bg-gradient-to-r from-ctp-blue/20 to-ctp-mauve/20 hover:from-ctp-blue hover:to-ctp-mauve transition-all duration-500 hover:text-ctp-crust font-medium border border-ctp-overlay0/30 hover:border-ctp-lavender/50 shadow-md"
-          >Start Seeing Clearly →</span
+          class="p-2 rounded-lg bg-gradient-to-r from-ctp-blue/20 to-ctp-mauve/20 hover:from-ctp-blue hover:to-ctp-mauve hover:scale-105 hover:shadow-lg transition-all duration-300 ease-out hover:text-ctp-crust font-medium border border-ctp-overlay0/30 hover:border-ctp-lavender/50 shadow-md"
+          >Get Started →</span
         >
       </button>
     </div>
@@ -115,20 +109,20 @@
   <div class="flex-1 pt-16">
     <div class="flex flex-col space-y-6">
       {@render FeatureCard(
-        "Instant Setup",
-        "Integrate effortlessly with three lines of Python—minimal disruption, maximum clarity.",
+        "Instant Integration",
+        "Effortless setup. Start seeing results in seconds.",
       )}
       {@render FeatureCard(
-        "Focused Insights",
-        "Clear visualizations and direct comparisons ensure you see what truly matters.",
+        "Insightful Visualization",
+        "Watch your experiments come to life with simple, beautiful charts.",
       )}
       {@render FeatureCard(
-        "Intuitive Support",
-        "AI-powered suggestions gently guide your experiments toward optimal outcomes.",
+        "AI That Thinks With You",
+        "Tora’s AI delivers insights, not just data. So you can make smarter decisions, faster.",
       )}
       {@render FeatureCard(
-        "Seamless Collaboration",
-        "Share experiments effortlessly. Unified context leads to natural teamwork and reproducibility.",
+        "Effortless Teamwork",
+        "Work together, share results, and keep everyone on the same page.",
       )}
     </div>
   </div>
