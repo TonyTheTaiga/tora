@@ -3,7 +3,6 @@
   import type p5 from "p5";
   import { BRIGHT_STARS_CATALOG } from "./star-catalog";
 
-
   let starfieldContainer: HTMLDivElement;
   let p5Instance: p5 | null = null;
 
@@ -42,7 +41,7 @@
     [255, 235, 195],
     [255, 215, 175],
     [170, 205, 255],
-    [255, 180, 150]
+    [255, 180, 150],
   ] as const;
 
   const NEW_YORK_LAT = 40.7128;
@@ -319,7 +318,13 @@
 
     private p: p5;
 
-    constructor(p: p5, props: Omit<Comet, "p" | "x" | "y" | "progress" | "active" | "update" | "render">) {
+    constructor(
+      p: p5,
+      props: Omit<
+        Comet,
+        "p" | "x" | "y" | "progress" | "active" | "update" | "render"
+      >,
+    ) {
       this.p = p;
       this.id = props.id;
       this.startX = props.startX;
@@ -414,9 +419,9 @@
       );
 
       const now = new Date();
-      const jd = 2440587.5 + (now.getTime() / 86400000);
+      const jd = 2440587.5 + now.getTime() / 86400000;
       const utc = now.getTime() / 1000 / 3600;
-      const lst = (utc / 24 + NEW_YORK_LON / 360) % 1 * 24;
+      const lst = ((utc / 24 + NEW_YORK_LON / 360) % 1) * 24;
 
       for (const starData of BRIGHT_STARS_CATALOG) {
         if (starData.mag > NYC_MAGNITUDE_CUTOFF) {
@@ -424,19 +429,28 @@
         }
 
         const hourAngle = (lst * 15 - starData.ra + 360) % 360;
-        
-        const sinAlt = Math.sin(starData.dec * Math.PI / 180) * Math.sin(NEW_YORK_LAT * Math.PI / 180) +
-                      Math.cos(starData.dec * Math.PI / 180) * Math.cos(NEW_YORK_LAT * Math.PI / 180) * Math.cos(hourAngle * Math.PI / 180);
-        const altitude = Math.asin(sinAlt) * 180 / Math.PI;
-        
+
+        const sinAlt =
+          Math.sin((starData.dec * Math.PI) / 180) *
+            Math.sin((NEW_YORK_LAT * Math.PI) / 180) +
+          Math.cos((starData.dec * Math.PI) / 180) *
+            Math.cos((NEW_YORK_LAT * Math.PI) / 180) *
+            Math.cos((hourAngle * Math.PI) / 180);
+        const altitude = (Math.asin(sinAlt) * 180) / Math.PI;
+
         if (altitude < 0) {
           continue;
         }
-        
-        const cosA = (Math.sin(starData.dec * Math.PI / 180) - Math.sin(altitude * Math.PI / 180) * Math.sin(NEW_YORK_LAT * Math.PI / 180)) /
-                     (Math.cos(altitude * Math.PI / 180) * Math.cos(NEW_YORK_LAT * Math.PI / 180));
-        let azimuth = Math.acos(Math.max(-1, Math.min(1, cosA))) * 180 / Math.PI;
-        if (Math.sin(hourAngle * Math.PI / 180) > 0) {
+
+        const cosA =
+          (Math.sin((starData.dec * Math.PI) / 180) -
+            Math.sin((altitude * Math.PI) / 180) *
+              Math.sin((NEW_YORK_LAT * Math.PI) / 180)) /
+          (Math.cos((altitude * Math.PI) / 180) *
+            Math.cos((NEW_YORK_LAT * Math.PI) / 180));
+        let azimuth =
+          (Math.acos(Math.max(-1, Math.min(1, cosA))) * 180) / Math.PI;
+        if (Math.sin((hourAngle * Math.PI) / 180) > 0) {
           azimuth = 360 - azimuth;
         }
 
@@ -672,11 +686,11 @@
       }
 
       for (const star of this.stars) {
-        if (!star.isStatic) { 
+        if (!star.isStatic) {
           star.render();
         }
       }
-      
+
       for (const comet of this.comets) {
         if (comet.active) {
           comet.render();
