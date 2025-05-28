@@ -20,8 +20,8 @@
 <section
   class="hidden md:flex flex-col h-full w-full text-ctp-text/95 relative"
 >
-  <div class="h-2/3 flex flex-col"> <!-- New wrapper for logo and description -->
-    <div class="flex-none w-full p-2 relative">
+  <div class="h-2/3 flex flex-col">
+    <div class="flex-none w-full p-2">
     <span
       class="font-extrabold leading-none text-[clamp(8rem,20vw,32rem)] text-transparent bg-clip-text bg-gradient-to-r from-ctp-text to-ctp-lavender"
     >
@@ -29,8 +29,8 @@
     </span>
   </div>
 
-  <div class="flex-1 flex justify-end w-full p-2 relative">
-    <div class="w-1/3 flex flex-col relative z-10 backdrop-blur-sm p-4 rounded-lg bg-ctp-crust/10">
+  <div class="flex-1 flex justify-end w-full p-2">
+    <div class="w-1/3 flex flex-col relative z-10 p-4">
       <p class="text-base leading-relaxed">
         Tired of the old way?
       </p>
@@ -55,7 +55,7 @@
       </button>
     </div>
   </div>
-  </div> <!-- Closing tag for the new h-2/3 wrapper -->
+  </div>
   <div class="h-1/3 flex flex-col justify-center items-center">
     <div class="flex flex-row space-x-8 p-2">
       {@render FeatureCard(
@@ -85,7 +85,7 @@
     >
       TORA
     </h1>
-    <div class="backdrop-blur-sm p-4 rounded-lg bg-ctp-crust/10">
+    <div class="p-4 rounded-lg bg-ctp-crust/10">
       <p class="text-base leading-relaxed">
         Tired of the old way?
       </p>
