@@ -5,7 +5,7 @@
 
 {#snippet FeatureCard(title: String, content: String)}
   <div
-    class="border border-ctp-overlay0/50 rounded-lg p-4 bg-gradient-to-br from-ctp-surface0/30 to-ctp-surface1/20 hover:from-ctp-surface0/50 hover:to-ctp-surface1/30 transition-all duration-300"
+    class="opacity-75 backdrop-blur-md border border-ctp-overlay0/40 rounded-lg bg-gradient-to-br from-ctp-surface0/20 to-ctp-surface1/10 hover:from-ctp-surface0/40 hover:to-ctp-surface1/20 hover:border-ctp-lavender/30 transition-all duration-500 p-4 shadow-lg shadow-ctp-overlay0/10"
   >
     <span class="font-bold text-ctp-lavender">{title}</span>
     <br />
@@ -18,24 +18,24 @@
 <Starfield />
 
 <section
-  class="hidden md:flex flex-col h-full w-full text-ctp-text/90 relative"
+  class="hidden md:flex flex-col h-full w-full text-ctp-text/95 relative"
 >
   <div class="flex-none w-full p-2 relative">
     <span
-      class="font-extrabold leading-none text-[clamp(8rem,20vw,32rem)] text-ctp-text"
+      class="font-extrabold leading-none text-[clamp(8rem,20vw,32rem)] text-transparent bg-clip-text bg-gradient-to-r from-ctp-text to-ctp-lavender"
     >
       TORA
     </span>
   </div>
 
   <div class="flex justify-end w-full p-2 relative">
-    <div class="w-1/3 flex flex-col relative z-10">
+    <div class="w-1/3 flex flex-col relative z-10 backdrop-blur-sm p-4 rounded-lg bg-ctp-crust/10">
       <p class="text-base leading-relaxed">
-        Your experiments deserve <span class="font-bold">clarity</span>, not
+        Your experiments deserve <span class="font-bold text-ctp-lavender">clarity</span>, not
         chaos.
       </p>
       <p class="text-base leading-relaxed mt-4">
-        TORA streamlines experiment tracking, <span class="font-bold"
+        TORA streamlines experiment tracking, <span class="font-bold text-ctp-blue"
           >just three simple lines of Python.</span
         >
       </p>
@@ -51,7 +51,7 @@
         onclick={() => goto("/signup")}
       >
         <span
-          class="p-2 rounded-lg bg-gradient-to-r from-ctp-blue/20 to-ctp-mauve/20 hover:from-ctp-blue hover:to-ctp-mauve transition-all duration-300 hover:text-ctp-crust font-medium"
+          class="p-2 rounded-lg bg-gradient-to-r from-ctp-blue/20 to-ctp-mauve/20 hover:from-ctp-blue hover:to-ctp-mauve transition-all duration-500 hover:text-ctp-crust font-medium border border-ctp-overlay0/30 hover:border-ctp-lavender/50 shadow-md"
           >Start Seeing Clearly →</span
         >
       </button>
@@ -80,34 +80,36 @@
   </div>
 </section>
 
-<section class="md:hidden flex flex-col h-full w-full text-ctp-text/90 px-4">
+<section class="md:hidden flex flex-col h-full w-full text-ctp-text/95 px-4">
   <div class="flex flex-col space-y-8 pt-4">
     <h1
-      class="font-extrabold leading-none text-[clamp(6rem,30vw,14rem)] text-ctp-text"
+      class="font-extrabold leading-none text-[clamp(6rem,30vw,14rem)] text-transparent bg-clip-text bg-gradient-to-r from-ctp-text to-ctp-lavender"
     >
       TORA
     </h1>
-    <p class="text-base leading-relaxed">
-      Your experiments deserve <span class="font-bold">clarity</span>, not
-      chaos.
-    </p>
-    <p class="text-base leading-relaxed mt-4">
-      TORA streamlines experiment tracking, <span class="font-bold"
-        >just three simple lines of Python.</span
-      >
-    </p>
-    <p class="text-base leading-relaxed mt-4 font-bold text-ctp-sapphire">
-      Less noise. More insight. Immediate impact.
-    </p>
-    <p class="text-base leading-relaxed mt-2">
-      With distractions gone, your best work emerges naturally.
-    </p>
-    <button type="button" onclick={() => goto("/signup")}>
-      <span
-        class="p-2 rounded-lg bg-gradient-to-r from-ctp-blue/20 to-ctp-mauve/20 hover:from-ctp-blue hover:to-ctp-mauve transition-all duration-300 hover:text-ctp-crust font-medium"
-        >Start Seeing Clearly →</span
-      >
-    </button>
+    <div class="backdrop-blur-sm p-4 rounded-lg bg-ctp-crust/10">
+      <p class="text-base leading-relaxed">
+        Your experiments deserve <span class="font-bold text-ctp-lavender">clarity</span>, not
+        chaos.
+      </p>
+      <p class="text-base leading-relaxed mt-4">
+        TORA streamlines experiment tracking, <span class="font-bold text-ctp-blue"
+          >just three simple lines of Python.</span
+        >
+      </p>
+      <p class="text-base leading-relaxed mt-4 font-bold text-ctp-sapphire">
+        Less noise. More insight. Immediate impact.
+      </p>
+      <p class="text-base leading-relaxed mt-2">
+        With distractions gone, your best work emerges naturally.
+      </p>
+      <button type="button" onclick={() => goto("/signup")} class="mt-6">
+        <span
+          class="p-2 rounded-lg bg-gradient-to-r from-ctp-blue/20 to-ctp-mauve/20 hover:from-ctp-blue hover:to-ctp-mauve transition-all duration-500 hover:text-ctp-crust font-medium border border-ctp-overlay0/30 hover:border-ctp-lavender/50 shadow-md"
+          >Start Seeing Clearly →</span
+        >
+      </button>
+    </div>
   </div>
 
   <div class="flex-1 pt-16">
