@@ -122,13 +122,13 @@
   :global(.tippy-box[data-theme~="tooltip-theme"] .tippy-arrow) {
     color: var(
       --color-ctp-surface1
-    ); /* Matches toolbar background for the arrow */
+    );
   }
 
   :global(.tippy-box[data-theme~="tooltip-theme"] .tippy-arrow::before) {
     border-color: var(
       --color-ctp-surface2
-    ); /* Matches toolbar border for the arrow */
+    );  
   }
 
   :global(.tippy-box[data-theme~="tooltip-theme"]::before) {
@@ -184,7 +184,7 @@
     position: fixed;
     bottom: 1rem;
     left: 50vw;
-    transform: translateX(-50%);
+    transform: translateX(-50%) scale(1.25);
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -195,10 +195,8 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     z-index: 40;
     overflow: hidden;
-    max-width: calc(100vw - 2rem);
-    scale: 100%;
     opacity: 100%;
-    transition: scale 0.3s ease, opacity 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
   }
   
   .toolbar-button {
@@ -222,8 +220,7 @@
     .toolbar {
       bottom: 3rem;
       gap: 0.25rem;
-      scale: 110%;
-      transition: scale 0.3s ease, opacity 0.3s ease;
+      transform: translateX(-50%) scale(1.1);
     }
     
     .toolbar-button {
@@ -238,26 +235,26 @@
   
   @media (min-width: 768px) {
     .toolbar {
-      scale: 110%;
+      width: auto;
+      max-width: calc(100vw - 4rem);
+      transform: translateX(-50%) scale(1.1);
       opacity: 80%;
-      transition: scale 0.3s ease, opacity 0.3s ease;
     }
     
     .toolbar:hover {
-      scale: 120%;
+      transform: translateX(-50%) scale(1.2);
       opacity: 100%;
     }
   }
   
   @media (min-width: 1024px) {
     .toolbar {
-      scale: 120%;
+      transform: translateX(-50%) scale(1.2); 
       opacity: 80%;
-      transition: scale 0.3s ease, opacity 0.3s ease;
     }
     
     .toolbar:hover {
-      scale: 130%;
+      transform: translateX(-50%) scale(1.3);
       opacity: 100%;
     }
   }
