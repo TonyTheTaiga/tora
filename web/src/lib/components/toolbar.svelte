@@ -4,7 +4,7 @@
   import { page } from "$app/state";
   import type { Attachment } from "svelte/attachments";
   import tippy from "tippy.js";
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
 
   let {
     selectedExperiment = $bindable(),
@@ -13,8 +13,20 @@
   } = $props();
   let { session } = $derived(page.data);
   let theme = $state<"dark" | "light">("dark");
+  let isAtBottom = $state(false);
+
+  const handleScroll = () => {
+    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+      const atBottom = (window.innerHeight + Math.ceil(window.scrollY)) >= document.documentElement.scrollHeight - 1;
+      isAtBottom = atBottom;
+    }
+  };
 
   onMount(() => {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', handleScroll);
+      handleScroll();
+    }
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined' && typeof document !== 'undefined') {
       const savedTheme = localStorage.getItem("theme");
       if (savedTheme && (savedTheme === "dark" || savedTheme === "light")) {
@@ -27,6 +39,12 @@
         theme = prefersDark ? "dark" : "light";
         applyTheme(theme);
       }
+    }
+  });
+
+  onDestroy(() => {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('scroll', handleScroll);
     }
   });
 
@@ -75,7 +93,7 @@
   }
 </script>
 
-<div class="toolbar">
+<div class="toolbar" class:hidden-at-bottom={isAtBottom}>
   <button
     class="toolbar-button"
     title="Create a new experiment"
@@ -304,6 +322,31 @@
     .toolbar:hover {
       transform: translateX(-50%) scale(1.3);
       opacity: 100%;
+    }
+  }
+
+  .toolbar.hidden-at-bottom {
+    opacity: 0;
+    transform: translateX(-50%) translateY(100%) scale(1.25); /* Slide down and out */
+    pointer-events: none;
+  }
+
+  /* Adjust responsive transforms for hidden state if necessary */
+  @media (min-width: 640px) {
+    .toolbar.hidden-at-bottom {
+      transform: translateX(-50%) translateY(100%) scale(1.1);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .toolbar.hidden-at-bottom {
+      transform: translateX(-50%) translateY(100%) scale(1.1);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .toolbar.hidden-at-bottom {
+      transform: translateX(-50%) translateY(100%) scale(1.2);
     }
   }
 </style>
