@@ -84,6 +84,7 @@
 
 <Starfield />
 
+<!-- Language Toggle Button -->
 <div class="absolute top-4 left-4 z-20 flex items-center space-x-2">
   <button
     type="button"
