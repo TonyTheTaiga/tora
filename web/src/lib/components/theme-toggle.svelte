@@ -37,15 +37,15 @@
 
 <button
   on:click={toggleTheme}
-  class="p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
+  class="p-2 sm:p-2.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
   aria-label={theme === "dark"
     ? "Switch to light theme"
     : "Switch to dark theme"}
   title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
 >
   {#if theme === "dark"}
-    <Sun size={16} />
+    <Sun size={20} class="sm:size-5" />
   {:else}
-    <Moon size={16} />
+    <Moon size={20} class="sm:size-5" />
   {/if}
 </button>

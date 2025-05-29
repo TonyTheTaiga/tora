@@ -48,8 +48,8 @@
     bg-ctp-surface1 border border-ctp-surface2
     rounded-lg shadow-md z-40
     overflow-hidden
-    scale-90 opacity-100
-    sm:scale-100 sm:opacity-100
+    scale-100 opacity-100
+    sm:scale-110 sm:opacity-100
     md:scale-110 md:hover:scale-120 md:transition-transform md:duration-300
     md:opacity-80 md:hover:opacity-100
     lg:scale-120 lg:hover:scale-130 lg:transition-transform lg:duration-300
@@ -58,7 +58,7 @@
   "
 >
   <button
-    class="p-1 sm:p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
+    class="p-2 sm:p-2.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
     title="Create a new experiment"
     onclick={() => {
       isOpenCreate = true;
@@ -70,30 +70,30 @@
       },
     )}
   >
-    <Plus size={16} class="sm:size-4" />
+    <Plus size={20} class="sm:size-5" />
   </button>
 
   <ThemeToggle />
 
   {#if session && session.user}
     <button
-      class="p-1 sm:p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
+      class="p-2 sm:p-2.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
       title="Manage workspaces"
       onclick={() => {
         goto("/workspaces");
       }}
     >
-      <Briefcase size={16} class="sm:size-4" />
+      <Briefcase size={20} class="sm:size-5" />
     </button>
 
     <button
-      class="p-1 sm:p-1.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
+      class="p-2 sm:p-2.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
       title="Go to user profile"
       onclick={() => {
         goto(`/users/${session.user.id}`);
       }}
     >
-      <User size={16} class="sm:size-4" />
+      <User size={20} class="sm:size-5" />
     </button>
   {/if}
 </div>
