@@ -262,7 +262,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0;
     background-color: var(--color-ctp-surface1);
     border: 1px solid var(--color-ctp-surface2);
     border-radius: 0.5rem;
@@ -293,7 +293,7 @@
   @media (min-width: 640px) {
     .toolbar {
       bottom: 3rem;
-      gap: 0.25rem;
+      gap: 0;
       transform: translateX(-50%) scale(1.1);
     }
     
