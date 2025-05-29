@@ -1,10 +1,9 @@
 <script lang="ts">
-  import type { Experiment, ExperimentStatus } from "$lib/types"; // Import ExperimentStatus
+  import type { Experiment, ExperimentStatus } from "$lib/types";
   import {
     X,
     Tag,
     Clock,
-    // ChartLine, // Removed: No longer showing number of metrics
     Eye,
     EyeClosed,
     Globe,
@@ -14,12 +13,12 @@
 
   let {
     experiment,
-    selectedExperiment = $bindable(), // This prop is now uncommented and bindable
+    selectedExperiment = $bindable(),
     highlighted = $bindable(),
     selectedForDelete = $bindable(),
   }: {
-    experiment: Experiment; // Assumes Experiment type now includes status and keyMetrics
-    selectedExperiment: Experiment | null; // Type for the bindable prop
+    experiment: Experiment;
+    selectedExperiment: Experiment | null;
     highlighted: string[];
     selectedForDelete: Experiment | null;
   } = $props();
@@ -65,9 +64,8 @@
           title={currentStatusTooltip}
         ></span>
       {/if}
-      <!-- Visibility Icon -->
       <div
-        class="p-0.5 rounded-md transition-colors {experiment.visibility ===
+        class="p-1 rounded-md transition-colors {experiment.visibility ===
         'PUBLIC'
           ? 'text-ctp-green hover:bg-ctp-green/10'
           : 'text-ctp-red hover:bg-ctp-red/10'}"
@@ -133,20 +131,17 @@
         </div>
       {:else}
         <div class="h-[18px]"></div>
-        <!-- Placeholder to maintain height consistency if no tags -->
       {/if}
     </div>
     <!-- Actions & Date -->
     <div class="flex items-center gap-1 text-ctp-subtext0 flex-shrink-0">
       <button
         onclick={async (e) => {
-          // Changed to onclick
           e.stopPropagation(); // Prevent card click
           if (highlighted.includes(experiment.id)) {
             highlighted = [];
           } else {
             try {
-              // Assuming this API endpoint exists and returns string[]
               const response = await fetch(
                 `/api/experiments/${experiment.id}/ref`,
               );
@@ -160,7 +155,7 @@
             }
           }
         }}
-        class="p-1 rounded-md hover:text-ctp-text hover:bg-ctp-surface0 transition-all"
+        class="p-1 rounded-md hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
         title="Show experiment chain"
       >
         {#if highlighted.includes(experiment.id)}
@@ -172,12 +167,11 @@
       {#if page.data.user && page.data.user.id === experiment.user_id}
         <button
           type="button"
-          class="p-1 rounded-md hover:text-ctp-red hover:bg-ctp-red/10 transition-all"
+          class="p-1 rounded-md hover:text-ctp-red hover:bg-ctp-red/10 transition-colors"
           aria-label="Delete"
           title="Delete experiment"
           onclick={(e) => {
-            // Changed to onclick
-            e.stopPropagation(); // Prevent card click
+            e.stopPropagation();
             selectedForDelete = experiment;
           }}
         >

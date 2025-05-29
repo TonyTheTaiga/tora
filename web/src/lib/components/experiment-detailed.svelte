@@ -22,8 +22,10 @@
     ChevronDown,
     CircleDot,
     Minimize2,
-    Table2, // Add this
-    Loader2, // Add this
+    Table2,
+    Loader2,
+    Globe,
+    GlobeLock,
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
   import { page } from "$app/state";
@@ -52,6 +54,8 @@
   let rawMetrics = $state<Metric[]>([]);
   let metricsLoading = $state(false);
   let metricsError = $state<string | null>(null);
+
+  let showActionMenu = $state(false); // Added state for action menu
 
   // Define a mapping for status colors (Tailwind CSS classes)
   const statusColors: Record<ExperimentStatus, string> = {
@@ -122,248 +126,170 @@
 <article class="h-full">
   <!-- Header with actions -->
   <header class="px-3 sm:px-4 py-3 bg-ctp-mantle border-b border-ctp-surface0">
-    <!-- Mobile header -->
-    <div class="flex flex-col sm:hidden w-full gap-2">
-      <!-- Title row -->
+    <!-- Combined Header for both Mobile and Desktop -->
+    <div class="flex flex-col gap-2">
+      <!-- Title and ID Row -->
       <div class="flex items-center justify-between">
-        <!-- Wrapper for name and button -->
-        <h2
-          class="text-base font-medium text-ctp-text truncate pr-2"
-          title={experiment.name}
-        >
-          {experiment.name}
-        </h2>
-        <button
-          type="button"
-          aria-label="Copy Experiment ID"
-          title={idCopied ? "ID Copied!" : "Copy Experiment ID"}
-          class="flex items-center p-1 rounded-md text-ctp-subtext0 transition-colors hover:bg-ctp-surface0 hover:text-ctp-text active:bg-ctp-surface1 group flex-shrink-0"
-          onclick={() => {
-            navigator.clipboard.writeText(experiment.id);
-            idCopied = true;
-            idCopyAnimated = true;
-            setTimeout(() => {
-              idCopied = false;
-            }, 800);
-            setTimeout(() => {
-              idCopyAnimated = false;
-            }, 300);
-          }}
-        >
-          {#if idCopied}
-            <ClipboardCheck
+        <div class="flex items-center gap-2 min-w-0 flex-grow">
+          <h2
+            class="text-base sm:text-lg font-medium text-ctp-text truncate"
+            title={experiment.name}
+          >
+            {experiment.name}
+          </h2>
+          <button
+            type="button"
+            aria-label="Copy Experiment ID"
+            title={idCopied ? "ID Copied!" : "Copy Experiment ID"}
+            class="flex items-center p-1 sm:p-1.5 rounded-md text-ctp-subtext0 transition-colors hover:bg-ctp-surface0 hover:text-ctp-text active:bg-ctp-surface1 group flex-shrink-0"
+            onclick={() => {
+              navigator.clipboard.writeText(experiment.id);
+              idCopied = true;
+              idCopyAnimated = true;
+              setTimeout(() => {
+                idCopied = false;
+              }, 800);
+              setTimeout(() => {
+                idCopyAnimated = false;
+              }, 300);
+            }}
+          >
+            {#if idCopied}
+              <ClipboardCheck
+                size={16}
+                class="text-ctp-green transition-transform duration-150 {idCopyAnimated
+                  ? 'scale-125'
+                  : 'animate-bounce'}"
+              />
+              <span class="text-xs text-ctp-green ml-1.5 hidden sm:inline">Copied!</span>
+            {:else}
+              <Copy size={16} />
+              <span
+                class="text-xs text-ctp-subtext0 ml-1.5 hidden sm:inline group-hover:text-ctp-text transition-colors duration-150"
+                >Copy ID</span
+              >
+            {/if}
+          </button>
+        </div>
+        
+        <div class="flex items-center gap-1">
+          {#if page.data.user && page.data.user.id === experiment.user_id}
+            <button
+              class="p-1.5 rounded-md text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
+              onclick={async () => {
+                const response = await fetch(
+                  `/api/ai/analysis?experimentId=${experiment.id}`,
+                );
+                const data = (await response.json()) as ExperimentAnalysis;
+                recommendations = data.hyperparameter_recommendations;
+              }}
+              title="Get AI recommendations"
+            >
+              <Sparkle size={16} />
+            </button>
+            <button
+              onclick={() => {
+                selectedForEdit = experiment;
+              }}
+              class="p-1.5 rounded-md text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
+              title="Edit experiment"
+            >
+              <Pencil size={16} />
+            </button>
+          {/if}
+          <button
+            onclick={async () => {
+              if (highlighted.includes(experiment.id)) {
+                highlighted = [];
+              } else {
+                try {
+                  const response = await fetch(
+                    `/api/experiments/${experiment.id}/ref`,
+                  );
+                  if (!response.ok) {
+                    return;
+                  }
+                  const data = await response.json();
+                  const uniqueIds = [...new Set([...data, experiment.id])];
+                  highlighted = uniqueIds;
+                } catch (err) {}
+              }
+            }}
+            class="p-1.5 rounded-md text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
+            title="Show experiment chain"
+          >
+            {#if highlighted.includes(experiment.id)}
+              <EyeClosed size={16} />
+            {:else}
+              <Eye size={16} />
+            {/if}
+          </button>
+          {#if page.data.user && page.data.user.id === experiment.user_id}
+            <button
+              type="button"
+              class="p-1.5 rounded-md text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/10 transition-colors"
+              aria-label="Delete"
+              title="Delete experiment"
+              onclick={(e) => {
+                e.stopPropagation();
+                selectedForDelete = experiment;
+              }}
+            >
+              <X size={16} />
+            </button>
+          {/if}
+          <button
+            class="p-1.5 rounded-md text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
+            onclick={() => {
+              selectedExperiment = null;
+            }}
+            title="Minimize"
+          >
+            <Minimize2 size={16} />
+          </button>
+        </div>
+      </div>
+
+      <!-- Status and metadata row -->
+      <div class="flex flex-wrap items-center gap-2 text-ctp-subtext0 text-xs">
+        {#if experiment.status}
+          <div class="flex items-center gap-1">
+            <CircleDot
               size={14}
-              class="text-ctp-green transition-transform duration-150 {idCopyAnimated
-                ? 'scale-125'
-                : 'animate-bounce'}"
+              class={"flex-shrink-0 " +
+                currentStatusColor.replace("bg-", "text-")}
             />
-            <span class="text-xs text-ctp-green ml-1">Copied!</span>
-          {:else}
-            <Copy size={14} />
-            <span
-              class="text-xs text-ctp-subtext0 ml-1 group-hover:text-ctp-text transition-colors duration-150"
-              >Copy ID</span
+            <span class="font-medium {currentStatusColor.replace('bg-', 'text-')}"
+              >{currentStatusTooltip}</span
             >
-          {/if}
-        </button>
-      </div>
+          </div>
+        {/if}
 
-      <!-- Actions row -->
-      <div class="flex items-center justify-end gap-2">
-        {#if page.data.user && page.data.user.id === experiment.user_id}
-          <button
-            class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-transform active:rotate-90"
-            onclick={async () => {
-              const response = await fetch(
-                `/api/ai/analysis?experimentId=${experiment.id}`,
-              );
-              const data = (await response.json()) as ExperimentAnalysis;
-              recommendations = data.hyperparameter_recommendations;
-            }}
-            title="Get AI recommendations"
-          >
-            <Sparkle size={16} />
-          </button>
-          <button
-            onclick={() => {
-              selectedForEdit = experiment;
-            }}
-            class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
-            title="Edit experiment"
-          >
-            <Pencil size={16} />
-          </button>
-        {/if}
-        <button
-          onclick={async () => {
-            if (highlighted.includes(experiment.id)) {
-              highlighted = [];
-            } else {
-              try {
-                const response = await fetch(
-                  `/api/experiments/${experiment.id}/ref`,
-                );
-                if (!response.ok) {
-                  return;
-                }
-                const data = await response.json();
-                const uniqueIds = [...new Set([...data, experiment.id])];
-                highlighted = uniqueIds;
-              } catch (err) {}
-            }
-          }}
-          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
-          title="Show experiment chain"
-        >
-          {#if highlighted.includes(experiment.id)}
-            <EyeClosed size={16} />
-          {:else}
-            <Eye size={16} />
-          {/if}
-        </button>
-        {#if page.data.user && page.data.user.id === experiment.user_id}
-          <button
-            type="button"
-            class="p-1.5 text-ctp-subtext0 hover:text-ctp-red"
-            aria-label="Delete"
-            title="Delete experiment"
-            onclick={(e) => {
-              e.stopPropagation();
-              selectedForDelete = experiment;
-            }}
-          >
-            <X size={16} />
-          </button>
-        {/if}
-        <button
-          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
-          onclick={() => {
-            selectedExperiment = null;
-          }}
-        >
-          <Minimize2 size={16} />
-        </button>
-      </div>
-    </div>
+        <div class="flex items-center gap-1">
+          <Clock size={14} class="flex-shrink-0" />
+          <time>
+            {new Date(experiment.createdAt).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}
+          </time>
+        </div>
 
-    <!-- Desktop/Tablet header -->
-    <div class="hidden sm:flex sm:flex-row justify-between items-center">
-      <div class="flex items-center gap-2 flex-grow min-w-0 mr-4">
-        <!-- Parent div for name and button -->
-        <h2
-          class="text-lg font-medium text-ctp-text truncate"
-          title={experiment.name}
+        <div
+          class="flex items-center gap-1 p-1 rounded-md transition-colors {experiment.visibility === 'PUBLIC' 
+            ? 'text-ctp-green hover:bg-ctp-green/10' 
+            : 'text-ctp-red hover:bg-ctp-red/10'}"
+          title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
         >
-          {experiment.name}
-        </h2>
-        <button
-          type="button"
-          aria-label="Copy Experiment ID"
-          title={idCopied ? "ID Copied!" : "Copy Experiment ID"}
-          class="flex items-center p-1.5 rounded-md text-ctp-subtext0 transition-colors hover:bg-ctp-surface0 hover:text-ctp-text active:bg-ctp-surface1 group flex-shrink-0"
-          onclick={() => {
-            navigator.clipboard.writeText(experiment.id);
-            idCopied = true;
-            idCopyAnimated = true;
-            setTimeout(() => {
-              idCopied = false;
-            }, 800);
-            setTimeout(() => {
-              idCopyAnimated = false;
-            }, 300);
-          }}
-        >
-          {#if idCopied}
-            <ClipboardCheck
-              size={16}
-              class="text-ctp-green transition-transform duration-150 {idCopyAnimated
-                ? 'scale-125'
-                : 'animate-bounce'}"
-            />
-            <span class="text-xs text-ctp-green ml-1.5">Copied!</span>
+          {#if experiment.visibility === "PUBLIC"}
+            <Globe size={14} />
+            <span>Public</span>
           {:else}
-            <Copy size={16} />
-            <span
-              class="text-xs text-ctp-subtext0 ml-1.5 group-hover:text-ctp-text transition-colors duration-150"
-              >Copy ID</span
-            >
+            <GlobeLock size={14} />
+            <span>Private</span>
           {/if}
-        </button>
-      </div>
-      <div class="flex items-center gap-2">
-        {#if page.data.user && page.data.user.id === experiment.user_id}
-          <button
-            class="p-1.5 text-ctp-subtext0 hover:text-ctp-text transition-transform active:rotate-90"
-            onclick={async () => {
-              const response = await fetch(
-                `/api/ai/analysis?experimentId=${experiment.id}`,
-              );
-              const data = (await response.json()) as ExperimentAnalysis;
-              recommendations = data.hyperparameter_recommendations;
-            }}
-            title="Get AI recommendations"
-          >
-            <Sparkle size={16} />
-          </button>
-          <button
-            onclick={() => {
-              selectedForEdit = experiment;
-            }}
-            class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
-            title="Edit experiment"
-          >
-            <Pencil size={16} />
-          </button>
-        {/if}
-        <button
-          onclick={async () => {
-            if (highlighted.includes(experiment.id)) {
-              highlighted = [];
-            } else {
-              try {
-                const response = await fetch(
-                  `/api/experiments/${experiment.id}/ref`,
-                );
-                if (!response.ok) {
-                  return;
-                }
-                const data = await response.json();
-                const uniqueIds = [...new Set([...data, experiment.id])];
-                highlighted = uniqueIds;
-              } catch (err) {}
-            }
-          }}
-          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
-          title="Show experiment chain"
-        >
-          {#if highlighted.includes(experiment.id)}
-            <EyeClosed size={16} />
-          {:else}
-            <Eye size={16} />
-          {/if}
-        </button>
-        {#if page.data.user && page.data.user.id === experiment.user_id}
-          <button
-            type="button"
-            class="p-1.5 text-ctp-subtext0 hover:text-ctp-red"
-            aria-label="Delete"
-            title="Delete experiment"
-            onclick={(e) => {
-              e.stopPropagation();
-              selectedForDelete = experiment;
-            }}
-          >
-            <X size={16} />
-          </button>
-        {/if}
-        <button
-          class="p-1.5 text-ctp-subtext0 hover:text-ctp-text"
-          onclick={() => {
-            selectedExperiment = null;
-          }}
-        >
-          <Minimize2 size={16} />
-        </button>
+        </div>
       </div>
     </div>
   </header>
