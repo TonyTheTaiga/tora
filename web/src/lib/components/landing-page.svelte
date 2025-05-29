@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import Starfield from "./starfield.svelte";
-  import Logo from "./logo.svelte"; // Import the Logo component
+  import Logo from "./logo.svelte";
 
   type LangKey = 'en' | 'ja';
   type CopyContent = {
@@ -24,34 +24,34 @@
 
   const copy: Record<LangKey, CopyContent> = {
     en: {
-      line1: "The path of complexity ends here.",
-      line2: "Tora. The blade that reveals truth in data.",
-      line3: "Three lines of code. Unsheathe its power.",
-      line4: "Master your model. Discover Tora.",
-      getStarted: "Get Started →",
-      feature1Title: "Instant Integration",
-      feature1Desc: "Effortless setup. Start seeing results in seconds.",
-      feature2Title: "Insightful Visualization",
-      feature2Desc: "Watch your experiments come to life with simple, beautiful charts.",
-      feature3Title: "AI That Thinks With You",
-      feature3Desc: "Tora’s AI delivers insights, not just data. So you can make smarter decisions, faster.",
-      feature4Title: "Effortless Teamwork",
-      feature4Desc: "Work together, share results, and keep everyone on the same page."
+      line1: "Elevate Your Team's Model Intelligence.",
+      line2: "Tora: Drive Deeper Insights from Complex Data.",
+      line3: "Rapid Integration. Powerful Results.",
+      line4: "Advance Your MLOps. Drive Tangible Results with Tora.",
+      getStarted: "Request a Demo",
+      feature1Title: "Seamless Integration",
+      feature1Desc: "Deploy Tora in minutes and accelerate your team's workflow immediately.",
+      feature2Title: "Actionable Visualizations",
+      feature2Desc: "Translate complex model behavior into clear, strategic insights for faster decision-making.",
+      feature3Title: "AI-Powered Diagnostics",
+      feature3Desc: "Leverage intelligent analysis to proactively identify bottlenecks and optimize model performance.",
+      feature4Title: "Collaborative MLOps",
+      feature4Desc: "Centralize experiment data, streamline reporting, and enhance knowledge sharing across your organization."
     },
     ja: {
-      line1: "複雑さの道は、ここに終わる。",
-      line2: "Tora。データに真実を現す刃。",
-      line3: "コード三行。その力を解き放て。",
-      line4: "モデルを極めよ。Toraを見出せ。",
-      getStarted: "始める →",
-      feature1Title: "瞬時の統合",
-      feature1Desc: "簡単なセットアップ。数秒で結果を確認。",
-      feature2Title: "洞察に満ちた可視化",
-      feature2Desc: "シンプルで美しいチャートで、実験が生き生きと動き出すのをご覧ください。",
-      feature3Title: "共に考えるAI",
-      feature3Desc: "ToraのAIはデータだけでなく、洞察を提供します。より賢明な意思決定を、より速く。",
-      feature4Title: "楽なチームワーク",
-      feature4Desc: "協力し、結果を共有し、全員が同じ認識を持つ。"
+      line1: "チームのモデルインテリジェンスを向上させる。",
+      line2: "Tora: 複雑なデータからより深い洞察を。",
+      line3: "迅速な統合。強力な結果。",
+      line4: "ToraでMLOpsを高度化し、具体的な成果を実現。",
+      getStarted: "デモをリクエスト",
+      feature1Title: "シームレスな統合",
+      feature1Desc: "Toraを数分で導入し、チームのワークフローを即座に加速します。",
+      feature2Title: "実用的な可視化",
+      feature2Desc: "複雑なモデルの挙動を明確で戦略的な洞察に変換し、迅速な意思決定を可能にします。",
+      feature3Title: "AIによる診断",
+      feature3Desc: "インテリジェントな分析を活用し、ボトルネックを積極的に特定し、モデルのパフォーマンスを最適化します。",
+      feature4Title: "協調的なMLOps",
+      feature4Desc: "実験データを一元管理し、レポート作成を合理化し、組織全体の知識共有を強化します。"
     }
   };
 
@@ -74,6 +74,8 @@
   </div>
 {/snippet}
 
+<Starfield />
+
 <div class="absolute top-4 left-4 z-20 flex items-center space-x-2">
   <button
     type="button"
@@ -81,8 +83,8 @@
     class="relative inline-flex h-6 w-20 items-center rounded-full bg-ctp-surface0 p-0.5 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-ctp-blue focus:ring-offset-2 focus:ring-offset-ctp-base"
   >
     <span class="sr-only">Toggle language</span>
-    <span 
-      class={`absolute left-0 top-0.5 h-5 w-10 rounded-full bg-ctp-blue/90 transition-transform duration-200 ease-in-out ${currentLang === 'en' ? 'translate-x-0' : 'translate-x-10'}`}
+    <span
+      class={`absolute left-0 top-0.5 h-5 w-9 rounded-full bg-ctp-blue/90 transition-transform duration-200 ease-in-out ${currentLang === 'en' ? 'translate-x-0.5' : 'translate-x-[2.625rem]'}`}
       aria-hidden="true"
     ></span>
     <span class="relative z-10 flex w-full items-center justify-between px-2 text-xs font-medium">
@@ -91,8 +93,6 @@
     </span>
   </button>
 </div>
-
-<Starfield />
 
 <!-- Desktop Version -->
 <section
