@@ -24,42 +24,42 @@
 
   const copy: Record<LangKey, CopyContent> = {
     en: {
-      line1: "Maximize Model Performance & Efficiency.",
-      line2: "Tora: Visualize, Analyze, and Optimize Your ML Experiments.",
-      line3: "Rapid Setup, Immediate Insights.",
-      line4: "Automate & Accelerate Your MLOps with Tora.",
+      line1: "Optimize Model Performance & Computational Efficiency.",
+      line2: "Tora: Visualize, Analyze, and Optimize ML Experiment Workflows.",
+      line3: "Fast Integration, Immediate Technical Insights.",
+      line4: "Streamline MLOps Pipelines with Automated Tooling.",
       getStarted: "Explore Tora",
-      feature1Title: "Instant Integration, Immediate Value",
+      feature1Title: "Seamless Tool Integration",
       feature1Desc:
-        "Skip the hassle. Integrate Tora in minutes and start seeing results. Its design works with your existing tools, guaranteeing a smooth, zero-downtime transition.",
-      feature2Title: "Dive into Data with Stunning Visuals!",
+        "Deploy in minutes with zero downtime. Integrates with existing ML stacks via Python client. Compatible with CI/CD pipelines and standard experiment frameworks.",
+      feature2Title: "Advanced Data Visualization",
       feature2Desc:
-        "Experience your data like never before! Interactive charts and real-time metrics bring your experiments to life, making it easy to spot trends and make data-driven decisions.",
-      feature3Title: "AI: Your Strategic Advantage",
+        "Interactive dashboards display real-time metrics and experiment comparisons. Supports custom chart configurations and anomaly highlighting for efficient trend analysis.",
+      feature3Title: "AI-Powered Experiment Analysis",
       feature3Desc:
-        "Harness the power of AI to optimize your models. Tora's intelligent analysis provides key insights, helping you fine-tune parameters, detect anomalies, and maximize performance.",
-      feature4Title: "MLOps: Together, Smarter",
+        "Automated hyperparameter optimization suggestions based on experiment history. Identifies performance bottlenecks and generates targeted improvement recommendations.",
+      feature4Title: "Collaborative MLOps Framework",
       feature4Desc:
-        "Build a thriving MLOps community. Tora's collaborative workspaces empower your team to share knowledge, manage experiments, and achieve more, together.",
+        "Centralized experiment management with version control integration. Supports reproducibility through detailed metadata tracking and shared workspaces for distributed teams.",
     },
     ja: {
-      line1: "モデルのパフォーマンスと効率を最大化",
-      line2: "Tora: ML実験を可視化、分析、最適化",
-      line3: "迅速なセットアップ、即座に洞察",
-      line4: "ToraでMLOpsを自動化し、加速",
-      getStarted: "Toraを探索",
-      feature1Title: "シームレスな統合",
+      line1: "モデル性能と計算効率の最適化",
+      line2: "Tora: ML実験の可視化・分析・最適化プラットフォーム",
+      line3: "迅速な導入、即時の洞察",
+      line4: "MLOpsワークフローの自動化と高速化",
+      getStarted: "Toraを試す",
+      feature1Title: "高速統合と即時価値提供",
       feature1Desc:
-        "Toraを数分で導入し、チームのワークフローを即座に加速します。",
-      feature2Title: "実用的な可視化",
+        "数分で導入可能。既存ツールとシームレスに連携し、ダウンタイムなしでワークフローを強化します。CI/CDパイプラインへの統合も容易です。",
+      feature2Title: "高度なデータ可視化",
       feature2Desc:
-        "複雑なモデルの挙動を明確で戦略的な洞察に変換し、迅速な意思決定を可能にします。",
-      feature3Title: "AIによる診断",
+        "インタラクティブなチャートとリアルタイムメトリクスにより、複雑な実験データを直感的に理解。異常検出や傾向分析を効率化し、データ駆動型の意思決定をサポートします。",
+      feature3Title: "AI支援の実験最適化",
       feature3Desc:
-        "インテリジェントな分析を活用し、ボトルネックを積極的に特定し、モデルのパフォーマンスを最適化します。",
-      feature4Title: "協調的なMLOps",
+        "AIによる実験分析でハイパーパラメータ最適化を支援。異常値やボトルネックを自動検出し、モデルパフォーマンス向上のための具体的な提案を生成します。",
+      feature4Title: "チーム協働MLOps",
       feature4Desc:
-        "実験データを一元管理し、レポート作成を合理化し、組織全体の知識共有を強化します。",
+        "分散チームの知識を統合し、実験管理を効率化。バージョン管理、変更追跡、再現性確保の機能により、チーム全体の生産性と実験品質を向上させます。",
     },
   };
 
