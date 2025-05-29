@@ -37,15 +37,43 @@
 
 <button
   on:click={toggleTheme}
-  class="p-2 sm:p-2.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
-  aria-label={theme === "dark"
-    ? "Switch to light theme"
-    : "Switch to dark theme"}
+  class="toolbar-button"
+  aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
   title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
 >
   {#if theme === "dark"}
-    <Sun size={20} class="sm:size-5" />
+    <Sun class="icon" />
   {:else}
-    <Moon size={20} class="sm:size-5" />
+    <Moon class="icon" />
   {/if}
 </button>
+
+<style>
+  .toolbar-button {
+    padding: 0.5rem;
+    color: var(--color-ctp-subtext0);
+    transition: color 0.2s, background-color 0.2s;
+  }
+  
+  .toolbar-button:hover {
+    color: var(--color-ctp-text);
+    background-color: var(--color-ctp-surface2);
+  }
+  
+  :global(.icon) {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Responsive styles */
+  @media (min-width: 640px) {
+    .toolbar-button {
+      padding: 0.625rem;
+    }
+    
+    :global(.icon) {
+      width: 20px;
+      height: 20px;
+    }
+  }
+</style>

@@ -81,7 +81,6 @@
 </div>
 
 <style>
-  /* Existing tooltip styles */
   :global(.tippy-box[data-theme~="tooltip-theme"]) {
     background-color: var(--color-ctp-surface1);
     border: 1px solid var(--color-ctp-surface2);
@@ -181,7 +180,6 @@
     }
   }
 
-  /* Toolbar styling */
   .toolbar {
     position: fixed;
     bottom: 1rem;
