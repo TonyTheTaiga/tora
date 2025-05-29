@@ -85,7 +85,7 @@
 <Starfield />
 
 <!-- Language Toggle Button -->
-<div class="absolute top-4 left-4 z-20 flex items-center space-x-2">
+<div class="absolute top-4 left-4 z-20 flex items-center space-x-2 opacity-75 hover:opacity-100 transition-opacity duration-300 ease-in-out">
   <button
     type="button"
     onclick={toggleLang}
