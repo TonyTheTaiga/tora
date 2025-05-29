@@ -1,9 +1,7 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
-  import NewExperimentCard from "./new-experiment-card.svelte";
   import ExperimentSimple from "./experiment-simple.svelte";
   import ExperimentDetailed from "./experiment-detailed.svelte";
-  import { page } from "$app/state";
   import type { Attachment } from "svelte/attachments";
 
   let {

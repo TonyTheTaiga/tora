@@ -32,7 +32,6 @@
       });
 
       if (response.ok) {
-        // Remove the experiment from the experiments array
         const experimentId = experiment.id;
         experiments = experiments.filter((exp) => exp.id !== experimentId);
         experiment = null;

@@ -200,7 +200,7 @@
       use:enhance={({ formElement, formData, action, cancel, submitter }) => {
         return async ({ result, update }) => {
           if (result.type === "success" || result.type === "redirect") {
-            // Copy values from experimentCopy to the original experiment
+            console.log("Experiment updated successfully");
             experiment.name = experimentCopy.name;
             experiment.description = experimentCopy.description;
             experiment.visibility = experimentCopy.visibility;

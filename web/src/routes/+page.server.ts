@@ -20,7 +20,6 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   const { session } = await locals.safeGetSession();
   const { currentWorkspace } = await parent();
 
-  // Build URL with workspace filter if available
   const apiUrl = new URL(API_ROUTES.GET_EXPERIMENTS, url.origin);
   if (currentWorkspace) {
     apiUrl.searchParams.set("workspace", currentWorkspace.id);
@@ -28,7 +27,6 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
 
   const response = await fetch(apiUrl.toString());
   if (!response.ok) {
-    // Handle case where fetching experiments itself fails
     console.error(
       `Failed to fetch experiments: ${response.status} ${response.statusText}`,
     );
@@ -37,7 +35,6 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
 
   let experiments: Experiment[] = await response.json();
 
-  // Populate keyMetrics for each experiment
   if (experiments && experiments.length > 0) {
     const experimentsWithKeyMetrics = await Promise.all(
       experiments.map(async (exp) => {
@@ -49,7 +46,7 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
             console.warn(
               `Failed to fetch metrics for experiment ${exp.id}: ${metricsResponse.status}`,
             );
-            return { ...exp, keyMetrics: [] }; // Return experiment with empty keyMetrics on error
+            return { ...exp, keyMetrics: [] };
           }
           const rawMetrics: Metric[] = await metricsResponse.json();
 
@@ -57,8 +54,6 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
             return { ...exp, keyMetrics: [] };
           }
 
-          // Sort metrics by created_at descending (most recent first)
-          // Ensure created_at is treated as a Date for proper sorting
           const sortedMetrics = rawMetrics.sort(
             (a, b) =>
               new Date(b.created_at).getTime() -
@@ -76,16 +71,13 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
               distinctNames.add(metric.name);
               latestDistinctMetrics.push({
                 name: metric.name,
-                // Value formatting might be needed if it's not already a string/number as desired
-                // For now, assume metric.value is directly usable.
-                // If metric.value can be other types, ensure conversion or appropriate handling.
                 value:
                   typeof metric.value === "number"
                     ? parseFloat(metric.value.toFixed(4))
                     : metric.value,
               });
               if (latestDistinctMetrics.length >= 2) {
-                break; // Stop after finding 2 distinct metrics
+                break;
               }
             }
           }
@@ -95,7 +87,7 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
             `Error processing metrics for experiment ${exp.id}:`,
             error,
           );
-          return { ...exp, keyMetrics: [] }; // Return with empty keyMetrics on processing error
+          return { ...exp, keyMetrics: [] };
         }
       }),
     );

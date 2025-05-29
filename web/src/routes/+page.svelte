@@ -11,8 +11,7 @@
 
   let { data }: { data: PageData } = $props();
   let user = $derived(page.data.user);
-
-  let experiments: Experiment[] = $derived(data.experiments);
+  let experiments: Experiment[] = $state(data.experiments);
   let hasExperiments: boolean = $derived(experiments.length > 0);
 
   let modalState = $state({
@@ -33,7 +32,7 @@
   {#if modalState.selectedForDelete}
     <DeleteConfirmationModal
       bind:experiment={modalState.selectedForDelete}
-      bind:experiments
+      bind:experiments={experiments}
     />
   {/if}
 
