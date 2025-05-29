@@ -38,27 +38,9 @@
   }
 </script>
 
-<div
-  class="
-    fixed
-    bottom-4 sm:bottom-12
-    left-[50vw]
-    transform -translate-x-1/2
-    flex flex-row items-center gap-1
-    bg-ctp-surface1 border border-ctp-surface2
-    rounded-lg shadow-md z-40
-    overflow-hidden
-    scale-100 opacity-100
-    sm:scale-110 sm:opacity-100
-    md:scale-110 md:hover:scale-120 md:transition-transform md:duration-300
-    md:opacity-80 md:hover:opacity-100
-    lg:scale-120 lg:hover:scale-130 lg:transition-transform lg:duration-300
-    lg:opacity-80 lg:hover:opacity-100
-    max-w-[calc(100vw-2rem)]
-  "
->
+<div class="toolbar">
   <button
-    class="p-2 sm:p-2.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
+    class="toolbar-button"
     title="Create a new experiment"
     onclick={() => {
       isOpenCreate = true;
@@ -70,35 +52,36 @@
       },
     )}
   >
-    <Plus size={20} class="sm:size-5" />
+    <Plus class="icon" />
   </button>
 
   <ThemeToggle />
 
   {#if session && session.user}
     <button
-      class="p-2 sm:p-2.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
+      class="toolbar-button"
       title="Manage workspaces"
       onclick={() => {
         goto("/workspaces");
       }}
     >
-      <Briefcase size={20} class="sm:size-5" />
+      <Briefcase class="icon" />
     </button>
 
     <button
-      class="p-2 sm:p-2.5 text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
+      class="toolbar-button"
       title="Go to user profile"
       onclick={() => {
         goto(`/users/${session.user.id}`);
       }}
     >
-      <User size={20} class="sm:size-5" />
+      <User class="icon" />
     </button>
   {/if}
 </div>
 
 <style>
+  /* Existing tooltip styles */
   :global(.tippy-box[data-theme~="tooltip-theme"]) {
     background-color: var(--color-ctp-surface1);
     border: 1px solid var(--color-ctp-surface2);
@@ -195,6 +178,89 @@
     50% {
       transform: translateY(3px);
       opacity: 1;
+    }
+  }
+
+  /* Toolbar styling */
+  .toolbar {
+    position: fixed;
+    bottom: 1rem;
+    left: 50vw;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.25rem;
+    background-color: var(--color-ctp-surface1);
+    border: 1px solid var(--color-ctp-surface2);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 40;
+    overflow: hidden;
+    max-width: calc(100vw - 2rem);
+    scale: 100%;
+    opacity: 100%;
+    transition: scale 0.3s ease, opacity 0.3s ease;
+  }
+  
+  .toolbar-button {
+    padding: 0.5rem;
+    color: var(--color-ctp-subtext0);
+    transition: color 0.2s, background-color 0.2s;
+  }
+  
+  .toolbar-button:hover {
+    color: var(--color-ctp-text);
+    background-color: var(--color-ctp-surface2);
+  }
+  
+  :global(.icon) {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Responsive styles */
+  @media (min-width: 640px) {
+    .toolbar {
+      bottom: 3rem;
+      gap: 0.25rem;
+      scale: 110%;
+      transition: scale 0.3s ease, opacity 0.3s ease;
+    }
+    
+    .toolbar-button {
+      padding: 0.625rem;
+    }
+    
+    :global(.icon) {
+      width: 20px;
+      height: 20px;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .toolbar {
+      scale: 110%;
+      opacity: 80%;
+      transition: scale 0.3s ease, opacity 0.3s ease;
+    }
+    
+    .toolbar:hover {
+      scale: 120%;
+      opacity: 100%;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .toolbar {
+      scale: 120%;
+      opacity: 80%;
+      transition: scale 0.3s ease, opacity 0.3s ease;
+    }
+    
+    .toolbar:hover {
+      scale: 130%;
+      opacity: 100%;
     }
   }
 </style>
