@@ -300,17 +300,6 @@
     <div
       class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-ctp-subtext0 text-xs"
     >
-      <div class="flex items-center gap-1">
-        <Clock size={14} class="flex-shrink-0" />
-        <time>
-          {new Date(experiment.createdAt).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })}
-        </time>
-      </div>
-
       <!-- Experiment Status Display -->
       {#if experiment.status}
         <div class="flex items-center gap-1">
