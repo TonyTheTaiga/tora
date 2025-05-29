@@ -335,11 +335,10 @@
 
   .toolbar.hidden-at-bottom {
     opacity: 0;
-    transform: translateX(-50%) translateY(100%) scale(1.25); /* Slide down and out */
+    transform: translateX(-50%) translateY(100%) scale(1.25); 
     pointer-events: none;
   }
 
-  /* Adjust responsive transforms for hidden state if necessary */
   @media (min-width: 640px) {
     .toolbar.hidden-at-bottom {
       transform: translateX(-50%) translateY(100%) scale(1.1);
