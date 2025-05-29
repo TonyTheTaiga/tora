@@ -17,14 +17,21 @@
 
   const handleScroll = () => {
     if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-      const atBottom = (window.innerHeight + Math.ceil(window.scrollY)) >= document.documentElement.scrollHeight - 1;
-      isAtBottom = atBottom;
+      const pageIsScrollable = document.documentElement.scrollHeight > window.innerHeight;
+      const atActualBottom = (window.innerHeight + Math.ceil(window.scrollY)) >= document.documentElement.scrollHeight - 1;
+
+      if (pageIsScrollable && atActualBottom) {
+        isAtBottom = true;
+      } else {
+        isAtBottom = false;
+      }
     }
   };
 
   onMount(() => {
     if (typeof window !== 'undefined') {
       window.addEventListener('scroll', handleScroll);
+      window.addEventListener('resize', handleScroll);
       handleScroll();
     }
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined' && typeof document !== 'undefined') {
@@ -45,6 +52,7 @@
   onDestroy(() => {
     if (typeof window !== 'undefined') {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll); 
     }
   });
 
