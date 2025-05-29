@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { Plus, User, Briefcase } from "lucide-svelte";
-  import ThemeToggle from "./theme-toggle.svelte";
+  import { Plus, User, Briefcase, Moon, Sun } from "lucide-svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
   import type { Attachment } from "svelte/attachments";
   import tippy from "tippy.js";
+  import { onMount } from "svelte";
 
   let {
     selectedExperiment = $bindable(),
@@ -12,6 +12,43 @@
     hasExperiments = $bindable(),
   } = $props();
   let { session } = $derived(page.data);
+  let theme = $state<"dark" | "light">("dark");
+
+  onMount(() => {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined' && typeof document !== 'undefined') {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme && (savedTheme === "dark" || savedTheme === "light")) {
+        theme = savedTheme as "dark" | "light";
+        applyTheme(theme);
+      } else {
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
+        theme = prefersDark ? "dark" : "light";
+        applyTheme(theme);
+      }
+    }
+  });
+
+  function toggleTheme() {
+    theme = theme === "dark" ? "light" : "dark";
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined' && typeof document !== 'undefined') {
+      applyTheme(theme);
+      localStorage.setItem("theme", theme);
+    }
+  }
+
+  function applyTheme(newTheme: "dark" | "light") {
+    if (typeof document !== 'undefined') {
+      if (newTheme === "dark") {
+        document.documentElement.classList.remove("light");
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        document.documentElement.classList.add("light");
+      }
+    }
+  }
 
   function tooltip(content: string, check: () => boolean): Attachment {
     return (element) => {
@@ -55,7 +92,18 @@
     <Plus class="icon" />
   </button>
 
-  <ThemeToggle />
+  <button
+    onclick={() => { toggleTheme(); }}
+    class="toolbar-button"
+    aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+    title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+  >
+    {#if theme === "dark"}
+      <Sun class="icon" />
+    {:else}
+      <Moon class="icon" />
+    {/if}
+  </button>
 
   {#if session && session.user}
     <button
