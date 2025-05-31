@@ -7,7 +7,7 @@
   import DeleteConfirmationModal from "$lib/components/delete-confirmation-modal.svelte";
   import EditExperimentModal from "$lib/components/edit-experiment-modal.svelte";
   import LandingPage from "$lib/components/landing-page.svelte";
-  import ComparisonToolbar from "$lib/components/comparison-toolbar.svelte";
+  import ComparisonToolbar from "$lib/components/comparison/comparison-toolbar.svelte";
   import { page } from "$app/state";
   import { getMode } from "$lib/components/comparison/state.svelte.js";
 
