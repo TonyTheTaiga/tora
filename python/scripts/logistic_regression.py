@@ -95,7 +95,6 @@ def main():
         description="Logistic regression on breast cancer dataset",
         hyperparams={"epochs": epochs, "lr": learning_rate},
         tags=["cancer", "logistic_regression"],
-        workspace_id="84679cc3-dae5-40c7-91f3-10de46123765",
     )
 
     model = LogisticRegression(num_features=X.shape[1], learning_rate=learning_rate)

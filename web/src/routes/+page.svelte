@@ -1,13 +1,15 @@
 <script lang="ts">
-  import CreateExperimentModal from "$lib/components/create-experiment-modal.svelte";
-  import ExperimentsList from "$lib/components/experiments-list.svelte";
   import type { Experiment } from "$lib/types";
   import type { PageData } from "./$types";
+  import CreateExperimentModal from "$lib/components/create-experiment-modal.svelte";
+  import ExperimentsList from "$lib/components/experiments-list.svelte";
   import Toolbar from "$lib/components/toolbar.svelte";
   import DeleteConfirmationModal from "$lib/components/delete-confirmation-modal.svelte";
   import EditExperimentModal from "$lib/components/edit-experiment-modal.svelte";
   import LandingPage from "$lib/components/landing-page.svelte";
+  import ComparisonToolbar from "$lib/components/comparison-toolbar.svelte";
   import { page } from "$app/state";
+  import { getMode } from "$lib/components/comparison/state.svelte.js";
 
   let { data }: { data: PageData } = $props();
   let user = $derived(page.data.user);
@@ -32,7 +34,7 @@
   {#if modalState.selectedForDelete}
     <DeleteConfirmationModal
       bind:experiment={modalState.selectedForDelete}
-      bind:experiments={experiments}
+      bind:experiments
     />
   {/if}
 
@@ -45,6 +47,13 @@
     bind:isOpenCreate={modalState.createExperiment}
     {hasExperiments}
   />
+
+  {#if getMode()}
+    <p class="text-ctp-red">IN COMPARISON MODE</p>
+    <div>
+      <ComparisonToolbar />
+    </div>
+  {/if}
 
   <ExperimentsList
     bind:experiments

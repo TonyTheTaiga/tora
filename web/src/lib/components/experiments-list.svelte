@@ -3,6 +3,10 @@
   import ExperimentSimple from "./experiment-simple.svelte";
   import ExperimentDetailed from "./experiment-detailed.svelte";
   import type { Attachment } from "svelte/attachments";
+  import {
+    toggleMode,
+    getMode,
+  } from "$lib/components/comparison/state.svelte.js";
 
   let {
     experiments = $bindable(),
@@ -44,7 +48,10 @@
           role="button"
           tabindex="0"
           onclick={() => {
-            selectedExperiment = experiment;
+            if (getMode()) {
+            } else {
+              selectedExperiment = experiment;
+            }
           }}
           onkeydown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
