@@ -13,7 +13,6 @@
   } from "lucide-svelte";
   import { browser } from "$app/environment";
   import { fade } from "svelte/transition";
-  import { invalidateAll } from "$app/navigation";
 
   const { data } = $props();
 
@@ -52,7 +51,6 @@
 
       showNewKeyValue = data.key.key;
       showNewKeyModal = true;
-      // invalidateAll();
     } catch (err) {
       console.error("Error creating API key:", err);
       error = err instanceof Error ? err.message : "Failed to create API key";
@@ -91,7 +89,7 @@
   onMount(() => {});
 </script>
 
-<div class="h-full w-full flex justify-center items-center">
+<div class="h-[calc(100vh-10rem)] flex justify-center items-center">
   <div
     class="bg-ctp-mantle rounded-lg shadow-sm p-6 border border-ctp-surface0"
   >
