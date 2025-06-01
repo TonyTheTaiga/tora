@@ -4,8 +4,9 @@
   import ExperimentDetailed from "./experiment-detailed.svelte";
   import type { Attachment } from "svelte/attachments";
   import {
-    toggleMode,
     getMode,
+    addExperiment,
+    selectedForComparison,
   } from "$lib/components/comparison/state.svelte.js";
 
   let {
@@ -45,10 +46,12 @@
             {highlighted.length > 0 && !highlighted.includes(experiment.id)
             ? 'opacity-40'
             : ''}"
+          class:border={selectedForComparison(experiment.id) === true}
           role="button"
           tabindex="0"
           onclick={() => {
             if (getMode()) {
+              addExperiment(experiment.id);
             } else {
               selectedExperiment = experiment;
             }
