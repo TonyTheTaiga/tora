@@ -49,8 +49,7 @@
   />
 
   {#if getMode()}
-    <p class="text-ctp-red">IN COMPARISON MODE</p>
-    <div>
+    <div class="sticky top-20 sm:top-22 z-20 max-w-fit">
       <ComparisonToolbar />
     </div>
   {/if}
