@@ -114,12 +114,10 @@
 </div>
 
 <!-- Desktop Version -->
-<section
-  class="hidden md:flex flex-col min-h-[calc(100vh-2rem)] text-ctp-text/95"
->
+<section class="hidden md:flex flex-col min-h-[calc(100vh-2rem)] text-ctp-text">
   <div class="flex-[2] flex flex-col">
     <div class="flex-none p-2">
-      <div class="w-[clamp(31rem,68vw,73rem)] fill-ctp-blue/80">
+      <div class="w-[clamp(31rem,68vw,73rem)] fill-ctp-blue opacity-80">
         <Logo />
       </div>
     </div>
@@ -157,10 +155,10 @@
 
 <!-- Mobile Version -->
 <section
-  class="md:hidden flex flex-col min-h-[calc(100vh-2rem)] text-ctp-text/95 px-4"
+  class="md:hidden flex flex-col min-h-[calc(100vh-2rem)] text-ctp-text px-4"
 >
   <div class="flex flex-col space-y-8 pt-4">
-    <div class="w-[clamp(16rem,85vw,32rem)] fill-ctp-blue/80">
+    <div class="w-[clamp(16rem,85vw,32rem)] fill-ctp-blue opacity-80">
       <Logo />
     </div>
     <div class="p-4">
