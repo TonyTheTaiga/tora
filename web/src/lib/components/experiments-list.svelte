@@ -46,7 +46,7 @@
             {highlighted.length > 0 && !highlighted.includes(experiment.id)
             ? 'opacity-40'
             : ''}"
-          class:border={selectedForComparison(experiment.id) === true}
+          class:bg-ctp-surface0={selectedForComparison(experiment.id) === true}
           role="button"
           tabindex="0"
           onclick={() => {
