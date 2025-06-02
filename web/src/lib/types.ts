@@ -7,12 +7,6 @@ export interface ExperimentAndMetrics {
 
 export type Visibility = "PUBLIC" | "PRIVATE";
 
-export type ExperimentStatus =
-  | "COMPLETED"
-  | "RUNNING"
-  | "FAILED"
-  | "DRAFT"
-  | "OTHER";
 
 export interface Experiment {
   id: string;
@@ -22,11 +16,9 @@ export interface Experiment {
   availableMetrics: string[];
   hyperparams?: HyperParam[] | null;
   tags?: string[] | null;
-  createdAt: Date; // Keep existing fields
-  updatedAt?: Date; // Optional: consider adding this if you want to sort by last updated
+  createdAt: Date;
+  updatedAt?: Date;
   visibility?: Visibility;
-  status?: ExperimentStatus; // New field for experiment status
-  keyMetrics?: Array<{ name: string; value: string | number }>; // New field for key metrics
 }
 
 export interface Metric {

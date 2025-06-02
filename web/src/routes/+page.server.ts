@@ -35,64 +35,6 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
 
   let experiments: Experiment[] = await response.json();
 
-  if (experiments && experiments.length > 0) {
-    const experimentsWithKeyMetrics = await Promise.all(
-      experiments.map(async (exp) => {
-        try {
-          const metricsResponse = await fetch(
-            `/api/experiments/${exp.id}/metrics`,
-          );
-          if (!metricsResponse.ok) {
-            console.warn(
-              `Failed to fetch metrics for experiment ${exp.id}: ${metricsResponse.status}`,
-            );
-            return { ...exp, keyMetrics: [] };
-          }
-          const rawMetrics: Metric[] = await metricsResponse.json();
-
-          if (!rawMetrics || rawMetrics.length === 0) {
-            return { ...exp, keyMetrics: [] };
-          }
-
-          const sortedMetrics = rawMetrics.sort(
-            (a, b) =>
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime(),
-          );
-
-          const latestDistinctMetrics: Array<{
-            name: string;
-            value: string | number;
-          }> = [];
-          const distinctNames = new Set<string>();
-
-          for (const metric of sortedMetrics) {
-            if (!distinctNames.has(metric.name)) {
-              distinctNames.add(metric.name);
-              latestDistinctMetrics.push({
-                name: metric.name,
-                value:
-                  typeof metric.value === "number"
-                    ? parseFloat(metric.value.toFixed(4))
-                    : metric.value,
-              });
-              if (latestDistinctMetrics.length >= 2) {
-                break;
-              }
-            }
-          }
-          return { ...exp, keyMetrics: latestDistinctMetrics };
-        } catch (error) {
-          console.error(
-            `Error processing metrics for experiment ${exp.id}:`,
-            error,
-          );
-          return { ...exp, keyMetrics: [] };
-        }
-      }),
-    );
-    experiments = experimentsWithKeyMetrics;
-  }
 
   return { experiments, session };
 };

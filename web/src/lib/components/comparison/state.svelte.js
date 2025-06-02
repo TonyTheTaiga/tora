@@ -1,6 +1,6 @@
 let state = $state({
   comparisonMode: false,
-  comparisonExperimentIds: [],
+  comparisonExperiments: [],
 });
 
 export function getMode() {
@@ -11,25 +11,24 @@ export function toggleMode() {
   state.comparisonMode = !state.comparisonMode;
   if (state.comparisonMode === false) {
     // do stuff on exit
-    state.comparisonExperimentIds = [];
+    state.comparisonExperiments = [];
   }
 }
 
 export function getExperimentsSelectedForComparision() {
-  return state.comparisonExperimentIds;
+  return state.comparisonExperiments;
 }
 
-export function addExperiment(experimentId) {
-  console.log($state.snapshot(state.comparisonExperimentIds));
-  if (state.comparisonExperimentIds.includes(experimentId)) {
-    state.comparisonExperimentIds = state.comparisonExperimentIds.filter(
-      (item) => item !== experimentId,
+export function addExperiment(experiment) {
+  if (state.comparisonExperiments.includes(experiment)) {
+    state.comparisonExperiments = state.comparisonExperiments.filter(
+      (item) => item !== experiment,
     );
   } else {
-    state.comparisonExperimentIds.push(experimentId);
+    state.comparisonExperiments.push(experiment);
   }
 }
 
-export function selectedForComparison(experimentId) {
-  return state.comparisonExperimentIds.includes(experimentId);
+export function selectedForComparison(experiment) {
+  return state.comparisonExperiments.includes(experiment);
 }

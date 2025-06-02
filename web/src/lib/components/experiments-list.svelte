@@ -46,12 +46,12 @@
             {highlighted.length > 0 && !highlighted.includes(experiment.id)
             ? 'opacity-40'
             : ''}"
-          class:bg-ctp-surface0={selectedForComparison(experiment.id) === true}
+          class:bg-ctp-surface0={selectedForComparison(experiment) === true}
           role="button"
           tabindex="0"
           onclick={() => {
             if (getMode()) {
-              addExperiment(experiment.id);
+              addExperiment(experiment);
             } else {
               selectedExperiment = experiment;
             }
