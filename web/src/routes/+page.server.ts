@@ -1,7 +1,7 @@
 import type { Actions } from "./$types";
 import type { PageServerLoad } from "./$types";
-import { fail, redirect } from "@sveltejs/kit";
-import type { HyperParam, Experiment, Metric } from "$lib/types"; // Added Metric and Experiment here
+import { fail } from "@sveltejs/kit";
+import type { HyperParam, Experiment, Metric } from "$lib/types";
 
 const API_ROUTES = {
   GET_EXPERIMENTS: "/api/experiments",
@@ -63,7 +63,7 @@ export const actions: Actions = {
       maxAge: 60 * 60 * 24 * 30, // 30 days
     });
 
-    return redirect(303, "/");
+    return { success: true };
   },
 };
 
@@ -144,7 +144,7 @@ async function handleCreate(request: Request, fetch: Function) {
     }
   }
 
-  throw redirect(303, "/");
+  return { success: true };
 }
 
 async function handleDelete(request: Request, fetch: Function) {
@@ -163,7 +163,7 @@ async function handleDelete(request: Request, fetch: Function) {
     return fail(500, { message: "Failed to delete experiment" });
   }
 
-  throw redirect(303, "/");
+  return { success: true };
 }
 
 async function handleUpdate(request: Request, fetch: Function) {
@@ -227,6 +227,5 @@ async function handleUpdate(request: Request, fetch: Function) {
 
   return {
     success: true,
-    message: "Experiment updated successfully!",
   };
 }

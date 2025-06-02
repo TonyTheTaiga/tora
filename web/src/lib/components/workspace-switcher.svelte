@@ -1,7 +1,9 @@
+<!-- might need to remove this component -->
+
 <script lang="ts">
   import { ChevronDown, Plus, Briefcase } from "lucide-svelte";
   import type { Workspace } from "$lib/types";
-  import { applyAction, enhance } from "$app/forms";
+  import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
 
