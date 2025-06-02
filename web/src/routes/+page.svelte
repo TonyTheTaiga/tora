@@ -11,11 +11,15 @@
   import { page } from "$app/state";
   import { getMode } from "$lib/components/comparison/state.svelte.js";
 
-  let { data }: { data: PageData } = $props();
   let user = $derived(page.data.user);
-  let experiments: Experiment[] = $state(data.experiments);
-  let hasExperiments: boolean = $derived(experiments.length > 0);
+  let { data = $bindable() }: { data: PageData } = $props();
+  let experiments = $state([...data.experiments]);
 
+  $effect(() => {
+    experiments = [...data.experiments];
+  });
+
+  let hasExperiments: boolean = $derived(experiments.length > 0);
   let modalState = $state({
     createExperiment: false,
     selectedForDelete: null as Experiment | null,
