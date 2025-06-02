@@ -16,7 +16,13 @@ interface FormDataResult {
   [key: string]: any;
 }
 
-export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
+export const load: PageServerLoad = async ({
+  fetch,
+  locals,
+  parent,
+  url,
+  depends,
+}) => {
   const { session } = await locals.safeGetSession();
   const { currentWorkspace } = await parent();
 
@@ -34,7 +40,6 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   }
 
   let experiments: Experiment[] = await response.json();
-
   return { experiments, session };
 };
 

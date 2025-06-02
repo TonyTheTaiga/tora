@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ChevronDown, Plus, Briefcase } from "lucide-svelte";
   import type { Workspace } from "$lib/types";
-  import { enhance } from "$app/forms";
+  import { applyAction, enhance } from "$app/forms";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
 
@@ -60,6 +60,7 @@
             use:enhance={() => {
               return async ({ result, update }) => {
                 await update();
+
                 const detailsElement =
                   document.getElementById("workspaceDropdown");
                 detailsElement?.removeAttribute("open");
