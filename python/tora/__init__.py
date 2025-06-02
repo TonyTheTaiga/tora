@@ -1,1 +1,1 @@
-from tora.tora import Tora
+from tora.tora import Tora, create_workspace
