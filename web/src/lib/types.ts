@@ -7,7 +7,6 @@ export interface ExperimentAndMetrics {
 
 export type Visibility = "PUBLIC" | "PRIVATE";
 
-
 export interface Experiment {
   id: string;
   user_id?: string;
@@ -54,4 +53,16 @@ export interface Workspace {
   name: string;
   description: string | null;
   created_at: Date;
+}
+
+export function isWorkspace(obj: unknown): obj is Workspace {
+  if (typeof obj !== "object" || obj === null) return false;
+  const w = obj as Record<string, unknown>;
+  return (
+    typeof w.id === "string" &&
+    typeof w.user_id === "string" &&
+    typeof w.name === "string" &&
+    typeof w.description === "string" &&
+    typeof w.created_at === "string"
+  );
 }

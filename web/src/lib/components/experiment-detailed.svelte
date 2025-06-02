@@ -133,7 +133,9 @@
                   ? 'scale-125'
                   : 'animate-bounce'}"
               />
-              <span class="text-xs text-ctp-green ml-1.5 hidden sm:inline">Copied!</span>
+              <span class="text-xs text-ctp-green ml-1.5 hidden sm:inline"
+                >Copied!</span
+              >
             {:else}
               <Copy size={16} />
               <span
@@ -143,7 +145,7 @@
             {/if}
           </button>
         </div>
-        
+
         <div class="flex items-center gap-1">
           {#if page.data.user && page.data.user.id === experiment.user_id}
             <button
@@ -236,8 +238,9 @@
         </div>
 
         <div
-          class="flex items-center gap-1 p-1 rounded-md transition-colors {experiment.visibility === 'PUBLIC' 
-            ? 'text-ctp-green hover:bg-ctp-green/10' 
+          class="flex items-center gap-1 p-1 rounded-md transition-colors {experiment.visibility ===
+          'PUBLIC'
+            ? 'text-ctp-green hover:bg-ctp-green/10'
             : 'text-ctp-red hover:bg-ctp-red/10'}"
           title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
         >

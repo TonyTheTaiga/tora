@@ -1,6 +1,15 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
-  import { X, Tag, Clock, Eye, EyeClosed, Globe, GlobeLock, Settings } from "lucide-svelte";
+  import {
+    X,
+    Tag,
+    Clock,
+    Eye,
+    EyeClosed,
+    Globe,
+    GlobeLock,
+    Settings,
+  } from "lucide-svelte";
   import { page } from "$app/state";
 
   let {
@@ -16,15 +25,20 @@
   } = $props();
 </script>
 
-<article class="flex flex-col h-full rounded-lg group hover:bg-ctp-surface0/30 transition-colors">
+<article
+  class="flex flex-col h-full rounded-lg group hover:bg-ctp-surface0/30 transition-colors"
+>
   <!-- Header -->
   <div class="flex items-center justify-between mb-2">
-    <h3 class="font-medium text-sm text-ctp-text group-hover:text-ctp-blue transition-colors truncate flex-1">
+    <h3
+      class="font-medium text-sm text-ctp-text group-hover:text-ctp-blue transition-colors truncate flex-1"
+    >
       {experiment.name}
     </h3>
     <div class="flex-shrink-0">
       <div
-        class="p-1 rounded-md transition-colors {experiment.visibility === 'PUBLIC'
+        class="p-1 rounded-md transition-colors {experiment.visibility ===
+        'PUBLIC'
           ? 'text-ctp-green hover:bg-ctp-green/10'
           : 'text-ctp-red hover:bg-ctp-red/10'}"
         title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
@@ -40,15 +54,22 @@
 
   <!-- Description -->
   {#if experiment.description}
-    <p class="text-xs text-ctp-subtext1 truncate mb-2" title={experiment.description}>
+    <p
+      class="text-xs text-ctp-subtext1 truncate mb-2"
+      title={experiment.description}
+    >
       {experiment.description}
     </p>
   {/if}
 
   <!-- Footer -->
-  <div class="mt-auto flex items-center justify-between gap-2 pt-2 border-t border-ctp-surface1">
+  <div
+    class="mt-auto flex items-center justify-between gap-2 pt-2 border-t border-ctp-surface1"
+  >
     <!-- Tags -->
-    <div class="flex items-center gap-1 text-xs text-ctp-subtext0 overflow-hidden">
+    <div
+      class="flex items-center gap-1 text-xs text-ctp-subtext0 overflow-hidden"
+    >
       {#if experiment.tags && experiment.tags.length > 0}
         <Tag size={10} class="text-ctp-overlay0 flex-shrink-0" />
         <div class="flex flex-nowrap gap-0.5 overflow-hidden">
@@ -70,7 +91,9 @@
             highlighted = [];
           } else {
             try {
-              const response = await fetch(`/api/experiments/${experiment.id}/ref`);
+              const response = await fetch(
+                `/api/experiments/${experiment.id}/ref`,
+              );
               if (!response.ok) return;
               const data = await response.json();
               highlighted = [...data, experiment.id];

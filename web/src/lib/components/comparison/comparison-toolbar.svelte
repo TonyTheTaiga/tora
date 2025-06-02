@@ -7,21 +7,17 @@
 </script>
 
 <div
-  class="flex flex-row justify-between text-ctp-mantle rounded bg-ctp-teal mb-4 p-2 max-w-fit space-x-8"
+  class="flex flex-row justify-between text-ctp-mantle rounded bg-ctp-sky mb-4 p-2 max-w-fit space-x-8"
 >
-  <span class="px-2 bg-ctp-overlay2/40 rounded"
-    >{experiments.length} Selected</span
-  >
+  <span class="px-2 rounded">{experiments.length} Selected</span>
   <button
     onclick={() => {
       goto("/compare");
     }}
   >
-    <div
-      class="flex flex-row items-center space-x-2 hover:bg-ctp-overlay2/40 rounded px-2"
-    >
+    <div class="flex flex-row items-center space-x-2 rounded px-2">
       <span>Compare</span>
-      <Merge size={16} />
+      <Merge size={14} />
     </div>
   </button>
 </div>

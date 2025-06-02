@@ -35,7 +35,6 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
 
   let experiments: Experiment[] = await response.json();
 
-
   return { experiments, session };
 };
 
