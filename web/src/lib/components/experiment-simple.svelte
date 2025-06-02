@@ -16,9 +16,9 @@
   } = $props();
 </script>
 
-<article class="flex flex-col h-full group hover:bg-ctp-surface0/30 transition-colors">
+<article class="flex flex-col h-full rounded-lg group hover:bg-ctp-surface0/30 transition-colors">
   <!-- Header -->
-  <div class="flex items-start gap-2 mb-1">
+  <div class="flex items-center justify-between mb-2">
     <h3 class="font-medium text-sm text-ctp-text group-hover:text-ctp-blue transition-colors truncate flex-1">
       {experiment.name}
     </h3>
@@ -45,38 +45,18 @@
     </p>
   {/if}
 
-  <!-- Hyperparams -->
-  {#if experiment.hyperparams && experiment.hyperparams.length > 0}
-    <div class="flex items-start gap-1.5 mb-2">
-      <Settings size={12} class="text-ctp-overlay0 mt-0.5" />
-      <div class="flex flex-wrap gap-x-1.5 gap-y-0.5">
-        {#each experiment.hyperparams.slice(0, 4) as hp}
-          <span class="text-[9px] text-ctp-overlay0">
-            <span class="text-ctp-blue">{hp.key}</span>=<span class="text-ctp-text">{hp.value}</span>
-          </span>
-        {/each}
-        {#if experiment.hyperparams.length > 4}
-          <span class="text-[9px] text-ctp-overlay0">+{experiment.hyperparams.length - 4}</span>
-        {/if}
-      </div>
-    </div>
-  {/if}
-
   <!-- Footer -->
-  <div class="mt-auto flex items-center justify-between gap-2 pt-2 border-t border-ctp-surface0/30">
+  <div class="mt-auto flex items-center justify-between gap-2 pt-2 border-t border-ctp-surface1">
     <!-- Tags -->
-    <div class="flex items-center gap-1 text-xs text-ctp-subtext0">
+    <div class="flex items-center gap-1 text-xs text-ctp-subtext0 overflow-hidden">
       {#if experiment.tags && experiment.tags.length > 0}
-        <Tag size={10} class="text-ctp-overlay0" />
-        <div class="flex gap-0.5">
-          {#each experiment.tags.slice(0, 2) as tag, i}
-            <span class="text-[9px] text-ctp-overlay0">
-              {tag}{i === 0 && experiment.tags.length > 2 ? `, ` : ''}
+        <Tag size={10} class="text-ctp-overlay0 flex-shrink-0" />
+        <div class="flex flex-nowrap gap-0.5 overflow-hidden">
+          {#each experiment.tags as tag, i}
+            <span class="text-[9px] text-ctp-overlay0 whitespace-nowrap">
+              {tag}{i < experiment.tags.length - 1 ? ", " : ""}
             </span>
           {/each}
-          {#if experiment.tags.length > 2}
-            <span class="text-[9px] text-ctp-overlay0">+{experiment.tags.length - 2}</span>
-          {/if}
         </div>
       {/if}
     </div>
