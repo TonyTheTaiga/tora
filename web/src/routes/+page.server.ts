@@ -1,7 +1,7 @@
 import type { Actions } from "./$types";
 import type { PageServerLoad } from "./$types";
 import { fail } from "@sveltejs/kit";
-import type { HyperParam, Experiment, Metric } from "$lib/types";
+import type { HyperParam, Experiment } from "$lib/types";
 
 const API_ROUTES = {
   GET_EXPERIMENTS: "/api/experiments",
@@ -16,13 +16,7 @@ interface FormDataResult {
   [key: string]: any;
 }
 
-export const load: PageServerLoad = async ({
-  fetch,
-  locals,
-  parent,
-  url,
-  depends,
-}) => {
+export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   const { session } = await locals.safeGetSession();
   const { currentWorkspace } = await parent();
 
