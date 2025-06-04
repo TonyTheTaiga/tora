@@ -206,6 +206,8 @@
             experiment.tags = [...experiment.tags];
           }
           experiment = null;
+
+          await update();
         };
       }}
     >
