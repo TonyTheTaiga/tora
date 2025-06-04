@@ -7,8 +7,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     throw error(400, "Missing 'ids' query parameter");
   }
   const ids = idsParam.split(",").filter(Boolean);
-  const { data: experiments, error: supError } = await locals.supabase.rpc(
-    "get_experiments_with_metrics_names",
+  const { data, error: supError } = await locals.supabase.rpc(
+    "get_experiments_with_metric_names",
     { experiment_ids: ids },
   );
 
@@ -16,6 +16,21 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     console.log(supError);
     throw error(400, "Failed to get experiments");
   }
+
+  const experiments = data.map((item) => ({
+    id: item.id,
+    visibility: item.visibility,
+    description: item.description,
+    availableMetrics: item.available_metrics,
+    tags: item.tags,
+    hyperparams: item.hyperparams
+      ? item.hyperparams.map((hp: any) => ({
+          key: hp.key,
+          value: hp.value,
+        }))
+      : null,
+    createdAt: new Date(item.created_at),
+  }));
 
   return { experiments };
 };

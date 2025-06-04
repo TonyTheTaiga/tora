@@ -12,7 +12,8 @@
   <span class="px-2 rounded">{experiments.length} Selected</span>
   <button
     onclick={() => {
-      goto("/compare");
+      const params = experiments.join(",");
+      goto(`/compare?ids=${params}`);
     }}
   >
     <div class="flex flex-row items-center space-x-2 rounded px-2">

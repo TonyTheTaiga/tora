@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { getExperimentsSelectedForComparision } from "$lib/components/comparison/state.svelte";
-  let experiments = $derived(getExperimentsSelectedForComparision());
+  import type { PageData } from "./$types";
+  let { data }: { data: PageData } = $props();
+  let experiments = $derived(data.experiments);
   $inspect(experiments);
 </script>
 
