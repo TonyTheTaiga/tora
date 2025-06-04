@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getExperimentsSelectedForComparision } from "./state.svelte.js";
+  import { getExperimentsSelectedForComparision } from "$lib/components/comparison/state.svelte";
   import { Merge } from "lucide-svelte";
   import { goto } from "$app/navigation";
 
