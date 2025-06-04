@@ -58,6 +58,14 @@ class Tora:
             },
         )
 
+    @property
+    def max_buffer_len(self) -> int:
+        return self._max_buffer_len
+
+    @max_buffer_len.setter
+    def max_buffer_len(self, value: int):
+        self._max_buffer_len = int(value)
+
     @classmethod
     def create_experiment(
         cls,
@@ -67,9 +75,9 @@ class Tora:
         tags: list[str] | None = None,
         workspace_id: str = "API_DEFAULT",
         server_url: str = TORA_BASE_URL,
+        max_buffer_len: int = 25,
     ):
         data = {}
-
         data["name"] = name
         data["workspaceId"] = workspace_id
 
@@ -102,6 +110,7 @@ class Tora:
             hyperparams=hyperparams,
             tags=tags,
             server_url=server_url,
+            max_buffer_len=max_buffer_len,
         )
 
     @classmethod
@@ -109,6 +118,7 @@ class Tora:
         cls,
         experiment_id: str,
         server_url: str = "http://localhost:5173/api",
+        max_buffer_len: int = 25,
     ):
         req = httpx.get(url=server_url + f"/experiments/{experiment_id}")
         req.raise_for_status()
@@ -120,7 +130,13 @@ class Tora:
         tags = data["tags"]
 
         return cls(
-            experiment_id, workspace_id, description, hyperparams, tags, server_url
+            experiment_id,
+            workspace_id,
+            description,
+            hyperparams,
+            tags,
+            server_url,
+            max_buffer_len=max_buffer_len,
         )
 
     def log(self, name, value, step: int | None = None, metadata: dict | None = None):
