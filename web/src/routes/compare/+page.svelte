@@ -41,9 +41,9 @@
 
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
-    let h,
-      s,
-      l = (max + min) / 2;
+    let h = 0;
+    let s = 0;
+    let l = (max + min) / 2;
 
     if (max === min) {
       h = s = 0;
@@ -64,13 +64,10 @@
       h /= 6;
     }
 
-    // Create variants by adjusting saturation and lightness
     const saturationAdjust = variant === 0 ? 0.8 : variant === 1 ? 1.2 : 0.9;
     const lightnessAdjust = variant === 0 ? 0.9 : variant === 1 ? 1.1 : 1.05;
-
     s = Math.min(1, s * saturationAdjust);
     l = Math.min(1, l * lightnessAdjust);
-
     return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
   }
 
