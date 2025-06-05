@@ -104,17 +104,13 @@
 
 <div class="text-ctp-text">
   <div class="mb-4">
-    <h3 class="text-lg font-medium text-ctp-text mb-2">
-      Experiment Comparison
-    </h3>
-
     <!-- Legend -->
     <div class="mb-4 p-3 bg-ctp-mantle border border-ctp-surface0 rounded-md">
       <h4 class="text-xs font-medium text-ctp-subtext1 mb-2">Legend</h4>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
         {#each data.experiments as experiment}
           <div
-            class="flex items-center gap-1.5 p-1.5 bg-ctp-surface0 rounded border border-ctp-surface1 hover:bg-ctp-surface1/50 transition-colors"
+            class="flex items-center gap-1.5 p-1.5 bg-ctp-surface0 rounded border border-ctp-surface1 hover:bg-ctp-surface1 transition-colors"
           >
             <Circle
               size={12}
