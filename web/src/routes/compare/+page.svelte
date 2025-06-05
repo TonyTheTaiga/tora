@@ -3,13 +3,19 @@
   import { Circle } from "lucide-svelte";
 
   let { data }: { data: PageData } = $props();
-  
+
   // Color palette for experiments (using established theme colors)
   const experimentColors = [
-    "#7dc4e4", "#f5bde6", "#a6da95", "#f5a97f", 
-    "#c6a0f6", "#ed8796", "#eed49f", "#8bd5ca"
+    "#7dc4e4",
+    "#f5bde6",
+    "#a6da95",
+    "#f5a97f",
+    "#c6a0f6",
+    "#ed8796",
+    "#eed49f",
+    "#8bd5ca",
   ];
-  
+
   let hyperparams = $derived.by(() => {
     const keys = new Set<string>();
     data.experiments?.forEach((exp) =>
@@ -17,7 +23,7 @@
     );
     return keys;
   });
-  
+
   let idToHP = $derived.by(() => {
     const ret = new Map();
     data.experiments?.forEach((exp) => {
@@ -28,7 +34,7 @@
     });
     return ret;
   });
-  
+
   let experimentColors_map = $derived.by(() => {
     const colorMap = new Map();
     data.experiments?.forEach((exp, index) => {
@@ -43,16 +49,18 @@
     <h3 class="text-lg font-medium text-ctp-text mb-2">
       Experiment Comparison
     </h3>
-    
+
     <!-- Legend -->
     <div class="mb-4">
       <h4 class="text-sm font-medium text-ctp-subtext1 mb-2">Legend</h4>
       <div class="flex flex-wrap gap-3">
-        {#each data.experiments as experiment, index}
+        {#each data.experiments as experiment}
           <div class="flex items-center gap-2">
-            <Circle 
-              size={16} 
-              style="color: {experimentColors[index % experimentColors.length]}; fill: {experimentColors[index % experimentColors.length]};" 
+            <Circle
+              size={16}
+              style="color: {experimentColors_map.get(
+                experiment.id,
+              )}; fill: {experimentColors_map.get(experiment.id)};"
             />
             <span class="text-sm text-ctp-text">{experiment.name}</span>
           </div>
@@ -83,7 +91,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each data.experiments as experiment, index}
+        {#each data.experiments as experiment}
           <tr
             class="border-t border-ctp-surface0 hover:bg-ctp-surface0/30 transition-colors"
           >
@@ -91,9 +99,11 @@
               scope="row"
               class="p-3 text-ctp-text font-medium bg-ctp-mantle sticky left-0 text-center"
             >
-              <Circle 
-                size={16} 
-                style="color: {experimentColors[index % experimentColors.length]}; fill: {experimentColors[index % experimentColors.length]};" 
+              <Circle
+                size={16}
+                style="color: {experimentColors_map.get(
+                  experiment.id,
+                )}; fill: {experimentColors_map.get(experiment.id)};"
                 class="mx-auto"
               />
             </th>
