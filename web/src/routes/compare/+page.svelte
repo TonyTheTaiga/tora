@@ -4,17 +4,75 @@
 
   let { data }: { data: PageData } = $props();
 
-  // Color palette for experiments (using established theme colors)
-  const experimentColors = [
-    "#7dc4e4",
-    "#f5bde6",
-    "#a6da95",
-    "#f5a97f",
-    "#c6a0f6",
-    "#ed8796",
-    "#eed49f",
-    "#8bd5ca",
-  ];
+  const catppuccinAccents = {
+    base: [
+      "#ed8796", // Red
+      "#f5a97f", // Peach
+      "#eed49f", // Yellow
+      "#a6da95", // Green
+      "#8bd5ca", // Teal
+      "#91d7e3", // Sky
+      "#7dc4e4", // Sapphire
+      "#8aadf4", // Blue
+      "#b7bdf8", // Lavender
+      "#c6a0f6", // Mauve
+      "#f5bde6", // Pink
+      "#f0c6c6", // Flamingo
+      "#f4dbd6", // Rosewater
+      "#ee99a0", // Maroon
+    ],
+    variants: [],
+  };
+
+  function generateCatppuccinColor(index: number): string {
+    const baseColors = catppuccinAccents.base;
+
+    if (index < baseColors.length) {
+      return baseColors[index];
+    }
+
+    const baseIndex = (index - baseColors.length) % baseColors.length;
+    const baseColor = baseColors[baseIndex];
+    const variant = Math.floor((index - baseColors.length) / baseColors.length);
+    const hex = baseColor.slice(1);
+    const r = parseInt(hex.slice(0, 2), 16) / 255;
+    const g = parseInt(hex.slice(2, 4), 16) / 255;
+    const b = parseInt(hex.slice(4, 6), 16) / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h,
+      s,
+      l = (max + min) / 2;
+
+    if (max === min) {
+      h = s = 0;
+    } else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r:
+          h = (g - b) / d + (g < b ? 6 : 0);
+          break;
+        case g:
+          h = (b - r) / d + 2;
+          break;
+        case b:
+          h = (r - g) / d + 4;
+          break;
+      }
+      h /= 6;
+    }
+
+    // Create variants by adjusting saturation and lightness
+    const saturationAdjust = variant === 0 ? 0.8 : variant === 1 ? 1.2 : 0.9;
+    const lightnessAdjust = variant === 0 ? 0.9 : variant === 1 ? 1.1 : 1.05;
+
+    s = Math.min(1, s * saturationAdjust);
+    l = Math.min(1, l * lightnessAdjust);
+
+    return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+  }
 
   let hyperparams = $derived.by(() => {
     const keys = new Set<string>();
@@ -38,7 +96,7 @@
   let experimentColors_map = $derived.by(() => {
     const colorMap = new Map();
     data.experiments?.forEach((exp, index) => {
-      colorMap.set(exp.id, experimentColors[index % experimentColors.length]);
+      colorMap.set(exp.id, generateCatppuccinColor(index));
     });
     return colorMap;
   });
