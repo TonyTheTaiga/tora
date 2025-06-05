@@ -132,53 +132,60 @@
     </div>
   </div>
 
-  <div
-    class="overflow-x-auto overflow-y-auto max-h-48 border border-ctp-surface0 rounded-md bg-ctp-base scroll-container"
-    style="scrollbar-width: none; -ms-overflow-style: none;"
-  >
-    <table class="w-full text-sm text-left">
-      <thead class="bg-ctp-mantle sticky top-0 z-10">
-        <tr>
-          <th
-            class="p-3 font-medium text-ctp-subtext1 border-b border-ctp-surface0 sticky left-0 bg-ctp-mantle z-20"
-          >
-            •
-          </th>
-          {#each hyperparams as hyperparam}
+  <div class="border border-ctp-surface0 rounded-md bg-ctp-base">
+    <div
+      class="text-xs font-medium text-ctp-subtext1 p-2 bg-ctp-mantle border-b border-ctp-surface0"
+    >
+      Hyperparameters
+    </div>
+    <div
+      class="overflow-x-auto overflow-y-auto max-h-44 scroll-container"
+      style="scrollbar-width: none; -ms-overflow-style: none;"
+    >
+      <table class="w-full text-sm text-left">
+        <thead class="bg-ctp-mantle sticky top-0 z-10">
+          <tr>
             <th
-              class="p-3 font-medium text-ctp-subtext1 border-b border-ctp-surface0 whitespace-nowrap"
+              class="p-3 font-medium text-ctp-subtext1 border-b border-ctp-surface0 sticky left-0 bg-ctp-mantle z-20"
             >
-              {hyperparam.toLowerCase()}
+              •
             </th>
-          {/each}
-        </tr>
-      </thead>
-      <tbody>
-        {#each data.experiments as experiment}
-          <tr
-            class="border-t border-ctp-surface0 hover:bg-ctp-surface0/30 transition-colors"
-          >
-            <th
-              scope="row"
-              class="p-3 text-ctp-text font-medium bg-ctp-mantle sticky left-0 text-center"
-            >
-              <Circle
-                size={16}
-                style="color: {experimentColors_map.get(
-                  experiment.id,
-                )}; fill: {experimentColors_map.get(experiment.id)};"
-                class="mx-auto"
-              />
-            </th>
-            {#each hyperparams as key}
-              <td class="p-3 text-ctp-text whitespace-nowrap">
-                {idToHP.get(experiment.id).get(key) ?? "-"}
-              </td>
+            {#each hyperparams as hyperparam}
+              <th
+                class="p-3 font-medium text-ctp-subtext1 border-b border-ctp-surface0 whitespace-nowrap"
+              >
+                {hyperparam.toLowerCase()}
+              </th>
             {/each}
           </tr>
-        {/each}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {#each data.experiments as experiment}
+            <tr
+              class="border-t border-ctp-surface0 hover:bg-ctp-surface0/30 transition-colors"
+            >
+              <th
+                scope="row"
+                class="p-3 text-ctp-text font-medium bg-ctp-mantle sticky left-0 text-center"
+              >
+                <Circle
+                  size={16}
+                  style="color: {experimentColors_map.get(
+                    experiment.id,
+                  )}; fill: {experimentColors_map.get(experiment.id)};"
+                  class="mx-auto"
+                />
+              </th>
+              {#each hyperparams as key}
+                <td class="p-3 text-ctp-text whitespace-nowrap">
+                  {idToHP.get(experiment.id).get(key) ?? "-"}
+                </td>
+              {/each}
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
