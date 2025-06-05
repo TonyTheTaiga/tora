@@ -21,12 +21,6 @@
   });
 </script>
 
-<style>
-  .scroll-container::-webkit-scrollbar {
-    display: none;
-  }
-</style>
-
 <div class="text-ctp-text">
   <div class="mb-4">
     <h3 class="text-lg font-medium text-ctp-text mb-2">
@@ -77,3 +71,9 @@
     </table>
   </div>
 </div>
+
+<style>
+  .scroll-container::-webkit-scrollbar {
+    display: none;
+  }
+</style>
