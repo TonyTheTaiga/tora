@@ -109,18 +109,23 @@
     </h3>
 
     <!-- Legend -->
-    <div class="mb-4">
-      <h4 class="text-sm font-medium text-ctp-subtext1 mb-2">Legend</h4>
-      <div class="flex flex-wrap gap-3">
+    <div class="mb-4 p-3 bg-ctp-mantle border border-ctp-surface0 rounded-md">
+      <h4 class="text-xs font-medium text-ctp-subtext1 mb-2">Legend</h4>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
         {#each data.experiments as experiment}
-          <div class="flex items-center gap-2">
+          <div
+            class="flex items-center gap-1.5 p-1.5 bg-ctp-surface0 rounded border border-ctp-surface1 hover:bg-ctp-surface1/50 transition-colors"
+          >
             <Circle
-              size={16}
+              size={12}
               style="color: {experimentColors_map.get(
                 experiment.id,
               )}; fill: {experimentColors_map.get(experiment.id)};"
+              class="flex-shrink-0"
             />
-            <span class="text-sm text-ctp-text">{experiment.name}</span>
+            <span class="text-xs text-ctp-text truncate" title={experiment.name}
+              >{experiment.name}</span
+            >
           </div>
         {/each}
       </div>
@@ -128,7 +133,7 @@
   </div>
 
   <div
-    class="w-full overflow-x-auto overflow-y-auto max-h-48 border border-ctp-surface0 rounded-md bg-ctp-base scroll-container"
+    class="overflow-x-auto overflow-y-auto max-h-48 border border-ctp-surface0 rounded-md bg-ctp-base scroll-container"
     style="scrollbar-width: none; -ms-overflow-style: none;"
   >
     <table class="w-full text-sm text-left">
