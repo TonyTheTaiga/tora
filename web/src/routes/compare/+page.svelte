@@ -8,20 +8,20 @@
 
   const catppuccinAccents = {
     base: [
-      "#ed8796", // Red
-      "#f5a97f", // Peach
-      "#eed49f", // Yellow
-      "#a6da95", // Green
-      "#8bd5ca", // Teal
-      "#91d7e3", // Sky
-      "#7dc4e4", // Sapphire
-      "#8aadf4", // Blue
-      "#b7bdf8", // Lavender
-      "#c6a0f6", // Mauve
-      "#f5bde6", // Pink
-      "#f0c6c6", // Flamingo
-      "#f4dbd6", // Rosewater
-      "#ee99a0", // Maroon
+      "var(--color-ctp-red)",
+      "var(--color-ctp-peach)", 
+      "var(--color-ctp-yellow)",
+      "var(--color-ctp-green)",
+      "var(--color-ctp-teal)",
+      "var(--color-ctp-sky)",
+      "var(--color-ctp-sapphire)",
+      "var(--color-ctp-blue)",
+      "var(--color-ctp-lavender)",
+      "var(--color-ctp-mauve)",
+      "var(--color-ctp-pink)",
+      "var(--color-ctp-flamingo)",
+      "var(--color-ctp-rosewater)",
+      "var(--color-ctp-maroon)",
     ],
     variants: [],
   };
