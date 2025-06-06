@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { PageData } from "./$types";
   import { Circle } from "lucide-svelte";
+  import { reset } from "$lib/components/comparison/state.svelte";
+  reset();
 
   let { data }: { data: PageData } = $props();
 

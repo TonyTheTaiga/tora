@@ -35,3 +35,8 @@ export function addExperiment(id: string) {
 export function selectedForComparison(id: string) {
   return state.comparisonIds.includes(id);
 }
+
+export function reset() {
+  state.comparisonMode = false;
+  state.comparisonIds = [];
+}
