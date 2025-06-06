@@ -9,7 +9,7 @@
   const catppuccinAccents = {
     base: [
       "var(--color-ctp-red)",
-      "var(--color-ctp-peach)", 
+      "var(--color-ctp-peach)",
       "var(--color-ctp-yellow)",
       "var(--color-ctp-green)",
       "var(--color-ctp-teal)",
