@@ -2,6 +2,7 @@ import httpx
 
 
 TORA_BASE_URL = "http://localhost:5173/api"
+TORA_DEV_KEY = "tosk_e5a828992e556642ba0d3edb097ca131a677188ef36d39dd"
 
 
 def hp_to_tora_format(
@@ -14,6 +15,21 @@ def hp_from_tora_format(
     hp_list: list[dict[str, str | int | float]],
 ) -> dict[str, str | int | float]:
     return {k: v for single in hp_list for k, v in single.items()}
+
+
+def create_workspace(name: str, description: str = "") -> str:
+    http_client = httpx.Client(
+        base_url=TORA_BASE_URL,
+        headers={
+            "x-api-key": TORA_DEV_KEY,
+            "Content-Type": "application/json",
+        },
+    )
+    req = http_client.post(
+        "/workspaces", json={"name": name, "description": description}
+    )
+    req.raise_for_status()
+    return req.json()
 
 
 class Tora:
@@ -37,10 +53,18 @@ class Tora:
         self._http_client = httpx.Client(
             base_url=server_url,
             headers={
-                "x-api-key": "tosk_f1477fb04daa14c007a2fa5159306df98d8891bb9eb37e05",
+                "x-api-key": TORA_DEV_KEY,
                 "Content-Type": "application/json",
             },
         )
+
+    @property
+    def max_buffer_len(self) -> int:
+        return self._max_buffer_len
+
+    @max_buffer_len.setter
+    def max_buffer_len(self, value: int):
+        self._max_buffer_len = int(value)
 
     @classmethod
     def create_experiment(
@@ -51,9 +75,9 @@ class Tora:
         tags: list[str] | None = None,
         workspace_id: str = "API_DEFAULT",
         server_url: str = TORA_BASE_URL,
+        max_buffer_len: int = 25,
     ):
         data = {}
-
         data["name"] = name
         data["workspaceId"] = workspace_id
 
@@ -71,7 +95,7 @@ class Tora:
             json=data,
             headers={
                 "Content-Type": "application/json",
-                "x-api-key": "tosk_e5a828992e556642ba0d3edb097ca131a677188ef36d39dd",
+                "x-api-key": TORA_DEV_KEY,
             },
         )
         try:
@@ -86,6 +110,7 @@ class Tora:
             hyperparams=hyperparams,
             tags=tags,
             server_url=server_url,
+            max_buffer_len=max_buffer_len,
         )
 
     @classmethod
@@ -93,6 +118,7 @@ class Tora:
         cls,
         experiment_id: str,
         server_url: str = "http://localhost:5173/api",
+        max_buffer_len: int = 25,
     ):
         req = httpx.get(url=server_url + f"/experiments/{experiment_id}")
         req.raise_for_status()
@@ -104,7 +130,13 @@ class Tora:
         tags = data["tags"]
 
         return cls(
-            experiment_id, workspace_id, description, hyperparams, tags, server_url
+            experiment_id,
+            workspace_id,
+            description,
+            hyperparams,
+            tags,
+            server_url,
+            max_buffer_len=max_buffer_len,
         )
 
     def log(self, name, value, step: int | None = None, metadata: dict | None = None):

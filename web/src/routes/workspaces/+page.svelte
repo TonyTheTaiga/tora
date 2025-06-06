@@ -6,8 +6,9 @@
     Copy,
     ClipboardCheck,
   } from "lucide-svelte";
-  import { enhance, applyAction } from "$app/forms";
-  import { goto, invalidateAll } from "$app/navigation";
+  import { enhance } from "$app/forms";
+  import { goto } from "$app/navigation";
+  import { isWorkspace, type Workspace } from "$lib/types.js";
 
   let { data } = $props();
   let workspaces = $state(data.workspaces);
@@ -47,15 +48,23 @@
       </div>
       <form
         method="POST"
-        action="/api/workspaces"
+        action="?/create"
         class="flex flex-col gap-4 p-5"
-        use:enhance={({ formData }) => {
+        use:enhance={() => {
           creating = true;
           return async ({ result, update }) => {
             creating = false;
             inputData.name = "";
             inputData.description = "";
-            workspaces.push(result);
+            if (result.type === "success" && result.data) {
+              if (isWorkspace(result.data)) {
+                workspaces.push(result.data);
+              } else {
+                throw new Error(
+                  "got back something other than a valid workspace!",
+                );
+              }
+            }
             await update();
           };
         }}

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Experiment, ExperimentStatus } from "$lib/types";
+  import type { Experiment } from "$lib/types";
   import {
     X,
     Tag,
@@ -8,6 +8,7 @@
     EyeClosed,
     Globe,
     GlobeLock,
+    Settings,
   } from "lucide-svelte";
   import { page } from "$app/state";
 
@@ -22,48 +23,19 @@
     highlighted: string[];
     selectedForDelete: Experiment | null;
   } = $props();
-
-  // Define a mapping for status colors (Tailwind CSS classes)
-  const statusColors: Record<ExperimentStatus, string> = {
-    COMPLETED: "bg-ctp-green",
-    RUNNING: "bg-ctp-blue",
-    FAILED: "bg-ctp-red",
-    DRAFT: "bg-ctp-overlay1",
-    OTHER: "bg-ctp-subtext0",
-  };
-
-  const statusTooltips: Record<ExperimentStatus, string> = {
-    COMPLETED: "Completed",
-    RUNNING: "Running",
-    FAILED: "Failed",
-    DRAFT: "Draft",
-    OTHER: "Other",
-  };
-
-  let currentStatusColor = $derived(
-    experiment.status ? statusColors[experiment.status] : "bg-ctp-subtext0",
-  );
-  let currentStatusTooltip = $derived(
-    experiment.status ? statusTooltips[experiment.status] : "Unknown Status",
-  );
 </script>
 
-<article class="flex flex-col h-full group">
-  <!-- TOP: Name, Status, Visibility -->
-  <div class="flex justify-between items-start mb-2">
+<article
+  class="flex flex-col h-full rounded-lg group hover:bg-ctp-surface0/30 transition-colors"
+>
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-2">
     <h3
-      class="font-semibold text-sm text-ctp-text group-hover:text-ctp-blue transition-colors line-clamp-2 pr-2 break-all"
+      class="font-medium text-sm text-ctp-text group-hover:text-ctp-blue transition-colors truncate flex-1"
     >
       {experiment.name}
     </h3>
-    <div class="flex items-center gap-1.5 flex-shrink-0">
-      <!-- Status Indicator -->
-      {#if experiment.status}
-        <span
-          class="w-3 h-3 rounded-full {currentStatusColor}"
-          title={currentStatusTooltip}
-        ></span>
-      {/if}
+    <div class="flex-shrink-0">
       <div
         class="p-1 rounded-md transition-colors {experiment.visibility ===
         'PUBLIC'
@@ -79,65 +51,42 @@
       </div>
     </div>
   </div>
-  <div class="mb-2 text-xs">
-    <!-- Base text size for this section -->
-    {#if experiment.keyMetrics && experiment.keyMetrics.length > 0}
-      <div
-        class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5"
-        title="Key Metrics"
-      >
-        <!-- Grid container with tooltip -->
-        {#each experiment.keyMetrics as metric (metric.name)}
-          <span
-            class="text-ctp-subtext1 truncate text-right"
-            title={metric.name}
-          >
-            {metric.name}:
-          </span>
-          <span
-            class="font-medium text-ctp-text truncate"
-            title={String(metric.value)}
-          >
-            {metric.value}
-          </span>
-        {/each}
-      </div>
-    {:else}
-      <p class="text-ctp-overlay0 text-xs italic">No key metrics.</p>
-    {/if}
-  </div>
 
-  <!-- BOTTOM: Tags, Date, Actions -->
+  <!-- Description -->
+  {#if experiment.description}
+    <p
+      class="text-xs text-ctp-subtext1 truncate mb-2"
+      title={experiment.description}
+    >
+      {experiment.description}
+    </p>
+  {/if}
+
+  <!-- Footer -->
   <div
-    class="mt-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-1 pt-2 border-t border-ctp-surface0/50"
+    class="mt-auto flex items-center justify-between gap-2 pt-2 border-t border-ctp-surface1"
   >
     <!-- Tags -->
-    <div class="flex items-center gap-1 text-xs text-ctp-subtext0 min-w-[60px]">
+    <div
+      class="flex items-center gap-1 text-xs text-ctp-subtext0 overflow-hidden"
+    >
       {#if experiment.tags && experiment.tags.length > 0}
         <Tag size={10} class="text-ctp-overlay0 flex-shrink-0" />
-        <div class="flex flex-wrap gap-0.5 items-center">
-          {#each experiment.tags.slice(0, 2) as tag, i}
-            <span
-              class="px-1 py-0.5 bg-ctp-lavender/10 text-ctp-lavender rounded-full text-[9px] font-medium leading-none"
-            >
-              {tag}
+        <div class="flex flex-nowrap gap-0.5 overflow-hidden">
+          {#each experiment.tags as tag, i}
+            <span class="text-[9px] text-ctp-overlay0 whitespace-nowrap">
+              {tag}{i < experiment.tags.length - 1 ? ", " : ""}
             </span>
-            {#if i === 0 && experiment.tags.length > 2}
-              <span class="text-ctp-overlay0 text-[9px]"
-                >+{experiment.tags.length - 1}</span
-              >
-            {/if}
           {/each}
         </div>
-      {:else}
-        <div class="h-[18px]"></div>
       {/if}
     </div>
+
     <!-- Actions & Date -->
-    <div class="flex items-center gap-1 text-ctp-subtext0 flex-shrink-0">
+    <div class="flex items-center gap-1 text-ctp-subtext0">
       <button
         onclick={async (e) => {
-          e.stopPropagation(); // Prevent card click
+          e.stopPropagation();
           if (highlighted.includes(experiment.id)) {
             highlighted = [];
           } else {
@@ -145,14 +94,10 @@
               const response = await fetch(
                 `/api/experiments/${experiment.id}/ref`,
               );
-              if (!response.ok) {
-                return;
-              }
+              if (!response.ok) return;
               const data = await response.json();
               highlighted = [...data, experiment.id];
-            } catch (err) {
-              // console.error("Failed to fetch experiment chain:", err);
-            }
+            } catch (err) {}
           }
         }}
         class="p-1 rounded-md hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
@@ -180,9 +125,9 @@
       {/if}
       {#if experiment?.createdAt}
         <time
-          class="flex items-center gap-1 text-[10px] text-ctp-overlay0 ml-0.5 whitespace-nowrap"
+          class="text-[10px] text-ctp-overlay0 ml-0.5"
+          title={new Date(experiment.createdAt).toLocaleString()}
         >
-          <Clock size={10} />
           {new Date(experiment.createdAt).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",

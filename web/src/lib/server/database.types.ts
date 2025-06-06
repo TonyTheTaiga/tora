@@ -249,6 +249,38 @@ export type Database = {
           visibility: Database["public"]["Enums"]["visibility"];
         }[];
       };
+      get_experiments_with_metric_names: {
+        Args: { experiment_ids?: string[] };
+        Returns: {
+          id: string;
+          name: string;
+          description: string;
+          created_at: string;
+          tags: string[];
+          hyperparams: Json[];
+          available_metrics: string[];
+          visibility: Database["public"]["Enums"]["visibility"];
+        }[];
+      };
+      get_workspace_experiments: {
+        Args: {
+          name_filter?: string;
+          user_id_param?: string;
+          workspace_id_param?: string;
+        };
+        Returns: {
+          id: string;
+          created_at: string;
+          name: string;
+          description: string;
+          hyperparams: Json[];
+          tags: string[];
+          visibility: string;
+          user_id: string;
+          available_metrics: string[];
+          key_metrics: Json;
+        }[];
+      };
     };
     Enums: {
       visibility: "PUBLIC" | "PRIVATE";

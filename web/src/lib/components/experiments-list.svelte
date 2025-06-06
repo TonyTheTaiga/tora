@@ -3,6 +3,11 @@
   import ExperimentSimple from "./experiment-simple.svelte";
   import ExperimentDetailed from "./experiment-detailed.svelte";
   import type { Attachment } from "svelte/attachments";
+  import {
+    getMode,
+    addExperiment,
+    selectedForComparison,
+  } from "$lib/components/comparison/state.svelte.js";
 
   let {
     experiments = $bindable(),
@@ -41,10 +46,15 @@
             {highlighted.length > 0 && !highlighted.includes(experiment.id)
             ? 'opacity-40'
             : ''}"
+          class:bg-ctp-surface0={selectedForComparison(experiment.id) === true}
           role="button"
           tabindex="0"
           onclick={() => {
-            selectedExperiment = experiment;
+            if (getMode()) {
+              addExperiment(experiment.id);
+            } else {
+              selectedExperiment = experiment;
+            }
           }}
           onkeydown={(e) => {
             if (e.key === "Enter" || e.key === " ") {

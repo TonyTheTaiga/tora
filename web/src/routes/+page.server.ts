@@ -1,7 +1,7 @@
 import type { Actions } from "./$types";
 import type { PageServerLoad } from "./$types";
-import { fail, redirect } from "@sveltejs/kit";
-import type { HyperParam, Experiment, Metric } from "$lib/types"; // Added Metric and Experiment here
+import { fail } from "@sveltejs/kit";
+import type { HyperParam, Experiment } from "$lib/types";
 
 const API_ROUTES = {
   GET_EXPERIMENTS: "/api/experiments",
@@ -34,66 +34,6 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   }
 
   let experiments: Experiment[] = await response.json();
-
-  if (experiments && experiments.length > 0) {
-    const experimentsWithKeyMetrics = await Promise.all(
-      experiments.map(async (exp) => {
-        try {
-          const metricsResponse = await fetch(
-            `/api/experiments/${exp.id}/metrics`,
-          );
-          if (!metricsResponse.ok) {
-            console.warn(
-              `Failed to fetch metrics for experiment ${exp.id}: ${metricsResponse.status}`,
-            );
-            return { ...exp, keyMetrics: [] };
-          }
-          const rawMetrics: Metric[] = await metricsResponse.json();
-
-          if (!rawMetrics || rawMetrics.length === 0) {
-            return { ...exp, keyMetrics: [] };
-          }
-
-          const sortedMetrics = rawMetrics.sort(
-            (a, b) =>
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime(),
-          );
-
-          const latestDistinctMetrics: Array<{
-            name: string;
-            value: string | number;
-          }> = [];
-          const distinctNames = new Set<string>();
-
-          for (const metric of sortedMetrics) {
-            if (!distinctNames.has(metric.name)) {
-              distinctNames.add(metric.name);
-              latestDistinctMetrics.push({
-                name: metric.name,
-                value:
-                  typeof metric.value === "number"
-                    ? parseFloat(metric.value.toFixed(4))
-                    : metric.value,
-              });
-              if (latestDistinctMetrics.length >= 2) {
-                break;
-              }
-            }
-          }
-          return { ...exp, keyMetrics: latestDistinctMetrics };
-        } catch (error) {
-          console.error(
-            `Error processing metrics for experiment ${exp.id}:`,
-            error,
-          );
-          return { ...exp, keyMetrics: [] };
-        }
-      }),
-    );
-    experiments = experimentsWithKeyMetrics;
-  }
-
   return { experiments, session };
 };
 
@@ -117,7 +57,7 @@ export const actions: Actions = {
       maxAge: 60 * 60 * 24 * 30, // 30 days
     });
 
-    return redirect(303, "/");
+    return { success: true };
   },
 };
 
@@ -198,7 +138,7 @@ async function handleCreate(request: Request, fetch: Function) {
     }
   }
 
-  throw redirect(303, "/");
+  return { success: true };
 }
 
 async function handleDelete(request: Request, fetch: Function) {
@@ -217,7 +157,7 @@ async function handleDelete(request: Request, fetch: Function) {
     return fail(500, { message: "Failed to delete experiment" });
   }
 
-  throw redirect(303, "/");
+  return { success: true };
 }
 
 async function handleUpdate(request: Request, fetch: Function) {
@@ -281,6 +221,5 @@ async function handleUpdate(request: Request, fetch: Function) {
 
   return {
     success: true,
-    message: "Experiment updated successfully!",
   };
 }

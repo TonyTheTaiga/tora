@@ -3,7 +3,7 @@
   import { User, Mail, Lock, LogIn } from "lucide-svelte";
 </script>
 
-<div class="flex items-center justify-center h-full">
+<div class="flex items-center justify-center min-h-[calc(100vh-2rem)]">
   <div class="w-full max-w-md">
     <div
       class="bg-ctp-mantle shadow-lg rounded-xl overflow-hidden border border-ctp-surface0"

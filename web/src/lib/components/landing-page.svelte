@@ -85,7 +85,9 @@
 <Starfield />
 
 <!-- Language Toggle Button -->
-<div class="absolute top-4 left-4 z-20 flex items-center space-x-2 opacity-75 hover:opacity-100 transition-opacity duration-300 ease-in-out">
+<div
+  class="absolute top-4 left-4 z-20 flex items-center space-x-2 opacity-75 hover:opacity-100 transition-opacity duration-300 ease-in-out"
+>
   <button
     type="button"
     onclick={toggleLang}
@@ -112,10 +114,10 @@
 </div>
 
 <!-- Desktop Version -->
-<section class="hidden md:flex flex-col h-full w-full text-ctp-text/95">
-  <div class="h-2/3 flex flex-col">
+<section class="hidden md:flex flex-col min-h-[calc(100vh-2rem)] text-ctp-text">
+  <div class="flex-[2] flex flex-col">
     <div class="flex-none p-2">
-      <div class="w-[clamp(31rem,68vw,73rem)] fill-ctp-blue/80">
+      <div class="w-[clamp(31rem,68vw,73rem)] fill-ctp-blue opacity-80">
         <Logo />
       </div>
     </div>
@@ -141,7 +143,7 @@
     </div>
   </div>
 
-  <div class="h-1/3 flex flex-col justify-center items-center">
+  <div class="flex-[1] flex flex-col justify-center items-center">
     <div class="flex flex-row space-x-8 p-2">
       {@render FeatureCard(activeCopy.feature1Title, activeCopy.feature1Desc)}
       {@render FeatureCard(activeCopy.feature2Title, activeCopy.feature2Desc)}
@@ -152,9 +154,11 @@
 </section>
 
 <!-- Mobile Version -->
-<section class="md:hidden flex flex-col h-full w-full text-ctp-text/95 px-4">
+<section
+  class="md:hidden flex flex-col min-h-[calc(100vh-2rem)] text-ctp-text px-4"
+>
   <div class="flex flex-col space-y-8 pt-4">
-    <div class="w-[clamp(16rem,85vw,32rem)] fill-ctp-blue/80">
+    <div class="w-[clamp(16rem,85vw,32rem)] fill-ctp-blue opacity-80">
       <Logo />
     </div>
     <div class="p-4">

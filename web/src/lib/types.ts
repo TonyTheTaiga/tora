@@ -7,13 +7,6 @@ export interface ExperimentAndMetrics {
 
 export type Visibility = "PUBLIC" | "PRIVATE";
 
-export type ExperimentStatus =
-  | "COMPLETED"
-  | "RUNNING"
-  | "FAILED"
-  | "DRAFT"
-  | "OTHER";
-
 export interface Experiment {
   id: string;
   user_id?: string;
@@ -22,11 +15,9 @@ export interface Experiment {
   availableMetrics: string[];
   hyperparams?: HyperParam[] | null;
   tags?: string[] | null;
-  createdAt: Date; // Keep existing fields
-  updatedAt?: Date; // Optional: consider adding this if you want to sort by last updated
+  createdAt: Date;
+  updatedAt?: Date;
   visibility?: Visibility;
-  status?: ExperimentStatus; // New field for experiment status
-  keyMetrics?: Array<{ name: string; value: string | number }>; // New field for key metrics
 }
 
 export interface Metric {
@@ -62,4 +53,16 @@ export interface Workspace {
   name: string;
   description: string | null;
   created_at: Date;
+}
+
+export function isWorkspace(obj: unknown): obj is Workspace {
+  if (typeof obj !== "object" || obj === null) return false;
+  const w = obj as Record<string, unknown>;
+  return (
+    typeof w.id === "string" &&
+    typeof w.user_id === "string" &&
+    typeof w.name === "string" &&
+    typeof w.description === "string" &&
+    typeof w.created_at === "string"
+  );
 }

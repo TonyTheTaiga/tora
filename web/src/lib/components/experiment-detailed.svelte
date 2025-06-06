@@ -3,7 +3,6 @@
     Experiment,
     ExperimentAnalysis,
     HPRecommendation,
-    ExperimentStatus,
     Metric, // Ensure Metric is imported
   } from "$lib/types";
   import {
@@ -20,7 +19,6 @@
     ClipboardCheck,
     Copy,
     ChevronDown,
-    CircleDot,
     Minimize2,
     Table2,
     Loader2,
@@ -54,32 +52,6 @@
   let rawMetrics = $state<Metric[]>([]);
   let metricsLoading = $state(false);
   let metricsError = $state<string | null>(null);
-
-  let showActionMenu = $state(false); // Added state for action menu
-
-  // Define a mapping for status colors (Tailwind CSS classes)
-  const statusColors: Record<ExperimentStatus, string> = {
-    COMPLETED: "bg-ctp-green",
-    RUNNING: "bg-ctp-blue",
-    FAILED: "bg-ctp-red",
-    DRAFT: "bg-ctp-overlay1",
-    OTHER: "bg-ctp-subtext0",
-  };
-
-  const statusTooltips: Record<ExperimentStatus, string> = {
-    COMPLETED: "Completed",
-    RUNNING: "Running",
-    FAILED: "Failed",
-    DRAFT: "Draft",
-    OTHER: "Other Status", // Changed from "Other" for clarity
-  };
-
-  let currentStatusColor = $derived(
-    experiment.status ? statusColors[experiment.status] : "bg-ctp-subtext0",
-  );
-  let currentStatusTooltip = $derived(
-    experiment.status ? statusTooltips[experiment.status] : "Unknown Status",
-  );
 
   async function toggleMetricsDisplay() {
     if (showMetricsTable) {
@@ -161,7 +133,9 @@
                   ? 'scale-125'
                   : 'animate-bounce'}"
               />
-              <span class="text-xs text-ctp-green ml-1.5 hidden sm:inline">Copied!</span>
+              <span class="text-xs text-ctp-green ml-1.5 hidden sm:inline"
+                >Copied!</span
+              >
             {:else}
               <Copy size={16} />
               <span
@@ -171,7 +145,7 @@
             {/if}
           </button>
         </div>
-        
+
         <div class="flex items-center gap-1">
           {#if page.data.user && page.data.user.id === experiment.user_id}
             <button
@@ -252,19 +226,6 @@
 
       <!-- Status and metadata row -->
       <div class="flex flex-wrap items-center gap-2 text-ctp-subtext0 text-xs">
-        {#if experiment.status}
-          <div class="flex items-center gap-1">
-            <CircleDot
-              size={14}
-              class={"flex-shrink-0 " +
-                currentStatusColor.replace("bg-", "text-")}
-            />
-            <span class="font-medium {currentStatusColor.replace('bg-', 'text-')}"
-              >{currentStatusTooltip}</span
-            >
-          </div>
-        {/if}
-
         <div class="flex items-center gap-1">
           <Clock size={14} class="flex-shrink-0" />
           <time>
@@ -277,8 +238,9 @@
         </div>
 
         <div
-          class="flex items-center gap-1 p-1 rounded-md transition-colors {experiment.visibility === 'PUBLIC' 
-            ? 'text-ctp-green hover:bg-ctp-green/10' 
+          class="flex items-center gap-1 p-1 rounded-md transition-colors {experiment.visibility ===
+          'PUBLIC'
+            ? 'text-ctp-green hover:bg-ctp-green/10'
             : 'text-ctp-red hover:bg-ctp-red/10'}"
           title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
         >
@@ -300,20 +262,6 @@
     <div
       class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-ctp-subtext0 text-xs"
     >
-      <!-- Experiment Status Display -->
-      {#if experiment.status}
-        <div class="flex items-center gap-1">
-          <CircleDot
-            size={14}
-            class={"flex-shrink-0 " +
-              currentStatusColor.replace("bg-", "text-")}
-          />
-          <span class="font-medium {currentStatusColor.replace('bg-', 'text-')}"
-            >{currentStatusTooltip}</span
-          >
-        </div>
-      {/if}
-
       {#if experiment.tags && experiment.tags.length > 0}
         <div
           class="flex items-center gap-1 overflow-x-auto sm:flex-wrap pb-1 sm:pb-0"
@@ -352,8 +300,8 @@
         <summary
           class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
         >
-          <Settings size={16} class="text-ctp-mauve flex-shrink-0" />
-          <span class="text-sm font-medium">Hyperparameters</span>
+          <Settings size={16} class="text-ctp-overlay0 flex-shrink-0" />
+          <span class="text-sm">Hyperparameters</span>
           <ChevronDown
             size={16}
             class="ml-auto text-ctp-subtext0 group-open:rotate-180"
@@ -443,7 +391,7 @@
         <summary
           class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
         >
-          <ChartLine size={16} class="text-ctp-blue" />
+          <ChartLine size={16} class="text-ctp-overlay0" />
           <span class="text-sm font-medium">Metrics</span>
           <ChevronDown
             size={16}

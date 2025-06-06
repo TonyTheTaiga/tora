@@ -1,19 +1,25 @@
 <script lang="ts">
-  import CreateExperimentModal from "$lib/components/create-experiment-modal.svelte";
-  import ExperimentsList from "$lib/components/experiments-list.svelte";
   import type { Experiment } from "$lib/types";
   import type { PageData } from "./$types";
+  import CreateExperimentModal from "$lib/components/create-experiment-modal.svelte";
+  import ExperimentsList from "$lib/components/experiments-list.svelte";
   import Toolbar from "$lib/components/toolbar.svelte";
   import DeleteConfirmationModal from "$lib/components/delete-confirmation-modal.svelte";
   import EditExperimentModal from "$lib/components/edit-experiment-modal.svelte";
   import LandingPage from "$lib/components/landing-page.svelte";
+  import ComparisonToolbar from "$lib/components/comparison/comparison-toolbar.svelte";
   import { page } from "$app/state";
+  import { getMode } from "$lib/components/comparison/state.svelte.js";
 
-  let { data }: { data: PageData } = $props();
   let user = $derived(page.data.user);
-  let experiments: Experiment[] = $state(data.experiments);
-  let hasExperiments: boolean = $derived(experiments.length > 0);
+  let { data = $bindable() }: { data: PageData } = $props();
+  let experiments = $state([...data.experiments]);
 
+  $effect(() => {
+    experiments = [...data.experiments];
+  });
+
+  let hasExperiments: boolean = $derived(experiments.length > 0);
   let modalState = $state({
     createExperiment: false,
     selectedForDelete: null as Experiment | null,
@@ -32,7 +38,7 @@
   {#if modalState.selectedForDelete}
     <DeleteConfirmationModal
       bind:experiment={modalState.selectedForDelete}
-      bind:experiments={experiments}
+      bind:experiments
     />
   {/if}
 
@@ -45,6 +51,12 @@
     bind:isOpenCreate={modalState.createExperiment}
     {hasExperiments}
   />
+
+  {#if getMode()}
+    <div class="sticky top-20 sm:top-22 z-20 max-w-fit">
+      <ComparisonToolbar />
+    </div>
+  {/if}
 
   <ExperimentsList
     bind:experiments
