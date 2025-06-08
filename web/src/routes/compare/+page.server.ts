@@ -9,9 +9,11 @@ export const load: PageServerLoad = async ({ url, locals }) => {
   }
   const ids = idsParam.split(",").filter(Boolean);
   const { data, error: supError } = await locals.supabase.rpc(
-    "get_experiments_with_metric_names",
+    "get_experiments_and_metrics",
     { experiment_ids: ids },
   );
+
+  console.log(data);
 
   if (supError) {
     console.log(supError);
@@ -24,7 +26,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
       name: item.name,
       visibility: item.visibility,
       description: item.description,
-      availableMetrics: item.available_metrics,
+      availableMetrics: Object.keys(item.metric_dict),
       tags: item.tags,
       hyperparams: item.hyperparams
         ? (item.hyperparams.map((hp: any) => ({
