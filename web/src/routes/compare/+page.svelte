@@ -26,7 +26,7 @@
 
   function generateColorVariant(baseColor: string, variant: number): string {
     const match = baseColor.match(/(\d+)/g);
-    if (!match || match.length < 3) return baseColor; // Failsafe
+    if (!match || match.length < 3) return baseColor;
 
     const r = parseInt(match[0]) / 255;
     const g = parseInt(match[1]) / 255;
@@ -147,8 +147,9 @@
   </div>
 
   <div class="border border-ctp-surface0 rounded-md bg-ctp-base">
+    <!-- hyperparams -->
     <div
-      class="text-xs font-medium text-ctp-subtext1 p-2 bg-ctp-mantle border-b border-ctp-surface0"
+      class="text-xs font-medium text-ctp-subtext1 p-2 bg-ctp-mantle border-b border-ctp-surface0 rounded"
     >
       Hyperparameters
     </div>
