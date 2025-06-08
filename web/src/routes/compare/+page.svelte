@@ -117,7 +117,9 @@
           const experimentColor = experimentColors_map.get(experiment.id);
 
           const dataPoints = labels.map((metricName) => {
-            const metricValues = experiment.metricData?.[metricName];
+            const metricValues = (
+              experiment.metricData as Record<string, number[]>
+            )?.[metricName];
             if (
               !metricValues ||
               !Array.isArray(metricValues) ||
@@ -131,8 +133,8 @@
           return {
             label: experiment.name,
             data: dataPoints,
-            fill: true,
-            backgroundColor: `${experimentColor}20`,
+            fill: false,
+            backgroundColor: `${experimentColor}30`,
             borderColor: experimentColor,
             pointBackgroundColor: experimentColor,
             pointBorderColor: surfaceColor || "#fff",
@@ -151,9 +153,16 @@
         data: chartData,
         options: {
           responsive: true,
-          maintainAspectRatio: false,
+          maintainAspectRatio: true,
+          aspectRatio: 1,
           elements: {
             line: {
+              borderWidth: 3,
+              tension: 0.1,
+            },
+            point: {
+              radius: 5,
+              hoverRadius: 8,
               borderWidth: 2,
             },
           },
@@ -166,10 +175,12 @@
             r: {
               beginAtZero: true,
               grid: {
-                color: surfaceColor || "rgba(255, 255, 255, 0.1)",
+                color: `${computedStyles.getPropertyValue("--color-ctp-overlay0").trim()}30`,
+                lineWidth: 1,
               },
               angleLines: {
-                color: surfaceColor || "rgba(255, 255, 255, 0.1)",
+                color: `${computedStyles.getPropertyValue("--color-ctp-overlay0").trim()}40`,
+                lineWidth: 1,
               },
               pointLabels: {
                 color:
@@ -186,6 +197,10 @@
                     .getPropertyValue("--color-ctp-subtext0")
                     .trim() || "#666",
                 backdropColor: "transparent",
+                stepSize: 0.1,
+                callback: function (value: number) {
+                  return value.toFixed(1);
+                },
               },
             },
           },
@@ -257,9 +272,7 @@
 
   <div class="border border-ctp-surface0 bg-ctp-base mb-4">
     <!-- hyperparams -->
-    <div
-      class="text-xs font-medium text-ctp-subtext1 p-2 bg-ctp-mantle border-b border-ctp-surface0"
-    >
+    <div class="text-sm font-semibold text-ctp-text p-4 border-ctp-surface1">
       Hyperparameters
     </div>
     <div
@@ -270,9 +283,8 @@
         <thead class="bg-ctp-mantle sticky top-0 z-10">
           <tr>
             <th
-              class="p-3 font-medium text-ctp-subtext1 border-b border-ctp-surface0 sticky left-0 bg-ctp-mantle z-20"
+              class="bg-ctp-mantle border-b border-ctp-surface0 sticky left-0 z-20"
             >
-              •
             </th>
             {#each hyperparams as hyperparam}
               <th
@@ -312,14 +324,14 @@
     </div>
   </div>
 
-  <div class="border border-ctp-surface0 bg-ctp-base w-1/2">
-    <div
-      class="text-xs font-medium text-ctp-subtext1 p-2 bg-ctp-mantle border-b border-ctp-surface0"
-    >
-      Metrics
+  <div class="border border-ctp-surface0 bg-ctp-base rounded-lg shadow-lg">
+    <div class="text-sm font-semibold text-ctp-text p-4 border-ctp-surface1">
+      <div class="flex items-center gap-2">Metrics Comparison</div>
     </div>
-    <div class="w-full" {@attach loadChartAttachment()}>
-      <canvas id="spider"></canvas>
+    <div class="w-full p-6 bg-ctp-base" {@attach loadChartAttachment()}>
+      <div class="aspect-square max-w-2xl mx-auto">
+        <canvas id="spider" class="w-full h-full"></canvas>
+      </div>
     </div>
   </div>
 </div>
