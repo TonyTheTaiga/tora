@@ -87,104 +87,112 @@
     return ret;
   });
 
-  const loadChartAttachment: Attachment = (element) => {
-    let chart = element.querySelector("#spider");
-    if (!chart) {
-      console.log("Couldn't find a child canvas on this element");
-      return;
-    }
+  function loadChartAttachment(): Attachment {
+    return (element) => {
+      if (experimentColors_map.size == 0) {
+        return;
+      }
 
-    const computedStyles = getComputedStyle(document.documentElement);
-    const surfaceColor = computedStyles
-      .getPropertyValue("--color-ctp-surface0")
-      .trim();
-    const redColor = computedStyles.getPropertyValue("--color-ctp-red").trim();
-    const blueColor = computedStyles
-      .getPropertyValue("--color-ctp-blue")
-      .trim();
+      let chart = element.querySelector("#spider");
+      if (!chart) {
+        console.log("Couldn't find a child canvas on this element");
+        return;
+      }
 
-    const data = {
-      labels: [
-        "Eating",
-        "Drinking",
-        "Sleeping",
-        "Designing",
-        "Coding",
-        "Cycling",
-        "Running",
-      ],
-      datasets: [
-        {
-          label: "My First Dataset",
-          data: [65, 59, 90, 81, 56, 55, 40],
-          fill: true,
-          backgroundColor: `${redColor}20`,
-          borderColor: redColor,
-          pointBackgroundColor: redColor,
-          pointBorderColor: surfaceColor || "#fff",
-          pointHoverBackgroundColor: surfaceColor || "#fff",
-          pointHoverBorderColor: redColor,
-        },
-        {
-          label: "My Second Dataset",
-          data: [28, 48, 40, 19, 96, 27, 100],
-          fill: true,
-          backgroundColor: `${blueColor}20`,
-          borderColor: blueColor,
-          pointBackgroundColor: blueColor,
-          pointBorderColor: surfaceColor || "#fff",
-          pointHoverBackgroundColor: surfaceColor || "#fff",
-          pointHoverBorderColor: blueColor,
-        },
-      ],
-    };
+      const computedStyles = getComputedStyle(document.documentElement);
+      const surfaceColor = computedStyles
+        .getPropertyValue("--color-ctp-surface0")
+        .trim();
 
-    new Chart(chart as HTMLCanvasElement, {
-      type: "radar",
-      data: data,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        elements: {
-          line: {
-            borderWidth: 2,
-          },
-        },
-        plugins: {
-          legend: {
-            display: false,
-          },
-        },
-        scales: {
-          r: {
-            beginAtZero: true,
-            grid: {
-              color: surfaceColor || "rgba(255, 255, 255, 0.1)",
+      const labels = Array.from(
+        new Set<string>(
+          data.experiments?.flatMap((exp) =>
+            exp.metricData ? Object.keys(exp.metricData) : [],
+          ) ?? [],
+        ),
+      ).sort();
+
+      const datasets =
+        data.experiments?.map((experiment) => {
+          const experimentColor = experimentColors_map.get(experiment.id);
+
+          const dataPoints = labels.map((metricName) => {
+            const metricValues = experiment.metricData?.[metricName];
+            if (
+              !metricValues ||
+              !Array.isArray(metricValues) ||
+              metricValues.length === 0
+            ) {
+              return 0;
+            }
+            return metricValues[metricValues.length - 1];
+          });
+
+          return {
+            label: experiment.name,
+            data: dataPoints,
+            fill: true,
+            backgroundColor: `${experimentColor}20`,
+            borderColor: experimentColor,
+            pointBackgroundColor: experimentColor,
+            pointBorderColor: surfaceColor || "#fff",
+            pointHoverBackgroundColor: surfaceColor || "#fff",
+            pointHoverBorderColor: experimentColor,
+          };
+        }) ?? [];
+
+      const chartData = {
+        labels: labels,
+        datasets: datasets,
+      };
+
+      new Chart(chart as HTMLCanvasElement, {
+        type: "radar",
+        data: chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          elements: {
+            line: {
+              borderWidth: 2,
             },
-            angleLines: {
-              color: surfaceColor || "rgba(255, 255, 255, 0.1)",
+          },
+          plugins: {
+            legend: {
+              display: false,
             },
-            pointLabels: {
-              color:
-                computedStyles
-                  .getPropertyValue("--color-ctp-subtext1")
-                  .trim() || "#888",
-              font: {
-                size: 12,
+          },
+          scales: {
+            r: {
+              beginAtZero: true,
+              grid: {
+                color: surfaceColor || "rgba(255, 255, 255, 0.1)",
+              },
+              angleLines: {
+                color: surfaceColor || "rgba(255, 255, 255, 0.1)",
+              },
+              pointLabels: {
+                color:
+                  computedStyles
+                    .getPropertyValue("--color-ctp-subtext1")
+                    .trim() || "#888",
+                font: {
+                  size: 12,
+                },
+              },
+              ticks: {
+                color:
+                  computedStyles
+                    .getPropertyValue("--color-ctp-subtext0")
+                    .trim() || "#666",
+                backdropColor: "transparent",
               },
             },
-            ticks: {
-              color:
-                computedStyles
-                  .getPropertyValue("--color-ctp-subtext0")
-                  .trim() || "#666",
-              backdropColor: "transparent",
-            },
           },
         },
-      },
-    });
-  };
+      });
+    };
+  }
 
   onMount(() => {
     const resolveAndSetColors = () => {
@@ -310,7 +318,7 @@
     >
       Metrics
     </div>
-    <div class="w-full" {@attach loadChartAttachment}>
+    <div class="w-full" {@attach loadChartAttachment()}>
       <canvas id="spider"></canvas>
     </div>
   </div>

@@ -24,7 +24,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
       name: item.name,
       visibility: item.visibility,
       description: item.description,
-      availableMetrics: item.metric_dict ? Object.keys(item.metric_dict) : [],
       metricData: item.metric_dict,
       tags: item.tags,
       hyperparams: item.hyperparams
