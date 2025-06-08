@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import type { PageData } from "./$types";
   import { Circle } from "lucide-svelte";
   import { reset } from "$lib/components/comparison/state.svelte";
@@ -6,50 +7,38 @@
 
   let { data }: { data: PageData } = $props();
 
-  const catppuccinAccents = {
-    base: [
-      "var(--color-ctp-red)",
-      "var(--color-ctp-peach)",
-      "var(--color-ctp-yellow)",
-      "var(--color-ctp-green)",
-      "var(--color-ctp-teal)",
-      "var(--color-ctp-sky)",
-      "var(--color-ctp-sapphire)",
-      "var(--color-ctp-blue)",
-      "var(--color-ctp-lavender)",
-      "var(--color-ctp-mauve)",
-      "var(--color-ctp-pink)",
-      "var(--color-ctp-flamingo)",
-      "var(--color-ctp-rosewater)",
-      "var(--color-ctp-maroon)",
-    ],
-    variants: [],
-  };
+  const catppuccinAccentNames = [
+    "--color-ctp-red",
+    "--color-ctp-peach",
+    "--color-ctp-yellow",
+    "--color-ctp-green",
+    "--color-ctp-teal",
+    "--color-ctp-sky",
+    "--color-ctp-sapphire",
+    "--color-ctp-blue",
+    "--color-ctp-lavender",
+    "--color-ctp-mauve",
+    "--color-ctp-pink",
+    "--color-ctp-flamingo",
+    "--color-ctp-rosewater",
+    "--color-ctp-maroon",
+  ];
 
-  function generateCatppuccinColor(index: number): string {
-    const baseColors = catppuccinAccents.base;
+  function generateColorVariant(baseColor: string, variant: number): string {
+    const match = baseColor.match(/(\d+)/g);
+    if (!match || match.length < 3) return baseColor; // Failsafe
 
-    if (index < baseColors.length) {
-      return baseColors[index];
-    }
-
-    const baseIndex = (index - baseColors.length) % baseColors.length;
-    const baseColor = baseColors[baseIndex];
-    const variant = Math.floor((index - baseColors.length) / baseColors.length);
-    const hex = baseColor.slice(1);
-    const r = parseInt(hex.slice(0, 2), 16) / 255;
-    const g = parseInt(hex.slice(2, 4), 16) / 255;
-    const b = parseInt(hex.slice(4, 6), 16) / 255;
+    const r = parseInt(match[0]) / 255;
+    const g = parseInt(match[1]) / 255;
+    const b = parseInt(match[2]) / 255;
 
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
-    let h = 0;
-    let s = 0;
-    let l = (max + min) / 2;
+    let h = 0,
+      s = 0,
+      l = (max + min) / 2;
 
-    if (max === min) {
-      h = s = 0;
-    } else {
+    if (max !== min) {
       const d = max - min;
       s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
       switch (max) {
@@ -66,19 +55,23 @@
       h /= 6;
     }
 
-    const saturationAdjust = variant === 0 ? 0.8 : variant === 1 ? 1.2 : 0.9;
-    const lightnessAdjust = variant === 0 ? 0.9 : variant === 1 ? 1.1 : 1.05;
+    const saturationAdjust = variant === 1 ? 0.8 : variant === 2 ? 1.2 : 0.9;
+    const lightnessAdjust = variant === 1 ? 1.1 : variant === 2 ? 0.9 : 1.05;
+
     s = Math.min(1, s * saturationAdjust);
     l = Math.min(1, l * lightnessAdjust);
+
     return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
   }
+
+  let experimentColors_map = $state(new Map<string, string>());
 
   let hyperparams = $derived.by(() => {
     const keys = new Set<string>();
     data.experiments?.forEach((exp) =>
       exp.hyperparams?.forEach((hp) => keys.add(hp.key)),
     );
-    return keys;
+    return Array.from(keys).sort((a, b) => a.localeCompare(b));
   });
 
   let idToHP = $derived.by(() => {
@@ -92,12 +85,40 @@
     return ret;
   });
 
-  let experimentColors_map = $derived.by(() => {
-    const colorMap = new Map();
-    data.experiments?.forEach((exp, index) => {
-      colorMap.set(exp.id, generateCatppuccinColor(index));
-    });
-    return colorMap;
+  onMount(() => {
+    const resolveAndSetColors = () => {
+      if (!data.experiments) return;
+
+      const computedStyles = getComputedStyle(document.documentElement);
+      const newColorMap = new Map<string, string>();
+      const resolvedBaseColors = catppuccinAccentNames.map((name) =>
+        computedStyles.getPropertyValue(name).trim(),
+      );
+
+      data.experiments.forEach((exp, index) => {
+        const numBaseColors = resolvedBaseColors.length;
+
+        if (index < numBaseColors) {
+          newColorMap.set(exp.id, resolvedBaseColors[index]);
+        } else {
+          const baseIndex = (index - numBaseColors) % numBaseColors;
+          const variant =
+            Math.floor((index - numBaseColors) / numBaseColors) + 1;
+          const resolvedBaseColor = resolvedBaseColors[baseIndex];
+          const variantColor = generateColorVariant(resolvedBaseColor, variant);
+          newColorMap.set(exp.id, variantColor);
+        }
+      });
+
+      experimentColors_map = newColorMap;
+    };
+
+    resolveAndSetColors();
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    mediaQuery.addEventListener("change", resolveAndSetColors);
+    return () => {
+      mediaQuery.removeEventListener("change", resolveAndSetColors);
+    };
   });
 </script>
 
