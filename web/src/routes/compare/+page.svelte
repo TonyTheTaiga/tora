@@ -94,6 +94,11 @@
       return;
     }
 
+    const computedStyles = getComputedStyle(document.documentElement);
+    const surfaceColor = computedStyles.getPropertyValue("--color-ctp-surface0").trim();
+    const redColor = computedStyles.getPropertyValue("--color-ctp-red").trim();
+    const blueColor = computedStyles.getPropertyValue("--color-ctp-blue").trim();
+
     const data = {
       labels: [
         "Eating",
@@ -109,23 +114,23 @@
           label: "My First Dataset",
           data: [65, 59, 90, 81, 56, 55, 40],
           fill: true,
-          backgroundColor: "rgba(255, 99, 132, 0.2)",
-          borderColor: "rgb(255, 99, 132)",
-          pointBackgroundColor: "rgb(255, 99, 132)",
-          pointBorderColor: "#fff",
-          pointHoverBackgroundColor: "#fff",
-          pointHoverBorderColor: "rgb(255, 99, 132)",
+          backgroundColor: `${redColor}20`,
+          borderColor: redColor,
+          pointBackgroundColor: redColor,
+          pointBorderColor: surfaceColor || "#fff",
+          pointHoverBackgroundColor: surfaceColor || "#fff",
+          pointHoverBorderColor: redColor,
         },
         {
           label: "My Second Dataset",
           data: [28, 48, 40, 19, 96, 27, 100],
           fill: true,
-          backgroundColor: "rgba(54, 162, 235, 0.2)",
-          borderColor: "rgb(54, 162, 235)",
-          pointBackgroundColor: "rgb(54, 162, 235)",
-          pointBorderColor: "#fff",
-          pointHoverBackgroundColor: "#fff",
-          pointHoverBorderColor: "rgb(54, 162, 235)",
+          backgroundColor: `${blueColor}20`,
+          borderColor: blueColor,
+          pointBackgroundColor: blueColor,
+          pointBorderColor: surfaceColor || "#fff",
+          pointHoverBackgroundColor: surfaceColor || "#fff",
+          pointHoverBorderColor: blueColor,
         },
       ],
     };
@@ -134,9 +139,37 @@
       type: "radar",
       data: data,
       options: {
+        responsive: true,
+        maintainAspectRatio: false,
         elements: {
           line: {
-            borderWidth: 3,
+            borderWidth: 2,
+          },
+        },
+        plugins: {
+          legend: {
+            display: false, // hide legend since we have our own
+          },
+        },
+        scales: {
+          r: {
+            beginAtZero: true,
+            grid: {
+              color: surfaceColor || "rgba(255, 255, 255, 0.1)",
+            },
+            angleLines: {
+              color: surfaceColor || "rgba(255, 255, 255, 0.1)",
+            },
+            pointLabels: {
+              color: computedStyles.getPropertyValue("--color-ctp-subtext1").trim() || "#888",
+              font: {
+                size: 12,
+              },
+            },
+            ticks: {
+              color: computedStyles.getPropertyValue("--color-ctp-subtext0").trim() || "#666",
+              backdropColor: "transparent",
+            },
           },
         },
       },
