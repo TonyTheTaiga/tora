@@ -146,10 +146,10 @@
     </div>
   </div>
 
-  <div class="border border-ctp-surface0 rounded-md bg-ctp-base">
+  <div class="border border-ctp-surface0 bg-ctp-base">
     <!-- hyperparams -->
     <div
-      class="text-xs font-medium text-ctp-subtext1 p-2 bg-ctp-mantle border-b border-ctp-surface0 rounded"
+      class="text-xs font-medium text-ctp-subtext1 p-2 bg-ctp-mantle border-b border-ctp-surface0"
     >
       Hyperparameters
     </div>
