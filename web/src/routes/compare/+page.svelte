@@ -139,7 +139,7 @@
       ],
     };
 
-    new Chart(chart, {
+    new Chart(chart as HTMLCanvasElement, {
       type: "radar",
       data: data,
       options: {

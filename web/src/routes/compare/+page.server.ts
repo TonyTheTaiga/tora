@@ -13,8 +13,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     { experiment_ids: ids },
   );
 
-  console.log(data);
-
   if (supError) {
     console.log(supError);
     throw error(400, "Failed to get experiments");
@@ -26,7 +24,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
       name: item.name,
       visibility: item.visibility,
       description: item.description,
-      availableMetrics: Object.keys(item.metric_dict),
+      availableMetrics: item.metric_dict ? Object.keys(item.metric_dict) : [],
+      metricData: item.metric_dict,
       tags: item.tags,
       hyperparams: item.hyperparams
         ? (item.hyperparams.map((hp: any) => ({
