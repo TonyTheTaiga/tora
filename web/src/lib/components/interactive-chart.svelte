@@ -129,7 +129,20 @@
         const color = colors[colorIndex];
         const steps = metricsData[metric]?.steps || [];
         const values = metricsData[metric]?.values || [];
-        const dataPoints = steps.map((step, i) => ({ x: step, y: values[i] }));
+        const rawDataPoints = steps.map((step, i) => ({
+          x: step,
+          y: values[i],
+        }));
+
+        // Manual downsampling - take every nth point to reduce to ~50 points
+        const targetSamples = 50;
+        const dataPoints =
+          rawDataPoints.length > targetSamples
+            ? rawDataPoints.filter(
+                (_, i) =>
+                  i % Math.ceil(rawDataPoints.length / targetSamples) === 0,
+              )
+            : rawDataPoints;
 
         return {
           label: metric,
@@ -165,11 +178,6 @@
             axis: "x",
           },
           plugins: {
-            decimation: {
-              enabled: true,
-              algorithm: "lttb",
-              samples: 10,
-            },
             legend: {
               display: true,
               position: "top",
