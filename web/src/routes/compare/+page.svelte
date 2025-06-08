@@ -198,8 +198,8 @@
                     .trim() || "#666",
                 backdropColor: "transparent",
                 stepSize: 0.1,
-                callback: function (value: number) {
-                  return value.toFixed(1);
+                callback: function (value: string | number) {
+                  return typeof value === 'number' ? value.toFixed(1) : value;
                 },
               },
             },
