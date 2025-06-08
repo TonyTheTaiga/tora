@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import type { Attachment } from "svelte/attachments";
+  import Chart from "chart.js/auto";
   import type { PageData } from "./$types";
   import { Circle } from "lucide-svelte";
   import { reset } from "$lib/components/comparison/state.svelte";
@@ -85,6 +87,37 @@
     return ret;
   });
 
+  const loadChartAttachment: Attachment = (element) => {
+    let chart = element.querySelector("#spider");
+    if (!chart) {
+      console.log("Couldn't find a child canvas on this element");
+      return;
+    }
+
+    const data = [
+      { year: 2010, count: 10 },
+      { year: 2011, count: 20 },
+      { year: 2012, count: 15 },
+      { year: 2013, count: 25 },
+      { year: 2014, count: 22 },
+      { year: 2015, count: 30 },
+      { year: 2016, count: 28 },
+    ];
+
+    new Chart(chart, {
+      type: "bar",
+      data: {
+        labels: data.map((row) => row.year),
+        datasets: [
+          {
+            label: "Acquisitions by year",
+            data: data.map((row) => row.count),
+          },
+        ],
+      },
+    });
+  };
+
   onMount(() => {
     const resolveAndSetColors = () => {
       if (!data.experiments) return;
@@ -146,7 +179,7 @@
     </div>
   </div>
 
-  <div class="border border-ctp-surface0 bg-ctp-base">
+  <div class="border border-ctp-surface0 bg-ctp-base mb-4">
     <!-- hyperparams -->
     <div
       class="text-xs font-medium text-ctp-subtext1 p-2 bg-ctp-mantle border-b border-ctp-surface0"
@@ -200,6 +233,17 @@
           {/each}
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <div class="border border-ctp-surface0 bg-ctp-base">
+    <div
+      class="text-xs font-medium text-ctp-subtext1 p-2 bg-ctp-mantle border-b border-ctp-surface0"
+    >
+      Logs
+    </div>
+    <div class="w-full" {@attach loadChartAttachment}>
+      <canvas id="spider"></canvas>
     </div>
   </div>
 </div>
