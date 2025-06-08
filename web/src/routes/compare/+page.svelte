@@ -95,9 +95,13 @@
     }
 
     const computedStyles = getComputedStyle(document.documentElement);
-    const surfaceColor = computedStyles.getPropertyValue("--color-ctp-surface0").trim();
+    const surfaceColor = computedStyles
+      .getPropertyValue("--color-ctp-surface0")
+      .trim();
     const redColor = computedStyles.getPropertyValue("--color-ctp-red").trim();
-    const blueColor = computedStyles.getPropertyValue("--color-ctp-blue").trim();
+    const blueColor = computedStyles
+      .getPropertyValue("--color-ctp-blue")
+      .trim();
 
     const data = {
       labels: [
@@ -161,13 +165,19 @@
               color: surfaceColor || "rgba(255, 255, 255, 0.1)",
             },
             pointLabels: {
-              color: computedStyles.getPropertyValue("--color-ctp-subtext1").trim() || "#888",
+              color:
+                computedStyles
+                  .getPropertyValue("--color-ctp-subtext1")
+                  .trim() || "#888",
               font: {
                 size: 12,
               },
             },
             ticks: {
-              color: computedStyles.getPropertyValue("--color-ctp-subtext0").trim() || "#666",
+              color:
+                computedStyles
+                  .getPropertyValue("--color-ctp-subtext0")
+                  .trim() || "#666",
               backdropColor: "transparent",
             },
           },

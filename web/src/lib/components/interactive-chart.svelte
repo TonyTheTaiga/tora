@@ -12,21 +12,32 @@
   let metricsData = $state<
     Record<string, { steps: number[]; values: number[] }>
   >({});
-  let currentTheme = $state<"light" | "dark">("dark");
 
   const chartColorKeys = [
-    "red", "blue", "green", "yellow", "mauve", "pink", 
-    "peach", "teal", "sky", "sapphire", "lavender", "maroon"
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "mauve",
+    "pink",
+    "peach",
+    "teal",
+    "sky",
+    "sapphire",
+    "lavender",
+    "maroon",
   ];
 
   function getChartColors() {
     const computedStyles = getComputedStyle(document.documentElement);
-    return chartColorKeys.map(colorKey => {
-      const baseColor = computedStyles.getPropertyValue(`--color-ctp-${colorKey}`).trim();
+    return chartColorKeys.map((colorKey) => {
+      const baseColor = computedStyles
+        .getPropertyValue(`--color-ctp-${colorKey}`)
+        .trim();
       return {
         border: baseColor,
-        bg: `${baseColor}10`, // hex transparency for ~6% opacity
-        point: baseColor
+        bg: `${baseColor}20`,
+        point: baseColor,
       };
     });
   }
@@ -44,9 +55,14 @@
   }
 
   onMount(() => {
-    updateTheme();
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleThemeChange = () => {
+      if (chartInstance) {
+        updateChart();
+      }
+    };
 
-    window.addEventListener("storage", handleStorageChange);
+    mediaQuery.addEventListener("change", handleThemeChange);
 
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
@@ -54,36 +70,28 @@
           mutation.attributeName === "class" &&
           mutation.target === document.documentElement
         ) {
-          updateTheme();
+          const classList = (mutation.target as Element).classList;
+          if (classList.contains("dark") || classList.contains("light")) {
+            handleThemeChange();
+          }
         }
       });
     });
 
-    observer.observe(document.documentElement, { attributes: true });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
     return () => {
+      mediaQuery.removeEventListener("change", handleThemeChange);
       observer.disconnect();
-      window.removeEventListener("storage", handleStorageChange);
     };
   });
 
   onDestroy(() => {
     destroyChart();
   });
-
-  function handleStorageChange(event: StorageEvent) {
-    if (event.key === "theme") {
-      updateTheme();
-    }
-  }
-
-  function updateTheme() {
-    const isDark = document.documentElement.classList.contains("dark");
-    currentTheme = isDark ? "dark" : "light";
-    if (chartInstance) {
-      updateChart();
-    }
-  }
 
   async function loadMetrics() {
     try {
@@ -131,8 +139,9 @@
           fill: false,
           pointBackgroundColor: color.point,
           pointBorderColor: ui.mantle,
-          pointHoverBackgroundColor: 
-            getComputedStyle(document.documentElement).getPropertyValue("--color-ctp-mauve").trim(),
+          pointHoverBackgroundColor: getComputedStyle(document.documentElement)
+            .getPropertyValue("--color-ctp-mauve")
+            .trim(),
           pointHoverBorderColor: ui.base,
           borderWidth: 1.5,
           tension: 0.3,
@@ -158,8 +167,8 @@
           plugins: {
             decimation: {
               enabled: true,
-              algorithm: 'lttb', // Largest-Triangle-Three-Buckets algorithm
-              samples: 50, // Maximum number of points to display
+              algorithm: "lttb",
+              samples: 10,
             },
             legend: {
               display: true,
@@ -176,7 +185,9 @@
             },
             tooltip: {
               backgroundColor: ui.crust,
-              titleColor: getComputedStyle(document.documentElement).getPropertyValue("--color-ctp-sky").trim(),
+              titleColor: getComputedStyle(document.documentElement)
+                .getPropertyValue("--color-ctp-sky")
+                .trim(),
               bodyColor: ui.text,
               borderColor: ui.overlay0,
               position: "nearest",
