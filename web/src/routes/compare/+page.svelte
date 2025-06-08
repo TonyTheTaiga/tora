@@ -152,7 +152,7 @@
         },
         plugins: {
           legend: {
-            display: false, // hide legend since we have our own
+            display: false,
           },
         },
         scales: {
@@ -308,7 +308,7 @@
     <div
       class="text-xs font-medium text-ctp-subtext1 p-2 bg-ctp-mantle border-b border-ctp-surface0"
     >
-      Logs
+      Metrics
     </div>
     <div class="w-full" {@attach loadChartAttachment}>
       <canvas id="spider"></canvas>

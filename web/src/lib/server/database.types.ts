@@ -249,6 +249,19 @@ export type Database = {
           visibility: Database["public"]["Enums"]["visibility"];
         }[];
       };
+      get_experiments_and_metrics: {
+        Args: { experiment_ids?: string[] };
+        Returns: {
+          id: string;
+          name: string;
+          description: string;
+          created_at: string;
+          tags: string[];
+          hyperparams: Json[];
+          metric_dict: Json;
+          visibility: Database["public"]["Enums"]["visibility"];
+        }[];
+      };
       get_experiments_with_metric_names: {
         Args: { experiment_ids?: string[] };
         Returns: {
