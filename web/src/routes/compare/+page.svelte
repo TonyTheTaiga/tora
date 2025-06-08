@@ -93,8 +93,8 @@
         return;
       }
 
-      let chart = element.querySelector("#spider");
-      if (!chart) {
+      let chartElement = element.querySelector("#spider");
+      if (!chartElement) {
         console.log("Couldn't find a child canvas on this element");
         return;
       }
@@ -148,7 +148,7 @@
         datasets: datasets,
       };
 
-      new Chart(chart as HTMLCanvasElement, {
+      const chart = new Chart(chartElement as HTMLCanvasElement, {
         type: "radar",
         data: chartData,
         options: {
@@ -206,6 +206,10 @@
           },
         },
       });
+
+      return () => {
+        chart.destroy();
+      };
     };
   }
 
