@@ -12,56 +12,57 @@
   let metricsData = $state<
     Record<string, { steps: number[]; values: number[] }>
   >({});
-  let currentTheme = $state<"light" | "dark">("dark");
 
-  const darkColors = [
-    { border: "#7dc4e4", bg: "rgba(125, 196, 228, 0.15)", point: "#b7bdf8" },
-    { border: "#f5bde6", bg: "rgba(245, 189, 230, 0.15)", point: "#ed8796" },
-    { border: "#a6da95", bg: "rgba(166, 218, 149, 0.15)", point: "#8bd5ca" },
-    { border: "#f5a97f", bg: "rgba(245, 169, 127, 0.15)", point: "#eed49f" },
-    { border: "#c6a0f6", bg: "rgba(198, 160, 246, 0.15)", point: "#8aadf4" },
-    { border: "#ed8796", bg: "rgba(237, 135, 150, 0.15)", point: "#ee99a0" },
+  const chartColorKeys = [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "mauve",
+    "pink",
+    "peach",
+    "teal",
+    "sky",
+    "sapphire",
+    "lavender",
+    "maroon",
   ];
 
-  const lightColors = [
-    { border: "#209fb5", bg: "rgba(32, 159, 181, 0.15)", point: "#7287fd" },
-    { border: "#ea76cb", bg: "rgba(234, 118, 203, 0.15)", point: "#d20f39" },
-    { border: "#40a02b", bg: "rgba(64, 160, 43, 0.15)", point: "#179299" },
-    { border: "#fe640b", bg: "rgba(254, 100, 11, 0.15)", point: "#df8e1d" },
-    { border: "#8839ef", bg: "rgba(136, 57, 239, 0.15)", point: "#1e66f5" },
-    { border: "#d20f39", bg: "rgba(210, 15, 57, 0.15)", point: "#e64553" },
-  ];
-
-  function getThemeColors() {
-    return currentTheme === "dark" ? darkColors : lightColors;
+  function getChartColors() {
+    const computedStyles = getComputedStyle(document.documentElement);
+    return chartColorKeys.map((colorKey) => {
+      const baseColor = computedStyles
+        .getPropertyValue(`--color-ctp-${colorKey}`)
+        .trim();
+      return {
+        border: baseColor,
+        bg: `${baseColor}20`,
+        point: baseColor,
+      };
+    });
   }
 
-  const darkThemeUI = {
-    text: "#cad3f5",
-    crust: "#181926",
-    mantle: "#1e2030",
-    base: "#24273a",
-    overlay0: "#6e738d",
-    gridLines: "rgba(183, 189, 248, 0.08)",
-  };
-
-  const lightThemeUI = {
-    text: "#4c4f69",
-    crust: "#dce0e8",
-    mantle: "#e6e9ef",
-    base: "#eff1f5",
-    overlay0: "#9ca0b0",
-    gridLines: "rgba(114, 135, 253, 0.08)",
-  };
-
   function getThemeUI() {
-    return currentTheme === "dark" ? darkThemeUI : lightThemeUI;
+    const computedStyles = getComputedStyle(document.documentElement);
+    return {
+      text: computedStyles.getPropertyValue("--color-ctp-text").trim(),
+      crust: computedStyles.getPropertyValue("--color-ctp-crust").trim(),
+      mantle: computedStyles.getPropertyValue("--color-ctp-mantle").trim(),
+      base: computedStyles.getPropertyValue("--color-ctp-base").trim(),
+      overlay0: computedStyles.getPropertyValue("--color-ctp-overlay0").trim(),
+      gridLines: `${computedStyles.getPropertyValue("--color-ctp-overlay0").trim()}15`, // hex transparency
+    };
   }
 
   onMount(() => {
-    updateTheme();
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleThemeChange = () => {
+      if (chartInstance) {
+        updateChart();
+      }
+    };
 
-    window.addEventListener("storage", handleStorageChange);
+    mediaQuery.addEventListener("change", handleThemeChange);
 
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
@@ -69,36 +70,28 @@
           mutation.attributeName === "class" &&
           mutation.target === document.documentElement
         ) {
-          updateTheme();
+          const classList = (mutation.target as Element).classList;
+          if (classList.contains("dark") || classList.contains("light")) {
+            handleThemeChange();
+          }
         }
       });
     });
 
-    observer.observe(document.documentElement, { attributes: true });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
     return () => {
+      mediaQuery.removeEventListener("change", handleThemeChange);
       observer.disconnect();
-      window.removeEventListener("storage", handleStorageChange);
     };
   });
 
   onDestroy(() => {
     destroyChart();
   });
-
-  function handleStorageChange(event: StorageEvent) {
-    if (event.key === "theme") {
-      updateTheme();
-    }
-  }
-
-  function updateTheme() {
-    const isDark = document.documentElement.classList.contains("dark");
-    currentTheme = isDark ? "dark" : "light";
-    if (chartInstance) {
-      updateChart();
-    }
-  }
 
   async function loadMetrics() {
     try {
@@ -128,7 +121,7 @@
     if (!chartCanvas || selectedMetrics.length === 0) return;
 
     try {
-      const colors = getThemeColors();
+      const colors = getChartColors();
       const ui = getThemeUI();
 
       const datasets = selectedMetrics.map((metric, index) => {
@@ -136,7 +129,20 @@
         const color = colors[colorIndex];
         const steps = metricsData[metric]?.steps || [];
         const values = metricsData[metric]?.values || [];
-        const dataPoints = steps.map((step, i) => ({ x: step, y: values[i] }));
+        const rawDataPoints = steps.map((step, i) => ({
+          x: step,
+          y: values[i],
+        }));
+
+        // Manual downsampling - take every nth point to reduce to ~50 points
+        const targetSamples = 50;
+        const dataPoints =
+          rawDataPoints.length > targetSamples
+            ? rawDataPoints.filter(
+                (_, i) =>
+                  i % Math.ceil(rawDataPoints.length / targetSamples) === 0,
+              )
+            : rawDataPoints;
 
         return {
           label: metric,
@@ -146,12 +152,13 @@
           fill: false,
           pointBackgroundColor: color.point,
           pointBorderColor: ui.mantle,
-          pointHoverBackgroundColor:
-            currentTheme === "dark" ? "#c6a0f6" : "#8839ef",
+          pointHoverBackgroundColor: getComputedStyle(document.documentElement)
+            .getPropertyValue("--color-ctp-mauve")
+            .trim(),
           pointHoverBorderColor: ui.base,
-          borderWidth: 2,
+          borderWidth: 1.5,
           tension: 0.3,
-          pointRadius: 3,
+          pointRadius: 2,
         };
       });
 
@@ -186,7 +193,9 @@
             },
             tooltip: {
               backgroundColor: ui.crust,
-              titleColor: currentTheme === "dark" ? "#7dc4e4" : "#209fb5",
+              titleColor: getComputedStyle(document.documentElement)
+                .getPropertyValue("--color-ctp-sky")
+                .trim(),
               bodyColor: ui.text,
               borderColor: ui.overlay0,
               position: "nearest",
@@ -215,11 +224,11 @@
               },
             },
             y: {
-              type: "linear",
+              type: "logarithmic",
               position: "left",
               title: {
                 display: true,
-                text: "Value",
+                text: "Value (log)",
                 color: ui.text,
               },
               ticks: {

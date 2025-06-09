@@ -1,55 +1,102 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+  import type { Attachment } from "svelte/attachments";
+  import Chart from "chart.js/auto";
   import type { PageData } from "./$types";
-  import { Circle } from "lucide-svelte";
+  import { Circle, ChevronDown } from "lucide-svelte";
   import { reset } from "$lib/components/comparison/state.svelte";
+  import { drawBarChart } from "./bar-chart.svelte";
+  import { drawScatterChart } from "./scatter-chart.svelte";
+  import { drawRadarChart } from "./radar-chart.svelte";
   reset();
 
   let { data }: { data: PageData } = $props();
+  let experimentColors_map = $state(new Map<string, string>());
+  let selectedMetrics = $state<string[]>([]);
+  let searchFilter = $state<string>("");
 
-  const catppuccinAccents = {
-    base: [
-      "var(--color-ctp-red)",
-      "var(--color-ctp-peach)",
-      "var(--color-ctp-yellow)",
-      "var(--color-ctp-green)",
-      "var(--color-ctp-teal)",
-      "var(--color-ctp-sky)",
-      "var(--color-ctp-sapphire)",
-      "var(--color-ctp-blue)",
-      "var(--color-ctp-lavender)",
-      "var(--color-ctp-mauve)",
-      "var(--color-ctp-pink)",
-      "var(--color-ctp-flamingo)",
-      "var(--color-ctp-rosewater)",
-      "var(--color-ctp-maroon)",
-    ],
-    variants: [],
-  };
+  let commonMetrics = $derived.by(() => {
+    if (!data.experiments?.length) return [];
 
-  function generateCatppuccinColor(index: number): string {
-    const baseColors = catppuccinAccents.base;
+    const metricSets = data.experiments.map(
+      (exp) => new Set(Object.keys(exp.metricData || {})),
+    );
 
-    if (index < baseColors.length) {
-      return baseColors[index];
+    if (metricSets.length === 0) return [];
+    let intersection = metricSets[0];
+    for (let i = 1; i < metricSets.length; i++) {
+      intersection = new Set(
+        [...intersection].filter((x) => metricSets[i].has(x)),
+      );
     }
 
-    const baseIndex = (index - baseColors.length) % baseColors.length;
-    const baseColor = baseColors[baseIndex];
-    const variant = Math.floor((index - baseColors.length) / baseColors.length);
-    const hex = baseColor.slice(1);
-    const r = parseInt(hex.slice(0, 2), 16) / 255;
-    const g = parseInt(hex.slice(2, 4), 16) / 255;
-    const b = parseInt(hex.slice(4, 6), 16) / 255;
+    return Array.from(intersection).sort();
+  });
+
+  let filteredMetrics = $derived(
+    commonMetrics.filter((metric) =>
+      metric.toLowerCase().includes(searchFilter.toLowerCase()),
+    ),
+  );
+
+  let chartType = $derived(() => {
+    if (selectedMetrics.length === 1) return "bar";
+    if (selectedMetrics.length === 2) return "scatter";
+    if (selectedMetrics.length >= 3) return "radar";
+    return "empty";
+  });
+
+  let hyperparams = $derived.by(() => {
+    const keys = new Set<string>();
+    data.experiments?.forEach((exp) =>
+      exp.hyperparams?.forEach((hp) => keys.add(hp.key)),
+    );
+    return Array.from(keys).sort((a, b) => a.localeCompare(b));
+  });
+
+  let idToHP = $derived.by(() => {
+    const ret = new Map();
+    data.experiments?.forEach((exp) => {
+      ret.set(exp.id, new Map());
+      exp.hyperparams?.forEach((hp) => {
+        ret.get(exp.id).set(hp.key, hp.value);
+      });
+    });
+    return ret;
+  });
+
+  const catppuccinAccentNames = [
+    "--color-ctp-red",
+    "--color-ctp-peach",
+    "--color-ctp-yellow",
+    "--color-ctp-green",
+    "--color-ctp-teal",
+    "--color-ctp-sky",
+    "--color-ctp-sapphire",
+    "--color-ctp-blue",
+    "--color-ctp-lavender",
+    "--color-ctp-mauve",
+    "--color-ctp-pink",
+    "--color-ctp-flamingo",
+    "--color-ctp-rosewater",
+    "--color-ctp-maroon",
+  ];
+
+  function generateColorVariant(baseColor: string, variant: number): string {
+    const match = baseColor.match(/(\d+)/g);
+    if (!match || match.length < 3) return baseColor;
+
+    const r = parseInt(match[0]) / 255;
+    const g = parseInt(match[1]) / 255;
+    const b = parseInt(match[2]) / 255;
 
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
-    let h = 0;
-    let s = 0;
-    let l = (max + min) / 2;
+    let h = 0,
+      s = 0,
+      l = (max + min) / 2;
 
-    if (max === min) {
-      h = s = 0;
-    } else {
+    if (max !== min) {
       const d = max - min;
       s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
       switch (max) {
@@ -66,38 +113,128 @@
       h /= 6;
     }
 
-    const saturationAdjust = variant === 0 ? 0.8 : variant === 1 ? 1.2 : 0.9;
-    const lightnessAdjust = variant === 0 ? 0.9 : variant === 1 ? 1.1 : 1.05;
+    const saturationAdjust = variant === 1 ? 0.8 : variant === 2 ? 1.2 : 0.9;
+    const lightnessAdjust = variant === 1 ? 1.1 : variant === 2 ? 0.9 : 1.05;
+
     s = Math.min(1, s * saturationAdjust);
     l = Math.min(1, l * lightnessAdjust);
+
     return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
   }
 
-  let hyperparams = $derived.by(() => {
-    const keys = new Set<string>();
-    data.experiments?.forEach((exp) =>
-      exp.hyperparams?.forEach((hp) => keys.add(hp.key)),
-    );
-    return keys;
-  });
+  function selectAllMetrics() {
+    selectedMetrics = [...commonMetrics];
+  }
 
-  let idToHP = $derived.by(() => {
-    const ret = new Map();
-    data.experiments?.forEach((exp) => {
-      ret.set(exp.id, new Map());
-      exp.hyperparams?.forEach((hp) => {
-        ret.get(exp.id).set(hp.key, hp.value);
+  function clearAllMetrics() {
+    selectedMetrics = [];
+  }
+
+  function toggleMetric(metric: string) {
+    if (selectedMetrics.includes(metric)) {
+      selectedMetrics = selectedMetrics.filter((m) => m !== metric);
+    } else {
+      selectedMetrics = [...selectedMetrics, metric];
+    }
+  }
+
+  function loadChartAttachment(): Attachment {
+    return (element) => {
+      if (experimentColors_map.size == 0) {
+        return;
+      }
+
+      let chartElement = element.querySelector("#spider");
+      if (!chartElement) {
+        console.log("Couldn't find a child canvas on this element");
+        return;
+      }
+
+      let chart: Chart | null = null;
+
+      const updateChart = () => {
+        if (chart) {
+          chart.destroy();
+          chart = null;
+        }
+
+        if (chartType() === "empty") {
+          return;
+        }
+
+        if (!data.experiments) {
+          return;
+        }
+
+        switch (chartType()) {
+          case "bar":
+            chart = drawBarChart(
+              chartElement as HTMLCanvasElement,
+              data.experiments,
+              selectedMetrics[0],
+              experimentColors_map,
+            );
+            break;
+          case "scatter":
+            chart = drawScatterChart(
+              chartElement as HTMLCanvasElement,
+              data.experiments,
+              selectedMetrics as [string, string],
+              experimentColors_map,
+            );
+            break;
+          case "radar":
+            chart = drawRadarChart(
+              chartElement as HTMLCanvasElement,
+              data.experiments,
+              selectedMetrics,
+              experimentColors_map,
+            );
+            break;
+        }
+      };
+
+      updateChart();
+      return () => {
+        if (chart) chart.destroy();
+      };
+    };
+  }
+
+  onMount(() => {
+    const resolveAndSetColors = () => {
+      if (!data.experiments) return;
+
+      const computedStyles = getComputedStyle(document.documentElement);
+      const newColorMap = new Map<string, string>();
+      const resolvedBaseColors = catppuccinAccentNames.map((name) =>
+        computedStyles.getPropertyValue(name).trim(),
+      );
+
+      data.experiments.forEach((exp, index) => {
+        const numBaseColors = resolvedBaseColors.length;
+
+        if (index < numBaseColors) {
+          newColorMap.set(exp.id, resolvedBaseColors[index]);
+        } else {
+          const baseIndex = (index - numBaseColors) % numBaseColors;
+          const variant =
+            Math.floor((index - numBaseColors) / numBaseColors) + 1;
+          const resolvedBaseColor = resolvedBaseColors[baseIndex];
+          const variantColor = generateColorVariant(resolvedBaseColor, variant);
+          newColorMap.set(exp.id, variantColor);
+        }
       });
-    });
-    return ret;
-  });
 
-  let experimentColors_map = $derived.by(() => {
-    const colorMap = new Map();
-    data.experiments?.forEach((exp, index) => {
-      colorMap.set(exp.id, generateCatppuccinColor(index));
-    });
-    return colorMap;
+      experimentColors_map = newColorMap;
+    };
+
+    resolveAndSetColors();
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    mediaQuery.addEventListener("change", resolveAndSetColors);
+    return () => {
+      mediaQuery.removeEventListener("change", resolveAndSetColors);
+    };
   });
 </script>
 
@@ -125,10 +262,9 @@
     </div>
   </div>
 
-  <div class="border border-ctp-surface0 rounded-md bg-ctp-base">
-    <div
-      class="text-xs font-medium text-ctp-subtext1 p-2 bg-ctp-mantle border-b border-ctp-surface0"
-    >
+  <div class="border border-ctp-surface0 bg-ctp-base mb-4">
+    <!-- hyperparams -->
+    <div class="text-sm font-semibold text-ctp-text p-4 border-ctp-surface1">
       Hyperparameters
     </div>
     <div
@@ -139,9 +275,8 @@
         <thead class="bg-ctp-mantle sticky top-0 z-10">
           <tr>
             <th
-              class="p-3 font-medium text-ctp-subtext1 border-b border-ctp-surface0 sticky left-0 bg-ctp-mantle z-20"
+              class="bg-ctp-mantle border-b border-ctp-surface0 sticky left-0 z-20"
             >
-              •
             </th>
             {#each hyperparams as hyperparam}
               <th
@@ -178,6 +313,106 @@
           {/each}
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <div class="border border-ctp-surface0 bg-ctp-base shadow-lg">
+    <div
+      class="text-sm font-semibold text-ctp-text p-4 border-b border-ctp-surface1"
+    >
+      <div class="flex items-center gap-2">Metrics Comparison</div>
+    </div>
+
+    <!-- Metric Selector -->
+    <div class="p-4 border-b border-ctp-surface1">
+      <!-- Dropdown selector -->
+      <details class="relative">
+        <summary
+          class="flex items-center justify-between cursor-pointer p-2 bg-ctp-surface0 rounded border border-ctp-surface1 hover:bg-ctp-surface1 transition-colors"
+        >
+          <span class="text-sm text-ctp-text">
+            Select metrics ({selectedMetrics.length} of {commonMetrics.length})
+          </span>
+          <ChevronDown size={16} class="text-ctp-subtext1" />
+        </summary>
+
+        <div
+          class="absolute top-full left-0 right-0 mt-1 bg-ctp-surface0 border border-ctp-surface1 rounded shadow-lg z-10 max-h-60 overflow-y-auto"
+        >
+          <!-- Search filter -->
+          <div class="p-2 border-b border-ctp-surface1">
+            <input
+              type="search"
+              placeholder="Filter metrics..."
+              bind:value={searchFilter}
+              class="w-full px-2 py-1 text-sm bg-ctp-base border border-ctp-surface1 rounded text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue"
+            />
+          </div>
+
+          <!-- Control buttons -->
+          <div class="flex gap-2 p-2 border-b border-ctp-surface1">
+            <button
+              onclick={selectAllMetrics}
+              class="px-2 py-1 text-xs bg-ctp-green/20 text-ctp-green rounded hover:bg-ctp-green/30 transition-colors"
+            >
+              Select All
+            </button>
+            <button
+              onclick={clearAllMetrics}
+              class="px-2 py-1 text-xs bg-ctp-red/20 text-ctp-red rounded hover:bg-ctp-red/30 transition-colors"
+            >
+              Clear All
+            </button>
+          </div>
+
+          <!-- Metric checkboxes -->
+          <div class="p-1">
+            {#each filteredMetrics as metric}
+              <label
+                class="flex items-center gap-2 p-2 hover:bg-ctp-surface1 rounded cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedMetrics.includes(metric)}
+                  onchange={() => toggleMetric(metric)}
+                  class="text-ctp-blue focus:ring-ctp-blue focus:ring-2"
+                />
+                <span class="text-sm text-ctp-text">{metric}</span>
+              </label>
+            {/each}
+
+            {#if filteredMetrics.length === 0}
+              <div class="p-2 text-sm text-ctp-subtext0 text-center">
+                No metrics found
+              </div>
+            {/if}
+          </div>
+        </div>
+      </details>
+    </div>
+    <div class="w-full p-6 bg-ctp-base">
+      {#if chartType() !== "empty"}
+        <div
+          class={chartType() === "radar"
+            ? "aspect-square max-w-2xl mx-auto"
+            : "aspect-[4/3] max-w-4xl mx-auto"}
+          {@attach loadChartAttachment()}
+        >
+          <canvas id="spider" class="w-full h-full"></canvas>
+        </div>
+      {:else}
+        <div
+          class="aspect-square max-w-2xl mx-auto flex items-center justify-center"
+        >
+          <div class="text-center text-ctp-subtext0">
+            <Circle size={48} class="mx-auto mb-4 opacity-50" />
+            <p class="text-lg mb-2">No metrics selected</p>
+            <p class="text-sm">
+              Select metrics above to start comparing experiments
+            </p>
+          </div>
+        </div>
+      {/if}
     </div>
   </div>
 </div>
