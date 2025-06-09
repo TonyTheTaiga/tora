@@ -11,17 +11,18 @@
     Settings,
   } from "lucide-svelte";
   import { page } from "$app/state";
+  import { 
+    openDeleteExperimentModal,
+    setSelectedExperiment,
+    getSelectedExperiment,
+  } from "$lib/state/app.svelte.js";
 
   let {
     experiment,
-    selectedExperiment = $bindable(),
     highlighted = $bindable(),
-    selectedForDelete = $bindable(),
   }: {
     experiment: Experiment;
-    selectedExperiment: Experiment | null;
     highlighted: string[];
-    selectedForDelete: Experiment | null;
   } = $props();
 </script>
 
@@ -117,7 +118,7 @@
           title="Delete experiment"
           onclick={(e) => {
             e.stopPropagation();
-            selectedForDelete = experiment;
+            openDeleteExperimentModal(experiment);
           }}
         >
           <X size={14} />

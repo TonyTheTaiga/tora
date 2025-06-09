@@ -12,8 +12,9 @@
   import { enhance } from "$app/forms";
   import type { Experiment } from "$lib/types";
   import { onMount, onDestroy } from "svelte";
+  import { closeEditExperimentModal } from "$lib/state/app.svelte.js";
 
-  let { experiment = $bindable() } = $props();
+  let { experiment } = $props();
 
   let experimentCopy = $state<Experiment>({
     id: experiment.id,
@@ -183,7 +184,7 @@
       </div>
       <button
         onclick={() => {
-          experiment = null;
+          closeEditExperimentModal();
         }}
         type="button"
         class="p-1.5 text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/10 rounded-full transition-all"
@@ -205,7 +206,7 @@
             experiment.visibility = experimentCopy.visibility;
             experiment.tags = [...experiment.tags];
           }
-          experiment = null;
+          closeEditExperimentModal();
 
           await update();
         };
@@ -456,7 +457,7 @@
       >
         <button
           onclick={() => {
-            experiment = null;
+            closeEditExperimentModal();
           }}
           type="button"
           class="inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"

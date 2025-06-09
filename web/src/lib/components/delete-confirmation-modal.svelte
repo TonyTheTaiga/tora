@@ -2,12 +2,13 @@
   import type { Experiment } from "$lib/types";
   import { AlertTriangle, X, Loader2 } from "lucide-svelte";
   import { onMount, onDestroy } from "svelte";
+  import { closeDeleteExperimentModal } from "$lib/state/app.svelte.js";
 
   let {
-    experiment = $bindable(),
+    experiment,
     experiments = $bindable(),
   }: {
-    experiment: Experiment | null;
+    experiment: Experiment;
     experiments: Experiment[];
   } = $props();
 
@@ -34,7 +35,7 @@
       if (response.ok) {
         const experimentId = experiment.id;
         experiments = experiments.filter((exp) => exp.id !== experimentId);
-        experiment = null;
+        closeDeleteExperimentModal();
       } else {
         console.error("Failed to delete experiment");
       }
@@ -47,7 +48,7 @@
 
   function closeModal() {
     if (isDeleting) return;
-    experiment = null;
+    closeDeleteExperimentModal();
   }
 </script>
 

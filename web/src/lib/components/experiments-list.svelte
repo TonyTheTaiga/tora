@@ -7,21 +7,11 @@
     getMode,
     addExperiment,
     selectedForComparison,
-  } from "$lib/components/comparison/state.svelte.js";
+  } from "$lib/state/comparison.svelte.js";
+  import { getSelectedExperiment, setSelectedExperiment } from "$lib/state/app.svelte.js";
 
-  let {
-    experiments = $bindable(),
-    createNewExperimentFlag = $bindable(),
-    selectedForEdit = $bindable(),
-    selectedForDelete = $bindable(),
-    selectedExperiment = $bindable(),
-  }: {
-    experiments: Experiment[];
-    createNewExperimentFlag: boolean;
-    selectedForDelete: Experiment | null;
-    selectedForEdit: Experiment | null;
-    selectedExperiment: Experiment | null;
-  } = $props();
+  let { experiments = $bindable() }: { experiments: Experiment[] } = $props();
+  let selectedExperiment = $derived(getSelectedExperiment());
 
   let highlighted = $state<string[]>([]);
 
@@ -53,20 +43,20 @@
             if (getMode()) {
               addExperiment(experiment.id);
             } else {
-              selectedExperiment = experiment;
+              setSelectedExperiment(experiment);
             }
           }}
           onkeydown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              selectedExperiment = experiment;
+              if (!getMode()) {
+                setSelectedExperiment(experiment);
+              }
             }
           }}
         >
           <ExperimentSimple
-            bind:selectedExperiment
             bind:highlighted
-            bind:selectedForDelete
             {experiment}
           />
         </div>
@@ -79,11 +69,8 @@
           {@attach focusOnExpandAttatchment}
         >
           <ExperimentDetailed
-            bind:selectedExperiment
             bind:highlighted
             bind:experiment={experiments[idx]}
-            bind:selectedForDelete
-            bind:selectedForEdit
           />
         </div>
       {/if}

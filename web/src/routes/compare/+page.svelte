@@ -4,7 +4,7 @@
   import Chart from "chart.js/auto";
   import type { PageData } from "./$types";
   import { Circle, ChevronDown } from "lucide-svelte";
-  import { reset } from "$lib/components/comparison/state.svelte";
+  import { reset } from "$lib/state/comparison.svelte.js";
   import { drawBarChart } from "./bar-chart.svelte";
   import { drawScatterChart } from "./scatter-chart.svelte";
   import { drawRadarChart } from "./radar-chart.svelte";

@@ -12,15 +12,17 @@
   import type { Attachment } from "svelte/attachments";
   import tippy from "tippy.js";
   import { onMount, onDestroy } from "svelte";
-  import { toggleMode } from "$lib/components/comparison/state.svelte.js";
+  import { toggleMode } from "$lib/state/comparison.svelte.js";
+  import { getTheme, toggleTheme as toggleAppTheme } from "$lib/state/theme.svelte.js";
+  import { 
+    openCreateExperimentModal,
+    getSelectedExperiment,
+  } from "$lib/state/app.svelte.js";
 
-  let {
-    selectedExperiment = $bindable(),
-    isOpenCreate = $bindable(),
-    hasExperiments = $bindable(),
-  } = $props();
+  let { hasExperiments } = $props();
   let { session } = $derived(page.data);
-  let theme = $state<"dark" | "light">("dark");
+  let theme = $derived(getTheme());
+  let selectedExperiment = $derived(getSelectedExperiment());
   let isAtBottom = $state(false);
 
   const handleScroll = () => {
@@ -45,23 +47,6 @@
       window.addEventListener("resize", handleScroll);
       handleScroll();
     }
-    if (
-      typeof window !== "undefined" &&
-      typeof localStorage !== "undefined" &&
-      typeof document !== "undefined"
-    ) {
-      const savedTheme = localStorage.getItem("theme");
-      if (savedTheme && (savedTheme === "dark" || savedTheme === "light")) {
-        theme = savedTheme as "dark" | "light";
-        applyTheme(theme);
-      } else {
-        const prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)",
-        ).matches;
-        theme = prefersDark ? "dark" : "light";
-        applyTheme(theme);
-      }
-    }
   });
 
   onDestroy(() => {
@@ -70,30 +55,6 @@
       window.removeEventListener("resize", handleScroll);
     }
   });
-
-  function toggleTheme() {
-    theme = theme === "dark" ? "light" : "dark";
-    if (
-      typeof window !== "undefined" &&
-      typeof localStorage !== "undefined" &&
-      typeof document !== "undefined"
-    ) {
-      applyTheme(theme);
-      localStorage.setItem("theme", theme);
-    }
-  }
-
-  function applyTheme(newTheme: "dark" | "light") {
-    if (typeof document !== "undefined") {
-      if (newTheme === "dark") {
-        document.documentElement.classList.remove("light");
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-        document.documentElement.classList.add("light");
-      }
-    }
-  }
 
   function tooltip(content: string, check: () => boolean): Attachment {
     return (element) => {
@@ -125,7 +86,7 @@
     class="toolbar-button"
     title="Create a new experiment"
     onclick={() => {
-      isOpenCreate = true;
+      openCreateExperimentModal();
     }}
     {@attach tooltip(
       "<div>No experiments yet! <strong>Ready to start? Tap here!</strong> and kick things off!</div>",
@@ -171,7 +132,7 @@
 
   <button
     onclick={() => {
-      toggleTheme();
+      toggleAppTheme();
     }}
     class="toolbar-button"
     aria-label={theme === "dark"

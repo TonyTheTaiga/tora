@@ -27,19 +27,18 @@
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
   import { page } from "$app/state";
+  import {
+    openDeleteExperimentModal,
+    openEditExperimentModal,
+    setSelectedExperiment,
+  } from "$lib/state/app.svelte.js";
 
   let {
     experiment = $bindable(),
-    selectedExperiment = $bindable(),
     highlighted = $bindable(),
-    selectedForDelete = $bindable(),
-    selectedForEdit = $bindable(),
   }: {
     experiment: Experiment;
-    selectedExperiment: Experiment | null;
     highlighted: string[];
-    selectedForDelete: Experiment | null;
-    selectedForEdit: Experiment | null;
   } = $props();
 
   let recommendations = $state<Record<string, HPRecommendation>>({});
@@ -163,7 +162,7 @@
             </button>
             <button
               onclick={() => {
-                selectedForEdit = experiment;
+                openEditExperimentModal(experiment);
               }}
               class="p-1.5 rounded-md text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
               title="Edit experiment"
@@ -206,7 +205,7 @@
               title="Delete experiment"
               onclick={(e) => {
                 e.stopPropagation();
-                selectedForDelete = experiment;
+                openDeleteExperimentModal(experiment);
               }}
             >
               <X size={16} />
@@ -215,7 +214,7 @@
           <button
             class="p-1.5 rounded-md text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
             onclick={() => {
-              selectedExperiment = null;
+              setSelectedExperiment(null);
             }}
             title="Minimize"
           >

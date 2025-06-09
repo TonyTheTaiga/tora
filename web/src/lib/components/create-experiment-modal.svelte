@@ -12,12 +12,7 @@
     ChevronDown,
   } from "lucide-svelte";
   import { onMount, onDestroy } from "svelte";
-
-  let {
-    createNewExperimentFlag = $bindable(),
-  }: {
-    createNewExperimentFlag: boolean;
-  } = $props();
+  import { closeCreateExperimentModal } from "$lib/state/app.svelte.js";
 
   let hyperparams = $state<HyperParam[]>([]);
   let addingNewTag = $state<boolean>(false);
@@ -142,7 +137,7 @@
         </h3>
       </div>
       <button
-        onclick={() => (createNewExperimentFlag = false)}
+        onclick={() => closeCreateExperimentModal()}
         type="button"
         class="p-1.5 text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/10 rounded-full transition-all"
       >
@@ -442,7 +437,7 @@
       >
         <button
           onclick={() => {
-            createNewExperimentFlag = !createNewExperimentFlag;
+            closeCreateExperimentModal();
           }}
           type="button"
           class="inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"

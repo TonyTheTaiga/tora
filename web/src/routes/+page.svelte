@@ -9,48 +9,42 @@
   import LandingPage from "$lib/components/landing-page.svelte";
   import ComparisonToolbar from "$lib/components/comparison/comparison-toolbar.svelte";
   import { page } from "$app/state";
-  import { getMode } from "$lib/components/comparison/state.svelte.js";
+  import { getMode } from "$lib/state/comparison.svelte.js";
+  import {
+    getCreateExperimentModal,
+    getEditExperimentModal,
+    getDeleteExperimentModal,
+    getSelectedExperiment,
+  } from "$lib/state/app.svelte.js";
 
   let user = $derived(page.data.user);
   let { data = $bindable() }: { data: PageData } = $props();
-  let experiments = $state([...data.experiments]);
-
-  $effect(() => {
-    experiments = [...data.experiments];
-  });
+  let experiments = $derived([...data.experiments]);
 
   let hasExperiments: boolean = $derived(experiments.length > 0);
-  let modalState = $state({
-    createExperiment: false,
-    selectedForDelete: null as Experiment | null,
-    selectedForEdit: null as Experiment | null,
-    selectedExperiment: null as Experiment | null,
-  });
+  let createExperimentModal = $derived(getCreateExperimentModal());
+  let editExperimentModal = $derived(getEditExperimentModal());
+  let deleteExperimentModal = $derived(getDeleteExperimentModal());
+  let selectedExperiment = $derived(getSelectedExperiment());
 </script>
 
 {#if user}
-  {#if modalState.createExperiment}
-    <CreateExperimentModal
-      bind:createNewExperimentFlag={modalState.createExperiment}
-    />
+  {#if createExperimentModal}
+    <CreateExperimentModal />
   {/if}
 
-  {#if modalState.selectedForDelete}
+  {#if deleteExperimentModal}
     <DeleteConfirmationModal
-      bind:experiment={modalState.selectedForDelete}
+      experiment={deleteExperimentModal}
       bind:experiments
     />
   {/if}
 
-  {#if modalState.selectedForEdit}
-    <EditExperimentModal bind:experiment={modalState.selectedForEdit} />
+  {#if editExperimentModal}
+    <EditExperimentModal experiment={editExperimentModal} />
   {/if}
 
-  <Toolbar
-    bind:selectedExperiment={modalState.selectedExperiment}
-    bind:isOpenCreate={modalState.createExperiment}
-    {hasExperiments}
-  />
+  <Toolbar {hasExperiments} />
 
   {#if getMode()}
     <div class="sticky top-20 sm:top-22 z-20 max-w-fit">
@@ -58,13 +52,7 @@
     </div>
   {/if}
 
-  <ExperimentsList
-    bind:experiments
-    bind:createNewExperimentFlag={modalState.createExperiment}
-    bind:selectedForEdit={modalState.selectedForEdit}
-    bind:selectedForDelete={modalState.selectedForDelete}
-    bind:selectedExperiment={modalState.selectedExperiment}
-  ></ExperimentsList>
+  <ExperimentsList bind:experiments />
 {:else}
   <LandingPage />
 {/if}
