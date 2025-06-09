@@ -1,7 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
-export async function GET({ url, locals }) {
+export const GET: RequestHandler = async ({ url, locals }) => {
   const { user } = locals;
   if (!user) {
     throw error(401, "Unauthorized");
@@ -20,7 +20,7 @@ export async function GET({ url, locals }) {
       err instanceof Error ? err.message : "Internal Server Error";
     throw error(500, errorMessage);
   }
-}
+};
 
 export const POST: RequestHandler = async ({ request, locals, cookies }) => {
   if (!locals.user) {

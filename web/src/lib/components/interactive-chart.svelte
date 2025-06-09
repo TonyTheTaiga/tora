@@ -1,17 +1,46 @@
 <script lang="ts">
   import type { Experiment, Metric } from "$lib/types";
   import Chart from "chart.js/auto";
-  import { ChartLine, Plus, EyeOff } from "lucide-svelte";
+  import { ChartLine, Plus, EyeOff, ChevronDown } from "lucide-svelte";
   import { onMount, onDestroy } from "svelte";
 
   let chartInstance: Chart | null = null;
   let chartCanvas: HTMLCanvasElement | null = $state(null);
-  let { experiment }: { experiment: Experiment } = $props();
+  let {
+    experiment,
+    selectedMetrics = $bindable([]),
+  }: {
+    experiment: Experiment;
+    selectedMetrics?: string[];
+  } = $props();
   let isLoading: boolean = $state(false);
-  let selectedMetrics = $state<string[]>([]);
   let metricsData = $state<
     Record<string, { steps: number[]; values: number[] }>
   >({});
+
+  let searchFilter = $state<string>("");
+  let availableMetrics = $derived(experiment.availableMetrics || []);
+  let filteredMetrics = $derived(
+    availableMetrics.filter((metric) =>
+      metric.toLowerCase().includes(searchFilter.toLowerCase()),
+    ),
+  );
+
+  function selectAllMetrics() {
+    selectedMetrics = [...availableMetrics];
+  }
+
+  function clearAllMetrics() {
+    selectedMetrics = [];
+  }
+
+  function toggleMetricCheckbox(metric: string) {
+    if (selectedMetrics.includes(metric)) {
+      selectedMetrics = selectedMetrics.filter((m) => m !== metric);
+    } else {
+      selectedMetrics = [...selectedMetrics, metric];
+    }
+  }
 
   const chartColorKeys = [
     "red",
@@ -246,39 +275,45 @@
     }
   }
 
-  async function toggleMetric(metric: string) {
-    isLoading = true;
+  async function loadMetricData(metric: string) {
+    if (!metricsData[metric]) {
+      const metrics = (await loadMetrics()) as Metric[];
+      const metricsByName = Object.groupBy(metrics, ({ name }) => name);
+      const chart_targets = metricsByName[metric];
+      if (chart_targets && chart_targets.length > 0) {
+        chart_targets.sort((a, b) => (a.step ?? 0) - (b.step ?? 0));
+        const steps = chart_targets.map((l, index) =>
+          l.step !== undefined ? l.step : index,
+        );
+        const values = chart_targets.map((l) =>
+          typeof l.value === "number" ? l.value : parseFloat(l.value) || 0,
+        );
 
-    try {
-      if (selectedMetrics.includes(metric)) {
-        selectedMetrics = selectedMetrics.filter((m) => m !== metric);
-      } else {
-        selectedMetrics = [...selectedMetrics, metric];
-        if (!metricsData[metric]) {
-          const metrics = (await loadMetrics()) as Metric[];
-          const metricsByName = Object.groupBy(metrics, ({ name }) => name);
-          const chart_targets = metricsByName[metric];
-          if (chart_targets && chart_targets.length > 0) {
-            chart_targets.sort((a, b) => (a.step ?? 0) - (b.step ?? 0));
-            const steps = chart_targets.map((l, index) =>
-              l.step !== undefined ? l.step : index,
-            );
-            const values = chart_targets.map((l) =>
-              typeof l.value === "number" ? l.value : parseFloat(l.value) || 0,
-            );
-
-            metricsData[metric] = { steps, values };
-          }
-        }
+        metricsData[metric] = { steps, values };
       }
-
-      updateChart();
-    } catch (error) {
-      console.error("Error toggling metric:", error);
-    } finally {
-      isLoading = false;
     }
   }
+
+  $effect(() => {
+    if (selectedMetrics.length > 0) {
+      const loadAndUpdate = async () => {
+        isLoading = true;
+        try {
+          for (const metric of selectedMetrics) {
+            await loadMetricData(metric);
+          }
+          updateChart();
+        } catch (error) {
+          console.error("Error loading metric data:", error);
+        } finally {
+          isLoading = false;
+        }
+      };
+      loadAndUpdate();
+    } else {
+      destroyChart();
+    }
+  });
 
   function resetChart() {
     selectedMetrics = [];
@@ -288,43 +323,72 @@
 </script>
 
 <div class="p-3 sm:p-4 space-y-4 w-full">
-  <!-- Available Metrics Header Section -->
-  {#if experiment.availableMetrics && experiment.availableMetrics.length > 0}
-    <div
-      class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2"
-    >
-      <h3 class="text-sm font-medium text-ctp-subtext0">Available Metrics</h3>
-      {#if selectedMetrics.length > 0}
-        <button
-          class="self-end sm:self-auto px-2 py-1 text-xs text-ctp-red border border-ctp-red rounded hover:bg-ctp-red/10 transition-colors"
-          onclick={resetChart}
+  <!-- Metric Selector -->
+  {#if availableMetrics.length > 0}
+    <div class="border-b border-ctp-surface1 pb-4">
+      <details class="relative">
+        <summary
+          class="flex items-center justify-between cursor-pointer p-2 bg-ctp-surface0 rounded border border-ctp-surface1 hover:bg-ctp-surface1 transition-colors"
         >
-          Clear All
-        </button>
-      {/if}
-    </div>
+          <span class="text-sm text-ctp-text">
+            Select metrics ({selectedMetrics.length} of {availableMetrics.length})
+          </span>
+          <ChevronDown size={16} class="text-ctp-subtext1" />
+        </summary>
 
-    <!-- Available Metrics Selection Buttons -->
-    <div class="flex flex-wrap gap-2 mb-4 max-w-full overflow-x-auto pb-1">
-      {#each experiment.availableMetrics as metric}
-        <button
-          class={`flex items-center gap-1.5 py-1 sm:py-1.5 px-2 sm:px-3 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
-            selectedMetrics.includes(metric)
-              ? "bg-ctp-mauve text-ctp-crust hover:bg-ctp-lavender"
-              : "bg-ctp-surface0 text-ctp-text border border-ctp-surface1 hover:bg-ctp-blue hover:text-ctp-crust hover:border-ctp-blue"
-          }`}
-          onclick={() => toggleMetric(metric)}
+        <div
+          class="absolute top-full left-0 right-0 mt-1 bg-ctp-surface0 border border-ctp-surface1 rounded shadow-lg z-10 max-h-60 overflow-y-auto"
         >
-          {#if selectedMetrics.includes(metric)}
-            <EyeOff size={12} class="sm:hidden" />
-            <EyeOff size={14} class="hidden sm:inline" />
-          {:else}
-            <Plus size={12} class="sm:hidden" />
-            <Plus size={14} class="hidden sm:inline" />
-          {/if}
-          {metric}
-        </button>
-      {/each}
+          <!-- Search filter -->
+          <div class="p-2 border-b border-ctp-surface1">
+            <input
+              type="search"
+              placeholder="Filter metrics..."
+              bind:value={searchFilter}
+              class="w-full px-2 py-1 text-sm bg-ctp-base border border-ctp-surface1 rounded text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue"
+            />
+          </div>
+
+          <!-- Control buttons -->
+          <div class="flex gap-2 p-2 border-b border-ctp-surface1">
+            <button
+              onclick={selectAllMetrics}
+              class="px-2 py-1 text-xs bg-ctp-green/20 text-ctp-green rounded hover:bg-ctp-green/30 transition-colors"
+            >
+              Select All
+            </button>
+            <button
+              onclick={clearAllMetrics}
+              class="px-2 py-1 text-xs bg-ctp-red/20 text-ctp-red rounded hover:bg-ctp-red/30 transition-colors"
+            >
+              Clear All
+            </button>
+          </div>
+
+          <!-- Metric checkboxes -->
+          <div class="p-1">
+            {#each filteredMetrics as metric}
+              <label
+                class="flex items-center gap-2 p-2 hover:bg-ctp-surface1 rounded cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedMetrics.includes(metric)}
+                  onchange={() => toggleMetricCheckbox(metric)}
+                  class="text-ctp-blue focus:ring-ctp-blue focus:ring-2"
+                />
+                <span class="text-sm text-ctp-text">{metric}</span>
+              </label>
+            {/each}
+
+            {#if filteredMetrics.length === 0}
+              <div class="p-2 text-sm text-ctp-subtext0 text-center">
+                No metrics found
+              </div>
+            {/if}
+          </div>
+        </div>
+      </details>
     </div>
   {/if}
 
@@ -335,7 +399,7 @@
     >
       {#if isLoading}
         <div
-          class="absolute inset-0 flex items-center justify-center bg-ctp-mantle/80 backdrop-blur-sm z-10"
+          class="absolute inset-0 flex items-center justify-center bg-ctp-mantle/80 backdrop-blur-sm"
         >
           <div class="animate-pulse text-[#91d7e3]">Loading data...</div>
         </div>

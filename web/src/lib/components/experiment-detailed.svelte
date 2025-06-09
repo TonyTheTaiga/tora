@@ -5,6 +5,10 @@
     HPRecommendation,
     Metric, // Ensure Metric is imported
   } from "$lib/types";
+
+  interface ExperimentWithMetrics extends Experiment {
+    metricData?: Record<string, number[]>;
+  }
   import {
     X,
     Clock,
@@ -37,7 +41,7 @@
     experiment = $bindable(),
     highlighted = $bindable(),
   }: {
-    experiment: Experiment;
+    experiment: ExperimentWithMetrics;
     highlighted: string[];
   } = $props();
 
@@ -51,6 +55,12 @@
   let rawMetrics = $state<Metric[]>([]);
   let metricsLoading = $state(false);
   let metricsError = $state<string | null>(null);
+
+  let availableMetrics = $derived(
+    experiment.metricData
+      ? Object.keys(experiment.metricData)
+      : experiment.availableMetrics || [],
+  );
 
   async function toggleMetricsDisplay() {
     if (showMetricsTable) {
@@ -391,7 +401,7 @@
     {/if}
 
     <!-- Metrics section -->
-    {#if experiment.availableMetrics && experiment.availableMetrics.length > 0}
+    {#if availableMetrics.length > 0}
       <details class="mt-1 group">
         <summary
           class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
