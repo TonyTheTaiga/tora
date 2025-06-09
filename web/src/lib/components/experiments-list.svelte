@@ -8,7 +8,10 @@
     addExperiment,
     selectedForComparison,
   } from "$lib/state/comparison.svelte.js";
-  import { getSelectedExperiment, setSelectedExperiment } from "$lib/state/app.svelte.js";
+  import {
+    getSelectedExperiment,
+    setSelectedExperiment,
+  } from "$lib/state/app.svelte.js";
 
   let { experiments = $bindable() }: { experiments: Experiment[] } = $props();
   let selectedExperiment = $derived(getSelectedExperiment());
@@ -55,10 +58,7 @@
             }
           }}
         >
-          <ExperimentSimple
-            bind:highlighted
-            {experiment}
-          />
+          <ExperimentSimple bind:highlighted {experiment} />
         </div>
       {:else}
         <div

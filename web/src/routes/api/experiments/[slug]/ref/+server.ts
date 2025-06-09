@@ -1,30 +1,27 @@
 import { json, error } from "@sveltejs/kit";
-import {
-  createReference,
-  getReferenceChain,
-  getExperiment,
-  deleteReference,
-} from "$lib/server/database";
+import type { RequestHandler } from "./$types";
+import { generateRequestId, startTimer } from "$lib/utils/timing";
 
-export async function GET({
-  params: { slug },
-}: {
-  params: { slug: string };
-  locals: { user: { id: string } | null };
-}) {
-  const references = await getReferenceChain(slug);
-  return json(references.map((experiment) => experiment.id));
-}
+export const GET: RequestHandler = async ({ params, locals }) => {
+  const requestId = generateRequestId();
+  const timer = startTimer("api.experimentRef.GET", {
+    requestId,
+    experimentId: params.slug,
+  });
 
-export async function POST({
-  params: { slug },
-  request,
-  locals,
-}: {
-  params: { slug: string };
-  request: Request;
-  locals: { user: { id: string } | null };
-}) {
+  try {
+    const references = await locals.dbClient.getReferenceChain(params.slug);
+    timer.end({ referenceCount: references.length });
+    return json(references.map((experiment) => experiment.id));
+  } catch (error) {
+    timer.end({
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    throw error;
+  }
+};
+
+export const POST: RequestHandler = async ({ params, request, locals }) => {
   const userId = locals.user?.id;
   if (!userId) {
     return json({ message: "Authentication required" }, { status: 401 });
@@ -33,8 +30,8 @@ export async function POST({
   try {
     const { referenceId } = await request.json();
     try {
-      await getExperiment(slug, userId);
-      await getExperiment(referenceId, userId);
+      await locals.dbClient.checkExperimentAccess(params.slug, userId);
+      await locals.dbClient.checkExperimentAccess(referenceId, userId);
     } catch (accessError) {
       return json(
         { message: "Access denied to one or both experiments" },
@@ -42,7 +39,7 @@ export async function POST({
       );
     }
 
-    await createReference(slug, referenceId);
+    await locals.dbClient.createReference(params.slug, referenceId);
     return json({ message: "Reference created successfully" }, { status: 201 });
   } catch (error) {
     return json(
@@ -55,4 +52,4 @@ export async function POST({
       { status: 500 },
     );
   }
-}
+};

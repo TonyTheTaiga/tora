@@ -14,7 +14,7 @@ let state = $state<ThemeState>({
 
 function getSystemTheme(): Theme | "no-preference" {
   if (!browser) return "no-preference";
-  
+
   if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
     return "dark";
   } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
@@ -25,7 +25,7 @@ function getSystemTheme(): Theme | "no-preference" {
 
 function getStoredTheme(): Theme | null {
   if (!browser) return null;
-  
+
   const stored = localStorage.getItem("theme");
   if (stored === "light" || stored === "dark") {
     return stored;
@@ -40,7 +40,7 @@ function setStoredTheme(theme: Theme) {
 
 function applyThemeToDOM(theme: Theme) {
   if (!browser) return;
-  
+
   const html = document.documentElement;
   html.classList.remove("light", "dark");
   html.classList.add(theme);
@@ -48,12 +48,12 @@ function applyThemeToDOM(theme: Theme) {
 
 function initializeTheme() {
   if (!browser) return;
-  
+
   const storedTheme = getStoredTheme();
   const systemTheme = getSystemTheme();
-  
+
   state.systemPreference = systemTheme;
-  
+
   if (storedTheme) {
     state.theme = storedTheme;
   } else if (systemTheme !== "no-preference") {
@@ -61,9 +61,9 @@ function initializeTheme() {
   } else {
     state.theme = "dark";
   }
-  
+
   applyThemeToDOM(state.theme);
-  
+
   const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
   mediaQuery.addEventListener("change", (e) => {
     state.systemPreference = e.matches ? "dark" : "light";
@@ -96,9 +96,9 @@ export function toggleTheme() {
 
 export function useSystemTheme() {
   if (!browser) return;
-  
+
   localStorage.removeItem("theme");
-  
+
   if (state.systemPreference !== "no-preference") {
     state.theme = state.systemPreference;
     applyThemeToDOM(state.theme);

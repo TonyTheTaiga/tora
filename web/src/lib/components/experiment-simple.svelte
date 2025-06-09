@@ -11,7 +11,7 @@
     Settings,
   } from "lucide-svelte";
   import { page } from "$app/state";
-  import { 
+  import {
     openDeleteExperimentModal,
     setSelectedExperiment,
     getSelectedExperiment,

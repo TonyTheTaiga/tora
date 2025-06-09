@@ -38,9 +38,27 @@ export function drawScatterChart(
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      events: ["mousemove", "mouseout", "click", "touchstart", "touchmove", "touchend"],
       plugins: {
         legend: {
           display: false,
+        },
+        tooltip: {
+          enabled: true,
+          mode: "nearest",
+          intersect: false,
+          callbacks: {
+            title: function (context) {
+              return context[0].dataset.label || "Experiment";
+            },
+            label: function (context) {
+              const point = context.parsed;
+              return [
+                `${xMetric}: ${point.x.toFixed(3)}`,
+                `${yMetric}: ${point.y.toFixed(3)}`,
+              ];
+            },
+          },
         },
       },
       scales: {
@@ -86,8 +104,69 @@ export function drawScatterChart(
       },
       interaction: {
         intersect: false,
+        mode: "nearest",
+      },
+      elements: {
+        point: {
+          radius: 8,
+          hoverRadius: 12,
+          borderWidth: 2,
+          hoverBorderWidth: 3,
+        },
+      },
+      onHover: (event, activeElements) => {
+        if (event.native) {
+          (event.native.target as HTMLElement).style.cursor =
+            activeElements.length > 0 ? "pointer" : "default";
+        }
       },
     },
+    plugins: [
+      {
+        id: "touchAndTooltipHandler",
+        beforeEvent(chart, args) {
+          const event = args.event;
+          const eventType = event.type as string;
+
+          // Prevent scrolling on touch events
+          if (eventType === "touchstart" || eventType === "touchmove") {
+            if (event.native) {
+              event.native.preventDefault();
+            }
+          }
+
+          // Clear tooltips when interaction ends
+          if (
+            event.type === "mouseout" ||
+            eventType === "touchend" ||
+            eventType === "mouseup"
+          ) {
+            if (
+              chart.tooltip &&
+              typeof chart.tooltip.setActiveElements === "function"
+            ) {
+              chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+              chart.update("none");
+            }
+          }
+        },
+        afterEvent(chart, args) {
+          const event = args.event;
+          const eventType = event.type as string;
+
+          // Additional cleanup for mouse leave
+          if (eventType === "mouseleave") {
+            if (
+              chart.tooltip &&
+              typeof chart.tooltip.setActiveElements === "function"
+            ) {
+              chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+              chart.update("none");
+            }
+          }
+        },
+      },
+    ],
   });
 
   return chart;

@@ -6,14 +6,14 @@ export function createClipboardState() {
 
   function copyToClipboard(text: string) {
     if (!browser) return;
-    
+
     navigator.clipboard.writeText(text).then(() => {
       copied = true;
-      
+
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      
+
       timeoutId = setTimeout(() => {
         copied = false;
       }, 2000);
@@ -35,7 +35,7 @@ export function createScrollState() {
 
   function updateScrollState() {
     if (!browser) return;
-    
+
     const pageIsScrollable =
       document.documentElement.scrollHeight > window.innerHeight;
     const atActualBottom =

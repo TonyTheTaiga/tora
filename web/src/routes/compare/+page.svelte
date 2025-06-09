@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import type { Attachment } from "svelte/attachments";
+  import { onMount, onDestroy } from "svelte";
   import Chart from "chart.js/auto";
   import type { PageData } from "./$types";
   import { Circle, ChevronDown } from "lucide-svelte";
@@ -138,68 +137,85 @@
     }
   }
 
-  function loadChartAttachment(): Attachment {
-    return (element) => {
-      if (experimentColors_map.size == 0) {
-        return;
-      }
+  let chartCanvas = $state<HTMLCanvasElement>();
+  let chart: Chart | null = null;
 
-      let chartElement = element.querySelector("#spider");
-      if (!chartElement) {
-        console.log("Couldn't find a child canvas on this element");
-        return;
-      }
-
-      let chart: Chart | null = null;
-
-      const updateChart = () => {
-        if (chart) {
-          chart.destroy();
-          chart = null;
-        }
-
-        if (chartType() === "empty") {
-          return;
-        }
-
-        if (!data.experiments) {
-          return;
-        }
-
-        switch (chartType()) {
-          case "bar":
-            chart = drawBarChart(
-              chartElement as HTMLCanvasElement,
-              data.experiments,
-              selectedMetrics[0],
-              experimentColors_map,
-            );
-            break;
-          case "scatter":
-            chart = drawScatterChart(
-              chartElement as HTMLCanvasElement,
-              data.experiments,
-              selectedMetrics as [string, string],
-              experimentColors_map,
-            );
-            break;
-          case "radar":
-            chart = drawRadarChart(
-              chartElement as HTMLCanvasElement,
-              data.experiments,
-              selectedMetrics,
-              experimentColors_map,
-            );
-            break;
+  // Fallback DOM listener for touchend events (Chart.js plugins don't always receive them reliably)
+  $effect(() => {
+    const currentCanvas = chartCanvas;
+    
+    if (currentCanvas) {
+      const clearTooltipOnTouchEnd = () => {
+        if (chart && chart.tooltip) {
+          if (typeof chart.tooltip.setActiveElements === 'function') {
+            chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+            chart.update('none');
+          }
         }
       };
-
-      updateChart();
+      
+      currentCanvas.addEventListener('touchend', clearTooltipOnTouchEnd);
+      currentCanvas.addEventListener('touchcancel', clearTooltipOnTouchEnd);
+      
       return () => {
-        if (chart) chart.destroy();
+        currentCanvas.removeEventListener('touchend', clearTooltipOnTouchEnd);
+        currentCanvas.removeEventListener('touchcancel', clearTooltipOnTouchEnd);
       };
-    };
+    }
+  });
+
+  function updateChart() {
+    if (chart) {
+      chart.destroy();
+      chart = null;
+    }
+
+    if (
+      !chartCanvas ||
+      chartType() === "empty" ||
+      !data.experiments ||
+      experimentColors_map.size === 0
+    ) {
+      return;
+    }
+
+    switch (chartType()) {
+      case "bar":
+        chart = drawBarChart(
+          chartCanvas,
+          data.experiments,
+          selectedMetrics[0],
+          experimentColors_map,
+        );
+        break;
+      case "scatter":
+        chart = drawScatterChart(
+          chartCanvas,
+          data.experiments,
+          selectedMetrics as [string, string],
+          experimentColors_map,
+        );
+        break;
+      case "radar":
+        chart = drawRadarChart(
+          chartCanvas,
+          data.experiments,
+          selectedMetrics,
+          experimentColors_map,
+        );
+        break;
+    }
   }
+
+  $effect(() => {
+    updateChart();
+  });
+
+  onDestroy(() => {
+    if (chart) {
+      chart.destroy();
+    }
+  });
 
   onMount(() => {
     const resolveAndSetColors = () => {
@@ -396,9 +412,9 @@
           class={chartType() === "radar"
             ? "aspect-square max-w-2xl mx-auto"
             : "aspect-[4/3] max-w-4xl mx-auto"}
-          {@attach loadChartAttachment()}
         >
-          <canvas id="spider" class="w-full h-full"></canvas>
+          <canvas bind:this={chartCanvas} class="w-full h-full chart-canvas"
+          ></canvas>
         </div>
       {:else}
         <div
@@ -420,5 +436,12 @@
 <style>
   .scroll-container::-webkit-scrollbar {
     display: none;
+  }
+
+  .chart-canvas {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
 </style>

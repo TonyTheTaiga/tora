@@ -1,7 +1,8 @@
 import type { Actions } from "./$types";
 import type { PageServerLoad } from "./$types";
-import { fail } from "@sveltejs/kit";
+import { error, fail } from "@sveltejs/kit";
 import type { HyperParam, Experiment } from "$lib/types";
+import { generateRequestId, startTimer } from "$lib/utils/timing";
 
 const API_ROUTES = {
   GET_EXPERIMENTS: "/api/experiments",
@@ -17,24 +18,41 @@ interface FormDataResult {
 }
 
 export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
-  const { session } = await locals.safeGetSession();
-  const { currentWorkspace } = await parent();
+  const requestId = generateRequestId();
+  const timer = startTimer("page.home.load", { requestId });
 
-  const apiUrl = new URL(API_ROUTES.GET_EXPERIMENTS, url.origin);
-  if (currentWorkspace) {
-    apiUrl.searchParams.set("workspace", currentWorkspace.id);
+  try {
+    const { session, user } = await locals.safeGetSession();
+    if (!user) {
+      const experiments = new Array();
+      return { experiments, session };
+    }
+
+    const { currentWorkspace } = await parent();
+
+    const apiUrl = new URL(API_ROUTES.GET_EXPERIMENTS, url.origin);
+    if (currentWorkspace?.id) {
+      apiUrl.searchParams.set("workspace", currentWorkspace.id);
+    }
+
+    const res = await fetch(apiUrl);
+
+    if (!res.ok) {
+      throw error(res.status, `Failed to fetch experiments: ${res.statusText}`);
+    }
+
+    const experiments: Experiment[] = await res.json();
+
+    timer.end({
+      userId: session?.user?.id || "unknown",
+      workspaceId: currentWorkspace?.id || "unknown",
+      experimentCount: experiments.length.toString(),
+    });
+    return { experiments, session };
+  } catch (err) {
+    timer.end({ error: err instanceof Error ? err.message : "Unknown error" });
+    throw err;
   }
-
-  const response = await fetch(apiUrl.toString());
-  if (!response.ok) {
-    console.error(
-      `Failed to fetch experiments: ${response.status} ${response.statusText}`,
-    );
-    return { experiments: [], session, error: "Failed to load experiments." };
-  }
-
-  let experiments: Experiment[] = await response.json();
-  return { experiments, session };
 };
 
 export const actions: Actions = {

@@ -3,8 +3,12 @@
     Experiment,
     ExperimentAnalysis,
     HPRecommendation,
-    Metric, // Ensure Metric is imported
+    Metric,
   } from "$lib/types";
+
+  interface ExperimentWithMetrics extends Experiment {
+    metricData?: Record<string, number[]>;
+  }
   import {
     X,
     Clock,
@@ -37,7 +41,7 @@
     experiment = $bindable(),
     highlighted = $bindable(),
   }: {
-    experiment: Experiment;
+    experiment: ExperimentWithMetrics;
     highlighted: string[];
   } = $props();
 
@@ -51,6 +55,12 @@
   let rawMetrics = $state<Metric[]>([]);
   let metricsLoading = $state(false);
   let metricsError = $state<string | null>(null);
+
+  let availableMetrics = $derived(
+    experiment.metricData
+      ? Object.keys(experiment.metricData)
+      : experiment.availableMetrics || [],
+  );
 
   async function toggleMetricsDisplay() {
     if (showMetricsTable) {
@@ -228,15 +238,17 @@
         <div class="flex items-center gap-1">
           <Clock size={14} class="flex-shrink-0" />
           <time>
-            {new Date(experiment.createdAt).toLocaleString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-              hour12: false,
-            }).replace(/,\s+/, " - ")}
+            {new Date(experiment.createdAt)
+              .toLocaleString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: false,
+              })
+              .replace(/,\s+/, " - ")}
           </time>
         </div>
 
@@ -389,7 +401,7 @@
     {/if}
 
     <!-- Metrics section -->
-    {#if experiment.availableMetrics && experiment.availableMetrics.length > 0}
+    {#if availableMetrics.length > 0}
       <details class="mt-1 group">
         <summary
           class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
@@ -467,15 +479,17 @@
                         >
                         <td class="p-2 text-ctp-text">{metric.step ?? "-"}</td>
                         <td class="p-2 text-ctp-text whitespace-nowrap">
-                          {new Date(metric.created_at).toLocaleString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            second: "2-digit",
-                            hour12: false,
-                          }).replace(/,\s+/, " - ")}
+                          {new Date(metric.created_at)
+                            .toLocaleString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                              hour12: false,
+                            })
+                            .replace(/,\s+/, " - ")}
                         </td>
                       </tr>
                     {/each}
@@ -489,7 +503,6 @@
               </p>
             {/if}
           {:else}
-            <!-- Original Chart Display -->
             <div class="-mx-2 sm:-mx-4">
               <div class="px-1 sm:px-2 w-full overflow-x-auto">
                 <InteractiveChart {experiment} />

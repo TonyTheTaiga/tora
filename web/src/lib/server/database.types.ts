@@ -47,6 +47,7 @@ export type Database = {
           id: string;
           name: string;
           tags: string[] | null;
+          updated_at: string;
           visibility: Database["public"]["Enums"]["visibility"];
         };
         Insert: {
@@ -56,6 +57,7 @@ export type Database = {
           id?: string;
           name: string;
           tags?: string[] | null;
+          updated_at?: string;
           visibility?: Database["public"]["Enums"]["visibility"];
         };
         Update: {
@@ -65,6 +67,7 @@ export type Database = {
           id?: string;
           name?: string;
           tags?: string[] | null;
+          updated_at?: string;
           visibility?: Database["public"]["Enums"]["visibility"];
         };
         Relationships: [];
@@ -147,19 +150,19 @@ export type Database = {
         Row: {
           added_at: string;
           experiment_id: string;
-          role: string;
+          role: Database["public"]["Enums"]["user_experiment_role"];
           user_id: string;
         };
         Insert: {
           added_at?: string;
           experiment_id: string;
-          role?: string;
+          role?: Database["public"]["Enums"]["user_experiment_role"];
           user_id: string;
         };
         Update: {
           added_at?: string;
           experiment_id?: string;
-          role?: string;
+          role?: Database["public"]["Enums"]["user_experiment_role"];
           user_id?: string;
         };
         Relationships: [
@@ -240,13 +243,15 @@ export type Database = {
       get_experiment_chain: {
         Args: { target_experiment_id: string };
         Returns: {
-          created_at: string;
-          description: string | null;
-          hyperparams: Json[] | null;
-          id: string;
-          name: string;
-          tags: string[] | null;
-          visibility: Database["public"]["Enums"]["visibility"];
+          experiment_id: string;
+          experiment_created_at: string;
+          experiment_updated_at: string;
+          experiment_name: string;
+          experiment_description: string;
+          experiment_hyperparams: Json[];
+          experiment_tags: string[];
+          experiment_visibility: Database["public"]["Enums"]["visibility"];
+          depth: number;
         }[];
       };
       get_experiments_and_metrics: {
@@ -256,6 +261,7 @@ export type Database = {
           name: string;
           description: string;
           created_at: string;
+          updated_at: string;
           tags: string[];
           hyperparams: Json[];
           metric_dict: Json;
@@ -273,6 +279,22 @@ export type Database = {
           hyperparams: Json[];
           available_metrics: string[];
           visibility: Database["public"]["Enums"]["visibility"];
+        }[];
+      };
+      get_user_experiments: {
+        Args: { user_id: string; workspace_id?: string };
+        Returns: {
+          experiment_id: string;
+          experiment_user_id: string;
+          experiment_user_role: Database["public"]["Enums"]["user_experiment_role"];
+          experiment_created_at: string;
+          experiment_updated_at: string;
+          experiment_name: string;
+          experiment_description: string;
+          experiment_hyperparams: Json[];
+          experiment_tags: string[];
+          experiment_visibility: Database["public"]["Enums"]["visibility"];
+          available_metrics: string[];
         }[];
       };
       get_workspace_experiments: {
@@ -294,8 +316,41 @@ export type Database = {
           key_metrics: Json;
         }[];
       };
+      gtrgm_compress: {
+        Args: { "": unknown };
+        Returns: unknown;
+      };
+      gtrgm_decompress: {
+        Args: { "": unknown };
+        Returns: unknown;
+      };
+      gtrgm_in: {
+        Args: { "": unknown };
+        Returns: unknown;
+      };
+      gtrgm_options: {
+        Args: { "": unknown };
+        Returns: undefined;
+      };
+      gtrgm_out: {
+        Args: { "": unknown };
+        Returns: unknown;
+      };
+      set_limit: {
+        Args: { "": number };
+        Returns: number;
+      };
+      show_limit: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
+      show_trgm: {
+        Args: { "": string };
+        Returns: string[];
+      };
     };
     Enums: {
+      user_experiment_role: "OWNER" | "EDITOR" | "VIEWER";
       visibility: "PUBLIC" | "PRIVATE";
     };
     CompositeTypes: {
@@ -412,6 +467,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      user_experiment_role: ["OWNER", "EDITOR", "VIEWER"],
       visibility: ["PUBLIC", "PRIVATE"],
     },
   },
