@@ -17,6 +17,7 @@ export interface Experiment {
   createdAt: Date;
   updatedAt: Date;
   visibility: Visibility;
+  availableMetrics: string[];
 }
 
 export interface Metric {

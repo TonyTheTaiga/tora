@@ -32,6 +32,7 @@ function mapToExperiment(data: any, userIdOverride?: string): Experiment {
     updatedAt: new Date(data.updated_at),
     tags: data.tags ?? [],
     visibility: data.visibility,
+    availableMetrics: data.availableMetrics,
   };
 }
 
@@ -46,6 +47,7 @@ function mapRpcResultToExperiment(row: any): Experiment {
     createdAt: new Date(row.experiment_created_at),
     updatedAt: new Date(row.experiment_updated_at),
     visibility: row.experiment_visibility,
+    availableMetrics: row.available_metrics,
   };
 }
 
@@ -267,6 +269,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
           updatedAt: new Date(item.experiment_updated_at),
           tags: item.experiment_tags ?? [],
           visibility: item.experiment_visibility,
+          availableMetrics: [],
         })) ?? []
       );
     },

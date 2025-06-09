@@ -294,6 +294,7 @@ export type Database = {
           experiment_hyperparams: Json[]
           experiment_tags: string[]
           experiment_visibility: Database["public"]["Enums"]["visibility"]
+          available_metrics: string[]
         }[]
       }
       get_workspace_experiments: {
