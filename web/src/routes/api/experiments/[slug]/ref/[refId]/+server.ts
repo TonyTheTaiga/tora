@@ -1,14 +1,20 @@
 import { json } from "@sveltejs/kit";
-import type { RequestHandler } from "./$types";
+import { deleteReference } from "$lib/server/database";
 
-export const DELETE: RequestHandler = async ({ params, locals }) => {
+export async function DELETE({
+  params: { slug, refId },
+  locals,
+}: {
+  params: { slug: string; refId: string };
+  locals: { user: { id: string } | null };
+}) {
   const userId = locals.user?.id;
   if (!userId) {
     return json({ message: "Authentication required" }, { status: 401 });
   }
 
   try {
-    await locals.dbClient.deleteReference(params.slug, params.refId);
+    await deleteReference(slug, refId);
     return json({ message: "Reference deleted successfully" }, { status: 200 });
   } catch (error) {
     return json(
@@ -21,4 +27,4 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
       { status: 500 },
     );
   }
-};
+}

@@ -1,5 +1,9 @@
 import type { Workspace } from "$lib/types";
 import type { LayoutServerLoad } from "./$types";
+import {
+  getWorkspaces,
+  getOrCreateDefaultWorkspace,
+} from "$lib/server/database";
 
 export const load: LayoutServerLoad = async ({ locals, cookies }) => {
   const { session, user } = await locals.safeGetSession();
@@ -8,7 +12,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
   let userWorkspaces: Workspace[] = [];
 
   if (user) {
-    userWorkspaces = await locals.dbClient.getWorkspaces(user.id);
+    userWorkspaces = await getWorkspaces(user.id);
     const workspaceId = cookies.get("current_workspace");
 
     if (workspaceId) {
@@ -17,9 +21,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
     }
 
     if (!currentWorkspace) {
-      currentWorkspace = await locals.dbClient.getOrCreateDefaultWorkspace(
-        user.id,
-      );
+      currentWorkspace = await getOrCreateDefaultWorkspace(user.id);
       userWorkspaces.push(currentWorkspace);
 
       cookies.set("current_workspace", currentWorkspace.id, {

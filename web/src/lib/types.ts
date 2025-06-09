@@ -9,15 +9,15 @@ export type Visibility = "PUBLIC" | "PRIVATE";
 
 export interface Experiment {
   id: string;
-  user_id: string;
+  user_id?: string;
   name: string;
-  description: string;
-  hyperparams: HyperParam[];
-  tags: string[];
-  createdAt: Date;
-  updatedAt: Date;
-  visibility: Visibility;
+  description?: string | null;
   availableMetrics: string[];
+  hyperparams?: HyperParam[] | null;
+  tags?: string[] | null;
+  createdAt: Date;
+  updatedAt?: Date;
+  visibility?: Visibility;
 }
 
 export interface Metric {

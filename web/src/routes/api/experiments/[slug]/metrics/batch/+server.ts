@@ -1,5 +1,5 @@
 import { json, type RequestEvent } from "@sveltejs/kit";
-import type { RequestHandler } from "./$types";
+import { batchCreateMetric, getExperiment } from "$lib/server/database";
 import type { Json } from "$lib/server/database.types";
 import type { Metric } from "$lib/types";
 
@@ -16,7 +16,13 @@ interface APIError {
   status: number;
 }
 
-export const POST: RequestHandler = async ({ request, params, locals }) => {
+export async function POST({
+  request,
+  params,
+  locals,
+}: RequestEvent<{ slug: string }, string> & {
+  locals: { user: { id: string } | null };
+}): Promise<Response> {
   const userId = locals.user?.id;
   const experimentId = params.slug;
 
@@ -25,7 +31,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
   }
 
   try {
-    await locals.dbClient.checkExperimentAccess(experimentId, userId);
+    await getExperiment(experimentId, userId);
   } catch (error) {
     return json(
       {
@@ -57,7 +63,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
       created_at: currentTime,
     })) as Metric[];
 
-    await locals.dbClient.batchCreateMetric(finalMetrics);
+    await batchCreateMetric(finalMetrics);
 
     return json({
       success: true,
@@ -74,7 +80,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 
     return json(apiError, { status: apiError.status });
   }
-};
+}
 
 function isValidMetric(metric: unknown): metric is MetricInput {
   if (!metric || typeof metric !== "object") return false;

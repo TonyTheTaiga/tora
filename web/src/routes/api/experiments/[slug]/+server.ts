@@ -1,14 +1,34 @@
 import { json } from "@sveltejs/kit";
-import type { RequestHandler } from "./$types";
+import {
+  getExperiment,
+  updateExperiment,
+  deleteExperiment,
+} from "$lib/server/database";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "$lib/server/database.types";
 
-export const GET: RequestHandler = async ({ params, locals }) => {
-  const experiment = await locals.dbClient.getExperiment(params.slug);
+export async function GET({
+  params: { slug },
+  locals,
+}: {
+  params: { slug: string };
+  locals: { supabase: SupabaseClient<Database>; user: { id: string } | null };
+}) {
+  // Pass the userId to getExperiment if user is logged in
+  const userId = locals.user?.id;
+  const experiment = await getExperiment(slug, userId);
   return json(experiment);
-};
+}
 
-export const POST: RequestHandler = async ({ params, request, locals }) => {
+export async function POST({
+  params: { slug },
+  request,
+}: {
+  params: { slug: string };
+  request: Request;
+}) {
   let data = await request.json();
-  await locals.dbClient.updateExperiment(params.slug, {
+  await updateExperiment(slug, {
     name: data.name,
     description: data.description,
     tags: data.tags,
@@ -22,10 +42,17 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
       headers: { "Content-Type": "application/json" },
     },
   );
-};
+}
 
-export const DELETE: RequestHandler = async ({ params, locals }) => {
-  await locals.dbClient.deleteExperiment(params.slug);
+export async function DELETE({
+  params: { slug },
+  locals,
+}: {
+  params: { slug: string };
+  locals: { supabase: SupabaseClient<Database>; user: { id: string } | null };
+}) {
+  // We could add authorization check here if needed
+  await deleteExperiment(slug);
 
   return new Response(
     JSON.stringify({ message: "Experiment deleted successfully" }),
@@ -34,4 +61,4 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
       headers: { "Content-Type": "application/json" },
     },
   );
-};
+}

@@ -1,4 +1,4 @@
-import type { RequestHandler } from "./$types";
+import { getExperimentAndMetrics } from "$lib/server/database";
 import type { ExperimentAndMetrics } from "$lib/types";
 import { createAnthropicClient } from "$lib/server/llm";
 import { AnalysisSchema } from "./schema";
@@ -6,7 +6,7 @@ import zodToJsonSchema from "zod-to-json-schema";
 
 const MODEL = "claude-3-7-sonnet-20250219";
 
-export const GET: RequestHandler = async ({ url, locals }) => {
+export async function GET({ url }: { url: URL }) {
   const experimentId = url.searchParams.get("experimentId");
   if (!experimentId) {
     return new Response(JSON.stringify({ error: "experimentId is required" }), {
@@ -14,7 +14,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
     });
   }
 
-  const data = (await locals.dbClient.getExperimentAndMetrics(
+  const data = (await getExperimentAndMetrics(
     experimentId,
   )) as ExperimentAndMetrics;
   const system = createSystemPrompt();
@@ -43,7 +43,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
       { status: 500 },
     );
   }
-};
+}
 
 function createSystemPrompt(): string {
   const schema = zodToJsonSchema(AnalysisSchema, "AnalysisSchema");
