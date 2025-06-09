@@ -13,8 +13,11 @@
   import tippy from "tippy.js";
   import { onMount, onDestroy } from "svelte";
   import { toggleMode } from "$lib/state/comparison.svelte.js";
-  import { getTheme, toggleTheme as toggleAppTheme } from "$lib/state/theme.svelte.js";
-  import { 
+  import {
+    getTheme,
+    toggleTheme as toggleAppTheme,
+  } from "$lib/state/theme.svelte.js";
+  import {
     openCreateExperimentModal,
     getSelectedExperiment,
   } from "$lib/state/app.svelte.js";

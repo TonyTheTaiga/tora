@@ -228,15 +228,17 @@
         <div class="flex items-center gap-1">
           <Clock size={14} class="flex-shrink-0" />
           <time>
-            {new Date(experiment.createdAt).toLocaleString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-              hour12: false,
-            }).replace(/,\s+/, " - ")}
+            {new Date(experiment.createdAt)
+              .toLocaleString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: false,
+              })
+              .replace(/,\s+/, " - ")}
           </time>
         </div>
 
@@ -467,15 +469,17 @@
                         >
                         <td class="p-2 text-ctp-text">{metric.step ?? "-"}</td>
                         <td class="p-2 text-ctp-text whitespace-nowrap">
-                          {new Date(metric.created_at).toLocaleString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            second: "2-digit",
-                            hour12: false,
-                          }).replace(/,\s+/, " - ")}
+                          {new Date(metric.created_at)
+                            .toLocaleString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                              hour12: false,
+                            })
+                            .replace(/,\s+/, " - ")}
                         </td>
                       </tr>
                     {/each}

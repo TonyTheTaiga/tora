@@ -146,7 +146,12 @@
       chart = null;
     }
 
-    if (!chartCanvas || chartType() === "empty" || !data.experiments || experimentColors_map.size === 0) {
+    if (
+      !chartCanvas ||
+      chartType() === "empty" ||
+      !data.experiments ||
+      experimentColors_map.size === 0
+    ) {
       return;
     }
 
