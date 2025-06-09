@@ -1,34 +1,14 @@
 import { json } from "@sveltejs/kit";
-import {
-  getExperiment,
-  updateExperiment,
-  deleteExperiment,
-} from "$lib/server/database";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "$lib/server/database.types";
+import type { RequestHandler } from "./$types";
 
-export async function GET({
-  params: { slug },
-  locals,
-}: {
-  params: { slug: string };
-  locals: { supabase: SupabaseClient<Database>; user: { id: string } | null };
-}) {
-  // Pass the userId to getExperiment if user is logged in
-  const userId = locals.user?.id;
-  const experiment = await getExperiment(slug, userId);
+export const GET: RequestHandler = async ({ params, locals }) => {
+  const experiment = await locals.dbClient.getExperiment(params.slug);
   return json(experiment);
-}
+};
 
-export async function POST({
-  params: { slug },
-  request,
-}: {
-  params: { slug: string };
-  request: Request;
-}) {
+export const POST: RequestHandler = async ({ params, request, locals }) => {
   let data = await request.json();
-  await updateExperiment(slug, {
+  await locals.dbClient.updateExperiment(params.slug, {
     name: data.name,
     description: data.description,
     tags: data.tags,
@@ -42,17 +22,10 @@ export async function POST({
       headers: { "Content-Type": "application/json" },
     },
   );
-}
+};
 
-export async function DELETE({
-  params: { slug },
-  locals,
-}: {
-  params: { slug: string };
-  locals: { supabase: SupabaseClient<Database>; user: { id: string } | null };
-}) {
-  // We could add authorization check here if needed
-  await deleteExperiment(slug);
+export const DELETE: RequestHandler = async ({ params, locals }) => {
+  await locals.dbClient.deleteExperiment(params.slug);
 
   return new Response(
     JSON.stringify({ message: "Experiment deleted successfully" }),
@@ -61,4 +34,4 @@ export async function DELETE({
       headers: { "Content-Type": "application/json" },
     },
   );
-}
+};

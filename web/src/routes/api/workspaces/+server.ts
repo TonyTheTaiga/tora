@@ -1,20 +1,20 @@
 import { json, error } from "@sveltejs/kit";
-import { getWorkspaces, createWorkspace } from "$lib/server/database";
+import type { RequestHandler } from "./$types";
 
-export async function GET({ locals: { user } }) {
-  if (!user) {
+export const GET: RequestHandler = async ({ locals }) => {
+  if (!locals.user) {
     return json([]);
   }
 
-  const workspaces = await getWorkspaces(user.id);
+  const workspaces = await locals.dbClient.getWorkspaces(locals.user.id);
   return json(workspaces);
-}
+};
 
-export async function POST({ request, locals: { user } }) {
+export const POST: RequestHandler = async ({ request, locals }) => {
   const { name, description }: { name: string; description: string } =
     await request.json();
 
-  if (!user) {
+  if (!locals.user) {
     return error(500, {
       message: "Cannot create a experiment for anonymous user",
     });
@@ -22,6 +22,6 @@ export async function POST({ request, locals: { user } }) {
   if (!name) {
     return error(500, { message: "name is required for workspaces" });
   }
-  const workspace = await createWorkspace(name, description, user.id);
+  const workspace = await locals.dbClient.createWorkspace(name, description, locals.user.id);
   return json(workspace);
-}
+};

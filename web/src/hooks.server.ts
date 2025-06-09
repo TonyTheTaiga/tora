@@ -89,16 +89,7 @@ const finalize: Handle = async ({ event, resolve }) => {
       if (apiKey) {
         const keyHash = createHash("sha256").update(apiKey).digest("hex");
 
-        const { data: keyData, error: keyError } = await event.locals.supabase
-          .from("api_keys")
-          .select("user_id")
-          .eq("key_hash", keyHash)
-          .eq("revoked", false)
-          .single();
-
-        if (keyError) {
-          console.error("Supabase API key query error:", keyError.message);
-        }
+        const keyData = await event.locals.dbClient.lookupApiKey(keyHash);
 
         if (keyData && keyData.user_id) {
           event.locals.user = {
@@ -106,11 +97,7 @@ const finalize: Handle = async ({ event, resolve }) => {
           };
 
           try {
-            await event.locals.supabase
-              .from("api_keys")
-              .update({ last_used: new Date().toISOString() })
-              .eq("key_hash", keyHash)
-              .eq("revoked", false);
+            await event.locals.dbClient.updateApiKeyLastUsed(keyHash);
           } catch (updateErr) {
             console.warn(
               `Failed to update API key last_used for user_id: ${keyData.user_id}:`,

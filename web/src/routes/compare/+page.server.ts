@@ -19,15 +19,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     throw error(400, "Missing 'ids' query parameter");
   }
   const ids = idsParam.split(",").filter(Boolean);
-  const { data, error: supError } = await locals.supabase.rpc(
-    "get_experiments_and_metrics",
-    { experiment_ids: ids },
-  );
-
-  if (supError) {
-    console.log(supError);
-    throw error(400, "Failed to get experiments");
-  }
+  const data = await locals.dbClient.getExperimentsAndMetrics(ids);
 
   const experiments = data
     .map((item) => ({

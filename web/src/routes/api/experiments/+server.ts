@@ -1,25 +1,15 @@
 import { json, error } from "@sveltejs/kit";
-import {
-  getExperiments,
-  createExperiment,
-  getOrCreateDefaultWorkspace,
-} from "$lib/server/database";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "$lib/server/database.types";
+import type { RequestHandler } from "./$types";
 
-export async function GET({
-  url,
-  locals,
-}: {
-  url: URL;
-  locals: { supabase: SupabaseClient<Database>; user: { id: string } | null };
-}) {
-  const name_filter = url.searchParams.get("startwith") || "";
+export const GET: RequestHandler = async ({ url, locals }) => {
   const workspace_id = url.searchParams.get("workspace") || undefined;
 
   try {
     const userId = locals.user?.id;
-    const experiments = await getExperiments(name_filter, userId, workspace_id);
+    if (!userId) {
+      return json([]);
+    }
+    const experiments = await locals.dbClient.getExperiments(userId, workspace_id);
     return json(experiments);
   } catch (err) {
     if (err instanceof Error) {
@@ -28,10 +18,10 @@ export async function GET({
 
     throw error(500, "Internal Error");
   }
-}
+};
 
-export async function POST({ request, locals: { user }, cookies }) {
-  if (!user) {
+export const POST: RequestHandler = async ({ request, locals, cookies }) => {
+  if (!locals.user) {
     return json(
       { error: "Cannot create a experiment for anonymous user" },
       { status: 500 },
@@ -48,7 +38,7 @@ export async function POST({ request, locals: { user }, cookies }) {
     let workspaceId = data["workspaceId"] || cookies.get("current_workspace");
 
     if (workspaceId === "API_DEFAULT") {
-      const workspace = await getOrCreateDefaultWorkspace(user.id);
+      const workspace = await locals.dbClient.getOrCreateDefaultWorkspace(locals.user.id);
       workspaceId = workspace.id;
     }
 
@@ -60,14 +50,16 @@ export async function POST({ request, locals: { user }, cookies }) {
         return json({ error: "Invalid hyperparams format" }, { status: 400 });
       }
     }
-    const experiment = await createExperiment(
-      user.id,
-      name,
-      description,
-      hyperparams,
-      tags,
-      visibility,
-      workspaceId,
+    const experiment = await locals.dbClient.createExperiment(
+      locals.user.id,
+      {
+        name,
+        description,
+        hyperparams,
+        tags,
+        visibility,
+        workspaceId,
+      },
     );
     return json({ success: true, experiment: experiment });
   } catch (error: unknown) {
@@ -79,4 +71,4 @@ export async function POST({ request, locals: { user }, cookies }) {
       { status: 500 },
     );
   }
-}
+};

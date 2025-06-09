@@ -362,5 +362,42 @@ export function createDbClient(client: SupabaseClient<Database>) {
 
       handleError(updateError, "Failed to revoke API key");
     },
+
+    async lookupApiKey(keyHash: string): Promise<{ user_id: string } | null> {
+      const { data, error } = await client
+        .from("api_keys")
+        .select("user_id")
+        .eq("key_hash", keyHash)
+        .eq("revoked", false)
+        .single();
+
+      if (error || !data?.user_id) {
+        if (error) console.error("API key lookup error:", error.message);
+        return null;
+      }
+
+      return { user_id: data.user_id };
+    },
+
+    async updateApiKeyLastUsed(keyHash: string): Promise<void> {
+      const { error } = await client
+        .from("api_keys")
+        .update({ last_used: new Date().toISOString() })
+        .eq("key_hash", keyHash)
+        .eq("revoked", false);
+
+      if (error) {
+        console.warn("Failed to update API key last_used:", error.message);
+      }
+    },
+
+    async getExperimentsAndMetrics(experimentIds: string[]): Promise<any[]> {
+      const { data, error } = await client.rpc("get_experiments_and_metrics", {
+        experiment_ids: experimentIds,
+      });
+
+      handleError(error, "Failed to get experiments and metrics");
+      return data ?? [];
+    },
   };
 }
