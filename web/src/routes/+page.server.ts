@@ -1,6 +1,6 @@
 import type { Actions } from "./$types";
 import type { PageServerLoad } from "./$types";
-import { fail } from "@sveltejs/kit";
+import { error, fail } from "@sveltejs/kit";
 import type { HyperParam, Experiment } from "$lib/types";
 
 const API_ROUTES = {
@@ -21,19 +21,18 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   const { currentWorkspace } = await parent();
 
   const apiUrl = new URL(API_ROUTES.GET_EXPERIMENTS, url.origin);
-  if (currentWorkspace) {
+  if (currentWorkspace?.id) {
     apiUrl.searchParams.set("workspace", currentWorkspace.id);
   }
 
-  const response = await fetch(apiUrl.toString());
-  if (!response.ok) {
-    console.error(
-      `Failed to fetch experiments: ${response.status} ${response.statusText}`,
-    );
-    return { experiments: [], session, error: "Failed to load experiments." };
+  const res = await fetch(apiUrl);
+
+  if (!res.ok) {
+    throw error(res.status, `Failed to fetch experiments: ${res.statusText}`);
   }
 
-  let experiments: Experiment[] = await response.json();
+  const experiments: Experiment[] = await res.json();
+
   return { experiments, session };
 };
 

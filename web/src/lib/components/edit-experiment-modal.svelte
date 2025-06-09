@@ -27,6 +27,7 @@
       : [],
     hyperparams: experiment.hyperparams ? [...experiment.hyperparams] : [],
     createdAt: experiment.createdAt,
+    updatedAt: experiment.updatedAt,
     user_id: experiment.user_id,
   });
 

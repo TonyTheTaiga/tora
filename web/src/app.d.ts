@@ -2,6 +2,7 @@
 
 import type { Database } from "$lib/server/database.types";
 import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
+import type { createDbClient } from "$lib/server/database";
 
 // for information about these interfaces
 declare global {
@@ -9,6 +10,7 @@ declare global {
     // interface Error {}
     interface Locals {
       supabase: SupabaseClient<Database>;
+      dbClient: ReturnType<typeof createDbClient>;
       safeGetSession: () => Promise<{
         session: Session | null;
         user: User | null;
