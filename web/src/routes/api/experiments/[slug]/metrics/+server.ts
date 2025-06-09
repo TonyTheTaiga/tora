@@ -94,7 +94,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
       { status: statusCode },
     );
   }
-}
+};
 
 export const GET: RequestHandler = async ({ params, locals }) => {
   const userId = locals.user?.id;

@@ -43,7 +43,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
       { status: 500 },
     );
   }
-}
+};
 
 function createSystemPrompt(): string {
   const schema = zodToJsonSchema(AnalysisSchema, "AnalysisSchema");

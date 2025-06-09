@@ -74,7 +74,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 
     return json(apiError, { status: apiError.status });
   }
-}
+};
 
 function isValidMetric(metric: unknown): metric is MetricInput {
   if (!metric || typeof metric !== "object") return false;

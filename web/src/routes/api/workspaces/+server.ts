@@ -22,6 +22,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   if (!name) {
     return error(500, { message: "name is required for workspaces" });
   }
-  const workspace = await locals.dbClient.createWorkspace(name, description, locals.user.id);
+  const workspace = await locals.dbClient.createWorkspace(
+    name,
+    description,
+    locals.user.id,
+  );
   return json(workspace);
 };
