@@ -1,7 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
-import { DatabaseClient } from "$lib/server/database";
+import { createDbClient } from "$lib/server/database";
+import { createHash } from "crypto";
 
 import {
   PUBLIC_SUPABASE_URL,
@@ -34,8 +35,7 @@ const supabase: Handle = async ({ event, resolve }) => {
     },
   );
 
-  // lol
-  DatabaseClient.setInstance(event.locals.supabase);
+  event.locals.dbClient = createDbClient(event.locals.supabase);
 
   /**
    * Unlike `supabase.auth.getSession()`, which returns the session _without_
@@ -87,8 +87,8 @@ const finalize: Handle = async ({ event, resolve }) => {
 
     try {
       if (apiKey) {
-        const { createHash } = await import("crypto");
         const keyHash = createHash("sha256").update(apiKey).digest("hex");
+
         const { data: keyData, error: keyError } = await event.locals.supabase
           .from("api_keys")
           .select("user_id")
@@ -96,21 +96,40 @@ const finalize: Handle = async ({ event, resolve }) => {
           .eq("revoked", false)
           .single();
 
+        if (keyError) {
+          console.error("Supabase API key query error:", keyError.message);
+        }
+
         if (keyData && keyData.user_id) {
           event.locals.user = {
             id: keyData.user_id,
           };
-          await event.locals.supabase
-            .from("api_keys")
-            .update({ last_used: new Date().toISOString() })
-            .eq("key_hash", keyHash)
-            .eq("revoked", false);
+
+          try {
+            await event.locals.supabase
+              .from("api_keys")
+              .update({ last_used: new Date().toISOString() })
+              .eq("key_hash", keyHash)
+              .eq("revoked", false);
+          } catch (updateErr) {
+            console.warn(
+              `Failed to update API key last_used for user_id: ${keyData.user_id}:`,
+              updateErr instanceof Error ? updateErr.message : updateErr,
+            );
+          }
+        } else {
+          console.warn(
+            "API key provided, but no valid user found or key is revoked.",
+          );
         }
+      } else {
+        console.warn("API key header was present but empty.");
       }
     } catch (err) {
       console.error(
-        "Error validating API key:",
+        "Unexpected error during API key validation:",
         err instanceof Error ? err.message : err,
+        err instanceof Error ? err.stack : "",
       );
     }
   }
@@ -118,23 +137,23 @@ const finalize: Handle = async ({ event, resolve }) => {
   return resolve(event);
 };
 
-const authGuard: Handle = async ({ event, resolve }) => {
-  if (event.url.pathname.startsWith("/api")) {
-    return resolve(event);
-  }
+// const authGuard: Handle = async ({ event, resolve }) => {
+//   if (event.url.pathname.startsWith("/api")) {
+//     return resolve(event);
+//   }
 
-  const { session, user } = await event.locals.safeGetSession();
-  event.locals.session = session;
-  event.locals.user = user;
+//   const { session, user } = await event.locals.safeGetSession();
+//   event.locals.session = session;
+//   event.locals.user = user;
 
-  if (!event.locals.session && event.url.pathname.startsWith("/private")) {
-    redirect(303, "/auth");
-  }
+//   if (!event.locals.session && event.url.pathname.startsWith("/private")) {
+//     redirect(303, "/auth");
+//   }
 
-  if (event.locals.session && event.url.pathname === "/auth") {
-    redirect(303, "/private");
-  }
-  return resolve(event);
-};
+//   if (event.locals.session && event.url.pathname === "/auth") {
+//     redirect(303, "/private");
+//   }
+//   return resolve(event);
+// };
 
 export const handle: Handle = sequence(supabase, finalize);
