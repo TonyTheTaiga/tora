@@ -232,96 +232,82 @@
         >
           <Minimize2 size={16} />
         </button>
+        <div
+          class="p-1.5 rounded-full text-ctp-subtext0"
+          title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
+        >
+          {#if experiment.visibility === "PUBLIC"}
+            <Globe size={16} class="text-ctp-green" />
+          {:else}
+            <GlobeLock size={16} class="text-ctp-red" />
+          {/if}
+        </div>
       </div>
     </div>
   </header>
 
   <!-- Content Area -->
   <div class="px-4 sm:px-6 py-4 flex flex-col gap-4 overflow-y-auto flex-grow">
-    <!-- Title, ID, and metadata -->
-    <div class="flex flex-col gap-1 min-w-0 flex-grow mb-2">
+    <!-- Date and Title -->
+    <div class="flex flex-col gap-1 min-w-0 mb-2 overflow-hidden">
+      <div class="flex items-center gap-1.5 text-ctp-subtext0 text-xs">
+        <Clock size={14} class="text-ctp-overlay1" />
+        <time class="text-ctp-subtext1">
+          {new Date(experiment.createdAt).toLocaleString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </time>
+      </div>
       <h2
-        class="text-xl sm:text-2xl font-bold text-ctp-text mb-1"
+        class="text-lg sm:text-xl md:text-2xl font-semibold text-ctp-text mb-1 leading-tight break-words overflow-wrap-anywhere"
         title={experiment.name}
       >
         {experiment.name}
       </h2>
-      <div class="flex flex-wrap items-center gap-4">
-        <button
-          type="button"
-          aria-label="Copy Experiment ID"
-          title={idCopied ? "ID Copied!" : "Copy Experiment ID"}
-          class="flex items-center p-1 rounded-md text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text group flex-shrink-0 w-fit"
-          onclick={() => {
-            navigator.clipboard.writeText(experiment.id);
-            idCopied = true;
-            idCopyAnimated = true;
-            setTimeout(() => {
-              idCopied = false;
-            }, 1200);
-            setTimeout(() => {
-              idCopyAnimated = false;
-            }, 400);
-          }}
-        >
-          {#if idCopied}
-            <ClipboardCheck
-              size={14}
-              class="text-ctp-green transition-transform duration-200 {idCopyAnimated
-                ? 'scale-125'
-                : ''}"
-            />
-            <span class="text-xs text-ctp-green ml-1 hidden sm:inline"
-              >Copied!</span
-            >
-          {:else}
-            <Copy size={14} />
-            <span
-              class="text-xs text-ctp-subtext1 ml-1 hidden sm:inline group-hover:text-ctp-text transition-colors"
-              >{experiment.id.substring(0, 8)}...</span
-            >
-          {/if}
-        </button>
-
-        <!-- Status and metadata row -->
-        <div
-          class="flex flex-wrap items-center gap-x-4 gap-y-2 text-ctp-subtext0 text-sm"
-        >
-          <div class="flex items-center gap-1.5">
-            <Clock size={15} class="flex-shrink-0 text-ctp-overlay1" />
-            <time class="text-ctp-subtext1">
-              {new Date(experiment.createdAt).toLocaleString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </time>
-          </div>
-
-          <div
-            class="flex items-center gap-1.5 p-1 px-2 rounded-full {experiment.visibility ===
-            'PUBLIC'
-              ? 'text-ctp-green bg-ctp-green/20'
-              : 'text-ctp-red bg-ctp-red/20'}"
-            title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
+      <button
+        type="button"
+        aria-label="Copy Experiment ID"
+        title={idCopied ? "ID Copied!" : "Copy Experiment ID"}
+        class="flex items-center p-1 rounded-md text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text group w-fit"
+        onclick={() => {
+          navigator.clipboard.writeText(experiment.id);
+          idCopied = true;
+          idCopyAnimated = true;
+          setTimeout(() => {
+            idCopied = false;
+          }, 1200);
+          setTimeout(() => {
+            idCopyAnimated = false;
+          }, 400);
+        }}
+      >
+        {#if idCopied}
+          <ClipboardCheck
+            size={14}
+            class="text-ctp-green transition-transform duration-200 {idCopyAnimated
+              ? 'scale-125'
+              : ''}"
+          />
+          <span class="text-xs text-ctp-green ml-1">Copied!</span>
+        {:else}
+          <Copy size={14} />
+          <span
+            class="text-xs text-ctp-subtext1 ml-1 group-hover:text-ctp-text transition-colors"
+            >{experiment.id.substring(0, 8)}...</span
           >
-            {#if experiment.visibility === "PUBLIC"}
-              <Globe size={15} />
-              <span class="text-xs text-ctp-green">Public</span>
-            {:else}
-              <GlobeLock size={15} />
-              <span class="text-xs text-ctp-red">Private</span>
-            {/if}
-          </div>
-        </div>
-      </div>
+        {/if}
+      </button>
     </div>
 
     <!-- Metadata section -->
     {#if experiment.tags && experiment.tags.length > 0}
-      <div class="flex items-start gap-1.5 text-ctp-subtext0 text-sm">
+      <div
+        class="flex items-start gap-1.5 text-ctp-subtext0 text-xs sm:text-sm"
+      >
         <Tag size={15} class="flex-shrink-0 text-ctp-overlay1 mt-0.5" />
         <div class="flex flex-wrap gap-1.5 items-center">
           {#each visibleTags as tag}
@@ -360,11 +346,10 @@
           text-xs sm:text-sm
           leading-relaxed
           border-l-2 border-ctp-mauve
-          pl-4 py-2 mt-2
+          pl-3 sm:pl-4 py-2 mt-2
           break-words
-          sm:break-normal
           description-truncate-detailed
-          mb-4
+          mb-3 sm:mb-4
         "
         title={experiment.description}
       >
@@ -382,7 +367,7 @@
         >
           <div class="flex items-center gap-2 flex-grow">
             <Settings size={18} class="text-ctp-blue" />
-            <span class="text-base font-semibold text-ctp-text"
+            <span class="text-sm sm:text-base font-semibold text-ctp-text"
               >Hyperparameters</span
             >
           </div>
@@ -403,7 +388,7 @@
             >
               <div class="flex items-center space-x-3 flex-1 min-w-0">
                 <span
-                  class="text-ctp-subtext1 font-medium truncate shrink"
+                  class="text-ctp-subtext1 font-medium truncate shrink text-xs sm:text-sm"
                   title={param.key}>{param.key}</span
                 >
                 {#if recommendations && recommendations[param.key]}
@@ -425,7 +410,7 @@
               <div class="flex items-center space-x-2">
                 <code
                   ><pre
-                    class="text-ctp-text font-mono bg-ctp-surface2/80 px-2 py-1 rounded text-sm truncate max-w-[150px] sm:max-w-xs backdrop-blur-sm border border-ctp-overlay0/20">{param.value}</pre></code
+                    class="text-ctp-text font-mono bg-ctp-surface2/80 px-2 py-1 rounded text-xs sm:text-sm truncate max-w-[120px] sm:max-w-[150px] md:max-w-xs backdrop-blur-sm border border-ctp-overlay0/20">{param.value}</pre></code
                 >
                 <button
                   type="button"
@@ -460,7 +445,7 @@
               onclick={() => {
                 allHyperparametersShown = !allHyperparametersShown;
               }}
-              class="w-full text-ctp-subtext0 hover:text-ctp-text mt-4 rounded-lg py-2.5 px-4 text-sm flex items-center justify-center bg-ctp-surface1/30 hover:bg-ctp-surface1/50 backdrop-blur-sm border border-ctp-surface2/20"
+              class="w-full text-ctp-subtext0 hover:text-ctp-text mt-4 rounded-lg py-2 px-3 text-xs sm:text-sm flex items-center justify-center bg-ctp-surface1/30 hover:bg-ctp-surface1/50 backdrop-blur-sm border border-ctp-surface2/20"
             >
               <ChevronDown
                 class="w-4 h-4 mr-2 transition-transform {allHyperparametersShown
@@ -506,7 +491,9 @@
         >
           <div class="flex items-center gap-2 flex-grow">
             <ChartArea size={18} class="text-ctp-blue" />
-            <span class="text-base font-semibold text-ctp-text">Metrics</span>
+            <span class="text-sm sm:text-base font-semibold text-ctp-text"
+              >Metrics</span
+            >
           </div>
           <ChevronDown
             size={18}
@@ -520,7 +507,7 @@
               class="flex bg-ctp-surface1/40 w-full rounded-lg p-1 space-x-1 backdrop-blur-sm border border-ctp-surface2/20"
             >
               <button
-                class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 focus:outline-none {!showMetricsTable
+                class="flex-1 px-2 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium flex items-center justify-center gap-1 sm:gap-2 focus:outline-none {!showMetricsTable
                   ? 'bg-ctp-surface2/50 text-ctp-text backdrop-blur-sm'
                   : 'text-ctp-subtext0 hover:bg-ctp-surface2/30'}"
                 onclick={() => {
@@ -531,7 +518,7 @@
                 Chart
               </button>
               <button
-                class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 focus:outline-none {showMetricsTable
+                class="flex-1 px-2 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium flex items-center justify-center gap-1 sm:gap-2 focus:outline-none {showMetricsTable
                   ? 'bg-ctp-surface2/50 text-ctp-text backdrop-blur-sm'
                   : 'text-ctp-subtext0 hover:bg-ctp-surface2/30'}"
                 onclick={() => {
@@ -556,15 +543,17 @@
                   size={28}
                   class="animate-spin text-ctp-subtext0 mb-3"
                 />
-                <span class="text-ctp-subtext0 text-base"
+                <span class="text-ctp-subtext0 text-sm sm:text-base"
                   >Loading metrics...</span
                 >
-                <p class="text-ctp-overlay1 text-xs mt-1">
+                <p class="text-ctp-overlay1 text-xs sm:text-sm mt-1">
                   Please wait a moment.
                 </p>
               </div>
             {:else if metricsError}
-              <p class="text-sm text-red-300 bg-red-900/20 p-4 rounded-lg">
+              <p
+                class="text-xs sm:text-sm text-red-300 bg-red-900/20 p-3 sm:p-4 rounded-lg"
+              >
                 {metricsError}
               </p>
             {:else if rawMetrics.length > 0}
@@ -576,30 +565,45 @@
                     class="bg-ctp-surface1/40 sticky top-0 z-10 backdrop-blur-sm"
                   >
                     <tr>
-                      <th class="p-3 font-semibold text-ctp-text">Name</th>
-                      <th class="p-3 font-semibold text-ctp-text">Value</th>
-                      <th class="p-3 font-semibold text-ctp-text">Step</th>
-                      <th class="p-3 font-semibold text-ctp-text">Timestamp</th>
+                      <th
+                        class="p-2 sm:p-3 font-semibold text-ctp-text text-xs sm:text-sm"
+                        >Name</th
+                      >
+                      <th
+                        class="p-2 sm:p-3 font-semibold text-ctp-text text-xs sm:text-sm"
+                        >Value</th
+                      >
+                      <th
+                        class="p-2 sm:p-3 font-semibold text-ctp-text text-xs sm:text-sm"
+                        >Step</th
+                      >
+                      <th
+                        class="p-2 sm:p-3 font-semibold text-ctp-text text-xs sm:text-sm hidden sm:table-cell"
+                        >Timestamp</th
+                      >
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-ctp-surface1">
                     {#each rawMetrics as metric (metric.id)}
                       <tr class="">
                         <td
-                          class="p-3 text-ctp-subtext1 truncate max-w-sm"
+                          class="p-2 sm:p-3 text-ctp-subtext1 truncate max-w-[120px] sm:max-w-sm text-xs sm:text-sm"
                           title={metric.name}>{metric.name}</td
                         >
                         <td
-                          class="p-3 text-ctp-text truncate max-w-sm"
+                          class="p-2 sm:p-3 text-ctp-text truncate max-w-[100px] sm:max-w-sm text-xs sm:text-sm"
                           title={String(metric.value)}
                           >{typeof metric.value === "number"
                             ? metric.value.toFixed(4)
                             : metric.value}</td
                         >
-                        <td class="p-3 text-ctp-subtext1 truncate max-w-[70px]"
+                        <td
+                          class="p-2 sm:p-3 text-ctp-subtext1 truncate max-w-[60px] sm:max-w-[70px] text-xs sm:text-sm"
                           >{metric.step ?? "N/A"}</td
                         >
-                        <td class="p-3 text-ctp-subtext1 whitespace-nowrap">
+                        <td
+                          class="p-2 sm:p-3 text-ctp-subtext1 whitespace-nowrap text-xs sm:text-sm hidden sm:table-cell"
+                        >
                           {new Date(metric.created_at).toLocaleString("en-US", {
                             year: "numeric",
                             month: "short",
@@ -615,7 +619,7 @@
               </div>
             {:else}
               <p
-                class="text-sm text-ctp-overlay2 bg-ctp-surface0/30 p-4 rounded-lg text-center backdrop-blur-sm border border-ctp-surface1/20"
+                class="text-xs sm:text-sm text-ctp-overlay2 bg-ctp-surface0/30 p-3 sm:p-4 rounded-lg text-center backdrop-blur-sm border border-ctp-surface1/20"
               >
                 No metric data points found for this experiment.
               </p>
