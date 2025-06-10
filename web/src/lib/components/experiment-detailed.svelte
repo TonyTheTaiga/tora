@@ -374,7 +374,7 @@
     <!-- Parameters section -->
     {#if experiment.hyperparams && experiment.hyperparams.length > 0}
       <details
-        class="mt-2 group open rounded-lg bg-ctp-surface0/80 backdrop-blur-sm border border-ctp-surface1/50"
+        class="mt-2 group open rounded-lg bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30"
         open
       >
         <summary
@@ -399,7 +399,7 @@
         <div class="pt-2 px-3 pb-3 space-y-2">
           {#each visibleHyperparameters as param (param.key)}
             <div
-              class="flex items-center justify-between p-2 rounded-lg bg-ctp-surface1/60 hover:bg-ctp-surface1/80 group backdrop-blur-sm border border-ctp-surface2/30"
+              class="flex items-center justify-between p-2 rounded-lg bg-ctp-surface1/30 hover:bg-ctp-surface1/50 group backdrop-blur-sm border border-ctp-surface2/20"
             >
               <div class="flex items-center space-x-3 flex-1 min-w-0">
                 <span
@@ -460,7 +460,7 @@
               onclick={() => {
                 allHyperparametersShown = !allHyperparametersShown;
               }}
-              class="w-full text-ctp-subtext0 hover:text-ctp-text mt-4 rounded-lg py-2.5 px-4 text-sm flex items-center justify-center bg-ctp-surface1/60 hover:bg-ctp-surface1/80 backdrop-blur-sm border border-ctp-surface2/30"
+              class="w-full text-ctp-subtext0 hover:text-ctp-text mt-4 rounded-lg py-2.5 px-4 text-sm flex items-center justify-center bg-ctp-surface1/30 hover:bg-ctp-surface1/50 backdrop-blur-sm border border-ctp-surface2/20"
             >
               <ChevronDown
                 class="w-4 h-4 mr-2 transition-transform {allHyperparametersShown
@@ -498,7 +498,7 @@
     <!-- Metrics section -->
     {#if availableMetrics.length > 0}
       <details
-        class="mt-2 group open rounded-lg bg-ctp-surface0/80 backdrop-blur-sm border border-ctp-surface1/50"
+        class="mt-2 group open rounded-lg bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30"
         open
       >
         <summary
@@ -517,12 +517,12 @@
           <!-- New Segmented Control -->
           <div class="flex justify-center mb-4">
             <div
-              class="flex bg-ctp-surface1/80 w-full rounded-lg p-1 space-x-1 backdrop-blur-sm border border-ctp-surface2/30"
+              class="flex bg-ctp-surface1/40 w-full rounded-lg p-1 space-x-1 backdrop-blur-sm border border-ctp-surface2/20"
             >
               <button
                 class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 focus:outline-none {!showMetricsTable
-                  ? 'bg-ctp-surface2/80 text-ctp-text backdrop-blur-sm'
-                  : 'text-ctp-subtext0 hover:bg-ctp-surface2/40'}"
+                  ? 'bg-ctp-surface2/50 text-ctp-text backdrop-blur-sm'
+                  : 'text-ctp-subtext0 hover:bg-ctp-surface2/30'}"
                 onclick={() => {
                   showMetricsTable = false;
                 }}
@@ -532,8 +532,8 @@
               </button>
               <button
                 class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 focus:outline-none {showMetricsTable
-                  ? 'bg-ctp-surface2/80 text-ctp-text backdrop-blur-sm'
-                  : 'text-ctp-subtext0 hover:bg-ctp-surface2/40'}"
+                  ? 'bg-ctp-surface2/50 text-ctp-text backdrop-blur-sm'
+                  : 'text-ctp-subtext0 hover:bg-ctp-surface2/30'}"
                 onclick={() => {
                   showMetricsTable = true;
                   fetchRawMetricsIfNeeded();
@@ -550,7 +550,7 @@
           {#if showMetricsTable}
             {#if metricsLoading}
               <div
-                class="flex flex-col justify-center items-center p-6 min-h-[150px] bg-ctp-surface0/60 rounded-lg text-center backdrop-blur-sm border border-ctp-surface1/40"
+                class="flex flex-col justify-center items-center p-6 min-h-[150px] bg-ctp-surface0/30 rounded-lg text-center backdrop-blur-sm border border-ctp-surface1/20"
               >
                 <Loader2
                   size={28}
@@ -569,11 +569,11 @@
               </p>
             {:else if rawMetrics.length > 0}
               <div
-                class="overflow-x-auto max-h-[500px] bg-ctp-surface0/60 rounded-lg p-4 backdrop-blur-sm border border-ctp-surface1/40"
+                class="overflow-x-auto max-h-[500px] bg-ctp-surface0/30 rounded-lg p-4 backdrop-blur-sm border border-ctp-surface1/20"
               >
                 <table class="w-full text-sm text-left">
                   <thead
-                    class="bg-ctp-surface1/80 sticky top-0 z-10 backdrop-blur-sm"
+                    class="bg-ctp-surface1/40 sticky top-0 z-10 backdrop-blur-sm"
                   >
                     <tr>
                       <th class="p-3 font-semibold text-ctp-text">Name</th>
@@ -615,14 +615,14 @@
               </div>
             {:else}
               <p
-                class="text-sm text-ctp-overlay2 bg-ctp-surface0/60 p-4 rounded-lg text-center backdrop-blur-sm border border-ctp-surface1/40"
+                class="text-sm text-ctp-overlay2 bg-ctp-surface0/30 p-4 rounded-lg text-center backdrop-blur-sm border border-ctp-surface1/20"
               >
                 No metric data points found for this experiment.
               </p>
             {/if}
           {:else}
             <div
-              class="bg-ctp-surface0/60 rounded-lg p-4 backdrop-blur-sm border border-ctp-surface1/40"
+              class="bg-ctp-surface0/30 rounded-lg p-4 backdrop-blur-sm border border-ctp-surface1/20"
             >
               <InteractiveChart {experiment} />
             </div>

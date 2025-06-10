@@ -71,7 +71,7 @@
         <div class="flex flex-nowrap md:flex-wrap gap-0.5 md:gap-1">
           {#each experiment.tags as tag}
             <span
-              class="text-[10px] bg-ctp-surface0 text-ctp-overlay2 px-1 py-px rounded-full whitespace-nowrap inline-block max-w-[100px] truncate"
+              class="text-[10px] bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-1 py-px rounded-full whitespace-nowrap inline-block max-w-[100px] truncate"
               title={tag}
             >
               {tag}
@@ -83,7 +83,7 @@
 
     <!-- Actions, Date & Visibility -->
     <div
-      class="flex items-center gap-1.5 text-ctp-subtext0 flex-shrink-0"
+      class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 flex-shrink-0"
       data-testid="footer-actions-group"
     >
       <button
@@ -102,7 +102,7 @@
             } catch (err) {}
           }
         }}
-        class="p-1 rounded-md hover:text-ctp-text hover:bg-ctp-surface1 transition-colors"
+        class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-teal hover:bg-ctp-surface1/60 transition-colors"
         title="Show experiment chain"
       >
         {#if highlighted.includes(experiment.id)}
@@ -113,7 +113,7 @@
       </button>
       <!-- Visibility Icon moved here -->
       <div
-        class="p-1 rounded-md hover:bg-ctp-surface1 transition-colors cursor-default"
+        class="p-1 rounded-full text-ctp-subtext0 transition-colors cursor-default"
         title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
         data-testid="visibility-status"
       >
@@ -126,7 +126,7 @@
       {#if page.data.user && page.data.user.id === experiment.user_id}
         <button
           type="button"
-          class="p-1 rounded-md hover:text-ctp-red hover:bg-ctp-red/20 transition-colors"
+          class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
           aria-label="Delete"
           title="Delete experiment"
           onclick={(e) => {
