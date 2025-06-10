@@ -7,17 +7,19 @@
 </script>
 
 <div
-  class="flex flex-row justify-between items-center text-ctp-text rounded-lg bg-ctp-surface1 shadow-md mb-4 p-3 px-4 w-full sm:w-auto sm:max-w-md" /* Adjusted styling for harmony */
+  class="flex flex-row justify-between items-center text-ctp-text rounded-lg bg-ctp-surface1 shadow-md mb-4 p-3 px-4 w-full sm:w-auto sm:max-w-md"
 >
-  <span class="font-medium">{experiments.length} experiment{experiments.length === 1 ? '' : 's'} selected</span>
+  <span class="font-medium"
+    >{experiments.length} experiment{experiments.length === 1 ? "" : "s"} selected</span
+  >
   <button
     onclick={() => {
       const params = experiments.join(",");
       goto(`/compare?ids=${params}`);
     }}
-    class="flex flex-row items-center space-x-2 px-3 py-1.5 bg-ctp-blue text-ctp-base rounded-md hover:bg-ctp-blue/90 transition-colors" /* Button styling */
+    class="flex flex-row items-center space-x-2 px-3 py-1.5 bg-ctp-blue text-ctp-base rounded-md hover:bg-ctp-blue/90 transition-colors"
   >
     <span>Compare</span>
-    <Merge size={16} /> {/* Slightly larger icon */}
+    <Merge size={16} />
   </button>
 </div>
