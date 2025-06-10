@@ -126,7 +126,10 @@
 
   async function fetchRawMetricsIfNeeded() {
     // Fetch data only if it hasn't been fetched yet, or if there was a previous error and no data currently displayed
-    if (rawMetrics.length === 0 || (metricsError && rawMetrics.length === 0)) {
+    if (
+      rawMetrics.length === 0 ||
+      (metricsError && rawMetrics.length === 0)
+    ) {
       metricsLoading = true;
       metricsError = null;
       try {
@@ -139,7 +142,8 @@
         const data = await response.json();
         rawMetrics = data as Metric[]; // Assuming API returns Metric[]
         if (rawMetrics.length === 0) {
-          metricsError = "No raw metric data points found for this experiment.";
+          metricsError =
+            "No raw metric data points found for this experiment.";
         }
       } catch (err) {
         if (err instanceof Error) {
@@ -159,7 +163,7 @@
   class="h-full bg-ctp-crust rounded-xl shadow-lg flex flex-col overflow-hidden"
 >
   <!-- Header with actions -->
-  <header class="px-4 sm:px-6 py-5 bg-ctp-mantle border-b border-ctp-surface1">
+  <header class="px-4 sm:px-6 py-5 bg-ctp-mantle border-b border-ctp-surface1"> {# py-4 to py-5 #}
     <!-- Combined Header for both Mobile and Desktop -->
     <div class="flex items-center justify-between">
       <!-- Action Buttons -->
@@ -281,7 +285,7 @@
     <!-- MOVED: Title and ID -->
     <div class="flex flex-col gap-1 min-w-0 flex-grow mb-3">
       <h2
-        class="text-xl sm:text-2xl font-semibold text-ctp-text mb-1.5"
+        class="text-2xl sm:text-3xl font-bold text-ctp-text mb-2" {# Changed classes #}
         title={experiment.name}
       >
         {experiment.name}
@@ -330,7 +334,7 @@
         <div class="flex flex-wrap gap-1.5 items-center">
           {#each visibleTags as tag}
             <span
-              class="whitespace-nowrap inline-flex items-center px-2 py-1 text-xs bg-ctp-surface0 text-ctp-blue rounded-full truncate max-w-[150px]"
+              class="whitespace-nowrap inline-flex items-center px-2 py-1 text-xs text-ctp-blue rounded-full bg-ctp-blue/20 border border-ctp-blue/30 truncate max-w-[150px]" {# Changed classes #}
               title={tag}
             >
               {tag}
@@ -360,7 +364,7 @@
     {#if experiment.description}
       <p
         class="
-          text-ctp-text
+          text-ctp-subtext0 {# Changed text-ctp-text to text-ctp-subtext0 #}
           text-xs sm:text-sm
           leading-relaxed
           border-l-2 border-ctp-mauve
@@ -368,6 +372,7 @@
           break-words
           sm:break-normal
           description-truncate-detailed
+          mb-4 {# Added mb-4 #}
         "
         title={experiment.description}
       >
@@ -376,18 +381,18 @@
     {/if}
     <!-- Parameters section -->
     {#if experiment.hyperparams && experiment.hyperparams.length > 0}
-      <details class="mt-2 group" open>
+      <details class="mt-2 group bg-ctp-mantle/60 border border-ctp-overlay0/30 backdrop-blur-sm rounded-lg" open>
         <summary
-          class="flex items-center gap-2.5 cursor-pointer text-ctp-text py-3 rounded-lg hover:bg-ctp-surface0 transition-colors -mx-2 px-2"
+          class="flex items-center gap-2.5 cursor-pointer text-ctp-text px-4 py-3 hover:bg-ctp-overlay0/20 transition-colors rounded-t-lg"
         >
           <Settings size={18} class="text-ctp-overlay1 flex-shrink-0" />
-          <span class="text-base font-medium">Hyperparameters</span>
+          <span class="text-lg font-semibold text-ctp-text">Hyperparameters</span> {# Changed classes #}
           <ChevronDown
             size={20}
             class="ml-auto text-ctp-subtext1 group-open:rotate-180 transition-transform"
           />
         </summary>
-        <div class="pt-2 space-y-0">
+        <div class="pt-2 px-4 pb-4 space-y-0"> {# Added px-4 pb-4 for content padding #}
           {#each visibleHyperparameters as param (param.key)}
             <div
               class="flex justify-between items-center py-2.5 px-2 border-b border-ctp-surface0 last:border-b-0 hover:bg-ctp-surface0/50 transition-colors group"
@@ -488,18 +493,18 @@
 
     <!-- Metrics section -->
     {#if availableMetrics.length > 0}
-      <details class="mt-3 group" open>
+      <details class="mt-3 group bg-ctp-mantle/60 border border-ctp-overlay0/30 backdrop-blur-sm rounded-lg" open>
         <summary
-          class="flex items-center gap-2.5 cursor-pointer text-ctp-text hover:text-ctp-blue py-3 rounded-lg -mx-2 px-2 hover:bg-ctp-surface0 transition-colors"
+          class="flex items-center gap-2.5 cursor-pointer text-ctp-text px-4 py-3 hover:bg-ctp-overlay0/20 transition-colors rounded-t-lg"
         >
           <ChartLine size={18} class="text-ctp-overlay1" />
-          <span class="text-base font-medium">Metrics</span>
+          <span class="text-lg font-semibold text-ctp-text">Metrics</span> {# Changed classes #}
           <ChevronDown
             size={20}
             class="ml-auto text-ctp-subtext0 group-open:rotate-180"
           />
         </summary>
-        <div class="pt-3 space-y-3">
+        <div class="pt-3 px-4 pb-4 space-y-3"> {# Added px-4 pb-4 for content padding #}
           <!-- New Segmented Control -->
           <div class="flex justify-center mb-4">
             <div class="inline-flex bg-ctp-surface0 p-1 rounded-lg space-x-1">
@@ -615,8 +620,8 @@
               </p>
             {/if}
           {:else}
-            <div class="-mx-4 sm:-mx-6 bg-ctp-mantle p-1 rounded-lg shadow-sm">
-              <div class="px-2 sm:px-3 w-full overflow-x-auto">
+            <div class="-mx-4 sm:-mx-6 bg-ctp-mantle p-1 rounded-lg shadow-sm"> {# p-4 to p-1 #}
+              <div class="px-2 sm:px-3 w-full overflow-x-auto"> {# This inner px might be redundant if chart handles its own padding well #}
                 <InteractiveChart {experiment} />
               </div>
             </div>
