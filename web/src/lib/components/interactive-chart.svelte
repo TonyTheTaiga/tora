@@ -438,10 +438,10 @@
   });
 </script>
 
-<div class="p-4 sm:p-5 space-y-5 w-full">
+<div class="w-full">
   <!-- Metric Selector -->
   {#if availableMetrics.length > 0}
-    <div class="border-b border-ctp-surface1 pb-4">
+    <div class="mb-4">
       <details class="relative">
         <summary
           class="flex items-center justify-between cursor-pointer p-3 bg-ctp-surface0 rounded border border-ctp-surface1 hover:bg-ctp-surface1 transition-colors"
@@ -520,14 +520,14 @@
           <div class="animate-pulse text-[#91d7e3]">Loading data...</div>
         </div>
       {/if}
-      <div class="absolute inset-0 p-4">
+      <div class="absolute inset-0">
         <canvas bind:this={chartCanvas} class="chart-canvas"></canvas>
       </div>
     </div>
     <!-- Empty State -->
   {:else if experiment.availableMetrics && experiment.availableMetrics.length > 0}
     <div
-      class="flex flex-col items-center justify-center h-60 sm:h-80 w-full rounded-md border border-ctp-surface1 bg-ctp-mantle p-4 sm:p-8"
+      class="flex flex-col items-center justify-center h-60 sm:h-80 w-full rounded-md border border-ctp-overlay0/10"
     >
       <ChartLine size={24} class="text-ctp-overlay0 mb-3 sm:mb-4 sm:text-3xl" />
       <p class="text-ctp-subtext0 text-xs sm:text-sm text-center max-w-md">

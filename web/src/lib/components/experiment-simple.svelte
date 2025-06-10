@@ -20,10 +20,7 @@
   class:border-ctp-blue={isSelectedForComparison}
   class:border-transparent={!isSelectedForComparison}
 >
-  <div
-    class="flex items-start justify-between mb-2"
-    data-testid="card-header"
-  >
+  <div class="flex items-start justify-between mb-2" data-testid="card-header">
     <div class="min-w-0 flex-1 pr-2">
       <h3
         class="font-semibold text-sm text-ctp-text group-hover:text-ctp-blue transition-colors truncate"
@@ -148,9 +145,7 @@
 
   @supports not (-webkit-line-clamp: 2) {
     .description-truncate {
-      max-height: calc(
-        1.5em * 2
-);
+      max-height: calc(1.5em * 2);
     }
   }
 

@@ -538,7 +538,7 @@
               </div>
             {:else if metricsError}
               <p
-                class="text-xs sm:text-sm text-red-300 bg-red-900/20 p-3 sm:p-4 rounded-lg"
+                class="text-xs sm:text-sm text-ctp-red bg-ctp-red/20 rounded-lg"
               >
                 {metricsError}
               </p>
@@ -611,11 +611,7 @@
               </p>
             {/if}
           {:else}
-            <div
-              class="bg-ctp-surface0/30 rounded-lg p-4 backdrop-blur-sm border border-ctp-surface1/20"
-            >
-              <InteractiveChart {experiment} />
-            </div>
+            <InteractiveChart {experiment} />
           {/if}
         </div>
       </details>
