@@ -140,6 +140,29 @@
   let chartCanvas = $state<HTMLCanvasElement>();
   let chart: Chart | null = null;
 
+  function addScrollPrevention() {
+    if (!chartCanvas) return;
+
+    chartCanvas.addEventListener("mousedown", () => {
+      document.body.style.overflow = "hidden";
+    });
+    chartCanvas.addEventListener("mouseup", () => {
+      document.body.style.overflow = "";
+    });
+    chartCanvas.addEventListener("mouseleave", () => {
+      document.body.style.overflow = "";
+    });
+    chartCanvas.addEventListener("touchstart", () => {
+      document.body.style.overflow = "hidden";
+    });
+    chartCanvas.addEventListener("touchend", () => {
+      document.body.style.overflow = "";
+    });
+    chartCanvas.addEventListener("touchcancel", () => {
+      document.body.style.overflow = "";
+    });
+  }
+
   function updateChart() {
     if (chart) {
       chart.destroy();
@@ -154,6 +177,8 @@
     ) {
       return;
     }
+
+    addScrollPrevention();
 
     switch (chartType()) {
       case "bar":
