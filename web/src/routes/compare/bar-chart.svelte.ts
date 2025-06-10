@@ -105,7 +105,8 @@ export function drawBarChart(
       },
       interaction: {
         intersect: false,
-        mode: "index",
+        mode: "nearest",
+        axis: "x",
       },
       elements: {
         bar: {

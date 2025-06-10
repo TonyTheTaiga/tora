@@ -69,8 +69,8 @@ export function drawRadarChart(
         },
         tooltip: {
           enabled: true,
-          mode: "point",
-          intersect: true,
+          mode: "nearest",
+          intersect: false,
           callbacks: {
             title: function (context) {
               return context[0].dataset.label || "Experiment";
@@ -115,8 +115,8 @@ export function drawRadarChart(
         },
       },
       interaction: {
-        intersect: true,
-        mode: "point",
+        intersect: false,
+        mode: "nearest",
       },
       onHover: (event, activeElements) => {
         if (event.native) {

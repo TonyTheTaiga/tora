@@ -113,9 +113,25 @@
       attributeFilter: ["class"],
     });
 
+    const preventScroll = (event: TouchEvent) => {
+      if (event.target === chartCanvas) {
+        event.preventDefault();
+      }
+    };
+
+    // Prevent page scrolling on touch events on the chart canvas
+    if (chartCanvas) {
+      chartCanvas.addEventListener('touchstart', preventScroll, { passive: false });
+      chartCanvas.addEventListener('touchmove', preventScroll, { passive: false });
+    }
+
     return () => {
       mediaQuery.removeEventListener("change", handleThemeChange);
       observer.disconnect();
+      if (chartCanvas) {
+        chartCanvas.removeEventListener('touchstart', preventScroll);
+        chartCanvas.removeEventListener('touchmove', preventScroll);
+      }
     };
   });
 
