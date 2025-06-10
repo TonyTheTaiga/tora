@@ -80,7 +80,11 @@
       mantle: computedStyles.getPropertyValue("--color-ctp-mantle").trim(),
       base: computedStyles.getPropertyValue("--color-ctp-base").trim(),
       overlay0: computedStyles.getPropertyValue("--color-ctp-overlay0").trim(),
-      gridLines: `${computedStyles.getPropertyValue("--color-ctp-overlay0").trim()}15`, // hex transparency
+      sky: computedStyles.getPropertyValue("--color-ctp-sky").trim(), // Added for tooltip title
+      // gridLines: `${computedStyles.getPropertyValue("--color-ctp-overlay0").trim()}15`, // Old gridLines
+      fadedGridLines:
+        computedStyles.getPropertyValue("--color-ctp-surface1").trim() + "33",
+      axisTicks: computedStyles.getPropertyValue("--color-ctp-subtext0").trim(),
     };
   }
 
@@ -218,15 +222,15 @@
           label: metric,
           data: dataPoints,
           borderColor: color.border,
-          backgroundColor: color.bg,
-          fill: false,
+          backgroundColor: color.border + "40", // Updated background color
+          fill: true, // Enabled fill
           pointBackgroundColor: color.point,
-          pointBorderColor: ui.mantle,
+          pointBorderColor: ui.base, // Updated point border color
           pointHoverBackgroundColor: getComputedStyle(document.documentElement)
             .getPropertyValue("--color-ctp-mauve")
             .trim(),
           pointHoverBorderColor: ui.base,
-          borderWidth: 1.5,
+          borderWidth: 2, // Updated border width
           tension: 0.3,
           pointRadius: 4,
           pointHoverRadius: 8,
@@ -272,12 +276,11 @@
             },
             tooltip: {
               enabled: true,
-              backgroundColor: ui.crust,
-              titleColor: getComputedStyle(document.documentElement)
-                .getPropertyValue("--color-ctp-sky")
-                .trim(),
+              backgroundColor: ui.base + "cc", // Updated tooltip background
+              titleColor: ui.sky, // Using ui.sky from getThemeUI
               bodyColor: ui.text,
-              borderColor: ui.overlay0,
+              borderColor: ui.overlay0 + "33", // Updated tooltip border
+              borderWidth: 1, // Added border width for tooltip
               position: "nearest",
               caretPadding: 12,
               cornerRadius: 8,
@@ -308,13 +311,13 @@
               title: {
                 display: true,
                 text: "Step",
-                color: ui.text,
+                color: ui.axisTicks, // Updated axis title color
               },
               ticks: {
-                color: ui.text,
+                color: ui.axisTicks, // Updated axis ticks color
               },
               grid: {
-                color: ui.gridLines,
+                color: ui.fadedGridLines, // Updated grid line color
               },
             },
             y: {
@@ -323,13 +326,13 @@
               title: {
                 display: true,
                 text: "Value (log)",
-                color: ui.text,
+                color: ui.axisTicks, // Updated axis title color
               },
               ticks: {
-                color: ui.text,
+                color: ui.axisTicks, // Updated axis ticks color
               },
               grid: {
-                color: ui.gridLines,
+                color: ui.fadedGridLines, // Updated grid line color
               },
             },
           },
@@ -435,13 +438,13 @@
   });
 </script>
 
-<div class="p-3 sm:p-4 space-y-4 w-full">
+<div class="p-4 sm:p-5 space-y-5 w-full">
   <!-- Metric Selector -->
   {#if availableMetrics.length > 0}
     <div class="border-b border-ctp-surface1 pb-4">
       <details class="relative">
         <summary
-          class="flex items-center justify-between cursor-pointer p-2 bg-ctp-surface0 rounded border border-ctp-surface1 hover:bg-ctp-surface1 transition-colors"
+          class="flex items-center justify-between cursor-pointer p-3 bg-ctp-surface0 rounded border border-ctp-surface1 hover:bg-ctp-surface1 transition-colors"
         >
           <span class="text-sm text-ctp-text">
             Select metrics ({selectedMetrics.length} of {availableMetrics.length})
@@ -458,7 +461,7 @@
               type="search"
               placeholder="Filter metrics..."
               bind:value={searchFilter}
-              class="w-full px-2 py-1 text-sm bg-ctp-base border border-ctp-surface1 rounded text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue"
+              class="w-full px-3 py-2 text-sm bg-ctp-base border border-ctp-surface1 rounded text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue"
             />
           </div>
 
@@ -466,13 +469,13 @@
           <div class="flex gap-2 p-2 border-b border-ctp-surface1">
             <button
               onclick={selectAllMetrics}
-              class="px-2 py-1 text-xs bg-ctp-green/20 text-ctp-green rounded hover:bg-ctp-green/30 transition-colors"
+              class="px-2.5 py-1.5 text-xs bg-ctp-green/20 text-ctp-green rounded hover:bg-ctp-green/30 transition-colors"
             >
               Select All
             </button>
             <button
               onclick={clearAllMetrics}
-              class="px-2 py-1 text-xs bg-ctp-red/20 text-ctp-red rounded hover:bg-ctp-red/30 transition-colors"
+              class="px-2.5 py-1.5 text-xs bg-ctp-red/20 text-ctp-red rounded hover:bg-ctp-red/30 transition-colors"
             >
               Clear All
             </button>
@@ -508,7 +511,7 @@
   <!-- Chart Display Section -->
   {#if selectedMetrics.length > 0}
     <div
-      class="relative h-60 sm:h-80 w-full rounded-md border border-ctp-surface1 bg-ctp-mantle overflow-hidden shadow-md"
+      class="relative h-60 sm:h-80 w-full rounded-md border border-ctp-overlay0/10 bg-transparent overflow-hidden"
     >
       {#if isLoading}
         <div
@@ -517,7 +520,7 @@
           <div class="animate-pulse text-[#91d7e3]">Loading data...</div>
         </div>
       {/if}
-      <div class="absolute inset-0 p-2 sm:p-4">
+      <div class="absolute inset-0 p-4">
         <canvas bind:this={chartCanvas} class="chart-canvas"></canvas>
       </div>
     </div>

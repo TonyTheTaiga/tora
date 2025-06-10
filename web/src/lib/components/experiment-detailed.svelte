@@ -28,6 +28,7 @@
     Loader2,
     Globe,
     GlobeLock,
+    ChartArea,
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
   import { page } from "$app/state";
@@ -111,57 +112,39 @@
     return hps.length - initialHyperparameterLimit;
   });
 
-  function showAllHyperparameters() {
-    allHyperparametersShown = true;
-  }
-  function showLessHyperparameters() {
-    allHyperparametersShown = false;
-  }
-
   let availableMetrics = $derived.by(() =>
     experiment.metricData
       ? Object.keys(experiment.metricData)
       : experiment.availableMetrics || [],
   );
 
-  async function toggleMetricsDisplay() {
-    if (showMetricsTable) {
-      // Currently showing table, switch to chart view
-      showMetricsTable = false;
-    } else {
-      // Currently showing chart, switch to table view
-      // Fetch data only if it hasn't been fetched yet, or if there was a previous error and no data currently displayed
-      if (
-        rawMetrics.length === 0 ||
-        (metricsError && rawMetrics.length === 0)
-      ) {
-        metricsLoading = true;
-        metricsError = null;
-        try {
-          const response = await fetch(
-            `/api/experiments/${experiment.id}/metrics`,
-          );
-          if (!response.ok) {
-            throw new Error(`Failed to fetch metrics: ${response.statusText}`);
-          }
-          const data = await response.json();
-          rawMetrics = data as Metric[]; // Assuming API returns Metric[]
-          if (rawMetrics.length === 0) {
-            metricsError =
-              "No raw metric data points found for this experiment.";
-          }
-        } catch (err) {
-          if (err instanceof Error) {
-            metricsError = err.message;
-          } else {
-            metricsError = "An unknown error occurred while fetching metrics.";
-          }
-          rawMetrics = []; // Clear any previous data in case of error
-        } finally {
-          metricsLoading = false;
+  async function fetchRawMetricsIfNeeded() {
+    // Fetch data only if it hasn't been fetched yet, or if there was a previous error and no data currently displayed
+    if (rawMetrics.length === 0 || (metricsError && rawMetrics.length === 0)) {
+      metricsLoading = true;
+      metricsError = null;
+      try {
+        const response = await fetch(
+          `/api/experiments/${experiment.id}/metrics`,
+        );
+        if (!response.ok) {
+          throw new Error(`Failed to fetch metrics: ${response.statusText}`);
         }
+        const data = await response.json();
+        rawMetrics = data as Metric[]; // Assuming API returns Metric[]
+        if (rawMetrics.length === 0) {
+          metricsError = "No raw metric data points found for this experiment.";
+        }
+      } catch (err) {
+        if (err instanceof Error) {
+          metricsError = err.message;
+        } else {
+          metricsError = "An unknown error occurred while fetching metrics.";
+        }
+        rawMetrics = []; // Clear any previous data in case of error
+      } finally {
+        metricsLoading = false;
       }
-      showMetricsTable = true; // Show the table section (which will handle loader/error/data display internally)
     }
   }
 </script>
@@ -170,131 +153,85 @@
   class="h-full bg-ctp-crust rounded-xl shadow-lg flex flex-col overflow-hidden"
 >
   <!-- Header with actions -->
-  <header class="px-4 sm:px-6 py-4 bg-ctp-mantle border-b border-ctp-surface1">
+  <header class="px-4 sm:px-6 py-5 bg-ctp-mantle border-b border-ctp-surface1">
     <!-- Combined Header for both Mobile and Desktop -->
-    <div class="flex flex-col gap-3">
-      <!-- Title and ID Row -->
-      <div class="flex items-start justify-between">
-        <div class="flex flex-col gap-1 min-w-0 flex-grow">
-          <h2
-            class="text-xl sm:text-2xl font-semibold text-ctp-text"
-            title={experiment.name}
+    <div class="flex items-center justify-between">
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        {#if page.data.user && page.data.user.id === experiment.user_id}
+          <button
+            class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-lavender hover:bg-ctp-surface0 transition-colors"
+            onclick={async () => {
+              const response = await fetch(
+                `/api/ai/analysis?experimentId=${experiment.id}`,
+              );
+              const data = (await response.json()) as ExperimentAnalysis;
+              recommendations = data.hyperparameter_recommendations;
+            }}
+            title="Get AI recommendations"
           >
-            {experiment.name}
-          </h2>
+            <Sparkle size={18} />
+          </button>
+          <button
+            onclick={() => {
+              openEditExperimentModal(experiment);
+            }}
+            class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface0 transition-colors"
+            title="Edit experiment"
+          >
+            <Pencil size={18} />
+          </button>
+        {/if}
+        <button
+          onclick={async () => {
+            if (highlighted.includes(experiment.id)) {
+              highlighted = [];
+            } else {
+              try {
+                const response = await fetch(
+                  `/api/experiments/${experiment.id}/ref`,
+                );
+                if (!response.ok) {
+                  return;
+                }
+                const data = await response.json();
+                const uniqueIds = [...new Set([...data, experiment.id])];
+                highlighted = uniqueIds;
+              } catch (err) {}
+            }
+          }}
+          class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-teal hover:bg-ctp-surface0 transition-colors"
+          title="Show experiment chain"
+        >
+          {#if highlighted.includes(experiment.id)}
+            <EyeClosed size={18} />
+          {:else}
+            <Eye size={18} />
+          {/if}
+        </button>
+        {#if page.data.user && page.data.user.id === experiment.user_id}
           <button
             type="button"
-            aria-label="Copy Experiment ID"
-            title={idCopied ? "ID Copied!" : "Copy Experiment ID"}
-            class="flex items-center p-1 rounded-md text-ctp-subtext1 transition-colors hover:bg-ctp-surface0 hover:text-ctp-text active:bg-ctp-surface1 group flex-shrink-0 w-fit"
-            onclick={() => {
-              navigator.clipboard.writeText(experiment.id);
-              idCopied = true;
-              idCopyAnimated = true;
-              setTimeout(() => {
-                idCopied = false;
-              }, 1200);
-              setTimeout(() => {
-                idCopyAnimated = false;
-              }, 400);
+            class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/20 transition-colors"
+            aria-label="Delete"
+            title="Delete experiment"
+            onclick={(e) => {
+              e.stopPropagation();
+              openDeleteExperimentModal(experiment);
             }}
           >
-            {#if idCopied}
-              <ClipboardCheck
-                size={14}
-                class="text-ctp-green transition-transform duration-200 {idCopyAnimated
-                  ? 'scale-125'
-                  : ''}"
-              />
-              <span class="text-xs text-ctp-green ml-1 hidden sm:inline"
-                >Copied!</span
-              >
-            {:else}
-              <Copy size={14} />
-              <span
-                class="text-xs text-ctp-subtext1 ml-1 hidden sm:inline group-hover:text-ctp-text transition-colors"
-                >{experiment.id.substring(0, 8)}...</span
-              >
-            {/if}
+            <X size={18} />
           </button>
-        </div>
-
-        <div class="flex items-center gap-2 flex-shrink-0">
-          {#if page.data.user && page.data.user.id === experiment.user_id}
-            <button
-              class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-lavender hover:bg-ctp-surface0 transition-colors"
-              onclick={async () => {
-                const response = await fetch(
-                  `/api/ai/analysis?experimentId=${experiment.id}`,
-                );
-                const data = (await response.json()) as ExperimentAnalysis;
-                recommendations = data.hyperparameter_recommendations;
-              }}
-              title="Get AI recommendations"
-            >
-              <Sparkle size={18} />
-            </button>
-            <button
-              onclick={() => {
-                openEditExperimentModal(experiment);
-              }}
-              class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface0 transition-colors"
-              title="Edit experiment"
-            >
-              <Pencil size={18} />
-            </button>
-          {/if}
-          <button
-            onclick={async () => {
-              if (highlighted.includes(experiment.id)) {
-                highlighted = [];
-              } else {
-                try {
-                  const response = await fetch(
-                    `/api/experiments/${experiment.id}/ref`,
-                  );
-                  if (!response.ok) {
-                    return;
-                  }
-                  const data = await response.json();
-                  const uniqueIds = [...new Set([...data, experiment.id])];
-                  highlighted = uniqueIds;
-                } catch (err) {}
-              }
-            }}
-            class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-teal hover:bg-ctp-surface0 transition-colors"
-            title="Show experiment chain"
-          >
-            {#if highlighted.includes(experiment.id)}
-              <EyeClosed size={18} />
-            {:else}
-              <Eye size={18} />
-            {/if}
-          </button>
-          {#if page.data.user && page.data.user.id === experiment.user_id}
-            <button
-              type="button"
-              class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/20 transition-colors"
-              aria-label="Delete"
-              title="Delete experiment"
-              onclick={(e) => {
-                e.stopPropagation();
-                openDeleteExperimentModal(experiment);
-              }}
-            >
-              <X size={18} />
-            </button>
-          {/if}
-          <button
-            class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
-            onclick={() => {
-              setSelectedExperiment(null);
-            }}
-            title="Minimize"
-          >
-            <Minimize2 size={18} />
-          </button>
-        </div>
+        {/if}
+        <button
+          class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
+          onclick={() => {
+            setSelectedExperiment(null);
+          }}
+          title="Minimize"
+        >
+          <Minimize2 size={18} />
+        </button>
       </div>
 
       <!-- Status and metadata row -->
@@ -334,7 +271,52 @@
   </header>
 
   <!-- Content Area -->
-  <div class="px-4 sm:px-6 py-4 flex flex-col gap-4 overflow-y-auto flex-grow">
+  <div class="px-4 sm:px-6 py-5 flex flex-col gap-5 overflow-y-auto flex-grow">
+    <!-- MOVED: Title and ID -->
+    <div class="flex flex-col gap-1 min-w-0 flex-grow mb-3">
+      <h2
+        class="text-2xl sm:text-3xl font-bold text-ctp-text mb-2"
+        title={experiment.name}
+      >
+        {experiment.name}
+      </h2>
+      <button
+        type="button"
+        aria-label="Copy Experiment ID"
+        title={idCopied ? "ID Copied!" : "Copy Experiment ID"}
+        class="flex items-center p-1 rounded-md text-ctp-subtext1 transition-colors hover:bg-ctp-surface0 hover:text-ctp-text active:bg-ctp-surface1 group flex-shrink-0 w-fit"
+        onclick={() => {
+          navigator.clipboard.writeText(experiment.id);
+          idCopied = true;
+          idCopyAnimated = true;
+          setTimeout(() => {
+            idCopied = false;
+          }, 1200);
+          setTimeout(() => {
+            idCopyAnimated = false;
+          }, 400);
+        }}
+      >
+        {#if idCopied}
+          <ClipboardCheck
+            size={14}
+            class="text-ctp-green transition-transform duration-200 {idCopyAnimated
+              ? 'scale-125'
+              : ''}"
+          />
+          <span class="text-xs text-ctp-green ml-1 hidden sm:inline"
+            >Copied!</span
+          >
+        {:else}
+          <Copy size={14} />
+          <span
+            class="text-xs text-ctp-subtext1 ml-1 hidden sm:inline group-hover:text-ctp-text transition-colors"
+            >{experiment.id.substring(0, 8)}...</span
+          >
+        {/if}
+      </button>
+    </div>
+
     <!-- Metadata section -->
     {#if experiment.tags && experiment.tags.length > 0}
       <div class="flex items-start gap-1.5 text-ctp-subtext0 text-sm">
@@ -342,7 +324,7 @@
         <div class="flex flex-wrap gap-1.5 items-center">
           {#each visibleTags as tag}
             <span
-              class="whitespace-nowrap inline-flex items-center px-2 py-1 text-xs bg-ctp-surface0 text-ctp-blue rounded-full truncate max-w-[150px]"
+              class="whitespace-nowrap inline-flex items-center px-2 py-1 text-xs text-ctp-blue rounded-full bg-ctp-blue/20 border border-ctp-blue/30 truncate max-w-[150px]"
               title={tag}
             >
               {tag}
@@ -352,7 +334,7 @@
             <button
               type="button"
               onclick={showAllTags}
-              class="text-xs text-ctp-sky hover:text-ctp-blue hover:underline focus:outline-none"
+              class="text-xs text-ctp-sky hover:text-ctp-blue hover:underline focus:outline-none hover:bg-ctp-surface0 px-2 py-0.5 rounded-md transition-colors"
             >
               +{hiddenTagCount} more
             </button>
@@ -361,7 +343,7 @@
             <button
               type="button"
               onclick={showLessTags}
-              class="text-xs text-ctp-sky hover:text-ctp-blue hover:underline focus:outline-none"
+              class="text-xs text-ctp-sky hover:text-ctp-blue hover:underline focus:outline-none hover:bg-ctp-surface0 px-2 py-0.5 rounded-md transition-colors"
             >
               Show less
             </button>
@@ -372,14 +354,15 @@
     {#if experiment.description}
       <p
         class="
-          text-ctp-text
+          text-ctp-subtext0
           text-xs sm:text-sm
           leading-relaxed
           border-l-2 border-ctp-mauve
-          pl-3 py-1.5 mt-1
+          pl-4 py-2 mt-2
           break-words
           sm:break-normal
           description-truncate-detailed
+          mb-4
         "
         title={experiment.description}
       >
@@ -388,94 +371,105 @@
     {/if}
     <!-- Parameters section -->
     {#if experiment.hyperparams && experiment.hyperparams.length > 0}
-      <details class="mt-3 group" open>
+      <details
+        class="mt-2 group open rounded-lg bg-ctp-base/70 border border-ctp-overlay0/30 backdrop-blur-xl shadow-2xl hover:bg-ctp-base/60 transition-all duration-300"
+        open
+      >
         <summary
-          class="flex items-center gap-2.5 cursor-pointer text-ctp-text py-2.5 rounded-lg -mx-2 px-2 hover:bg-ctp-surface0 transition-colors"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-ctp-overlay0/20 transition-colors rounded-t-lg cursor-pointer"
         >
-          <Settings size={18} class="text-ctp-overlay1 flex-shrink-0" />
-          <span class="text-base font-medium">Hyperparameters</span>
+          <div class="flex items-center gap-2 flex-grow">
+            <Settings size={20} class="text-ctp-blue" />
+            <span class="text-lg font-semibold text-ctp-text"
+              >Hyperparameters</span
+            >
+          </div>
+          <span
+            class="bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/40 backdrop-blur-lg shadow-md rounded-md px-2 py-0.5 text-xs shrink-0"
+          >
+            {experiment.hyperparams?.length || 0} params
+          </span>
           <ChevronDown
-            size={18}
-            class="ml-auto text-ctp-subtext1 group-open:rotate-180 transition-transform"
+            size={20}
+            class="text-ctp-subtext0 group-open:rotate-180 transition-transform shrink-0"
           />
         </summary>
-        <div class="pt-3 space-y-2">
-          <div class="space-y-1.5">
-            {#each visibleHyperparameters as param (param.key)}
-              <div
-                class="flex flex-col sm:flex-row justify-between sm:items-center p-2 rounded-md bg-ctp-mantle hover:bg-ctp-surface0 transition-colors group"
-              >
-                <div class="flex items-center min-w-0 flex-1">
-                  <span
-                    class="text-sm font-medium text-ctp-text truncate mr-1 shrink"
-                    title={param.key}>{param.key}</span
-                  >
-                  {#if recommendations && recommendations[param.key]}
-                    <button
-                      class="p-0.5 rounded-sm text-ctp-overlay2 hover:text-ctp-lavender hover:bg-ctp-surface1 transition-colors flex-shrink-0"
-                      onclick={() => {
-                        activeRecommendation =
-                          recommendations[param.key].recommendation;
-                      }}
-                      aria-label="Show recommendation"
-                      title="Show AI recommendation"
-                    >
-                      <Info size={14} />
-                    </button>
-                  {/if}
-                </div>
-                <div class="flex items-center gap-1 mt-1 sm:mt-0">
-                  <span
-                    class="text-sm text-ctp-subtext1 truncate max-w-[150px] sm:max-w-xs"
-                    title={String(param.value)}>{param.value}</span
-                  >
+        <div class="pt-2 px-4 pb-4 space-y-2">
+          {#each visibleHyperparameters as param (param.key)}
+            <div
+              class="flex items-center justify-between p-3 rounded-lg bg-ctp-surface0/10 hover:bg-ctp-surface0/20 transition-all duration-200 group backdrop-blur-lg border border-ctp-overlay0/10 shadow-md hover:shadow-lg"
+            >
+              <div class="flex items-center space-x-3 flex-1 min-w-0">
+                <span
+                  class="text-ctp-subtext1 font-medium truncate shrink"
+                  title={param.key}>{param.key}</span
+                >
+                {#if recommendations && recommendations[param.key]}
                   <button
-                    class="p-0.5 rounded-sm text-ctp-overlay2 hover:text-ctp-blue hover:bg-ctp-surface1 transition-colors flex-shrink-0"
-                    title="Copy value"
-                    aria-label="Copy hyperparameter value {param.value}"
+                    class="p-0.5 rounded-sm text-ctp-overlay2 hover:text-ctp-lavender hover:bg-ctp-surface1 transition-colors flex-shrink-0"
                     onclick={() => {
-                      navigator.clipboard.writeText(
-                        `${param.key}: ${param.value}`,
-                      );
-                      copiedParamKey = param.key;
-                      setTimeout(() => {
-                        if (copiedParamKey === param.key) {
-                          // Check against param.value if copying only value
-                          copiedParamKey = null;
-                        }
-                      }, 1200);
+                      activeRecommendation =
+                        recommendations[param.key].recommendation;
                     }}
+                    aria-label="Show recommendation"
+                    title="Show AI recommendation"
                   >
-                    {#if copiedParamKey === param.key}
-                      <ClipboardCheck size={14} class="text-ctp-green" />
-                    {:else}
-                      <Copy size={14} />
-                    {/if}
+                    <Info size={14} />
                   </button>
-                </div>
+                {/if}
               </div>
-            {/each}
-          </div>
 
-          {#if hiddenHyperparameterCount > 0}
+              <!-- Right Part: Value + Copy Button -->
+              <div class="flex items-center space-x-2">
+                <code
+                  ><pre
+                    class="text-ctp-text font-mono bg-ctp-base/50 px-2 py-1 rounded text-sm backdrop-blur-lg border border-ctp-overlay0/20 shadow-inner truncate max-w-[150px] sm:max-w-xs">{param.value}</pre></code
+                >
+                <button
+                  type="button"
+                  class="hover:bg-ctp-surface0/20 backdrop-blur-lg p-1 rounded text-ctp-subtext1 hover:text-ctp-text"
+                  title="Copy value"
+                  aria-label="Copy hyperparameter value {param.value}"
+                  onclick={() => {
+                    navigator.clipboard.writeText(
+                      String(param.value), // Ensure value is string for clipboard
+                    );
+                    copiedParamKey = param.key;
+                    setTimeout(() => {
+                      if (copiedParamKey === param.key) {
+                        copiedParamKey = null;
+                      }
+                    }, 1200);
+                  }}
+                >
+                  {#if copiedParamKey === param.key}
+                    <ClipboardCheck size={14} class="text-ctp-green" />
+                  {:else}
+                    <Copy size={14} />
+                  {/if}
+                </button>
+              </div>
+            </div>
+          {/each}
+
+          {#if (experiment.hyperparams?.length || 0) > initialHyperparameterLimit}
             <button
               type="button"
-              onclick={showAllHyperparameters}
-              class="mt-2 text-xs text-ctp-sky hover:text-ctp-blue hover:underline focus:outline-none w-full text-center"
+              onclick={() => {
+                allHyperparametersShown = !allHyperparametersShown;
+              }}
+              class="w-full text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0/20 mt-4 backdrop-blur-lg border border-ctp-overlay0/10 shadow-md rounded-lg py-2.5 px-4 text-sm flex items-center justify-center transition-colors duration-200"
             >
-              Show +{hiddenHyperparameterCount} more hyperparameters
+              <ChevronDown
+                class="w-4 h-4 mr-2 transition-transform {allHyperparametersShown
+                  ? 'rotate-180'
+                  : ''}"
+              />
+              {allHyperparametersShown
+                ? "Show less"
+                : `Show +${hiddenHyperparameterCount} more hyperparameters`}
             </button>
           {/if}
-          {#if allHyperparametersShown && (experiment.hyperparams?.length || 0) > initialHyperparameterLimit}
-            <button
-              type="button"
-              onclick={showLessHyperparameters}
-              class="mt-2 text-xs text-ctp-sky hover:text-ctp-blue hover:underline focus:outline-none w-full text-center"
-            >
-              Show less hyperparameters
-            </button>
-          {/if}
-
           {#if activeRecommendation}
             <div
               class="mt-3 p-3.5 bg-ctp-surface1 border border-ctp-lavender/50 rounded-lg relative shadow-sm"
@@ -501,34 +495,53 @@
 
     <!-- Metrics section -->
     {#if availableMetrics.length > 0}
-      <details class="mt-3 group" open>
+      <details
+        class="mt-3 group open rounded-lg bg-ctp-base/70 border border-ctp-overlay0/30 backdrop-blur-xl shadow-2xl hover:bg-ctp-base/60 transition-all duration-300"
+        open
+      >
         <summary
-          class="flex items-center gap-2.5 cursor-pointer text-ctp-text hover:text-ctp-blue py-2.5 rounded-lg -mx-2 px-2 hover:bg-ctp-surface0 transition-colors"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-ctp-overlay0/20 transition-colors rounded-t-lg cursor-pointer"
         >
-          <ChartLine size={18} class="text-ctp-overlay1" />
-          <span class="text-base font-medium">Metrics</span>
+          <div class="flex items-center gap-2 flex-grow">
+            <ChartArea size={20} class="text-ctp-blue" />
+            <span class="text-lg font-semibold text-ctp-text">Metrics</span>
+          </div>
           <ChevronDown
-            size={16}
-            class="ml-auto text-ctp-subtext0 group-open:rotate-180"
+            size={20}
+            class="text-ctp-subtext0 group-open:rotate-180 transition-transform shrink-0"
           />
         </summary>
-        <div class="pt-3 space-y-3">
-          <!-- Toggle Button -->
-          <div class="mb-4 text-right">
-            <button
-              class="inline-flex items-center gap-2 text-sm px-3.5 py-2 rounded-lg text-ctp-subtext1 hover:text-ctp-text bg-ctp-surface0 hover:bg-ctp-surface1 transition-colors shadow-sm focus-visible:ring-2 focus-visible:ring-ctp-blue"
-              onclick={toggleMetricsDisplay}
-              disabled={metricsLoading && !showMetricsTable}
+        <div class="pt-3 px-4 pb-4 space-y-3">
+          <!-- New Segmented Control -->
+          <div class="flex justify-center mb-4">
+            <div
+              class="flex bg-ctp-base/70 border border-ctp-overlay0/20 w-full backdrop-blur-xl shadow-md rounded-lg p-1 space-x-1"
             >
-              {#if showMetricsTable}
-                <ChartLine size={16} /> Show Chart
-              {:else}
-                <Table2 size={16} /> Show Raw Data Table
-              {/if}
-              {#if metricsLoading && !showMetricsTable}
-                <Loader2 size={16} class="animate-spin ml-1" />
-              {/if}
-            </button>
+              <button
+                class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none {!showMetricsTable
+                  ? 'bg-ctp-surface0/20 backdrop-blur-lg shadow-md text-ctp-text'
+                  : 'text-ctp-subtext0 hover:bg-ctp-surface0/10'}"
+                onclick={() => {
+                  showMetricsTable = false;
+                }}
+              >
+                <ChartLine size={16} />
+                Chart
+              </button>
+              <button
+                class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none {showMetricsTable
+                  ? 'bg-ctp-surface0/20 backdrop-blur-lg shadow-md text-ctp-text'
+                  : 'text-ctp-subtext0 hover:bg-ctp-surface0/10'}"
+                onclick={() => {
+                  showMetricsTable = true;
+                  fetchRawMetricsIfNeeded();
+                }}
+                disabled={metricsLoading}
+              >
+                <Table2 size={16} />
+                Data
+              </button>
+            </div>
           </div>
 
           <!-- Conditional Display: Chart or Table -->
@@ -556,10 +569,12 @@
               </p>
             {:else if rawMetrics.length > 0}
               <div
-                class="overflow-x-auto max-h-[500px] border border-ctp-surface1 rounded-lg bg-ctp-mantle shadow-md"
+                class="overflow-x-auto max-h-[500px] bg-ctp-surface0/10 rounded-lg p-4 backdrop-blur-lg border border-ctp-overlay0/10 shadow-md"
               >
                 <table class="w-full text-sm text-left">
-                  <thead class="bg-ctp-surface0 sticky top-0 z-10">
+                  <thead
+                    class="bg-ctp-surface0/50 sticky top-0 z-10 backdrop-blur-lg"
+                  >
                     <tr>
                       <th class="p-3 font-semibold text-ctp-text">Name</th>
                       <th class="p-3 font-semibold text-ctp-text">Value</th>
@@ -608,10 +623,10 @@
               </p>
             {/if}
           {:else}
-            <div class="-mx-4 sm:-mx-6 bg-ctp-mantle p-2 rounded-lg shadow-sm">
-              <div class="px-2 sm:px-3 w-full overflow-x-auto">
-                <InteractiveChart {experiment} />
-              </div>
+            <div
+              class="bg-ctp-base/70 rounded-lg p-4 backdrop-blur-lg border border-ctp-overlay0/10 shadow-inner"
+            >
+              <InteractiveChart {experiment} />
             </div>
           {/if}
         </div>
