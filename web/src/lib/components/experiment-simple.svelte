@@ -34,13 +34,28 @@
   class:border-transparent={!isSelectedForComparison}
 >
   <!-- Header -->
-  <div class="flex items-start justify-between mb-2 flex-shrink-0">
-    <h3
-      class="font-semibold text-sm text-ctp-text group-hover:text-ctp-blue transition-colors flex-1 mr-2 truncate"
-    >
-      {experiment.name}
-    </h3>
-    <!-- Visibility Icon has been moved to the footer -->
+  <div class="flex items-start justify-between mb-2 flex-shrink-0" data-testid="card-header">
+    <div class="min-w-0 flex-grow pr-2">
+      <h3
+        class="font-semibold text-sm text-ctp-text group-hover:text-ctp-blue transition-colors truncate"
+        title={experiment.name}
+        data-testid="experiment-name"
+      >
+        {experiment.name}
+      </h3>
+    </div>
+    {#if experiment?.createdAt}
+      <time
+        class="text-[11px] text-ctp-overlay1 flex-shrink-0"
+        title={new Date(experiment.createdAt).toLocaleString()}
+        data-testid="experiment-date"
+      >
+        {new Date(experiment.createdAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        })}
+      </time>
+    {/if}
   </div>
 
   <!-- Description -->
@@ -77,7 +92,7 @@
     </div>
 
     <!-- Actions, Date & Visibility -->
-    <div class="flex items-center gap-1.5 text-ctp-subtext0 flex-shrink-0" data-testid="footer-meta-info">
+    <div class="flex items-center gap-1.5 text-ctp-subtext0 flex-shrink-0" data-testid="footer-actions-group">
       <button
         onclick={async (e) => {
           e.stopPropagation();
@@ -103,6 +118,18 @@
           <Eye size={14} />
         {/if}
       </button>
+      <!-- Visibility Icon moved here -->
+      <div
+        class="p-1 rounded-md hover:bg-ctp-surface1 transition-colors cursor-default" /* Adjusted padding and added hover, cursor-default if not clickable */
+        title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
+        data-testid="visibility-status"
+      >
+        {#if experiment.visibility === "PUBLIC"}
+          <Globe size={14} class="text-ctp-green" />
+        {:else}
+          <GlobeLock size={14} class="text-ctp-red" />
+        {/if}
+      </div>
       {#if page.data.user && page.data.user.id === experiment.user_id}
         <button
           type="button"
@@ -117,31 +144,7 @@
           <X size={14} />
         </button>
       {/if}
-      {#if experiment?.createdAt}
-        <time
-          class="text-[11px] text-ctp-overlay1" /* Removed ml-0.5 */
-          title={new Date(experiment.createdAt).toLocaleString()}
-          data-testid="experiment-date"
-        >
-          {new Date(experiment.createdAt).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-          })}
-        </time>
-      {/if}
-      <div
-        class="p-0.5 rounded-md {experiment.visibility === 'PUBLIC'
-          ? 'text-ctp-green'
-          : 'text-ctp-red'}"
-        title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
-        data-testid="visibility-status"
-      >
-        {#if experiment.visibility === "PUBLIC"}
-          <Globe size={14} />
-        {:else}
-          <GlobeLock size={14} />
-        {/if}
-      </div>
+      <!-- Date element removed from here -->
     </div>
   </div>
 </article>

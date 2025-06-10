@@ -257,64 +257,67 @@ describe('ExperimentSimple.svelte', () => {
     expect(dateElement).toHaveClass('text-[11px]'); // Updated font size
   });
 
-  test('visibility icon is repositioned to footer, after date, using data-testid', () => {
-    const { container, getByTestId } = render(ExperimentSimple, { experiment: mockExperiment, highlighted: [] });
+  describe('Header Layout', () => {
+    test('date is in the card header and positioned to the right of the name', () => {
+      const { getByTestId } = render(ExperimentSimple, { experiment: mockExperiment, highlighted: [] });
+      const header = getByTestId('card-header');
+      const dateElement = getByTestId('experiment-date');
+      const nameElement = getByTestId('experiment-name'); // Name h3 itself
 
-    // Check header no longer contains visibility icon (by its title, as it has no testid there)
-    const header = container.querySelector('article > div:first-child');
-    expect(header.querySelector('div[title="Public"]')).not.toBeInTheDocument();
-    expect(header.querySelector('div[title="Private"]')).not.toBeInTheDocument();
+      expect(header).toContainElement(dateElement);
+      expect(header).toContainElement(nameElement.parentElement); // name is wrapped in a div
 
-    // Use data-testids to find elements in the footer
-    const metaInfoContainer = getByTestId('footer-meta-info');
-    const dateElement = getByTestId('experiment-date');
-    const visibilityElement = getByTestId('visibility-status');
+      // Check name's container is before date element
+      expect(nameElement.parentElement.compareDocumentPosition(dateElement) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 
-    expect(dateElement).toBeInTheDocument();
-    expect(visibilityElement).toBeInTheDocument();
-
-    // Ensure they are children of the meta info container
-    expect(metaInfoContainer).toContainElement(dateElement);
-    expect(metaInfoContainer).toContainElement(visibilityElement);
-
-    // Check order: Iterate through children of metaInfoContainer
-    // This is more robust than nextElementSibling if other non-element nodes are present (like comments, text nodes)
-    // However, for direct element children, nextElementSibling is fine.
-    // Let's use a more direct approach if possible by checking parent and relative positions if fragile.
-    // A simple way is to check if dateElement appears before visibilityElement in the source order of all children.
-    const children = Array.from(metaInfoContainer.childNodes);
-    const dateIndex = children.indexOf(dateElement);
-    const visibilityIndex = children.indexOf(visibilityElement);
-
-    expect(dateIndex).not.toBe(-1); // Ensure dateElement is found
-    expect(visibilityIndex).not.toBe(-1); // Ensure visibilityElement is found
-
-    // Only check order if both date and visibility icon are present
-    if (dateElement && visibilityElement) {
-       // This checks if the date element's "compareDocumentPosition" relative to the visibility element
-       // indicates that it precedes the visibility element.
-       // Node.DOCUMENT_POSITION_FOLLOWING means dateElement precedes visibilityElement.
-       expect(dateElement.compareDocumentPosition(visibilityElement) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    } else if (!dateElement && visibilityElement) {
-      // If there's no date, the visibility icon can be the first of these two. This is acceptable.
-      // No specific order check needed other than visibilityElement is present.
-    }
-
-    // Fallback/alternative check if the above is too complex or specific:
-    // Ensure the time element's next direct element sibling is the visibility status div,
-    // only if a time element exists.
-    if (dateElement) { // Corrected from timeElement to dateElement
-        if (dateElement.nextElementSibling) { // Check if it has a next sibling
-            expect(dateElement.nextElementSibling).toBe(visibilityElement);
-        } else {
-            // If date is the last element in this specific group (e.g. visibility is conditional and not shown)
-            // this specific check might not apply. The primary goal is date BEFORE visibility if both are present.
-            // The compareDocumentPosition handles cases where one might be missing more gracefully.
-        }
-    }
-
-
+      // Check header no longer contains visibility icon
+      expect(header.querySelector('div[title="Public"]')).not.toBeInTheDocument();
+      expect(header.querySelector('div[title="Private"]')).not.toBeInTheDocument();
+    });
   });
+
+  describe('Footer Layout & Icons', () => {
+    test('visibility icon is in the footer actions group and correctly ordered', () => {
+      const { getByTestId, queryByTitle } = render(ExperimentSimple, { experiment: mockExperiment, highlighted: [] });
+      const actionsGroup = getByTestId('footer-actions-group'); // Updated testid
+      const visibilityElement = getByTestId('visibility-status');
+
+      expect(actionsGroup).toContainElement(visibilityElement);
+
+      const showChainButton = queryByTitle('Show experiment chain');
+      const deleteButton = queryByTitle('Delete experiment'); // Will be null if user_id doesn't match
+
+      // Expected order: [Show Chain] -> [Visibility Icon] -> [Delete Button (if owner)]
+      const elementsInOrder = [showChainButton, visibilityElement, deleteButton].filter(Boolean);
+
+      for (let i = 0; i < elementsInOrder.length - 1; i++) {
+        expect(elementsInOrder[i].compareDocumentPosition(elementsInOrder[i+1]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      }
+    });
+
+    test('visibility icon has correct styling', () => {
+      const { getByTestId } = render(ExperimentSimple, { experiment: mockExperiment, highlighted: [] });
+      const visibilityElementWrapper = getByTestId('visibility-status');
+
+      expect(visibilityElementWrapper).toHaveClass('p-1');
+      expect(visibilityElementWrapper).toHaveClass('rounded-md');
+      expect(visibilityElementWrapper).toHaveClass('hover:bg-ctp-surface1');
+      expect(visibilityElementWrapper).toHaveClass('cursor-default');
+
+      // Check icon color (assuming public experiment)
+      const icon = visibilityElementWrapper.querySelector('svg'); // A bit generic, but Globe/GlobeLock are svgs
+      expect(icon).toHaveClass('text-ctp-green'); // For PUBLIC experiment
+    });
+
+    test('visibility icon shows correct icon for private experiment', () => {
+        const privateExperiment = { ...mockExperiment, visibility: 'PRIVATE' as 'PUBLIC' | 'PRIVATE' };
+        const { getByTestId } = render(ExperimentSimple, { experiment: privateExperiment, highlighted: [] });
+        const visibilityElementWrapper = getByTestId('visibility-status');
+        const icon = visibilityElementWrapper.querySelector('svg');
+        expect(icon).toHaveClass('text-ctp-red');
+      });
+  });
+
 
   test('tags container has responsive classes for overflow and wrapping', () => {
     const { container } = render(ExperimentSimple, { experiment: mockExperimentLong, highlighted: [] });
