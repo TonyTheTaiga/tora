@@ -153,7 +153,7 @@
   <!-- Header with actions -->
   <header class="px-4 sm:px-6 py-5 border-b border-ctp-surface1">
     <!-- Combined Header for both Mobile and Desktop -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-end">
       <!-- Action Buttons -->
       <div class="flex items-center gap-1 bg-ctp-surface0/80 backdrop-blur-sm border border-ctp-surface1/50 rounded-full p-1 flex-shrink-0">
         {#if page.data.user && page.data.user.id === experiment.user_id}
@@ -231,46 +231,12 @@
           <Minimize2 size={18} />
         </button>
       </div>
-
-      <!-- Status and metadata row -->
-      <div
-        class="flex flex-wrap items-center gap-x-4 gap-y-2 text-ctp-subtext0 text-sm"
-      >
-        <div class="flex items-center gap-1.5">
-          <Clock size={15} class="flex-shrink-0 text-ctp-overlay1" />
-          <time class="text-ctp-subtext1">
-            {new Date(experiment.createdAt).toLocaleString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </time>
-        </div>
-
-        <div
-          class="flex items-center gap-1.5 p-1 px-2 rounded-full {experiment.visibility ===
-          'PUBLIC'
-            ? 'text-ctp-green bg-ctp-green/20'
-            : 'text-ctp-red bg-ctp-red/20'}"
-          title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
-        >
-          {#if experiment.visibility === "PUBLIC"}
-            <Globe size={15} />
-            <span class="text-xs text-ctp-green">Public</span>
-          {:else}
-            <GlobeLock size={15} />
-            <span class="text-xs text-ctp-red">Private</span>
-          {/if}
-        </div>
-      </div>
     </div>
   </header>
 
   <!-- Content Area -->
   <div class="px-4 sm:px-6 py-5 flex flex-col gap-5 overflow-y-auto flex-grow">
-    <!-- MOVED: Title and ID -->
+    <!-- Title, ID, and metadata -->
     <div class="flex flex-col gap-1 min-w-0 flex-grow mb-3">
       <h2
         class="text-2xl sm:text-3xl font-bold text-ctp-text mb-2"
@@ -278,41 +244,75 @@
       >
         {experiment.name}
       </h2>
-      <button
-        type="button"
-        aria-label="Copy Experiment ID"
-        title={idCopied ? "ID Copied!" : "Copy Experiment ID"}
-        class="flex items-center p-1 rounded-md text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text group flex-shrink-0 w-fit"
-        onclick={() => {
-          navigator.clipboard.writeText(experiment.id);
-          idCopied = true;
-          idCopyAnimated = true;
-          setTimeout(() => {
-            idCopied = false;
-          }, 1200);
-          setTimeout(() => {
-            idCopyAnimated = false;
-          }, 400);
-        }}
-      >
-        {#if idCopied}
-          <ClipboardCheck
-            size={14}
-            class="text-ctp-green transition-transform duration-200 {idCopyAnimated
-              ? 'scale-125'
-              : ''}"
-          />
-          <span class="text-xs text-ctp-green ml-1 hidden sm:inline"
-            >Copied!</span
+      <div class="flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          aria-label="Copy Experiment ID"
+          title={idCopied ? "ID Copied!" : "Copy Experiment ID"}
+          class="flex items-center p-1 rounded-md text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text group flex-shrink-0 w-fit"
+          onclick={() => {
+            navigator.clipboard.writeText(experiment.id);
+            idCopied = true;
+            idCopyAnimated = true;
+            setTimeout(() => {
+              idCopied = false;
+            }, 1200);
+            setTimeout(() => {
+              idCopyAnimated = false;
+            }, 400);
+          }}
+        >
+          {#if idCopied}
+            <ClipboardCheck
+              size={14}
+              class="text-ctp-green transition-transform duration-200 {idCopyAnimated
+                ? 'scale-125'
+                : ''}"
+            />
+            <span class="text-xs text-ctp-green ml-1 hidden sm:inline"
+              >Copied!</span
+            >
+          {:else}
+            <Copy size={14} />
+            <span
+              class="text-xs text-ctp-subtext1 ml-1 hidden sm:inline group-hover:text-ctp-text transition-colors"
+              >{experiment.id.substring(0, 8)}...</span
+            >
+          {/if}
+        </button>
+        
+        <!-- Status and metadata row -->
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-ctp-subtext0 text-sm">
+          <div class="flex items-center gap-1.5">
+            <Clock size={15} class="flex-shrink-0 text-ctp-overlay1" />
+            <time class="text-ctp-subtext1">
+              {new Date(experiment.createdAt).toLocaleString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </time>
+          </div>
+
+          <div
+            class="flex items-center gap-1.5 p-1 px-2 rounded-full {experiment.visibility ===
+            'PUBLIC'
+              ? 'text-ctp-green bg-ctp-green/20'
+              : 'text-ctp-red bg-ctp-red/20'}"
+            title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
           >
-        {:else}
-          <Copy size={14} />
-          <span
-            class="text-xs text-ctp-subtext1 ml-1 hidden sm:inline group-hover:text-ctp-text transition-colors"
-            >{experiment.id.substring(0, 8)}...</span
-          >
-        {/if}
-      </button>
+            {#if experiment.visibility === "PUBLIC"}
+              <Globe size={15} />
+              <span class="text-xs text-ctp-green">Public</span>
+            {:else}
+              <GlobeLock size={15} />
+              <span class="text-xs text-ctp-red">Private</span>
+            {/if}
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Metadata section -->
