@@ -149,18 +149,18 @@
   }
 </script>
 
-<article
-  class="h-full bg-ctp-crust rounded-xl shadow-lg flex flex-col overflow-hidden"
->
+<article class="h-full bg-ctp-mantle rounded-xl flex flex-col overflow-hidden">
   <!-- Header with actions -->
-  <header class="px-4 sm:px-6 py-5 bg-ctp-mantle border-b border-ctp-surface1">
+  <header class="px-4 sm:px-6 py-3 border-b border-ctp-surface1">
     <!-- Combined Header for both Mobile and Desktop -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-end">
       <!-- Action Buttons -->
-      <div class="flex items-center gap-2 flex-shrink-0">
+      <div
+        class="flex items-center gap-1 bg-ctp-surface0/80 backdrop-blur-sm border border-ctp-surface1/50 rounded-full p-1 flex-shrink-0"
+      >
         {#if page.data.user && page.data.user.id === experiment.user_id}
           <button
-            class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-lavender hover:bg-ctp-surface0 transition-colors"
+            class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-lavender hover:bg-ctp-surface1/60 transition-colors"
             onclick={async () => {
               const response = await fetch(
                 `/api/ai/analysis?experimentId=${experiment.id}`,
@@ -170,16 +170,16 @@
             }}
             title="Get AI recommendations"
           >
-            <Sparkle size={18} />
+            <Sparkle size={16} />
           </button>
           <button
             onclick={() => {
               openEditExperimentModal(experiment);
             }}
-            class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface0 transition-colors"
+            class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface1/60 transition-colors"
             title="Edit experiment"
           >
-            <Pencil size={18} />
+            <Pencil size={16} />
           </button>
         {/if}
         <button
@@ -200,19 +200,19 @@
               } catch (err) {}
             }
           }}
-          class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-teal hover:bg-ctp-surface0 transition-colors"
+          class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-teal hover:bg-ctp-surface1/60 transition-colors"
           title="Show experiment chain"
         >
           {#if highlighted.includes(experiment.id)}
-            <EyeClosed size={18} />
+            <EyeClosed size={16} />
           {:else}
-            <Eye size={18} />
+            <Eye size={16} />
           {/if}
         </button>
         {#if page.data.user && page.data.user.id === experiment.user_id}
           <button
             type="button"
-            class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/20 transition-colors"
+            class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
             aria-label="Delete"
             title="Delete experiment"
             onclick={(e) => {
@@ -220,101 +220,103 @@
               openDeleteExperimentModal(experiment);
             }}
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         {/if}
         <button
-          class="p-2 rounded-lg text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
+          class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface1/60 transition-colors"
           onclick={() => {
             setSelectedExperiment(null);
           }}
           title="Minimize"
         >
-          <Minimize2 size={18} />
+          <Minimize2 size={16} />
         </button>
-      </div>
-
-      <!-- Status and metadata row -->
-      <div
-        class="flex flex-wrap items-center gap-x-4 gap-y-2 text-ctp-subtext0 text-sm"
-      >
-        <div class="flex items-center gap-1.5">
-          <Clock size={15} class="flex-shrink-0 text-ctp-overlay1" />
-          <time class="text-ctp-subtext1">
-            {new Date(experiment.createdAt).toLocaleString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </time>
-        </div>
-
-        <div
-          class="flex items-center gap-1.5 p-1 px-2 rounded-full transition-colors {experiment.visibility ===
-          'PUBLIC'
-            ? 'text-ctp-green bg-ctp-green/10 hover:bg-ctp-green/20'
-            : 'text-ctp-red bg-ctp-red/10 hover:bg-ctp-red/20'}"
-          title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
-        >
-          {#if experiment.visibility === "PUBLIC"}
-            <Globe size={15} />
-            <span class="text-xs">Public</span>
-          {:else}
-            <GlobeLock size={15} />
-            <span class="text-xs">Private</span>
-          {/if}
-        </div>
       </div>
     </div>
   </header>
 
   <!-- Content Area -->
-  <div class="px-4 sm:px-6 py-5 flex flex-col gap-5 overflow-y-auto flex-grow">
-    <!-- MOVED: Title and ID -->
-    <div class="flex flex-col gap-1 min-w-0 flex-grow mb-3">
+  <div class="px-4 sm:px-6 py-4 flex flex-col gap-4 overflow-y-auto flex-grow">
+    <!-- Title, ID, and metadata -->
+    <div class="flex flex-col gap-1 min-w-0 flex-grow mb-2">
       <h2
-        class="text-2xl sm:text-3xl font-bold text-ctp-text mb-2"
+        class="text-xl sm:text-2xl font-bold text-ctp-text mb-1"
         title={experiment.name}
       >
         {experiment.name}
       </h2>
-      <button
-        type="button"
-        aria-label="Copy Experiment ID"
-        title={idCopied ? "ID Copied!" : "Copy Experiment ID"}
-        class="flex items-center p-1 rounded-md text-ctp-subtext1 transition-colors hover:bg-ctp-surface0 hover:text-ctp-text active:bg-ctp-surface1 group flex-shrink-0 w-fit"
-        onclick={() => {
-          navigator.clipboard.writeText(experiment.id);
-          idCopied = true;
-          idCopyAnimated = true;
-          setTimeout(() => {
-            idCopied = false;
-          }, 1200);
-          setTimeout(() => {
-            idCopyAnimated = false;
-          }, 400);
-        }}
-      >
-        {#if idCopied}
-          <ClipboardCheck
-            size={14}
-            class="text-ctp-green transition-transform duration-200 {idCopyAnimated
-              ? 'scale-125'
-              : ''}"
-          />
-          <span class="text-xs text-ctp-green ml-1 hidden sm:inline"
-            >Copied!</span
+      <div class="flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          aria-label="Copy Experiment ID"
+          title={idCopied ? "ID Copied!" : "Copy Experiment ID"}
+          class="flex items-center p-1 rounded-md text-ctp-subtext1 hover:bg-ctp-surface0 hover:text-ctp-text group flex-shrink-0 w-fit"
+          onclick={() => {
+            navigator.clipboard.writeText(experiment.id);
+            idCopied = true;
+            idCopyAnimated = true;
+            setTimeout(() => {
+              idCopied = false;
+            }, 1200);
+            setTimeout(() => {
+              idCopyAnimated = false;
+            }, 400);
+          }}
+        >
+          {#if idCopied}
+            <ClipboardCheck
+              size={14}
+              class="text-ctp-green transition-transform duration-200 {idCopyAnimated
+                ? 'scale-125'
+                : ''}"
+            />
+            <span class="text-xs text-ctp-green ml-1 hidden sm:inline"
+              >Copied!</span
+            >
+          {:else}
+            <Copy size={14} />
+            <span
+              class="text-xs text-ctp-subtext1 ml-1 hidden sm:inline group-hover:text-ctp-text transition-colors"
+              >{experiment.id.substring(0, 8)}...</span
+            >
+          {/if}
+        </button>
+
+        <!-- Status and metadata row -->
+        <div
+          class="flex flex-wrap items-center gap-x-4 gap-y-2 text-ctp-subtext0 text-sm"
+        >
+          <div class="flex items-center gap-1.5">
+            <Clock size={15} class="flex-shrink-0 text-ctp-overlay1" />
+            <time class="text-ctp-subtext1">
+              {new Date(experiment.createdAt).toLocaleString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </time>
+          </div>
+
+          <div
+            class="flex items-center gap-1.5 p-1 px-2 rounded-full {experiment.visibility ===
+            'PUBLIC'
+              ? 'text-ctp-green bg-ctp-green/20'
+              : 'text-ctp-red bg-ctp-red/20'}"
+            title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
           >
-        {:else}
-          <Copy size={14} />
-          <span
-            class="text-xs text-ctp-subtext1 ml-1 hidden sm:inline group-hover:text-ctp-text transition-colors"
-            >{experiment.id.substring(0, 8)}...</span
-          >
-        {/if}
-      </button>
+            {#if experiment.visibility === "PUBLIC"}
+              <Globe size={15} />
+              <span class="text-xs text-ctp-green">Public</span>
+            {:else}
+              <GlobeLock size={15} />
+              <span class="text-xs text-ctp-red">Private</span>
+            {/if}
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Metadata section -->
@@ -334,7 +336,7 @@
             <button
               type="button"
               onclick={showAllTags}
-              class="text-xs text-ctp-sky hover:text-ctp-blue hover:underline focus:outline-none hover:bg-ctp-surface0 px-2 py-0.5 rounded-md transition-colors"
+              class="text-xs text-ctp-sky hover:text-ctp-blue hover:bg-ctp-surface0 px-2 py-0.5 rounded-md"
             >
               +{hiddenTagCount} more
             </button>
@@ -343,7 +345,7 @@
             <button
               type="button"
               onclick={showLessTags}
-              class="text-xs text-ctp-sky hover:text-ctp-blue hover:underline focus:outline-none hover:bg-ctp-surface0 px-2 py-0.5 rounded-md transition-colors"
+              class="text-xs text-ctp-sky hover:text-ctp-blue hover:bg-ctp-surface0 px-2 py-0.5 rounded-md"
             >
               Show less
             </button>
@@ -372,32 +374,32 @@
     <!-- Parameters section -->
     {#if experiment.hyperparams && experiment.hyperparams.length > 0}
       <details
-        class="mt-2 group open rounded-lg bg-ctp-base/70 border border-ctp-overlay0/30 backdrop-blur-xl shadow-2xl hover:bg-ctp-base/60 transition-all duration-300"
+        class="mt-2 group open rounded-lg bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30"
         open
       >
         <summary
-          class="flex items-center gap-3 px-4 py-3 hover:bg-ctp-overlay0/20 transition-colors rounded-t-lg cursor-pointer"
+          class="flex items-center gap-3 px-3 py-2 rounded-t-lg cursor-pointer"
         >
           <div class="flex items-center gap-2 flex-grow">
-            <Settings size={20} class="text-ctp-blue" />
-            <span class="text-lg font-semibold text-ctp-text"
+            <Settings size={18} class="text-ctp-blue" />
+            <span class="text-base font-semibold text-ctp-text"
               >Hyperparameters</span
             >
           </div>
           <span
-            class="bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/40 backdrop-blur-lg shadow-md rounded-md px-2 py-0.5 text-xs shrink-0"
+            class="bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/40 rounded-md px-2 py-0.5 text-xs shrink-0"
           >
             {experiment.hyperparams?.length || 0} params
           </span>
           <ChevronDown
-            size={20}
+            size={18}
             class="text-ctp-subtext0 group-open:rotate-180 transition-transform shrink-0"
           />
         </summary>
-        <div class="pt-2 px-4 pb-4 space-y-2">
+        <div class="pt-2 px-3 pb-3 space-y-2">
           {#each visibleHyperparameters as param (param.key)}
             <div
-              class="flex items-center justify-between p-3 rounded-lg bg-ctp-surface0/10 hover:bg-ctp-surface0/20 transition-all duration-200 group backdrop-blur-lg border border-ctp-overlay0/10 shadow-md hover:shadow-lg"
+              class="flex items-center justify-between p-2 rounded-lg bg-ctp-surface1/30 hover:bg-ctp-surface1/50 group backdrop-blur-sm border border-ctp-surface2/20"
             >
               <div class="flex items-center space-x-3 flex-1 min-w-0">
                 <span
@@ -406,7 +408,7 @@
                 >
                 {#if recommendations && recommendations[param.key]}
                   <button
-                    class="p-0.5 rounded-sm text-ctp-overlay2 hover:text-ctp-lavender hover:bg-ctp-surface1 transition-colors flex-shrink-0"
+                    class="p-0.5 rounded-sm text-ctp-overlay2 hover:text-ctp-lavender hover:bg-ctp-surface2 flex-shrink-0"
                     onclick={() => {
                       activeRecommendation =
                         recommendations[param.key].recommendation;
@@ -423,11 +425,11 @@
               <div class="flex items-center space-x-2">
                 <code
                   ><pre
-                    class="text-ctp-text font-mono bg-ctp-base/50 px-2 py-1 rounded text-sm backdrop-blur-lg border border-ctp-overlay0/20 shadow-inner truncate max-w-[150px] sm:max-w-xs">{param.value}</pre></code
+                    class="text-ctp-text font-mono bg-ctp-surface2/80 px-2 py-1 rounded text-sm truncate max-w-[150px] sm:max-w-xs backdrop-blur-sm border border-ctp-overlay0/20">{param.value}</pre></code
                 >
                 <button
                   type="button"
-                  class="hover:bg-ctp-surface0/20 backdrop-blur-lg p-1 rounded text-ctp-subtext1 hover:text-ctp-text"
+                  class="p-1 rounded text-ctp-subtext1 hover:bg-ctp-surface2/60 hover:text-ctp-text"
                   title="Copy value"
                   aria-label="Copy hyperparameter value {param.value}"
                   onclick={() => {
@@ -443,7 +445,7 @@
                   }}
                 >
                   {#if copiedParamKey === param.key}
-                    <ClipboardCheck size={14} class="text-ctp-green" />
+                    <ClipboardCheck size={14} class="text-green-400" />
                   {:else}
                     <Copy size={14} />
                   {/if}
@@ -458,7 +460,7 @@
               onclick={() => {
                 allHyperparametersShown = !allHyperparametersShown;
               }}
-              class="w-full text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0/20 mt-4 backdrop-blur-lg border border-ctp-overlay0/10 shadow-md rounded-lg py-2.5 px-4 text-sm flex items-center justify-center transition-colors duration-200"
+              class="w-full text-ctp-subtext0 hover:text-ctp-text mt-4 rounded-lg py-2.5 px-4 text-sm flex items-center justify-center bg-ctp-surface1/30 hover:bg-ctp-surface1/50 backdrop-blur-sm border border-ctp-surface2/20"
             >
               <ChevronDown
                 class="w-4 h-4 mr-2 transition-transform {allHyperparametersShown
@@ -472,19 +474,19 @@
           {/if}
           {#if activeRecommendation}
             <div
-              class="mt-3 p-3.5 bg-ctp-surface1 border border-ctp-lavender/50 rounded-lg relative shadow-sm"
+              class="mt-3 p-3.5 bg-ctp-surface1/80 rounded-lg relative backdrop-blur-sm border border-ctp-lavender/50"
             >
               <button
-                class="absolute top-2 right-2 p-1 rounded-md text-ctp-subtext1 hover:text-ctp-text hover:bg-ctp-surface2 transition-colors"
+                class="absolute top-2 right-2 p-1 rounded-md text-ctp-subtext1 hover:text-ctp-text hover:bg-ctp-surface2"
                 onclick={() => (activeRecommendation = null)}
                 aria-label="Close recommendation"
               >
                 <X size={15} />
               </button>
-              <h4 class="text-sm font-semibold text-ctp-lavender mb-2">
+              <h4 class="text-sm font-semibold text-purple-300 mb-2">
                 AI Recommendation
               </h4>
-              <p class="text-sm text-ctp-text leading-relaxed">
+              <p class="text-sm text-white leading-relaxed">
                 {activeRecommendation}
               </p>
             </div>
@@ -496,31 +498,31 @@
     <!-- Metrics section -->
     {#if availableMetrics.length > 0}
       <details
-        class="mt-3 group open rounded-lg bg-ctp-base/70 border border-ctp-overlay0/30 backdrop-blur-xl shadow-2xl hover:bg-ctp-base/60 transition-all duration-300"
+        class="mt-2 group open rounded-lg bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30"
         open
       >
         <summary
-          class="flex items-center gap-3 px-4 py-3 hover:bg-ctp-overlay0/20 transition-colors rounded-t-lg cursor-pointer"
+          class="flex items-center gap-3 px-3 py-2 rounded-t-lg cursor-pointer"
         >
           <div class="flex items-center gap-2 flex-grow">
-            <ChartArea size={20} class="text-ctp-blue" />
-            <span class="text-lg font-semibold text-ctp-text">Metrics</span>
+            <ChartArea size={18} class="text-ctp-blue" />
+            <span class="text-base font-semibold text-ctp-text">Metrics</span>
           </div>
           <ChevronDown
-            size={20}
+            size={18}
             class="text-ctp-subtext0 group-open:rotate-180 transition-transform shrink-0"
           />
         </summary>
-        <div class="pt-3 px-4 pb-4 space-y-3">
+        <div class="pt-2 px-3 pb-3 space-y-3">
           <!-- New Segmented Control -->
           <div class="flex justify-center mb-4">
             <div
-              class="flex bg-ctp-base/70 border border-ctp-overlay0/20 w-full backdrop-blur-xl shadow-md rounded-lg p-1 space-x-1"
+              class="flex bg-ctp-surface1/40 w-full rounded-lg p-1 space-x-1 backdrop-blur-sm border border-ctp-surface2/20"
             >
               <button
-                class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none {!showMetricsTable
-                  ? 'bg-ctp-surface0/20 backdrop-blur-lg shadow-md text-ctp-text'
-                  : 'text-ctp-subtext0 hover:bg-ctp-surface0/10'}"
+                class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 focus:outline-none {!showMetricsTable
+                  ? 'bg-ctp-surface2/50 text-ctp-text backdrop-blur-sm'
+                  : 'text-ctp-subtext0 hover:bg-ctp-surface2/30'}"
                 onclick={() => {
                   showMetricsTable = false;
                 }}
@@ -529,9 +531,9 @@
                 Chart
               </button>
               <button
-                class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none {showMetricsTable
-                  ? 'bg-ctp-surface0/20 backdrop-blur-lg shadow-md text-ctp-text'
-                  : 'text-ctp-subtext0 hover:bg-ctp-surface0/10'}"
+                class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 focus:outline-none {showMetricsTable
+                  ? 'bg-ctp-surface2/50 text-ctp-text backdrop-blur-sm'
+                  : 'text-ctp-subtext0 hover:bg-ctp-surface2/30'}"
                 onclick={() => {
                   showMetricsTable = true;
                   fetchRawMetricsIfNeeded();
@@ -548,7 +550,7 @@
           {#if showMetricsTable}
             {#if metricsLoading}
               <div
-                class="flex flex-col justify-center items-center p-6 min-h-[150px] bg-ctp-mantle rounded-lg shadow-sm text-center"
+                class="flex flex-col justify-center items-center p-6 min-h-[150px] bg-ctp-surface0/30 rounded-lg text-center backdrop-blur-sm border border-ctp-surface1/20"
               >
                 <Loader2
                   size={28}
@@ -562,18 +564,16 @@
                 </p>
               </div>
             {:else if metricsError}
-              <p
-                class="text-sm text-ctp-red bg-ctp-red/10 p-4 rounded-lg shadow-sm border border-ctp-red/30"
-              >
+              <p class="text-sm text-red-300 bg-red-900/20 p-4 rounded-lg">
                 {metricsError}
               </p>
             {:else if rawMetrics.length > 0}
               <div
-                class="overflow-x-auto max-h-[500px] bg-ctp-surface0/10 rounded-lg p-4 backdrop-blur-lg border border-ctp-overlay0/10 shadow-md"
+                class="overflow-x-auto max-h-[500px] bg-ctp-surface0/30 rounded-lg p-4 backdrop-blur-sm border border-ctp-surface1/20"
               >
                 <table class="w-full text-sm text-left">
                   <thead
-                    class="bg-ctp-surface0/50 sticky top-0 z-10 backdrop-blur-lg"
+                    class="bg-ctp-surface1/40 sticky top-0 z-10 backdrop-blur-sm"
                   >
                     <tr>
                       <th class="p-3 font-semibold text-ctp-text">Name</th>
@@ -584,9 +584,7 @@
                   </thead>
                   <tbody class="divide-y divide-ctp-surface1">
                     {#each rawMetrics as metric (metric.id)}
-                      <tr
-                        class="hover:bg-ctp-surface0/70 transition-colors duration-150"
-                      >
+                      <tr class="">
                         <td
                           class="p-3 text-ctp-subtext1 truncate max-w-sm"
                           title={metric.name}>{metric.name}</td
@@ -617,14 +615,14 @@
               </div>
             {:else}
               <p
-                class="text-sm text-ctp-overlay2 bg-ctp-mantle p-4 rounded-lg shadow-sm text-center"
+                class="text-sm text-ctp-overlay2 bg-ctp-surface0/30 p-4 rounded-lg text-center backdrop-blur-sm border border-ctp-surface1/20"
               >
                 No metric data points found for this experiment.
               </p>
             {/if}
           {:else}
             <div
-              class="bg-ctp-base/70 rounded-lg p-4 backdrop-blur-lg border border-ctp-overlay0/10 shadow-inner"
+              class="bg-ctp-surface0/30 rounded-lg p-4 backdrop-blur-sm border border-ctp-surface1/20"
             >
               <InteractiveChart {experiment} />
             </div>
