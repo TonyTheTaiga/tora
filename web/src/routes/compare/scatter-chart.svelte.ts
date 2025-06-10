@@ -45,7 +45,7 @@ export function drawScatterChart(
         },
         tooltip: {
           enabled: true,
-          mode: "point",
+          mode: "nearest",
           intersect: false,
           callbacks: {
             title: function (context) {
@@ -104,7 +104,7 @@ export function drawScatterChart(
       },
       interaction: {
         intersect: false,
-        mode: "point",
+        mode: "nearest",
       },
       elements: {
         point: {

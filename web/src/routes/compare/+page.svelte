@@ -140,6 +140,27 @@
   let chartCanvas = $state<HTMLCanvasElement>();
   let chart: Chart | null = null;
 
+  // $effect for managing touch event listeners on the chart canvas
+  $effect(() => {
+    const currentCanvas = chartCanvas; // Capture current value for cleanup
+
+    if (currentCanvas) {
+      const preventScroll = (event: TouchEvent) => {
+        if (event.target === currentCanvas) {
+          event.preventDefault();
+        }
+      };
+
+      currentCanvas.addEventListener('touchstart', preventScroll, { passive: false });
+      currentCanvas.addEventListener('touchmove', preventScroll, { passive: false });
+
+      // Cleanup function for this $effect
+      return () => {
+        currentCanvas.removeEventListener('touchstart', preventScroll);
+        currentCanvas.removeEventListener('touchmove', preventScroll);
+      };
+    }
+  });
 
   function updateChart() {
     if (chart) {
