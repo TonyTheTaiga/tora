@@ -329,7 +329,7 @@
         </summary>
 
         <div
-          class="absolute top-full left-0 right-0 mt-1 z-10 max-h-60 overflow-y-auto border border-ctp-surface1"
+          class="absolute top-full left-0 right-0 mt-1 z-10 max-h-60 overflow-y-auto border border-ctp-surface1 bg-ctp-surface0 rounded shadow-lg"
         >
           <!-- Search filter -->
           <div class="p-2 border-b border-ctp-surface1">
