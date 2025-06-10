@@ -87,7 +87,6 @@
     allTagsShown = false;
   }
 
-  // For Hyperparameter display
   let allHyperparametersShown = $state(false);
   const initialHyperparameterLimit = 7;
 
@@ -391,7 +390,7 @@
     {#if experiment.hyperparams && experiment.hyperparams.length > 0}
       <details class="mt-3 group" open>
         <summary
-          class="flex items-center gap-2.5 cursor-pointer text-ctp-text hover:text-ctp-blue py-2.5 rounded-lg -mx-2 px-2 hover:bg-ctp-surface0 transition-colors"
+          class="flex items-center gap-2.5 cursor-pointer text-ctp-text py-2.5 rounded-lg -mx-2 px-2 hover:bg-ctp-surface0 transition-colors"
         >
           <Settings size={18} class="text-ctp-overlay1 flex-shrink-0" />
           <span class="text-base font-medium">Hyperparameters</span>
@@ -408,7 +407,7 @@
               >
                 <div class="flex items-center min-w-0 flex-1">
                   <span
-                    class="text-sm font-medium text-ctp-text group-hover:text-ctp-blue truncate mr-1 shrink"
+                    class="text-sm font-medium text-ctp-text truncate mr-1 shrink"
                     title={param.key}>{param.key}</span
                   >
                   {#if recommendations && recommendations[param.key]}
