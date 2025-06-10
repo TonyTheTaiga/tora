@@ -43,10 +43,9 @@
 
   <Toolbar {hasExperiments} />
 
-  <div class="pt-4 px-0 sm:px-2 md:px-4"> {/* Reduced padding */}
+  <div class="pt-4 px-0 sm:px-2 md:px-4">
     {#if getMode()}
-      <div class="sticky top-3 z-30 flex justify-center mb-4"> {/* Removed bg-ctp-base, py-2. Adjusted top to top-3 */}
-        {/* max-w-fit was on ComparisonToolbar's wrapper, now ComparisonToolbar itself handles its width */}
+      <div class="sticky top-3 z-30 flex justify-center mb-4">
         <ComparisonToolbar />
       </div>
     {/if}
