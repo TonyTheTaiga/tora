@@ -3,7 +3,7 @@
     Experiment,
     ExperimentAnalysis,
     HPRecommendation,
-    Metric, // Ensure Metric is imported
+    Metric,
   } from "$lib/types";
 
   interface ExperimentWithMetrics extends Experiment {
@@ -503,7 +503,6 @@
               </p>
             {/if}
           {:else}
-            <!-- Original Chart Display -->
             <div class="-mx-2 sm:-mx-4">
               <div class="px-1 sm:px-2 w-full overflow-x-auto">
                 <InteractiveChart {experiment} />

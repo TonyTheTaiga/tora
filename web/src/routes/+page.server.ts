@@ -22,7 +22,12 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   const timer = startTimer("page.home.load", { requestId });
 
   try {
-    const { session } = await locals.safeGetSession();
+    const { session, user } = await locals.safeGetSession();
+    if (!user) {
+      const experiments = new Array();
+      return { experiments, session };
+    }
+
     const { currentWorkspace } = await parent();
 
     const apiUrl = new URL(API_ROUTES.GET_EXPERIMENTS, url.origin);
@@ -39,9 +44,9 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
     const experiments: Experiment[] = await res.json();
 
     timer.end({
-      userId: session?.user?.id,
-      workspaceId: currentWorkspace?.id,
-      experimentCount: experiments.length,
+      userId: session?.user?.id || "unknown",
+      workspaceId: currentWorkspace?.id || "unknown",
+      experimentCount: experiments.length.toString(),
     });
     return { experiments, session };
   } catch (err) {

@@ -140,28 +140,6 @@
   let chartCanvas = $state<HTMLCanvasElement>();
   let chart: Chart | null = null;
 
-  // $effect for managing touch event listeners on the chart canvas
-  $effect(() => {
-    const currentCanvas = chartCanvas; // Capture current value for cleanup
-
-    if (currentCanvas) {
-      const preventScroll = (event: TouchEvent) => {
-        if (event.target === currentCanvas) {
-          event.preventDefault();
-        }
-      };
-
-      currentCanvas.addEventListener('touchstart', preventScroll, { passive: false });
-      currentCanvas.addEventListener('touchmove', preventScroll, { passive: false });
-
-      // Cleanup function for this $effect
-      return () => {
-        currentCanvas.removeEventListener('touchstart', preventScroll);
-        currentCanvas.removeEventListener('touchmove', preventScroll);
-      };
-    }
-  });
-
   function updateChart() {
     if (chart) {
       chart.destroy();
@@ -411,9 +389,7 @@
             ? "aspect-square max-w-2xl mx-auto"
             : "aspect-[4/3] max-w-4xl mx-auto"}
         >
-          <canvas
-            bind:this={chartCanvas}
-            class="w-full h-full chart-canvas"
+          <canvas bind:this={chartCanvas} class="w-full h-full chart-canvas"
           ></canvas>
         </div>
       {:else}
@@ -437,9 +413,9 @@
   .scroll-container::-webkit-scrollbar {
     display: none;
   }
-  
+
   .chart-canvas {
-    touch-action: manipulation;
+    touch-action: none;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;

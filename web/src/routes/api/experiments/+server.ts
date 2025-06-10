@@ -20,9 +20,9 @@ export const GET: RequestHandler = async ({ url, locals }) => {
     );
 
     timer.end({
-      userId: user.id,
-      workspaceId: workspace_id,
-      experimentCount: experiments.length,
+      userId: user.id || "unknown",
+      workspaceId: workspace_id || "unknown",
+      experimentCount: experiments.length.toString(),
     });
     return json(experiments);
   } catch (err) {

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { Experiment } from "$lib/types";
   import type { PageData } from "./$types";
   import CreateExperimentModal from "$lib/components/create-experiment-modal.svelte";
   import ExperimentsList from "$lib/components/experiments-list.svelte";
@@ -14,7 +13,6 @@
     getCreateExperimentModal,
     getEditExperimentModal,
     getDeleteExperimentModal,
-    getSelectedExperiment,
   } from "$lib/state/app.svelte.js";
 
   let user = $derived(page.data.user);
@@ -25,7 +23,6 @@
   let createExperimentModal = $derived(getCreateExperimentModal());
   let editExperimentModal = $derived(getEditExperimentModal());
   let deleteExperimentModal = $derived(getDeleteExperimentModal());
-  let selectedExperiment = $derived(getSelectedExperiment());
 </script>
 
 {#if user}

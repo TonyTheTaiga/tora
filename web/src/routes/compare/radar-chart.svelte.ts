@@ -50,7 +50,7 @@ export function drawRadarChart(
       responsive: true,
       maintainAspectRatio: true,
       aspectRatio: 1,
-      events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
+      events: ["mousemove", "mouseout", "click", "touchstart", "touchmove"],
       elements: {
         line: {
           borderWidth: 3,
@@ -125,6 +125,52 @@ export function drawRadarChart(
         }
       },
     },
+    plugins: [
+      {
+        id: "touchAndTooltipHandler",
+        beforeEvent(chart, args) {
+          const event = args.event;
+          const eventType = event.type as string;
+
+          // Prevent scrolling on touch events
+          if (eventType === "touchstart" || eventType === "touchmove") {
+            if (event.native) {
+              event.native.preventDefault();
+            }
+          }
+
+          // Clear tooltips when interaction ends
+          if (
+            event.type === "mouseout" ||
+            eventType === "touchend" ||
+            eventType === "mouseup"
+          ) {
+            if (
+              chart.tooltip &&
+              typeof chart.tooltip.setActiveElements === "function"
+            ) {
+              chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+              chart.update("none");
+            }
+          }
+        },
+        afterEvent(chart, args) {
+          const event = args.event;
+          const eventType = event.type as string;
+
+          // Additional cleanup for mouse leave
+          if (eventType === "mouseleave") {
+            if (
+              chart.tooltip &&
+              typeof chart.tooltip.setActiveElements === "function"
+            ) {
+              chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+              chart.update("none");
+            }
+          }
+        },
+      },
+    ],
   });
 
   return chart;

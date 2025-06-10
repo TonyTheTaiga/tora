@@ -433,7 +433,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
           handleError(error, "Failed to get experiments and metrics");
           return data ?? [];
         },
-        { experimentCount: experimentIds.length },
+        { experimentCount: experimentIds.length.toString() },
       );
     },
   };

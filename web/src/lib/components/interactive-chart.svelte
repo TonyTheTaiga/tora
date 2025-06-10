@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Experiment, Metric } from "$lib/types";
   import Chart from "chart.js/auto";
-  import { ChartLine, Plus, EyeOff, ChevronDown } from "lucide-svelte";
+  import { ChartLine, ChevronDown } from "lucide-svelte";
   import { onMount, onDestroy } from "svelte";
   import { startTimer } from "$lib/utils/timing";
 
@@ -119,41 +119,6 @@
     };
   });
 
-  $effect(() => {
-    const currentCanvas = chartCanvas; // Capture current value for cleanup
-
-    if (currentCanvas) {
-      const preventScroll = (event: TouchEvent) => {
-        if (event.target === currentCanvas) {
-          event.preventDefault();
-        }
-      };
-
-      currentCanvas.addEventListener('touchstart', preventScroll, { passive: false });
-      currentCanvas.addEventListener('touchmove', preventScroll, { passive: false });
-
-      const clearTooltip = () => {
-        if (chartInstance && chartInstance.tooltip) {
-          // Check if tooltip is an object and has the method
-          if (typeof chartInstance.tooltip.setActiveElements === 'function') {
-            chartInstance.tooltip.setActiveElements([], {x:0, y:0});
-          }
-        }
-      };
-
-      currentCanvas.addEventListener('mouseout', clearTooltip);
-      currentCanvas.addEventListener('touchend', clearTooltip); // Added for touch devices
-
-      // Cleanup function for this $effect
-      return () => {
-        currentCanvas.removeEventListener('touchstart', preventScroll);
-        currentCanvas.removeEventListener('touchmove', preventScroll);
-        currentCanvas.removeEventListener('mouseout', clearTooltip);
-        currentCanvas.removeEventListener('touchend', clearTooltip); // Added for touch devices
-      };
-    }
-  });
-
   onDestroy(() => {
     destroyChart();
   });
@@ -189,13 +154,13 @@
 
   function updateChart() {
     const timer = startTimer("chart.updateChart", {
-      experimentId: experiment.id,
-      selectedMetricsCount: selectedMetrics.length,
+      experimentId: experiment.id.toString(),
+      selectedMetricsCount: selectedMetrics.length.toString(),
     });
 
     destroyChart();
     if (!chartCanvas || selectedMetrics.length === 0) {
-      timer.end({ skipped: true });
+      timer.end({ skipped: "true" });
       return;
     }
 
@@ -213,7 +178,6 @@
           y: values[i],
         }));
 
-        // Manual downsampling - take every nth point to reduce to ~50 points
         const targetSamples = 50;
         const dataPoints =
           rawDataPoints.length > targetSamples
@@ -242,7 +206,6 @@
         };
       });
 
-
       chartInstance = new Chart(chartCanvas, {
         type: "line",
         data: {
@@ -253,7 +216,7 @@
           maintainAspectRatio: false,
           parsing: false,
           normalized: true,
-          events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
+          events: ["mousemove", "mouseout", "click", "touchstart", "touchmove"],
           interaction: {
             mode: "nearest",
             intersect: false,
@@ -343,8 +306,52 @@
             }
           },
         },
+        plugins: [
+          {
+            id: "touchAndTooltipHandler",
+            beforeEvent(chart, args) {
+              const event = args.event;
+              const eventType = event.type as string;
+
+              if (eventType === "touchstart" || eventType === "touchmove") {
+                if (event.native) {
+                  event.native.preventDefault();
+                }
+              }
+
+              if (
+                event.type === "mouseout" ||
+                eventType === "touchend" ||
+                eventType === "mouseup"
+              ) {
+                if (
+                  chart.tooltip &&
+                  typeof chart.tooltip.setActiveElements === "function"
+                ) {
+                  chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+                  chart.update("none");
+                }
+              }
+            },
+            afterEvent(chart, args) {
+              const event = args.event;
+              const eventType = event.type as string;
+
+              // Additional cleanup for mouse leave
+              if (eventType === "mouseleave") {
+                if (
+                  chart.tooltip &&
+                  typeof chart.tooltip.setActiveElements === "function"
+                ) {
+                  chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+                  chart.update("none");
+                }
+              }
+            },
+          },
+        ],
       });
-      timer.end({ success: true });
+      timer.end({ success: "true" });
     } catch (error) {
       timer.end({
         error: error instanceof Error ? error.message : "Unknown error",
@@ -392,12 +399,6 @@
       destroyChart();
     }
   });
-
-  function resetChart() {
-    selectedMetrics = [];
-    metricsData = {};
-    destroyChart();
-  }
 </script>
 
 <div class="p-3 sm:p-4 space-y-4 w-full">
@@ -483,10 +484,7 @@
         </div>
       {/if}
       <div class="absolute inset-0 p-2 sm:p-4">
-        <canvas
-          bind:this={chartCanvas}
-          class="chart-canvas"
-        ></canvas>
+        <canvas bind:this={chartCanvas} class="chart-canvas"></canvas>
       </div>
     </div>
     <!-- Empty State -->
@@ -506,7 +504,7 @@
   .chart-canvas {
     background-color: transparent;
     border-radius: 4px;
-    touch-action: manipulation;
+    touch-action: none;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;

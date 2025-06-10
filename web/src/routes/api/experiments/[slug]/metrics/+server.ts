@@ -110,12 +110,15 @@ export const GET: RequestHandler = async ({ params, locals }) => {
     try {
       await locals.dbClient.checkExperimentAccess(params.slug, userId);
     } catch (error) {
-      timer.end({ error: "Access denied", userId });
+      timer.end({ error: "Access denied", userId: userId || "unknown" });
       return json([], { status: 200 });
     }
 
     const metrics = await locals.dbClient.getMetrics(params.slug);
-    timer.end({ userId, metricsCount: metrics.length });
+    timer.end({
+      userId: userId || "unknown",
+      metricsCount: metrics.length.toString(),
+    });
     return json(metrics);
   } catch (error) {
     timer.end({
