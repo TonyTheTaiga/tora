@@ -29,18 +29,18 @@
 </script>
 
 <article
-  class="flex flex-col h-full rounded-xl bg-ctp-mantle p-4 shadow-md group hover:bg-ctp-surface0 transition-all duration-200 ease-in-out transform hover:-translate-y-1 border-2"
+  class="flex flex-col h-full w-full rounded-xl bg-ctp-mantle p-4 shadow-md group hover:bg-ctp-surface0 transition-all duration-200 ease-in-out transform hover:-translate-y-1 border-2 md:h-64"
   class:border-ctp-blue={isSelectedForComparison}
   class:border-transparent={!isSelectedForComparison}
 >
   <!-- Header -->
-  <div class="flex items-start justify-between mb-3">
+  <div class="flex items-start justify-between mb-3 flex-shrink-0"> {/* Added flex-shrink-0 to header and footer areas */}
     <h3
-      class="font-semibold text-base text-ctp-text group-hover:text-ctp-blue transition-colors flex-1 mr-2"
+      class="font-semibold text-base text-ctp-text group-hover:text-ctp-blue transition-colors flex-1 mr-2 truncate"
     >
       {experiment.name}
     </h3>
-    <div class="flex-shrink-0">
+    <div class="flex-shrink-0"> {/* Ensured this doesn't shrink if name is too long */}
       <div
         class="p-1 rounded-md transition-colors {experiment.visibility ===
         'PUBLIC'
@@ -60,7 +60,7 @@
   <!-- Description -->
   {#if experiment.description}
     <p
-      class="text-sm text-ctp-subtext0 mb-3 leading-relaxed"
+      class="text-sm text-ctp-subtext0 mb-3 leading-relaxed flex-grow overflow-hidden description-truncate"
       title={experiment.description}
     >
       {experiment.description}
@@ -69,18 +69,19 @@
 
   <!-- Footer -->
   <div
-    class="mt-auto flex items-center justify-between gap-2 pt-3 border-t border-ctp-surface1"
+    class="mt-auto flex items-center justify-between gap-2 pt-3 border-t border-ctp-surface1 flex-shrink-0"
   >
     <!-- Tags -->
     <div
-      class="flex items-center gap-1.5 text-xs text-ctp-subtext0 overflow-hidden"
+      class="flex items-center gap-1.5 text-xs text-ctp-subtext0 overflow-x-auto min-w-0 pr-2" /* Allow tags area to scroll if needed, min-w-0 for flex child */
     >
       {#if experiment.tags && experiment.tags.length > 0}
         <Tag size={12} class="text-ctp-overlay1 flex-shrink-0" />
-        <div class="flex flex-wrap gap-1 overflow-hidden">
+        <div class="flex flex-nowrap gap-1"> {/* Changed to flex-nowrap for horizontal scroll of tags */}
           {#each experiment.tags as tag, i}
             <span
-              class="text-xs bg-ctp-surface0 text-ctp-overlay2 px-1.5 py-0.5 rounded-full whitespace-nowrap"
+              class="text-xs bg-ctp-surface0 text-ctp-overlay2 px-1.5 py-0.5 rounded-full whitespace-nowrap inline-block max-w-[120px] truncate"
+              title={tag}
             >
               {tag}
             </span>
@@ -90,7 +91,7 @@
     </div>
 
     <!-- Actions & Date -->
-    <div class="flex items-center gap-2 text-ctp-subtext0">
+    <div class="flex items-center gap-2 text-ctp-subtext0 flex-shrink-0"> {/* Added flex-shrink-0 here as well */}
       <button
         onclick={async (e) => {
           e.stopPropagation();
@@ -144,3 +145,39 @@
     </div>
   </div>
 </article>
+
+<style>
+  .description-truncate {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3; /* Show 3 lines, adjust as needed */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 0; /* Important for flex-grow in some browsers */
+  }
+
+  /* Fallback for non-webkit browsers for description, not perfect but better than nothing */
+  @supports not (-webkit-line-clamp: 3) {
+    .description-truncate {
+      max-height: calc(1.5em * 3); /* Assuming line-height is around 1.5em, for 3 lines */
+      /* white-space: normal; /* Ensure it wraps if it was nowrap before */
+    }
+  }
+
+  /* Ensure tags area does not cause parent to grow indefinitely if all tags are very long */
+  .overflow-x-auto {
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: var(--color-ctp-surface2) var(--color-ctp-mantle); /* For Firefox */
+  }
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 4px;
+  }
+  .overflow-x-auto::-webkit-scrollbar-track {
+    background: var(--color-ctp-mantle);
+    border-radius: 2px;
+  }
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background-color: var(--color-ctp-surface2);
+    border-radius: 2px;
+  }
+</style>

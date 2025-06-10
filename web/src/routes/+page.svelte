@@ -43,9 +43,10 @@
 
   <Toolbar {hasExperiments} />
 
-  <div class="pt-6 px-4 md:px-6 lg:px-8">
+  <div class="pt-6 px-4 md:px-6 lg:px-8"> {/* Added a padded container */}
     {#if getMode()}
-      <div class="sticky top-4 sm:top-6 z-30 flex justify-center mb-6">
+      <div class="sticky top-4 sm:top-6 z-30 flex justify-center mb-6"> {/* Adjusted sticky top, added mb and centering for the toolbar */}
+        {/* max-w-fit was on ComparisonToolbar's wrapper, now ComparisonToolbar itself handles its width */}
         <ComparisonToolbar />
       </div>
     {/if}
