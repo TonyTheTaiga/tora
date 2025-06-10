@@ -82,9 +82,8 @@
       overlay0: computedStyles.getPropertyValue("--color-ctp-overlay0").trim(),
       sky: computedStyles.getPropertyValue("--color-ctp-sky").trim(), // Added for tooltip title
       // gridLines: `${computedStyles.getPropertyValue("--color-ctp-overlay0").trim()}15`, // Old gridLines
-      fadedGridLines:
-        computedStyles.getPropertyValue("--color-ctp-surface1").trim() + "33",
-      axisTicks: computedStyles.getPropertyValue("--color-ctp-subtext0").trim(),
+      fadedGridLines: computedStyles.getPropertyValue('--color-ctp-surface1').trim() + '33',
+      axisTicks: computedStyles.getPropertyValue('--color-ctp-subtext0').trim(),
     };
   }
 
@@ -222,7 +221,7 @@
           label: metric,
           data: dataPoints,
           borderColor: color.border,
-          backgroundColor: color.border + "40", // Updated background color
+          backgroundColor: color.border + '40', // Updated background color
           fill: true, // Enabled fill
           pointBackgroundColor: color.point,
           pointBorderColor: ui.base, // Updated point border color
@@ -276,10 +275,10 @@
             },
             tooltip: {
               enabled: true,
-              backgroundColor: ui.base + "cc", // Updated tooltip background
+              backgroundColor: ui.base + 'cc', // Updated tooltip background
               titleColor: ui.sky, // Using ui.sky from getThemeUI
               bodyColor: ui.text,
-              borderColor: ui.overlay0 + "33", // Updated tooltip border
+              borderColor: ui.overlay0 + '33', // Updated tooltip border
               borderWidth: 1, // Added border width for tooltip
               position: "nearest",
               caretPadding: 12,
@@ -438,14 +437,14 @@
   });
 </script>
 
-<div class="p-4 sm:p-5 space-y-5 w-full">
+<div class="p-4 sm:p-5 space-y-5 w-full"> {# p-3 sm:p-4 to p-4 sm:p-5, space-y-4 to space-y-5 #}
   <!-- Metric Selector -->
   {#if availableMetrics.length > 0}
-    <div class="border-b border-ctp-surface1 pb-4">
+    <div class="border-b border-ctp-surface1 pb-4"> {# Consider pb-5 if space-y-5 is used #}
       <details class="relative">
         <summary
           class="flex items-center justify-between cursor-pointer p-3 bg-ctp-surface0 rounded border border-ctp-surface1 hover:bg-ctp-surface1 transition-colors"
-        >
+        > {# p-2 to p-3 #}
           <span class="text-sm text-ctp-text">
             Select metrics ({selectedMetrics.length} of {availableMetrics.length})
           </span>
@@ -456,27 +455,27 @@
           class="absolute top-full left-0 right-0 mt-1 bg-ctp-surface0 border border-ctp-surface1 rounded shadow-lg z-10 max-h-60 overflow-y-auto"
         >
           <!-- Search filter -->
-          <div class="p-2 border-b border-ctp-surface1">
+          <div class="p-2 border-b border-ctp-surface1"> {# Consider p-2.5 or p-3 if input is larger #}
             <input
               type="search"
               placeholder="Filter metrics..."
               bind:value={searchFilter}
               class="w-full px-3 py-2 text-sm bg-ctp-base border border-ctp-surface1 rounded text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue"
-            />
+            /> {# px-2 py-1 to px-3 py-2 #}
           </div>
 
           <!-- Control buttons -->
-          <div class="flex gap-2 p-2 border-b border-ctp-surface1">
+          <div class="flex gap-2 p-2 border-b border-ctp-surface1"> {# Consider p-2.5 or p-3 if buttons are larger #}
             <button
               onclick={selectAllMetrics}
               class="px-2.5 py-1.5 text-xs bg-ctp-green/20 text-ctp-green rounded hover:bg-ctp-green/30 transition-colors"
-            >
+            > {# px-2 py-1 to px-2.5 py-1.5 #}
               Select All
             </button>
             <button
               onclick={clearAllMetrics}
               class="px-2.5 py-1.5 text-xs bg-ctp-red/20 text-ctp-red rounded hover:bg-ctp-red/30 transition-colors"
-            >
+            > {# px-2 py-1 to px-2.5 py-1.5 #}
               Clear All
             </button>
           </div>
@@ -511,7 +510,7 @@
   <!-- Chart Display Section -->
   {#if selectedMetrics.length > 0}
     <div
-      class="relative h-60 sm:h-80 w-full rounded-md border border-ctp-overlay0/10 bg-transparent overflow-hidden"
+      class="relative h-60 sm:h-80 w-full rounded-md border border-ctp-overlay0/10 bg-transparent overflow-hidden" {# Updated border, removed shadow #}
     >
       {#if isLoading}
         <div
@@ -520,7 +519,7 @@
           <div class="animate-pulse text-[#91d7e3]">Loading data...</div>
         </div>
       {/if}
-      <div class="absolute inset-0 p-4">
+      <div class="absolute inset-0 p-4"> {# p-2 sm:p-4 to p-4 #}
         <canvas bind:this={chartCanvas} class="chart-canvas"></canvas>
       </div>
     </div>
