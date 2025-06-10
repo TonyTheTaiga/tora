@@ -149,101 +149,103 @@
   }
 </script>
 
-<article class="h-full bg-ctp-mantle rounded-xl flex flex-col overflow-hidden">
-  <!-- Header with actions -->
-  <header class="px-4 sm:px-6 py-3 border-b border-ctp-surface1">
-    <div class="flex items-center justify-end">
-      <div
-        class="flex items-center gap-1 bg-ctp-surface0/80 backdrop-blur-sm border border-ctp-surface1/50 rounded-full p-1"
-      >
-        {#if page.data.user && page.data.user.id === experiment.user_id}
-          <button
-            class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-lavender hover:bg-ctp-surface1/60 transition-colors"
-            onclick={async () => {
-              const response = await fetch(
-                `/api/ai/analysis?experimentId=${experiment.id}`,
-              );
-              const data = (await response.json()) as ExperimentAnalysis;
-              recommendations = data.hyperparameter_recommendations;
-            }}
-            title="Get AI recommendations"
-          >
-            <Sparkle size={16} />
-          </button>
-          <button
-            onclick={() => {
-              openEditExperimentModal(experiment);
-            }}
-            class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface1/60 transition-colors"
-            title="Edit experiment"
-          >
-            <Pencil size={16} />
-          </button>
-        {/if}
+<header>
+  <div class="flex items-center justify-end">
+    <div
+      class="flex items-center gap-1 bg-gradient-to-b from-bg-ctp-surface0/80 to-bg-ctp-mantle backdrop-blur-sm border-t border-x border-ctp-surface1/50 rounded-t-xl p-1"
+    >
+      {#if page.data.user && page.data.user.id === experiment.user_id}
         <button
+          class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-lavender hover:bg-ctp-surface1/60 transition-colors"
           onclick={async () => {
-            if (highlighted.includes(experiment.id)) {
-              highlighted = [];
-            } else {
-              try {
-                const response = await fetch(
-                  `/api/experiments/${experiment.id}/ref`,
-                );
-                if (!response.ok) {
-                  return;
-                }
-                const data = await response.json();
-                const uniqueIds = [...new Set([...data, experiment.id])];
-                highlighted = uniqueIds;
-              } catch (err) {}
-            }
+            const response = await fetch(
+              `/api/ai/analysis?experimentId=${experiment.id}`,
+            );
+            const data = (await response.json()) as ExperimentAnalysis;
+            recommendations = data.hyperparameter_recommendations;
           }}
-          class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-teal hover:bg-ctp-surface1/60 transition-colors"
-          title="Show experiment chain"
+          title="Get AI recommendations"
         >
-          {#if highlighted.includes(experiment.id)}
-            <EyeClosed size={16} />
-          {:else}
-            <Eye size={16} />
-          {/if}
+          <Sparkle size={16} />
         </button>
-        {#if page.data.user && page.data.user.id === experiment.user_id}
-          <button
-            type="button"
-            class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
-            aria-label="Delete"
-            title="Delete experiment"
-            onclick={(e) => {
-              e.stopPropagation();
-              openDeleteExperimentModal(experiment);
-            }}
-          >
-            <X size={16} />
-          </button>
-        {/if}
         <button
-          class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface1/60 transition-colors"
           onclick={() => {
-            setSelectedExperiment(null);
+            openEditExperimentModal(experiment);
           }}
-          title="Minimize"
+          class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface1/60 transition-colors"
+          title="Edit experiment"
         >
-          <Minimize2 size={16} />
+          <Pencil size={16} />
         </button>
-        <div
-          class="p-1.5 rounded-full text-ctp-subtext0"
-          title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
+      {/if}
+      <button
+        onclick={async () => {
+          if (highlighted.includes(experiment.id)) {
+            highlighted = [];
+          } else {
+            try {
+              const response = await fetch(
+                `/api/experiments/${experiment.id}/ref`,
+              );
+              if (!response.ok) {
+                return;
+              }
+              const data = await response.json();
+              const uniqueIds = [...new Set([...data, experiment.id])];
+              highlighted = uniqueIds;
+            } catch (err) {}
+          }
+        }}
+        class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-teal hover:bg-ctp-surface1/60 transition-colors"
+        title="Show experiment chain"
+      >
+        {#if highlighted.includes(experiment.id)}
+          <EyeClosed size={16} />
+        {:else}
+          <Eye size={16} />
+        {/if}
+      </button>
+      {#if page.data.user && page.data.user.id === experiment.user_id}
+        <button
+          type="button"
+          class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
+          aria-label="Delete"
+          title="Delete experiment"
+          onclick={(e) => {
+            e.stopPropagation();
+            openDeleteExperimentModal(experiment);
+          }}
         >
-          {#if experiment.visibility === "PUBLIC"}
-            <Globe size={16} class="text-ctp-green" />
-          {:else}
-            <GlobeLock size={16} class="text-ctp-red" />
-          {/if}
-        </div>
+          <X size={16} />
+        </button>
+      {/if}
+      <button
+        class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface1/60 transition-colors"
+        onclick={() => {
+          setSelectedExperiment(null);
+        }}
+        title="Minimize"
+      >
+        <Minimize2 size={16} />
+      </button>
+      <div
+        class="p-1.5 rounded-full text-ctp-subtext0"
+        title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
+      >
+        {#if experiment.visibility === "PUBLIC"}
+          <Globe size={16} class="text-ctp-green" />
+        {:else}
+          <GlobeLock size={16} class="text-ctp-red" />
+        {/if}
       </div>
     </div>
-  </header>
+  </div>
+</header>
 
+<article
+  class="h-full bg-ctp-mantle rounded-b-xl flex flex-col overflow-hidden"
+>
+  <!-- Header with actions -->
   <!-- Content Area -->
   <div class="px-4 sm:px-6 py-4 flex flex-col gap-4 overflow-y-auto flex-grow">
     <!-- Date and Title -->
