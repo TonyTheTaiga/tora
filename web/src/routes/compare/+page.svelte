@@ -140,30 +140,6 @@
   let chartCanvas = $state<HTMLCanvasElement>();
   let chart: Chart | null = null;
 
-  // Fallback DOM listener for touchend events (Chart.js plugins don't always receive them reliably)
-  $effect(() => {
-    const currentCanvas = chartCanvas;
-    
-    if (currentCanvas) {
-      const clearTooltipOnTouchEnd = () => {
-        if (chart && chart.tooltip) {
-          if (typeof chart.tooltip.setActiveElements === 'function') {
-            chart.tooltip.setActiveElements([], { x: 0, y: 0 });
-            chart.update('none');
-          }
-        }
-      };
-      
-      currentCanvas.addEventListener('touchend', clearTooltipOnTouchEnd);
-      currentCanvas.addEventListener('touchcancel', clearTooltipOnTouchEnd);
-      
-      return () => {
-        currentCanvas.removeEventListener('touchend', clearTooltipOnTouchEnd);
-        currentCanvas.removeEventListener('touchcancel', clearTooltipOnTouchEnd);
-      };
-    }
-  });
-
   function updateChart() {
     if (chart) {
       chart.destroy();
@@ -255,13 +231,13 @@
 </script>
 
 <div class="text-ctp-text">
-  <div class="mb-4">
+  <div class="mb-4 mt-8">
     <!-- Legend -->
-    <div class="mb-4 p-3 bg-ctp-mantle/50 rounded-md">
+    <div class="mb-4 p-3 pt-4">
       <h4 class="text-xs font-medium text-ctp-subtext1 mb-3">Legend</h4>
-      <div class="flex flex-wrap gap-x-4 gap-y-2">
+      <div class="flex flex-wrap gap-x-4 gap-y-2 overflow-x-auto">
         {#each data.experiments as experiment}
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 min-w-0 flex-shrink-0">
             <Circle
               size={10}
               style="color: {experimentColors_map.get(
@@ -269,8 +245,9 @@
               )}; fill: {experimentColors_map.get(experiment.id)};"
               class="flex-shrink-0"
             />
-            <span class="text-xs text-ctp-text" title={experiment.name}
-              >{experiment.name}</span
+            <span
+              class="text-xs text-ctp-text truncate max-w-40"
+              title={experiment.name}>{experiment.name}</span
             >
           </div>
         {/each}
@@ -278,7 +255,7 @@
     </div>
   </div>
 
-  <div class="border border-ctp-surface0 bg-ctp-base mb-4">
+  <div class="mb-4 mt-8">
     <!-- hyperparams -->
     <div class="text-sm font-semibold text-ctp-text p-4 border-ctp-surface1">
       Hyperparameters
@@ -288,10 +265,10 @@
       style="scrollbar-width: none; -ms-overflow-style: none;"
     >
       <table class="w-full text-sm text-left">
-        <thead class="bg-ctp-mantle sticky top-0 z-10">
+        <thead class="sticky top-0 z-10">
           <tr>
             <th
-              class="bg-ctp-mantle border-b border-ctp-surface0 sticky left-0 z-20"
+              class="bg-ctp-crust border-b border-ctp-surface0 sticky left-0 z-20"
             >
             </th>
             {#each hyperparams as hyperparam}
@@ -306,11 +283,11 @@
         <tbody>
           {#each data.experiments as experiment}
             <tr
-              class="border-t border-ctp-surface0 hover:bg-ctp-surface0/30 transition-colors"
+              class="border-t border-ctp-surface0 hover:bg-ctp-surface0/50 transition-colors duration-200"
             >
               <th
                 scope="row"
-                class="p-3 text-ctp-text font-medium bg-ctp-mantle sticky left-0 text-center"
+                class="bg-ctp-crust p-3 text-ctp-text font-medium sticky left-0 text-center"
               >
                 <Circle
                   size={16}
@@ -332,7 +309,7 @@
     </div>
   </div>
 
-  <div class="border border-ctp-surface0 bg-ctp-base shadow-lg">
+  <div class="mt-8">
     <div
       class="text-sm font-semibold text-ctp-text p-4 border-b border-ctp-surface1"
     >
@@ -344,7 +321,7 @@
       <!-- Dropdown selector -->
       <details class="relative">
         <summary
-          class="flex items-center justify-between cursor-pointer p-2 bg-ctp-surface0 rounded border border-ctp-surface1 hover:bg-ctp-surface1 transition-colors"
+          class="flex items-center justify-between cursor-pointer p-2 hover:bg-ctp-surface1 transition-colors"
         >
           <span class="text-sm text-ctp-text">
             Select metrics ({selectedMetrics.length} of {commonMetrics.length})
@@ -353,7 +330,7 @@
         </summary>
 
         <div
-          class="absolute top-full left-0 right-0 mt-1 bg-ctp-surface0 border border-ctp-surface1 rounded shadow-lg z-10 max-h-60 overflow-y-auto"
+          class="absolute top-full left-0 right-0 mt-1 z-10 max-h-60 overflow-y-auto border border-ctp-surface1 bg-ctp-surface0 rounded shadow-lg"
         >
           <!-- Search filter -->
           <div class="p-2 border-b border-ctp-surface1">
@@ -406,7 +383,7 @@
         </div>
       </details>
     </div>
-    <div class="w-full p-6 bg-ctp-base">
+    <div class="w-full p-6">
       {#if chartType() !== "empty"}
         <div
           class={chartType() === "radar"
