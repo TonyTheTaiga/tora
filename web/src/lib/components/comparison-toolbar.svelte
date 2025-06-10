@@ -1,0 +1,25 @@
+<script lang="ts">
+  import { getExperimentsSelectedForComparision } from "$lib/state/comparison.svelte.js";
+  import { Merge } from "lucide-svelte";
+  import { goto } from "$app/navigation";
+
+  let experiments = $derived.by(() => getExperimentsSelectedForComparision());
+</script>
+
+<div
+  class="flex flex-row justify-between items-center text-ctp-text rounded-full bg-ctp-surface0/80 backdrop-blur-sm border border-ctp-surface1/50 py-2 px-4 w-auto sm:max-w-md gap-4"
+>
+  <span class="font-medium flex-shrink-0"
+    >{experiments.length} experiment{experiments.length === 1 ? "" : "s"} selected</span
+  >
+  <button
+    onclick={() => {
+      const params = experiments.join(",");
+      goto(`/compare?ids=${params}`);
+    }}
+    class="flex flex-row items-center space-x-2 px-3 py-1.5 bg-ctp-blue/80 text-ctp-base rounded-full hover:bg-ctp-blue backdrop-blur-sm border border-ctp-blue/40 transition-colors"
+  >
+    <span>Compare</span>
+    <Merge size={16} />
+  </button>
+</div>
