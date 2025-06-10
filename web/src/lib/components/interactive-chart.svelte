@@ -207,46 +207,6 @@
         };
       });
 
-      const addScrollPrevention = () => {
-        if (!chartCanvas) return;
-        
-        const preventScroll = (e: Event) => {
-          e.preventDefault();
-        };
-        
-        chartCanvas.addEventListener("mousedown", () => {
-          document.body.style.overflow = "hidden";
-          document.addEventListener("wheel", preventScroll, { passive: false });
-          document.addEventListener("touchmove", preventScroll, { passive: false });
-        });
-        chartCanvas.addEventListener("mouseup", () => {
-          document.body.style.overflow = "";
-          document.removeEventListener("wheel", preventScroll);
-          document.removeEventListener("touchmove", preventScroll);
-        });
-        chartCanvas.addEventListener("mouseleave", () => {
-          document.body.style.overflow = "";
-          document.removeEventListener("wheel", preventScroll);
-          document.removeEventListener("touchmove", preventScroll);
-        });
-        chartCanvas.addEventListener("touchstart", () => {
-          document.body.style.overflow = "hidden";
-          document.addEventListener("wheel", preventScroll, { passive: false });
-          document.addEventListener("touchmove", preventScroll, { passive: false });
-        });
-        chartCanvas.addEventListener("touchend", () => {
-          document.body.style.overflow = "";
-          document.removeEventListener("wheel", preventScroll);
-          document.removeEventListener("touchmove", preventScroll);
-        });
-        chartCanvas.addEventListener("touchcancel", () => {
-          document.body.style.overflow = "";
-          document.removeEventListener("wheel", preventScroll);
-          document.removeEventListener("touchmove", preventScroll);
-        });
-      };
-
-      addScrollPrevention();
 
       chartInstance = new Chart(chartCanvas, {
         type: "line",
@@ -258,6 +218,7 @@
           maintainAspectRatio: false,
           parsing: false,
           normalized: true,
+          events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
           interaction: {
             mode: "nearest",
             intersect: false,
@@ -489,8 +450,7 @@
       <div class="absolute inset-0 p-2 sm:p-4">
         <canvas
           bind:this={chartCanvas}
-          class="touch-manipulation"
-          style="touch-action: manipulation;"
+          class="chart-canvas"
         ></canvas>
       </div>
     </div>
@@ -508,12 +468,9 @@
 </div>
 
 <style>
-  canvas {
+  .chart-canvas {
     background-color: transparent;
     border-radius: 4px;
-  }
-
-  .touch-manipulation {
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;

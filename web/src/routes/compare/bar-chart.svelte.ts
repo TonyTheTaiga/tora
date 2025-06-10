@@ -50,6 +50,7 @@ export function drawBarChart(
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
       plugins: {
         legend: {
           display: false,

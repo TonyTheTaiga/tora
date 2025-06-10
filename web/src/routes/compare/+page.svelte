@@ -140,44 +140,6 @@
   let chartCanvas = $state<HTMLCanvasElement>();
   let chart: Chart | null = null;
 
-  function addScrollPrevention() {
-    if (!chartCanvas) return;
-
-    const preventScroll = (e: Event) => {
-      e.preventDefault();
-    };
-
-    chartCanvas.addEventListener("mousedown", () => {
-      document.body.style.overflow = "hidden";
-      document.addEventListener("wheel", preventScroll, { passive: false });
-      document.addEventListener("touchmove", preventScroll, { passive: false });
-    });
-    chartCanvas.addEventListener("mouseup", () => {
-      document.body.style.overflow = "";
-      document.removeEventListener("wheel", preventScroll);
-      document.removeEventListener("touchmove", preventScroll);
-    });
-    chartCanvas.addEventListener("mouseleave", () => {
-      document.body.style.overflow = "";
-      document.removeEventListener("wheel", preventScroll);
-      document.removeEventListener("touchmove", preventScroll);
-    });
-    chartCanvas.addEventListener("touchstart", () => {
-      document.body.style.overflow = "hidden";
-      document.addEventListener("wheel", preventScroll, { passive: false });
-      document.addEventListener("touchmove", preventScroll, { passive: false });
-    });
-    chartCanvas.addEventListener("touchend", () => {
-      document.body.style.overflow = "";
-      document.removeEventListener("wheel", preventScroll);
-      document.removeEventListener("touchmove", preventScroll);
-    });
-    chartCanvas.addEventListener("touchcancel", () => {
-      document.body.style.overflow = "";
-      document.removeEventListener("wheel", preventScroll);
-      document.removeEventListener("touchmove", preventScroll);
-    });
-  }
 
   function updateChart() {
     if (chart) {
@@ -193,8 +155,6 @@
     ) {
       return;
     }
-
-    addScrollPrevention();
 
     switch (chartType()) {
       case "bar":
@@ -432,8 +392,7 @@
         >
           <canvas
             bind:this={chartCanvas}
-            class="w-full h-full touch-manipulation"
-            style="touch-action: manipulation;"
+            class="w-full h-full chart-canvas"
           ></canvas>
         </div>
       {:else}
@@ -456,5 +415,12 @@
 <style>
   .scroll-container::-webkit-scrollbar {
     display: none;
+  }
+  
+  .chart-canvas {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
 </style>
