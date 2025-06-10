@@ -149,13 +149,15 @@
   }
 </script>
 
-<article class="h-full bg-ctp-base rounded-xl flex flex-col overflow-hidden">
+<article class="h-full bg-ctp-mantle rounded-xl flex flex-col overflow-hidden">
   <!-- Header with actions -->
   <header class="px-4 sm:px-6 py-3 border-b border-ctp-surface1">
     <!-- Combined Header for both Mobile and Desktop -->
     <div class="flex items-center justify-end">
       <!-- Action Buttons -->
-      <div class="flex items-center gap-1 bg-ctp-surface0/80 backdrop-blur-sm border border-ctp-surface1/50 rounded-full p-1 flex-shrink-0">
+      <div
+        class="flex items-center gap-1 bg-ctp-surface0/80 backdrop-blur-sm border border-ctp-surface1/50 rounded-full p-1 flex-shrink-0"
+      >
         {#if page.data.user && page.data.user.id === experiment.user_id}
           <button
             class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-lavender hover:bg-ctp-surface1/60 transition-colors"
@@ -280,9 +282,11 @@
             >
           {/if}
         </button>
-        
+
         <!-- Status and metadata row -->
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-ctp-subtext0 text-sm">
+        <div
+          class="flex flex-wrap items-center gap-x-4 gap-y-2 text-ctp-subtext0 text-sm"
+        >
           <div class="flex items-center gap-1.5">
             <Clock size={15} class="flex-shrink-0 text-ctp-overlay1" />
             <time class="text-ctp-subtext1">
@@ -378,7 +382,8 @@
         >
           <div class="flex items-center gap-2 flex-grow">
             <Settings size={18} class="text-ctp-blue" />
-            <span class="text-base font-semibold text-ctp-text">Hyperparameters</span
+            <span class="text-base font-semibold text-ctp-text"
+              >Hyperparameters</span
             >
           </div>
           <span
@@ -468,7 +473,9 @@
             </button>
           {/if}
           {#if activeRecommendation}
-            <div class="mt-3 p-3.5 bg-ctp-surface1/80 rounded-lg relative backdrop-blur-sm border border-ctp-lavender/50">
+            <div
+              class="mt-3 p-3.5 bg-ctp-surface1/80 rounded-lg relative backdrop-blur-sm border border-ctp-lavender/50"
+            >
               <button
                 class="absolute top-2 right-2 p-1 rounded-md text-ctp-subtext1 hover:text-ctp-text hover:bg-ctp-surface2"
                 onclick={() => (activeRecommendation = null)}
@@ -509,7 +516,9 @@
         <div class="pt-2 px-3 pb-3 space-y-3">
           <!-- New Segmented Control -->
           <div class="flex justify-center mb-4">
-            <div class="flex bg-ctp-surface1/80 w-full rounded-lg p-1 space-x-1 backdrop-blur-sm border border-ctp-surface2/30">
+            <div
+              class="flex bg-ctp-surface1/80 w-full rounded-lg p-1 space-x-1 backdrop-blur-sm border border-ctp-surface2/30"
+            >
               <button
                 class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 focus:outline-none {!showMetricsTable
                   ? 'bg-ctp-surface2/80 text-ctp-text backdrop-blur-sm'
@@ -543,9 +552,16 @@
               <div
                 class="flex flex-col justify-center items-center p-6 min-h-[150px] bg-ctp-surface0/60 rounded-lg text-center backdrop-blur-sm border border-ctp-surface1/40"
               >
-                <Loader2 size={28} class="animate-spin text-ctp-subtext0 mb-3" />
-                <span class="text-ctp-subtext0 text-base">Loading metrics...</span>
-                <p class="text-ctp-overlay1 text-xs mt-1">Please wait a moment.</p>
+                <Loader2
+                  size={28}
+                  class="animate-spin text-ctp-subtext0 mb-3"
+                />
+                <span class="text-ctp-subtext0 text-base"
+                  >Loading metrics...</span
+                >
+                <p class="text-ctp-overlay1 text-xs mt-1">
+                  Please wait a moment.
+                </p>
               </div>
             {:else if metricsError}
               <p class="text-sm text-red-300 bg-red-900/20 p-4 rounded-lg">
@@ -556,7 +572,9 @@
                 class="overflow-x-auto max-h-[500px] bg-ctp-surface0/60 rounded-lg p-4 backdrop-blur-sm border border-ctp-surface1/40"
               >
                 <table class="w-full text-sm text-left">
-                  <thead class="bg-ctp-surface1/80 sticky top-0 z-10 backdrop-blur-sm">
+                  <thead
+                    class="bg-ctp-surface1/80 sticky top-0 z-10 backdrop-blur-sm"
+                  >
                     <tr>
                       <th class="p-3 font-semibold text-ctp-text">Name</th>
                       <th class="p-3 font-semibold text-ctp-text">Value</th>
@@ -603,7 +621,9 @@
               </p>
             {/if}
           {:else}
-            <div class="bg-ctp-surface0/60 rounded-lg p-4 backdrop-blur-sm border border-ctp-surface1/40">
+            <div
+              class="bg-ctp-surface0/60 rounded-lg p-4 backdrop-blur-sm border border-ctp-surface1/40"
+            >
               <InteractiveChart {experiment} />
             </div>
           {/if}
