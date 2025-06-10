@@ -235,9 +235,9 @@
     <!-- Legend -->
     <div class="mb-4 p-3 pt-4">
       <h4 class="text-xs font-medium text-ctp-subtext1 mb-3">Legend</h4>
-      <div class="flex flex-wrap gap-x-4 gap-y-2">
+      <div class="flex flex-wrap gap-x-4 gap-y-2 overflow-x-auto">
         {#each data.experiments as experiment}
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 min-w-0 flex-shrink-0">
             <Circle
               size={10}
               style="color: {experimentColors_map.get(
@@ -245,8 +245,9 @@
               )}; fill: {experimentColors_map.get(experiment.id)};"
               class="flex-shrink-0"
             />
-            <span class="text-xs text-ctp-text" title={experiment.name}
-              >{experiment.name}</span
+            <span
+              class="text-xs text-ctp-text truncate max-w-40"
+              title={experiment.name}>{experiment.name}</span
             >
           </div>
         {/each}
@@ -267,7 +268,7 @@
         <thead class="sticky top-0 z-10">
           <tr>
             <th
-              class="border-b border-ctp-surface0 sticky left-0 z-20"
+              class="bg-ctp-crust border-b border-ctp-surface0 sticky left-0 z-20"
             >
             </th>
             {#each hyperparams as hyperparam}
@@ -282,11 +283,11 @@
         <tbody>
           {#each data.experiments as experiment}
             <tr
-              class="border-t border-ctp-surface0 hover:bg-ctp-surface0/30 transition-colors"
+              class="border-t border-ctp-surface0 hover:bg-ctp-surface0/50 transition-colors duration-200"
             >
               <th
                 scope="row"
-                class="p-3 text-ctp-text font-medium sticky left-0 text-center"
+                class="bg-ctp-crust p-3 text-ctp-text font-medium sticky left-0 text-center"
               >
                 <Circle
                   size={16}
