@@ -164,7 +164,7 @@
   class="h-full bg-ctp-crust rounded-xl shadow-lg flex flex-col overflow-hidden"
 >
   <!-- Header with actions -->
-  <header class="px-4 sm:px-6 py-5 bg-ctp-mantle border-b border-ctp-surface1"> {# py-4 to py-5 #}
+  <header class="px-4 sm:px-6 py-5 bg-ctp-mantle border-b border-ctp-surface1">
     <!-- Combined Header for both Mobile and Desktop -->
     <div class="flex items-center justify-between">
       <!-- Action Buttons -->
@@ -286,7 +286,7 @@
     <!-- MOVED: Title and ID -->
     <div class="flex flex-col gap-1 min-w-0 flex-grow mb-3">
       <h2
-        class="text-2xl sm:text-3xl font-bold text-ctp-text mb-2" {# Changed classes #}
+        class="text-2xl sm:text-3xl font-bold text-ctp-text mb-2" 
         title={experiment.name}
       >
         {experiment.name}
@@ -335,7 +335,7 @@
         <div class="flex flex-wrap gap-1.5 items-center">
           {#each visibleTags as tag}
             <span
-              class="whitespace-nowrap inline-flex items-center px-2 py-1 text-xs text-ctp-blue rounded-full bg-ctp-blue/20 border border-ctp-blue/30 truncate max-w-[150px]" {# Changed classes #}
+              class="whitespace-nowrap inline-flex items-center px-2 py-1 text-xs text-ctp-blue rounded-full bg-ctp-blue/20 border border-ctp-blue/30 truncate max-w-[150px]"
               title={tag}
             >
               {tag}
@@ -365,7 +365,7 @@
     {#if experiment.description}
       <p
         class="
-          text-ctp-subtext0 {# Changed text-ctp-text to text-ctp-subtext0 #}
+          text-ctp-subtext0 
           text-xs sm:text-sm
           leading-relaxed
           border-l-2 border-ctp-mauve
@@ -373,7 +373,7 @@
           break-words
           sm:break-normal
           description-truncate-detailed
-          mb-4 {# Added mb-4 #}
+          mb-4 
         "
         title={experiment.description}
       >
@@ -398,7 +398,7 @@
             class="text-ctp-subtext0 group-open:rotate-180 transition-transform shrink-0"
           />
         </summary>
-        <div class="pt-2 px-4 pb-4 space-y-2"> {# Changed space-y-0 to space-y-2 for item spacing #}
+        <div class="pt-2 px-4 pb-4 space-y-2"> 
           {#each visibleHyperparameters as param (param.key)}
             <div
               class="flex items-center justify-between p-3 rounded-lg bg-ctp-surface0/10 hover:bg-ctp-surface0/20 transition-all duration-200 group backdrop-blur-sm border border-ctp-overlay0/10 shadow-md hover:shadow-lg"
@@ -508,13 +508,7 @@
           <div class="flex justify-center mb-4">
             <div class="flex bg-ctp-base/80 border border-ctp-overlay0/20 w-full backdrop-blur-xl shadow-md rounded-lg p-1 space-x-1">
               <button
-                class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none" {# Added justify-center #}
-                class:bg-ctp-surface0/20={!showMetricsTable}
-                class:backdrop-blur-sm={!showMetricsTable}
-                class:shadow-md={!showMetricsTable}
-                class:text-ctp-text={!showMetricsTable}
-                class:text-ctp-subtext0={showMetricsTable}
-                class:hover:bg-ctp-surface0/10={showMetricsTable}
+                class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none {!showMetricsTable ? 'bg-ctp-surface0/20 backdrop-blur-sm shadow-md text-ctp-text' : 'text-ctp-subtext0 hover:bg-ctp-surface0/10'}"
                 onclick={() => {
                   showMetricsTable = false;
                 }}
@@ -523,13 +517,7 @@
                 Chart
               </button>
               <button
-                class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none" {# Added justify-center #}
-                class:bg-ctp-surface0/20={showMetricsTable}
-                class:backdrop-blur-sm={showMetricsTable}
-                class:shadow-md={showMetricsTable}
-                class:text-ctp-text={showMetricsTable}
-                class:text-ctp-subtext0={!showMetricsTable}
-                class:hover:bg-ctp-surface0/10={!showMetricsTable}
+                class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none {showMetricsTable ? 'bg-ctp-surface0/20 backdrop-blur-sm shadow-md text-ctp-text' : 'text-ctp-subtext0 hover:bg-ctp-surface0/10'}"
                 onclick={() => {
                   showMetricsTable = true;
                   fetchRawMetricsIfNeeded();
@@ -585,7 +573,7 @@
                 class="overflow-x-auto max-h-[500px] bg-ctp-surface0/10 rounded-lg p-4 backdrop-blur-sm border border-ctp-overlay0/10 shadow-md"
               >
                 <table class="w-full text-sm text-left">
-                  <thead class="bg-ctp-surface0/50 sticky top-0 z-10"> {# Made thead slightly transparent too #}
+                  <thead class="bg-ctp-surface0/50 sticky top-0 z-10"> 
                     <tr>
                       <th class="p-3 font-semibold text-ctp-text">Name</th>
                       <th class="p-3 font-semibold text-ctp-text">Value</th>
