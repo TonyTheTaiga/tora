@@ -1,4 +1,5 @@
 import type { Experiment } from "$lib/types";
+import { startTimer } from "$lib/utils/timing";
 
 interface ModalState {
   createExperiment: boolean;
@@ -37,7 +38,9 @@ export function closeCreateExperimentModal() {
 }
 
 export function openEditExperimentModal(experiment: Experiment) {
+  const timer = startTimer("ui.openEditModal", { experimentId: experiment.id });
   state.modals.editExperiment = experiment;
+  timer.end();
 }
 
 export function closeEditExperimentModal() {
@@ -45,7 +48,9 @@ export function closeEditExperimentModal() {
 }
 
 export function openDeleteExperimentModal(experiment: Experiment) {
+  const timer = startTimer("ui.openDeleteModal", { experimentId: experiment.id });
   state.modals.deleteExperiment = experiment;
+  timer.end();
 }
 
 export function closeDeleteExperimentModal() {
@@ -53,7 +58,13 @@ export function closeDeleteExperimentModal() {
 }
 
 export function setSelectedExperiment(experiment: Experiment | null) {
+  const timer = startTimer("ui.setSelectedExperiment", { 
+    experimentId: experiment?.id,
+    action: experiment ? "select" : "deselect"
+  });
+  
   state.modals.selectedExperiment = experiment;
+  timer.end();
 }
 
 export function getModalState() {

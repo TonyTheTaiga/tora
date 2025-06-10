@@ -8,6 +8,7 @@ import type {
   Visibility,
   Workspace,
 } from "$lib/types";
+import { timeAsync, startTimer } from "$lib/utils/timing";
 
 function handleError(error: PostgrestError | null, context: string): void {
   if (error) {
@@ -117,13 +118,19 @@ export function createDbClient(client: SupabaseClient<Database>) {
       userId: string,
       workspaceId?: string,
     ): Promise<Experiment[]> {
-      const { data, error } = await client.rpc("get_user_experiments", {
-        user_id: userId,
-        workspace_id: workspaceId,
-      });
+      return timeAsync(
+        "db.getExperiments",
+        async () => {
+          const { data, error } = await client.rpc("get_user_experiments", {
+            user_id: userId,
+            workspace_id: workspaceId,
+          });
 
-      handleError(error, "Failed to get experiments");
-      return data?.map(mapRpcResultToExperiment) ?? [];
+          handleError(error, "Failed to get experiments");
+          return data?.map(mapRpcResultToExperiment) ?? [];
+        },
+        { userId, workspaceId }
+      );
     },
 
     async getExperiment(id: string): Promise<Experiment> {
@@ -139,19 +146,25 @@ export function createDbClient(client: SupabaseClient<Database>) {
     },
 
     async getExperimentAndMetrics(id: string): Promise<ExperimentAndMetrics> {
-      const { data, error } = await client
-        .from("experiment")
-        .select("*, metric(*), user_experiments!inner(user_id)")
-        .eq("id", id)
-        .single();
+      return timeAsync(
+        "db.getExperimentAndMetrics",
+        async () => {
+          const { data, error } = await client
+            .from("experiment")
+            .select("*, metric(*), user_experiments!inner(user_id)")
+            .eq("id", id)
+            .single();
 
-      handleError(error, `Failed to get experiment and metrics for ID ${id}`);
-      if (!data) throw new Error(`Experiment with ID ${id} not found.`);
+          handleError(error, `Failed to get experiment and metrics for ID ${id}`);
+          if (!data) throw new Error(`Experiment with ID ${id} not found.`);
 
-      return {
-        experiment: mapToExperiment(data),
-        metrics: (data.metric as Metric[]) ?? [],
-      };
+          return {
+            experiment: mapToExperiment(data),
+            metrics: (data.metric as Metric[]) ?? [],
+          };
+        },
+        { experimentId: id }
+      );
     },
 
     async checkExperimentAccess(id: string, userId?: string): Promise<void> {
@@ -195,17 +208,23 @@ export function createDbClient(client: SupabaseClient<Database>) {
     // --- Metric Methods ---
 
     async getMetrics(experimentId: string): Promise<Metric[]> {
-      const { data, error } = await client
-        .from("metric")
-        .select("*")
-        .eq("experiment_id", experimentId)
-        .order("created_at", { ascending: false });
+      return timeAsync(
+        "db.getMetrics",
+        async () => {
+          const { data, error } = await client
+            .from("metric")
+            .select("*")
+            .eq("experiment_id", experimentId)
+            .order("created_at", { ascending: false });
 
-      handleError(
-        error,
-        `Failed to get metrics for experiment ${experimentId}`,
+          handleError(
+            error,
+            `Failed to get metrics for experiment ${experimentId}`,
+          );
+          return (data as Metric[]) ?? [];
+        },
+        { experimentId }
       );
-      return (data as Metric[]) ?? [];
     },
 
     async createMetric(metric: Metric): Promise<void> {
@@ -247,20 +266,23 @@ export function createDbClient(client: SupabaseClient<Database>) {
     },
 
     async getReferenceChain(experimentId: string): Promise<Experiment[]> {
-      const { data, error } = await client.rpc("get_experiment_chain", {
-        target_experiment_id: experimentId,
-      });
+      return timeAsync(
+        "db.getReferenceChain",
+        async () => {
+          const { data, error } = await client.rpc("get_experiment_chain", {
+            target_experiment_id: experimentId,
+          });
 
-      console.error(error);
+          console.error(error);
 
-      handleError(
-        error,
-        `Failed to get reference chain for experiment ${experimentId}`,
-      );
-      return (
+          handleError(
+            error,
+            `Failed to get reference chain for experiment ${experimentId}`,
+          );
+          return (
         data?.map((item) => ({
           id: item.experiment_id,
-          user_id: "", // This should be returned by the RPC function
+          user_id: "", 
           name: item.experiment_name,
           description: item.experiment_description ?? "",
           hyperparams:
@@ -271,6 +293,9 @@ export function createDbClient(client: SupabaseClient<Database>) {
           visibility: item.experiment_visibility,
           availableMetrics: [],
         })) ?? []
+          );
+        },
+        { experimentId }
       );
     },
 
@@ -392,12 +417,18 @@ export function createDbClient(client: SupabaseClient<Database>) {
     },
 
     async getExperimentsAndMetrics(experimentIds: string[]): Promise<any[]> {
-      const { data, error } = await client.rpc("get_experiments_and_metrics", {
-        experiment_ids: experimentIds,
-      });
+      return timeAsync(
+        "db.getExperimentsAndMetrics",
+        async () => {
+          const { data, error } = await client.rpc("get_experiments_and_metrics", {
+            experiment_ids: experimentIds,
+          });
 
-      handleError(error, "Failed to get experiments and metrics");
-      return data ?? [];
+          handleError(error, "Failed to get experiments and metrics");
+          return data ?? [];
+        },
+        { experimentCount: experimentIds.length }
+      );
     },
   };
 }

@@ -2,6 +2,7 @@ import { json, type RequestEvent } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import type { Json } from "$lib/server/database.types";
 import type { Metric } from "$lib/types";
+import { generateRequestId, startTimer } from "$lib/utils/timing";
 
 interface MetricInput {
   name: string;
@@ -97,13 +98,24 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 };
 
 export const GET: RequestHandler = async ({ params, locals }) => {
-  const userId = locals.user?.id;
+  const requestId = generateRequestId();
+  const timer = startTimer("api.metrics.GET", { requestId, experimentId: params.slug });
+  
   try {
-    await locals.dbClient.checkExperimentAccess(params.slug, userId);
-  } catch (error) {
-    return json([], { status: 200 });
-  }
+    const userId = locals.user?.id;
+    
+    try {
+      await locals.dbClient.checkExperimentAccess(params.slug, userId);
+    } catch (error) {
+      timer.end({ error: "Access denied", userId });
+      return json([], { status: 200 });
+    }
 
-  const metrics = await locals.dbClient.getMetrics(params.slug);
-  return json(metrics);
+    const metrics = await locals.dbClient.getMetrics(params.slug);
+    timer.end({ userId, metricsCount: metrics.length });
+    return json(metrics);
+  } catch (error) {
+    timer.end({ error: error instanceof Error ? error.message : "Unknown error" });
+    throw error;
+  }
 };

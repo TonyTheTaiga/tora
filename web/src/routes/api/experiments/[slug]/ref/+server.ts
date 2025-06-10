@@ -1,9 +1,19 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { generateRequestId, startTimer } from "$lib/utils/timing";
 
 export const GET: RequestHandler = async ({ params, locals }) => {
-  const references = await locals.dbClient.getReferenceChain(params.slug);
-  return json(references.map((experiment) => experiment.id));
+  const requestId = generateRequestId();
+  const timer = startTimer("api.experimentRef.GET", { requestId, experimentId: params.slug });
+  
+  try {
+    const references = await locals.dbClient.getReferenceChain(params.slug);
+    timer.end({ referenceCount: references.length });
+    return json(references.map((experiment) => experiment.id));
+  } catch (error) {
+    timer.end({ error: error instanceof Error ? error.message : "Unknown error" });
+    throw error;
+  }
 };
 
 export const POST: RequestHandler = async ({ params, request, locals }) => {

@@ -3,6 +3,7 @@
   import Chart from "chart.js/auto";
   import { ChartLine, Plus, EyeOff, ChevronDown } from "lucide-svelte";
   import { onMount, onDestroy } from "svelte";
+  import { startTimer } from "$lib/utils/timing";
 
   let chartInstance: Chart | null = null;
   let chartCanvas: HTMLCanvasElement | null = $state(null);
@@ -123,14 +124,18 @@
   });
 
   async function loadMetrics() {
+    const timer = startTimer("chart.loadMetrics", { experimentId: experiment.id });
     try {
       isLoading = true;
       const response = await fetch(`/api/experiments/${experiment.id}/metrics`);
       if (!response.ok) {
         throw new Error(`Failed to load metrics: ${response.statusText}`);
       }
-      return await response.json();
+      const data = await response.json();
+      timer.end({ metricsCount: data.length });
+      return data;
     } catch (e) {
+      timer.end({ error: e instanceof Error ? e.message : "Unknown error" });
       console.error("Error loading metrics:", e);
       return null;
     } finally {
@@ -146,8 +151,16 @@
   }
 
   function updateChart() {
+    const timer = startTimer("chart.updateChart", { 
+      experimentId: experiment.id, 
+      selectedMetricsCount: selectedMetrics.length 
+    });
+    
     destroyChart();
-    if (!chartCanvas || selectedMetrics.length === 0) return;
+    if (!chartCanvas || selectedMetrics.length === 0) {
+      timer.end({ skipped: true });
+      return;
+    }
 
     try {
       const colors = getChartColors();
@@ -270,7 +283,9 @@
           },
         },
       });
+      timer.end({ success: true });
     } catch (error) {
+      timer.end({ error: error instanceof Error ? error.message : "Unknown error" });
       console.error("Failed to create chart:", error);
     }
   }
