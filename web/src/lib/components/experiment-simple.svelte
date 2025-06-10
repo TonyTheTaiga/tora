@@ -1,21 +1,8 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
-  import {
-    X,
-    Tag,
-    Clock,
-    Eye,
-    EyeClosed,
-    Globe,
-    GlobeLock,
-    Settings,
-  } from "lucide-svelte";
+  import { X, Tag, Eye, EyeClosed, Globe, GlobeLock } from "lucide-svelte";
   import { page } from "$app/state";
-  import {
-    openDeleteExperimentModal,
-    setSelectedExperiment,
-    getSelectedExperiment,
-  } from "$lib/state/app.svelte.js";
+  import { openDeleteExperimentModal } from "$lib/state/app.svelte.js";
 
   let {
     experiment,
@@ -34,13 +21,13 @@
   class:border-transparent={!isSelectedForComparison}
 >
   <!-- Header -->
-  <div class="flex items-start justify-between mb-3 flex-shrink-0"> {/* Added flex-shrink-0 to header and footer areas */}
+  <div class="flex items-start justify-between mb-3 flex-shrink-0">
     <h3
       class="font-semibold text-base text-ctp-text group-hover:text-ctp-blue transition-colors flex-1 mr-2 truncate"
     >
       {experiment.name}
     </h3>
-    <div class="flex-shrink-0"> {/* Ensured this doesn't shrink if name is too long */}
+    <div class="flex-shrink-0">
       <div
         class="p-1 rounded-md transition-colors {experiment.visibility ===
         'PUBLIC'
@@ -73,12 +60,12 @@
   >
     <!-- Tags -->
     <div
-      class="flex items-center gap-1.5 text-xs text-ctp-subtext0 overflow-x-auto min-w-0 pr-2" /* Allow tags area to scroll if needed, min-w-0 for flex child */
+      class="flex items-center gap-1.5 text-xs text-ctp-subtext0 overflow-x-auto min-w-0 pr-2"
     >
       {#if experiment.tags && experiment.tags.length > 0}
         <Tag size={12} class="text-ctp-overlay1 flex-shrink-0" />
-        <div class="flex flex-nowrap gap-1"> {/* Changed to flex-nowrap for horizontal scroll of tags */}
-          {#each experiment.tags as tag, i}
+        <div class="flex flex-nowrap gap-1">
+          {#each experiment.tags as tag}
             <span
               class="text-xs bg-ctp-surface0 text-ctp-overlay2 px-1.5 py-0.5 rounded-full whitespace-nowrap inline-block max-w-[120px] truncate"
               title={tag}
@@ -91,7 +78,7 @@
     </div>
 
     <!-- Actions & Date -->
-    <div class="flex items-center gap-2 text-ctp-subtext0 flex-shrink-0"> {/* Added flex-shrink-0 here as well */}
+    <div class="flex items-center gap-2 text-ctp-subtext0 flex-shrink-0">
       <button
         onclick={async (e) => {
           e.stopPropagation();
@@ -150,21 +137,19 @@
   .description-truncate {
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3; /* Show 3 lines, adjust as needed */
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-height: 0; /* Important for flex-grow in some browsers */
+    min-height: 0;
   }
 
-  /* Fallback for non-webkit browsers for description, not perfect but better than nothing */
   @supports not (-webkit-line-clamp: 3) {
     .description-truncate {
-      max-height: calc(1.5em * 3); /* Assuming line-height is around 1.5em, for 3 lines */
-      /* white-space: normal; /* Ensure it wraps if it was nowrap before */
+      max-height: calc(1.5em * 3);
     }
   }
 
-  /* Ensure tags area does not cause parent to grow indefinitely if all tags are very long */
   .overflow-x-auto {
     scrollbar-width: thin; /* For Firefox */
     scrollbar-color: var(--color-ctp-surface2) var(--color-ctp-mantle); /* For Firefox */
