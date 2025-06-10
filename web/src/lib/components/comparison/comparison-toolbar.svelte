@@ -3,22 +3,23 @@
   import { Merge } from "lucide-svelte";
   import { goto } from "$app/navigation";
 
-  let experiments = $derived(getExperimentsSelectedForComparision());
+  let experiments = $derived.by(() => getExperimentsSelectedForComparision());
 </script>
 
 <div
-  class="flex flex-row justify-between text-ctp-mantle rounded bg-ctp-sky mb-4 p-2 max-w-fit space-x-8"
+  class="flex flex-row justify-between items-center text-ctp-text rounded-2xl bg-ctp-surface1 shadow-lg py-2 px-4 w-auto sm:max-w-md gap-4"
 >
-  <span class="px-2 rounded">{experiments.length} Selected</span>
+  <span class="font-medium flex-shrink-0"
+    >{experiments.length} experiment{experiments.length === 1 ? "" : "s"} selected</span
+  >
   <button
     onclick={() => {
       const params = experiments.join(",");
       goto(`/compare?ids=${params}`);
     }}
+    class="flex flex-row items-center space-x-2 px-3 py-1.5 bg-ctp-blue text-ctp-base rounded-md hover:bg-ctp-blue/90 transition-colors"
   >
-    <div class="flex flex-row items-center space-x-2 rounded px-2">
-      <span>Compare</span>
-      <Merge size={14} />
-    </div>
+    <span>Compare</span>
+    <Merge size={16} />
   </button>
 </div>

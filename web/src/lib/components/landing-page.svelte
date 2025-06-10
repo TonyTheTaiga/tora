@@ -67,7 +67,7 @@
     currentLang = currentLang === "en" ? "ja" : "en";
   }
 
-  const activeCopy = $derived(copy[currentLang]);
+  const activeCopy = $derived.by(() => copy[currentLang]);
 </script>
 
 {#snippet FeatureCard(title: String, content: String)}

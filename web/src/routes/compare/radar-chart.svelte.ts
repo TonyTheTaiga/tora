@@ -50,7 +50,14 @@ export function drawRadarChart(
       responsive: true,
       maintainAspectRatio: true,
       aspectRatio: 1,
-      events: ["mousemove", "mouseout", "click", "touchstart", "touchmove", "touchend"],
+      events: [
+        "mousemove",
+        "mouseout",
+        "click",
+        "touchstart",
+        "touchmove",
+        "touchend",
+      ],
       elements: {
         line: {
           borderWidth: 3,

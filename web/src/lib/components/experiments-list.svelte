@@ -14,7 +14,7 @@
   } from "$lib/state/app.svelte.js";
 
   let { experiments = $bindable() }: { experiments: Experiment[] } = $props();
-  let selectedExperiment = $derived(getSelectedExperiment());
+  let selectedExperiment = $derived.by(() => getSelectedExperiment());
 
   let highlighted = $state<string[]>([]);
 
@@ -29,17 +29,16 @@
 </script>
 
 <div
-  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 [&>*:has(.expanded-experiment)]:md:col-span-2 [&>*:has(.expanded-experiment)]:lg:col-span-3"
+  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 [&>*:has(.expanded-experiment)]:md:col-span-2 [&>*:has(.expanded-experiment)]:lg:col-span-3"
 >
   {#each experiments as experiment, idx (experiment.id)}
     <div id={`experiment-${experiment.id}`}>
       {#if !selectedExperiment || selectedExperiment.id !== experiment.id}
         <div
-          class="rounded-lg bg-ctp-mantle overflow-hidden h-[200px] p-4 hover:bg-ctp-surface0 transition-colors cursor-pointer
+          class="cursor-pointer group /* Removed conflicting styles: bg, overflow, h, p, hover, rounded */
             {highlighted.length > 0 && !highlighted.includes(experiment.id)
-            ? 'opacity-40'
+            ? 'opacity-40' /* Kept opacity logic */
             : ''}"
-          class:bg-ctp-surface0={selectedForComparison(experiment.id) === true}
           role="button"
           tabindex="0"
           onclick={() => {
@@ -52,17 +51,22 @@
           onkeydown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
+              // Ensure setSelectedExperiment is only called if not in comparison mode.
               if (!getMode()) {
                 setSelectedExperiment(experiment);
               }
             }
           }}
         >
-          <ExperimentSimple bind:highlighted {experiment} />
+          <ExperimentSimple
+            bind:highlighted
+            {experiment}
+            isSelectedForComparison={selectedForComparison(experiment.id)}
+          />
         </div>
       {:else}
         <div
-          class="rounded-lg overflow-hidden bg-ctp-base expanded-experiment
+          class="expanded-experiment rounded-xl overflow-hidden
             {highlighted.length > 0 && !highlighted.includes(experiment.id)
             ? 'opacity-40'
             : ''}"

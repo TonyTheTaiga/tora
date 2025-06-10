@@ -43,13 +43,15 @@
 
   <Toolbar {hasExperiments} />
 
-  {#if getMode()}
-    <div class="sticky top-20 sm:top-22 z-20 max-w-fit">
-      <ComparisonToolbar />
-    </div>
-  {/if}
+  <div class="pt-4 px-0 sm:px-2 md:px-4">
+    {#if getMode()}
+      <div class="sticky top-3 z-30 flex justify-center mb-4">
+        <ComparisonToolbar />
+      </div>
+    {/if}
 
-  <ExperimentsList bind:experiments />
+    <ExperimentsList bind:experiments />
+  </div>
 {:else}
   <LandingPage />
 {/if}

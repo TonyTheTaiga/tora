@@ -1,62 +1,57 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
-  import {
-    X,
-    Tag,
-    Clock,
-    Eye,
-    EyeClosed,
-    Globe,
-    GlobeLock,
-    Settings,
-  } from "lucide-svelte";
+  import { X, Tag, Eye, EyeClosed, Globe, GlobeLock } from "lucide-svelte";
   import { page } from "$app/state";
-  import {
-    openDeleteExperimentModal,
-    setSelectedExperiment,
-    getSelectedExperiment,
-  } from "$lib/state/app.svelte.js";
+  import { openDeleteExperimentModal } from "$lib/state/app.svelte.js";
 
   let {
     experiment,
     highlighted = $bindable(),
+    isSelectedForComparison = false, // New prop
   }: {
     experiment: Experiment;
     highlighted: string[];
+    isSelectedForComparison?: boolean; // Optional prop
   } = $props();
 </script>
 
 <article
-  class="flex flex-col h-full rounded-lg group hover:bg-ctp-surface0/30 transition-colors"
+  class="flex flex-col h-full w-full rounded-xl bg-ctp-mantle p-3 shadow-md group hover:bg-ctp-surface0 transition-all duration-200 ease-in-out transform hover:-translate-y-1 border-2 md:h-52"
+  class:border-ctp-blue={isSelectedForComparison}
+  class:border-transparent={!isSelectedForComparison}
 >
   <!-- Header -->
-  <div class="flex items-center justify-between mb-2">
-    <h3
-      class="font-medium text-sm text-ctp-text group-hover:text-ctp-blue transition-colors truncate flex-1"
-    >
-      {experiment.name}
-    </h3>
-    <div class="flex-shrink-0">
-      <div
-        class="p-1 rounded-md transition-colors {experiment.visibility ===
-        'PUBLIC'
-          ? 'text-ctp-green hover:bg-ctp-green/10'
-          : 'text-ctp-red hover:bg-ctp-red/10'}"
-        title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
+  <div
+    class="flex items-start justify-between mb-2 flex-shrink-0"
+    data-testid="card-header"
+  >
+    <div class="min-w-0 flex-grow pr-2">
+      <h3
+        class="font-semibold text-sm text-ctp-text group-hover:text-ctp-blue transition-colors truncate"
+        title={experiment.name}
+        data-testid="experiment-name"
       >
-        {#if experiment.visibility === "PUBLIC"}
-          <Globe size={14} />
-        {:else}
-          <GlobeLock size={14} />
-        {/if}
-      </div>
+        {experiment.name}
+      </h3>
     </div>
+    {#if experiment?.createdAt}
+      <time
+        class="text-[11px] text-ctp-overlay1 flex-shrink-0"
+        title={new Date(experiment.createdAt).toLocaleString()}
+        data-testid="experiment-date"
+      >
+        {new Date(experiment.createdAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        })}
+      </time>
+    {/if}
   </div>
 
   <!-- Description -->
   {#if experiment.description}
     <p
-      class="text-xs text-ctp-subtext1 truncate mb-2"
+      class="text-sm text-ctp-subtext0 mb-2 leading-relaxed flex-grow overflow-hidden description-truncate"
       title={experiment.description}
     >
       {experiment.description}
@@ -65,26 +60,32 @@
 
   <!-- Footer -->
   <div
-    class="mt-auto flex items-center justify-between gap-2 pt-2 border-t border-ctp-surface1"
+    class="mt-auto flex items-center justify-between gap-1.5 pt-2 border-t border-ctp-surface1 flex-shrink-0"
   >
     <!-- Tags -->
     <div
-      class="flex items-center gap-1 text-xs text-ctp-subtext0 overflow-hidden"
+      class="flex items-center gap-1 text-xs text-ctp-subtext0 overflow-x-auto md:overflow-visible min-w-0 pr-1.5 md:pr-0"
     >
       {#if experiment.tags && experiment.tags.length > 0}
-        <Tag size={10} class="text-ctp-overlay0 flex-shrink-0" />
-        <div class="flex flex-nowrap gap-0.5 overflow-hidden">
-          {#each experiment.tags as tag, i}
-            <span class="text-[9px] text-ctp-overlay0 whitespace-nowrap">
-              {tag}{i < experiment.tags.length - 1 ? ", " : ""}
+        <Tag size={10} class="text-ctp-overlay1 flex-shrink-0" />
+        <div class="flex flex-nowrap md:flex-wrap gap-0.5 md:gap-1">
+          {#each experiment.tags as tag}
+            <span
+              class="text-[10px] bg-ctp-surface0 text-ctp-overlay2 px-1 py-px rounded-full whitespace-nowrap inline-block max-w-[100px] truncate"
+              title={tag}
+            >
+              {tag}
             </span>
           {/each}
         </div>
       {/if}
     </div>
 
-    <!-- Actions & Date -->
-    <div class="flex items-center gap-1 text-ctp-subtext0">
+    <!-- Actions, Date & Visibility -->
+    <div
+      class="flex items-center gap-1.5 text-ctp-subtext0 flex-shrink-0"
+      data-testid="footer-actions-group"
+    >
       <button
         onclick={async (e) => {
           e.stopPropagation();
@@ -101,7 +102,7 @@
             } catch (err) {}
           }
         }}
-        class="p-1 rounded-md hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
+        class="p-1 rounded-md hover:text-ctp-text hover:bg-ctp-surface1 transition-colors"
         title="Show experiment chain"
       >
         {#if highlighted.includes(experiment.id)}
@@ -110,10 +111,22 @@
           <Eye size={14} />
         {/if}
       </button>
+      <!-- Visibility Icon moved here -->
+      <div
+        class="p-1 rounded-md hover:bg-ctp-surface1 transition-colors cursor-default"
+        title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
+        data-testid="visibility-status"
+      >
+        {#if experiment.visibility === "PUBLIC"}
+          <Globe size={14} class="text-ctp-green" />
+        {:else}
+          <GlobeLock size={14} class="text-ctp-red" />
+        {/if}
+      </div>
       {#if page.data.user && page.data.user.id === experiment.user_id}
         <button
           type="button"
-          class="p-1 rounded-md hover:text-ctp-red hover:bg-ctp-red/10 transition-colors"
+          class="p-1 rounded-md hover:text-ctp-red hover:bg-ctp-red/20 transition-colors"
           aria-label="Delete"
           title="Delete experiment"
           onclick={(e) => {
@@ -124,17 +137,45 @@
           <X size={14} />
         </button>
       {/if}
-      {#if experiment?.createdAt}
-        <time
-          class="text-[10px] text-ctp-overlay0 ml-0.5"
-          title={new Date(experiment.createdAt).toLocaleString()}
-        >
-          {new Date(experiment.createdAt).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-          })}
-        </time>
-      {/if}
+      <!-- Date element removed from here -->
     </div>
   </div>
 </article>
+
+<style>
+  .description-truncate {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; /* Reduced to 2 lines */
+    line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 0; /* Important for flex-grow in some browsers */
+  }
+
+  /* Fallback for non-webkit browsers for description, not perfect but better than nothing */
+  @supports not (-webkit-line-clamp: 2) {
+    .description-truncate {
+      max-height: calc(
+        1.5em * 2
+      ); /* Assuming line-height is around 1.5em, for 2 lines */
+    }
+  }
+
+  /* Custom scrollbar for tags (already present, ensure it's still relevant) */
+  .overflow-x-auto {
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: var(--color-ctp-surface2) var(--color-ctp-mantle); /* For Firefox */
+  }
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 4px;
+  }
+  .overflow-x-auto::-webkit-scrollbar-track {
+    background: var(--color-ctp-mantle);
+    border-radius: 2px;
+  }
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background-color: var(--color-ctp-surface2);
+    border-radius: 2px;
+  }
+</style>
