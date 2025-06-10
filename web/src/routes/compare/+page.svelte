@@ -389,7 +389,11 @@
             ? "aspect-square max-w-2xl mx-auto"
             : "aspect-[4/3] max-w-4xl mx-auto"}
         >
-          <canvas bind:this={chartCanvas} class="w-full h-full"></canvas>
+          <canvas
+            bind:this={chartCanvas}
+            class="w-full h-full touch-manipulation"
+            style="touch-action: manipulation;"
+          ></canvas>
         </div>
       {:else}
         <div

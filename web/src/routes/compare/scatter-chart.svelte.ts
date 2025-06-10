@@ -42,6 +42,23 @@ export function drawScatterChart(
         legend: {
           display: false,
         },
+        tooltip: {
+          enabled: true,
+          mode: "point",
+          intersect: false,
+          callbacks: {
+            title: function (context) {
+              return context[0].dataset.label || "Experiment";
+            },
+            label: function (context) {
+              const point = context.parsed;
+              return [
+                `${xMetric}: ${point.x.toFixed(3)}`,
+                `${yMetric}: ${point.y.toFixed(3)}`,
+              ];
+            },
+          },
+        },
       },
       scales: {
         x: {
@@ -86,6 +103,21 @@ export function drawScatterChart(
       },
       interaction: {
         intersect: false,
+        mode: "point",
+      },
+      elements: {
+        point: {
+          radius: 8,
+          hoverRadius: 12,
+          borderWidth: 2,
+          hoverBorderWidth: 3,
+        },
+      },
+      onHover: (event, activeElements) => {
+        if (event.native) {
+          (event.native.target as HTMLElement).style.cursor =
+            activeElements.length > 0 ? "pointer" : "default";
+        }
       },
     },
   });

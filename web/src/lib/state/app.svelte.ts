@@ -48,7 +48,9 @@ export function closeEditExperimentModal() {
 }
 
 export function openDeleteExperimentModal(experiment: Experiment) {
-  const timer = startTimer("ui.openDeleteModal", { experimentId: experiment.id });
+  const timer = startTimer("ui.openDeleteModal", {
+    experimentId: experiment.id,
+  });
   state.modals.deleteExperiment = experiment;
   timer.end();
 }
@@ -58,11 +60,11 @@ export function closeDeleteExperimentModal() {
 }
 
 export function setSelectedExperiment(experiment: Experiment | null) {
-  const timer = startTimer("ui.setSelectedExperiment", { 
+  const timer = startTimer("ui.setSelectedExperiment", {
     experimentId: experiment?.id,
-    action: experiment ? "select" : "deselect"
+    action: experiment ? "select" : "deselect",
   });
-  
+
   state.modals.selectedExperiment = experiment;
   timer.end();
 }

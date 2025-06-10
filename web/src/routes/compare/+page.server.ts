@@ -17,7 +17,7 @@ export interface ExperimentWithMetrics {
 export const load: PageServerLoad = async ({ url, locals }) => {
   const requestId = generateRequestId();
   const timer = startTimer("page.compare.load", { requestId });
-  
+
   try {
     const idsParam = url.searchParams.get("ids");
     if (!idsParam) {
@@ -46,9 +46,9 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
       ) as ExperimentWithMetrics[];
 
-    timer.end({ 
-      experimentCount: experiments.length, 
-      requestedIds: ids.length 
+    timer.end({
+      experimentCount: experiments.length,
+      requestedIds: ids.length,
     });
     return { experiments };
   } catch (err) {

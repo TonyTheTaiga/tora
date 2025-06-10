@@ -20,7 +20,7 @@ interface FormDataResult {
 export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   const requestId = generateRequestId();
   const timer = startTimer("page.home.load", { requestId });
-  
+
   try {
     const { session } = await locals.safeGetSession();
     const { currentWorkspace } = await parent();
@@ -37,11 +37,11 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
     }
 
     const experiments: Experiment[] = await res.json();
-    
-    timer.end({ 
-      userId: session?.user?.id, 
-      workspaceId: currentWorkspace?.id, 
-      experimentCount: experiments.length 
+
+    timer.end({
+      userId: session?.user?.id,
+      workspaceId: currentWorkspace?.id,
+      experimentCount: experiments.length,
     });
     return { experiments, session };
   } catch (err) {

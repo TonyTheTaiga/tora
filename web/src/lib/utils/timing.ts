@@ -18,7 +18,7 @@ class Timer {
 
   end(additionalContext?: Record<string, string | number>): number {
     const duration = performance.now() - this.startTime;
-    
+
     const logData = {
       operation: this.operation,
       duration: Math.round(duration * 100) / 100,
@@ -26,24 +26,30 @@ class Timer {
       ...additionalContext,
     };
 
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       console.log(`[TIMING:CLIENT] ${this.operation}:`, logData);
     } else {
-      console.log(`[TIMING:SERVER] ${this.operation}:`, JSON.stringify(logData));
+      console.log(
+        `[TIMING:SERVER] ${this.operation}:`,
+        JSON.stringify(logData),
+      );
     }
 
     return duration;
   }
 }
 
-export function startTimer(operation: string, context: TimingContext = {}): Timer {
+export function startTimer(
+  operation: string,
+  context: TimingContext = {},
+): Timer {
   return new Timer(operation, context);
 }
 
 export function timeAsync<T>(
   operation: string,
   fn: () => Promise<T>,
-  context: TimingContext = {}
+  context: TimingContext = {},
 ): Promise<T> {
   const timer = startTimer(operation, context);
   return fn().finally(() => timer.end());
@@ -52,7 +58,7 @@ export function timeAsync<T>(
 export function timeSync<T>(
   operation: string,
   fn: () => T,
-  context: TimingContext = {}
+  context: TimingContext = {},
 ): T {
   const timer = startTimer(operation, context);
   try {
@@ -63,5 +69,8 @@ export function timeSync<T>(
 }
 
 export function generateRequestId(): string {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
 }

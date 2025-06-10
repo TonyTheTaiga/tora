@@ -124,7 +124,9 @@
   });
 
   async function loadMetrics() {
-    const timer = startTimer("chart.loadMetrics", { experimentId: experiment.id });
+    const timer = startTimer("chart.loadMetrics", {
+      experimentId: experiment.id,
+    });
     try {
       isLoading = true;
       const response = await fetch(`/api/experiments/${experiment.id}/metrics`);
@@ -151,11 +153,11 @@
   }
 
   function updateChart() {
-    const timer = startTimer("chart.updateChart", { 
-      experimentId: experiment.id, 
-      selectedMetricsCount: selectedMetrics.length 
+    const timer = startTimer("chart.updateChart", {
+      experimentId: experiment.id,
+      selectedMetricsCount: selectedMetrics.length,
     });
-    
+
     destroyChart();
     if (!chartCanvas || selectedMetrics.length === 0) {
       timer.end({ skipped: true });
@@ -200,7 +202,8 @@
           pointHoverBorderColor: ui.base,
           borderWidth: 1.5,
           tension: 0.3,
-          pointRadius: 2,
+          pointRadius: 4,
+          pointHoverRadius: 8,
         };
       });
 
@@ -234,6 +237,7 @@
               },
             },
             tooltip: {
+              enabled: true,
               backgroundColor: ui.crust,
               titleColor: getComputedStyle(document.documentElement)
                 .getPropertyValue("--color-ctp-sky")
@@ -241,10 +245,24 @@
               bodyColor: ui.text,
               borderColor: ui.overlay0,
               position: "nearest",
-              caretPadding: 10,
+              caretPadding: 12,
+              cornerRadius: 8,
+              displayColors: true,
+              titleFont: {
+                size: 13,
+                weight: "bold",
+              },
+              bodyFont: {
+                size: 12,
+              },
+              padding: 12,
               callbacks: {
                 title: function (tooltipItems) {
                   return `Step ${tooltipItems[0].parsed.x}`;
+                },
+                label: function (context) {
+                  const value = context.parsed.y;
+                  return `${context.dataset.label}: ${value.toFixed(4)}`;
                 },
               },
             },
@@ -281,11 +299,19 @@
               },
             },
           },
+          onHover: (event, activeElements) => {
+            if (event.native) {
+              (event.native.target as HTMLElement).style.cursor =
+                activeElements.length > 0 ? "pointer" : "default";
+            }
+          },
         },
       });
       timer.end({ success: true });
     } catch (error) {
-      timer.end({ error: error instanceof Error ? error.message : "Unknown error" });
+      timer.end({
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
       console.error("Failed to create chart:", error);
     }
   }
@@ -420,7 +446,11 @@
         </div>
       {/if}
       <div class="absolute inset-0 p-2 sm:p-4">
-        <canvas bind:this={chartCanvas}></canvas>
+        <canvas
+          bind:this={chartCanvas}
+          class="touch-manipulation"
+          style="touch-action: manipulation;"
+        ></canvas>
       </div>
     </div>
     <!-- Empty State -->
@@ -440,5 +470,12 @@
   canvas {
     background-color: transparent;
     border-radius: 4px;
+  }
+
+  .touch-manipulation {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
 </style>

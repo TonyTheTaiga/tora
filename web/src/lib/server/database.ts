@@ -129,7 +129,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
           handleError(error, "Failed to get experiments");
           return data?.map(mapRpcResultToExperiment) ?? [];
         },
-        { userId, workspaceId }
+        { userId, workspaceId },
       );
     },
 
@@ -155,7 +155,10 @@ export function createDbClient(client: SupabaseClient<Database>) {
             .eq("id", id)
             .single();
 
-          handleError(error, `Failed to get experiment and metrics for ID ${id}`);
+          handleError(
+            error,
+            `Failed to get experiment and metrics for ID ${id}`,
+          );
           if (!data) throw new Error(`Experiment with ID ${id} not found.`);
 
           return {
@@ -163,7 +166,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
             metrics: (data.metric as Metric[]) ?? [],
           };
         },
-        { experimentId: id }
+        { experimentId: id },
       );
     },
 
@@ -223,7 +226,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
           );
           return (data as Metric[]) ?? [];
         },
-        { experimentId }
+        { experimentId },
       );
     },
 
@@ -280,22 +283,22 @@ export function createDbClient(client: SupabaseClient<Database>) {
             `Failed to get reference chain for experiment ${experimentId}`,
           );
           return (
-        data?.map((item) => ({
-          id: item.experiment_id,
-          user_id: "", 
-          name: item.experiment_name,
-          description: item.experiment_description ?? "",
-          hyperparams:
-            (item.experiment_hyperparams as unknown as HyperParam[]) ?? [],
-          createdAt: new Date(item.experiment_created_at),
-          updatedAt: new Date(item.experiment_updated_at),
-          tags: item.experiment_tags ?? [],
-          visibility: item.experiment_visibility,
-          availableMetrics: [],
-        })) ?? []
+            data?.map((item) => ({
+              id: item.experiment_id,
+              user_id: "",
+              name: item.experiment_name,
+              description: item.experiment_description ?? "",
+              hyperparams:
+                (item.experiment_hyperparams as unknown as HyperParam[]) ?? [],
+              createdAt: new Date(item.experiment_created_at),
+              updatedAt: new Date(item.experiment_updated_at),
+              tags: item.experiment_tags ?? [],
+              visibility: item.experiment_visibility,
+              availableMetrics: [],
+            })) ?? []
           );
         },
-        { experimentId }
+        { experimentId },
       );
     },
 
@@ -420,14 +423,17 @@ export function createDbClient(client: SupabaseClient<Database>) {
       return timeAsync(
         "db.getExperimentsAndMetrics",
         async () => {
-          const { data, error } = await client.rpc("get_experiments_and_metrics", {
-            experiment_ids: experimentIds,
-          });
+          const { data, error } = await client.rpc(
+            "get_experiments_and_metrics",
+            {
+              experiment_ids: experimentIds,
+            },
+          );
 
           handleError(error, "Failed to get experiments and metrics");
           return data ?? [];
         },
-        { experimentCount: experimentIds.length }
+        { experimentCount: experimentIds.length },
       );
     },
   };

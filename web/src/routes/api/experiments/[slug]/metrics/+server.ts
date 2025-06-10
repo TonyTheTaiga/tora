@@ -99,11 +99,14 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 
 export const GET: RequestHandler = async ({ params, locals }) => {
   const requestId = generateRequestId();
-  const timer = startTimer("api.metrics.GET", { requestId, experimentId: params.slug });
-  
+  const timer = startTimer("api.metrics.GET", {
+    requestId,
+    experimentId: params.slug,
+  });
+
   try {
     const userId = locals.user?.id;
-    
+
     try {
       await locals.dbClient.checkExperimentAccess(params.slug, userId);
     } catch (error) {
@@ -115,7 +118,9 @@ export const GET: RequestHandler = async ({ params, locals }) => {
     timer.end({ userId, metricsCount: metrics.length });
     return json(metrics);
   } catch (error) {
-    timer.end({ error: error instanceof Error ? error.message : "Unknown error" });
+    timer.end({
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
     throw error;
   }
 };

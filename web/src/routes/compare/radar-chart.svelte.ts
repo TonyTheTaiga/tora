@@ -56,14 +56,30 @@ export function drawRadarChart(
           tension: 0.1,
         },
         point: {
-          radius: 5,
-          hoverRadius: 8,
+          radius: 6,
+          hoverRadius: 10,
           borderWidth: 2,
+          hoverBorderWidth: 3,
         },
       },
       plugins: {
         legend: {
           display: false,
+        },
+        tooltip: {
+          enabled: true,
+          mode: "point",
+          intersect: true,
+          callbacks: {
+            title: function (context) {
+              return context[0].dataset.label || "Experiment";
+            },
+            label: function (context) {
+              const metricName = selectedMetrics[context.dataIndex];
+              const value = context.parsed.r;
+              return `${metricName}: ${value.toFixed(3)}`;
+            },
+          },
         },
       },
       scales: {
@@ -96,6 +112,16 @@ export function drawRadarChart(
             },
           },
         },
+      },
+      interaction: {
+        intersect: true,
+        mode: "point",
+      },
+      onHover: (event, activeElements) => {
+        if (event.native) {
+          (event.native.target as HTMLElement).style.cursor =
+            activeElements.length > 0 ? "pointer" : "default";
+        }
       },
     },
   });

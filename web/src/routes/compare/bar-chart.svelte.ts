@@ -54,6 +54,20 @@ export function drawBarChart(
         legend: {
           display: false,
         },
+        tooltip: {
+          enabled: true,
+          mode: "index",
+          intersect: false,
+          callbacks: {
+            title: function (context) {
+              const index = context[0].dataIndex;
+              return experiments[index]?.name || `Experiment ${index + 1}`;
+            },
+            label: function (context) {
+              return `${selectedMetric}: ${context.parsed.y.toFixed(3)}`;
+            },
+          },
+        },
       },
       scales: {
         y: {
@@ -90,6 +104,18 @@ export function drawBarChart(
       },
       interaction: {
         intersect: false,
+        mode: "index",
+      },
+      elements: {
+        bar: {
+          borderRadius: 4,
+        },
+      },
+      onHover: (event, activeElements) => {
+        if (event.native) {
+          (event.native.target as HTMLElement).style.cursor =
+            activeElements.length > 0 ? "pointer" : "default";
+        }
       },
     },
   });

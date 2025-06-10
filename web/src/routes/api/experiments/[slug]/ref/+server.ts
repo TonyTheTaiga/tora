@@ -4,14 +4,19 @@ import { generateRequestId, startTimer } from "$lib/utils/timing";
 
 export const GET: RequestHandler = async ({ params, locals }) => {
   const requestId = generateRequestId();
-  const timer = startTimer("api.experimentRef.GET", { requestId, experimentId: params.slug });
-  
+  const timer = startTimer("api.experimentRef.GET", {
+    requestId,
+    experimentId: params.slug,
+  });
+
   try {
     const references = await locals.dbClient.getReferenceChain(params.slug);
     timer.end({ referenceCount: references.length });
     return json(references.map((experiment) => experiment.id));
   } catch (error) {
-    timer.end({ error: error instanceof Error ? error.message : "Unknown error" });
+    timer.end({
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
     throw error;
   }
 };

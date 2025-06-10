@@ -5,7 +5,7 @@ import { generateRequestId, startTimer } from "$lib/utils/timing";
 export const GET: RequestHandler = async ({ url, locals }) => {
   const requestId = generateRequestId();
   const timer = startTimer("api.experiments.GET", { requestId });
-  
+
   try {
     const { user } = locals;
     if (!user) {
@@ -18,8 +18,12 @@ export const GET: RequestHandler = async ({ url, locals }) => {
       user.id,
       workspace_id,
     );
-    
-    timer.end({ userId: user.id, workspaceId: workspace_id, experimentCount: experiments.length });
+
+    timer.end({
+      userId: user.id,
+      workspaceId: workspace_id,
+      experimentCount: experiments.length,
+    });
     return json(experiments);
   } catch (err) {
     timer.end({ error: err instanceof Error ? err.message : "Unknown error" });
@@ -32,7 +36,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 export const POST: RequestHandler = async ({ request, locals, cookies }) => {
   const requestId = generateRequestId();
   const timer = startTimer("api.experiments.POST", { requestId });
-  
+
   try {
     if (!locals.user) {
       timer.end({ error: "Unauthorized" });
@@ -74,11 +78,17 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
       visibility,
       workspaceId,
     });
-    
-    timer.end({ userId: locals.user.id, experimentId: experiment.id, workspaceId });
+
+    timer.end({
+      userId: locals.user.id,
+      experimentId: experiment.id,
+      workspaceId,
+    });
     return json({ success: true, experiment: experiment });
   } catch (error: unknown) {
-    timer.end({ error: error instanceof Error ? error.message : "Unknown error" });
+    timer.end({
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
     return json(
       {
         error:
