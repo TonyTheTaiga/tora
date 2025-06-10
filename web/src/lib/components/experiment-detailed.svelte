@@ -28,6 +28,7 @@
     Loader2,
     Globe,
     GlobeLock,
+    BarChart3,
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
   import { page } from "$app/state";
@@ -111,13 +112,6 @@
     return hps.length - initialHyperparameterLimit;
   });
 
-  function showAllHyperparameters() {
-    allHyperparametersShown = true;
-  }
-  function showLessHyperparameters() {
-    allHyperparametersShown = false;
-  }
-
   let availableMetrics = $derived.by(() =>
     experiment.metricData
       ? Object.keys(experiment.metricData)
@@ -157,6 +151,13 @@
       }
     }
   }
+
+  const placeholderMetrics = [
+    { name: "Final Accuracy", value: "96.45%", change: "+2.3%", color: "text-ctp-green" },
+    { name: "Final Loss", value: "0.0934", change: "-0.14", color: "text-ctp-red" },
+    { name: "Val Accuracy", value: "98.78%", change: "+1.8%", color: "text-ctp-green" },
+    { name: "Training Time", value: "12.4s", change: "-2.1s", color: "text-ctp-green" },
+  ];
 </script>
 
 <article
@@ -381,28 +382,31 @@
     {/if}
     <!-- Parameters section -->
     {#if experiment.hyperparams && experiment.hyperparams.length > 0}
-      <details class="mt-2 group bg-ctp-mantle/60 border border-ctp-overlay0/30 backdrop-blur-sm rounded-lg" open>
+      <details class="mt-2 group open rounded-lg bg-ctp-base/80 border border-ctp-overlay0/20 backdrop-blur-xl shadow-2xl hover:bg-ctp-base/70 transition-all duration-300" open>
         <summary
-          class="flex items-center gap-2.5 cursor-pointer text-ctp-text px-4 py-3 hover:bg-ctp-overlay0/20 transition-colors rounded-t-lg"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-ctp-overlay0/20 transition-colors rounded-t-lg cursor-pointer"
         >
-          <Settings size={18} class="text-ctp-overlay1 flex-shrink-0" />
-          <span class="text-lg font-semibold text-ctp-text">Hyperparameters</span> {# Changed classes #}
+          <div class="flex items-center gap-2 flex-grow">
+            <Settings size={20} class="text-ctp-blue" />
+            <span class="text-lg font-semibold text-ctp-text">Hyperparameters</span>
+          </div>
+          <span class="bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/40 backdrop-blur-sm shadow-md rounded-md px-2 py-0.5 text-xs shrink-0">
+            {experiment.hyperparams?.length || 0} params
+          </span>
           <ChevronDown
             size={20}
-            class="ml-auto text-ctp-subtext1 group-open:rotate-180 transition-transform"
+            class="text-ctp-subtext0 group-open:rotate-180 transition-transform shrink-0"
           />
         </summary>
-        <div class="pt-2 px-4 pb-4 space-y-0"> {# Added px-4 pb-4 for content padding #}
+        <div class="pt-2 px-4 pb-4 space-y-2"> {# Changed space-y-0 to space-y-2 for item spacing #}
           {#each visibleHyperparameters as param (param.key)}
             <div
-              class="flex justify-between items-center py-2.5 px-2 border-b border-ctp-surface0 last:border-b-0 hover:bg-ctp-surface0/50 transition-colors group"
+              class="flex items-center justify-between p-3 rounded-lg bg-ctp-surface0/10 hover:bg-ctp-surface0/20 transition-all duration-200 group backdrop-blur-sm border border-ctp-overlay0/10 shadow-md hover:shadow-lg"
             >
-              <!-- Left Column: Key and Info Icon -->
-              <div class="flex items-center min-w-0 flex-1 mr-4">
-                <span
-                  class="text-sm font-medium text-ctp-text truncate mr-1 shrink"
-                  title={param.key}>{param.key}</span
-                >
+              <!-- Left Part: Type Badge + Key + Info Icon -->
+              <div class="flex items-center space-x-3 flex-1 min-w-0">
+                <span class="text-xs bg-ctp-mauve/30 text-ctp-mauve border border-ctp-mauve/40 backdrop-blur-sm shadow-sm rounded-md px-1.5 py-0.5 shrink-0">PARAM</span>
+                <span class="text-ctp-subtext1 font-medium truncate shrink" title={param.key}>{param.key}</span>
                 {#if recommendations && recommendations[param.key]}
                   <button
                     class="p-0.5 rounded-sm text-ctp-overlay2 hover:text-ctp-lavender hover:bg-ctp-surface1 transition-colors flex-shrink-0"
@@ -418,19 +422,17 @@
                 {/if}
               </div>
 
-              <!-- Right Column: Value and Copy Icon -->
-              <div class="flex items-center gap-2">
-                <span
-                  class="text-sm text-ctp-subtext1 truncate max-w-[150px] sm:max-w-xs"
-                  title={String(param.value)}>{param.value}</span
-                >
+              <!-- Right Part: Value + Copy Button -->
+              <div class="flex items-center space-x-2">
+                <code><pre class="text-ctp-text font-mono bg-ctp-base/60 px-2 py-1 rounded text-sm backdrop-blur-sm border border-ctp-overlay0/20 shadow-inner truncate max-w-[150px] sm:max-w-xs">{param.value}</pre></code>
                 <button
-                  class="p-0.5 rounded-sm text-ctp-overlay2 hover:text-ctp-blue hover:bg-ctp-surface1 transition-colors flex-shrink-0"
+                  type="button"
+                  class="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-ctp-surface0/20 backdrop-blur-sm p-1 rounded text-ctp-subtext1 hover:text-ctp-text"
                   title="Copy value"
                   aria-label="Copy hyperparameter value {param.value}"
                   onclick={() => {
                     navigator.clipboard.writeText(
-                      `${param.key}: ${param.value}`,
+                      String(param.value) // Ensure value is string for clipboard
                     );
                     copiedParamKey = param.key;
                     setTimeout(() => {
@@ -450,22 +452,14 @@
             </div>
           {/each}
 
-          {#if hiddenHyperparameterCount > 0}
+          {#if (experiment.hyperparams?.length || 0) > initialHyperparameterLimit}
             <button
               type="button"
-              onclick={showAllHyperparameters}
-              class="mt-2 text-xs text-ctp-sky hover:text-ctp-blue hover:underline focus:outline-none w-full text-center hover:bg-ctp-surface0 px-2 py-1 rounded-md transition-colors"
+              onclick={() => { allHyperparametersShown = !allHyperparametersShown; }}
+              class="w-full text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0/20 mt-4 backdrop-blur-sm border border-ctp-overlay0/10 shadow-md rounded-lg py-2.5 px-4 text-sm flex items-center justify-center transition-colors duration-200"
             >
-              Show +{hiddenHyperparameterCount} more hyperparameters
-            </button>
-          {/if}
-          {#if allHyperparametersShown && (experiment.hyperparams?.length || 0) > initialHyperparameterLimit}
-            <button
-              type="button"
-              onclick={showLessHyperparameters}
-              class="mt-2 text-xs text-ctp-sky hover:text-ctp-blue hover:underline focus:outline-none w-full text-center hover:bg-ctp-surface0 px-2 py-1 rounded-md transition-colors"
-            >
-              Show less hyperparameters
+              <ChevronDown class="w-4 h-4 mr-2 transition-transform {allHyperparametersShown ? 'rotate-180' : ''}" />
+              {allHyperparametersShown ? 'Show less' : `Show +${hiddenHyperparameterCount} more hyperparameters`}
             </button>
           {/if}
           {#if activeRecommendation}
@@ -493,29 +487,34 @@
 
     <!-- Metrics section -->
     {#if availableMetrics.length > 0}
-      <details class="mt-3 group bg-ctp-mantle/60 border border-ctp-overlay0/30 backdrop-blur-sm rounded-lg" open>
+      <details class="mt-3 group open rounded-lg bg-ctp-base/80 border border-ctp-overlay0/20 backdrop-blur-xl shadow-2xl hover:bg-ctp-base/70 transition-all duration-300" open>
         <summary
-          class="flex items-center gap-2.5 cursor-pointer text-ctp-text px-4 py-3 hover:bg-ctp-overlay0/20 transition-colors rounded-t-lg"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-ctp-overlay0/20 transition-colors rounded-t-lg cursor-pointer"
         >
-          <ChartLine size={18} class="text-ctp-overlay1" />
-          <span class="text-lg font-semibold text-ctp-text">Metrics</span> {# Changed classes #}
+          <div class="flex items-center gap-2 flex-grow">
+            <BarChart3 size={20} class="text-ctp-purple" />
+            <span class="text-lg font-semibold text-ctp-text">Metrics</span>
+          </div>
+          <span class="bg-ctp-green/20 text-ctp-green border border-ctp-green/40 backdrop-blur-sm shadow-md rounded-md px-2 py-0.5 text-xs shrink-0">
+            Completed
+          </span>
           <ChevronDown
             size={20}
-            class="ml-auto text-ctp-subtext0 group-open:rotate-180"
+            class="text-ctp-subtext0 group-open:rotate-180 transition-transform shrink-0"
           />
         </summary>
-        <div class="pt-3 px-4 pb-4 space-y-3"> {# Added px-4 pb-4 for content padding #}
+        <div class="pt-3 px-4 pb-4 space-y-3">
           <!-- New Segmented Control -->
           <div class="flex justify-center mb-4">
-            <div class="inline-flex bg-ctp-surface0 p-1 rounded-lg space-x-1">
+            <div class="flex bg-ctp-base/80 border border-ctp-overlay0/20 w-full backdrop-blur-xl shadow-md rounded-lg p-1 space-x-1">
               <button
-                class="px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-colors focus:outline-none"
-                class:bg-ctp-surface1={!showMetricsTable}
+                class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none" {# Added justify-center #}
+                class:bg-ctp-surface0/20={!showMetricsTable}
+                class:backdrop-blur-sm={!showMetricsTable}
+                class:shadow-md={!showMetricsTable}
                 class:text-ctp-text={!showMetricsTable}
                 class:text-ctp-subtext0={showMetricsTable}
-                class:hover:text-ctp-text={showMetricsTable}
-                class:hover:bg-ctp-surface1={showMetricsTable}
-                class:hover:bg-opacity-50={showMetricsTable}
+                class:hover:bg-ctp-surface0/10={showMetricsTable}
                 onclick={() => {
                   showMetricsTable = false;
                 }}
@@ -524,13 +523,13 @@
                 Chart
               </button>
               <button
-                class="px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-colors focus:outline-none"
-                class:bg-ctp-surface1={showMetricsTable}
+                class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none" {# Added justify-center #}
+                class:bg-ctp-surface0/20={showMetricsTable}
+                class:backdrop-blur-sm={showMetricsTable}
+                class:shadow-md={showMetricsTable}
                 class:text-ctp-text={showMetricsTable}
                 class:text-ctp-subtext0={!showMetricsTable}
-                class:hover:text-ctp-text={!showMetricsTable}
-                class:hover:bg-ctp-surface1={!showMetricsTable}
-                class:hover:bg-opacity-50={!showMetricsTable}
+                class:hover:bg-ctp-surface0/10={!showMetricsTable}
                 onclick={() => {
                   showMetricsTable = true;
                   fetchRawMetricsIfNeeded();
@@ -541,6 +540,21 @@
                 Data
               </button>
             </div>
+          </div>
+
+          <!-- Quick Stats Section -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-4">
+            {#each placeholderMetrics as metric}
+              <div class="bg-ctp-surface0/10 rounded-lg p-3 hover:bg-ctp-surface0/20 transition-colors backdrop-blur-sm border border-ctp-overlay0/10 shadow-md">
+                <div class="text-xs text-ctp-subtext0 mb-1">{metric.name}</div>
+                <div class="flex items-center justify-between">
+                  <span class="text-ctp-text font-semibold text-lg">{metric.value}</span>
+                  <span class="text-xs {metric.color} flex items-center">
+                    {metric.change}
+                  </span>
+                </div>
+              </div>
+            {/each}
           </div>
 
           <!-- Conditional Display: Chart or Table -->
@@ -568,10 +582,10 @@
               </p>
             {:else if rawMetrics.length > 0}
               <div
-                class="overflow-x-auto max-h-[500px] border border-ctp-surface1 rounded-lg bg-ctp-mantle shadow-md"
+                class="overflow-x-auto max-h-[500px] bg-ctp-surface0/10 rounded-lg p-4 backdrop-blur-sm border border-ctp-overlay0/10 shadow-md"
               >
                 <table class="w-full text-sm text-left">
-                  <thead class="bg-ctp-surface0 sticky top-0 z-10">
+                  <thead class="bg-ctp-surface0/50 sticky top-0 z-10"> {# Made thead slightly transparent too #}
                     <tr>
                       <th class="p-3 font-semibold text-ctp-text">Name</th>
                       <th class="p-3 font-semibold text-ctp-text">Value</th>
@@ -620,10 +634,8 @@
               </p>
             {/if}
           {:else}
-            <div class="-mx-4 sm:-mx-6 bg-ctp-mantle p-1 rounded-lg shadow-sm"> {# p-4 to p-1 #}
-              <div class="px-2 sm:px-3 w-full overflow-x-auto"> {# This inner px might be redundant if chart handles its own padding well #}
-                <InteractiveChart {experiment} />
-              </div>
+            <div class="bg-ctp-base/80 rounded-lg p-4 backdrop-blur-sm border border-ctp-overlay0/10 shadow-inner">
+              <InteractiveChart {experiment} />
             </div>
           {/if}
         </div>

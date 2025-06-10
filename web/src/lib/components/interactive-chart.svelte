@@ -80,7 +80,10 @@
       mantle: computedStyles.getPropertyValue("--color-ctp-mantle").trim(),
       base: computedStyles.getPropertyValue("--color-ctp-base").trim(),
       overlay0: computedStyles.getPropertyValue("--color-ctp-overlay0").trim(),
-      gridLines: `${computedStyles.getPropertyValue("--color-ctp-overlay0").trim()}15`, // hex transparency
+      sky: computedStyles.getPropertyValue("--color-ctp-sky").trim(), // Added for tooltip title
+      // gridLines: `${computedStyles.getPropertyValue("--color-ctp-overlay0").trim()}15`, // Old gridLines
+      fadedGridLines: computedStyles.getPropertyValue('--color-ctp-surface1').trim() + '33',
+      axisTicks: computedStyles.getPropertyValue('--color-ctp-subtext0').trim(),
     };
   }
 
@@ -218,15 +221,15 @@
           label: metric,
           data: dataPoints,
           borderColor: color.border,
-          backgroundColor: color.bg,
-          fill: false,
+          backgroundColor: color.border + '40', // Updated background color
+          fill: true, // Enabled fill
           pointBackgroundColor: color.point,
-          pointBorderColor: ui.mantle,
+          pointBorderColor: ui.base, // Updated point border color
           pointHoverBackgroundColor: getComputedStyle(document.documentElement)
             .getPropertyValue("--color-ctp-mauve")
             .trim(),
           pointHoverBorderColor: ui.base,
-          borderWidth: 1.5,
+          borderWidth: 2, // Updated border width
           tension: 0.3,
           pointRadius: 4,
           pointHoverRadius: 8,
@@ -272,12 +275,11 @@
             },
             tooltip: {
               enabled: true,
-              backgroundColor: ui.crust,
-              titleColor: getComputedStyle(document.documentElement)
-                .getPropertyValue("--color-ctp-sky")
-                .trim(),
+              backgroundColor: ui.base + 'cc', // Updated tooltip background
+              titleColor: ui.sky, // Using ui.sky from getThemeUI
               bodyColor: ui.text,
-              borderColor: ui.overlay0,
+              borderColor: ui.overlay0 + '33', // Updated tooltip border
+              borderWidth: 1, // Added border width for tooltip
               position: "nearest",
               caretPadding: 12,
               cornerRadius: 8,
@@ -308,13 +310,13 @@
               title: {
                 display: true,
                 text: "Step",
-                color: ui.text,
+                color: ui.axisTicks, // Updated axis title color
               },
               ticks: {
-                color: ui.text,
+                color: ui.axisTicks, // Updated axis ticks color
               },
               grid: {
-                color: ui.gridLines,
+                color: ui.fadedGridLines, // Updated grid line color
               },
             },
             y: {
@@ -323,13 +325,13 @@
               title: {
                 display: true,
                 text: "Value (log)",
-                color: ui.text,
+                color: ui.axisTicks, // Updated axis title color
               },
               ticks: {
-                color: ui.text,
+                color: ui.axisTicks, // Updated axis ticks color
               },
               grid: {
-                color: ui.gridLines,
+                color: ui.fadedGridLines, // Updated grid line color
               },
             },
           },
@@ -508,7 +510,7 @@
   <!-- Chart Display Section -->
   {#if selectedMetrics.length > 0}
     <div
-      class="relative h-60 sm:h-80 w-full rounded-md border border-ctp-surface1 bg-transparent overflow-hidden shadow-md" {# bg-ctp-mantle to bg-transparent #}
+      class="relative h-60 sm:h-80 w-full rounded-md border border-ctp-overlay0/10 bg-transparent overflow-hidden" {# Updated border, removed shadow #}
     >
       {#if isLoading}
         <div
