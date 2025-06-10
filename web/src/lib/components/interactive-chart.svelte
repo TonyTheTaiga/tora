@@ -113,26 +113,45 @@
       attributeFilter: ["class"],
     });
 
-    const preventScroll = (event: TouchEvent) => {
-      if (event.target === chartCanvas) {
-        event.preventDefault();
-      }
-    };
-
-    // Prevent page scrolling on touch events on the chart canvas
-    if (chartCanvas) {
-      chartCanvas.addEventListener('touchstart', preventScroll, { passive: false });
-      chartCanvas.addEventListener('touchmove', preventScroll, { passive: false });
-    }
-
     return () => {
       mediaQuery.removeEventListener("change", handleThemeChange);
       observer.disconnect();
-      if (chartCanvas) {
-        chartCanvas.removeEventListener('touchstart', preventScroll);
-        chartCanvas.removeEventListener('touchmove', preventScroll);
-      }
     };
+  });
+
+  $effect(() => {
+    const currentCanvas = chartCanvas; // Capture current value for cleanup
+
+    if (currentCanvas) {
+      const preventScroll = (event: TouchEvent) => {
+        if (event.target === currentCanvas) {
+          event.preventDefault();
+        }
+      };
+
+      currentCanvas.addEventListener('touchstart', preventScroll, { passive: false });
+      currentCanvas.addEventListener('touchmove', preventScroll, { passive: false });
+
+      const clearTooltip = () => {
+        if (chartInstance && chartInstance.tooltip) {
+          // Check if tooltip is an object and has the method
+          if (typeof chartInstance.tooltip.setActiveElements === 'function') {
+            chartInstance.tooltip.setActiveElements([], {x:0, y:0});
+          }
+        }
+      };
+
+      currentCanvas.addEventListener('mouseout', clearTooltip);
+      currentCanvas.addEventListener('touchend', clearTooltip); // Added for touch devices
+
+      // Cleanup function for this $effect
+      return () => {
+        currentCanvas.removeEventListener('touchstart', preventScroll);
+        currentCanvas.removeEventListener('touchmove', preventScroll);
+        currentCanvas.removeEventListener('mouseout', clearTooltip);
+        currentCanvas.removeEventListener('touchend', clearTooltip); // Added for touch devices
+      };
+    }
   });
 
   onDestroy(() => {
