@@ -87,6 +87,37 @@
     allTagsShown = false;
   }
 
+  let allHyperparametersShown = $state(false);
+  const initialHyperparameterLimit = 7;
+
+  let visibleHyperparameters = $derived.by(() => {
+    const hps = experiment.hyperparams || [];
+    if (!Array.isArray(hps)) return [];
+    if (allHyperparametersShown || hps.length <= initialHyperparameterLimit) {
+      return hps;
+    }
+    return hps.slice(0, initialHyperparameterLimit);
+  });
+
+  let hiddenHyperparameterCount = $derived.by(() => {
+    const hps = experiment.hyperparams || [];
+    if (
+      !Array.isArray(hps) ||
+      allHyperparametersShown ||
+      hps.length <= initialHyperparameterLimit
+    ) {
+      return 0;
+    }
+    return hps.length - initialHyperparameterLimit;
+  });
+
+  function showAllHyperparameters() {
+    allHyperparametersShown = true;
+  }
+  function showLessHyperparameters() {
+    allHyperparametersShown = false;
+  }
+
   let availableMetrics = $derived.by(() =>
     experiment.metricData
       ? Object.keys(experiment.metricData)
@@ -360,8 +391,8 @@
             class="ml-auto text-ctp-subtext1 group-open:rotate-180 transition-transform"
           />
         </summary>
-        <div class="pt-2 space-y-0"> {#* Adjusted pt-3 space-y-2 to pt-2 space-y-0 *#}
-          {#each experiment.hyperparams || [] as param (param.key)}
+        <div class="pt-2 space-y-0">
+          {#each visibleHyperparameters as param (param.key)}
             <div
               class="flex justify-between items-center py-2.5 px-2 border-b border-ctp-surface0 last:border-b-0 hover:bg-ctp-surface0/50 transition-colors group"
             >
@@ -417,6 +448,25 @@
               </div>
             </div>
           {/each}
+
+          {#if hiddenHyperparameterCount > 0}
+            <button
+              type="button"
+              onclick={showAllHyperparameters}
+              class="mt-2 text-xs text-ctp-sky hover:text-ctp-blue hover:underline focus:outline-none w-full text-center hover:bg-ctp-surface0 px-2 py-1 rounded-md transition-colors"
+            >
+              Show +{hiddenHyperparameterCount} more hyperparameters
+            </button>
+          {/if}
+          {#if allHyperparametersShown && (experiment.hyperparams?.length || 0) > initialHyperparameterLimit}
+            <button
+              type="button"
+              onclick={showLessHyperparameters}
+              class="mt-2 text-xs text-ctp-sky hover:text-ctp-blue hover:underline focus:outline-none w-full text-center hover:bg-ctp-surface0 px-2 py-1 rounded-md transition-colors"
+            >
+              Show less hyperparameters
+            </button>
+          {/if}
           {#if activeRecommendation}
             <div
               class="mt-3 p-3.5 bg-ctp-surface1 border border-ctp-lavender/50 rounded-lg relative shadow-sm"
@@ -569,7 +619,7 @@
               </p>
             {/if}
           {:else}
-            <div class="-mx-4 sm:-mx-6 bg-ctp-mantle p-4 rounded-lg shadow-sm"> {# p-2 to p-4 #}
+            <div class="-mx-4 sm:-mx-6 bg-ctp-mantle p-1 rounded-lg shadow-sm"> {# p-4 to p-1 #}
               <div class="px-2 sm:px-3 w-full overflow-x-auto"> {# This inner px might be redundant if chart handles its own padding well #}
                 <InteractiveChart {experiment} />
               </div>
