@@ -19,7 +19,6 @@
   let { data = $bindable() }: { data: PageData } = $props();
   let experiments = $derived([...data.experiments]);
 
-  let hasExperiments: boolean = $derived(experiments.length > 0);
   let createExperimentModal = $derived(getCreateExperimentModal());
   let editExperimentModal = $derived(getEditExperimentModal());
   let deleteExperimentModal = $derived(getDeleteExperimentModal());
@@ -41,7 +40,7 @@
     <EditExperimentModal experiment={editExperimentModal} />
   {/if}
 
-  <Toolbar {hasExperiments} />
+  <Toolbar />
 
   <div class="pt-4 px-0 sm:px-2 md:px-4">
     {#if getMode()}

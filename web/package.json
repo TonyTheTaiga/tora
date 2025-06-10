@@ -16,34 +16,34 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-node": "^5.2.12",
-    "@sveltejs/kit": "^2.21.1",
+    "@sveltejs/kit": "^2.21.4",
     "@sveltejs/vite-plugin-svelte": "^4.0.4",
-    "@tailwindcss/postcss": "^4.1.7",
+    "@tailwindcss/postcss": "^4.1.8",
     "@types/p5": "^1.7.6",
-    "postcss": "^8.5.3",
+    "postcss": "^8.5.4",
     "prettier": "3.4.2",
     "prettier-plugin-svelte": "^3.4.0",
-    "svelte": "^5.32.0",
+    "svelte": "^5.33.19",
     "svelte-check": "^4.2.1",
-    "tailwindcss": "^4.1.7",
+    "tailwindcss": "^4.1.8",
     "typescript": "^5.8.3",
     "vite": "^5.4.19"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@supabase/ssr": "^0.6.1",
-    "@supabase/supabase-js": "^2.49.7",
-    "@tailwindcss/vite": "^4.1.7",
+    "@supabase/supabase-js": "^2.50.0",
+    "@tailwindcss/vite": "^4.1.8",
     "chart.js": "^4.4.9",
     "lucide-svelte": "^0.469.0",
     "marked": "^15.0.12",
-    "p5": "^2.0.2",
-    "tippy.js": "^6.3.7",
-    "zod": "^3.25.7",
+    "p5": "^2.0.3",
+    "zod": "^3.25.57",
     "zod-to-json-schema": "^3.24.5"
   },
   "pnpm": {
     "ignoredBuiltDependencies": [
+      "@tailwindcss/oxide",
       "esbuild",
       "lefthook"
     ]
