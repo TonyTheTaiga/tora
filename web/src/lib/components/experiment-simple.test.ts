@@ -207,60 +207,89 @@ describe('ExperimentSimple.svelte', () => {
     expect(screen.queryByTitle('Delete experiment')).not.toBeInTheDocument();
   });
 
-  // --- Tests for new styling and truncation ---
+  // --- Tests for new styling, truncation, and element repositioning ---
 
-  test('applies fixed height class for medium screens (md:h-64)', () => {
+  test('applies correct scaling classes (height, padding)', () => {
     const { container } = render(ExperimentSimple, { experiment: mockExperiment, highlighted: [] });
     const articleElement = container.querySelector('article');
-    expect(articleElement).toHaveClass('md:h-64');
+    expect(articleElement).toHaveClass('md:h-52'); // Updated height
+    expect(articleElement).toHaveClass('p-3');     // Updated padding
   });
 
-  test('experiment name has truncate class and title attribute for long names', () => {
-    render(ExperimentSimple, { experiment: mockExperimentLong, highlighted: [] });
-    const nameElement = screen.getByText(mockExperimentLong.name); // Text content will be the full name
-    expect(nameElement).toHaveClass('truncate');
-    expect(nameElement.getAttribute('title')).toBe(null); // Title is on the parent <p> for description, name itself if not truncated by parent
-                                                        // The h3 itself is what gets truncated. It should have the title.
-                                                        // Actually, h3 itself does not have a title attribute in the component.
-                                                        // The text is directly inside. The parent div doesn't have it either.
-                                                        // Let's assume the browser provides title on truncated text, or test it by checking its container.
-                                                        // For now, class check is primary. The component doesn't explicitly set title on H3.
-  });
-
-  test('experiment name is truncated', () => {
+  test('experiment name has correct classes (font size, truncation)', () => {
     render(ExperimentSimple, { experiment: mockExperimentLong, highlighted: [] });
     const nameElement = screen.getByText(mockExperimentLong.name);
+    expect(nameElement).toHaveClass('text-sm');    // Updated font size
     expect(nameElement).toHaveClass('truncate');
+    // Title attribute is not explicitly set on H3 in the component, browser handles it for overflow.
   });
 
-
-  test('description has truncation class and title attribute for long descriptions', () => {
+  test('description has correct truncation class and title attribute', () => {
     const { container } = render(ExperimentSimple, { experiment: mockExperimentLong, highlighted: [] });
     const descriptionElement = container.querySelector('p.description-truncate');
     expect(descriptionElement).toBeInTheDocument();
+    // The class '.description-truncate' implies 2-line clamp via CSS in <style> tag,
+    // which is hard to check directly in JSDOM beyond class presence.
     expect(descriptionElement).toHaveClass('description-truncate');
     expect(descriptionElement).toHaveAttribute('title', mockExperimentLong.description);
   });
 
-  test('tags have truncation classes and title attribute for long tag names', () => {
+  test('tags have correct scaling and truncation classes and title attributes', () => {
     const { container } = render(ExperimentSimple, { experiment: mockExperimentLong, highlighted: [] });
-    const tagElements = container.querySelectorAll('.flex-nowrap span.truncate'); // Selects the individual tag pills
+    // The inner div directly containing tags now has 'md:flex-wrap'
+    const tagElements = container.querySelectorAll('div.flex.md\\:flex-wrap span');
 
     expect(tagElements.length).toBe(mockExperimentLong.tags.length);
-
     tagElements.forEach((tagElement, index) => {
+      expect(tagElement).toHaveClass('text-[10px]');        // Updated font size
+      expect(tagElement).toHaveClass('px-1');            // Updated padding
+      expect(tagElement).toHaveClass('py-px');           // Updated padding
       expect(tagElement).toHaveClass('truncate');
-      expect(tagElement).toHaveClass('max-w-[120px]');
+      expect(tagElement).toHaveClass('max-w-[100px]');   // Updated max-width
       expect(tagElement).toHaveAttribute('title', mockExperimentLong.tags[index]);
-      expect(tagElement.textContent).toBe(mockExperimentLong.tags[index]); // Text content should be full, CSS handles visual truncation
+      expect(tagElement.textContent).toBe(mockExperimentLong.tags[index]);
     });
   });
 
-  test('tags container has overflow-x-auto class', () => {
+  test('date text has correct font size class', () => {
+    render(ExperimentSimple, { experiment: mockExperiment, highlighted: [] });
+    const dateElement = screen.getByTitle(new Date(mockExperiment.createdAt).toLocaleString());
+    expect(dateElement).toHaveClass('text-[11px]'); // Updated font size
+  });
+
+  test('visibility icon is repositioned to footer, after date', () => {
+    const { container } = render(ExperimentSimple, { experiment: mockExperiment, highlighted: [] });
+
+    // Check header no longer contains visibility
+    const header = container.querySelector('article > div:first-child');
+    expect(header.querySelector('div[title="Public"]')).not.toBeInTheDocument();
+    expect(header.querySelector('div[title="Private"]')).not.toBeInTheDocument();
+
+    // Check footer contains date and then visibility
+    const footerActionsDateVisibilityDiv = container.querySelector('.mt-auto .flex.items-center.gap-1\\.5.text-ctp-subtext0.flex-shrink-0');
+    expect(footerActionsDateVisibilityDiv).toBeInTheDocument();
+
+    const timeElement = footerActionsDateVisibilityDiv.querySelector('time');
+    const visibilityDiv = footerActionsDateVisibilityDiv.querySelector('div[title="Public"], div[title="Private"]');
+
+    expect(timeElement).toBeInTheDocument();
+    expect(visibilityDiv).toBeInTheDocument();
+
+    // Check order: time should be before visibility sibling
+    // This is a bit fragile if more elements are added, but checks direct sibling order
+    expect(timeElement.nextElementSibling).toBe(visibilityDiv);
+  });
+
+  test('tags container has responsive classes for overflow and wrapping', () => {
     const { container } = render(ExperimentSimple, { experiment: mockExperimentLong, highlighted: [] });
-    // Find the div that is the direct parent of the div containing tags, and should have overflow-x-auto
-    const tagsOuterContainer = container.querySelector('div.flex.items-center.gap-1\\.5.text-xs.text-ctp-subtext0');
-    expect(tagsOuterContainer).toHaveClass('overflow-x-auto');
+    const outerTagsContainer = container.querySelector('div.overflow-x-auto.md\\:overflow-visible');
+    expect(outerTagsContainer).toBeInTheDocument();
+
+    const innerTagsContainer = outerTagsContainer.querySelector('div.flex');
+    expect(innerTagsContainer).toHaveClass('flex-nowrap');
+    expect(innerTagsContainer).toHaveClass('md:flex-wrap');
+    expect(innerTagsContainer).toHaveClass('gap-0.5');
+    expect(innerTagsContainer).toHaveClass('md:gap-1');
   });
 
 });
