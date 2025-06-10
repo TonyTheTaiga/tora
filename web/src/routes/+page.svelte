@@ -17,7 +17,11 @@
 
   let user = $derived(page.data.user);
   let { data = $bindable() }: { data: PageData } = $props();
-  let experiments = $derived([...data.experiments]);
+  let experiments = $state([...data.experiments]);
+
+  $effect(() => {
+    experiments = [...data.experiments];
+  });
 
   let createExperimentModal = $derived(getCreateExperimentModal());
   let editExperimentModal = $derived(getEditExperimentModal());
