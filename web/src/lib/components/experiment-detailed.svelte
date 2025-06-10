@@ -151,14 +151,14 @@
 
 <article class="h-full bg-ctp-base rounded-xl flex flex-col overflow-hidden">
   <!-- Header with actions -->
-  <header class="px-4 sm:px-6 py-5 border-b border-ctp-surface1">
+  <header class="px-4 sm:px-6 py-3 border-b border-ctp-surface1">
     <!-- Combined Header for both Mobile and Desktop -->
     <div class="flex items-center justify-end">
       <!-- Action Buttons -->
       <div class="flex items-center gap-1 bg-ctp-surface0/80 backdrop-blur-sm border border-ctp-surface1/50 rounded-full p-1 flex-shrink-0">
         {#if page.data.user && page.data.user.id === experiment.user_id}
           <button
-            class="p-2 rounded-full text-ctp-subtext0 hover:text-ctp-lavender hover:bg-ctp-surface1/60 transition-colors"
+            class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-lavender hover:bg-ctp-surface1/60 transition-colors"
             onclick={async () => {
               const response = await fetch(
                 `/api/ai/analysis?experimentId=${experiment.id}`,
@@ -168,16 +168,16 @@
             }}
             title="Get AI recommendations"
           >
-            <Sparkle size={18} />
+            <Sparkle size={16} />
           </button>
           <button
             onclick={() => {
               openEditExperimentModal(experiment);
             }}
-            class="p-2 rounded-full text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface1/60 transition-colors"
+            class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface1/60 transition-colors"
             title="Edit experiment"
           >
-            <Pencil size={18} />
+            <Pencil size={16} />
           </button>
         {/if}
         <button
@@ -198,19 +198,19 @@
               } catch (err) {}
             }
           }}
-          class="p-2 rounded-full text-ctp-subtext0 hover:text-ctp-teal hover:bg-ctp-surface1/60 transition-colors"
+          class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-teal hover:bg-ctp-surface1/60 transition-colors"
           title="Show experiment chain"
         >
           {#if highlighted.includes(experiment.id)}
-            <EyeClosed size={18} />
+            <EyeClosed size={16} />
           {:else}
-            <Eye size={18} />
+            <Eye size={16} />
           {/if}
         </button>
         {#if page.data.user && page.data.user.id === experiment.user_id}
           <button
             type="button"
-            class="p-2 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
+            class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
             aria-label="Delete"
             title="Delete experiment"
             onclick={(e) => {
@@ -218,28 +218,28 @@
               openDeleteExperimentModal(experiment);
             }}
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         {/if}
         <button
-          class="p-2 rounded-full text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface1/60 transition-colors"
+          class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface1/60 transition-colors"
           onclick={() => {
             setSelectedExperiment(null);
           }}
           title="Minimize"
         >
-          <Minimize2 size={18} />
+          <Minimize2 size={16} />
         </button>
       </div>
     </div>
   </header>
 
   <!-- Content Area -->
-  <div class="px-4 sm:px-6 py-5 flex flex-col gap-5 overflow-y-auto flex-grow">
+  <div class="px-4 sm:px-6 py-4 flex flex-col gap-4 overflow-y-auto flex-grow">
     <!-- Title, ID, and metadata -->
-    <div class="flex flex-col gap-1 min-w-0 flex-grow mb-3">
+    <div class="flex flex-col gap-1 min-w-0 flex-grow mb-2">
       <h2
-        class="text-2xl sm:text-3xl font-bold text-ctp-text mb-2"
+        class="text-xl sm:text-2xl font-bold text-ctp-text mb-1"
         title={experiment.name}
       >
         {experiment.name}
@@ -374,11 +374,11 @@
         open
       >
         <summary
-          class="flex items-center gap-3 px-4 py-3 rounded-t-lg cursor-pointer"
+          class="flex items-center gap-3 px-3 py-2 rounded-t-lg cursor-pointer"
         >
           <div class="flex items-center gap-2 flex-grow">
-            <Settings size={20} class="text-ctp-blue" />
-            <span class="text-lg font-semibold text-ctp-text">Hyperparameters</span
+            <Settings size={18} class="text-ctp-blue" />
+            <span class="text-base font-semibold text-ctp-text">Hyperparameters</span
             >
           </div>
           <span
@@ -387,14 +387,14 @@
             {experiment.hyperparams?.length || 0} params
           </span>
           <ChevronDown
-            size={20}
+            size={18}
             class="text-ctp-subtext0 group-open:rotate-180 transition-transform shrink-0"
           />
         </summary>
-        <div class="pt-2 px-4 pb-4 space-y-2">
+        <div class="pt-2 px-3 pb-3 space-y-2">
           {#each visibleHyperparameters as param (param.key)}
             <div
-              class="flex items-center justify-between p-3 rounded-lg bg-ctp-surface1/60 hover:bg-ctp-surface1/80 group backdrop-blur-sm border border-ctp-surface2/30"
+              class="flex items-center justify-between p-2 rounded-lg bg-ctp-surface1/60 hover:bg-ctp-surface1/80 group backdrop-blur-sm border border-ctp-surface2/30"
             >
               <div class="flex items-center space-x-3 flex-1 min-w-0">
                 <span
@@ -495,18 +495,18 @@
         open
       >
         <summary
-          class="flex items-center gap-3 px-4 py-3 rounded-t-lg cursor-pointer"
+          class="flex items-center gap-3 px-3 py-2 rounded-t-lg cursor-pointer"
         >
           <div class="flex items-center gap-2 flex-grow">
-            <ChartArea size={20} class="text-ctp-blue" />
-            <span class="text-lg font-semibold text-ctp-text">Metrics</span>
+            <ChartArea size={18} class="text-ctp-blue" />
+            <span class="text-base font-semibold text-ctp-text">Metrics</span>
           </div>
           <ChevronDown
-            size={20}
+            size={18}
             class="text-ctp-subtext0 group-open:rotate-180 transition-transform shrink-0"
           />
         </summary>
-        <div class="pt-3 px-4 pb-4 space-y-3">
+        <div class="pt-2 px-3 pb-3 space-y-3">
           <!-- New Segmented Control -->
           <div class="flex justify-center mb-4">
             <div class="flex bg-ctp-surface1/80 w-full rounded-lg p-1 space-x-1 backdrop-blur-sm border border-ctp-surface2/30">
