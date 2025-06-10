@@ -435,14 +435,14 @@
   });
 </script>
 
-<div class="p-4 sm:p-5 space-y-5 w-full"> {# p-3 sm:p-4 to p-4 sm:p-5, space-y-4 to space-y-5 #}
+<div class="p-4 sm:p-5 space-y-5 w-full">
   <!-- Metric Selector -->
   {#if availableMetrics.length > 0}
-    <div class="border-b border-ctp-surface1 pb-4"> {# Consider pb-5 if space-y-5 is used #}
+    <div class="border-b border-ctp-surface1 pb-4">
       <details class="relative">
         <summary
           class="flex items-center justify-between cursor-pointer p-3 bg-ctp-surface0 rounded border border-ctp-surface1 hover:bg-ctp-surface1 transition-colors"
-        > {# p-2 to p-3 #}
+        >
           <span class="text-sm text-ctp-text">
             Select metrics ({selectedMetrics.length} of {availableMetrics.length})
           </span>
@@ -453,27 +453,27 @@
           class="absolute top-full left-0 right-0 mt-1 bg-ctp-surface0 border border-ctp-surface1 rounded shadow-lg z-10 max-h-60 overflow-y-auto"
         >
           <!-- Search filter -->
-          <div class="p-2 border-b border-ctp-surface1"> {# Consider p-2.5 or p-3 if input is larger #}
+          <div class="p-2 border-b border-ctp-surface1">
             <input
               type="search"
               placeholder="Filter metrics..."
               bind:value={searchFilter}
               class="w-full px-3 py-2 text-sm bg-ctp-base border border-ctp-surface1 rounded text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue"
-            /> {# px-2 py-1 to px-3 py-2 #}
+            />
           </div>
 
           <!-- Control buttons -->
-          <div class="flex gap-2 p-2 border-b border-ctp-surface1"> {# Consider p-2.5 or p-3 if buttons are larger #}
+          <div class="flex gap-2 p-2 border-b border-ctp-surface1">
             <button
               onclick={selectAllMetrics}
               class="px-2.5 py-1.5 text-xs bg-ctp-green/20 text-ctp-green rounded hover:bg-ctp-green/30 transition-colors"
-            > {# px-2 py-1 to px-2.5 py-1.5 #}
+            >
               Select All
             </button>
             <button
               onclick={clearAllMetrics}
               class="px-2.5 py-1.5 text-xs bg-ctp-red/20 text-ctp-red rounded hover:bg-ctp-red/30 transition-colors"
-            > {# px-2 py-1 to px-2.5 py-1.5 #}
+            >
               Clear All
             </button>
           </div>
@@ -517,7 +517,7 @@
           <div class="animate-pulse text-[#91d7e3]">Loading data...</div>
         </div>
       {/if}
-      <div class="absolute inset-0 p-4"> {# p-2 sm:p-4 to p-4 #}
+      <div class="absolute inset-0 p-4">
         <canvas bind:this={chartCanvas} class="chart-canvas"></canvas>
       </div>
     </div>

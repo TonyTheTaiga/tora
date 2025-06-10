@@ -126,10 +126,7 @@
 
   async function fetchRawMetricsIfNeeded() {
     // Fetch data only if it hasn't been fetched yet, or if there was a previous error and no data currently displayed
-    if (
-      rawMetrics.length === 0 ||
-      (metricsError && rawMetrics.length === 0)
-    ) {
+    if (rawMetrics.length === 0 || (metricsError && rawMetrics.length === 0)) {
       metricsLoading = true;
       metricsError = null;
       try {
@@ -142,8 +139,7 @@
         const data = await response.json();
         rawMetrics = data as Metric[]; // Assuming API returns Metric[]
         if (rawMetrics.length === 0) {
-          metricsError =
-            "No raw metric data points found for this experiment.";
+          metricsError = "No raw metric data points found for this experiment.";
         }
       } catch (err) {
         if (err instanceof Error) {
@@ -163,7 +159,7 @@
   class="h-full bg-ctp-crust rounded-xl shadow-lg flex flex-col overflow-hidden"
 >
   <!-- Header with actions -->
-  <header class="px-4 sm:px-6 py-5 bg-ctp-mantle border-b border-ctp-surface1"> {# py-4 to py-5 #}
+  <header class="px-4 sm:px-6 py-5 bg-ctp-mantle border-b border-ctp-surface1">
     <!-- Combined Header for both Mobile and Desktop -->
     <div class="flex items-center justify-between">
       <!-- Action Buttons -->
@@ -281,11 +277,11 @@
   </header>
 
   <!-- Content Area -->
-  <div class="px-4 sm:px-6 py-5 flex flex-col gap-5 overflow-y-auto flex-grow"> {# py-4 to py-5, gap-4 to gap-5 #}
+  <div class="px-4 sm:px-6 py-5 flex flex-col gap-5 overflow-y-auto flex-grow">
     <!-- MOVED: Title and ID -->
-    <div class="flex flex-col gap-1 min-w-0 flex-grow mb-3"> {# Consider making mb-3 to mb-4 if sections need more space #}
+    <div class="flex flex-col gap-1 min-w-0 flex-grow mb-3">
       <h2
-        class="text-xl sm:text-2xl font-semibold text-ctp-text mb-1.5" {# Added mb-1.5 #}
+        class="text-xl sm:text-2xl font-semibold text-ctp-text mb-1.5"
         title={experiment.name}
       >
         {experiment.name}
@@ -368,7 +364,7 @@
           text-xs sm:text-sm
           leading-relaxed
           border-l-2 border-ctp-mauve
-          pl-4 py-2 mt-2 {# pl-3 to pl-4, py-1.5 to py-2, mt-1 to mt-2 #}
+          pl-4 py-2 mt-2
           break-words
           sm:break-normal
           description-truncate-detailed
@@ -383,11 +379,11 @@
       <details class="mt-2 group" open>
         <summary
           class="flex items-center gap-2.5 cursor-pointer text-ctp-text py-3 rounded-lg hover:bg-ctp-surface0 transition-colors -mx-2 px-2"
-        > {# py-2 to py-3 #}
+        >
           <Settings size={18} class="text-ctp-overlay1 flex-shrink-0" />
           <span class="text-base font-medium">Hyperparameters</span>
           <ChevronDown
-            size={20} {# size 18 to 20 #}
+            size={20}
             class="ml-auto text-ctp-subtext1 group-open:rotate-180 transition-transform"
           />
         </summary>
@@ -495,17 +491,17 @@
       <details class="mt-3 group" open>
         <summary
           class="flex items-center gap-2.5 cursor-pointer text-ctp-text hover:text-ctp-blue py-3 rounded-lg -mx-2 px-2 hover:bg-ctp-surface0 transition-colors"
-        > {# py-2.5 to py-3 #}
+        >
           <ChartLine size={18} class="text-ctp-overlay1" />
           <span class="text-base font-medium">Metrics</span>
           <ChevronDown
-            size={20} {# size 16 to 20 #}
+            size={20}
             class="ml-auto text-ctp-subtext0 group-open:rotate-180"
           />
         </summary>
         <div class="pt-3 space-y-3">
           <!-- New Segmented Control -->
-          <div class="flex justify-center mb-4"> {# mb-3 to mb-4 #}
+          <div class="flex justify-center mb-4">
             <div class="inline-flex bg-ctp-surface0 p-1 rounded-lg space-x-1">
               <button
                 class="px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-colors focus:outline-none"
@@ -619,8 +615,8 @@
               </p>
             {/if}
           {:else}
-            <div class="-mx-4 sm:-mx-6 bg-ctp-mantle p-1 rounded-lg shadow-sm"> {# p-4 to p-1 #}
-              <div class="px-2 sm:px-3 w-full overflow-x-auto"> {# This inner px might be redundant if chart handles its own padding well #}
+            <div class="-mx-4 sm:-mx-6 bg-ctp-mantle p-1 rounded-lg shadow-sm">
+              <div class="px-2 sm:px-3 w-full overflow-x-auto">
                 <InteractiveChart {experiment} />
               </div>
             </div>
