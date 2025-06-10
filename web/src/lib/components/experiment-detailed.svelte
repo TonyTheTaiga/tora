@@ -28,7 +28,7 @@
     Loader2,
     Globe,
     GlobeLock,
-    BarChart3,
+    ChartArea,
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
   import { page } from "$app/state";
@@ -399,12 +399,7 @@
             <div
               class="flex items-center justify-between p-3 rounded-lg bg-ctp-surface0/10 hover:bg-ctp-surface0/20 transition-all duration-200 group backdrop-blur-lg border border-ctp-overlay0/10 shadow-md hover:shadow-lg"
             >
-              <!-- Left Part: Type Badge + Key + Info Icon -->
               <div class="flex items-center space-x-3 flex-1 min-w-0">
-                <span
-                  class="text-xs bg-ctp-mauve/30 text-ctp-mauve border border-ctp-mauve/40 backdrop-blur-lg shadow-sm rounded-md px-1.5 py-0.5 shrink-0"
-                  >PARAM</span
-                >
                 <span
                   class="text-ctp-subtext1 font-medium truncate shrink"
                   title={param.key}>{param.key}</span
@@ -432,7 +427,7 @@
                 >
                 <button
                   type="button"
-                  class="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-ctp-surface0/20 backdrop-blur-lg p-1 rounded text-ctp-subtext1 hover:text-ctp-text"
+                  class="hover:bg-ctp-surface0/20 backdrop-blur-lg p-1 rounded text-ctp-subtext1 hover:text-ctp-text"
                   title="Copy value"
                   aria-label="Copy hyperparameter value {param.value}"
                   onclick={() => {
@@ -508,14 +503,9 @@
           class="flex items-center gap-3 px-4 py-3 hover:bg-ctp-overlay0/20 transition-colors rounded-t-lg cursor-pointer"
         >
           <div class="flex items-center gap-2 flex-grow">
-            <BarChart3 size={20} class="text-ctp-purple" />
+            <ChartArea size={20} class="text-ctp-blue" />
             <span class="text-lg font-semibold text-ctp-text">Metrics</span>
           </div>
-          <span
-            class="bg-ctp-green/20 text-ctp-green border border-ctp-green/40 backdrop-blur-lg shadow-md rounded-md px-2 py-0.5 text-xs shrink-0"
-          >
-            Completed
-          </span>
           <ChevronDown
             size={20}
             class="text-ctp-subtext0 group-open:rotate-180 transition-transform shrink-0"
