@@ -14,7 +14,7 @@
   } from "$lib/state/app.svelte.js";
 
   let { experiments = $bindable() }: { experiments: Experiment[] } = $props();
-  let selectedExperiment = $derived(getSelectedExperiment());
+  let selectedExperiment = $derived.by(() => getSelectedExperiment());
 
   let highlighted = $state<string[]>([]);
 

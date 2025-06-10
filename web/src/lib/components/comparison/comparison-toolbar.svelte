@@ -3,7 +3,7 @@
   import { Merge } from "lucide-svelte";
   import { goto } from "$app/navigation";
 
-  let experiments = $derived(getExperimentsSelectedForComparision());
+  let experiments = $derived.by(() => getExperimentsSelectedForComparision());
 </script>
 
 <div

@@ -20,8 +20,8 @@
   >({});
 
   let searchFilter = $state<string>("");
-  let availableMetrics = $derived(experiment.availableMetrics || []);
-  let filteredMetrics = $derived(
+  let availableMetrics = $derived.by(() => experiment.availableMetrics || []);
+  let filteredMetrics = $derived.by(() =>
     availableMetrics.filter((metric) =>
       metric.toLowerCase().includes(searchFilter.toLowerCase()),
     ),
@@ -126,19 +126,22 @@
     if (currentCanvas) {
       const clearTooltipOnTouchEnd = () => {
         if (chartInstance && chartInstance.tooltip) {
-          if (typeof chartInstance.tooltip.setActiveElements === 'function') {
+          if (typeof chartInstance.tooltip.setActiveElements === "function") {
             chartInstance.tooltip.setActiveElements([], { x: 0, y: 0 });
-            chartInstance.update('none');
+            chartInstance.update("none");
           }
         }
       };
 
-      currentCanvas.addEventListener('touchend', clearTooltipOnTouchEnd);
-      currentCanvas.addEventListener('touchcancel', clearTooltipOnTouchEnd);
+      currentCanvas.addEventListener("touchend", clearTooltipOnTouchEnd);
+      currentCanvas.addEventListener("touchcancel", clearTooltipOnTouchEnd);
 
       return () => {
-        currentCanvas.removeEventListener('touchend', clearTooltipOnTouchEnd);
-        currentCanvas.removeEventListener('touchcancel', clearTooltipOnTouchEnd);
+        currentCanvas.removeEventListener("touchend", clearTooltipOnTouchEnd);
+        currentCanvas.removeEventListener(
+          "touchcancel",
+          clearTooltipOnTouchEnd,
+        );
       };
     }
   });
@@ -240,7 +243,14 @@
           maintainAspectRatio: false,
           parsing: false,
           normalized: true,
-          events: ["mousemove", "mouseout", "click", "touchstart", "touchmove", "touchend"],
+          events: [
+            "mousemove",
+            "mouseout",
+            "click",
+            "touchstart",
+            "touchmove",
+            "touchend",
+          ],
           interaction: {
             mode: "nearest",
             intersect: false,

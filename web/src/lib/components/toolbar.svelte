@@ -23,9 +23,9 @@
   } from "$lib/state/app.svelte.js";
 
   let { hasExperiments } = $props();
-  let { session } = $derived(page.data);
-  let theme = $derived(getTheme());
-  let selectedExperiment = $derived(getSelectedExperiment());
+  let { session } = $derived.by(() => page.data);
+  let theme = $derived.by(() => getTheme());
+  let selectedExperiment = $derived.by(() => getSelectedExperiment());
   let isAtBottom = $state(false);
 
   const handleScroll = () => {

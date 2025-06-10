@@ -60,7 +60,7 @@
   let allTagsShown = $state(false);
   const initialTagLimit = 7;
 
-  let visibleTags = $derived(() => {
+  let visibleTags = $derived.by(() => {
     if (!experiment.tags || !Array.isArray(experiment.tags)) return [];
     if (allTagsShown || experiment.tags.length <= initialTagLimit) {
       return experiment.tags;
@@ -68,7 +68,7 @@
     return experiment.tags.slice(0, initialTagLimit);
   });
 
-  let hiddenTagCount = $derived(() => {
+  let hiddenTagCount = $derived.by(() => {
     if (
       !experiment.tags ||
       !Array.isArray(experiment.tags) ||
@@ -91,7 +91,7 @@
   let allHyperparametersShown = $state(false);
   const initialHyperparameterLimit = 7;
 
-  let visibleHyperparameters = $derived(() => {
+  let visibleHyperparameters = $derived.by(() => {
     const hps = experiment.hyperparams || [];
     if (!Array.isArray(hps)) return [];
     if (allHyperparametersShown || hps.length <= initialHyperparameterLimit) {
@@ -100,7 +100,7 @@
     return hps.slice(0, initialHyperparameterLimit);
   });
 
-  let hiddenHyperparameterCount = $derived(() => {
+  let hiddenHyperparameterCount = $derived.by(() => {
     const hps = experiment.hyperparams || [];
     if (
       !Array.isArray(hps) ||
@@ -119,7 +119,7 @@
     allHyperparametersShown = false;
   }
 
-  let availableMetrics = $derived(
+  let availableMetrics = $derived.by(() =>
     experiment.metricData
       ? Object.keys(experiment.metricData)
       : experiment.availableMetrics || [],
