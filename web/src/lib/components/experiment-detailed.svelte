@@ -49,7 +49,7 @@
   let recommendations = $state<Record<string, HPRecommendation>>({});
   let activeRecommendation = $state<string | null>(null);
   let idCopied = $state<boolean>(false);
-  let idCopyAnimated = $state<boolean>(false); // Added this line
+  let idCopyAnimated = $state<boolean>(false);
   let copiedParamKey = $state<string | null>(null);
 
   let showMetricsTable = $state(false);
@@ -152,11 +152,9 @@
 <article class="h-full bg-ctp-mantle rounded-xl flex flex-col overflow-hidden">
   <!-- Header with actions -->
   <header class="px-4 sm:px-6 py-3 border-b border-ctp-surface1">
-    <!-- Combined Header for both Mobile and Desktop -->
     <div class="flex items-center justify-end">
-      <!-- Action Buttons -->
       <div
-        class="flex items-center gap-1 bg-ctp-surface0/80 backdrop-blur-sm border border-ctp-surface1/50 rounded-full p-1 flex-shrink-0"
+        class="flex items-center gap-1 bg-ctp-surface0/80 backdrop-blur-sm border border-ctp-surface1/50 rounded-full p-1"
       >
         {#if page.data.user && page.data.user.id === experiment.user_id}
           <button
@@ -308,7 +306,7 @@
       <div
         class="flex items-start gap-1.5 text-ctp-subtext0 text-xs sm:text-sm"
       >
-        <Tag size={15} class="flex-shrink-0 text-ctp-overlay1 mt-0.5" />
+        <Tag size={15} class="text-ctp-overlay1 mt-0.5" />
         <div class="flex flex-wrap gap-1.5 items-center">
           {#each visibleTags as tag}
             <span
@@ -341,16 +339,7 @@
     {/if}
     {#if experiment.description}
       <p
-        class="
-          text-ctp-subtext0
-          text-xs sm:text-sm
-          leading-relaxed
-          border-l-2 border-ctp-mauve
-          pl-3 sm:pl-4 py-2 mt-2
-          break-words
-          description-truncate-detailed
-          mb-3 sm:mb-4
-        "
+        class="text-ctp-subtext0 text-xs sm:text-sm leading-relaxed border-l-2 border-ctp-mauve pl-3 sm:pl-4 py-2 mt-2 break-words description-truncate-detailed mb-3 sm:mb-4"
         title={experiment.description}
       >
         {experiment.description}
@@ -372,13 +361,13 @@
             >
           </div>
           <span
-            class="bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/40 rounded-md px-2 py-0.5 text-xs shrink-0"
+            class="bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/40 rounded-md px-2 py-0.5 text-xs"
           >
             {experiment.hyperparams?.length || 0} params
           </span>
           <ChevronDown
             size={18}
-            class="text-ctp-subtext0 group-open:rotate-180 transition-transform shrink-0"
+            class="text-ctp-subtext0 group-open:rotate-180 transition-transform"
           />
         </summary>
         <div class="pt-2 px-3 pb-3 space-y-2">
@@ -388,12 +377,12 @@
             >
               <div class="flex items-center space-x-3 flex-1 min-w-0">
                 <span
-                  class="text-ctp-subtext1 font-medium truncate shrink text-xs sm:text-sm"
+                  class="text-ctp-subtext1 font-medium truncate text-xs sm:text-sm"
                   title={param.key}>{param.key}</span
                 >
                 {#if recommendations && recommendations[param.key]}
                   <button
-                    class="p-0.5 rounded-sm text-ctp-overlay2 hover:text-ctp-lavender hover:bg-ctp-surface2 flex-shrink-0"
+                    class="p-0.5 rounded-sm text-ctp-overlay2 hover:text-ctp-lavender hover:bg-ctp-surface2"
                     onclick={() => {
                       activeRecommendation =
                         recommendations[param.key].recommendation;
@@ -406,7 +395,6 @@
                 {/if}
               </div>
 
-              <!-- Right Part: Value + Copy Button -->
               <div class="flex items-center space-x-2">
                 <code
                   ><pre
@@ -497,11 +485,10 @@
           </div>
           <ChevronDown
             size={18}
-            class="text-ctp-subtext0 group-open:rotate-180 transition-transform shrink-0"
+            class="text-ctp-subtext0 group-open:rotate-180 transition-transform"
           />
         </summary>
         <div class="pt-2 px-3 pb-3 space-y-3">
-          <!-- New Segmented Control -->
           <div class="flex justify-center mb-4">
             <div
               class="flex bg-ctp-surface1/40 w-full rounded-lg p-1 space-x-1 backdrop-blur-sm border border-ctp-surface2/20"
@@ -533,7 +520,6 @@
             </div>
           </div>
 
-          <!-- Conditional Display: Chart or Table -->
           {#if showMetricsTable}
             {#if metricsLoading}
               <div
@@ -585,7 +571,7 @@
                   </thead>
                   <tbody class="divide-y divide-ctp-surface1">
                     {#each rawMetrics as metric (metric.id)}
-                      <tr class="">
+                      <tr>
                         <td
                           class="p-2 sm:p-3 text-ctp-subtext1 truncate max-w-[120px] sm:max-w-sm text-xs sm:text-sm"
                           title={metric.name}>{metric.name}</td
@@ -653,7 +639,6 @@
       max-height: calc(
         1.5em * 5
       ); /* Assuming line-height ~1.5em, for 5 lines */
-      /* white-space: normal; */ /* Ensure it wraps */
     }
   }
 </style>
