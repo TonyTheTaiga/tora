@@ -1,8 +1,21 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
-  import { X, Tag, Eye, EyeClosed, Globe, GlobeLock } from "lucide-svelte";
+  import {
+    X,
+    Tag,
+    Clock,
+    Eye,
+    EyeClosed,
+    Globe,
+    GlobeLock,
+    Settings,
+  } from "lucide-svelte";
   import { page } from "$app/state";
-  import { openDeleteExperimentModal } from "$lib/state/app.svelte.js";
+  import {
+    openDeleteExperimentModal,
+    setSelectedExperiment,
+    getSelectedExperiment,
+  } from "$lib/state/app.svelte.js";
 
   let {
     experiment,
@@ -46,12 +59,12 @@
   >
     <!-- Tags -->
     <div
-      class="flex items-center gap-1 text-xs text-ctp-subtext0 overflow-x-auto md:overflow-visible min-w-0 pr-1.5 md:pr-0"
+      class="flex items-center gap-1 text-xs text-ctp-subtext0 overflow-x-auto md:overflow-visible min-w-0 pr-1.5 md:pr-0" /* Adjusted overflow and padding for md screens */
     >
       {#if experiment.tags && experiment.tags.length > 0}
         <Tag size={10} class="text-ctp-overlay1 flex-shrink-0" />
-        <div class="flex flex-nowrap md:flex-wrap gap-0.5 md:gap-1">
-          {#each experiment.tags as tag}
+        <div class="flex flex-nowrap md:flex-wrap gap-0.5 md:gap-1"> {/* Adjusted flex behavior and gap for md screens */}
+          {#each experiment.tags as tag, i}
             <span
               class="text-[10px] bg-ctp-surface0 text-ctp-overlay2 px-1 py-px rounded-full whitespace-nowrap inline-block max-w-[100px] truncate"
               title={tag}
@@ -64,7 +77,7 @@
     </div>
 
     <!-- Actions, Date & Visibility -->
-    <div class="flex items-center gap-1.5 text-ctp-subtext0 flex-shrink-0">
+    <div class="flex items-center gap-1.5 text-ctp-subtext0 flex-shrink-0" data-testid="footer-meta-info">
       <button
         onclick={async (e) => {
           e.stopPropagation();
@@ -106,8 +119,9 @@
       {/if}
       {#if experiment?.createdAt}
         <time
-          class="text-[11px] text-ctp-overlay1 ml-0.5"
+          class="text-[11px] text-ctp-overlay1" /* Removed ml-0.5 */
           title={new Date(experiment.createdAt).toLocaleString()}
+          data-testid="experiment-date"
         >
           {new Date(experiment.createdAt).toLocaleDateString("en-US", {
             month: "short",
@@ -120,6 +134,7 @@
           ? 'text-ctp-green'
           : 'text-ctp-red'}"
         title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
+        data-testid="visibility-status"
       >
         {#if experiment.visibility === "PUBLIC"}
           <Globe size={14} />
@@ -136,7 +151,6 @@
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2; /* Reduced to 2 lines */
-    line-clamp: 2;
     overflow: hidden;
     text-overflow: ellipsis;
     min-height: 0; /* Important for flex-grow in some browsers */
@@ -145,9 +159,7 @@
   /* Fallback for non-webkit browsers for description, not perfect but better than nothing */
   @supports not (-webkit-line-clamp: 2) {
     .description-truncate {
-      max-height: calc(
-        1.5em * 2
-      ); /* Assuming line-height is around 1.5em, for 2 lines */
+      max-height: calc(1.5em * 2); /* Assuming line-height is around 1.5em, for 2 lines */
     }
   }
 

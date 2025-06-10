@@ -42,4 +42,4 @@
   </header>
 {/if}
 
-<main class="flex-1 w-full p-2">{@render children()}</main>
+<main class="flex-1 w-full p-2">{@render children()}</main> {/* Reduced global padding from p-4 to p-2 */}

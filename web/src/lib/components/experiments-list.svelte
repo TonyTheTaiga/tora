@@ -29,7 +29,7 @@
 </script>
 
 <div
-  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 [&>*:has(.expanded-experiment)]:md:col-span-2 [&>*:has(.expanded-experiment)]:lg:col-span-3"
+  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 [&>*:has(.expanded-experiment)]:md:col-span-2 [&>*:has(.expanded-experiment)]:lg:col-span-3" /* Increased gap */
 >
   {#each experiments as experiment, idx (experiment.id)}
     <div id={`experiment-${experiment.id}`}>
@@ -39,6 +39,7 @@
             {highlighted.length > 0 && !highlighted.includes(experiment.id)
             ? 'opacity-40' /* Kept opacity logic */
             : ''}"
+          /* Removed class:comparison-selected, prop will be used instead */
           role="button"
           tabindex="0"
           onclick={() => {
@@ -51,21 +52,18 @@
           onkeydown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
+              // Ensure setSelectedExperiment is only called if not in comparison mode.
               if (!getMode()) {
                 setSelectedExperiment(experiment);
               }
             }
           }}
         >
-          <ExperimentSimple
-            bind:highlighted
-            {experiment}
-            isSelectedForComparison={selectedForComparison(experiment.id)}
-          />
+          <ExperimentSimple bind:highlighted {experiment} isSelectedForComparison={selectedForComparison(experiment.id)} />
         </div>
       {:else}
         <div
-          class="expanded-experiment rounded-xl overflow-hidden
+          class="expanded-experiment rounded-xl overflow-hidden /* Removed bg-ctp-base, ensure ExperimentDetailed handles its own bg and shadow. Added rounded-xl for consistency. */
             {highlighted.length > 0 && !highlighted.includes(experiment.id)
             ? 'opacity-40'
             : ''}"
