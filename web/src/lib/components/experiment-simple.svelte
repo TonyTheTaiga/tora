@@ -7,11 +7,11 @@
   let {
     experiment,
     highlighted = $bindable(),
-    isSelectedForComparison = false, // New prop
+    isSelectedForComparison = false,
   }: {
     experiment: Experiment;
     highlighted: string[];
-    isSelectedForComparison?: boolean; // Optional prop
+    isSelectedForComparison?: boolean;
   } = $props();
 </script>
 
@@ -20,12 +20,11 @@
   class:border-ctp-blue={isSelectedForComparison}
   class:border-transparent={!isSelectedForComparison}
 >
-  <!-- Header -->
   <div
-    class="flex items-start justify-between mb-2 flex-shrink-0"
+    class="flex items-start justify-between mb-2"
     data-testid="card-header"
   >
-    <div class="min-w-0 flex-grow pr-2">
+    <div class="min-w-0 flex-1 pr-2">
       <h3
         class="font-semibold text-sm text-ctp-text group-hover:text-ctp-blue transition-colors truncate"
         title={experiment.name}
@@ -36,7 +35,7 @@
     </div>
     {#if experiment?.createdAt}
       <time
-        class="text-[11px] text-ctp-overlay1 flex-shrink-0"
+        class="text-[11px] text-ctp-overlay1"
         title={new Date(experiment.createdAt).toLocaleString()}
         data-testid="experiment-date"
       >
@@ -48,26 +47,23 @@
     {/if}
   </div>
 
-  <!-- Description -->
   {#if experiment.description}
     <p
-      class="text-sm text-ctp-subtext0 mb-2 leading-relaxed flex-grow overflow-hidden description-truncate"
+      class="text-sm text-ctp-subtext0 mb-2 leading-relaxed flex-1 overflow-hidden description-truncate"
       title={experiment.description}
     >
       {experiment.description}
     </p>
   {/if}
 
-  <!-- Footer -->
   <div
-    class="mt-auto flex items-center justify-between gap-1.5 pt-2 border-t border-ctp-surface1 flex-shrink-0"
+    class="mt-auto flex items-center justify-between gap-1.5 pt-2 border-t border-ctp-surface1"
   >
-    <!-- Tags -->
     <div
       class="flex items-center gap-1 text-xs text-ctp-subtext0 overflow-x-auto md:overflow-visible min-w-0 pr-1.5 md:pr-0"
     >
       {#if experiment.tags && experiment.tags.length > 0}
-        <Tag size={10} class="text-ctp-overlay1 flex-shrink-0" />
+        <Tag size={10} class="text-ctp-overlay1" />
         <div class="flex flex-nowrap md:flex-wrap gap-0.5 md:gap-1">
           {#each experiment.tags as tag}
             <span
@@ -81,9 +77,8 @@
       {/if}
     </div>
 
-    <!-- Actions, Date & Visibility -->
     <div
-      class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 flex-shrink-0"
+      class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5"
       data-testid="footer-actions-group"
     >
       <button
@@ -111,7 +106,6 @@
           <Eye size={14} />
         {/if}
       </button>
-      <!-- Visibility Icon moved here -->
       <div
         class="p-1 rounded-full text-ctp-subtext0 transition-colors cursor-default"
         title={experiment.visibility === "PUBLIC" ? "Public" : "Private"}
@@ -137,7 +131,6 @@
           <X size={14} />
         </button>
       {/if}
-      <!-- Date element removed from here -->
     </div>
   </div>
 </article>
@@ -146,26 +139,24 @@
   .description-truncate {
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2; /* Reduced to 2 lines */
+    -webkit-line-clamp: 2;
     line-clamp: 2;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-height: 0; /* Important for flex-grow in some browsers */
+    min-height: 0;
   }
 
-  /* Fallback for non-webkit browsers for description, not perfect but better than nothing */
   @supports not (-webkit-line-clamp: 2) {
     .description-truncate {
       max-height: calc(
         1.5em * 2
-      ); /* Assuming line-height is around 1.5em, for 2 lines */
+);
     }
   }
 
-  /* Custom scrollbar for tags (already present, ensure it's still relevant) */
   .overflow-x-auto {
-    scrollbar-width: thin; /* For Firefox */
-    scrollbar-color: var(--color-ctp-surface2) var(--color-ctp-mantle); /* For Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-ctp-surface2) var(--color-ctp-mantle);
   }
   .overflow-x-auto::-webkit-scrollbar {
     height: 4px;

@@ -35,9 +35,8 @@
     <div id={`experiment-${experiment.id}`}>
       {#if !selectedExperiment || selectedExperiment.id !== experiment.id}
         <div
-          class="cursor-pointer group /* Removed conflicting styles: bg, overflow, h, p, hover, rounded */
-            {highlighted.length > 0 && !highlighted.includes(experiment.id)
-            ? 'opacity-40' /* Kept opacity logic */
+          class="cursor-pointer group {highlighted.length > 0 && !highlighted.includes(experiment.id)
+            ? 'opacity-40'
             : ''}"
           role="button"
           tabindex="0"
@@ -51,7 +50,6 @@
           onkeydown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              // Ensure setSelectedExperiment is only called if not in comparison mode.
               if (!getMode()) {
                 setSelectedExperiment(experiment);
               }
@@ -66,8 +64,7 @@
         </div>
       {:else}
         <div
-          class="expanded-experiment rounded-xl overflow-hidden
-            {highlighted.length > 0 && !highlighted.includes(experiment.id)
+          class="expanded-experiment rounded-xl overflow-hidden {highlighted.length > 0 && !highlighted.includes(experiment.id)
             ? 'opacity-40'
             : ''}"
           {@attach focusOnExpandAttatchment}
