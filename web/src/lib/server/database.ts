@@ -362,7 +362,11 @@ export function createDbClient(client: SupabaseClient<Database>) {
       );
     },
 
-    async createApiKey(userId: string, name: string, keyHash: string) {
+    async createApiKey(
+      userId: string,
+      name: string,
+      keyHash: string,
+    ): Promise<ApiKey> {
       const { data, error } = await client
         .from("api_keys")
         .insert({
@@ -376,7 +380,13 @@ export function createDbClient(client: SupabaseClient<Database>) {
 
       handleError(error, "Failed to create API key");
       if (!data) throw new Error("API key creation returned no data.");
-      return data;
+      return {
+        id: data.id,
+        name: data.name,
+        revoked: data.revoked,
+        createdAt: new Date(data.created_at),
+        lastUsed: new Date(data.last_used),
+      };
     },
 
     async revokeApiKey(userId: string, keyId: string): Promise<void> {

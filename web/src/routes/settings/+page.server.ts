@@ -28,9 +28,6 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
     console.error("Error fetching API keys:", err);
   }
 
-  console.log(apiKeys);
-
-  // timer.end({});
   return { workspaces, apiKeys, session, currentWorkspace };
 };
 
@@ -55,5 +52,21 @@ export const actions: Actions = {
     });
 
     return await res.json();
+  },
+
+  createApiKey: async ({ request, fetch }) => {
+    const formData = await request.formData();
+    const { name } = Object.fromEntries(formData.entries());
+    if (!name) {
+      throw error(400, "A unique name is required for your api key");
+    }
+
+    const response = await fetch("/api/keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name }),
+    });
+
+    return await response.json();
   },
 };

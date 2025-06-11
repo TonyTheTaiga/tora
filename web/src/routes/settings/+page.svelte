@@ -1,13 +1,22 @@
 <script lang="ts">
-  import { User, Plus, GalleryVertical, LogOut } from "lucide-svelte";
+  import {
+    User,
+    Plus,
+    GalleryVertical,
+    LogOut,
+    KeySquare,
+  } from "lucide-svelte";
   import Toolbar from "./toolbar.svelte";
   import { enhance } from "$app/forms";
   import { isWorkspace } from "$lib/types";
+  import type { ApiKey } from "$lib/types";
 
   let { data } = $props();
   let showUser: boolean = $state(true);
   let showWorkspaces: boolean = $state(false);
+  let showApiKeys: boolean = $state(false);
   let creatingWorkspace: boolean = $state(false);
+  let creatingApiKey: boolean = $state(false);
 </script>
 
 <Toolbar>
@@ -16,6 +25,7 @@
       if (!showUser) {
         showUser = true;
         showWorkspaces = false;
+        showApiKeys = false;
       }
     }}
   >
@@ -26,10 +36,22 @@
       if (!showWorkspaces) {
         showWorkspaces = true;
         showUser = false;
+        showApiKeys = false;
       }
     }}
   >
     <GalleryVertical />
+  </button>
+  <button
+    onclick={() => {
+      if (!showApiKeys) {
+        showApiKeys = true;
+        showUser = false;
+        showWorkspaces = false;
+      }
+    }}
+  >
+    <KeySquare />
   </button>
 </Toolbar>
 
@@ -130,5 +152,43 @@
         </span>
       {/each}
     </div>
+  {/if}
+
+  {#if showApiKeys}
+    <form
+      class="mb-6"
+      use:enhance={() => {
+        creatingApiKey = true;
+
+        return async ({ result, update }) => {
+          await update();
+          if (result.type === "success" || result.type === "failure") {
+            const newKey = result.data as unknown as ApiKey;
+            console.log(newKey);
+          }
+          creatingApiKey = false;
+        };
+      }}
+      action="?/createApiKey"
+      method="POST"
+    >
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input
+          type="text"
+          name="name"
+          placeholder="Key name"
+          class="flex-grow bg-ctp-crust border border-ctp-surface0 rounded-md px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue focus:ring-1 focus:ring-ctp-blue/30"
+          disabled={creatingApiKey}
+          required
+        />
+        <button
+          type="submit"
+          class="flex items-center gap-1.5 px-3 py-1.5 border border-ctp-blue rounded-md text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-colors font-medium text-sm"
+        >
+          <Plus size={16} />
+          <span>Create</span>
+        </button>
+      </div>
+    </form>
   {/if}
 </div>
