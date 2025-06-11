@@ -6,6 +6,7 @@
     Moon,
     Sun,
     GitCompareArrows,
+    Cog,
   } from "lucide-svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
@@ -111,6 +112,17 @@
     {:else}
       <Moon class="icon" />
     {/if}
+  </button>
+
+  <button
+    class="toolbar-button"
+    aria-label="go to settings page"
+    title="go to settings page"
+    onclick={() => {
+      goto("/settings");
+    }}
+  >
+    <Cog class="icon" />
   </button>
 </div>
 

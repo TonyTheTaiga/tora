@@ -1,16 +1,28 @@
-import type { Actions, PageServerLoad } from "./$types";
+import { startTimer, generateRequestId } from "$lib/utils/timing";
+import type { PageServerLoad, Actions } from "./$types";
 import { error } from "@sveltejs/kit";
+import type { Workspace } from "$lib/types";
 
-export const load: PageServerLoad = async ({ fetch, locals, parent }) => {
-  const { session } = await locals.safeGetSession();
+export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
+  const { session, user } = await locals.safeGetSession();
   const { currentWorkspace } = await parent();
+
+  const requestId = generateRequestId();
+  const timer = startTimer("page.home.load", { requestId });
+  if (!user) {
+    const experiments = new Array();
+    return { experiments, session };
+  }
+
   const response = await fetch("/api/workspaces");
-  const workspaces = await response.json();
+  const workspaces: Workspace[] = await response.json();
+
+  // timer.end({});
   return { workspaces, session, currentWorkspace };
 };
 
 export const actions: Actions = {
-  create: async ({ request, fetch }) => {
+  createWorkspace: async ({ request, fetch }) => {
     const fd = await request.formData();
     const rawName = fd.get("name");
     const rawDescription = fd.get("description");
