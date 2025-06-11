@@ -5,7 +5,6 @@ export const GET: RequestHandler = async ({ locals }) => {
   if (!locals.user) {
     return json([]);
   }
-
   const workspaces = await locals.dbClient.getWorkspaces(locals.user.id);
   return json(workspaces);
 };

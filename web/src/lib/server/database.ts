@@ -7,8 +7,9 @@ import type {
   Metric,
   Visibility,
   Workspace,
+  ApiKey,
 } from "$lib/types";
-import { timeAsync, startTimer } from "$lib/utils/timing";
+import { timeAsync } from "$lib/utils/timing";
 
 function handleError(error: PostgrestError | null, context: string): void {
   if (error) {
@@ -341,7 +342,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
 
     // --- API Key Methods ---
 
-    async getApiKeys(userId: string) {
+    async getApiKeys(userId: string): Promise<ApiKey[]> {
       const { data, error } = await client
         .from("api_keys")
         .select("id, name, created_at, last_used, revoked")
@@ -350,10 +351,22 @@ export function createDbClient(client: SupabaseClient<Database>) {
         .order("created_at", { ascending: false });
 
       handleError(error, "Failed to get API keys");
-      return data ?? [];
+      return (
+        data?.map((row) => ({
+          id: row.id,
+          name: row.name,
+          createdAt: new Date(row.created_at),
+          lastUsed: new Date(row.last_used),
+          revoked: row.revoked,
+        })) ?? []
+      );
     },
 
-    async createApiKey(userId: string, name: string, keyHash: string) {
+    async createApiKey(
+      userId: string,
+      name: string,
+      keyHash: string,
+    ): Promise<ApiKey> {
       const { data, error } = await client
         .from("api_keys")
         .insert({
@@ -367,7 +380,13 @@ export function createDbClient(client: SupabaseClient<Database>) {
 
       handleError(error, "Failed to create API key");
       if (!data) throw new Error("API key creation returned no data.");
-      return data;
+      return {
+        id: data.id,
+        name: data.name,
+        revoked: data.revoked,
+        createdAt: new Date(data.created_at),
+        lastUsed: new Date(data.last_used),
+      };
     },
 
     async revokeApiKey(userId: string, keyId: string): Promise<void> {

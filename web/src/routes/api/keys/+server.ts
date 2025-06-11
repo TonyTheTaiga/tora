@@ -2,12 +2,10 @@ import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { createHash } from "crypto";
 
-// Helper to hash an API key for storage
 function hashApiKey(key: string): string {
   return createHash("sha256").update(key).digest("hex");
 }
 
-// GET /api/keys - Get all API keys for the authenticated user
 export const GET: RequestHandler = async ({ locals }) => {
   if (!locals.user) {
     throw error(401, "Unauthorized");
@@ -20,8 +18,8 @@ export const GET: RequestHandler = async ({ locals }) => {
       id: key.id,
       prefix: "tosk_",
       name: key.name,
-      createdAt: key.created_at,
-      lastUsed: key.last_used,
+      createdAt: key.createdAt,
+      lastUsed: key.lastUsed,
       revoked: key.revoked,
     }));
 
@@ -29,7 +27,7 @@ export const GET: RequestHandler = async ({ locals }) => {
   } catch (err) {
     console.error("Error fetching API keys:", err);
     if (err instanceof Error && "status" in err && "body" in err) {
-      throw err; // Re-throw SvelteKit errors
+      throw err;
     }
     throw error(500, "Failed to fetch API keys");
   }
@@ -51,30 +49,21 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       throw error(400, "API key name is required");
     }
 
-    const prefix = "tosk_";
+    const prefix = "tora_";
     const randomBytes = Array.from(crypto.getRandomValues(new Uint8Array(24)))
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
-    const fullKey = prefix + randomBytes;
 
+    const fullKey = prefix + randomBytes;
     const keyHash = hashApiKey(fullKey);
 
-    const newKeyData = await locals.dbClient.createApiKey(
+    const newKey = await locals.dbClient.createApiKey(
       locals.user.id,
       body.name,
       keyHash,
     );
 
-    const newKey = {
-      id: newKeyData.id,
-      name: body.name,
-      prefix,
-      key: fullKey,
-      createdAt: newKeyData.created_at,
-      revoked: newKeyData.revoked,
-    };
-
-    return json({ key: newKey }, { status: 201 });
+    return json({ ...newKey, key: fullKey }, { status: 201 });
   } catch (err) {
     console.error("Error creating API key:", err);
     if (err instanceof Error && "status" in err && "body" in err) {

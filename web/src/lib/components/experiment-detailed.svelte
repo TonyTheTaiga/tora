@@ -51,13 +51,10 @@
   let idCopied = $state<boolean>(false);
   let idCopyAnimated = $state<boolean>(false);
   let copiedParamKey = $state<string | null>(null);
-
   let showMetricsTable = $state(false);
   let rawMetrics = $state<Metric[]>([]);
   let metricsLoading = $state(false);
   let metricsError = $state<string | null>(null);
-
-  // For Tag display
   let allTagsShown = $state(false);
   const initialTagLimit = 7;
 

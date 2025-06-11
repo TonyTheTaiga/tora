@@ -66,3 +66,12 @@ export function isWorkspace(obj: unknown): obj is Workspace {
     typeof w.created_at === "string"
   );
 }
+
+export interface ApiKey {
+  id: string;
+  key?: string;
+  name: string;
+  createdAt: Date;
+  lastUsed: Date;
+  revoked: boolean;
+}
