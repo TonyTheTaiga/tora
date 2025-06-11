@@ -68,7 +68,7 @@
       padding: 0.625rem;
     }
 
-    :global(.icon) {
+    :global(.toolbar-button svg) {
       width: 20px;
       height: 20px;
     }
