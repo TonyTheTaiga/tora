@@ -5,11 +5,13 @@
     GalleryVertical,
     LogOut,
     KeySquare,
+    Home,
   } from "lucide-svelte";
   import Toolbar from "./toolbar.svelte";
   import { enhance } from "$app/forms";
   import { isWorkspace } from "$lib/types";
   import type { ApiKey } from "$lib/types";
+  import { goto } from "$app/navigation";
 
   let { data } = $props();
   let showUser: boolean = $state(true);
@@ -21,6 +23,13 @@
 </script>
 
 <Toolbar>
+  <button
+    onclick={() => {
+      goto("/");
+    }}
+  >
+    <Home />
+  </button>
   <button
     onclick={() => {
       if (!showUser) {
