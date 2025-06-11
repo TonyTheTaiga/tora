@@ -63,7 +63,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       keyHash,
     );
 
-    return json(newKey, { status: 201 });
+    return json({ ...newKey, key: fullKey }, { status: 201 });
   } catch (err) {
     console.error("Error creating API key:", err);
     if (err instanceof Error && "status" in err && "body" in err) {

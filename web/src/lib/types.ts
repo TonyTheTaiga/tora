@@ -69,6 +69,7 @@ export function isWorkspace(obj: unknown): obj is Workspace {
 
 export interface ApiKey {
   id: string;
+  key?: string;
   name: string;
   createdAt: Date;
   lastUsed: Date;

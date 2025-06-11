@@ -17,6 +17,7 @@
   let showApiKeys: boolean = $state(false);
   let creatingWorkspace: boolean = $state(false);
   let creatingApiKey: boolean = $state(false);
+  let createdKey: string = $state("");
 </script>
 
 <Toolbar>
@@ -145,50 +146,81 @@
       </form>
 
       {#each data.workspaces ? data.workspaces : [] as workspace}
-        <h3>{workspace.name}</h3>
-        <span>{workspace.id}</span>
-        <span>
-          {workspace.description}
-        </span>
+        <div>
+          <h3>{workspace.name}</h3>
+          <span>{workspace.id}</span>
+          <span>
+            {workspace.description}
+          </span>
+        </div>
       {/each}
     </div>
   {/if}
 
   {#if showApiKeys}
-    <form
-      class="mb-6"
-      use:enhance={() => {
-        creatingApiKey = true;
+    <div>
+      <form
+        class="mb-6"
+        use:enhance={() => {
+          creatingApiKey = true;
 
-        return async ({ result, update }) => {
-          await update();
-          if (result.type === "success" || result.type === "failure") {
-            const newKey = result.data as unknown as ApiKey;
-            console.log(newKey);
-          }
-          creatingApiKey = false;
-        };
-      }}
-      action="?/createApiKey"
-      method="POST"
-    >
-      <div class="flex flex-col sm:flex-row gap-3">
-        <input
-          type="text"
-          name="name"
-          placeholder="Key name"
-          class="flex-grow bg-ctp-crust border border-ctp-surface0 rounded-md px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue focus:ring-1 focus:ring-ctp-blue/30"
-          disabled={creatingApiKey}
-          required
-        />
-        <button
-          type="submit"
-          class="flex items-center gap-1.5 px-3 py-1.5 border border-ctp-blue rounded-md text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-colors font-medium text-sm"
-        >
-          <Plus size={16} />
-          <span>Create</span>
-        </button>
-      </div>
-    </form>
+          return async ({ result, update }) => {
+            await update();
+            if (result.type === "success" || result.type === "failure") {
+              const newKey = result.data as unknown as ApiKey;
+              if (newKey.key) {
+                createdKey = newKey.key;
+              }
+            }
+            creatingApiKey = false;
+          };
+        }}
+        action="?/createApiKey"
+        method="POST"
+      >
+        <div class="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            name="name"
+            placeholder="Key name"
+            class="flex-grow bg-ctp-crust border border-ctp-surface0 rounded-md px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue focus:ring-1 focus:ring-ctp-blue/30"
+            disabled={creatingApiKey}
+            required
+          />
+          <button
+            type="submit"
+            class="flex items-center gap-1.5 px-3 py-1.5 border border-ctp-blue rounded-md text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-colors font-medium text-sm"
+          >
+            <Plus size={16} />
+            <span>Create</span>
+          </button>
+        </div>
+      </form>
+
+      {#if createdKey !== ""}
+        <div>
+          <p>
+            <span class="text-ctp-blue">{createdKey}</span>
+            Do NOT lost this key, it will be gone after you copy it.
+          </p>
+          <button
+            type="button"
+            onclick={() => {
+              navigator.clipboard.writeText(createdKey);
+              createdKey = "";
+            }}>Copy</button
+          >
+        </div>
+      {/if}
+
+      {#each data.apiKeys ? data.apiKeys : [] as apiKey}
+        <div class="py-2">
+          <span>{apiKey.name}</span>
+          <span>{apiKey.createdAt}</span>
+          <span>{apiKey.lastUsed}</span>
+          <span>{apiKey.revoked}</span>
+        </div>
+      {/each}
+    </div>
   {/if}
 </div>
