@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { User, Plus, GalleryVertical } from "lucide-svelte";
+  import { User, Plus, GalleryVertical, LogOut } from "lucide-svelte";
   import Toolbar from "./toolbar.svelte";
   import { enhance } from "$app/forms";
   import { isWorkspace } from "$lib/types";
@@ -42,6 +42,19 @@
       <span>
         {data?.user?.email}
       </span>
+      <span>
+        {data?.user?.created_at}
+      </span>
+      <form action="/logout" method="POST">
+        <button
+          type="submit"
+          class="w-full sm:w-auto flex items-center gap-2 px-3 py-1.5 border border-ctp-red rounded-md text-ctp-red hover:bg-ctp-red hover:text-ctp-crust transition-colors font-medium text-sm"
+          aria-label="Sign out"
+        >
+          <LogOut size={16} />
+          <span>Sign Out</span>
+        </button>
+      </form>
     </div>
   {/if}
 

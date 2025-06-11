@@ -1,7 +1,7 @@
 import { startTimer, generateRequestId } from "$lib/utils/timing";
 import type { PageServerLoad, Actions } from "./$types";
 import { error } from "@sveltejs/kit";
-import type { Workspace } from "$lib/types";
+import type { Workspace, ApiKey } from "$lib/types";
 
 export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   const { session, user } = await locals.safeGetSession();
@@ -17,8 +17,21 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   const response = await fetch("/api/workspaces");
   const workspaces: Workspace[] = await response.json();
 
+  let apiKeys: ApiKey[] = [];
+  try {
+    const response = await fetch("/api/keys");
+    if (response.ok) {
+      const data = await response.json();
+      apiKeys = data.keys;
+    }
+  } catch (err) {
+    console.error("Error fetching API keys:", err);
+  }
+
+  console.log(apiKeys);
+
   // timer.end({});
-  return { workspaces, session, currentWorkspace };
+  return { workspaces, apiKeys, session, currentWorkspace };
 };
 
 export const actions: Actions = {
