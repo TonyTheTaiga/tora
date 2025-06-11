@@ -138,7 +138,7 @@
         <button
           type="submit"
           disabled={creatingWorkspace}
-          class="inline-flex items-center justify-center gap-2 px-4 py-2 font-medium rounded-lg bg-gradient-to-r from-ctp-blue to-ctp-mauve text-ctp-crust hover:shadow-lg transition-all self-start"
+          class="inline-flex items-center justify-center gap-2 px-4 py-2 font-medium rounded-lg bg-ctp-blue text-ctp-crust self-start"
         >
           <Plus size={16} />
           Create Workspace
@@ -204,6 +204,7 @@
             Do NOT lost this key, it will be gone after you copy it.
           </p>
           <button
+            class="inline-flex items-center justify-center gap-2 px-4 py-2 font-medium rounded-lg bg-ctp-blue text-ctp-crust self-start"
             type="button"
             onclick={() => {
               navigator.clipboard.writeText(createdKey);

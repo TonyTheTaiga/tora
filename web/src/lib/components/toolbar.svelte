@@ -1,15 +1,6 @@
 <script lang="ts">
-  import {
-    Plus,
-    User,
-    Briefcase,
-    Moon,
-    Sun,
-    GitCompareArrows,
-    Cog,
-  } from "lucide-svelte";
+  import { Plus, Moon, Sun, GitCompareArrows, Cog } from "lucide-svelte";
   import { goto } from "$app/navigation";
-  import { page } from "$app/state";
   import { onMount, onDestroy } from "svelte";
   import { toggleMode } from "$lib/state/comparison.svelte.js";
   import {
@@ -18,7 +9,6 @@
   } from "$lib/state/theme.svelte.js";
   import { openCreateExperimentModal } from "$lib/state/app.svelte.js";
 
-  let { session } = $derived.by(() => page.data);
   let theme = $derived.by(() => getTheme());
   let isAtBottom = $state(false);
 
@@ -74,28 +64,6 @@
   >
     <GitCompareArrows class="icon" />
   </button>
-
-  {#if session && session.user}
-    <button
-      class="toolbar-button"
-      title="Manage workspaces"
-      onclick={() => {
-        goto("/workspaces");
-      }}
-    >
-      <Briefcase class="icon" />
-    </button>
-
-    <button
-      class="toolbar-button"
-      title="Go to user profile"
-      onclick={() => {
-        goto(`/users/${session.user.id}`);
-      }}
-    >
-      <User class="icon" />
-    </button>
-  {/if}
 
   <button
     onclick={() => {
