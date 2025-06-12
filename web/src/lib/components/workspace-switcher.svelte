@@ -33,12 +33,9 @@
 <div class="workspace-switcher relative" bind:this={dropdownRef}>
   <details id="workspaceDropdown" class="group">
     <summary
-      class="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-md border border-ctp-surface0 bg-ctp-crust hover:bg-ctp-surface0 transition-colors text-sm cursor-pointer list-none"
+      class="flex items-center gap-2 px-3 py-2 rounded-full border border-ctp-surface0/20 bg-ctp-crust/70 backdrop-blur-md hover:bg-ctp-surface0/50 transition-all text-sm cursor-pointer list-none shadow-sm"
     >
       <Briefcase size={16} class="text-ctp-mauve flex-shrink-0" />
-      <span class="text-ctp-text font-medium truncate min-w-0">
-        {currentWorkspace?.name || "Select Workspace"}
-      </span>
       <ChevronDown
         size={14}
         class="text-ctp-subtext0 transition-transform group-open:rotate-180 flex-shrink-0"
@@ -46,7 +43,7 @@
     </summary>
 
     <div
-      class="absolute top-full mt-1 right-0 w-64 sm:w-72 md:w-80 max-w-[calc(100vw-1rem)] bg-ctp-mantle border border-ctp-surface0 rounded-md shadow-lg z-50 max-h-80 overflow-y-auto"
+      class="absolute top-full mt-2 right-0 w-64 sm:w-72 md:w-80 max-w-[calc(100vw-1rem)] bg-ctp-mantle/80 backdrop-blur-md border border-ctp-surface0/30 rounded-2xl shadow-2xl z-50 max-h-80 overflow-y-auto"
     >
       <div class="p-2 space-y-2">
         <div
@@ -72,9 +69,9 @@
             <input type="hidden" name="workspaceId" value={workspace.id} />
             <button
               type="submit"
-              class="w-full text-left px-2 py-1.5 rounded hover:bg-ctp-surface0 transition-colors flex items-center gap-2 {workspace.id ===
+              class="w-full text-left px-3 py-2 rounded-xl hover:bg-ctp-surface0/50 transition-all flex items-center gap-2 {workspace.id ===
               currentWorkspace?.id
-                ? 'bg-ctp-surface0'
+                ? 'bg-ctp-surface0/70 backdrop-blur-sm'
                 : ''}"
             >
               <Briefcase size={14} class="text-ctp-mauve" />
@@ -95,7 +92,7 @@
         <div class="border-t border-ctp-surface0 mt-2 pt-2">
           <button
             type="button"
-            class="w-full text-left px-2 py-1.5 rounded hover:bg-ctp-surface0 transition-colors flex items-center gap-2 text-ctp-blue"
+            class="w-full text-left px-3 py-2 rounded-xl hover:bg-ctp-surface0/50 transition-all flex items-center gap-2 text-ctp-blue"
             onclick={() => {
               const detailsElement =
                 document.getElementById("workspaceDropdown");
