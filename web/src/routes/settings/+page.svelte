@@ -7,7 +7,6 @@
   let { data } = $props();
   let creatingWorkspace: boolean = $state(false);
   let creatingApiKey: boolean = $state(false);
-  let deletingWorkspace: string | null = $state(null);
   let createdKey: string = $state("");
   let workspaceError: string = $state("");
   let apiKeyError: string = $state("");
