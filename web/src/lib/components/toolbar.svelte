@@ -48,6 +48,28 @@
 
 <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 transition-all duration-300 {isAtBottom ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100'}">
   <div class="flex items-center bg-ctp-surface1/30 backdrop-blur-xl border border-ctp-surface0/20 rounded-full p-1 shadow-2xl hover:bg-ctp-surface1/40 hover:scale-105 transition-all duration-200">
+
+<style>
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+</style>
     <button
       class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
       title="Create a new experiment"
@@ -69,12 +91,13 @@
         <GitCompareArrows size={20} />
       </button>
     {:else}
-      <div class="flex items-center">
-        <span class="text-xs text-ctp-subtext0 px-2 whitespace-nowrap">
+      <div class="flex items-center" style="animation: slideInRight 0.3s ease-out;">
+        <span class="text-xs text-ctp-subtext0 px-2 whitespace-nowrap" style="animation: fadeIn 0.5s ease-out 0.1s both;">
           {selectedExperiments.length} selected
         </span>
         <button
           class="p-2 rounded-full hover:bg-ctp-red/20 transition-all duration-200 text-ctp-red hover:text-ctp-red hover:scale-110 active:scale-95"
+          style="animation: slideInRight 0.3s ease-out 0.15s both;"
           title="Cancel Comparison"
           onclick={() => {
             toggleMode();
@@ -84,6 +107,7 @@
         </button>
         <button
           class="p-2 rounded-full hover:bg-ctp-blue/20 transition-all duration-200 text-ctp-blue hover:text-ctp-blue hover:scale-110 active:scale-95 {selectedExperiments.length < 2 ? 'opacity-50 cursor-not-allowed' : ''}"
+          style="animation: slideInRight 0.3s ease-out 0.2s both;"
           title="Compare Selected"
           disabled={selectedExperiments.length < 2}
           onclick={() => {
