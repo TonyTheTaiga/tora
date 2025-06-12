@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plus, LogOut } from "lucide-svelte";
+  import { Plus, LogOut, Trash2 } from "lucide-svelte";
   import { enhance } from "$app/forms";
   import { isWorkspace } from "$lib/types";
   import type { ApiKey } from "$lib/types";
@@ -134,14 +134,37 @@
           <div
             class="p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30 hover:border-ctp-surface0/50 transition-all"
           >
-            <h3 class="text-lg font-semibold text-ctp-text mb-2">
-              {workspace.name}
-            </h3>
-            <p class="text-ctp-subtext0 mb-3">
-              {workspace.description || "No description provided"}
-            </p>
-            <div class="text-xs text-ctp-overlay0 font-mono">
-              ID: {workspace.id}
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-ctp-text mb-2">
+                  {workspace.name}
+                </h3>
+                <p class="text-ctp-subtext0 mb-3">
+                  {workspace.description || "No description provided"}
+                </p>
+                <div class="text-xs text-ctp-overlay0 font-mono">
+                  ID: {workspace.id}
+                </div>
+              </div>
+              <form method="POST" action="?/deleteWorkspace" use:enhance>
+                <input type="hidden" name="id" value={workspace.id} />
+                <button
+                  type="submit"
+                  class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
+                  title="Delete workspace"
+                  onclick={(e) => {
+                    if (
+                      !confirm(
+                        "Are you sure you want to delete this workspace?",
+                      )
+                    ) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </form>
             </div>
           </div>
         {/each}

@@ -60,8 +60,9 @@ export const actions: Actions = {
     if (!id) {
       throw error(400, "ID required to delete workspace");
     }
+    console.log(id);
 
-    const response = await fetch(`/workspaces/${id}`, {
+    const response = await fetch(`/api/workspaces/${id}`, {
       method: "DELETE",
     });
 
