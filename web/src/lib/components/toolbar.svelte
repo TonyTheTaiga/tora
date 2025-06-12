@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { Plus, Moon, Sun, GitCompareArrows, Cog } from "lucide-svelte";
+  import { Plus, Moon, Sun, GitCompareArrows, Cog, X, ArrowRight } from "lucide-svelte";
   import { goto } from "$app/navigation";
   import { onMount, onDestroy } from "svelte";
-  import { toggleMode } from "$lib/state/comparison.svelte.js";
+  import { toggleMode, getMode, getExperimentsSelectedForComparision } from "$lib/state/comparison.svelte.js";
   import {
     getTheme,
     toggleTheme as toggleAppTheme,
@@ -11,6 +11,8 @@
 
   let theme = $derived.by(() => getTheme());
   let isAtBottom = $state(false);
+  let isComparisonMode = $derived.by(() => getMode());
+  let selectedExperiments = $derived.by(() => getExperimentsSelectedForComparision());
 
   const handleScroll = () => {
     if (typeof window !== "undefined" && typeof document !== "undefined") {
@@ -56,15 +58,45 @@
       <Plus size={20} />
     </button>
 
-    <button
-      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
-      title="Enter Comparison Mode"
-      onclick={() => {
-        toggleMode();
-      }}
-    >
-      <GitCompareArrows size={20} />
-    </button>
+{#if !isComparisonMode}
+      <button
+        class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+        title="Enter Comparison Mode"
+        onclick={() => {
+          toggleMode();
+        }}
+      >
+        <GitCompareArrows size={20} />
+      </button>
+    {:else}
+      <div class="flex items-center">
+        <span class="text-xs text-ctp-subtext0 px-2 whitespace-nowrap">
+          {selectedExperiments.length} selected
+        </span>
+        <button
+          class="p-2 rounded-full hover:bg-ctp-red/20 transition-all duration-200 text-ctp-red hover:text-ctp-red hover:scale-110 active:scale-95"
+          title="Cancel Comparison"
+          onclick={() => {
+            toggleMode();
+          }}
+        >
+          <X size={18} />
+        </button>
+        <button
+          class="p-2 rounded-full hover:bg-ctp-blue/20 transition-all duration-200 text-ctp-blue hover:text-ctp-blue hover:scale-110 active:scale-95 {selectedExperiments.length < 2 ? 'opacity-50 cursor-not-allowed' : ''}"
+          title="Compare Selected"
+          disabled={selectedExperiments.length < 2}
+          onclick={() => {
+            if (selectedExperiments.length >= 2) {
+              const params = selectedExperiments.join(",");
+              goto(`/compare?ids=${params}`);
+            }
+          }}
+        >
+          <ArrowRight size={18} />
+        </button>
+      </div>
+    {/if}
 
     <button
       onclick={() => {

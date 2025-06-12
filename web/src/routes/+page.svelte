@@ -6,9 +6,7 @@
   import DeleteConfirmationModal from "$lib/components/delete-confirmation-modal.svelte";
   import EditExperimentModal from "$lib/components/edit-experiment-modal.svelte";
   import LandingPage from "$lib/components/landing-page.svelte";
-  import ComparisonToolbar from "$lib/components/comparison-toolbar.svelte";
   import { page } from "$app/state";
-  import { getMode } from "$lib/state/comparison.svelte.js";
   import {
     getCreateExperimentModal,
     getEditExperimentModal,
@@ -47,12 +45,6 @@
   <Toolbar />
 
   <div class="pt-4 px-0 sm:px-2 md:px-4">
-    {#if getMode()}
-      <div class="sticky top-3 z-30 flex justify-center mb-4">
-        <ComparisonToolbar />
-      </div>
-    {/if}
-
     <ExperimentsList bind:experiments />
   </div>
 {:else}
