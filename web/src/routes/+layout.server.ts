@@ -8,7 +8,12 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
   let userWorkspaces: Workspace[] = [];
 
   if (user) {
-    userWorkspaces = await locals.dbClient.getWorkspaces(user.id);
+    userWorkspaces = await locals.dbClient.getWorkspacesV2(user.id, [
+      "OWNER", 
+      "ADMIN", 
+      "EDITOR", 
+      "VIEWER"
+    ]);
     const workspaceId = cookies.get("current_workspace");
 
     if (workspaceId) {

@@ -1,4 +1,4 @@
-import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
+import { PostgrestError, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "./database.types";
 import type {
   Experiment,
@@ -8,6 +8,7 @@ import type {
   Visibility,
   Workspace,
   ApiKey,
+  PendingInvitation,
 } from "$lib/types";
 import { timeAsync } from "$lib/utils/timing";
 
@@ -54,12 +55,14 @@ function mapRpcResultToExperiment(row: any): Experiment {
 }
 
 function mapToWorkspace(data: any): Workspace {
+  console.log(data);
   return {
     id: data.id,
     user_id: data.user_id,
     name: data.name,
     description: data.description ? data.description : "",
     created_at: new Date(data.created_at),
+    role: data.user_workspaces[0].workspace_role.name,
   };
 }
 
@@ -305,11 +308,28 @@ export function createDbClient(client: SupabaseClient<Database>) {
 
     // --- Workspace Methods ---
 
-    async getWorkspaces(userId: string): Promise<Workspace[]> {
+    async getWorkspacesV2(
+      userId: string,
+      roles: string[],
+    ): Promise<Workspace[]> {
       const { data, error } = await client
         .from("workspace")
-        .select("*")
-        .eq("user_id", userId);
+        .select(
+          `
+          id,
+          name,
+          description,
+          created_at,
+          user_workspaces!inner (
+            user_id,
+            workspace_role (
+              name
+            )
+          )
+        `,
+        )
+        .eq("user_workspaces.user_id", userId)
+        .in("user_workspaces.workspace_role.name", roles);
 
       handleError(error, "Failed to get workspaces");
       return data?.map(mapToWorkspace) ?? [];
@@ -332,7 +352,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
     },
 
     async getOrCreateDefaultWorkspace(userId: string): Promise<Workspace> {
-      const workspaces = await this.getWorkspaces(userId);
+      const workspaces = await this.getWorkspacesV2(userId, ["OWNER"]);
       if (workspaces[0]) {
         return workspaces[0];
       }
@@ -458,6 +478,132 @@ export function createDbClient(client: SupabaseClient<Database>) {
           return data ?? [];
         },
         { experimentCount: experimentIds.length.toString() },
+      );
+    },
+
+    // Workspace Invitations
+    async createInvitation(
+      from: string,
+      to: string,
+      workspace_id: string,
+      role_id: string,
+    ): Promise<PendingInvitation> {
+      return timeAsync(
+        "db.createInvitation",
+        async () => {
+          const { data, error } = await client
+            .from("workspace_invitations")
+            .insert({
+              from: from,
+              to: to,
+              workspace_id: workspace_id,
+              role_id: role_id,
+              status: "PENDING",
+            })
+            .select()
+            .single();
+
+          if (error) {
+            handleError(error, "Failed to create invitation");
+          }
+          if (!data) {
+            throw new Error("unknown error");
+          }
+
+          return {
+            id: data.id,
+            from: data.from,
+            to: data.to,
+            workspaceId: data.workspace_id,
+            roleId: data.role_id,
+            status: data.status,
+            createdAt: new Date(data.created_at),
+          };
+        },
+        {
+          from: from,
+          to: to,
+        },
+      );
+    },
+
+    async markInvitationAsAccepted(id: string) {
+      return timeAsync(
+        "db.markInvitationMarked",
+        async () => {
+          const { error } = await client
+            .from("workspace_invitations")
+            .update({ status: "accepted" })
+            .eq("id", id);
+
+          if (error) {
+            handleError(error, "failed to update invitation");
+          }
+        },
+        { id },
+      );
+    },
+
+    async getPendingInvitationsFrom(
+      userId: string,
+      state: string,
+    ): Promise<PendingInvitation> {
+      return timeAsync(
+        "db.getPendingInvitationsFrom",
+        async () => {
+          const { data, error } = await client
+            .from("workspace_invitations")
+            .select("*")
+            .eq("from", userId)
+            .eq("state", state)
+            .single();
+
+          handleError(error, "Failed to get pending invitations");
+          if (!data) {
+            throw new Error("unknown error");
+          }
+
+          return {
+            id: data.id,
+            from: data.from,
+            to: data.to,
+            workspaceId: data.workspace_id,
+            roleId: data.role_id,
+            createdAt: new Date(data.created_at),
+          };
+        },
+        { userId },
+      );
+    },
+    async getPendingInvitationsTo(
+      userId: string,
+      state: string,
+    ): Promise<PendingInvitation> {
+      return timeAsync(
+        "db.getPendingInvitationsTo",
+        async () => {
+          const { data, error } = await client
+            .from("workspace_invitations")
+            .select("*")
+            .eq("to", userId)
+            .eq("state", state)
+            .single();
+
+          handleError(error, "Failed to get pending invitations");
+          if (!data) {
+            throw new Error("unknown error");
+          }
+
+          return {
+            id: data.id,
+            from: data.from,
+            to: data.to,
+            workspaceId: data.workspace_id,
+            roleId: data.role_id,
+            createdAt: new Date(data.created_at),
+          };
+        },
+        { userId },
       );
     },
   };

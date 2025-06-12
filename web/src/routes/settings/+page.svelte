@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plus, LogOut, Trash2 } from "lucide-svelte";
+  import { Plus, LogOut, Trash2, Crown, Users } from "lucide-svelte";
   import { enhance } from "$app/forms";
   import { isWorkspace } from "$lib/types";
   import type { ApiKey } from "$lib/types";
@@ -10,6 +10,9 @@
   let createdKey: string = $state("");
   let workspaceError: string = $state("");
   let apiKeyError: string = $state("");
+
+  const ownedWorkspaces = $derived(data.workspaces?.filter(w => w.role === "OWNER") || []);
+  const sharedWorkspaces = $derived(data.workspaces?.filter(w => w.role !== "OWNER") || []);
 </script>
 
 <div class="flex-1 p-2 sm:p-4 max-w-none mx-2 sm:mx-4">
@@ -148,45 +151,97 @@
         </div>
       {/if}
 
-      <div class="space-y-4">
-        {#each data.workspaces ? data.workspaces : [] as workspace}
-          <div
-            class="p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30 hover:border-ctp-surface0/50 transition-all"
-          >
-            <div class="flex justify-between items-start">
-              <div class="flex-1">
-                <h3 class="text-lg font-semibold text-ctp-text mb-2">
-                  {workspace.name}
-                </h3>
-                <p class="text-ctp-subtext0 mb-3">
-                  {workspace.description || "No description provided"}
-                </p>
-                <div class="text-xs text-ctp-overlay0 font-mono">
-                  ID: {workspace.id}
-                </div>
-              </div>
-              <form method="POST" action="?/deleteWorkspace" use:enhance>
-                <input type="hidden" name="id" value={workspace.id} />
-                <button
-                  type="submit"
-                  class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
-                  title="Delete workspace"
-                  onclick={(e) => {
-                    if (
-                      !confirm(
-                        "Are you sure you want to delete this workspace?",
-                      )
-                    ) {
-                      e.preventDefault();
-                    }
-                  }}
+      <div class="space-y-6">
+        {#if ownedWorkspaces.length > 0}
+          <div>
+            <div class="flex items-center gap-2 mb-4">
+              <Crown size={16} class="text-ctp-yellow" />
+              <h3 class="text-lg font-semibold text-ctp-text">Your Workspaces</h3>
+            </div>
+            <div class="space-y-4">
+              {#each ownedWorkspaces as workspace}
+                <div
+                  class="p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30 hover:border-ctp-surface0/50 transition-all"
                 >
-                  <Trash2 size={14} />
-                </button>
-              </form>
+                  <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                      <h4 class="text-lg font-semibold text-ctp-text mb-2">
+                        {workspace.name}
+                      </h4>
+                      <p class="text-ctp-subtext0 mb-3">
+                        {workspace.description || "No description provided"}
+                      </p>
+                      <div class="text-xs text-ctp-overlay0 font-mono">
+                        ID: {workspace.id}
+                      </div>
+                    </div>
+                    <form method="POST" action="?/deleteWorkspace" use:enhance>
+                      <input type="hidden" name="id" value={workspace.id} />
+                      <button
+                        type="submit"
+                        class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
+                        title="Delete workspace"
+                        onclick={(e) => {
+                          if (
+                            !confirm(
+                              "Are you sure you want to delete this workspace?",
+                            )
+                          ) {
+                            e.preventDefault();
+                          }
+                        }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              {/each}
             </div>
           </div>
-        {/each}
+        {/if}
+
+        {#if sharedWorkspaces.length > 0}
+          <div>
+            <div class="flex items-center gap-2 mb-4">
+              <Users size={16} class="text-ctp-green" />
+              <h3 class="text-lg font-semibold text-ctp-text">Shared with You</h3>
+            </div>
+            <div class="space-y-4">
+              {#each sharedWorkspaces as workspace}
+                <div
+                  class="p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30 hover:border-ctp-surface0/50 transition-all"
+                >
+                  <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                      <h4 class="text-lg font-semibold text-ctp-text mb-2">
+                        {workspace.name}
+                      </h4>
+                      <p class="text-ctp-subtext0 mb-2">
+                        {workspace.description || "No description provided"}
+                      </p>
+                      <div class="flex items-center gap-2 mb-3">
+                        <span class="text-xs px-2 py-1 bg-ctp-green/20 text-ctp-green rounded-full border border-ctp-green/30">
+                          {workspace.role}
+                        </span>
+                        <span class="text-xs text-ctp-subtext0">Shared workspace</span>
+                      </div>
+                      <div class="text-xs text-ctp-overlay0 font-mono">
+                        ID: {workspace.id}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
+
+        {#if ownedWorkspaces.length === 0 && sharedWorkspaces.length === 0}
+          <div class="text-center py-8 text-ctp-subtext0">
+            <p>No workspaces found. Create your first workspace above.</p>
+          </div>
+        {/if}
       </div>
     </div>
 

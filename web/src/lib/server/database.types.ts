@@ -268,6 +268,51 @@ export type Database = {
           },
         ];
       };
+      workspace_invitations: {
+        Row: {
+          created_at: string;
+          from: string;
+          id: string;
+          role_id: string;
+          status: string;
+          to: string;
+          workspace_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          from: string;
+          id?: string;
+          role_id: string;
+          status: string;
+          to: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          from?: string;
+          id?: string;
+          role_id?: string;
+          status?: string;
+          to?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pending_workspace_invitations_role_id_fkey";
+            columns: ["role_id"];
+            isOneToOne: false;
+            referencedRelation: "workspace_role";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pending_workspace_invitations_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspace";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       workspace_role: {
         Row: {
           id: string;

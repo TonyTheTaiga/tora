@@ -47,12 +47,24 @@ export interface ExperimentAnalysis {
   hyperparameter_recommendations: Record<string, HPRecommendation>;
 }
 
+export type WorkspaceRole = "VIEWER" | "EDITOR" | "ADMIN" | "OWNER";
+
 export interface Workspace {
   id: string;
   user_id: string;
   name: string;
   description: string | null;
   created_at: Date;
+  role: string;
+}
+
+export interface PendingInvitation {
+  id: string;
+  from: string;
+  to: string;
+  workspaceId: string;
+  roleId: string;
+  createdAt: Date;
 }
 
 export function isWorkspace(obj: unknown): obj is Workspace {
