@@ -100,26 +100,26 @@
     }
   }
 
-  .toolbar.hidden-at-bottom {
+  :global(.toolbar.hidden-at-bottom) {
     opacity: 0;
     transform: translateX(-50%) translateY(100%) scale(1.25);
     pointer-events: none;
   }
 
   @media (min-width: 640px) {
-    .toolbar.hidden-at-bottom {
+    :global(.toolbar.hidden-at-bottom) {
       transform: translateX(-50%) translateY(100%) scale(1.1);
     }
   }
 
   @media (min-width: 768px) {
-    .toolbar.hidden-at-bottom {
+    :global(.toolbar.hidden-at-bottom) {
       transform: translateX(-50%) translateY(100%) scale(1.1);
     }
   }
 
   @media (min-width: 1024px) {
-    .toolbar.hidden-at-bottom {
+    :global(.toolbar.hidden-at-bottom) {
       transform: translateX(-50%) translateY(100%) scale(1.2);
     }
   }

@@ -44,163 +44,54 @@
   });
 </script>
 
-<div class="toolbar" class:hidden-at-bottom={isAtBottom}>
-  <button
-    class="toolbar-button"
-    title="Create a new experiment"
-    onclick={() => {
-      openCreateExperimentModal();
-    }}
-  >
-    <Plus class="icon" />
-  </button>
+<div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 transition-all duration-300 {isAtBottom ? 'opacity-0 translate-y-full pointer-events-none' : 'opacity-100'}">
+  <div class="flex items-center bg-ctp-surface1/30 backdrop-blur-xl border border-ctp-surface0/20 rounded-full p-1 shadow-2xl hover:bg-ctp-surface1/40 hover:scale-105 transition-all duration-200">
+    <button
+      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+      title="Create a new experiment"
+      onclick={() => {
+        openCreateExperimentModal();
+      }}
+    >
+      <Plus size={20} />
+    </button>
 
-  <button
-    class="toolbar-button"
-    title="Enter Comparison Mode"
-    onclick={() => {
-      toggleMode();
-    }}
-  >
-    <GitCompareArrows class="icon" />
-  </button>
+    <button
+      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+      title="Enter Comparison Mode"
+      onclick={() => {
+        toggleMode();
+      }}
+    >
+      <GitCompareArrows size={20} />
+    </button>
 
-  <button
-    onclick={() => {
-      toggleAppTheme();
-    }}
-    class="toolbar-button"
-    aria-label={theme === "dark"
-      ? "Switch to light theme"
-      : "Switch to dark theme"}
-    title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-  >
-    {#if theme === "dark"}
-      <Sun class="icon" />
-    {:else}
-      <Moon class="icon" />
-    {/if}
-  </button>
+    <button
+      onclick={() => {
+        toggleAppTheme();
+      }}
+      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+      aria-label={theme === "dark"
+        ? "Switch to light theme"
+        : "Switch to dark theme"}
+      title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+    >
+      {#if theme === "dark"}
+        <Sun size={20} />
+      {:else}
+        <Moon size={20} />
+      {/if}
+    </button>
 
-  <button
-    class="toolbar-button"
-    aria-label="go to settings page"
-    title="go to settings page"
-    onclick={() => {
-      goto("/settings");
-    }}
-  >
-    <Cog class="icon" />
-  </button>
+    <button
+      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+      aria-label="go to settings page"
+      title="go to settings page"
+      onclick={() => {
+        goto("/settings");
+      }}
+    >
+      <Cog size={20} />
+    </button>
+  </div>
 </div>
-
-<style>
-  .toolbar {
-    position: fixed;
-    bottom: 1rem;
-    left: 50vw;
-    transform: translateX(-50%) scale(1.25);
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0;
-    background-color: var(--color-ctp-surface1);
-    border: 1px solid var(--color-ctp-surface2);
-    border-radius: 0.5rem;
-    box-shadow:
-      0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    z-index: 40;
-    overflow: hidden;
-    opacity: 100%;
-    transition:
-      transform 0.3s ease,
-      opacity 0.3s ease;
-  }
-
-  .toolbar-button {
-    padding: 0.5rem;
-    color: var(--color-ctp-subtext0);
-    transition:
-      color 0.2s,
-      background-color 0.2s;
-  }
-
-  .toolbar-button:hover {
-    color: var(--color-ctp-text);
-    background-color: var(--color-ctp-surface2);
-  }
-
-  :global(.icon) {
-    width: 20px;
-    height: 20px;
-  }
-
-  /* Responsive styles */
-  @media (min-width: 640px) {
-    .toolbar {
-      bottom: 3rem;
-      gap: 0;
-      transform: translateX(-50%) scale(1.1);
-    }
-
-    .toolbar-button {
-      padding: 0.625rem;
-    }
-
-    :global(.icon) {
-      width: 20px;
-      height: 20px;
-    }
-  }
-
-  @media (min-width: 768px) {
-    .toolbar {
-      width: auto;
-      max-width: calc(100vw - 4rem);
-      transform: translateX(-50%) scale(1.1);
-      opacity: 80%;
-    }
-
-    .toolbar:hover {
-      transform: translateX(-50%) scale(1.2);
-      opacity: 100%;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .toolbar {
-      transform: translateX(-50%) scale(1.2);
-      opacity: 80%;
-    }
-
-    .toolbar:hover {
-      transform: translateX(-50%) scale(1.3);
-      opacity: 100%;
-    }
-  }
-
-  .toolbar.hidden-at-bottom {
-    opacity: 0;
-    transform: translateX(-50%) translateY(100%) scale(1.25);
-    pointer-events: none;
-  }
-
-  @media (min-width: 640px) {
-    .toolbar.hidden-at-bottom {
-      transform: translateX(-50%) translateY(100%) scale(1.1);
-    }
-  }
-
-  @media (min-width: 768px) {
-    .toolbar.hidden-at-bottom {
-      transform: translateX(-50%) translateY(100%) scale(1.1);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .toolbar.hidden-at-bottom {
-      transform: translateX(-50%) translateY(100%) scale(1.2);
-    }
-  }
-</style>
