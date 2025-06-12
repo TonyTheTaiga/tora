@@ -54,6 +54,20 @@ export const actions: Actions = {
     return await res.json();
   },
 
+  deleteWorkspace: async ({ request, fetch }) => {
+    const formData = await request.formData();
+    const { id } = Object.fromEntries(formData.entries());
+    if (!id) {
+      throw error(400, "ID required to delete workspace");
+    }
+
+    const response = await fetch(`/workspaces/${id}`, {
+      method: "DELETE",
+    });
+
+    return await response.json();
+  },
+
   createApiKey: async ({ request, fetch }) => {
     const formData = await request.formData();
     const { name } = Object.fromEntries(formData.entries());

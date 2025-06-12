@@ -10,6 +10,7 @@ import type {
   ApiKey,
 } from "$lib/types";
 import { timeAsync } from "$lib/utils/timing";
+import { handle } from "../../hooks.server";
 
 function handleError(error: PostgrestError | null, context: string): void {
   if (error) {
@@ -338,6 +339,11 @@ export function createDbClient(client: SupabaseClient<Database>) {
       }
 
       return this.createWorkspace("Default", "Your default workspace", userId);
+    },
+
+    async deleteWorkspace(id: string) {
+      const { error } = await client.from("workspace").delete().eq("id", id);
+      handleError(error, "Failed to delete workspace");
     },
 
     // --- API Key Methods ---
