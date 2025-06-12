@@ -7,7 +7,10 @@
   let { data } = $props();
   let creatingWorkspace: boolean = $state(false);
   let creatingApiKey: boolean = $state(false);
+  let deletingWorkspace: string | null = $state(null);
   let createdKey: string = $state("");
+  let workspaceError: string = $state("");
+  let apiKeyError: string = $state("");
 </script>
 
 <div class="flex-1 p-2 sm:p-4 max-w-none mx-2 sm:mx-4">
@@ -68,18 +71,29 @@
         class="mb-6 p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30"
         use:enhance={() => {
           creatingWorkspace = true;
+          workspaceError = "";
           return async ({ result, update }) => {
-            creatingWorkspace = false;
-            if (result.type === "success" && result.data) {
-              if (isWorkspace(result.data)) {
-                data.workspaces?.push(result.data);
-              } else {
-                throw new Error(
-                  "got back something other than a valid workspace!",
-                );
+            try {
+              if (result.type === "success" && result.data) {
+                if (isWorkspace(result.data)) {
+                  data.workspaces?.push(result.data);
+                } else {
+                  workspaceError = "Invalid workspace data received";
+                }
+              } else if (result.type === "failure") {
+                workspaceError =
+                  (result.data as any)?.message || "Failed to create workspace";
+              } else if (result.type === "error") {
+                workspaceError =
+                  "An error occurred while creating the workspace";
               }
+            } catch (error) {
+              workspaceError = "An unexpected error occurred";
+              console.error("Workspace creation error:", error);
+            } finally {
+              creatingWorkspace = false;
+              await update();
             }
-            await update();
           };
         }}
       >
@@ -125,9 +139,15 @@
           class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-lg bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm disabled:opacity-50"
         >
           <Plus size={18} />
-          <span>Create Workspace</span>
+          <span>{creatingWorkspace ? "Creating..." : "Create Workspace"}</span>
         </button>
       </form>
+
+      {#if workspaceError}
+        <div class="mb-4 p-3 bg-ctp-red/10 border border-ctp-red/30 rounded-lg">
+          <p class="text-ctp-red text-sm">{workspaceError}</p>
+        </div>
+      {/if}
 
       <div class="space-y-4">
         {#each data.workspaces ? data.workspaces : [] as workspace}
@@ -180,16 +200,30 @@
         class="mb-6 p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30"
         use:enhance={() => {
           creatingApiKey = true;
+          apiKeyError = "";
 
           return async ({ result, update }) => {
-            await update();
-            if (result.type === "success" || result.type === "failure") {
-              const newKey = result.data as unknown as ApiKey;
-              if (newKey.key) {
-                createdKey = newKey.key;
+            try {
+              if (result.type === "success" && result.data) {
+                const newKey = result.data as unknown as ApiKey;
+                if (newKey?.key) {
+                  createdKey = newKey.key;
+                } else {
+                  apiKeyError = "No API key received";
+                }
+              } else if (result.type === "failure") {
+                apiKeyError =
+                  (result.data as any)?.message || "Failed to create API key";
+              } else if (result.type === "error") {
+                apiKeyError = "An error occurred while creating the API key";
               }
+            } catch (error) {
+              apiKeyError = "An unexpected error occurred";
+              console.error("API key creation error:", error);
+            } finally {
+              creatingApiKey = false;
+              await update();
             }
-            creatingApiKey = false;
           };
         }}
         action="?/createApiKey"
@@ -220,9 +254,15 @@
           class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-lg bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm disabled:opacity-50"
         >
           <Plus size={18} />
-          <span>Create API Key</span>
+          <span>{creatingApiKey ? "Creating..." : "Create API Key"}</span>
         </button>
       </form>
+
+      {#if apiKeyError}
+        <div class="mb-4 p-3 bg-ctp-red/10 border border-ctp-red/30 rounded-lg">
+          <p class="text-ctp-red text-sm">{apiKeyError}</p>
+        </div>
+      {/if}
 
       {#if createdKey !== ""}
         <div

@@ -1,6 +1,6 @@
 import { startTimer, generateRequestId } from "$lib/utils/timing";
 import type { PageServerLoad, Actions } from "./$types";
-import { error } from "@sveltejs/kit";
+import { error, redirect } from "@sveltejs/kit";
 import type { Workspace, ApiKey } from "$lib/types";
 
 export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
@@ -60,13 +60,11 @@ export const actions: Actions = {
     if (!id) {
       throw error(400, "ID required to delete workspace");
     }
-    console.log(id);
-
-    const response = await fetch(`/api/workspaces/${id}`, {
+    await fetch(`/api/workspaces/${id}`, {
       method: "DELETE",
     });
 
-    return await response.json();
+    return redirect(300, "/settings");
   },
 
   createApiKey: async ({ request, fetch }) => {

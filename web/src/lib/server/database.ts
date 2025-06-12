@@ -59,7 +59,7 @@ function mapToWorkspace(data: any): Workspace {
     id: data.id,
     user_id: data.user_id,
     name: data.name,
-    description: data.description,
+    description: data.description ? data.description : "",
     created_at: new Date(data.created_at),
   };
 }
