@@ -10,7 +10,6 @@ import type {
   ApiKey,
 } from "$lib/types";
 import { timeAsync } from "$lib/utils/timing";
-import { handle } from "../../hooks.server";
 
 function handleError(error: PostgrestError | null, context: string): void {
   if (error) {
