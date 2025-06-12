@@ -175,6 +175,45 @@ export type Database = {
           },
         ];
       };
+      user_workspaces: {
+        Row: {
+          created_at: string | null;
+          id: string;
+          role_id: string;
+          user_id: string;
+          workspace_id: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          id?: string;
+          role_id: string;
+          user_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string | null;
+          id?: string;
+          role_id?: string;
+          user_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_workspaces_role_id_fkey";
+            columns: ["role_id"];
+            isOneToOne: false;
+            referencedRelation: "workspace_role";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_workspaces_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspace";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       workspace: {
         Row: {
           created_at: string;
@@ -228,6 +267,21 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      workspace_role: {
+        Row: {
+          id: string;
+          name: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+        };
+        Relationships: [];
       };
     };
     Views: {
