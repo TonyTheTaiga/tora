@@ -82,4 +82,15 @@ export const actions: Actions = {
 
     return await response.json();
   },
+
+  revokeApiKey: async ({ request, fetch }) => {
+    const formData = await request.formData();
+    const { id } = Object.fromEntries(formData.entries());
+    if (!id) {
+      throw error(400, "ID reuired to revoke api key");
+    }
+
+    await fetch(`/api/keys/${id}`, { method: "DELETE" });
+    return redirect(300, "/settings");
+  },
 };

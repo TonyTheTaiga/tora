@@ -72,25 +72,3 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     throw error(500, "Failed to create API key");
   }
 };
-
-export const DELETE: RequestHandler = async ({ url, locals }) => {
-  if (!locals.user) {
-    throw error(401, "Unauthorized");
-  }
-
-  const keyId = url.searchParams.get("id");
-  if (!keyId) {
-    throw error(400, "Key ID is required");
-  }
-
-  try {
-    await locals.dbClient.revokeApiKey(locals.user.id, keyId);
-    return json({ success: true });
-  } catch (err) {
-    console.error("Error revoking API key:", err);
-    if (err instanceof Error && "status" in err && "body" in err) {
-      throw err;
-    }
-    throw error(500, "Failed to revoke API key");
-  }
-};

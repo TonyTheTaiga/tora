@@ -321,6 +321,27 @@
                   </div>
                 </div>
               </div>
+              {#if !apiKey.revoked}
+                <form method="POST" action="?/revokeApiKey" use:enhance>
+                  <input type="hidden" name="id" value={apiKey.id} />
+                  <button
+                    type="submit"
+                    class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
+                    title="Revoke API key"
+                    onclick={(e) => {
+                      if (
+                        !confirm(
+                          "Are you sure you want to revoke this API key?",
+                        )
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </form>
+              {/if}
             </div>
           </div>
         {/each}
