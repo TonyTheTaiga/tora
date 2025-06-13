@@ -9,7 +9,7 @@ steps:
         echo "Creating .env file from Secret Manager secrets"
         echo "PUBLIC_SUPABASE_URL=$(gcloud secrets versions access latest --secret=SUPABASE_URL)" >> .env
         echo "PUBLIC_SUPABASE_ANON_KEY=$(gcloud secrets versions access latest --secret=SUPABASE_KEY)" >> .env
-        echo "PUBLIC_ANTHROPIC_KEY=$(gcloud secrets versions access latest --secret=ANTHROPIC_KEY)" >> .env
+        echo "PRIVATE_ANTHROPIC_KEY=$(gcloud secrets versions access latest --secret=ANTHROPIC_KEY)" >> .env
 
         echo ".env file created successfully"
 
