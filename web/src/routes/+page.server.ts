@@ -29,7 +29,6 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
     }
 
     const { currentWorkspace } = await parent();
-
     const apiUrl = new URL(API_ROUTES.GET_EXPERIMENTS, url.origin);
     if (currentWorkspace?.id) {
       apiUrl.searchParams.set("workspace", currentWorkspace.id);

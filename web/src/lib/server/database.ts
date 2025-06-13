@@ -1,4 +1,4 @@
-import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
+import { PostgrestError, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "./database.types";
 import type {
   Experiment,
@@ -8,6 +8,7 @@ import type {
   Visibility,
   Workspace,
   ApiKey,
+  PendingInvitation,
 } from "$lib/types";
 import { timeAsync } from "$lib/utils/timing";
 
@@ -26,7 +27,6 @@ function mapToExperiment(data: any, userIdOverride?: string): Experiment {
 
   return {
     id: data.id,
-    user_id: finalUserId,
     name: data.name,
     description: data.description ?? "",
     hyperparams: (data.hyperparams as HyperParam[]) ?? [],
@@ -41,7 +41,6 @@ function mapToExperiment(data: any, userIdOverride?: string): Experiment {
 function mapRpcResultToExperiment(row: any): Experiment {
   return {
     id: row.experiment_id,
-    user_id: row.experiment_user_id,
     name: row.experiment_name,
     description: row.experiment_description ?? "",
     hyperparams: (row.experiment_hyperparams as HyperParam[]) ?? [],
@@ -56,10 +55,10 @@ function mapRpcResultToExperiment(row: any): Experiment {
 function mapToWorkspace(data: any): Workspace {
   return {
     id: data.id,
-    user_id: data.user_id,
     name: data.name,
     description: data.description ? data.description : "",
-    created_at: new Date(data.created_at),
+    createdAt: new Date(data.created_at),
+    role: data.user_workspaces[0].workspace_role.name,
   };
 }
 
@@ -86,21 +85,13 @@ export function createDbClient(client: SupabaseClient<Database>) {
           hyperparams: details.hyperparams as unknown as Json[],
           tags: details.tags,
           visibility: details.visibility ?? "PRIVATE",
+          creator: userId,
         })
         .select()
         .single();
 
       handleError(expError, "Failed to create experiment");
       if (!expData) throw new Error("Experiment creation returned no data.");
-
-      const { error: userExpError } = await client
-        .from("user_experiments")
-        .insert({
-          user_id: userId,
-          experiment_id: expData.id,
-          role: "OWNER",
-        });
-      handleError(userExpError, "Failed to link user to experiment");
 
       if (details.workspaceId) {
         const { error: wsExpError } = await client
@@ -115,29 +106,25 @@ export function createDbClient(client: SupabaseClient<Database>) {
       return mapToExperiment(expData, userId);
     },
 
-    async getExperiments(
-      userId: string,
-      workspaceId?: string,
-    ): Promise<Experiment[]> {
+    async getExperiments(workspaceId: string): Promise<Experiment[]> {
       return timeAsync(
         "db.getExperiments",
         async () => {
           const { data, error } = await client.rpc("get_user_experiments", {
-            user_id: userId,
             workspace_id: workspaceId,
           });
 
           handleError(error, "Failed to get experiments");
           return data?.map(mapRpcResultToExperiment) ?? [];
         },
-        { userId, workspaceId },
+        { workspaceId },
       );
     },
 
     async getExperiment(id: string): Promise<Experiment> {
       const { data, error } = await client
         .from("experiment")
-        .select("*, user_experiments(user_id)")
+        .select("*")
         .eq("id", id)
         .single();
 
@@ -152,7 +139,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
         async () => {
           const { data, error } = await client
             .from("experiment")
-            .select("*, metric(*), user_experiments!inner(user_id)")
+            .select("*, metric(*)")
             .eq("id", id)
             .single();
 
@@ -174,7 +161,9 @@ export function createDbClient(client: SupabaseClient<Database>) {
     async checkExperimentAccess(id: string, userId?: string): Promise<void> {
       const { data, error } = await client
         .from("experiment")
-        .select("visibility, user_experiments(user_id)")
+        .select(
+          "visibility, creator, workspace_experiments(workspace_id, workspace(user_workspaces(user_id)))",
+        )
         .eq("id", id)
         .single();
 
@@ -185,10 +174,19 @@ export function createDbClient(client: SupabaseClient<Database>) {
         return;
       }
 
-      if (
-        !userId ||
-        !data.user_experiments.some((ue) => ue.user_id === userId)
-      ) {
+      if (!userId) {
+        throw new Error(`Access denied to experiment with ID ${id}`);
+      }
+
+      if (data.creator === userId) {
+        return;
+      }
+
+      const hasWorkspaceAccess = data.workspace_experiments?.some((we) =>
+        we.workspace?.user_workspaces?.some((uw) => uw.user_id === userId),
+      );
+
+      if (!hasWorkspaceAccess) {
         throw new Error(`Access denied to experiment with ID ${id}`);
       }
     },
@@ -286,7 +284,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
           return (
             data?.map((item) => ({
               id: item.experiment_id,
-              user_id: "",
               name: item.experiment_name,
               description: item.experiment_description ?? "",
               hyperparams:
@@ -305,11 +302,28 @@ export function createDbClient(client: SupabaseClient<Database>) {
 
     // --- Workspace Methods ---
 
-    async getWorkspaces(userId: string): Promise<Workspace[]> {
+    async getWorkspacesV2(
+      userId: string,
+      roles: string[],
+    ): Promise<Workspace[]> {
       const { data, error } = await client
         .from("workspace")
-        .select("*")
-        .eq("user_id", userId);
+        .select(
+          `
+          id,
+          name,
+          description,
+          created_at,
+          user_workspaces!inner (
+            user_id,
+            workspace_role (
+              name
+            )
+          )
+        `,
+        )
+        .eq("user_workspaces.user_id", userId)
+        .in("user_workspaces.workspace_role.name", roles);
 
       handleError(error, "Failed to get workspaces");
       return data?.map(mapToWorkspace) ?? [];
@@ -320,24 +334,41 @@ export function createDbClient(client: SupabaseClient<Database>) {
       description: string | null,
       userId: string,
     ): Promise<Workspace> {
-      const { data, error } = await client
+      const { data: workspaceData, error: workspaceError } = await client
         .from("workspace")
-        .insert({ name, description, user_id: userId })
+        .insert({ name, description })
         .select()
         .single();
 
-      handleError(error, "Failed to create workspace");
-      if (!data) throw new Error("Workspace creation returned no data.");
-      return mapToWorkspace(data);
-    },
+      handleError(workspaceError, "Failed to create workspace");
+      if (!workspaceData)
+        throw new Error("Workspace creation returned no data.");
 
-    async getOrCreateDefaultWorkspace(userId: string): Promise<Workspace> {
-      const workspaces = await this.getWorkspaces(userId);
-      if (workspaces[0]) {
-        return workspaces[0];
-      }
+      const { data: ownerRole, error: roleError } = await client
+        .from("workspace_role")
+        .select("id")
+        .eq("name", "OWNER")
+        .single();
 
-      return this.createWorkspace("Default", "Your default workspace", userId);
+      handleError(roleError, "Failed to get OWNER role");
+      if (!ownerRole) throw new Error("OWNER role not found");
+
+      const { error: userWorkspaceError } = await client
+        .from("user_workspaces")
+        .insert({
+          user_id: userId,
+          workspace_id: workspaceData.id,
+          role_id: ownerRole.id,
+        });
+
+      handleError(userWorkspaceError, "Failed to add user to workspace");
+
+      const workspaceWithRole = {
+        ...workspaceData,
+        user_workspaces: [{ workspace_role: { name: "OWNER" } }],
+      };
+
+      return mapToWorkspace(workspaceWithRole);
     },
 
     async deleteWorkspace(id: string) {
@@ -458,6 +489,132 @@ export function createDbClient(client: SupabaseClient<Database>) {
           return data ?? [];
         },
         { experimentCount: experimentIds.length.toString() },
+      );
+    },
+
+    // Workspace Invitations
+    async createInvitation(
+      from: string,
+      to: string,
+      workspace_id: string,
+      role_id: string,
+    ): Promise<PendingInvitation> {
+      return timeAsync(
+        "db.createInvitation",
+        async () => {
+          const { data, error } = await client
+            .from("workspace_invitations")
+            .insert({
+              from: from,
+              to: to,
+              workspace_id: workspace_id,
+              role_id: role_id,
+              status: "PENDING",
+            })
+            .select()
+            .single();
+
+          if (error) {
+            handleError(error, "Failed to create invitation");
+          }
+          if (!data) {
+            throw new Error("unknown error");
+          }
+
+          return {
+            id: data.id,
+            from: data.from,
+            to: data.to,
+            workspaceId: data.workspace_id,
+            roleId: data.role_id,
+            status: data.status,
+            createdAt: new Date(data.created_at),
+          };
+        },
+        {
+          from: from,
+          to: to,
+        },
+      );
+    },
+
+    async markInvitationAsAccepted(id: string) {
+      return timeAsync(
+        "db.markInvitationMarked",
+        async () => {
+          const { error } = await client
+            .from("workspace_invitations")
+            .update({ status: "accepted" })
+            .eq("id", id);
+
+          if (error) {
+            handleError(error, "failed to update invitation");
+          }
+        },
+        { id },
+      );
+    },
+
+    async getPendingInvitationsFrom(
+      userId: string,
+      status: string,
+    ): Promise<PendingInvitation[]> {
+      return timeAsync(
+        "db.getPendingInvitationsFrom",
+        async () => {
+          const { data, error } = await client
+            .from("workspace_invitations")
+            .select("*")
+            .eq("from", userId)
+            .eq("status", status);
+
+          handleError(error, "Failed to get pending invitations");
+          if (!data) {
+            return [];
+          }
+
+          return data.map((item) => ({
+            id: item.id,
+            from: item.from,
+            to: item.to,
+            workspaceId: item.workspace_id,
+            roleId: item.role_id,
+            createdAt: new Date(item.created_at),
+            status: item.status,
+          }));
+        },
+        { userId },
+      );
+    },
+    async getPendingInvitationsTo(
+      userId: string,
+      status: string,
+    ): Promise<PendingInvitation[]> {
+      return timeAsync(
+        "db.getPendingInvitationsTo",
+        async () => {
+          const { data, error } = await client
+            .from("workspace_invitations")
+            .select("*")
+            .eq("to", userId)
+            .eq("status", status);
+
+          handleError(error, "Failed to get pending invitations");
+          if (!data) {
+            return [];
+          }
+
+          return data.map((item) => ({
+            id: item.id,
+            from: item.from,
+            to: item.to,
+            workspaceId: item.workspace_id,
+            roleId: item.role_id,
+            createdAt: new Date(item.created_at),
+            status: item.status,
+          }));
+        },
+        { userId },
       );
     },
   };

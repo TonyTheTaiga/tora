@@ -13,6 +13,11 @@
     highlighted: string[];
     isSelectedForComparison?: boolean;
   } = $props();
+
+  let currentWorkspace = $derived(page.data.currentWorkspace);
+  let canDeleteExperiment = $derived(
+    currentWorkspace && ["OWNER", "ADMIN"].includes(currentWorkspace.role),
+  );
 </script>
 
 <article
@@ -114,7 +119,7 @@
           <GlobeLock size={14} class="text-ctp-red" />
         {/if}
       </div>
-      {#if page.data.user && page.data.user.id === experiment.user_id}
+      {#if canDeleteExperiment}
         <button
           type="button"
           class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"

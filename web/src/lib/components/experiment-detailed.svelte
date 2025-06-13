@@ -58,6 +58,15 @@
   let allTagsShown = $state(false);
   const initialTagLimit = 7;
 
+  let currentWorkspace = $derived(page.data.currentWorkspace);
+  let canEditExperiment = $derived(
+    currentWorkspace &&
+      ["OWNER", "ADMIN", "EDITOR"].includes(currentWorkspace.role),
+  );
+  let canDeleteExperiment = $derived(
+    currentWorkspace && ["OWNER", "ADMIN"].includes(currentWorkspace.role),
+  );
+
   let visibleTags = $derived.by(() => {
     if (!experiment.tags || !Array.isArray(experiment.tags)) return [];
     if (allTagsShown || experiment.tags.length <= initialTagLimit) {
@@ -151,7 +160,7 @@
     <div
       class="flex items-center gap-1 bg-gradient-to-b from-bg-ctp-surface0/80 to-bg-ctp-mantle backdrop-blur-sm border-t border-x border-ctp-surface1/50 rounded-t-xl p-1"
     >
-      {#if page.data.user && page.data.user.id === experiment.user_id}
+      {#if canEditExperiment}
         <button
           class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-lavender hover:bg-ctp-surface1/60 transition-colors"
           onclick={async () => {
@@ -202,7 +211,7 @@
           <Eye size={16} />
         {/if}
       </button>
-      {#if page.data.user && page.data.user.id === experiment.user_id}
+      {#if canDeleteExperiment}
         <button
           type="button"
           class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"

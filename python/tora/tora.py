@@ -69,11 +69,11 @@ class Tora:
     @classmethod
     def create_experiment(
         cls,
+        workspace_id: str,
         name: str,
         description: str | None = None,
         hyperparams: dict[str, str | int | float] | None = None,
         tags: list[str] | None = None,
-        workspace_id: str = "API_DEFAULT",
         server_url: str = TORA_BASE_URL,
         max_buffer_len: int = 25,
     ):

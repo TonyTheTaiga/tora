@@ -2,34 +2,41 @@ import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { generateRequestId, startTimer } from "$lib/utils/timing";
 
+function handleError(
+  err: unknown,
+  timer: ReturnType<typeof startTimer>,
+): never {
+  const message =
+    err instanceof Error ? err.message : "An unknown error occurred.";
+  timer.end({ error: message });
+  throw error(500, message);
+}
+
 export const GET: RequestHandler = async ({ url, locals }) => {
   const requestId = generateRequestId();
   const timer = startTimer("api.experiments.GET", { requestId });
 
   try {
-    const { user } = locals;
+    const { user, dbClient } = locals;
     if (!user) {
       throw error(401, "Unauthorized");
     }
 
-    const workspace_id = url.searchParams.get("workspace") || undefined;
+    const workspaceId = url.searchParams.get("workspace");
+    if (!workspaceId) {
+      throw error(400, "Missing required 'workspace' parameter");
+    }
 
-    const experiments = await locals.dbClient.getExperiments(
-      user.id,
-      workspace_id,
-    );
-
+    const experiments = await dbClient.getExperiments(workspaceId);
     timer.end({
       userId: user.id || "unknown",
-      workspaceId: workspace_id || "unknown",
+      workspaceId,
       experimentCount: experiments.length.toString(),
     });
     return json(experiments);
   } catch (err) {
-    timer.end({ error: err instanceof Error ? err.message : "Unknown error" });
-    const errorMessage =
-      err instanceof Error ? err.message : "Internal Server Error";
-    throw error(500, errorMessage);
+    if (err instanceof Error && "status" in err) throw err;
+    handleError(err, timer);
   }
 };
 
@@ -38,39 +45,41 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
   const timer = startTimer("api.experiments.POST", { requestId });
 
   try {
-    if (!locals.user) {
-      timer.end({ error: "Unauthorized" });
-      return json(
-        { error: "Cannot create a experiment for anonymous user" },
-        { status: 500 },
+    const { user, dbClient } = locals;
+    if (!user) {
+      throw error(
+        401,
+        "Unauthorized: Cannot create an experiment for an anonymous user",
       );
     }
 
-    let data = await request.json();
-    let name = data["name"];
-    let description = data["description"];
-    let hyperparams = data["hyperparams"];
-    let tags = data["tags"];
-    let visibility = data["visibility"] || "PRIVATE";
-    let workspaceId = data["workspaceId"] || cookies.get("current_workspace");
+    const data = await request.json();
+    const {
+      name,
+      description,
+      tags,
+      rawHyperparams,
+      visibility = "PRIVATE",
+    } = data;
 
-    if (workspaceId === "API_DEFAULT") {
-      const workspace = await locals.dbClient.getOrCreateDefaultWorkspace(
-        locals.user.id,
+    const workspaceId = data.workspaceId || cookies.get("current_workspace");
+    if (!workspaceId) {
+      throw error(
+        400,
+        "A workspace must be specified to create an experiment.",
       );
-      workspaceId = workspace.id;
     }
 
-    if (typeof hyperparams === "string") {
+    let hyperparams = rawHyperparams;
+    if (typeof rawHyperparams === "string") {
       try {
-        hyperparams = JSON.parse(hyperparams);
+        hyperparams = JSON.parse(rawHyperparams);
       } catch (e) {
-        console.error("Failed to parse hyperparams:", e);
-        timer.end({ error: "Invalid hyperparams format" });
-        return json({ error: "Invalid hyperparams format" }, { status: 400 });
+        throw error(400, "Invalid 'hyperparams' format: must be valid JSON.");
       }
     }
-    const experiment = await locals.dbClient.createExperiment(locals.user.id, {
+
+    const experiment = await dbClient.createExperiment(user.id, {
       name,
       description,
       hyperparams,
@@ -80,21 +89,14 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
     });
 
     timer.end({
-      userId: locals.user.id,
+      userId: user.id,
       experimentId: experiment.id,
       workspaceId,
     });
-    return json({ success: true, experiment: experiment });
-  } catch (error: unknown) {
-    timer.end({
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-    return json(
-      {
-        error:
-          error instanceof Error ? error.message : "Unknown error occurred",
-      },
-      { status: 500 },
-    );
+
+    return json({ success: true, experiment }, { status: 201 });
+  } catch (err) {
+    if (err instanceof Error && "status" in err) throw err;
+    handleError(err, timer);
   }
 };
