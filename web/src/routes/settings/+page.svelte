@@ -217,6 +217,7 @@
               placeholder="Describe your workspace"
               disabled={creatingWorkspace}
               class="w-full px-4 py-3 bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface0/40 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue/50 focus:border-ctp-blue/50 transition-all placeholder-ctp-overlay0"
+              required
             />
           </div>
         </div>
@@ -352,8 +353,16 @@
                         action="?/removeSharedWorkspace"
                         use:enhance
                       >
-                        <input type="hidden" name="userId" value={data?.user?.id} />
-                        <input type="hidden" name="workspaceId" value={workspace.id} />
+                        <input
+                          type="hidden"
+                          name="userId"
+                          value={data?.user?.id}
+                        />
+                        <input
+                          type="hidden"
+                          name="workspaceId"
+                          value={workspace.id}
+                        />
                         <button
                           type="submit"
                           class="p-2 rounded-lg text-ctp-red hover:bg-ctp-red/20 hover:text-ctp-red transition-colors border border-ctp-red/30"
