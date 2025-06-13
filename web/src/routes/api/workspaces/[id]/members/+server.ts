@@ -17,8 +17,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
         id: user.id,
         email: user.email,
         role: "OWNER",
-        joinedAt: new Date().toISOString()
-      }
+        joinedAt: new Date().toISOString(),
+      },
     ];
 
     return json({

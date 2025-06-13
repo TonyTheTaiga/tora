@@ -346,7 +346,8 @@ export function createDbClient(client: SupabaseClient<Database>) {
         .single();
 
       handleError(workspaceError, "Failed to create workspace");
-      if (!workspaceData) throw new Error("Workspace creation returned no data.");
+      if (!workspaceData)
+        throw new Error("Workspace creation returned no data.");
 
       // Get the OWNER role ID
       const { data: ownerRole, error: roleError } = await client
@@ -364,7 +365,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
         .insert({
           user_id: userId,
           workspace_id: workspaceData.id,
-          role_id: ownerRole.id
+          role_id: ownerRole.id,
         });
 
       handleError(userWorkspaceError, "Failed to add user to workspace");
@@ -372,7 +373,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
       // Return workspace with role information
       const workspaceWithRole = {
         ...workspaceData,
-        user_workspaces: [{ workspace_role: { name: "OWNER" } }]
+        user_workspaces: [{ workspace_role: { name: "OWNER" } }],
       };
 
       return mapToWorkspace(workspaceWithRole);

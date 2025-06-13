@@ -1,5 +1,14 @@
 <script lang="ts">
-  import { Plus, LogOut, Trash2, Crown, Users, Mail, Check, X } from "lucide-svelte";
+  import {
+    Plus,
+    LogOut,
+    Trash2,
+    Crown,
+    Users,
+    Mail,
+    Check,
+    X,
+  } from "lucide-svelte";
   import { enhance } from "$app/forms";
   import { isWorkspace } from "$lib/types";
   import type { ApiKey } from "$lib/types";
@@ -16,8 +25,12 @@
   let pendingInvitations = $state<any[]>([]);
   let invitationsLoading = $state(true);
 
-  const ownedWorkspaces = $derived(data.workspaces?.filter(w => w.role === "OWNER") || []);
-  const sharedWorkspaces = $derived(data.workspaces?.filter(w => w.role !== "OWNER") || []);
+  const ownedWorkspaces = $derived(
+    data.workspaces?.filter((w) => w.role === "OWNER") || [],
+  );
+  const sharedWorkspaces = $derived(
+    data.workspaces?.filter((w) => w.role !== "OWNER") || [],
+  );
 
   function openInviteModal(workspace: any) {
     workspaceToInvite = workspace;
@@ -26,35 +39,35 @@
 
   async function sendInvitation(email: string, roleId: string) {
     if (!workspaceToInvite || !data.user) return;
-    
+
     try {
-      const response = await fetch('/api/workspace-invitations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/workspace-invitations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workspaceId: workspaceToInvite.id,
           email,
-          roleId
-        })
+          roleId,
+        }),
       });
-      
+
       if (response.ok) {
         inviteModalOpen = false;
         workspaceToInvite = null;
       }
     } catch (error) {
-      console.error('Failed to send invitation:', error);
+      console.error("Failed to send invitation:", error);
     }
   }
 
   async function loadInvitations() {
     try {
-      const response = await fetch('/api/workspace-invitations');
+      const response = await fetch("/api/workspace-invitations");
       if (response.ok) {
         pendingInvitations = await response.json();
       }
     } catch (error) {
-      console.error('Failed to load invitations:', error);
+      console.error("Failed to load invitations:", error);
     } finally {
       invitationsLoading = false;
     }
@@ -62,25 +75,29 @@
 
   async function respondToInvitation(invitationId: string, accept: boolean) {
     try {
-      const response = await fetch(`/api/workspaces/any/invitations?invitationId=${invitationId}&action=${accept ? 'accept' : 'deny'}`, {
-        method: 'PATCH'
-      });
-      
+      const response = await fetch(
+        `/api/workspaces/any/invitations?invitationId=${invitationId}&action=${accept ? "accept" : "deny"}`,
+        {
+          method: "PATCH",
+        },
+      );
+
       if (response.ok) {
-        pendingInvitations = pendingInvitations.filter(inv => inv.id !== invitationId);
+        pendingInvitations = pendingInvitations.filter(
+          (inv) => inv.id !== invitationId,
+        );
         if (accept) {
           window.location.reload();
         }
       }
     } catch (error) {
-      console.error('Failed to respond to invitation:', error);
+      console.error("Failed to respond to invitation:", error);
     }
   }
 
   $effect(() => {
     loadInvitations();
   });
-
 </script>
 
 <div class="flex-1 p-2 sm:p-4 max-w-none mx-2 sm:mx-4">
@@ -223,7 +240,9 @@
         {#if ownedWorkspaces.length > 0}
           <div>
             <div class="flex items-center gap-2 mb-4">
-              <h3 class="text-lg font-semibold text-ctp-text">Your Workspaces</h3>
+              <h3 class="text-lg font-semibold text-ctp-text">
+                Your Workspaces
+              </h3>
             </div>
             <div class="space-y-4">
               {#each ownedWorkspaces as workspace}
@@ -251,7 +270,11 @@
                       >
                         <Users size={14} />
                       </button>
-                      <form method="POST" action="?/deleteWorkspace" use:enhance>
+                      <form
+                        method="POST"
+                        action="?/deleteWorkspace"
+                        use:enhance
+                      >
                         <input type="hidden" name="id" value={workspace.id} />
                         <button
                           type="submit"
@@ -281,7 +304,9 @@
         {#if sharedWorkspaces.length > 0}
           <div>
             <div class="flex items-center gap-2 mb-4">
-              <h3 class="text-lg font-semibold text-ctp-text">Shared with You</h3>
+              <h3 class="text-lg font-semibold text-ctp-text">
+                Shared with You
+              </h3>
             </div>
             <div class="space-y-4">
               {#each sharedWorkspaces as workspace}
@@ -298,13 +323,24 @@
                       </p>
                       <div class="flex items-center gap-2 mb-3">
                         {#if workspace.role === "ADMIN"}
-                          <span class="text-xs px-2 py-1 bg-ctp-red/20 text-ctp-red rounded-full border border-ctp-red/30">ADMIN</span>
+                          <span
+                            class="text-xs px-2 py-1 bg-ctp-red/20 text-ctp-red rounded-full border border-ctp-red/30"
+                            >ADMIN</span
+                          >
                         {:else if workspace.role === "EDITOR"}
-                          <span class="text-xs px-2 py-1 bg-ctp-blue/20 text-ctp-blue rounded-full border border-ctp-blue/30">EDITOR</span>
+                          <span
+                            class="text-xs px-2 py-1 bg-ctp-blue/20 text-ctp-blue rounded-full border border-ctp-blue/30"
+                            >EDITOR</span
+                          >
                         {:else}
-                          <span class="text-xs px-2 py-1 bg-ctp-green/20 text-ctp-green rounded-full border border-ctp-green/30">VIEWER</span>
+                          <span
+                            class="text-xs px-2 py-1 bg-ctp-green/20 text-ctp-green rounded-full border border-ctp-green/30"
+                            >VIEWER</span
+                          >
                         {/if}
-                        <span class="text-xs text-ctp-subtext0">Shared workspace</span>
+                        <span class="text-xs text-ctp-subtext0"
+                          >Shared workspace</span
+                        >
                       </div>
                       <div class="text-xs text-ctp-overlay0 font-mono">
                         ID: {workspace.id}
@@ -332,7 +368,9 @@
 
       {#if invitationsLoading}
         <div class="flex items-center justify-center py-8">
-          <div class="w-6 h-6 border-2 border-ctp-blue/30 border-t-ctp-blue rounded-full animate-spin"></div>
+          <div
+            class="w-6 h-6 border-2 border-ctp-blue/30 border-t-ctp-blue rounded-full animate-spin"
+          ></div>
         </div>
       {:else if pendingInvitations.length === 0}
         <div class="text-center py-8 text-ctp-subtext0">
@@ -342,11 +380,19 @@
       {:else}
         <div class="space-y-4">
           {#each pendingInvitations as invitation}
-            <div class="p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30 hover:border-ctp-surface0/50 transition-all">
+            <div
+              class="p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30 hover:border-ctp-surface0/50 transition-all"
+            >
               <div class="mb-3">
-                <h4 class="font-semibold text-ctp-text">{invitation.workspaceName}</h4>
-                <p class="text-sm text-ctp-subtext0">Invited by {invitation.fromEmail}</p>
-                <span class="text-xs px-2 py-1 bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 rounded-full">
+                <h4 class="font-semibold text-ctp-text">
+                  {invitation.workspaceName}
+                </h4>
+                <p class="text-sm text-ctp-subtext0">
+                  Invited by {invitation.fromEmail}
+                </p>
+                <span
+                  class="text-xs px-2 py-1 bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 rounded-full"
+                >
                   {invitation.role}
                 </span>
               </div>
@@ -533,8 +579,8 @@
   </div>
 </div>
 
-<WorkspaceInviteModal 
-  bind:isOpen={inviteModalOpen} 
-  workspace={workspaceToInvite} 
-  onInvite={sendInvitation} 
+<WorkspaceInviteModal
+  bind:isOpen={inviteModalOpen}
+  workspace={workspaceToInvite}
+  onInvite={sendInvitation}
 />

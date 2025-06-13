@@ -16,7 +16,7 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
     // 2. If accepted, add user to workspace with the specified role
     // 3. Mark invitation as accepted/declined
     // 4. Clean up the invitation record
-    
+
     const action = accept ? "accepted" : "declined";
     return json({
       success: true,

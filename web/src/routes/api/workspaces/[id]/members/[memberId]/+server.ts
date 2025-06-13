@@ -21,7 +21,7 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
     // 1. Verify user has OWNER permissions for the workspace
     // 2. Update the member's role in the database
     // 3. Return the updated member data
-    
+
     return json({
       success: true,
       message: `Member role updated to ${role}`,
@@ -46,7 +46,7 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
     // 1. Verify user has OWNER permissions for the workspace
     // 2. Remove the member from the workspace in the database
     // 3. Handle any cleanup (remove access to experiments, etc.)
-    
+
     return json({
       success: true,
       message: "Member removed from workspace",

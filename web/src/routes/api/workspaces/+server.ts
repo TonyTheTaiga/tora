@@ -6,10 +6,10 @@ export const GET: RequestHandler = async ({ locals }) => {
     return json([]);
   }
   const workspaces = await locals.dbClient.getWorkspacesV2(locals.user.id, [
-    "OWNER", 
-    "ADMIN", 
-    "EDITOR", 
-    "VIEWER"
+    "OWNER",
+    "ADMIN",
+    "EDITOR",
+    "VIEWER",
   ]);
   return json(workspaces);
 };

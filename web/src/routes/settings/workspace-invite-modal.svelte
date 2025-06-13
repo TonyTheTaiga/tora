@@ -4,28 +4,28 @@
   let {
     isOpen = $bindable(false),
     workspace,
-    onInvite
+    onInvite,
   }: {
     isOpen: boolean;
     workspace: any;
     onInvite: (email: string, roleId: string) => Promise<void>;
   } = $props();
 
-  let workspaceRoles = $state<Array<{id: string, name: string}>>([]);
+  let workspaceRoles = $state<Array<{ id: string; name: string }>>([]);
   let loading = $state(false);
 
   async function loadRoles() {
     if (!isOpen) return;
-    
+
     loading = true;
     try {
-      const rolesRes = await fetch('/api/workspace-roles');
-      
+      const rolesRes = await fetch("/api/workspace-roles");
+
       if (rolesRes.ok) {
         workspaceRoles = await rolesRes.json();
       }
     } catch (error) {
-      console.error('Failed to load roles:', error);
+      console.error("Failed to load roles:", error);
     } finally {
       loading = false;
     }
@@ -44,9 +44,9 @@
   async function handleSubmit(e: Event) {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-    const email = formData.get('email');
-    const roleId = formData.get('roleId');
-    
+    const email = formData.get("email");
+    const roleId = formData.get("roleId");
+
     if (email && roleId) {
       await onInvite(email.toString(), roleId.toString());
       closeModal();
@@ -55,35 +55,47 @@
 </script>
 
 {#if isOpen && workspace}
-  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div class="bg-ctp-mantle/95 backdrop-blur-md border border-ctp-surface0/30 rounded-2xl shadow-2xl w-full max-w-md p-6">
+  <div
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+  >
+    <div
+      class="bg-ctp-mantle/95 backdrop-blur-md border border-ctp-surface0/30 rounded-2xl shadow-2xl w-full max-w-md p-6"
+    >
       <div class="flex items-center gap-3 mb-4">
         <Users size={24} class="text-ctp-blue" />
-        <h3 class="text-xl font-bold text-ctp-text">Invite User to {workspace.name}</h3>
+        <h3 class="text-xl font-bold text-ctp-text">
+          Invite User to {workspace.name}
+        </h3>
       </div>
-      
+
       {#if loading}
         <div class="flex items-center justify-center py-8">
-          <div class="w-6 h-6 border-2 border-ctp-blue/30 border-t-ctp-blue rounded-full animate-spin"></div>
+          <div
+            class="w-6 h-6 border-2 border-ctp-blue/30 border-t-ctp-blue rounded-full animate-spin"
+          ></div>
         </div>
       {:else}
         <form onsubmit={handleSubmit}>
           <div class="space-y-4">
             <div>
-              <label class="text-sm font-medium text-ctp-subtext0 block mb-2">Email Address</label>
-              <input 
+              <label class="text-sm font-medium text-ctp-subtext0 block mb-2"
+                >Email Address</label
+              >
+              <input
                 type="email"
-                name="email" 
+                name="email"
                 required
                 placeholder="colleague@example.com"
                 class="w-full px-4 py-3 bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface0/40 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue/50 focus:border-ctp-blue/50 transition-all placeholder-ctp-overlay0"
               />
             </div>
-            
+
             <div>
-              <label class="text-sm font-medium text-ctp-subtext0 block mb-2">Role</label>
-              <select 
-                name="roleId" 
+              <label class="text-sm font-medium text-ctp-subtext0 block mb-2"
+                >Role</label
+              >
+              <select
+                name="roleId"
                 required
                 class="w-full px-4 py-3 bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface0/40 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue/50 focus:border-ctp-blue/50 transition-all"
               >
@@ -94,7 +106,7 @@
               </select>
             </div>
           </div>
-          
+
           <div class="flex gap-3 mt-6">
             <button
               type="button"

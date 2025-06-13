@@ -25,8 +25,8 @@
   let theme = $derived.by(() => getTheme());
   let currentWorkspace = $derived(page.data.currentWorkspace);
   let canCreateExperiments = $derived(
-    currentWorkspace && 
-    ["OWNER", "ADMIN", "EDITOR"].includes(currentWorkspace.role)
+    currentWorkspace &&
+      ["OWNER", "ADMIN", "EDITOR"].includes(currentWorkspace.role),
   );
   let isAtBottom = $state(false);
   let isComparisonMode = $derived.by(() => getMode());

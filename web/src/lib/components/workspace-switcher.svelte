@@ -20,8 +20,12 @@
   let shareModalOpen = $state(false);
   let workspaceToShare: Workspace | null = $state(null);
 
-  const ownedWorkspaces = $derived(workspaces.filter(w => w.role === "OWNER"));
-  const sharedWorkspaces = $derived(workspaces.filter(w => w.role !== "OWNER"));
+  const ownedWorkspaces = $derived(
+    workspaces.filter((w) => w.role === "OWNER"),
+  );
+  const sharedWorkspaces = $derived(
+    workspaces.filter((w) => w.role !== "OWNER"),
+  );
 
   function openShareModal(workspace: Workspace) {
     workspaceToShare = workspace;
@@ -60,7 +64,9 @@
     >
       <div class="p-2 space-y-2">
         {#if ownedWorkspaces.length > 0}
-          <div class="text-xs text-ctp-subtext0 uppercase tracking-wider px-2 py-1">
+          <div
+            class="text-xs text-ctp-subtext0 uppercase tracking-wider px-2 py-1"
+          >
             Your Workspaces
           </div>
 
@@ -72,7 +78,8 @@
                 use:enhance={() => {
                   return async ({ result, update }) => {
                     await update();
-                    const detailsElement = document.getElementById("workspaceDropdown");
+                    const detailsElement =
+                      document.getElementById("workspaceDropdown");
                     detailsElement?.removeAttribute("open");
                   };
                 }}
@@ -80,14 +87,20 @@
                 <input type="hidden" name="workspaceId" value={workspace.id} />
                 <button
                   type="submit"
-                  class="w-full text-left px-3 py-2 rounded-xl hover:bg-ctp-surface0/50 transition-all flex items-center gap-2 {workspace.id === currentWorkspace?.id ? 'bg-ctp-surface0/70 backdrop-blur-sm' : ''}"
+                  class="w-full text-left px-3 py-2 rounded-xl hover:bg-ctp-surface0/50 transition-all flex items-center gap-2 {workspace.id ===
+                  currentWorkspace?.id
+                    ? 'bg-ctp-surface0/70 backdrop-blur-sm'
+                    : ''}"
                 >
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-1">
                       <div class="text-sm text-ctp-text truncate">
                         {workspace.name}
                       </div>
-                      <span class="text-xs px-2 py-0.5 bg-ctp-yellow/20 text-ctp-yellow border border-ctp-yellow/30 rounded-full">OWNER</span>
+                      <span
+                        class="text-xs px-2 py-0.5 bg-ctp-yellow/20 text-ctp-yellow border border-ctp-yellow/30 rounded-full"
+                        >OWNER</span
+                      >
                     </div>
                     {#if workspace.description}
                       <div class="text-xs text-ctp-subtext0 truncate">
@@ -110,7 +123,12 @@
         {/if}
 
         {#if sharedWorkspaces.length > 0}
-          <div class="text-xs text-ctp-subtext0 uppercase tracking-wider px-2 py-1 {ownedWorkspaces.length > 0 ? 'mt-4' : ''}">
+          <div
+            class="text-xs text-ctp-subtext0 uppercase tracking-wider px-2 py-1 {ownedWorkspaces.length >
+            0
+              ? 'mt-4'
+              : ''}"
+          >
             Shared with You
           </div>
 
@@ -121,7 +139,8 @@
               use:enhance={() => {
                 return async ({ result, update }) => {
                   await update();
-                  const detailsElement = document.getElementById("workspaceDropdown");
+                  const detailsElement =
+                    document.getElementById("workspaceDropdown");
                   detailsElement?.removeAttribute("open");
                 };
               }}
@@ -129,7 +148,10 @@
               <input type="hidden" name="workspaceId" value={workspace.id} />
               <button
                 type="submit"
-                class="w-full text-left px-3 py-2 rounded-xl hover:bg-ctp-surface0/50 transition-all flex items-center gap-2 {workspace.id === currentWorkspace?.id ? 'bg-ctp-surface0/70 backdrop-blur-sm' : ''}"
+                class="w-full text-left px-3 py-2 rounded-xl hover:bg-ctp-surface0/50 transition-all flex items-center gap-2 {workspace.id ===
+                currentWorkspace?.id
+                  ? 'bg-ctp-surface0/70 backdrop-blur-sm'
+                  : ''}"
               >
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2 mb-1">
@@ -137,11 +159,20 @@
                       {workspace.name}
                     </div>
                     {#if workspace.role === "ADMIN"}
-                      <span class="text-xs px-2 py-0.5 bg-ctp-red/20 text-ctp-red border border-ctp-red/30 rounded-full">ADMIN</span>
+                      <span
+                        class="text-xs px-2 py-0.5 bg-ctp-red/20 text-ctp-red border border-ctp-red/30 rounded-full"
+                        >ADMIN</span
+                      >
                     {:else if workspace.role === "EDITOR"}
-                      <span class="text-xs px-2 py-0.5 bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 rounded-full">EDITOR</span>
+                      <span
+                        class="text-xs px-2 py-0.5 bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 rounded-full"
+                        >EDITOR</span
+                      >
                     {:else}
-                      <span class="text-xs px-2 py-0.5 bg-ctp-green/20 text-ctp-green border border-ctp-green/30 rounded-full">VIEWER</span>
+                      <span
+                        class="text-xs px-2 py-0.5 bg-ctp-green/20 text-ctp-green border border-ctp-green/30 rounded-full"
+                        >VIEWER</span
+                      >
                     {/if}
                   </div>
                   <div class="text-xs text-ctp-subtext0 truncate">
@@ -174,5 +205,8 @@
 </div>
 
 {#if workspaceToShare}
-  <WorkspaceShareModal bind:isOpen={shareModalOpen} workspace={workspaceToShare} />
+  <WorkspaceShareModal
+    bind:isOpen={shareModalOpen}
+    workspace={workspaceToShare}
+  />
 {/if}
