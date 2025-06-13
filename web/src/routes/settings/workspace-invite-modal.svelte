@@ -78,10 +78,11 @@
         <form onsubmit={handleSubmit}>
           <div class="space-y-4">
             <div>
-              <label class="text-sm font-medium text-ctp-subtext0 block mb-2"
+              <label for="invite-email" class="text-sm font-medium text-ctp-subtext0 block mb-2"
                 >Email Address</label
               >
               <input
+                id="invite-email"
                 type="email"
                 name="email"
                 required
@@ -91,10 +92,11 @@
             </div>
 
             <div>
-              <label class="text-sm font-medium text-ctp-subtext0 block mb-2"
+              <label for="invite-role" class="text-sm font-medium text-ctp-subtext0 block mb-2"
                 >Role</label
               >
               <select
+                id="invite-role"
                 name="roleId"
                 required
                 class="w-full px-4 py-3 bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface0/40 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue/50 focus:border-ctp-blue/50 transition-all"

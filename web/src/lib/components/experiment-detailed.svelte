@@ -60,16 +60,11 @@
 
   let currentWorkspace = $derived(page.data.currentWorkspace);
   let canEditExperiment = $derived(
-    page.data.user &&
-      (page.data.user.id === experiment.user_id ||
-        (currentWorkspace &&
-          ["OWNER", "ADMIN", "EDITOR"].includes(currentWorkspace.role))),
+    currentWorkspace &&
+      ["OWNER", "ADMIN", "EDITOR"].includes(currentWorkspace.role),
   );
   let canDeleteExperiment = $derived(
-    page.data.user &&
-      (page.data.user.id === experiment.user_id ||
-        (currentWorkspace &&
-          ["OWNER", "ADMIN"].includes(currentWorkspace.role))),
+    currentWorkspace && ["OWNER", "ADMIN"].includes(currentWorkspace.role),
   );
 
   let visibleTags = $derived.by(() => {

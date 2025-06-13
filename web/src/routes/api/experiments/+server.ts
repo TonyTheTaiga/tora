@@ -12,16 +12,15 @@ export const GET: RequestHandler = async ({ url, locals }) => {
       throw error(401, "Unauthorized");
     }
 
-    const workspace_id = url.searchParams.get("workspace") || undefined;
+    const workspaceId = url.searchParams.get("workspace") || undefined;
+    if (!workspaceId) {
+      throw error(401, "missing workspace id");
+    }
 
-    const experiments = await locals.dbClient.getExperiments(
-      user.id,
-      workspace_id,
-    );
-
+    const experiments = await locals.dbClient.getExperiments(workspaceId);
     timer.end({
       userId: user.id || "unknown",
-      workspaceId: workspace_id || "unknown",
+      workspaceId: workspaceId || "unknown",
       experimentCount: experiments.length.toString(),
     });
     return json(experiments);

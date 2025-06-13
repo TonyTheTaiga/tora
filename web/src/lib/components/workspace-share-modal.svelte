@@ -73,10 +73,16 @@
   <div
     class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
     onclick={() => (isOpen = false)}
+    onkeydown={(e) => e.key === 'Escape' && (isOpen = false)}
+    role="button"
+    tabindex="0"
   >
     <div
       class="bg-ctp-base/80 backdrop-blur-xl border border-ctp-surface0/20 rounded-2xl shadow-2xl max-w-md w-full p-6"
       onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => e.stopPropagation()}
+      role="dialog"
+      tabindex="-1"
     >
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
@@ -98,10 +104,11 @@
 
       <form onsubmit={handleInvite} class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-ctp-text mb-2">
+          <label for="email-input" class="block text-sm font-medium text-ctp-text mb-2">
             Email Address
           </label>
           <input
+            id="email-input"
             type="email"
             bind:value={email}
             placeholder="colleague@example.com"
@@ -111,11 +118,12 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-ctp-text mb-2">
+          <label for="role-select" class="block text-sm font-medium text-ctp-text mb-2">
             Role
           </label>
           <div class="relative">
             <button
+              id="role-select"
               type="button"
               class="w-full px-4 py-3 bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface1/20 rounded-xl text-left text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue/50 focus:border-ctp-blue/30 transition-all duration-200 flex items-center justify-between"
               onclick={() => (dropdownOpen = !dropdownOpen)}

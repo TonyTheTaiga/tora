@@ -27,7 +27,6 @@ function mapToExperiment(data: any, userIdOverride?: string): Experiment {
 
   return {
     id: data.id,
-    user_id: finalUserId,
     name: data.name,
     description: data.description ?? "",
     hyperparams: (data.hyperparams as HyperParam[]) ?? [],
@@ -42,7 +41,6 @@ function mapToExperiment(data: any, userIdOverride?: string): Experiment {
 function mapRpcResultToExperiment(row: any): Experiment {
   return {
     id: row.experiment_id,
-    user_id: row.experiment_user_id,
     name: row.experiment_name,
     description: row.experiment_description ?? "",
     hyperparams: (row.experiment_hyperparams as HyperParam[]) ?? [],
@@ -116,22 +114,18 @@ export function createDbClient(client: SupabaseClient<Database>) {
       return mapToExperiment(expData, userId);
     },
 
-    async getExperiments(
-      userId: string,
-      workspaceId?: string,
-    ): Promise<Experiment[]> {
+    async getExperiments(workspaceId: string): Promise<Experiment[]> {
       return timeAsync(
         "db.getExperiments",
         async () => {
           const { data, error } = await client.rpc("get_user_experiments", {
-            user_id: userId,
             workspace_id: workspaceId,
           });
 
           handleError(error, "Failed to get experiments");
           return data?.map(mapRpcResultToExperiment) ?? [];
         },
-        { userId, workspaceId },
+        { workspaceId },
       );
     },
 
@@ -287,7 +281,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
           return (
             data?.map((item) => ({
               id: item.experiment_id,
-              user_id: "",
               name: item.experiment_name,
               description: item.experiment_description ?? "",
               hyperparams:
