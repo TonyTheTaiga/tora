@@ -228,7 +228,9 @@
                   <div class="flex justify-between items-start">
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2 mb-2">
-                        <h4 class="text-base font-medium text-ctp-text truncate">
+                        <h4
+                          class="text-base font-medium text-ctp-text truncate"
+                        >
                           {workspace.name}
                         </h4>
                         <WorkspaceRoleBadge role={workspace.role} />
@@ -242,7 +244,9 @@
                         {workspace.id}
                       </div>
                     </div>
-                    <div class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3">
+                    <div
+                      class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3"
+                    >
                       <button
                         type="button"
                         class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface1/60 transition-colors"
@@ -297,7 +301,9 @@
                   <div class="flex justify-between items-start">
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2 mb-2">
-                        <h4 class="text-base font-medium text-ctp-text truncate">
+                        <h4
+                          class="text-base font-medium text-ctp-text truncate"
+                        >
                           {workspace.name}
                         </h4>
                         <WorkspaceRoleBadge role={workspace.role} />
@@ -311,7 +317,9 @@
                         {workspace.id}
                       </div>
                     </div>
-                    <div class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3">
+                    <div
+                      class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3"
+                    >
                       <form
                         method="POST"
                         action="?/removeSharedWorkspace"
@@ -386,7 +394,9 @@
                         Invited by {invitation.fromEmail}
                       </p>
                     </div>
-                    <div class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3">
+                    <div
+                      class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3"
+                    >
                       <button
                         type="button"
                         class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-green hover:bg-ctp-surface1/60 transition-colors"
@@ -399,7 +409,8 @@
                         type="button"
                         class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
                         title="Decline invitation"
-                        onclick={() => respondToInvitation(invitation.id, false)}
+                        onclick={() =>
+                          respondToInvitation(invitation.id, false)}
                       >
                         <X size={14} />
                       </button>
@@ -412,7 +423,6 @@
         {/if}
       </div>
     </div>
-
 
     <div
       class="bg-ctp-surface0/10 backdrop-blur-md rounded-2xl border border-ctp-surface0/20 p-4 sm:p-6 shadow-xl h-fit"
@@ -500,7 +510,9 @@
                     {apiKey.name}
                   </h3>
                   <span
-                    class="text-xs px-2 py-0.5 {apiKey.revoked ? 'bg-ctp-red/20 text-ctp-red border-ctp-red/30' : 'bg-ctp-green/20 text-ctp-green border-ctp-green/30'} border rounded-full font-medium flex-shrink-0"
+                    class="text-xs px-2 py-0.5 {apiKey.revoked
+                      ? 'bg-ctp-red/20 text-ctp-red border-ctp-red/30'
+                      : 'bg-ctp-green/20 text-ctp-green border-ctp-green/30'} border rounded-full font-medium flex-shrink-0"
                   >
                     {apiKey.revoked ? "REVOKED" : "ACTIVE"}
                   </span>
@@ -519,7 +531,9 @@
                 </div>
               </div>
               {#if !apiKey.revoked}
-                <div class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3">
+                <div
+                  class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3"
+                >
                   <form method="POST" action="?/revokeApiKey" use:enhance>
                     <input type="hidden" name="id" value={apiKey.id} />
                     <button

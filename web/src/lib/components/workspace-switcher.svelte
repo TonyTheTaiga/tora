@@ -25,7 +25,6 @@
     workspaces.filter((w) => w.role !== "OWNER"),
   );
 
-
   onMount(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef && !dropdownRef.contains(event.target as Node)) {
@@ -69,9 +68,10 @@
               type="button"
               class="px-4 py-2 bg-ctp-blue/20 hover:bg-ctp-blue/30 border border-ctp-blue/30 rounded-lg text-ctp-blue font-medium transition-all duration-200 flex items-center justify-center gap-2 w-full"
               onclick={() => {
-                const detailsElement = document.getElementById('workspaceDropdown');
-                detailsElement?.removeAttribute('open');
-                goto('/settings');
+                const detailsElement =
+                  document.getElementById("workspaceDropdown");
+                detailsElement?.removeAttribute("open");
+                goto("/settings");
               }}
             >
               <Plus size={14} />
@@ -178,24 +178,23 @@
         {/if}
 
         {#if workspaces.length > 0}
-        <div class="border-t border-ctp-surface0 mt-2 pt-2">
-          <button
-            type="button"
-            class="w-full text-left px-3 py-2 rounded-xl hover:bg-ctp-surface0/50 transition-all flex items-center gap-2 text-ctp-blue"
-            onclick={() => {
-              const detailsElement =
-                document.getElementById("workspaceDropdown");
-              detailsElement?.removeAttribute("open");
-              goto("/settings");
-            }}
-          >
-            <Plus size={14} />
-            <span class="text-sm">Manage Workspaces</span>
-          </button>
-        </div>
+          <div class="border-t border-ctp-surface0 mt-2 pt-2">
+            <button
+              type="button"
+              class="w-full text-left px-3 py-2 rounded-xl hover:bg-ctp-surface0/50 transition-all flex items-center gap-2 text-ctp-blue"
+              onclick={() => {
+                const detailsElement =
+                  document.getElementById("workspaceDropdown");
+                detailsElement?.removeAttribute("open");
+                goto("/settings");
+              }}
+            >
+              <Plus size={14} />
+              <span class="text-sm">Manage Workspaces</span>
+            </button>
+          </div>
         {/if}
       </div>
     </div>
   </details>
 </div>
-

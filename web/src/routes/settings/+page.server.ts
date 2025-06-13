@@ -78,9 +78,12 @@ export const actions: Actions = {
       );
     }
 
-    const response = await fetch(`/api/workspaces/${workspaceId}/members/${userId}`, {
-      method: "DELETE",
-    });
+    const response = await fetch(
+      `/api/workspaces/${workspaceId}/members/${userId}`,
+      {
+        method: "DELETE",
+      },
+    );
 
     if (!response.ok) {
       throw error(500, "Failed to leave workspace");
