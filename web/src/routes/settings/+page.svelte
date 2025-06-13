@@ -156,33 +156,7 @@
         method="POST"
         action="?/createWorkspace"
         class="mb-6 p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30"
-        use:enhance={() => {
-          creatingWorkspace = true;
-          workspaceError = "";
-          return async ({ result, update }) => {
-            try {
-              if (result.type === "success" && result.data) {
-                if (isWorkspace(result.data)) {
-                  data.workspaces?.push(result.data);
-                } else {
-                  workspaceError = "Invalid workspace data received";
-                }
-              } else if (result.type === "failure") {
-                workspaceError =
-                  (result.data as any)?.message || "Failed to create workspace";
-              } else if (result.type === "error") {
-                workspaceError =
-                  "An error occurred while creating the workspace";
-              }
-            } catch (error) {
-              workspaceError = "An unexpected error occurred";
-              console.error("Workspace creation error:", error);
-            } finally {
-              creatingWorkspace = false;
-              await update();
-            }
-          };
-        }}
+        use:enhance
       >
         <h3 class="text-lg font-semibold text-ctp-text mb-4">
           Create New Workspace
@@ -217,7 +191,7 @@
               placeholder="Describe your workspace"
               disabled={creatingWorkspace}
               class="w-full px-4 py-3 bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface0/40 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue/50 focus:border-ctp-blue/50 transition-all placeholder-ctp-overlay0"
-              required
+              defaultvalue=""
             />
           </div>
         </div>
@@ -462,36 +436,9 @@
 
       <form
         class="mb-6 p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30"
-        use:enhance={() => {
-          creatingApiKey = true;
-          apiKeyError = "";
-
-          return async ({ result, update }) => {
-            try {
-              if (result.type === "success" && result.data) {
-                const newKey = result.data as unknown as ApiKey;
-                if (newKey?.key) {
-                  createdKey = newKey.key;
-                } else {
-                  apiKeyError = "No API key received";
-                }
-              } else if (result.type === "failure") {
-                apiKeyError =
-                  (result.data as any)?.message || "Failed to create API key";
-              } else if (result.type === "error") {
-                apiKeyError = "An error occurred while creating the API key";
-              }
-            } catch (error) {
-              apiKeyError = "An unexpected error occurred";
-              console.error("API key creation error:", error);
-            } finally {
-              creatingApiKey = false;
-              await update();
-            }
-          };
-        }}
         action="?/createApiKey"
         method="POST"
+        use:enhance
       >
         <h3 class="text-lg font-semibold text-ctp-text mb-4">
           Create New API Key
