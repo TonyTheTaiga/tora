@@ -28,10 +28,10 @@
   };
 
   const roleColors = {
-    OWNER: "text-ctp-yellow",
-    ADMIN: "text-ctp-red", 
-    EDITOR: "text-ctp-blue",
-    VIEWER: "text-ctp-green"
+    OWNER: "bg-ctp-yellow/20 text-ctp-yellow border-ctp-yellow/30",
+    ADMIN: "bg-ctp-red/20 text-ctp-red border-ctp-red/30", 
+    EDITOR: "bg-ctp-blue/20 text-ctp-blue border-ctp-blue/30",
+    VIEWER: "bg-ctp-green/20 text-ctp-green border-ctp-green/30"
   };
 
   async function loadMembers() {
@@ -129,16 +129,7 @@
             <div>
               <div class="font-medium text-ctp-text">{member.email}</div>
               <div class="flex items-center gap-2">
-                {#if member.role === "OWNER"}
-                  <Crown size={12} class="text-ctp-yellow" />
-                {:else if member.role === "ADMIN"}
-                  <Shield size={12} class="text-ctp-red" />
-                {:else if member.role === "EDITOR"}
-                  <Edit size={12} class="text-ctp-blue" />
-                {:else}
-                  <Eye size={12} class="text-ctp-green" />
-                {/if}
-                <span class="text-xs {roleColors[member.role]}">{member.role}</span>
+                <span class="text-xs px-2 py-1 rounded-full border {roleColors[member.role]}">{member.role}</span>
               </div>
             </div>
           </div>
@@ -166,13 +157,6 @@
                           class="w-full text-left px-3 py-2 hover:bg-ctp-surface1/30 rounded-lg transition-all duration-200 flex items-center gap-2"
                           onclick={() => changeRole(member.id, role)}
                         >
-                          {#if role === "ADMIN"}
-                            <Shield size={14} class="text-ctp-red" />
-                          {:else if role === "EDITOR"}
-                            <Edit size={14} class="text-ctp-blue" />
-                          {:else}
-                            <Eye size={14} class="text-ctp-green" />
-                          {/if}
                           <span class="text-sm text-ctp-text">{role}</span>
                         </button>
                       {/if}

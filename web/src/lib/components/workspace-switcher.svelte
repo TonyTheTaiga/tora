@@ -82,10 +82,12 @@
                   type="submit"
                   class="w-full text-left px-3 py-2 rounded-xl hover:bg-ctp-surface0/50 transition-all flex items-center gap-2 {workspace.id === currentWorkspace?.id ? 'bg-ctp-surface0/70 backdrop-blur-sm' : ''}"
                 >
-                  <Crown size={14} class="text-ctp-yellow" />
                   <div class="flex-1 min-w-0">
-                    <div class="text-sm text-ctp-text truncate">
-                      {workspace.name}
+                    <div class="flex items-center gap-2 mb-1">
+                      <div class="text-sm text-ctp-text truncate">
+                        {workspace.name}
+                      </div>
+                      <span class="text-xs px-2 py-0.5 bg-ctp-yellow/20 text-ctp-yellow border border-ctp-yellow/30 rounded-full">OWNER</span>
                     </div>
                     {#if workspace.description}
                       <div class="text-xs text-ctp-subtext0 truncate">
@@ -129,13 +131,21 @@
                 type="submit"
                 class="w-full text-left px-3 py-2 rounded-xl hover:bg-ctp-surface0/50 transition-all flex items-center gap-2 {workspace.id === currentWorkspace?.id ? 'bg-ctp-surface0/70 backdrop-blur-sm' : ''}"
               >
-                <Users size={14} class="text-ctp-green" />
                 <div class="flex-1 min-w-0">
-                  <div class="text-sm text-ctp-text truncate">
-                    {workspace.name}
+                  <div class="flex items-center gap-2 mb-1">
+                    <div class="text-sm text-ctp-text truncate">
+                      {workspace.name}
+                    </div>
+                    {#if workspace.role === "ADMIN"}
+                      <span class="text-xs px-2 py-0.5 bg-ctp-red/20 text-ctp-red border border-ctp-red/30 rounded-full">ADMIN</span>
+                    {:else if workspace.role === "EDITOR"}
+                      <span class="text-xs px-2 py-0.5 bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 rounded-full">EDITOR</span>
+                    {:else}
+                      <span class="text-xs px-2 py-0.5 bg-ctp-green/20 text-ctp-green border border-ctp-green/30 rounded-full">VIEWER</span>
+                    {/if}
                   </div>
                   <div class="text-xs text-ctp-subtext0 truncate">
-                    {workspace.role} • Shared workspace
+                    Shared workspace
                   </div>
                 </div>
               </button>
