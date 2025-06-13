@@ -67,6 +67,28 @@ export const actions: Actions = {
     return redirect(300, "/settings");
   },
 
+  removeSharedWorkspace: async ({ request, fetch }) => {
+    const formData = await request.formData();
+    const { userId, workspaceId } = Object.fromEntries(formData.entries());
+
+    if (!(userId && workspaceId)) {
+      throw error(
+        400,
+        "userId and workspaceId required to remove shared workspace",
+      );
+    }
+
+    const response = await fetch(`/api/workspaces/${workspaceId}/members/${userId}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      throw error(500, "Failed to leave workspace");
+    }
+
+    return redirect(300, "/settings");
+  },
+
   createApiKey: async ({ request, fetch }) => {
     const formData = await request.formData();
     const { name } = Object.fromEntries(formData.entries());

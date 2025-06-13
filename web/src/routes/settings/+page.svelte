@@ -13,6 +13,7 @@
   import { isWorkspace } from "$lib/types";
   import type { ApiKey } from "$lib/types";
   import WorkspaceInviteModal from "./workspace-invite-modal.svelte";
+  import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
 
   let { data } = $props();
   let creatingWorkspace: boolean = $state(false);
@@ -101,7 +102,7 @@
 </script>
 
 <div class="flex-1 p-2 sm:p-4 max-w-none mx-2 sm:mx-4">
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6 h-fit">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 h-fit">
     <div
       class="bg-ctp-surface0/10 backdrop-blur-md rounded-2xl border border-ctp-surface0/20 p-4 sm:p-6 shadow-xl h-fit"
     >
@@ -136,7 +137,7 @@
           <form action="/logout" method="POST">
             <button
               type="submit"
-              class="flex items-center gap-2 px-4 py-2.5 bg-ctp-red/10 border border-ctp-red/30 rounded-lg text-ctp-red hover:bg-ctp-red hover:text-ctp-crust transition-all duration-200 font-medium backdrop-blur-sm"
+              class="flex items-center gap-2 px-4 py-2.5 bg-ctp-red/10 border border-ctp-red/30 rounded-full text-ctp-red hover:bg-ctp-red hover:text-ctp-crust transition-all duration-200 font-medium backdrop-blur-sm"
               aria-label="Sign out"
             >
               <LogOut size={18} />
@@ -156,33 +157,7 @@
         method="POST"
         action="?/createWorkspace"
         class="mb-6 p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30"
-        use:enhance={() => {
-          creatingWorkspace = true;
-          workspaceError = "";
-          return async ({ result, update }) => {
-            try {
-              if (result.type === "success" && result.data) {
-                if (isWorkspace(result.data)) {
-                  data.workspaces?.push(result.data);
-                } else {
-                  workspaceError = "Invalid workspace data received";
-                }
-              } else if (result.type === "failure") {
-                workspaceError =
-                  (result.data as any)?.message || "Failed to create workspace";
-              } else if (result.type === "error") {
-                workspaceError =
-                  "An error occurred while creating the workspace";
-              }
-            } catch (error) {
-              workspaceError = "An unexpected error occurred";
-              console.error("Workspace creation error:", error);
-            } finally {
-              creatingWorkspace = false;
-              await update();
-            }
-          };
-        }}
+        use:enhance
       >
         <h3 class="text-lg font-semibold text-ctp-text mb-4">
           Create New Workspace
@@ -217,13 +192,14 @@
               placeholder="Describe your workspace"
               disabled={creatingWorkspace}
               class="w-full px-4 py-3 bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface0/40 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue/50 focus:border-ctp-blue/50 transition-all placeholder-ctp-overlay0"
+              defaultvalue=""
             />
           </div>
         </div>
         <button
           type="submit"
           disabled={creatingWorkspace}
-          class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-lg bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm disabled:opacity-50"
+          class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-full bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm disabled:opacity-50"
         >
           <Plus size={18} />
           <span>{creatingWorkspace ? "Creating..." : "Create Workspace"}</span>
@@ -247,24 +223,29 @@
             <div class="space-y-4">
               {#each ownedWorkspaces as workspace}
                 <div
-                  class="p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30 hover:border-ctp-surface0/50 transition-all"
+                  class="p-4 border border-ctp-surface0/30 rounded-lg hover:border-ctp-surface0/50 transition-all"
                 >
                   <div class="flex justify-between items-start">
-                    <div class="flex-1">
-                      <h4 class="text-lg font-semibold text-ctp-text mb-2">
-                        {workspace.name}
-                      </h4>
-                      <p class="text-ctp-subtext0 mb-3">
-                        {workspace.description || "No description provided"}
-                      </p>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-2">
+                        <h4 class="text-base font-medium text-ctp-text truncate">
+                          {workspace.name}
+                        </h4>
+                        <WorkspaceRoleBadge role={workspace.role} />
+                      </div>
+                      {#if workspace.description}
+                        <p class="text-sm text-ctp-subtext0 mb-2">
+                          {workspace.description}
+                        </p>
+                      {/if}
                       <div class="text-xs text-ctp-overlay0 font-mono">
-                        ID: {workspace.id}
+                        {workspace.id}
                       </div>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3">
                       <button
                         type="button"
-                        class="p-2 rounded-lg text-ctp-blue hover:bg-ctp-blue/20 hover:text-ctp-blue transition-colors border border-ctp-blue/30"
+                        class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface1/60 transition-colors"
                         title="Invite users"
                         onclick={() => openInviteModal(workspace)}
                       >
@@ -311,40 +292,58 @@
             <div class="space-y-4">
               {#each sharedWorkspaces as workspace}
                 <div
-                  class="p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30 hover:border-ctp-surface0/50 transition-all"
+                  class="p-4 border border-ctp-surface0/30 rounded-lg hover:border-ctp-surface0/50 transition-all"
                 >
                   <div class="flex justify-between items-start">
-                    <div class="flex-1">
-                      <h4 class="text-lg font-semibold text-ctp-text mb-2">
-                        {workspace.name}
-                      </h4>
-                      <p class="text-ctp-subtext0 mb-2">
-                        {workspace.description || "No description provided"}
-                      </p>
-                      <div class="flex items-center gap-2 mb-3">
-                        {#if workspace.role === "ADMIN"}
-                          <span
-                            class="text-xs px-2 py-1 bg-ctp-red/20 text-ctp-red rounded-full border border-ctp-red/30"
-                            >ADMIN</span
-                          >
-                        {:else if workspace.role === "EDITOR"}
-                          <span
-                            class="text-xs px-2 py-1 bg-ctp-blue/20 text-ctp-blue rounded-full border border-ctp-blue/30"
-                            >EDITOR</span
-                          >
-                        {:else}
-                          <span
-                            class="text-xs px-2 py-1 bg-ctp-green/20 text-ctp-green rounded-full border border-ctp-green/30"
-                            >VIEWER</span
-                          >
-                        {/if}
-                        <span class="text-xs text-ctp-subtext0"
-                          >Shared workspace</span
-                        >
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-2">
+                        <h4 class="text-base font-medium text-ctp-text truncate">
+                          {workspace.name}
+                        </h4>
+                        <WorkspaceRoleBadge role={workspace.role} />
                       </div>
+                      {#if workspace.description}
+                        <p class="text-sm text-ctp-subtext0 mb-2">
+                          {workspace.description}
+                        </p>
+                      {/if}
                       <div class="text-xs text-ctp-overlay0 font-mono">
-                        ID: {workspace.id}
+                        {workspace.id}
                       </div>
+                    </div>
+                    <div class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3">
+                      <form
+                        method="POST"
+                        action="?/removeSharedWorkspace"
+                        use:enhance
+                      >
+                        <input
+                          type="hidden"
+                          name="userId"
+                          value={data?.user?.id}
+                        />
+                        <input
+                          type="hidden"
+                          name="workspaceId"
+                          value={workspace.id}
+                        />
+                        <button
+                          type="submit"
+                          class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
+                          title="Leave workspace"
+                          onclick={(e) => {
+                            if (
+                              !confirm(
+                                "Are you sure you want to leave this workspace?",
+                              )
+                            ) {
+                              e.preventDefault();
+                            }
+                          }}
+                        >
+                          <LogOut size={14} />
+                        </button>
+                      </form>
                     </div>
                   </div>
                 </div>
@@ -358,67 +357,62 @@
             <p>No workspaces found. Create your first workspace above.</p>
           </div>
         {/if}
+
+        {#if !invitationsLoading && pendingInvitations.length > 0}
+          <div>
+            <div class="flex items-center gap-2 mb-4 mt-6">
+              <h3 class="text-lg font-semibold text-ctp-text">
+                Pending Invitations
+              </h3>
+            </div>
+            <div class="space-y-4">
+              {#each pendingInvitations as invitation}
+                <div
+                  class="p-4 border border-ctp-blue/30 rounded-lg hover:border-ctp-blue/50 transition-all"
+                >
+                  <div class="flex justify-between items-start">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-2">
+                        <h4 class="font-medium text-ctp-text truncate">
+                          {invitation.workspaceName}
+                        </h4>
+                        <span
+                          class="text-xs px-2 py-0.5 bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 rounded-full font-medium flex-shrink-0"
+                        >
+                          {invitation.role}
+                        </span>
+                      </div>
+                      <p class="text-sm text-ctp-subtext0">
+                        Invited by {invitation.fromEmail}
+                      </p>
+                    </div>
+                    <div class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3">
+                      <button
+                        type="button"
+                        class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-green hover:bg-ctp-surface1/60 transition-colors"
+                        title="Accept invitation"
+                        onclick={() => respondToInvitation(invitation.id, true)}
+                      >
+                        <Check size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
+                        title="Decline invitation"
+                        onclick={() => respondToInvitation(invitation.id, false)}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
       </div>
     </div>
 
-    <div
-      class="bg-ctp-surface0/10 backdrop-blur-md rounded-2xl border border-ctp-surface0/20 p-4 sm:p-6 shadow-xl h-fit"
-    >
-      <h2 class="text-2xl font-bold text-ctp-text mb-6">Invitations</h2>
-
-      {#if invitationsLoading}
-        <div class="flex items-center justify-center py-8">
-          <div
-            class="w-6 h-6 border-2 border-ctp-blue/30 border-t-ctp-blue rounded-full animate-spin"
-          ></div>
-        </div>
-      {:else if pendingInvitations.length === 0}
-        <div class="text-center py-8 text-ctp-subtext0">
-          <Mail size={24} class="mx-auto mb-2 opacity-50" />
-          <p>No pending invitations</p>
-        </div>
-      {:else}
-        <div class="space-y-4">
-          {#each pendingInvitations as invitation}
-            <div
-              class="p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30 hover:border-ctp-surface0/50 transition-all"
-            >
-              <div class="mb-3">
-                <h4 class="font-semibold text-ctp-text">
-                  {invitation.workspaceName}
-                </h4>
-                <p class="text-sm text-ctp-subtext0">
-                  Invited by {invitation.fromEmail}
-                </p>
-                <span
-                  class="text-xs px-2 py-1 bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 rounded-full"
-                >
-                  {invitation.role}
-                </span>
-              </div>
-              <div class="flex gap-2">
-                <button
-                  type="button"
-                  class="flex-1 px-3 py-2 bg-ctp-green/20 hover:bg-ctp-green/30 border border-ctp-green/30 rounded-lg text-ctp-green font-medium transition-all duration-200 flex items-center justify-center gap-2"
-                  onclick={() => respondToInvitation(invitation.id, true)}
-                >
-                  <Check size={14} />
-                  Accept
-                </button>
-                <button
-                  type="button"
-                  class="flex-1 px-3 py-2 bg-ctp-red/20 hover:bg-ctp-red/30 border border-ctp-red/30 rounded-lg text-ctp-red font-medium transition-all duration-200 flex items-center justify-center gap-2"
-                  onclick={() => respondToInvitation(invitation.id, false)}
-                >
-                  <X size={14} />
-                  Decline
-                </button>
-              </div>
-            </div>
-          {/each}
-        </div>
-      {/if}
-    </div>
 
     <div
       class="bg-ctp-surface0/10 backdrop-blur-md rounded-2xl border border-ctp-surface0/20 p-4 sm:p-6 shadow-xl h-fit"
@@ -427,36 +421,9 @@
 
       <form
         class="mb-6 p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30"
-        use:enhance={() => {
-          creatingApiKey = true;
-          apiKeyError = "";
-
-          return async ({ result, update }) => {
-            try {
-              if (result.type === "success" && result.data) {
-                const newKey = result.data as unknown as ApiKey;
-                if (newKey?.key) {
-                  createdKey = newKey.key;
-                } else {
-                  apiKeyError = "No API key received";
-                }
-              } else if (result.type === "failure") {
-                apiKeyError =
-                  (result.data as any)?.message || "Failed to create API key";
-              } else if (result.type === "error") {
-                apiKeyError = "An error occurred while creating the API key";
-              }
-            } catch (error) {
-              apiKeyError = "An unexpected error occurred";
-              console.error("API key creation error:", error);
-            } finally {
-              creatingApiKey = false;
-              await update();
-            }
-          };
-        }}
         action="?/createApiKey"
         method="POST"
+        use:enhance
       >
         <h3 class="text-lg font-semibold text-ctp-text mb-4">
           Create New API Key
@@ -480,7 +447,7 @@
         <button
           type="submit"
           disabled={creatingApiKey}
-          class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-lg bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm disabled:opacity-50"
+          class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-full bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm disabled:opacity-50"
         >
           <Plus size={18} />
           <span>{creatingApiKey ? "Creating..." : "Create API Key"}</span>
@@ -509,7 +476,7 @@
             ⚠️ Save this key now - it won't be shown again after you copy it.
           </p>
           <button
-            class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-lg bg-ctp-green/20 border border-ctp-green/40 text-ctp-green hover:bg-ctp-green hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm w-full"
+            class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-full bg-ctp-green/20 border border-ctp-green/40 text-ctp-green hover:bg-ctp-green hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm w-full"
             type="button"
             onclick={() => {
               navigator.clipboard.writeText(createdKey);
@@ -524,52 +491,55 @@
       <div class="space-y-4">
         {#each data.apiKeys ? data.apiKeys : [] as apiKey}
           <div
-            class="p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30 hover:border-ctp-surface0/50 transition-all"
+            class="p-4 border border-ctp-surface0/30 rounded-lg hover:border-ctp-surface0/50 transition-all"
           >
             <div class="flex justify-between items-start">
-              <div class="flex-1">
-                <h3 class="text-lg font-semibold text-ctp-text mb-2">
-                  {apiKey.name}
-                </h3>
-                <div class="space-y-2 text-sm">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-2">
+                  <h3 class="text-base font-medium text-ctp-text truncate">
+                    {apiKey.name}
+                  </h3>
+                  <span
+                    class="text-xs px-2 py-0.5 {apiKey.revoked ? 'bg-ctp-red/20 text-ctp-red border-ctp-red/30' : 'bg-ctp-green/20 text-ctp-green border-ctp-green/30'} border rounded-full font-medium flex-shrink-0"
+                  >
+                    {apiKey.revoked ? "REVOKED" : "ACTIVE"}
+                  </span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <span class="text-ctp-subtext0">Created:</span>
+                    <span class="text-ctp-subtext0 text-xs">Created</span>
                     <div class="text-ctp-text">{apiKey.createdAt}</div>
                   </div>
                   <div>
-                    <span class="text-ctp-subtext0">Last Used:</span>
+                    <span class="text-ctp-subtext0 text-xs">Last Used</span>
                     <div class="text-ctp-text">
                       {apiKey.lastUsed || "Never"}
-                    </div>
-                  </div>
-                  <div>
-                    <span class="text-ctp-subtext0">Status:</span>
-                    <div class="text-ctp-text">
-                      {apiKey.revoked ? "Revoked" : "Active"}
                     </div>
                   </div>
                 </div>
               </div>
               {#if !apiKey.revoked}
-                <form method="POST" action="?/revokeApiKey" use:enhance>
-                  <input type="hidden" name="id" value={apiKey.id} />
-                  <button
-                    type="submit"
-                    class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
-                    title="Revoke API key"
-                    onclick={(e) => {
-                      if (
-                        !confirm(
-                          "Are you sure you want to revoke this API key?",
-                        )
-                      ) {
-                        e.preventDefault();
-                      }
-                    }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </form>
+                <div class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3">
+                  <form method="POST" action="?/revokeApiKey" use:enhance>
+                    <input type="hidden" name="id" value={apiKey.id} />
+                    <button
+                      type="submit"
+                      class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
+                      title="Revoke API key"
+                      onclick={(e) => {
+                        if (
+                          !confirm(
+                            "Are you sure you want to revoke this API key?",
+                          )
+                        ) {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </form>
+                </div>
               {/if}
             </div>
           </div>

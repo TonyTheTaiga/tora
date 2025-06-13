@@ -21,7 +21,7 @@
   const focusOnExpandAttatchment: Attachment = (element) => {
     element.scrollIntoView({
       behavior: "smooth",
-      block: "center",
+      block: "nearest",
     });
 
     return () => {};
@@ -69,7 +69,6 @@
             0 && !highlighted.includes(experiment.id)
             ? 'opacity-40'
             : ''}"
-          {@attach focusOnExpandAttatchment}
         >
           <ExperimentDetailed
             bind:highlighted

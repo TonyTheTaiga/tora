@@ -81,7 +81,7 @@
         <div class="pt-2">
           <button
             type="submit"
-            class="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-ctp-blue to-ctp-mauve py-3 px-4 text-ctp-crust font-medium hover:shadow-lg transition-all"
+            class="w-full flex items-center justify-center gap-2 rounded-full bg-ctp-blue/20 border border-ctp-blue/40 py-3 px-4 text-ctp-blue font-medium hover:bg-ctp-blue hover:text-ctp-crust transition-all"
           >
             <LogIn size={18} />
             Sign In
@@ -96,7 +96,7 @@
         <p class="text-sm text-ctp-subtext0 pt-3">Don't Have an Account?</p>
         <button
           type="button"
-          class="inline-flex items-center justify-center px-5 py-2.5 font-medium rounded-lg bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"
+          class="inline-flex items-center justify-center px-5 py-2.5 font-medium rounded-full bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"
           onclick={() => {
             goto("/signup");
           }}

@@ -41,11 +41,13 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
   const workspaceId = params.id;
   const memberId = params.memberId;
 
+  if (!workspaceId || !memberId) {
+    throw error(400, "Workspace ID and member ID are required");
+  }
+
   try {
-    // In a real implementation, this would:
-    // 1. Verify user has OWNER permissions for the workspace
-    // 2. Remove the member from the workspace in the database
-    // 3. Handle any cleanup (remove access to experiments, etc.)
+    const db = locals.dbClient;
+    await db.removeWorkspaceRole(workspaceId, memberId);
 
     return json({
       success: true,

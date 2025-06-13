@@ -32,6 +32,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
       });
     }
   }
+
   return {
     session,
     cookies: cookies.getAll(),
