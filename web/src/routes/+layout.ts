@@ -50,7 +50,5 @@ export const load: LayoutLoad = async ({ data, depends, fetch }) => {
     session,
     supabase,
     user,
-    currentWorkspace: data.currentWorkspace,
-    userWorkspaces: data.userWorkspaces,
   };
 };

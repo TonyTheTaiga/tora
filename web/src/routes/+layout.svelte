@@ -3,12 +3,11 @@
   import { invalidate } from "$app/navigation";
   import { onMount } from "svelte";
   import Logo from "$lib/components/logo.svelte";
-  import WorkspaceSwitcher from "$lib/components/workspace-switcher.svelte";
   import { goto } from "$app/navigation";
+  import Toolbar from "$lib/components/toolbar.svelte";
 
   let { data, children } = $props();
-  let { supabase, session, user, currentWorkspace, userWorkspaces } =
-    $derived(data);
+  let { supabase, session, user } = $derived(data);
 
   onMount(() => {
     const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
@@ -30,11 +29,8 @@
       <button class="w-32 text-ctp-blue fill-current" onclick={() => goto("/")}>
         <Logo />
       </button>
-      <div class="flex items-center gap-2 sm:gap-3">
-        <WorkspaceSwitcher bind:currentWorkspace workspaces={userWorkspaces} />
-      </div>
     </nav>
   </header>
+  <Toolbar />
 {/if}
-
 <main class="flex-1 w-full p-2">{@render children()}</main>

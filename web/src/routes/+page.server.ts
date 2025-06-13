@@ -1,7 +1,7 @@
-import { error, fail } from "@sveltejs/kit";
+import { fail } from "@sveltejs/kit";
 import { generateRequestId, startTimer } from "$lib/utils/timing";
 import type { Actions, PageServerLoad } from "./$types";
-import type { HyperParam, Experiment } from "$lib/types";
+import type { HyperParam } from "$lib/types";
 
 const API = {
   getExperiments: (origin: string, workspaceId?: string) => {
@@ -20,8 +20,6 @@ const API = {
     `/api/experiments/${id}/ref/${refId}`,
 } as const;
 
-const COOKIE_MAX_AGE_30_DAYS = 60 * 60 * 24 * 30; // 30 days in seconds
-
 interface FormDataResult {
   hyperparams: HyperParam[];
   tags: string[];
@@ -30,38 +28,12 @@ interface FormDataResult {
 
 export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   const requestId = generateRequestId();
-  const timer = startTimer("page.home.load", {
+  const timer = startTimer("home.load", {
     requestId,
   });
-
   try {
-    const { session, user } = await locals.safeGetSession();
-    const { currentWorkspace } = await parent();
-    if (!user || !currentWorkspace) {
-      return {
-        experiments: [],
-        session,
-      };
-    }
-
-    const apiUrl = API.getExperiments(url.origin, currentWorkspace?.id);
-    const res = await fetch(apiUrl);
-    if (!res.ok) {
-      throw error(res.status, `Failed to fetch experiments: ${res.statusText}`);
-    }
-
-    const experiments: Experiment[] = await res.json();
-
-    timer.end({
-      userId: session?.user?.id || "unknown",
-      workspaceId: currentWorkspace?.id || "unknown",
-      experimentCount: experiments.length.toString(),
-    });
-
-    return {
-      experiments,
-      session,
-    };
+    timer.end({});
+    return {};
   } catch (err) {
     timer.end({
       error: err instanceof Error ? err.message : "Unknown error",
@@ -75,28 +47,6 @@ export const actions: Actions = {
   create: async ({ request, fetch }) => handleCreate(request, fetch),
   delete: async ({ request, fetch }) => handleDelete(request, fetch),
   update: async ({ request, fetch }) => handleUpdate(request, fetch),
-  switchWorkspace: async ({ request, cookies }) => {
-    const formData = await request.formData();
-    const workspaceId = formData.get("workspaceId");
-
-    if (!workspaceId || typeof workspaceId !== "string") {
-      return fail(400, {
-        message: "Workspace ID is required",
-      });
-    }
-
-    cookies.set("current_workspace", workspaceId, {
-      path: "/",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: COOKIE_MAX_AGE_30_DAYS,
-    });
-
-    return {
-      success: true,
-    };
-  },
 };
 
 async function handleCreate(request: Request, fetch: typeof window.fetch) {
