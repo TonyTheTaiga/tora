@@ -55,13 +55,11 @@ function mapRpcResultToExperiment(row: any): Experiment {
 }
 
 function mapToWorkspace(data: any): Workspace {
-  console.log(data);
   return {
     id: data.id,
-    user_id: data.user_id,
     name: data.name,
     description: data.description ? data.description : "",
-    created_at: new Date(data.created_at),
+    createdAt: new Date(data.created_at),
     role: data.user_workspaces[0].workspace_role.name,
   };
 }
@@ -340,15 +338,44 @@ export function createDbClient(client: SupabaseClient<Database>) {
       description: string | null,
       userId: string,
     ): Promise<Workspace> {
-      const { data, error } = await client
+      // Create the workspace
+      const { data: workspaceData, error: workspaceError } = await client
         .from("workspace")
-        .insert({ name, description, user_id: userId })
+        .insert({ name, description })
         .select()
         .single();
 
-      handleError(error, "Failed to create workspace");
-      if (!data) throw new Error("Workspace creation returned no data.");
-      return mapToWorkspace(data);
+      handleError(workspaceError, "Failed to create workspace");
+      if (!workspaceData) throw new Error("Workspace creation returned no data.");
+
+      // Get the OWNER role ID
+      const { data: ownerRole, error: roleError } = await client
+        .from("workspace_role")
+        .select("id")
+        .eq("name", "OWNER")
+        .single();
+
+      handleError(roleError, "Failed to get OWNER role");
+      if (!ownerRole) throw new Error("OWNER role not found");
+
+      // Add user to workspace with OWNER role
+      const { error: userWorkspaceError } = await client
+        .from("user_workspaces")
+        .insert({
+          user_id: userId,
+          workspace_id: workspaceData.id,
+          role_id: ownerRole.id
+        });
+
+      handleError(userWorkspaceError, "Failed to add user to workspace");
+
+      // Return workspace with role information
+      const workspaceWithRole = {
+        ...workspaceData,
+        user_workspaces: [{ workspace_role: { name: "OWNER" } }]
+      };
+
+      return mapToWorkspace(workspaceWithRole);
     },
 
     async getOrCreateDefaultWorkspace(userId: string): Promise<Workspace> {
@@ -562,7 +589,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
             return [];
           }
 
-          return data.map(item => ({
+          return data.map((item) => ({
             id: item.id,
             from: item.from,
             to: item.to,
@@ -593,7 +620,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
             return [];
           }
 
-          return data.map(item => ({
+          return data.map((item) => ({
             id: item.id,
             from: item.from,
             to: item.to,

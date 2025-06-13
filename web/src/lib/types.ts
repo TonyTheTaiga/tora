@@ -51,10 +51,9 @@ export type WorkspaceRole = "VIEWER" | "EDITOR" | "ADMIN" | "OWNER";
 
 export interface Workspace {
   id: string;
-  user_id: string;
   name: string;
   description: string | null;
-  created_at: Date;
+  createdAt: Date;
   role: string;
 }
 
