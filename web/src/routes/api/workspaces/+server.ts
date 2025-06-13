@@ -18,14 +18,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   const { name, description }: { name: string; description: string } =
     await request.json();
 
-  if (!locals.user) {
-    return error(500, {
-      message: "Cannot create a experiment for anonymous user",
+  if (!locals.user || !locals.user.id) {
+    return error(401, {
+      message: "Authentication required to create workspace",
     });
   }
   if (!name) {
-    return error(500, { message: "name is required for workspaces" });
+    return error(400, { message: "name is required for workspaces" });
   }
+
   const workspace = await locals.dbClient.createWorkspace(
     name,
     description,

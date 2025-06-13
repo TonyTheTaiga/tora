@@ -34,6 +34,10 @@ export const PATCH: RequestHandler = async ({ request, locals, url }) => {
       }
 
       // Add user to the workspace
+      if (!locals.user.id) {
+        return error(401, { message: "User ID not found" });
+      }
+
       const { error: workspaceError } = await locals.supabase
         .from("user_workspaces")
         .insert({

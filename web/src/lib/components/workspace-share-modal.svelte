@@ -73,7 +73,7 @@
   <div
     class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
     onclick={() => (isOpen = false)}
-    onkeydown={(e) => e.key === 'Escape' && (isOpen = false)}
+    onkeydown={(e) => e.key === "Escape" && (isOpen = false)}
     role="button"
     tabindex="0"
   >
@@ -104,7 +104,10 @@
 
       <form onsubmit={handleInvite} class="space-y-4">
         <div>
-          <label for="email-input" class="block text-sm font-medium text-ctp-text mb-2">
+          <label
+            for="email-input"
+            class="block text-sm font-medium text-ctp-text mb-2"
+          >
             Email Address
           </label>
           <input
@@ -118,7 +121,10 @@
         </div>
 
         <div>
-          <label for="role-select" class="block text-sm font-medium text-ctp-text mb-2">
+          <label
+            for="role-select"
+            class="block text-sm font-medium text-ctp-text mb-2"
+          >
             Role
           </label>
           <div class="relative">

@@ -85,21 +85,13 @@ export function createDbClient(client: SupabaseClient<Database>) {
           hyperparams: details.hyperparams as unknown as Json[],
           tags: details.tags,
           visibility: details.visibility ?? "PRIVATE",
+          creator: userId,
         })
         .select()
         .single();
 
       handleError(expError, "Failed to create experiment");
       if (!expData) throw new Error("Experiment creation returned no data.");
-
-      const { error: userExpError } = await client
-        .from("user_experiments")
-        .insert({
-          user_id: userId,
-          experiment_id: expData.id,
-          role: "OWNER",
-        });
-      handleError(userExpError, "Failed to link user to experiment");
 
       if (details.workspaceId) {
         const { error: wsExpError } = await client
@@ -132,7 +124,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
     async getExperiment(id: string): Promise<Experiment> {
       const { data, error } = await client
         .from("experiment")
-        .select("*, user_experiments(user_id)")
+        .select("*")
         .eq("id", id)
         .single();
 
@@ -147,7 +139,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
         async () => {
           const { data, error } = await client
             .from("experiment")
-            .select("*, metric(*), user_experiments!inner(user_id)")
+            .select("*, metric(*)")
             .eq("id", id)
             .single();
 
@@ -169,7 +161,9 @@ export function createDbClient(client: SupabaseClient<Database>) {
     async checkExperimentAccess(id: string, userId?: string): Promise<void> {
       const { data, error } = await client
         .from("experiment")
-        .select("visibility, user_experiments(user_id)")
+        .select(
+          "visibility, creator, workspace_experiments(workspace_id, workspace(user_workspaces(user_id)))",
+        )
         .eq("id", id)
         .single();
 
@@ -180,10 +174,19 @@ export function createDbClient(client: SupabaseClient<Database>) {
         return;
       }
 
-      if (
-        !userId ||
-        !data.user_experiments.some((ue) => ue.user_id === userId)
-      ) {
+      if (!userId) {
+        throw new Error(`Access denied to experiment with ID ${id}`);
+      }
+
+      if (data.creator === userId) {
+        return;
+      }
+
+      const hasWorkspaceAccess = data.workspace_experiments?.some((we) =>
+        we.workspace?.user_workspaces?.some((uw) => uw.user_id === userId),
+      );
+
+      if (!hasWorkspaceAccess) {
         throw new Error(`Access denied to experiment with ID ${id}`);
       }
     },
@@ -331,7 +334,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
       description: string | null,
       userId: string,
     ): Promise<Workspace> {
-      // Create the workspace
       const { data: workspaceData, error: workspaceError } = await client
         .from("workspace")
         .insert({ name, description })
@@ -352,7 +354,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
       handleError(roleError, "Failed to get OWNER role");
       if (!ownerRole) throw new Error("OWNER role not found");
 
-      // Add user to workspace with OWNER role
       const { error: userWorkspaceError } = await client
         .from("user_workspaces")
         .insert({
@@ -363,7 +364,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
 
       handleError(userWorkspaceError, "Failed to add user to workspace");
 
-      // Return workspace with role information
       const workspaceWithRole = {
         ...workspaceData,
         user_workspaces: [{ workspace_role: { name: "OWNER" } }],

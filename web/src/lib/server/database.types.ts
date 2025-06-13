@@ -42,6 +42,7 @@ export type Database = {
       experiment: {
         Row: {
           created_at: string
+          creator: string
           description: string | null
           hyperparams: Json[] | null
           id: string
@@ -52,6 +53,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          creator: string
           description?: string | null
           hyperparams?: Json[] | null
           id?: string
@@ -62,6 +64,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          creator?: string
           description?: string | null
           hyperparams?: Json[] | null
           id?: string
@@ -139,35 +142,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "metric_experiment_id_fkey"
-            columns: ["experiment_id"]
-            isOneToOne: false
-            referencedRelation: "experiment"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_experiments: {
-        Row: {
-          added_at: string
-          experiment_id: string
-          role: Database["public"]["Enums"]["user_experiment_role"]
-          user_id: string
-        }
-        Insert: {
-          added_at?: string
-          experiment_id: string
-          role?: Database["public"]["Enums"]["user_experiment_role"]
-          user_id: string
-        }
-        Update: {
-          added_at?: string
-          experiment_id?: string
-          role?: Database["public"]["Enums"]["user_experiment_role"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_experiment"
             columns: ["experiment_id"]
             isOneToOne: false
             referencedRelation: "experiment"

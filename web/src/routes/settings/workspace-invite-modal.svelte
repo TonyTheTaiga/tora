@@ -78,7 +78,9 @@
         <form onsubmit={handleSubmit}>
           <div class="space-y-4">
             <div>
-              <label for="invite-email" class="text-sm font-medium text-ctp-subtext0 block mb-2"
+              <label
+                for="invite-email"
+                class="text-sm font-medium text-ctp-subtext0 block mb-2"
                 >Email Address</label
               >
               <input
@@ -92,7 +94,9 @@
             </div>
 
             <div>
-              <label for="invite-role" class="text-sm font-medium text-ctp-subtext0 block mb-2"
+              <label
+                for="invite-role"
+                class="text-sm font-medium text-ctp-subtext0 block mb-2"
                 >Role</label
               >
               <select
