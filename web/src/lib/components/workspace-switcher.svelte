@@ -6,6 +6,7 @@
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
+  import WorkspaceRoleBadge from "./workspace-role-badge.svelte";
 
   let {
     currentWorkspace = $bindable(),
@@ -100,25 +101,22 @@
               <input type="hidden" name="workspaceId" value={workspace.id} />
               <button
                 type="submit"
-                class="w-full text-left px-3 py-2 rounded-xl hover:bg-ctp-surface0/50 transition-all flex items-center gap-2 {workspace.id ===
+                class="w-full text-left px-3 py-2 rounded-xl hover:bg-ctp-surface0/50 transition-all flex items-start gap-2 {workspace.id ===
                 currentWorkspace?.id
                   ? 'bg-ctp-surface0/70 backdrop-blur-sm'
                   : ''}"
               >
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2 mb-1">
-                    <div class="text-sm text-ctp-text truncate">
+                    <h4 class="text-sm font-medium text-ctp-text truncate">
                       {workspace.name}
-                    </div>
-                    <span
-                      class="text-xs px-2 py-0.5 bg-ctp-yellow/20 text-ctp-yellow border border-ctp-yellow/30 rounded-full"
-                      >OWNER</span
-                    >
+                    </h4>
+                    <WorkspaceRoleBadge role={workspace.role} />
                   </div>
                   {#if workspace.description}
-                    <div class="text-xs text-ctp-subtext0 truncate">
+                    <p class="text-xs text-ctp-subtext0 truncate">
                       {workspace.description}
-                    </div>
+                    </p>
                   {/if}
                 </div>
               </button>
@@ -152,36 +150,27 @@
               <input type="hidden" name="workspaceId" value={workspace.id} />
               <button
                 type="submit"
-                class="w-full text-left px-3 py-2 rounded-xl hover:bg-ctp-surface0/50 transition-all flex items-center gap-2 {workspace.id ===
+                class="w-full text-left px-3 py-2 rounded-xl hover:bg-ctp-surface0/50 transition-all flex items-start gap-2 {workspace.id ===
                 currentWorkspace?.id
                   ? 'bg-ctp-surface0/70 backdrop-blur-sm'
                   : ''}"
               >
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2 mb-1">
-                    <div class="text-sm text-ctp-text truncate">
+                    <h4 class="text-sm font-medium text-ctp-text truncate">
                       {workspace.name}
-                    </div>
-                    {#if workspace.role === "ADMIN"}
-                      <span
-                        class="text-xs px-2 py-0.5 bg-ctp-red/20 text-ctp-red border border-ctp-red/30 rounded-full"
-                        >ADMIN</span
-                      >
-                    {:else if workspace.role === "EDITOR"}
-                      <span
-                        class="text-xs px-2 py-0.5 bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 rounded-full"
-                        >EDITOR</span
-                      >
-                    {:else}
-                      <span
-                        class="text-xs px-2 py-0.5 bg-ctp-green/20 text-ctp-green border border-ctp-green/30 rounded-full"
-                        >VIEWER</span
-                      >
-                    {/if}
+                    </h4>
+                    <WorkspaceRoleBadge role={workspace.role} />
                   </div>
-                  <div class="text-xs text-ctp-subtext0 truncate">
-                    Shared workspace
-                  </div>
+                  {#if workspace.description}
+                    <p class="text-xs text-ctp-subtext0 truncate">
+                      {workspace.description}
+                    </p>
+                  {:else}
+                    <p class="text-xs text-ctp-subtext0/70 truncate">
+                      Shared workspace
+                    </p>
+                  {/if}
                 </div>
               </button>
             </form>

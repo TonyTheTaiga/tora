@@ -13,6 +13,7 @@
   import { isWorkspace } from "$lib/types";
   import type { ApiKey } from "$lib/types";
   import WorkspaceInviteModal from "./workspace-invite-modal.svelte";
+  import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
 
   let { data } = $props();
   let creatingWorkspace: boolean = $state(false);
@@ -136,7 +137,7 @@
           <form action="/logout" method="POST">
             <button
               type="submit"
-              class="flex items-center gap-2 px-4 py-2.5 bg-ctp-red/10 border border-ctp-red/30 rounded-lg text-ctp-red hover:bg-ctp-red hover:text-ctp-crust transition-all duration-200 font-medium backdrop-blur-sm"
+              class="flex items-center gap-2 px-4 py-2.5 bg-ctp-red/10 border border-ctp-red/30 rounded-full text-ctp-red hover:bg-ctp-red hover:text-ctp-crust transition-all duration-200 font-medium backdrop-blur-sm"
               aria-label="Sign out"
             >
               <LogOut size={18} />
@@ -198,7 +199,7 @@
         <button
           type="submit"
           disabled={creatingWorkspace}
-          class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-lg bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm disabled:opacity-50"
+          class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-full bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm disabled:opacity-50"
         >
           <Plus size={18} />
           <span>{creatingWorkspace ? "Creating..." : "Create Workspace"}</span>
@@ -230,10 +231,7 @@
                         <h4 class="text-base font-medium text-ctp-text truncate">
                           {workspace.name}
                         </h4>
-                        <span
-                          class="text-xs px-2 py-0.5 bg-ctp-yellow/20 text-ctp-yellow border border-ctp-yellow/30 rounded-full font-medium flex-shrink-0"
-                          >OWNER</span
-                        >
+                        <WorkspaceRoleBadge role={workspace.role} />
                       </div>
                       {#if workspace.description}
                         <p class="text-sm text-ctp-subtext0 mb-2">
@@ -302,22 +300,7 @@
                         <h4 class="text-base font-medium text-ctp-text truncate">
                           {workspace.name}
                         </h4>
-                        {#if workspace.role === "ADMIN"}
-                          <span
-                            class="text-xs px-2 py-0.5 bg-ctp-red/20 text-ctp-red rounded-full border border-ctp-red/30 font-medium flex-shrink-0"
-                            >ADMIN</span
-                          >
-                        {:else if workspace.role === "EDITOR"}
-                          <span
-                            class="text-xs px-2 py-0.5 bg-ctp-blue/20 text-ctp-blue rounded-full border border-ctp-blue/30 font-medium flex-shrink-0"
-                            >EDITOR</span
-                          >
-                        {:else}
-                          <span
-                            class="text-xs px-2 py-0.5 bg-ctp-green/20 text-ctp-green rounded-full border border-ctp-green/30 font-medium flex-shrink-0"
-                            >VIEWER</span
-                          >
-                        {/if}
+                        <WorkspaceRoleBadge role={workspace.role} />
                       </div>
                       {#if workspace.description}
                         <p class="text-sm text-ctp-subtext0 mb-2">
@@ -464,7 +447,7 @@
         <button
           type="submit"
           disabled={creatingApiKey}
-          class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-lg bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm disabled:opacity-50"
+          class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-full bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm disabled:opacity-50"
         >
           <Plus size={18} />
           <span>{creatingApiKey ? "Creating..." : "Create API Key"}</span>
@@ -493,7 +476,7 @@
             ⚠️ Save this key now - it won't be shown again after you copy it.
           </p>
           <button
-            class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-lg bg-ctp-green/20 border border-ctp-green/40 text-ctp-green hover:bg-ctp-green hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm w-full"
+            class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-full bg-ctp-green/20 border border-ctp-green/40 text-ctp-green hover:bg-ctp-green hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm w-full"
             type="button"
             onclick={() => {
               navigator.clipboard.writeText(createdKey);
@@ -508,52 +491,55 @@
       <div class="space-y-4">
         {#each data.apiKeys ? data.apiKeys : [] as apiKey}
           <div
-            class="p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30 hover:border-ctp-surface0/50 transition-all"
+            class="p-4 border border-ctp-surface0/30 rounded-lg hover:border-ctp-surface0/50 transition-all"
           >
             <div class="flex justify-between items-start">
-              <div class="flex-1">
-                <h3 class="text-lg font-semibold text-ctp-text mb-2">
-                  {apiKey.name}
-                </h3>
-                <div class="space-y-2 text-sm">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-2">
+                  <h3 class="text-base font-medium text-ctp-text truncate">
+                    {apiKey.name}
+                  </h3>
+                  <span
+                    class="text-xs px-2 py-0.5 {apiKey.revoked ? 'bg-ctp-red/20 text-ctp-red border-ctp-red/30' : 'bg-ctp-green/20 text-ctp-green border-ctp-green/30'} border rounded-full font-medium flex-shrink-0"
+                  >
+                    {apiKey.revoked ? "REVOKED" : "ACTIVE"}
+                  </span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <span class="text-ctp-subtext0">Created:</span>
+                    <span class="text-ctp-subtext0 text-xs">Created</span>
                     <div class="text-ctp-text">{apiKey.createdAt}</div>
                   </div>
                   <div>
-                    <span class="text-ctp-subtext0">Last Used:</span>
+                    <span class="text-ctp-subtext0 text-xs">Last Used</span>
                     <div class="text-ctp-text">
                       {apiKey.lastUsed || "Never"}
-                    </div>
-                  </div>
-                  <div>
-                    <span class="text-ctp-subtext0">Status:</span>
-                    <div class="text-ctp-text">
-                      {apiKey.revoked ? "Revoked" : "Active"}
                     </div>
                   </div>
                 </div>
               </div>
               {#if !apiKey.revoked}
-                <form method="POST" action="?/revokeApiKey" use:enhance>
-                  <input type="hidden" name="id" value={apiKey.id} />
-                  <button
-                    type="submit"
-                    class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
-                    title="Revoke API key"
-                    onclick={(e) => {
-                      if (
-                        !confirm(
-                          "Are you sure you want to revoke this API key?",
-                        )
-                      ) {
-                        e.preventDefault();
-                      }
-                    }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </form>
+                <div class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3">
+                  <form method="POST" action="?/revokeApiKey" use:enhance>
+                    <input type="hidden" name="id" value={apiKey.id} />
+                    <button
+                      type="submit"
+                      class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
+                      title="Revoke API key"
+                      onclick={(e) => {
+                        if (
+                          !confirm(
+                            "Are you sure you want to revoke this API key?",
+                          )
+                        ) {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </form>
+                </div>
               {/if}
             </div>
           </div>
