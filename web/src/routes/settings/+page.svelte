@@ -346,6 +346,32 @@
                         ID: {workspace.id}
                       </div>
                     </div>
+                    <div class="flex gap-2">
+                      <form
+                        method="POST"
+                        action="?/removeSharedWorkspace"
+                        use:enhance
+                      >
+                        <input type="hidden" name="userId" value={data?.user?.id} />
+                        <input type="hidden" name="workspaceId" value={workspace.id} />
+                        <button
+                          type="submit"
+                          class="p-2 rounded-lg text-ctp-red hover:bg-ctp-red/20 hover:text-ctp-red transition-colors border border-ctp-red/30"
+                          title="Leave workspace"
+                          onclick={(e) => {
+                            if (
+                              !confirm(
+                                "Are you sure you want to leave this workspace?",
+                              )
+                            ) {
+                              e.preventDefault();
+                            }
+                          }}
+                        >
+                          <LogOut size={14} />
+                        </button>
+                      </form>
+                    </div>
                   </div>
                 </div>
               {/each}

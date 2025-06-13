@@ -376,8 +376,16 @@ export function createDbClient(client: SupabaseClient<Database>) {
       handleError(error, "Failed to delete workspace");
     },
 
-    // --- API Key Methods ---
+    async removeWorkspaceRole(workspaceID: string, userId: string) {
+      const { error } = await client
+        .from("user_workspaces")
+        .delete()
+        .eq("user_id", userId)
+        .eq("workspace_id", workspaceID);
+      handleError(error, "Failed to remove workspace role");
+    },
 
+    // --- API Key Methods ---
     async getApiKeys(userId: string): Promise<ApiKey[]> {
       const { data, error } = await client
         .from("api_keys")
