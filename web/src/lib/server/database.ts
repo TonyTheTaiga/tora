@@ -344,7 +344,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
       if (!workspaceData)
         throw new Error("Workspace creation returned no data.");
 
-      // Get the OWNER role ID
       const { data: ownerRole, error: roleError } = await client
         .from("workspace_role")
         .select("id")
@@ -370,15 +369,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
       };
 
       return mapToWorkspace(workspaceWithRole);
-    },
-
-    async getOrCreateDefaultWorkspace(userId: string): Promise<Workspace> {
-      const workspaces = await this.getWorkspacesV2(userId, ["OWNER"]);
-      if (workspaces[0]) {
-        return workspaces[0];
-      }
-
-      return this.createWorkspace("Default", "Your default workspace", userId);
     },
 
     async deleteWorkspace(id: string) {

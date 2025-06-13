@@ -53,11 +53,13 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
     let visibility = data["visibility"] || "PRIVATE";
     let workspaceId = data["workspaceId"] || cookies.get("current_workspace");
 
-    if (workspaceId === "API_DEFAULT") {
-      const workspace = await locals.dbClient.getOrCreateDefaultWorkspace(
-        locals.user.id,
+
+    if (!workspaceId) {
+      timer.end({ error: "No workspace specified" });
+      return json(
+        { error: "A workspace must be specified to create an experiment." },
+        { status: 400 },
       );
-      workspaceId = workspace.id;
     }
 
     if (typeof hyperparams === "string") {
