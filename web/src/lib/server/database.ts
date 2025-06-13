@@ -546,8 +546,8 @@ export function createDbClient(client: SupabaseClient<Database>) {
 
     async getPendingInvitationsFrom(
       userId: string,
-      state: string,
-    ): Promise<PendingInvitation> {
+      status: string,
+    ): Promise<PendingInvitation[]> {
       return timeAsync(
         "db.getPendingInvitationsFrom",
         async () => {
@@ -555,30 +555,30 @@ export function createDbClient(client: SupabaseClient<Database>) {
             .from("workspace_invitations")
             .select("*")
             .eq("from", userId)
-            .eq("state", state)
-            .single();
+            .eq("status", status);
 
           handleError(error, "Failed to get pending invitations");
           if (!data) {
-            throw new Error("unknown error");
+            return [];
           }
 
-          return {
-            id: data.id,
-            from: data.from,
-            to: data.to,
-            workspaceId: data.workspace_id,
-            roleId: data.role_id,
-            createdAt: new Date(data.created_at),
-          };
+          return data.map(item => ({
+            id: item.id,
+            from: item.from,
+            to: item.to,
+            workspaceId: item.workspace_id,
+            roleId: item.role_id,
+            createdAt: new Date(item.created_at),
+            status: item.status,
+          }));
         },
         { userId },
       );
     },
     async getPendingInvitationsTo(
       userId: string,
-      state: string,
-    ): Promise<PendingInvitation> {
+      status: string,
+    ): Promise<PendingInvitation[]> {
       return timeAsync(
         "db.getPendingInvitationsTo",
         async () => {
@@ -586,22 +586,22 @@ export function createDbClient(client: SupabaseClient<Database>) {
             .from("workspace_invitations")
             .select("*")
             .eq("to", userId)
-            .eq("state", state)
-            .single();
+            .eq("status", status);
 
           handleError(error, "Failed to get pending invitations");
           if (!data) {
-            throw new Error("unknown error");
+            return [];
           }
 
-          return {
-            id: data.id,
-            from: data.from,
-            to: data.to,
-            workspaceId: data.workspace_id,
-            roleId: data.role_id,
-            createdAt: new Date(data.created_at),
-          };
+          return data.map(item => ({
+            id: item.id,
+            from: item.from,
+            to: item.to,
+            workspaceId: item.workspace_id,
+            roleId: item.role_id,
+            createdAt: new Date(item.created_at),
+            status: item.status,
+          }));
         },
         { userId },
       );

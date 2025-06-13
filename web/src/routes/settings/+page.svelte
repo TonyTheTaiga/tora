@@ -3,7 +3,7 @@
   import { enhance } from "$app/forms";
   import { isWorkspace } from "$lib/types";
   import type { ApiKey } from "$lib/types";
-  import { onMount } from "svelte";
+  import WorkspaceInviteModal from "./workspace-invite-modal.svelte";
 
   let { data } = $props();
   let creatingWorkspace: boolean = $state(false);
@@ -11,26 +11,50 @@
   let createdKey: string = $state("");
   let workspaceError: string = $state("");
   let apiKeyError: string = $state("");
-  interface PendingInvitation {
-    id: string;
-    workspaceName: string;
-    fromEmail: string;
-    role: string;
-  }
-
-  let pendingInvitations = $state<PendingInvitation[]>([]);
+  let inviteModalOpen = $state(false);
+  let workspaceToInvite: any = $state(null);
+  let pendingInvitations = $state<any[]>([]);
   let invitationsLoading = $state(true);
 
   const ownedWorkspaces = $derived(data.workspaces?.filter(w => w.role === "OWNER") || []);
   const sharedWorkspaces = $derived(data.workspaces?.filter(w => w.role !== "OWNER") || []);
 
+  function openInviteModal(workspace: any) {
+    workspaceToInvite = workspace;
+    inviteModalOpen = true;
+  }
+
+  async function sendInvitation(email: string, roleId: string) {
+    if (!workspaceToInvite || !data.user) return;
+    
+    try {
+      const response = await fetch('/api/workspace-invitations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspaceId: workspaceToInvite.id,
+          email,
+          roleId
+        })
+      });
+      
+      if (response.ok) {
+        inviteModalOpen = false;
+        workspaceToInvite = null;
+      }
+    } catch (error) {
+      console.error('Failed to send invitation:', error);
+    }
+  }
+
   async function loadInvitations() {
     try {
-      // This would fetch pending invitations for the user
-      // For now, using mock data
-      pendingInvitations = [];
+      const response = await fetch('/api/workspace-invitations');
+      if (response.ok) {
+        pendingInvitations = await response.json();
+      }
     } catch (error) {
-      console.error("Failed to load invitations:", error);
+      console.error('Failed to load invitations:', error);
     } finally {
       invitationsLoading = false;
     }
@@ -38,27 +62,25 @@
 
   async function respondToInvitation(invitationId: string, accept: boolean) {
     try {
-      const response = await fetch(`/api/invitations/${invitationId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accept })
+      const response = await fetch(`/api/workspaces/any/invitations?invitationId=${invitationId}&action=${accept ? 'accept' : 'deny'}`, {
+        method: 'PATCH'
       });
       
       if (response.ok) {
         pendingInvitations = pendingInvitations.filter(inv => inv.id !== invitationId);
         if (accept) {
-          // Refresh the page data to show the new workspace
           window.location.reload();
         }
       }
     } catch (error) {
-      console.error("Failed to respond to invitation:", error);
+      console.error('Failed to respond to invitation:', error);
     }
   }
 
-  onMount(() => {
+  $effect(() => {
     loadInvitations();
   });
+
 </script>
 
 <div class="flex-1 p-2 sm:p-4 max-w-none mx-2 sm:mx-4">
@@ -220,25 +242,35 @@
                         ID: {workspace.id}
                       </div>
                     </div>
-                    <form method="POST" action="?/deleteWorkspace" use:enhance>
-                      <input type="hidden" name="id" value={workspace.id} />
+                    <div class="flex gap-2">
                       <button
-                        type="submit"
-                        class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
-                        title="Delete workspace"
-                        onclick={(e) => {
-                          if (
-                            !confirm(
-                              "Are you sure you want to delete this workspace?",
-                            )
-                          ) {
-                            e.preventDefault();
-                          }
-                        }}
+                        type="button"
+                        class="p-2 rounded-lg text-ctp-blue hover:bg-ctp-blue/20 hover:text-ctp-blue transition-colors border border-ctp-blue/30"
+                        title="Invite users"
+                        onclick={() => openInviteModal(workspace)}
                       >
-                        <Trash2 size={14} />
+                        <Users size={14} />
                       </button>
-                    </form>
+                      <form method="POST" action="?/deleteWorkspace" use:enhance>
+                        <input type="hidden" name="id" value={workspace.id} />
+                        <button
+                          type="submit"
+                          class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
+                          title="Delete workspace"
+                          onclick={(e) => {
+                            if (
+                              !confirm(
+                                "Are you sure you want to delete this workspace?",
+                              )
+                            ) {
+                              e.preventDefault();
+                            }
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </form>
+                    </div>
                   </div>
                 </div>
               {/each}
@@ -500,3 +532,9 @@
     </div>
   </div>
 </div>
+
+<WorkspaceInviteModal 
+  bind:isOpen={inviteModalOpen} 
+  workspace={workspaceToInvite} 
+  onInvite={sendInvitation} 
+/>

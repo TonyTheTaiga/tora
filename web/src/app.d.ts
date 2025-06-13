@@ -10,6 +10,7 @@ declare global {
     // interface Error {}
     interface Locals {
       supabase: SupabaseClient<Database>;
+      adminSupabaseClient: SupabaseClient<Database>;
       dbClient: ReturnType<typeof createDbClient>;
       safeGetSession: () => Promise<{
         session: Session | null;

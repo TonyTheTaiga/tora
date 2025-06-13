@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
-import { type Handle, redirect } from "@sveltejs/kit";
+import { createClient } from "@supabase/supabase-js";
+import { type Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { createDbClient } from "$lib/server/database";
 import { createHash } from "crypto";
@@ -8,6 +9,8 @@ import {
   PUBLIC_SUPABASE_URL,
   PUBLIC_SUPABASE_ANON_KEY,
 } from "$env/static/public";
+
+import { PRIVATE_SERVICE_ROLE_KEY } from "$env/static/private";
 
 const supabase: Handle = async ({ event, resolve }) => {
   /**
@@ -32,6 +35,14 @@ const supabase: Handle = async ({ event, resolve }) => {
           });
         },
       },
+    },
+  );
+
+  event.locals.adminSupabaseClient = createClient(
+    PUBLIC_SUPABASE_URL,
+    PRIVATE_SERVICE_ROLE_KEY,
+    {
+      auth: { autoRefreshToken: false, persistSession: false },
     },
   );
 

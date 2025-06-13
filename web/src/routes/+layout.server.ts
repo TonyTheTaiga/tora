@@ -25,7 +25,10 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
       currentWorkspace = await locals.dbClient.getOrCreateDefaultWorkspace(
         user.id,
       );
-      userWorkspaces.push(currentWorkspace);
+      
+      if (!userWorkspaces.find(w => w.id === currentWorkspace!.id)) {
+        userWorkspaces.push(currentWorkspace);
+      }
 
       cookies.set("current_workspace", currentWorkspace.id, {
         path: "/",
