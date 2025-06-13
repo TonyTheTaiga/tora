@@ -31,12 +31,7 @@
         <Logo />
       </button>
       <div class="flex items-center gap-2 sm:gap-3">
-        {#if session && currentWorkspace}
-          <WorkspaceSwitcher
-            bind:currentWorkspace
-            workspaces={userWorkspaces}
-          />
-        {/if}
+        <WorkspaceSwitcher bind:currentWorkspace workspaces={userWorkspaces} />
       </div>
     </nav>
   </header>
