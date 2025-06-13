@@ -1,8 +1,8 @@
-import type { PageServerLoad } from "./$types";
+import type { LayoutServerLoad } from "./$types";
 import { startTimer, generateRequestId } from "$lib/utils/timing";
 import { error } from "@sveltejs/kit";
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: LayoutServerLoad = async ({ locals }) => {
   if (!locals.user) {
     error(501, "user required");
   }

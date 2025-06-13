@@ -31,7 +31,6 @@
     ChartArea,
   } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
-  import { page } from "$app/state";
   import {
     openDeleteExperimentModal,
     openEditExperimentModal,
@@ -57,15 +56,6 @@
   let metricsError = $state<string | null>(null);
   let allTagsShown = $state(false);
   const initialTagLimit = 7;
-
-  let currentWorkspace = $derived(page.data.currentWorkspace);
-  let canEditExperiment = $derived(
-    currentWorkspace &&
-      ["OWNER", "ADMIN", "EDITOR"].includes(currentWorkspace.role),
-  );
-  let canDeleteExperiment = $derived(
-    currentWorkspace && ["OWNER", "ADMIN"].includes(currentWorkspace.role),
-  );
 
   let visibleTags = $derived.by(() => {
     if (!experiment.tags || !Array.isArray(experiment.tags)) return [];
@@ -125,7 +115,6 @@
   );
 
   async function fetchRawMetricsIfNeeded() {
-    // Fetch data only if it hasn't been fetched yet, or if there was a previous error and no data currently displayed
     if (rawMetrics.length === 0 || (metricsError && rawMetrics.length === 0)) {
       metricsLoading = true;
       metricsError = null;
@@ -137,7 +126,7 @@
           throw new Error(`Failed to fetch metrics: ${response.statusText}`);
         }
         const data = await response.json();
-        rawMetrics = data as Metric[]; // Assuming API returns Metric[]
+        rawMetrics = data as Metric[];
         if (rawMetrics.length === 0) {
           metricsError = "No raw metric data points found for this experiment.";
         }
@@ -147,7 +136,7 @@
         } else {
           metricsError = "An unknown error occurred while fetching metrics.";
         }
-        rawMetrics = []; // Clear any previous data in case of error
+        rawMetrics = [];
       } finally {
         metricsLoading = false;
       }
@@ -160,30 +149,28 @@
     <div
       class="flex items-center gap-1 bg-gradient-to-b from-bg-ctp-surface0/80 to-bg-ctp-mantle backdrop-blur-sm border-t border-x border-ctp-surface1/50 rounded-t-xl p-1"
     >
-      {#if canEditExperiment}
-        <button
-          class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-lavender hover:bg-ctp-surface1/60 transition-colors"
-          onclick={async () => {
-            const response = await fetch(
-              `/api/ai/analysis?experimentId=${experiment.id}`,
-            );
-            const data = (await response.json()) as ExperimentAnalysis;
-            recommendations = data.hyperparameter_recommendations;
-          }}
-          title="Get AI recommendations"
-        >
-          <Sparkle size={16} />
-        </button>
-        <button
-          onclick={() => {
-            openEditExperimentModal(experiment);
-          }}
-          class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface1/60 transition-colors"
-          title="Edit experiment"
-        >
-          <Pencil size={16} />
-        </button>
-      {/if}
+      <button
+        class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-lavender hover:bg-ctp-surface1/60 transition-colors"
+        onclick={async () => {
+          const response = await fetch(
+            `/api/ai/analysis?experimentId=${experiment.id}`,
+          );
+          const data = (await response.json()) as ExperimentAnalysis;
+          recommendations = data.hyperparameter_recommendations;
+        }}
+        title="Get AI recommendations"
+      >
+        <Sparkle size={16} />
+      </button>
+      <button
+        onclick={() => {
+          openEditExperimentModal(experiment);
+        }}
+        class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface1/60 transition-colors"
+        title="Edit experiment"
+      >
+        <Pencil size={16} />
+      </button>
       <button
         onclick={async () => {
           if (highlighted.includes(experiment.id)) {
@@ -211,20 +198,18 @@
           <Eye size={16} />
         {/if}
       </button>
-      {#if canDeleteExperiment}
-        <button
-          type="button"
-          class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
-          aria-label="Delete"
-          title="Delete experiment"
-          onclick={(e) => {
-            e.stopPropagation();
-            openDeleteExperimentModal(experiment);
-          }}
-        >
-          <X size={16} />
-        </button>
-      {/if}
+      <button
+        type="button"
+        class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
+        aria-label="Delete"
+        title="Delete experiment"
+        onclick={(e) => {
+          e.stopPropagation();
+          openDeleteExperimentModal(experiment);
+        }}
+      >
+        <X size={16} />
+      </button>
       <button
         class="p-1.5 rounded-full text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface1/60 transition-colors"
         onclick={() => {
