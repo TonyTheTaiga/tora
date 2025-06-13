@@ -7,6 +7,7 @@
     Cog,
     X,
     ArrowRight,
+    Group,
   } from "lucide-svelte";
   import { goto } from "$app/navigation";
   import { onMount, onDestroy } from "svelte";
@@ -95,6 +96,16 @@
         }
       }
     </style>
+    <button
+      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+      title="Go to workspaces"
+      onclick={() => {
+        goto("/workspaces");
+      }}
+    >
+      <Group size={20} />
+    </button>
+
     {#if canCreateExperiments}
       <button
         class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
