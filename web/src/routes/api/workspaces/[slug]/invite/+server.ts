@@ -8,7 +8,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
     throw error(401, "Authentication required");
   }
 
-  const workspaceId = params.id;
+  const workspaceSlug = params.slug;
   const { email, role }: { email: string; role: WorkspaceRole } =
     await request.json();
 
@@ -29,7 +29,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
       success: true,
       message: `Invitation would be sent to ${email} for role ${role}`,
       invitation: {
-        workspace_id: workspaceId,
+        workspace_slug: workspaceSlug,
         email: email,
         role: role,
         created_at: new Date().toISOString(),
@@ -48,7 +48,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
     throw error(401, "Authentication required");
   }
 
-  const workspaceId = params.id;
+  const workspaceSlug = params.slug;
 
   try {
     // This would get pending invitations from the database

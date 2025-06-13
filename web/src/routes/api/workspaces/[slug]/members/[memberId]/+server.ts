@@ -8,7 +8,7 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
     throw error(401, "Authentication required");
   }
 
-  const workspaceId = params.id;
+  const workspaceSlug = params.slug;
   const memberId = params.memberId;
   const { role }: { role: WorkspaceRole } = await request.json();
 
@@ -38,16 +38,17 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
     throw error(401, "Authentication required");
   }
 
-  const workspaceId = params.id;
+  const workspaceSlug = params.slug;
   const memberId = params.memberId;
 
-  if (!workspaceId || !memberId) {
-    throw error(400, "Workspace ID and member ID are required");
+  if (!workspaceSlug || !memberId) {
+    throw error(400, "Workspace slug and member ID are required");
   }
 
   try {
     const db = locals.dbClient;
-    await db.removeWorkspaceRole(workspaceId, memberId);
+    // The slug parameter is actually the workspace ID (UUID) in this implementation
+    await db.removeWorkspaceRole(workspaceSlug, memberId);
 
     return json({
       success: true,

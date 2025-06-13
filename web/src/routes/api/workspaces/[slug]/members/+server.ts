@@ -7,7 +7,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
     throw error(401, "Authentication required");
   }
 
-  const workspaceId = params.id;
+  const workspaceSlug = params.slug;
 
   try {
     // For now, return mock data
