@@ -1,15 +1,26 @@
-import type { Actions } from "./$types";
-import type { PageServerLoad } from "./$types";
 import { error, fail } from "@sveltejs/kit";
-import type { HyperParam, Experiment } from "$lib/types";
 import { generateRequestId, startTimer } from "$lib/utils/timing";
+import type { Actions, PageServerLoad } from "./$types";
+import type { HyperParam, Experiment } from "$lib/types";
 
-const API_ROUTES = {
-  GET_EXPERIMENTS: "/api/experiments",
-  CREATE_EXPERIMENT: "/api/experiments",
-  UPDATE_EXPERIMENT: "/api/experiments/update",
-  CREATE_REFERENCE: "/api/experiments/[slug]/ref",
+const API = {
+  getExperiments: (origin: string, workspaceId?: string) => {
+    const url = new URL("/api/experiments", origin);
+    if (workspaceId) {
+      url.searchParams.set("workspace", workspaceId);
+    }
+    return url;
+  },
+  createExperiment: "/api/experiments",
+  deleteExperiment: (id: string) => `/api/experiments/${id}`,
+  updateExperiment: (id: string) => `/api/experiments/${id}`,
+  createReference: (slug: string) => `/api/experiments/${slug}/ref`,
+  getReferences: (id: string) => `/api/experiments/${id}/ref`,
+  deleteReference: (id: string, refId: string) =>
+    `/api/experiments/${id}/ref/${refId}`,
 } as const;
+
+const COOKIE_MAX_AGE_30_DAYS = 60 * 60 * 24 * 30; // 30 days in seconds
 
 interface FormDataResult {
   hyperparams: HyperParam[];
@@ -19,23 +30,22 @@ interface FormDataResult {
 
 export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   const requestId = generateRequestId();
-  const timer = startTimer("page.home.load", { requestId });
+  const timer = startTimer("page.home.load", {
+    requestId,
+  });
 
   try {
     const { session, user } = await locals.safeGetSession();
-    if (!user) {
-      const experiments = new Array();
-      return { experiments, session };
-    }
-
     const { currentWorkspace } = await parent();
-    const apiUrl = new URL(API_ROUTES.GET_EXPERIMENTS, url.origin);
-    if (currentWorkspace?.id) {
-      apiUrl.searchParams.set("workspace", currentWorkspace.id);
+    if (!user || !currentWorkspace) {
+      return {
+        experiments: [],
+        session,
+      };
     }
 
+    const apiUrl = API.getExperiments(url.origin, currentWorkspace?.id);
     const res = await fetch(apiUrl);
-
     if (!res.ok) {
       throw error(res.status, `Failed to fetch experiments: ${res.statusText}`);
     }
@@ -47,13 +57,20 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
       workspaceId: currentWorkspace?.id || "unknown",
       experimentCount: experiments.length.toString(),
     });
-    return { experiments, session };
+
+    return {
+      experiments,
+      session,
+    };
   } catch (err) {
-    timer.end({ error: err instanceof Error ? err.message : "Unknown error" });
+    timer.end({
+      error: err instanceof Error ? err.message : "Unknown error",
+    });
     throw err;
   }
 };
 
+// --- Form Actions ---
 export const actions: Actions = {
   create: async ({ request, fetch }) => handleCreate(request, fetch),
   delete: async ({ request, fetch }) => handleDelete(request, fetch),
@@ -63,7 +80,9 @@ export const actions: Actions = {
     const workspaceId = formData.get("workspaceId");
 
     if (!workspaceId || typeof workspaceId !== "string") {
-      return fail(400, { message: "Workspace ID is required" });
+      return fail(400, {
+        message: "Workspace ID is required",
+      });
     }
 
     cookies.set("current_workspace", workspaceId, {
@@ -71,172 +90,191 @@ export const actions: Actions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: COOKIE_MAX_AGE_30_DAYS,
     });
 
-    return { success: true };
+    return {
+      success: true,
+    };
   },
 };
 
-function parseFormData(formData: FormData): FormDataResult {
-  const obj = Object.fromEntries(formData);
-  const result: FormDataResult = {
-    hyperparams: [],
-    tags: [],
-  };
-
-  Object.entries(obj).forEach(([key, value]) => {
-    if (key.startsWith("hyperparams.")) {
-      const [_, index, field] = key.split(".");
-      const idx = Number(index);
-
-      if (!result.hyperparams[idx]) {
-        result.hyperparams[idx] = { key: value as string, value: "" };
-      } else {
-        result.hyperparams[idx].value = value as string | number;
-      }
-    } else if (key.startsWith("tags.")) {
-      const [_, index] = key.split(".");
-      const idx = Number(index);
-
-      if (!result.tags[idx]) {
-        result.tags[idx] = value as string;
-      }
-    } else {
-      result[key] = value;
-    }
-  });
-
-  return {
-    ...result,
-    hyperparams: result.hyperparams.filter(Boolean),
-    tags: result.tags.filter(Boolean),
-  };
-}
-
-async function handleCreate(request: Request, fetch: Function) {
+async function handleCreate(request: Request, fetch: typeof window.fetch) {
   const form = await request.formData();
+  const data = parseFormData(form);
+
   const {
     "experiment-name": name,
     "experiment-description": description,
     "reference-id": referenceId,
-    visibility,
-    hyperparams,
-    tags,
-  } = parseFormData(form);
+  } = data;
 
   if (!name || !description) {
-    return fail(400, { message: "Name and description are required" });
+    return fail(400, {
+      message: "Name and description are required",
+    });
   }
 
-  const response = await fetch(API_ROUTES.CREATE_EXPERIMENT, {
+  const response = await fetch(API.createExperiment, {
     method: "POST",
-    body: JSON.stringify({ name, description, hyperparams, tags, visibility }),
+    body: JSON.stringify({
+      ...data,
+      name,
+      description,
+    }),
   });
 
   if (!response.ok) {
-    return fail(500, { message: "Failed to create experiment" });
+    return fail(500, {
+      message: "Failed to create experiment",
+    });
   }
 
   if (referenceId) {
-    const {
-      experiment: { id },
-    } = await response.json();
-    const referenceResponse = await fetch(
-      API_ROUTES.CREATE_REFERENCE.replace("[slug]", id),
-      {
-        method: "POST",
-        body: JSON.stringify({ referenceId }),
-      },
-    );
+    const { experiment } = await response.json();
+    const refResponse = await fetch(API.createReference(experiment.id), {
+      method: "POST",
+      body: JSON.stringify({
+        referenceId,
+      }),
+    });
 
-    if (!referenceResponse.ok) {
-      return fail(500, { message: "Failed to create reference" });
-    }
-  }
-
-  return { success: true };
-}
-
-async function handleDelete(request: Request, fetch: Function) {
-  const data = await request.formData();
-  const id = data.get("id");
-
-  if (!id) {
-    return fail(400, { message: "ID is required" });
-  }
-
-  const response = await fetch(`/api/experiments/${id}`, {
-    method: "DELETE",
-  });
-
-  if (!response.ok) {
-    return fail(500, { message: "Failed to delete experiment" });
-  }
-
-  return { success: true };
-}
-
-async function handleUpdate(request: Request, fetch: Function) {
-  const form = await request.formData();
-  const {
-    "experiment-id": id,
-    "experiment-name": name,
-    "experiment-description": description,
-    "reference-id": referenceId,
-    visibility,
-    tags,
-  } = parseFormData(form);
-
-  if (!id || !name || !description) {
-    return fail(400, { message: "ID, name, and description are required" });
-  }
-
-  const response = await fetch(`/api/experiments/${id}`, {
-    method: "POST",
-    body: JSON.stringify({ name, description, visibility, tags }),
-  });
-
-  if (!response.ok) {
-    return fail(500, { message: "Failed to update experiment" });
-  }
-
-  const refResponse = await fetch(`/api/experiments/${id}/ref`);
-  const currentRefs = await refResponse.json();
-
-  if (referenceId) {
-    if (currentRefs.length > 0) {
-      for (const refId of currentRefs) {
-        if (refId !== id) {
-          await fetch(`/api/experiments/${id}/ref/${refId}`, {
-            method: "DELETE",
-          });
-        }
-      }
-    }
-
-    const referenceResponse = await fetch(
-      API_ROUTES.CREATE_REFERENCE.replace("[slug]", id),
-      {
-        method: "POST",
-        body: JSON.stringify({ referenceId }),
-      },
-    );
-
-    if (!referenceResponse.ok) {
-      return fail(500, { message: "Failed to create reference" });
-    }
-  } else if (currentRefs.length > 0) {
-    for (const refId of currentRefs) {
-      if (refId !== id) {
-        await fetch(`/api/experiments/${id}/ref/${refId}`, {
-          method: "DELETE",
-        });
-      }
+    if (!refResponse.ok) {
+      return fail(500, {
+        message: "Failed to create reference",
+      });
     }
   }
 
   return {
     success: true,
   };
+}
+
+async function handleDelete(request: Request, fetch: typeof window.fetch) {
+  const data = await request.formData();
+  const id = data.get("id");
+
+  if (!id || typeof id !== "string") {
+    return fail(400, {
+      message: "A valid ID is required",
+    });
+  }
+
+  const response = await fetch(API.deleteExperiment(id), {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    return fail(500, {
+      message: "Failed to delete experiment",
+    });
+  }
+
+  return {
+    success: true,
+  };
+}
+
+async function handleUpdate(request: Request, fetch: typeof window.fetch) {
+  const form = await request.formData();
+  const data = parseFormData(form);
+
+  const {
+    "experiment-id": id,
+    "experiment-name": name,
+    "experiment-description": description,
+    "reference-id": referenceId,
+  } = data;
+
+  if (!id || !name || !description) {
+    return fail(400, {
+      message: "ID, name, and description are required",
+    });
+  }
+
+  const response = await fetch(API.updateExperiment(id), {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    return fail(500, {
+      message: "Failed to update experiment",
+    });
+  }
+
+  try {
+    await replaceExperimentReference(id, referenceId, fetch);
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Could not update references";
+    return fail(500, {
+      message,
+    });
+  }
+
+  return {
+    success: true,
+  };
+}
+
+// --- Helper Functions ---
+function parseFormData(formData: FormData): FormDataResult {
+  const data = Object.fromEntries(formData);
+  const result: FormDataResult = {
+    hyperparams: [],
+    tags: [],
+  };
+  const hyperparamMap = new Map<number, Partial<HyperParam>>();
+
+  for (const [key, value] of Object.entries(data)) {
+    if (typeof value !== "string") continue;
+
+    if (key.startsWith("hyperparams.")) {
+      const [, indexStr, field] = key.split(".");
+      const index = Number(indexStr);
+      const existing = hyperparamMap.get(index) ?? {};
+      hyperparamMap.set(index, { ...existing, [field]: value });
+    } else if (key.startsWith("tags.")) {
+      const [, indexStr] = key.split(".");
+      result.tags[Number(indexStr)] = value;
+    } else {
+      result[key] = value;
+    }
+  }
+
+  result.hyperparams = [...hyperparamMap.values()].filter(
+    (hp): hp is HyperParam => hp.key != null && hp.value != null,
+  );
+  result.tags = result.tags.filter(Boolean);
+
+  return result;
+}
+
+async function replaceExperimentReference(
+  id: string,
+  newReferenceId: any,
+  fetch: typeof window.fetch,
+) {
+  const res = await fetch(API.getReferences(id));
+  if (!res.ok) throw new Error("Failed to fetch existing references.");
+  const currentRefIds: string[] = await res.json();
+
+  await Promise.all(
+    currentRefIds.map((refId) =>
+      fetch(API.deleteReference(id, refId), {
+        method: "DELETE",
+      }),
+    ),
+  );
+
+  if (newReferenceId && typeof newReferenceId === "string") {
+    const addRes = await fetch(API.createReference(id), {
+      method: "POST",
+      body: JSON.stringify({
+        referenceId: newReferenceId,
+      }),
+    });
+    if (!addRes.ok) throw new Error("Failed to create new reference.");
+  }
 }
