@@ -101,7 +101,7 @@
 </script>
 
 <div class="flex-1 p-2 sm:p-4 max-w-none mx-2 sm:mx-4">
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6 h-fit">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 h-fit">
     <div
       class="bg-ctp-surface0/10 backdrop-blur-md rounded-2xl border border-ctp-surface0/20 p-4 sm:p-6 shadow-xl h-fit"
     >
@@ -222,24 +222,32 @@
             <div class="space-y-4">
               {#each ownedWorkspaces as workspace}
                 <div
-                  class="p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30 hover:border-ctp-surface0/50 transition-all"
+                  class="p-4 border border-ctp-surface0/30 rounded-lg hover:border-ctp-surface0/50 transition-all"
                 >
                   <div class="flex justify-between items-start">
-                    <div class="flex-1">
-                      <h4 class="text-lg font-semibold text-ctp-text mb-2">
-                        {workspace.name}
-                      </h4>
-                      <p class="text-ctp-subtext0 mb-3">
-                        {workspace.description || "No description provided"}
-                      </p>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-2">
+                        <h4 class="text-base font-medium text-ctp-text truncate">
+                          {workspace.name}
+                        </h4>
+                        <span
+                          class="text-xs px-2 py-0.5 bg-ctp-yellow/20 text-ctp-yellow border border-ctp-yellow/30 rounded-full font-medium flex-shrink-0"
+                          >OWNER</span
+                        >
+                      </div>
+                      {#if workspace.description}
+                        <p class="text-sm text-ctp-subtext0 mb-2">
+                          {workspace.description}
+                        </p>
+                      {/if}
                       <div class="text-xs text-ctp-overlay0 font-mono">
-                        ID: {workspace.id}
+                        {workspace.id}
                       </div>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3">
                       <button
                         type="button"
-                        class="p-2 rounded-lg text-ctp-blue hover:bg-ctp-blue/20 hover:text-ctp-blue transition-colors border border-ctp-blue/30"
+                        class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface1/60 transition-colors"
                         title="Invite users"
                         onclick={() => openInviteModal(workspace)}
                       >
@@ -286,42 +294,41 @@
             <div class="space-y-4">
               {#each sharedWorkspaces as workspace}
                 <div
-                  class="p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30 hover:border-ctp-surface0/50 transition-all"
+                  class="p-4 border border-ctp-surface0/30 rounded-lg hover:border-ctp-surface0/50 transition-all"
                 >
                   <div class="flex justify-between items-start">
-                    <div class="flex-1">
-                      <h4 class="text-lg font-semibold text-ctp-text mb-2">
-                        {workspace.name}
-                      </h4>
-                      <p class="text-ctp-subtext0 mb-2">
-                        {workspace.description || "No description provided"}
-                      </p>
-                      <div class="flex items-center gap-2 mb-3">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-2">
+                        <h4 class="text-base font-medium text-ctp-text truncate">
+                          {workspace.name}
+                        </h4>
                         {#if workspace.role === "ADMIN"}
                           <span
-                            class="text-xs px-2 py-1 bg-ctp-red/20 text-ctp-red rounded-full border border-ctp-red/30"
+                            class="text-xs px-2 py-0.5 bg-ctp-red/20 text-ctp-red rounded-full border border-ctp-red/30 font-medium flex-shrink-0"
                             >ADMIN</span
                           >
                         {:else if workspace.role === "EDITOR"}
                           <span
-                            class="text-xs px-2 py-1 bg-ctp-blue/20 text-ctp-blue rounded-full border border-ctp-blue/30"
+                            class="text-xs px-2 py-0.5 bg-ctp-blue/20 text-ctp-blue rounded-full border border-ctp-blue/30 font-medium flex-shrink-0"
                             >EDITOR</span
                           >
                         {:else}
                           <span
-                            class="text-xs px-2 py-1 bg-ctp-green/20 text-ctp-green rounded-full border border-ctp-green/30"
+                            class="text-xs px-2 py-0.5 bg-ctp-green/20 text-ctp-green rounded-full border border-ctp-green/30 font-medium flex-shrink-0"
                             >VIEWER</span
                           >
                         {/if}
-                        <span class="text-xs text-ctp-subtext0"
-                          >Shared workspace</span
-                        >
                       </div>
+                      {#if workspace.description}
+                        <p class="text-sm text-ctp-subtext0 mb-2">
+                          {workspace.description}
+                        </p>
+                      {/if}
                       <div class="text-xs text-ctp-overlay0 font-mono">
-                        ID: {workspace.id}
+                        {workspace.id}
                       </div>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3">
                       <form
                         method="POST"
                         action="?/removeSharedWorkspace"
@@ -339,7 +346,7 @@
                         />
                         <button
                           type="submit"
-                          class="p-2 rounded-lg text-ctp-red hover:bg-ctp-red/20 hover:text-ctp-red transition-colors border border-ctp-red/30"
+                          class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
                           title="Leave workspace"
                           onclick={(e) => {
                             if (
@@ -367,67 +374,62 @@
             <p>No workspaces found. Create your first workspace above.</p>
           </div>
         {/if}
+
+        {#if !invitationsLoading && pendingInvitations.length > 0}
+          <div>
+            <div class="flex items-center gap-2 mb-4 mt-6">
+              <h3 class="text-lg font-semibold text-ctp-text">
+                Pending Invitations
+              </h3>
+            </div>
+            <div class="space-y-4">
+              {#each pendingInvitations as invitation}
+                <div
+                  class="p-4 border border-ctp-blue/30 rounded-lg hover:border-ctp-blue/50 transition-all"
+                >
+                  <div class="flex justify-between items-start">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-2">
+                        <h4 class="font-medium text-ctp-text truncate">
+                          {invitation.workspaceName}
+                        </h4>
+                        <span
+                          class="text-xs px-2 py-0.5 bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 rounded-full font-medium flex-shrink-0"
+                        >
+                          {invitation.role}
+                        </span>
+                      </div>
+                      <p class="text-sm text-ctp-subtext0">
+                        Invited by {invitation.fromEmail}
+                      </p>
+                    </div>
+                    <div class="flex items-center gap-1 bg-ctp-surface0/40 backdrop-blur-sm border border-ctp-surface1/30 rounded-full p-0.5 ml-3">
+                      <button
+                        type="button"
+                        class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-green hover:bg-ctp-surface1/60 transition-colors"
+                        title="Accept invitation"
+                        onclick={() => respondToInvitation(invitation.id, true)}
+                      >
+                        <Check size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        class="p-1 rounded-full text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface1/60 transition-colors"
+                        title="Decline invitation"
+                        onclick={() => respondToInvitation(invitation.id, false)}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
       </div>
     </div>
 
-    <div
-      class="bg-ctp-surface0/10 backdrop-blur-md rounded-2xl border border-ctp-surface0/20 p-4 sm:p-6 shadow-xl h-fit"
-    >
-      <h2 class="text-2xl font-bold text-ctp-text mb-6">Invitations</h2>
-
-      {#if invitationsLoading}
-        <div class="flex items-center justify-center py-8">
-          <div
-            class="w-6 h-6 border-2 border-ctp-blue/30 border-t-ctp-blue rounded-full animate-spin"
-          ></div>
-        </div>
-      {:else if pendingInvitations.length === 0}
-        <div class="text-center py-8 text-ctp-subtext0">
-          <Mail size={24} class="mx-auto mb-2 opacity-50" />
-          <p>No pending invitations</p>
-        </div>
-      {:else}
-        <div class="space-y-4">
-          {#each pendingInvitations as invitation}
-            <div
-              class="p-4 bg-ctp-surface0/20 backdrop-blur-sm rounded-xl border border-ctp-surface0/30 hover:border-ctp-surface0/50 transition-all"
-            >
-              <div class="mb-3">
-                <h4 class="font-semibold text-ctp-text">
-                  {invitation.workspaceName}
-                </h4>
-                <p class="text-sm text-ctp-subtext0">
-                  Invited by {invitation.fromEmail}
-                </p>
-                <span
-                  class="text-xs px-2 py-1 bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 rounded-full"
-                >
-                  {invitation.role}
-                </span>
-              </div>
-              <div class="flex gap-2">
-                <button
-                  type="button"
-                  class="flex-1 px-3 py-2 bg-ctp-green/20 hover:bg-ctp-green/30 border border-ctp-green/30 rounded-lg text-ctp-green font-medium transition-all duration-200 flex items-center justify-center gap-2"
-                  onclick={() => respondToInvitation(invitation.id, true)}
-                >
-                  <Check size={14} />
-                  Accept
-                </button>
-                <button
-                  type="button"
-                  class="flex-1 px-3 py-2 bg-ctp-red/20 hover:bg-ctp-red/30 border border-ctp-red/30 rounded-lg text-ctp-red font-medium transition-all duration-200 flex items-center justify-center gap-2"
-                  onclick={() => respondToInvitation(invitation.id, false)}
-                >
-                  <X size={14} />
-                  Decline
-                </button>
-              </div>
-            </div>
-          {/each}
-        </div>
-      {/if}
-    </div>
 
     <div
       class="bg-ctp-surface0/10 backdrop-blur-md rounded-2xl border border-ctp-surface0/20 p-4 sm:p-6 shadow-xl h-fit"
