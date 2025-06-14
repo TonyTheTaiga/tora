@@ -138,7 +138,7 @@
 <!-- Folder tab with actions -->
 <div class="flex items-center justify-end mb-2 font-mono">
   <div
-    class="flex items-center gap-1 bg-ctp-surface0/20 border border-ctp-surface0/30 rounded-lg px-2 py-1"
+    class="flex items-center gap-1 bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1"
   >
     <button
       onclick={async () => {
@@ -148,7 +148,7 @@
         const data = (await response.json()) as ExperimentAnalysis;
         recommendations = data.hyperparameter_recommendations;
       }}
-      class="text-ctp-subtext0 hover:text-ctp-lavender hover:bg-ctp-surface0/30 rounded p-1 transition-all"
+      class="text-ctp-subtext0 hover:text-ctp-lavender hover:bg-ctp-surface0/30 p-1 transition-all"
       title="Get AI recommendations"
     >
       <Sparkle size={14} />
@@ -157,7 +157,7 @@
       onclick={() => {
         openEditExperimentModal(experiment);
       }}
-      class="text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface0/30 rounded p-1 transition-all"
+      class="text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface0/30 p-1 transition-all"
       title="Edit experiment"
     >
       <Pencil size={14} />
@@ -180,7 +180,7 @@
           } catch (err) {}
         }
       }}
-      class="text-ctp-subtext0 hover:text-ctp-teal hover:bg-ctp-surface0/30 rounded p-1 transition-all"
+      class="text-ctp-subtext0 hover:text-ctp-teal hover:bg-ctp-surface0/30 p-1 transition-all"
       title="Show experiment chain"
     >
       {#if highlighted.includes(experiment.id)}
@@ -194,7 +194,7 @@
         e.stopPropagation();
         openDeleteExperimentModal(experiment);
       }}
-      class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 rounded p-1 transition-all"
+      class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 p-1 transition-all"
       title="Delete experiment"
     >
       <X size={14} />
@@ -214,19 +214,27 @@
 
 <!-- Terminal-style experiment details -->
 <div class="font-mono space-y-3">
-  <!-- Header section - config file style -->
-  <div class="space-y-2">
-    <div class="space-y-1 text-xs overflow-hidden">
-      <div class="grid grid-cols-[auto_auto_1fr] gap-1 items-start">
-        <span class="text-ctp-subtext0">name</span>
-        <span class="text-ctp-text">=</span>
-        <span class="text-ctp-green font-medium break-words min-w-0"
-          >"{experiment.name}"</span
-        >
+  <!-- Header section - file listing style -->
+  <div class="space-y-3">
+    <!-- Primary info - name as filename -->
+    <div class="flex items-center gap-2">
+      <div class="text-ctp-green text-sm">●</div>
+      <div class="text-sm text-ctp-text font-mono font-semibold break-words min-w-0">
+        {experiment.name}
       </div>
-      <div class="grid grid-cols-[auto_auto_1fr] gap-1 items-center">
-        <span class="text-ctp-subtext0">id</span>
-        <span class="text-ctp-text">=</span>
+      <div class="text-xs text-ctp-subtext0 font-mono ml-auto">
+        {new Date(experiment.createdAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "2-digit",
+        })}
+      </div>
+    </div>
+
+    <!-- Secondary metadata -->
+    <div class="pl-6 space-y-1 text-xs font-mono">
+      <div class="flex items-center gap-2">
+        <span class="text-ctp-subtext0 w-8">id:</span>
         <button
           onclick={() => {
             navigator.clipboard.writeText(experiment.id);
@@ -239,12 +247,10 @@
               idCopyAnimated = false;
             }, 400);
           }}
-          class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex items-center gap-1 min-w-0 justify-self-start"
+          class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex items-center gap-1 min-w-0"
           title={idCopied ? "ID Copied!" : "Copy Experiment ID"}
         >
-          <span class="truncate max-w-20"
-            >{experiment.id.substring(0, 8)}...</span
-          >
+          <span class="truncate">{experiment.id}</span>
           {#if idCopied}
             <ClipboardCheck size={10} class="text-ctp-green flex-shrink-0" />
           {:else}
@@ -252,28 +258,13 @@
           {/if}
         </button>
       </div>
-      <div class="grid grid-cols-[auto_auto_1fr] gap-1 items-start">
-        <span class="text-ctp-subtext0">created</span>
-        <span class="text-ctp-text">=</span>
-        <span class="text-ctp-subtext1 truncate min-w-0">
-          {new Date(experiment.createdAt).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "2-digit",
-          })}
-          {new Date(experiment.createdAt).toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </span>
-      </div>
+      
       {#if experiment.description}
-        <div class="grid grid-cols-[auto_auto_1fr] gap-1 items-start">
-          <span class="text-ctp-subtext0">desc</span>
-          <span class="text-ctp-text">=</span>
-          <span class="text-ctp-subtext1 break-words min-w-0"
-            >"{experiment.description}"</span
-          >
+        <div class="flex gap-2">
+          <span class="text-ctp-subtext0 w-8 flex-shrink-0">desc:</span>
+          <span class="text-ctp-subtext1 break-words min-w-0">
+            {experiment.description}
+          </span>
         </div>
       {/if}
     </div>
@@ -285,7 +276,7 @@
       <div class="flex flex-wrap gap-1">
         {#each visibleTags as tag}
           <span
-            class="text-xs bg-ctp-blue/20 text-ctp-blue px-1 py-0.5 rounded font-mono"
+            class="text-xs bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-2 py-0.5 rounded-full font-mono"
           >
             {tag}
           </span>
@@ -314,9 +305,9 @@
   {#if experiment.hyperparams && experiment.hyperparams.length > 0}
     <div class="space-y-1">
       <div class="flex items-center justify-between">
-        <div class="text-sm text-ctp-text">Hyperparameters</div>
-        <div class="text-xs text-ctp-subtext0">
-          {experiment.hyperparams?.length || 0}
+        <div class="text-sm text-ctp-text font-medium">hyperparams</div>
+        <div class="text-xs text-ctp-subtext0 font-mono">
+          [{experiment.hyperparams?.length || 0}]
         </div>
       </div>
       <div class="space-y-1">
@@ -342,7 +333,7 @@
             </div>
             <div class="flex items-center gap-1 flex-shrink-0">
               <span
-                class="text-ctp-blue font-mono bg-ctp-surface0/20 px-1 py-0.5 rounded text-xs max-w-24 truncate"
+                class="text-ctp-blue font-mono bg-ctp-surface0/20 border border-ctp-surface0/30 px-1 py-0.5 text-xs max-w-24 truncate"
                 title={String(param.value)}
               >
                 {param.value}
@@ -383,7 +374,7 @@
 
         {#if activeRecommendation}
           <div
-            class="mt-2 p-2 bg-ctp-lavender/10 border border-ctp-lavender/30 rounded relative"
+            class="mt-2 p-2 bg-ctp-lavender/10 border border-ctp-lavender/30 relative"
           >
             <button
               onclick={() => (activeRecommendation = null)}
@@ -391,8 +382,8 @@
             >
               <X size={10} />
             </button>
-            <div class="text-xs text-ctp-lavender mb-1">ai_rec:</div>
-            <div class="text-xs text-ctp-text leading-relaxed pr-4">
+            <div class="text-xs text-ctp-lavender mb-1 font-mono">ai_recommendation:</div>
+            <div class="text-xs text-ctp-text leading-relaxed pr-4 font-mono">
               {activeRecommendation}
             </div>
           </div>
@@ -405,8 +396,8 @@
   {#if availableMetrics.length > 0}
     <div class="space-y-1">
       <div class="flex items-center gap-2">
-        <div class="text-sm text-ctp-text">Metrics</div>
-        <div class="flex items-center gap-1 text-xs">
+        <div class="text-sm text-ctp-text font-medium">metrics</div>
+        <div class="flex items-center gap-1 text-xs font-mono">
           <button
             onclick={() => {
               showMetricsTable = false;
