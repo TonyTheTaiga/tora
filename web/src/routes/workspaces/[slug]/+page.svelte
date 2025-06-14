@@ -145,26 +145,7 @@
 
   <!-- Terminal-style experiments display -->
   <div class="px-4 md:px-6 font-mono">
-    {#if selectedExperiment}
-      <!-- Detailed view -->
-      <div class="mb-6">
-        <button
-          onclick={() => setSelectedExperiment(null)}
-          class="flex items-center gap-2 text-sm text-ctp-subtext0 hover:text-ctp-blue transition-colors mb-4"
-        >
-          <ArrowLeft class="w-4 h-4" />
-          back to list
-        </button>
-        <div
-          class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 p-4 md:p-6"
-        >
-          <ExperimentDetailed
-            bind:highlighted
-            bind:experiment={selectedExperiment}
-          />
-        </div>
-      </div>
-    {:else if filteredExperiments.length === 0 && searchQuery}
+    {#if filteredExperiments.length === 0 && searchQuery}
       <div class="text-ctp-subtext0 text-sm">
         <div>$ search "{searchQuery}"</div>
         <div class="text-ctp-subtext1 ml-2">no results found</div>

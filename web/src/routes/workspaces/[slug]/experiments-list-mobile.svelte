@@ -20,6 +20,7 @@
     Edit,
   } from "lucide-svelte";
   import { page } from "$app/state";
+  import { goto } from "$app/navigation";
 
   interface Props {
     experiments: Experiment[];
@@ -56,7 +57,7 @@
             if (getMode()) {
               addExperiment(experiment.id);
             } else {
-              setSelectedExperiment(experiment);
+              goto(`/workspaces/${page.params.slug}/experiments/${experiment.id}`);
             }
           }}
           class="w-full text-left"
