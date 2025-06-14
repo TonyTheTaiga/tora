@@ -112,10 +112,24 @@
         <h1 class="text-lg md:text-xl text-ctp-text truncate font-mono">
           {workspace?.name || "Workspace"}
         </h1>
-        <div class="text-xs text-ctp-subtext0">
-          {experiments.length} experiment{experiments.length !== 1 ? "s" : ""}
-          {#if workspace?.description}
-            <span class="hidden sm:inline">• {workspace.description}</span>
+        <div class="text-xs text-ctp-subtext0 space-y-1">
+          <div>
+            {experiments.length} experiment{experiments.length !== 1 ? "s" : ""}
+            {#if workspace?.description}
+              <span class="hidden sm:inline">• {workspace.description}</span>
+            {/if}
+          </div>
+          {#if workspace?.id}
+            <div class="flex items-center gap-2">
+              <span>id:</span>
+              <button
+                onclick={() => navigator.clipboard.writeText(workspace.id)}
+                class="text-ctp-blue hover:text-ctp-blue/80 transition-colors truncate max-w-xs"
+                title="click to copy workspace id"
+              >
+                {workspace.id}
+              </button>
+            </div>
           {/if}
         </div>
       </div>
@@ -159,16 +173,16 @@
         <div class="text-ctp-subtext1 ml-2">no results found</div>
       </div>
     {:else if experiments.length === 0}
-      <div class="space-y-2 text-sm">
-        <div class="text-ctp-subtext0">$ ls -la experiments/</div>
-        <div class="text-ctp-subtext1 ml-2">total 0</div>
-        <div class="text-ctp-subtext1 ml-2">directory empty</div>
+      <div class="space-y-3 text-sm">
+        <div class="text-ctp-subtext0 text-xs">
+          no experiments found in this workspace
+        </div>
         <div class="mt-4">
           <button
             onclick={() => openCreateExperimentModal()}
-            class="text-ctp-blue hover:text-ctp-blue/80 transition-colors"
+            class="text-ctp-blue hover:text-ctp-blue/80 transition-colors text-xs"
           >
-            $ touch new_experiment
+            [create experiment]
           </button>
         </div>
       </div>
