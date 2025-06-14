@@ -11,13 +11,13 @@
 {#if !user}
   <LandingPage />
 {:else}
-  <div class="text-ctp-text p-6 space-y-6">
-    <div class="mb-8">
+  <div class="flex-1 p-2 sm:p-4 max-w-none mx-2 sm:mx-4">
+    <div class="mb-6 sm:mb-8">
       <h1 class="text-2xl font-bold text-ctp-text mb-2">Dashboard</h1>
       <p class="text-ctp-subtext0">Welcome back! Here's what's happening with your experiments.</p>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6">
       <DashboardCard
         title="Total Experiments"
         value={stats?.totalExperiments || 0}
