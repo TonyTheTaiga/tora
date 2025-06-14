@@ -44,7 +44,6 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
 
 export const actions: Actions = {
   delete: async ({ request, fetch }) => handleDelete(request, fetch),
-  update: async ({ request, fetch }) => handleUpdate(request, fetch),
 };
 
 async function handleDelete(request: Request, fetch: typeof window.fetch) {
@@ -63,49 +62,6 @@ async function handleDelete(request: Request, fetch: typeof window.fetch) {
   if (!response.ok) {
     return fail(500, {
       message: "Failed to delete experiment",
-    });
-  }
-
-  return {
-    success: true,
-  };
-}
-
-async function handleUpdate(request: Request, fetch: typeof window.fetch) {
-  const form = await request.formData();
-  const data = parseFormData(form);
-
-  const {
-    "experiment-id": id,
-    "experiment-name": name,
-    "experiment-description": description,
-    "reference-id": referenceId,
-  } = data;
-
-  if (!id || !name || !description) {
-    return fail(400, {
-      message: "ID, name, and description are required",
-    });
-  }
-
-  const response = await fetch(API.updateExperiment(id), {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    return fail(500, {
-      message: "Failed to update experiment",
-    });
-  }
-
-  try {
-    await replaceExperimentReference(id, referenceId, fetch);
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Could not update references";
-    return fail(500, {
-      message,
     });
   }
 

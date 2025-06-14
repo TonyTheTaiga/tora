@@ -20,7 +20,10 @@ export const load: PageServerLoad = async ({ locals, params, parent }) => {
   try {
     let experiments: Experiment[] =
       await locals.dbClient.getExperiments(workspaceId);
-    experiments = experiments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    experiments = experiments.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
 
     const workspace = workspaces.find((w) => w.id === workspaceId);
     timer.end({ workspace_id: workspaceId });
@@ -81,15 +84,33 @@ export const actions: Actions = {
       visibility,
     } = parseFormData(await request.formData());
 
-    console.log("referenceId", referenceId);
-
-    const experiment = await locals.dbClient.createExperiment(locals.user.id, {
+    await locals.dbClient.createExperiment(locals.user.id, {
       name,
       description,
       hyperparams,
       tags,
       visibility,
       workspaceId,
+    });
+
+    return { success: true };
+  },
+  update: async ({ request, locals }) => {
+    const {
+      "experiment-id": id,
+      "experiment-name": name,
+      "experiment-description": description,
+      "reference-id": referenceId,
+      tags,
+      hyperparams,
+      visibility,
+    } = parseFormData(await request.formData());
+
+    await locals.dbClient.updateExperiment(id, {
+      name: name,
+      description: description,
+      tags: tags,
+      visibility: visibility,
     });
 
     return { success: true };

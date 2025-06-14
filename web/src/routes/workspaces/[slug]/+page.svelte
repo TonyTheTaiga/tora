@@ -7,7 +7,7 @@
   import ExperimentsList from "$lib/components/experiments-list.svelte";
   import CreateExperimentModal from "./create-experiment-modal.svelte";
   import DeleteConfirmationModal from "$lib/components/delete-confirmation-modal.svelte";
-  import EditExperimentModal from "$lib/components/edit-experiment-modal.svelte";
+  import EditExperimentModal from "./edit-experiment-modal.svelte";
 
   let { data = $bindable() } = $props();
   let { workspace } = $derived(data);
@@ -36,4 +36,5 @@
 {#if editExperimentModal}
   <EditExperimentModal experiment={editExperimentModal} />
 {/if}
+
 <ExperimentsList bind:experiments />
