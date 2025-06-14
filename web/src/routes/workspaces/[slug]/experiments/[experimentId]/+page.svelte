@@ -254,7 +254,7 @@
         <div class="flex flex-wrap gap-1">
           {#each visibleTags as tag}
             <span
-              class="text-xs bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-2 py-0.5 rounded-full font-mono"
+              class="text-xs bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-2 py-0.5 font-mono"
             >
               {tag}
             </span>

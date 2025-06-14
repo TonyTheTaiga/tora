@@ -72,7 +72,7 @@
 
 {#snippet FeatureCard(title: String, content: String)}
   <div
-    class="opacity-75 backdrop-blur-md border border-ctp-overlay0/40 rounded-lg bg-gradient-to-br from-ctp-surface0/20 to-ctp-surface1/10 hover:from-ctp-surface0/40 hover:to-ctp-surface1/20 hover:border-ctp-lavender/30 hover:opacity-90 hover:scale-105 hover:shadow-xl transition-all duration-300 ease-out p-4 shadow-md shadow-ctp-overlay0/10"
+    class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 hover:bg-ctp-surface0/20 hover:border-ctp-surface0/30 transition-all p-4"
   >
     <span class="text-ctp-lavender font-mono">{title}</span>
     <br />
@@ -114,7 +114,9 @@
 </div>
 
 <!-- Desktop Version -->
-<section class="hidden md:flex flex-col min-h-[calc(100vh-2rem)] text-ctp-text font-mono">
+<section
+  class="hidden md:flex flex-col min-h-[calc(100vh-2rem)] text-ctp-text font-mono"
+>
   <div class="flex-[2] flex flex-col">
     <div class="flex-none p-2">
       <div class="w-[clamp(31rem,68vw,73rem)] fill-ctp-blue opacity-80">
@@ -135,7 +137,7 @@
         <button
           type="button"
           onclick={() => goto("/signup")}
-          class="mt-4 p-2 rounded-lg bg-gradient-to-r from-ctp-blue/10 to-ctp-mauve/10 hover:from-ctp-blue/80 hover:to-ctp-mauve/80 hover:scale-105 hover:shadow-lg transition-all duration-300 ease-out hover:text-ctp-crust font-mono border border-ctp-overlay0/30 hover:border-ctp-lavender/50 shadow-md w-auto"
+          class="mt-4 p-2 bg-ctp-blue/20 border border-ctp-blue/40 hover:bg-ctp-blue/30 hover:border-ctp-blue/60 transition-all hover:text-ctp-crust font-mono w-auto"
         >
           {activeCopy.getStarted}
         </button>
@@ -173,7 +175,7 @@
       <button
         type="button"
         onclick={() => goto("/signup")}
-        class="mt-4 p-2 rounded-lg bg-gradient-to-r from-ctp-blue/10 to-ctp-mauve/10 hover:from-ctp-blue hover:to-ctp-mauve hover:scale-105 hover:shadow-lg transition-all duration-300 ease-out hover:text-ctp-crust font-mono border border-ctp-overlay0/30 hover:border-ctp-lavender/50 shadow-md w-auto"
+        class="mt-4 p-2 bg-ctp-blue/20 border border-ctp-blue/40 hover:bg-ctp-blue/30 hover:border-ctp-blue/60 transition-all hover:text-ctp-crust font-mono w-auto"
       >
         {activeCopy.getStarted}
       </button>

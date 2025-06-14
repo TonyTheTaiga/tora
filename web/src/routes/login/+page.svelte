@@ -3,7 +3,9 @@
   import { goto } from "$app/navigation";
 </script>
 
-<div class="flex items-center justify-center min-h-[calc(100vh-2rem)] font-mono">
+<div
+  class="flex items-center justify-center min-h-[calc(100vh-2rem)] font-mono"
+>
   <div class="w-full max-w-md">
     <div
       class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 overflow-hidden"
@@ -26,10 +28,7 @@
       >
         <!-- Email field -->
         <div class="space-y-2">
-          <label
-            class="text-sm text-ctp-subtext0 block"
-            for="email"
-          >
+          <label class="text-sm text-ctp-subtext0 block" for="email">
             email address
           </label>
           <div class="relative">
@@ -52,10 +51,7 @@
 
         <!-- Password field -->
         <div class="space-y-2">
-          <label
-            class="text-sm text-ctp-subtext0 block"
-            for="password"
-          >
+          <label class="text-sm text-ctp-subtext0 block" for="password">
             password
           </label>
           <div class="relative">

@@ -24,7 +24,7 @@
   <CreateWorkspaceModal />
 {/if}
 
-<div class="bg-ctp-base">
+<div class="bg-ctp-base font-mono">
   <!-- Minimal top bar -->
   <div class="flex items-center justify-between p-6">
     <div class="flex items-center gap-4">
@@ -39,7 +39,7 @@
 
     <button
       onclick={() => openCreateWorkspaceModal()}
-      class="group relative bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-text hover:bg-ctp-surface0/30 hover:border-ctp-surface0/50 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 active:scale-95"
+      class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-text hover:bg-ctp-surface0/30 hover:border-ctp-surface0/50 px-4 py-2 text-sm transition-all"
     >
       <div class="flex items-center gap-2">
         <svg

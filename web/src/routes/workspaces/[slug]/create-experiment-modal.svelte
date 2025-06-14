@@ -183,7 +183,7 @@
                 {#each tags as tag, i}
                   <input type="hidden" value={tag} name="tags.{i}" />
                   <span
-                    class="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-ctp-blue/10 text-ctp-blue border-0 group"
+                    class="inline-flex items-center px-2 py-0.5 text-xs bg-ctp-blue/10 text-ctp-blue border-0 group"
                   >
                     {tag}
                     <button
@@ -229,7 +229,7 @@
                       event.preventDefault();
                       addingNewTag = true;
                     }}
-                    class="inline-flex items-center gap-1 py-0.5 px-2 text-xs rounded-full bg-transparent text-ctp-blue border border-dashed border-ctp-blue/50 hover:bg-ctp-blue/10 transition-all"
+                    class="inline-flex items-center gap-1 py-0.5 px-2 text-xs bg-transparent text-ctp-blue border border-dashed border-ctp-blue/50 hover:bg-ctp-blue/10 transition-all"
                   >
                     <Plus size={12} />
                     Add Tag

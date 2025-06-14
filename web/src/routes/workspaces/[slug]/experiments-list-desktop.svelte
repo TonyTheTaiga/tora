@@ -93,7 +93,7 @@
               <div class="flex gap-1">
                 {#each experiment.tags.slice(0, 3) as tag}
                   <span
-                    class="text-[10px] bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-1 py-px rounded-full"
+                    class="text-[10px] bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-1 py-px"
                   >
                     {tag}
                   </span>
