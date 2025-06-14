@@ -4,29 +4,20 @@
     getEditExperimentModal,
     getDeleteExperimentModal,
     openCreateExperimentModal,
-    setSelectedExperiment,
-    getSelectedExperiment,
   } from "$lib/state/app.svelte.js";
-  import {
-    getMode,
-    addExperiment,
-    selectedForComparison,
-  } from "$lib/state/comparison.svelte.js";
   import CreateExperimentModal from "./create-experiment-modal.svelte";
   import DeleteConfirmationModal from "./delete-confirmation-modal.svelte";
   import EditExperimentModal from "./edit-experiment-modal.svelte";
-  import ExperimentDetailed from "./experiment-detailed.svelte";
   import ExperimentsListMobile from "./experiments-list-mobile.svelte";
   import ExperimentsListDesktop from "./experiments-list-desktop.svelte";
   import type { Experiment } from "$lib/types";
   import { Plus } from "lucide-svelte";
 
   let { data = $bindable() } = $props();
-  let { workspace } = $derived(data);
+  let { currentWorkspace } = $derived(data);
   let experiments = $state(data.experiments);
   let searchQuery = $state("");
   let highlighted = $state<string[]>([]);
-  let selectedExperiment = $derived.by(() => getSelectedExperiment());
 
   $effect(() => {
     experiments = data.experiments;
@@ -75,7 +66,7 @@
 </script>
 
 {#if createExperimentModal}
-  <CreateExperimentModal {workspace} {experiments} />
+  <CreateExperimentModal workspace={currentWorkspace} {experiments} />
 {/if}
 
 {#if deleteExperimentModal}
@@ -88,7 +79,7 @@
 {#if editExperimentModal}
   <EditExperimentModal
     experiment={editExperimentModal}
-    {workspace}
+    workspace={currentWorkspace}
     {experiments}
   />
 {/if}
@@ -102,24 +93,24 @@
       <div class="w-2 h-6 md:h-8 bg-ctp-blue rounded-full flex-shrink-0"></div>
       <div class="min-w-0 flex-1">
         <h1 class="text-lg md:text-xl text-ctp-text truncate font-mono">
-          {workspace?.name || "Workspace"}
+          {currentWorkspace?.name || "Workspace"}
         </h1>
         <div class="text-xs text-ctp-subtext0 space-y-1">
           <div>
             {experiments.length} experiment{experiments.length !== 1 ? "s" : ""}
-            {#if workspace?.description}
-              <span class="hidden sm:inline">• {workspace.description}</span>
+            {#if currentWorkspace?.description}
+              <span class="hidden sm:inline">• {currentWorkspace.description}</span>
             {/if}
           </div>
-          {#if workspace?.id}
+          {#if currentWorkspace?.id}
             <div class="flex items-center gap-2">
               <span>id:</span>
               <button
-                onclick={() => navigator.clipboard.writeText(workspace.id)}
+                onclick={() => navigator.clipboard.writeText(currentWorkspace.id)}
                 class="text-ctp-blue hover:text-ctp-blue/80 transition-colors truncate max-w-xs"
                 title="click to copy workspace id"
               >
-                {workspace.id}
+                {currentWorkspace.id}
               </button>
             </div>
           {/if}
