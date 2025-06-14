@@ -42,9 +42,11 @@
       const windowHeight = window.innerHeight;
       const hasScroll = documentHeight > windowHeight;
       
+      // For pages without scroll content, always keep toolbar visible
+      // and ignore rubber banding effects (negative scroll values)
       if (!hasScroll) {
         visible = true;
-        lastScrollY = currentScrollY;
+        lastScrollY = Math.max(0, currentScrollY); // Clamp to 0 to ignore rubber banding
         return;
       }
 
@@ -56,11 +58,14 @@
         lastScrollY = currentScrollY;
         return;
       }
+      
+      // At top or during rubber band effect (negative scroll)
       if (currentScrollY <= 0) {
         visible = true;
-        lastScrollY = currentScrollY;
+        lastScrollY = Math.max(0, currentScrollY); // Clamp to 0 to ignore rubber banding
         return;
       }
+      
       if (Math.abs(currentScrollY - lastScrollY) > scrollThreshold) {
         visible = currentScrollY < lastScrollY;
       }
