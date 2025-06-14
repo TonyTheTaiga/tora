@@ -94,7 +94,7 @@ export const actions: Actions = {
     });
 
     // Handle reference creation if provided
-    if (referenceId && referenceId !== '') {
+    if (referenceId && referenceId !== "") {
       try {
         await locals.dbClient.createReference(experiment.id, referenceId);
       } catch (error) {
@@ -124,18 +124,24 @@ export const actions: Actions = {
     });
 
     // Handle reference updates
-    if (referenceId && referenceId !== '') {
+    if (referenceId && referenceId !== "") {
       // Get current references to check if we need to update
       try {
         const currentReferences = await locals.dbClient.getReferenceChain(id);
-        
+
         // If there's a current reference and it's different, delete it first
-        if (currentReferences.length > 0 && currentReferences[0].id !== referenceId) {
+        if (
+          currentReferences.length > 0 &&
+          currentReferences[0].id !== referenceId
+        ) {
           await locals.dbClient.deleteReference(id, currentReferences[0].id);
         }
-        
+
         // If no current reference or it's different, create the new one
-        if (currentReferences.length === 0 || currentReferences[0].id !== referenceId) {
+        if (
+          currentReferences.length === 0 ||
+          currentReferences[0].id !== referenceId
+        ) {
           await locals.dbClient.createReference(id, referenceId);
         }
       } catch (error) {

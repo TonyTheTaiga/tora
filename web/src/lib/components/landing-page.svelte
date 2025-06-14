@@ -28,26 +28,26 @@
       line2: "Tora: Visualize, Analyze, and Optimize ML Experiment Workflows.",
       line3: "Fast Integration, Immediate Technical Insights.",
       line4: "Streamline MLOps Pipelines with Automated Tooling.",
-      getStarted: "Explore Tora",
-      feature1Title: "Seamless Tool Integration",
+      getStarted: "explore tora",
+      feature1Title: "seamless tool integration",
       feature1Desc:
-        "Deploy in minutes with zero downtime. Integrates with existing ML stacks via Python client. Compatible with CI/CD pipelines and standard experiment frameworks.",
-      feature2Title: "Advanced Data Visualization",
+        "deploy in minutes with zero downtime. integrates with existing ml stacks via python client. compatible with ci/cd pipelines and standard experiment frameworks.",
+      feature2Title: "advanced data visualization",
       feature2Desc:
-        "Interactive dashboards display real-time metrics and experiment comparisons. Supports custom chart configurations and anomaly highlighting for efficient trend analysis.",
-      feature3Title: "AI-Powered Experiment Analysis",
+        "interactive dashboards display real-time metrics and experiment comparisons. supports custom chart configurations and anomaly highlighting for efficient trend analysis.",
+      feature3Title: "ai-powered experiment analysis",
       feature3Desc:
-        "Automated hyperparameter optimization suggestions based on experiment history. Identifies performance bottlenecks and generates targeted improvement recommendations.",
-      feature4Title: "Collaborative MLOps Framework",
+        "automated hyperparameter optimization suggestions based on experiment history. identifies performance bottlenecks and generates targeted improvement recommendations.",
+      feature4Title: "collaborative mlops framework",
       feature4Desc:
-        "Centralized experiment management with version control integration. Supports reproducibility through detailed metadata tracking and shared workspaces for distributed teams.",
+        "centralized experiment management with version control integration. supports reproducibility through detailed metadata tracking and shared workspaces for distributed teams.",
     },
     ja: {
       line1: "モデル性能と計算効率の最適化",
       line2: "Tora: ML実験の可視化・分析・最適化プラットフォーム",
       line3: "迅速な導入、即時の洞察",
       line4: "MLOpsワークフローの自動化と高速化",
-      getStarted: "Toraを試す",
+      getStarted: "toraを試す",
       feature1Title: "高速統合と即時価値提供",
       feature1Desc:
         "数分で導入可能。既存ツールとシームレスに連携し、ダウンタイムなしでワークフローを強化します。CI/CDパイプラインへの統合も容易です。",
@@ -74,9 +74,9 @@
   <div
     class="opacity-75 backdrop-blur-md border border-ctp-overlay0/40 rounded-lg bg-gradient-to-br from-ctp-surface0/20 to-ctp-surface1/10 hover:from-ctp-surface0/40 hover:to-ctp-surface1/20 hover:border-ctp-lavender/30 hover:opacity-90 hover:scale-105 hover:shadow-xl transition-all duration-300 ease-out p-4 shadow-md shadow-ctp-overlay0/10"
   >
-    <span class="font-bold text-ctp-lavender">{title}</span>
+    <span class="text-ctp-lavender font-mono">{title}</span>
     <br />
-    <span class="italic text-ctp-subtext0">
+    <span class="text-ctp-subtext0 font-mono">
       {content}
     </span>
   </div>
@@ -99,7 +99,7 @@
       aria-hidden="true"
     ></span>
     <span
-      class="relative z-10 flex w-full items-center justify-between px-2 text-xs font-medium"
+      class="relative z-10 flex w-full items-center justify-between px-2 text-xs font-mono"
     >
       <span
         class={`${currentLang === "en" ? "text-ctp-crust" : "text-ctp-subtext1"}`}
@@ -114,7 +114,7 @@
 </div>
 
 <!-- Desktop Version -->
-<section class="hidden md:flex flex-col min-h-[calc(100vh-2rem)] text-ctp-text">
+<section class="hidden md:flex flex-col min-h-[calc(100vh-2rem)] text-ctp-text font-mono">
   <div class="flex-[2] flex flex-col">
     <div class="flex-none p-2">
       <div class="w-[clamp(31rem,68vw,73rem)] fill-ctp-blue opacity-80">
@@ -126,7 +126,7 @@
       <div class="flex flex-col p-4 justify-center">
         <p class="text-base leading-relaxed">{activeCopy.line1}</p>
         <p class="text-base leading-relaxed mt-2">{activeCopy.line2}</p>
-        <p class="text-base leading-relaxed mt-2 font-bold text-ctp-sapphire">
+        <p class="text-base leading-relaxed mt-2 text-ctp-sapphire">
           {activeCopy.line3}
         </p>
         <p class="text-base leading-relaxed mt-2">
@@ -135,7 +135,7 @@
         <button
           type="button"
           onclick={() => goto("/signup")}
-          class="mt-4 p-2 rounded-lg bg-gradient-to-r from-ctp-blue/10 to-ctp-mauve/10 hover:from-ctp-blue/80 hover:to-ctp-mauve/80 hover:scale-105 hover:shadow-lg transition-all duration-300 ease-out hover:text-ctp-crust font-medium border border-ctp-overlay0/30 hover:border-ctp-lavender/50 shadow-md w-auto"
+          class="mt-4 p-2 rounded-lg bg-gradient-to-r from-ctp-blue/10 to-ctp-mauve/10 hover:from-ctp-blue/80 hover:to-ctp-mauve/80 hover:scale-105 hover:shadow-lg transition-all duration-300 ease-out hover:text-ctp-crust font-mono border border-ctp-overlay0/30 hover:border-ctp-lavender/50 shadow-md w-auto"
         >
           {activeCopy.getStarted}
         </button>
@@ -155,7 +155,7 @@
 
 <!-- Mobile Version -->
 <section
-  class="md:hidden flex flex-col min-h-[calc(100vh-2rem)] text-ctp-text px-4"
+  class="md:hidden flex flex-col min-h-[calc(100vh-2rem)] text-ctp-text px-4 font-mono"
 >
   <div class="flex flex-col space-y-8 pt-4">
     <div class="w-[clamp(16rem,85vw,32rem)] fill-ctp-blue opacity-80">
@@ -164,7 +164,7 @@
     <div class="p-4">
       <p class="text-base leading-relaxed">{activeCopy.line1}</p>
       <p class="text-base leading-relaxed mt-2">{activeCopy.line2}</p>
-      <p class="text-base leading-relaxed mt-2 font-bold text-ctp-sapphire">
+      <p class="text-base leading-relaxed mt-2 text-ctp-sapphire">
         {activeCopy.line3}
       </p>
       <p class="text-base leading-relaxed mt-2">
@@ -173,7 +173,7 @@
       <button
         type="button"
         onclick={() => goto("/signup")}
-        class="mt-4 p-2 rounded-lg bg-gradient-to-r from-ctp-blue/10 to-ctp-mauve/10 hover:from-ctp-blue hover:to-ctp-mauve hover:scale-105 hover:shadow-lg transition-all duration-300 ease-out hover:text-ctp-crust font-medium border border-ctp-overlay0/30 hover:border-ctp-lavender/50 shadow-md w-auto"
+        class="mt-4 p-2 rounded-lg bg-gradient-to-r from-ctp-blue/10 to-ctp-mauve/10 hover:from-ctp-blue hover:to-ctp-mauve hover:scale-105 hover:shadow-lg transition-all duration-300 ease-out hover:text-ctp-crust font-mono border border-ctp-overlay0/30 hover:border-ctp-lavender/50 shadow-md w-auto"
       >
         {activeCopy.getStarted}
       </button>

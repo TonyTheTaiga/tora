@@ -444,40 +444,40 @@
     <div class="mb-4">
       <details class="relative">
         <summary
-          class="flex items-center justify-between cursor-pointer p-3 bg-ctp-surface0 rounded border border-ctp-surface1 hover:bg-ctp-surface1 transition-colors"
+          class="flex items-center justify-between cursor-pointer p-2 md:p-3 bg-ctp-surface0/20 border border-ctp-surface0/30 hover:bg-ctp-surface0/30 transition-colors text-xs md:text-sm"
         >
-          <span class="text-sm text-ctp-text">
-            Select metrics ({selectedMetrics.length} of {availableMetrics.length})
+          <span class="text-ctp-text">
+            select metrics ({selectedMetrics.length}/{availableMetrics.length})
           </span>
-          <ChevronDown size={16} class="text-ctp-subtext1" />
+          <ChevronDown size={12} class="text-ctp-subtext0 md:w-4 md:h-4" />
         </summary>
 
         <div
-          class="absolute top-full left-0 right-0 mt-1 bg-ctp-surface0 border border-ctp-surface1 rounded shadow-lg z-10 max-h-60 overflow-y-auto"
+          class="absolute top-full left-0 right-0 mt-1 bg-ctp-base border border-ctp-surface0/30 shadow-lg z-10 max-h-60 overflow-y-auto"
         >
           <!-- Search filter -->
-          <div class="p-2 border-b border-ctp-surface1">
+          <div class="p-2 border-b border-ctp-surface0/20">
             <input
               type="search"
-              placeholder="Filter metrics..."
+              placeholder="filter metrics..."
               bind:value={searchFilter}
-              class="w-full px-3 py-2 text-sm bg-ctp-base border border-ctp-surface1 rounded text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue"
+              class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-xs"
             />
           </div>
 
           <!-- Control buttons -->
-          <div class="flex gap-2 p-2 border-b border-ctp-surface1">
+          <div class="flex gap-2 p-2 border-b border-ctp-surface0/20">
             <button
               onclick={selectAllMetrics}
-              class="px-2.5 py-1.5 text-xs bg-ctp-green/20 text-ctp-green rounded hover:bg-ctp-green/30 transition-colors"
+              class="px-2 py-1 text-xs bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 transition-all"
             >
-              Select All
+              all
             </button>
             <button
               onclick={clearAllMetrics}
-              class="px-2.5 py-1.5 text-xs bg-ctp-red/20 text-ctp-red rounded hover:bg-ctp-red/30 transition-colors"
+              class="px-2 py-1 text-xs bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 transition-all"
             >
-              Clear All
+              clear
             </button>
           </div>
 
@@ -485,21 +485,21 @@
           <div class="p-1">
             {#each filteredMetrics as metric}
               <label
-                class="flex items-center gap-2 p-2 hover:bg-ctp-surface1 rounded cursor-pointer"
+                class="flex items-center gap-2 p-1 hover:bg-ctp-surface0/20 cursor-pointer text-xs"
               >
                 <input
                   type="checkbox"
                   checked={selectedMetrics.includes(metric)}
                   onchange={() => toggleMetricCheckbox(metric)}
-                  class="text-ctp-blue focus:ring-ctp-blue focus:ring-2"
+                  class="text-ctp-blue focus:ring-ctp-blue focus:ring-1 w-3 h-3"
                 />
-                <span class="text-sm text-ctp-text">{metric}</span>
+                <span class="text-ctp-text">{metric}</span>
               </label>
             {/each}
 
             {#if filteredMetrics.length === 0}
-              <div class="p-2 text-sm text-ctp-subtext0 text-center">
-                No metrics found
+              <div class="p-2 text-xs text-ctp-subtext0 text-center">
+                no metrics found
               </div>
             {/if}
           </div>
@@ -511,13 +511,13 @@
   <!-- Chart Display Section -->
   {#if selectedMetrics.length > 0}
     <div
-      class="relative h-60 sm:h-80 w-full rounded-md border border-ctp-overlay0/10 bg-transparent overflow-hidden"
+      class="relative h-60 sm:h-80 w-full border border-ctp-surface0/20 bg-transparent overflow-hidden"
     >
       {#if isLoading}
         <div
-          class="absolute inset-0 flex items-center justify-center bg-ctp-mantle/80 backdrop-blur-sm"
+          class="absolute inset-0 flex items-center justify-center bg-ctp-base/80 backdrop-blur-sm"
         >
-          <div class="animate-pulse text-[#91d7e3]">Loading data...</div>
+          <div class="animate-pulse text-ctp-blue text-xs">loading data...</div>
         </div>
       {/if}
       <div class="absolute inset-0">
@@ -527,11 +527,14 @@
     <!-- Empty State -->
   {:else if experiment.availableMetrics && experiment.availableMetrics.length > 0}
     <div
-      class="flex flex-col items-center justify-center h-60 sm:h-80 w-full rounded-md border border-ctp-overlay0/10"
+      class="flex flex-col items-center justify-center h-60 sm:h-80 w-full border border-ctp-surface0/20"
     >
-      <ChartLine size={24} class="text-ctp-overlay0 mb-3 sm:mb-4 sm:text-3xl" />
-      <p class="text-ctp-subtext0 text-xs sm:text-sm text-center max-w-md">
-        Select metrics from above to view and compare chart data
+      <ChartLine
+        size={20}
+        class="text-ctp-subtext0 mb-2 sm:mb-3 sm:w-6 sm:h-6"
+      />
+      <p class="text-ctp-subtext0 text-xs text-center max-w-md">
+        $ select metrics to view chart data
       </p>
     </div>
   {/if}

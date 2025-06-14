@@ -28,7 +28,7 @@
   <div class="flex items-start justify-between mb-2" data-testid="card-header">
     <div class="min-w-0 flex-1 pr-2">
       <h3
-        class="font-semibold text-sm text-ctp-text group-hover:text-ctp-blue transition-colors truncate"
+        class="text-sm text-ctp-text group-hover:text-ctp-blue transition-colors truncate"
         title={experiment.name}
         data-testid="experiment-name"
       >

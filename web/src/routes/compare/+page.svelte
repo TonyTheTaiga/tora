@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import Chart from "chart.js/auto";
   import type { PageData } from "./$types";
-  import { Circle, ChevronDown } from "lucide-svelte";
+  import { Circle, ChevronDown, ArrowLeft } from "lucide-svelte";
   import { reset } from "$lib/state/comparison.svelte.js";
   import { drawBarChart } from "./bar-chart.svelte";
   import { drawScatterChart } from "./scatter-chart.svelte";
@@ -230,190 +230,213 @@
   });
 </script>
 
-<div class="text-ctp-text">
-  <div class="mb-4 mt-8">
-    <!-- Legend -->
-    <div
-      class="mb-4 p-3 pt-4 bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface1/20 rounded-lg"
+<div class="bg-ctp-base font-mono">
+  <!-- Header -->
+  <div
+    class="flex items-center justify-between p-6 border-b border-ctp-surface0/10"
+  >
+    <div class="flex items-center gap-4">
+      <div class="w-2 h-8 bg-ctp-mauve rounded-full"></div>
+      <div>
+        <h1 class="text-xl font-bold text-ctp-text">Experiment Comparison</h1>
+        <div class="text-xs text-ctp-subtext0">
+          {data.experiments?.length || 0} experiments selected
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-6 space-y-6">
+    <!-- Back button -->
+    <button
+      onclick={() => history.back()}
+      class="flex items-center gap-2 text-sm text-ctp-subtext0 hover:text-ctp-blue transition-colors"
     >
-      <h4 class="text-xs font-medium text-ctp-subtext1 mb-3">Legend</h4>
-      <div class="flex flex-wrap gap-x-4 gap-y-2 overflow-x-auto">
+      <ArrowLeft class="w-4 h-4" />
+      back to workspace
+    </button>
+    <!-- Legend -->
+    <div>
+      <div class="text-sm text-ctp-text mb-3">Legend</div>
+      <div class="space-y-1">
+        <!-- Header -->
+        <div
+          class="flex items-center text-xs text-ctp-subtext0 pb-1 border-b border-ctp-surface0/20"
+        >
+          <div class="w-4">•</div>
+          <div class="flex-1">name</div>
+          <div class="w-20 text-right">color</div>
+        </div>
+        <!-- Experiment entries -->
         {#each data.experiments as experiment}
-          <div class="flex items-center gap-2 min-w-0 flex-shrink-0">
-            <Circle
-              size={10}
-              style="color: {experimentColors_map.get(
-                experiment.id,
-              )}; fill: {experimentColors_map.get(experiment.id)};"
-              class="flex-shrink-0"
-            />
-            <span
-              class="text-xs text-ctp-text truncate max-w-40"
-              title={experiment.name}>{experiment.name}</span
+          <div
+            class="flex items-center text-xs hover:bg-ctp-surface0/10 px-1 py-1 transition-colors"
+          >
+            <div class="w-4 text-ctp-green text-xs">●</div>
+            <div
+              class="flex-1 text-ctp-text truncate min-w-0"
+              title={experiment.name}
             >
+              {experiment.name}
+            </div>
+            <div class="w-20 text-right">
+              <Circle
+                size={8}
+                style="color: {experimentColors_map.get(
+                  experiment.id,
+                )}; fill: {experimentColors_map.get(experiment.id)};"
+                class="inline"
+              />
+            </div>
           </div>
         {/each}
       </div>
     </div>
-  </div>
 
-  <div class="mb-4 mt-8">
-    <!-- hyperparams -->
-    <div
-      class="bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface1/20 rounded-lg overflow-hidden"
-    >
+    <!-- Hyperparameters -->
+    <div>
+      <div class="text-sm text-ctp-text mb-3">Hyperparameters</div>
       <div
-        class="text-sm font-semibold text-ctp-text p-4 border-b border-ctp-surface1/20"
+        class="bg-ctp-surface0/10 border border-ctp-surface0/20 overflow-hidden"
       >
-        Hyperparameters
-      </div>
-      <div
-        class="overflow-x-auto overflow-y-auto max-h-44 scroll-container"
-        style="scrollbar-width: none; -ms-overflow-style: none;"
-      >
-        <table class="w-full text-sm text-left">
-          <thead class="sticky top-0 z-10">
-            <tr>
-              <th class="border-b border-ctp-surface0 sticky left-0 z-20"> </th>
-              {#each hyperparams as hyperparam}
+        <div
+          class="overflow-x-auto overflow-y-auto max-h-60 scroll-container"
+          style="scrollbar-width: none; -ms-overflow-style: none;"
+        >
+          <table class="w-full text-xs text-left font-mono">
+            <thead class="sticky top-0 z-10 bg-ctp-base">
+              <tr>
                 <th
-                  class="p-3 font-medium text-ctp-subtext1 border-b border-ctp-surface0 whitespace-nowrap"
+                  class="border-b border-ctp-surface0/20 sticky left-0 z-20 bg-ctp-base px-2 py-1 w-4"
+                  >•</th
                 >
-                  {hyperparam.toLowerCase()}
-                </th>
-              {/each}
-            </tr>
-          </thead>
-          <tbody>
-            {#each data.experiments as experiment}
-              <tr
-                class="border-t border-ctp-surface0 hover:bg-ctp-surface0/50 transition-colors duration-200"
-              >
-                <th
-                  scope="row"
-                  class="bg-ctp-surface0/30 backdrop-blur-sm p-3 text-ctp-text font-medium sticky left-0 text-center"
-                >
-                  <Circle
-                    size={16}
-                    style="color: {experimentColors_map.get(
-                      experiment.id,
-                    )}; fill: {experimentColors_map.get(experiment.id)};"
-                    class="mx-auto"
-                  />
-                </th>
-                {#each hyperparams as key}
-                  <td class="p-3 text-ctp-text whitespace-nowrap">
-                    {idToHP.get(experiment.id).get(key) ?? "-"}
-                  </td>
+                {#each hyperparams as hyperparam}
+                  <th
+                    class="px-2 py-1 text-ctp-subtext0 border-b border-ctp-surface0/20 whitespace-nowrap"
+                  >
+                    {hyperparam}
+                  </th>
                 {/each}
               </tr>
-            {/each}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {#each data.experiments as experiment}
+                <tr class="hover:bg-ctp-surface0/20 transition-colors">
+                  <td
+                    class="bg-ctp-base sticky left-0 z-10 px-2 py-1 text-center border-r border-ctp-surface0/20"
+                  >
+                    <Circle
+                      size={8}
+                      style="color: {experimentColors_map.get(
+                        experiment.id,
+                      )}; fill: {experimentColors_map.get(experiment.id)};"
+                    />
+                  </td>
+                  {#each hyperparams as key}
+                    <td class="px-2 py-1 text-ctp-text whitespace-nowrap">
+                      {idToHP.get(experiment.id).get(key) ?? "-"}
+                    </td>
+                  {/each}
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="mt-8">
-    <div
-      class="bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface1/20 rounded-lg overflow-hidden"
-    >
-      <div
-        class="text-sm font-semibold text-ctp-text p-4 border-b border-ctp-surface1/20"
-      >
-        <div class="flex items-center gap-2">Metrics Comparison</div>
-      </div>
+    <!-- Metrics Comparison -->
+    <div>
+      <div class="text-sm text-ctp-text mb-3">Metrics Comparison</div>
+      <div class="bg-ctp-surface0/10 border border-ctp-surface0/20">
+        <!-- Metric Selector -->
+        <div class="p-3 border-b border-ctp-surface0/20">
+          <details class="relative">
+            <summary
+              class="flex items-center justify-between cursor-pointer p-2 hover:bg-ctp-surface0/20 transition-colors text-xs"
+            >
+              <span class="text-ctp-text">
+                select metrics ({selectedMetrics.length}/{commonMetrics.length})
+              </span>
+              <ChevronDown size={12} class="text-ctp-subtext0" />
+            </summary>
 
-      <!-- Metric Selector -->
-      <div class="p-4 border-b border-ctp-surface1/20">
-        <!-- Dropdown selector -->
-        <details class="relative">
-          <summary
-            class="flex items-center justify-between cursor-pointer p-2 hover:bg-ctp-surface1 transition-colors"
-          >
-            <span class="text-sm text-ctp-text">
-              Select metrics ({selectedMetrics.length} of {commonMetrics.length})
-            </span>
-            <ChevronDown size={16} class="text-ctp-subtext1" />
-          </summary>
+            <div
+              class="absolute top-full left-0 right-0 mt-1 z-10 max-h-60 overflow-y-auto border border-ctp-surface0/30 bg-ctp-base shadow-lg"
+            >
+              <!-- Search filter -->
+              <div class="p-2 border-b border-ctp-surface0/20">
+                <input
+                  type="search"
+                  placeholder="filter metrics..."
+                  bind:value={searchFilter}
+                  class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-xs"
+                />
+              </div>
 
-          <div
-            class="absolute top-full left-0 right-0 mt-1 z-10 max-h-60 overflow-y-auto border border-ctp-surface1/30 bg-ctp-surface0/80 backdrop-blur-sm rounded-lg shadow-lg"
-          >
-            <!-- Search filter -->
-            <div class="p-2 border-b border-ctp-surface1/20">
-              <input
-                type="search"
-                placeholder="Filter metrics..."
-                bind:value={searchFilter}
-                class="w-full px-2 py-1 text-sm bg-ctp-base border border-ctp-surface1 rounded text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-blue"
-              />
-            </div>
-
-            <!-- Control buttons -->
-            <div class="flex gap-2 p-2 border-b border-ctp-surface1/20">
-              <button
-                onclick={selectAllMetrics}
-                class="px-2 py-1 text-xs bg-ctp-green/20 text-ctp-green rounded hover:bg-ctp-green/30 transition-colors"
-              >
-                Select All
-              </button>
-              <button
-                onclick={clearAllMetrics}
-                class="px-2 py-1 text-xs bg-ctp-red/20 text-ctp-red rounded hover:bg-ctp-red/30 transition-colors"
-              >
-                Clear All
-              </button>
-            </div>
-
-            <!-- Metric checkboxes -->
-            <div class="p-1">
-              {#each filteredMetrics as metric}
-                <label
-                  class="flex items-center gap-2 p-2 hover:bg-ctp-surface1 rounded cursor-pointer"
+              <!-- Control buttons -->
+              <div class="flex gap-2 p-2 border-b border-ctp-surface0/20">
+                <button
+                  onclick={selectAllMetrics}
+                  class="px-2 py-1 text-xs bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 transition-all"
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedMetrics.includes(metric)}
-                    onchange={() => toggleMetric(metric)}
-                    class="text-ctp-blue focus:ring-ctp-blue focus:ring-2"
-                  />
-                  <span class="text-sm text-ctp-text">{metric}</span>
-                </label>
-              {/each}
+                  all
+                </button>
+                <button
+                  onclick={clearAllMetrics}
+                  class="px-2 py-1 text-xs bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 transition-all"
+                >
+                  clear
+                </button>
+              </div>
 
-              {#if filteredMetrics.length === 0}
-                <div class="p-2 text-sm text-ctp-subtext0 text-center">
-                  No metrics found
-                </div>
-              {/if}
+              <!-- Metric checkboxes -->
+              <div class="p-1">
+                {#each filteredMetrics as metric}
+                  <label
+                    class="flex items-center gap-2 p-1 hover:bg-ctp-surface0/20 cursor-pointer text-xs"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedMetrics.includes(metric)}
+                      onchange={() => toggleMetric(metric)}
+                      class="text-ctp-blue focus:ring-ctp-blue focus:ring-1 w-3 h-3"
+                    />
+                    <span class="text-ctp-text">{metric}</span>
+                  </label>
+                {/each}
+
+                {#if filteredMetrics.length === 0}
+                  <div class="p-2 text-xs text-ctp-subtext0 text-center">
+                    no metrics found
+                  </div>
+                {/if}
+              </div>
             </div>
-          </div>
-        </details>
-      </div>
-      <div class="w-full p-6">
-        {#if chartType() !== "empty"}
-          <div
-            class={chartType() === "radar"
-              ? "aspect-square max-w-2xl mx-auto"
-              : "aspect-[4/3] max-w-4xl mx-auto"}
-          >
-            <canvas bind:this={chartCanvas} class="w-full h-full chart-canvas"
-            ></canvas>
-          </div>
-        {:else}
-          <div
-            class="aspect-square max-w-2xl mx-auto flex items-center justify-center"
-          >
-            <div class="text-center text-ctp-subtext0">
-              <Circle size={48} class="mx-auto mb-4 opacity-50" />
-              <p class="text-lg mb-2">No metrics selected</p>
-              <p class="text-sm">
-                Select metrics above to start comparing experiments
-              </p>
+          </details>
+        </div>
+
+        <div class="p-4">
+          {#if chartType() !== "empty"}
+            <div
+              class={chartType() === "radar"
+                ? "aspect-square max-w-2xl mx-auto"
+                : "aspect-[4/3] max-w-4xl mx-auto"}
+            >
+              <canvas bind:this={chartCanvas} class="w-full h-full chart-canvas"
+              ></canvas>
             </div>
-          </div>
-        {/if}
+          {:else}
+            <div
+              class="aspect-square max-w-2xl mx-auto flex items-center justify-center"
+            >
+              <div class="text-center text-ctp-subtext0">
+                <div class="text-xs mb-2">$ select metrics</div>
+                <div class="text-xs text-ctp-subtext1">no data to display</div>
+              </div>
+            </div>
+          {/if}
+        </div>
       </div>
     </div>
   </div>
