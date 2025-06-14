@@ -24,176 +24,121 @@
   <CreateWorkspaceModal />
 {/if}
 
-<div class="flex-1 p-2 sm:p-4 max-w-none mx-2 sm:mx-4">
-  <div class="max-w-6xl mx-auto space-y-6">
-    <div
-      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-    >
+<div class="min-h-screen bg-gradient-to-br from-ctp-base via-ctp-base to-ctp-mantle">
+  <!-- Minimal top bar -->
+  <div class="flex items-center justify-between p-6">
+    <div class="flex items-center gap-4">
+      <div class="w-2 h-8 bg-ctp-blue rounded-full"></div>
       <div>
-        <h1 class="text-3xl font-bold text-ctp-text">Workspaces</h1>
-        <p class="text-ctp-subtext1 mt-1">Manage and access your workspaces</p>
+        <h1 class="text-xl font-bold text-ctp-text">Workspaces</h1>
+        <div class="text-xs text-ctp-subtext0 font-mono">{workspaces.length} total</div>
       </div>
-
-      <button
-        onclick={() => openCreateWorkspaceModal()}
-        class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-full bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm"
-      >
-        <svg
-          class="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4v16m8-8H4"
-          ></path>
-        </svg>
-        Create Workspace
-      </button>
     </div>
+    
+    <button
+      onclick={() => openCreateWorkspaceModal()}
+      class="group relative overflow-hidden bg-ctp-text text-ctp-base px-6 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 active:scale-95"
+    >
+      <div class="absolute inset-0 bg-gradient-to-r from-ctp-blue to-ctp-mauve opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <span class="relative z-10">New Workspace</span>
+    </button>
+  </div>
 
-    <div class="relative">
-      <input
-        type="text"
-        placeholder="Search workspaces..."
-        bind:value={searchQuery}
-        class="w-full bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface0/40 rounded-lg px-4 py-3 pl-10 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-2 focus:ring-ctp-blue/50 focus:border-ctp-blue/50 transition-all"
-      />
-      <svg
-        class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-ctp-subtext0"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        ></path>
-      </svg>
-    </div>
-
-    {#if filteredWorkspaces.length === 0 && searchQuery}
-      <div class="text-center py-12">
-        <div class="text-ctp-subtext0 text-lg">
-          No workspaces found matching "{searchQuery}"
+  <!-- Search and filter bar -->
+  <div class="px-6 pb-8">
+    <div class="max-w-lg">
+      <div class="relative">
+        <input
+          type="text"
+          placeholder="Search or filter workspaces..."
+          bind:value={searchQuery}
+          class="w-full bg-ctp-surface0/20 border-0 px-4 py-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-text/20 transition-all font-mono text-sm"
+        />
+        <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-ctp-subtext0 font-mono">
+          {filteredWorkspaces.length}/{workspaces.length}
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Terminal-style workspace display -->
+  <div class="px-6 font-mono">
+    {#if filteredWorkspaces.length === 0 && searchQuery}
+      <div class="text-ctp-subtext0 text-sm">
+        <div>$ search "{searchQuery}"</div>
+        <div class="text-ctp-subtext1 ml-2">no results found</div>
+      </div>
     {:else if workspaces.length === 0}
-      <div class="text-center py-16">
-        <div
-          class="bg-ctp-surface0/10 backdrop-blur-md rounded-2xl border border-ctp-surface0/20 p-8 max-w-md mx-auto shadow-xl"
-        >
-          <div class="text-ctp-subtext0 text-lg mb-4">No workspaces yet</div>
-          <p class="text-ctp-subtext1 mb-6">
-            Create your first workspace to get started with experiments and data
-            analysis.
-          </p>
+      <div class="space-y-2 text-sm">
+        <div class="text-ctp-subtext0">$ ls -la workspaces/</div>
+        <div class="text-ctp-subtext1 ml-2">total 0</div>
+        <div class="text-ctp-subtext1 ml-2">directory empty</div>
+        <div class="mt-4">
           <button
             onclick={() => openCreateWorkspaceModal()}
-            class="inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-full bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all duration-200 backdrop-blur-sm"
+            class="text-ctp-blue hover:text-ctp-blue/80 transition-colors"
           >
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 4v16m8-8H4"
-              ></path>
-            </svg>
-            Create Your First Workspace
+            $ mkdir new_workspace
           </button>
         </div>
       </div>
     {:else}
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div class="lg:col-span-3">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {#each filteredWorkspaces as workspace}
-              <a
-                href={`/workspaces/${workspace.id}`}
-                class="group bg-ctp-surface0/10 backdrop-blur-md hover:bg-ctp-surface0/20 border border-ctp-surface0/20 hover:border-ctp-surface0/40 rounded-2xl p-6 transition-all duration-200 hover:scale-105 shadow-xl"
-              >
-                <div class="flex items-start justify-between mb-4">
-                  <div class="bg-ctp-blue/10 p-3 rounded-lg">
-                    <svg
-                      class="w-6 h-6 text-ctp-blue"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                      ></path>
-                    </svg>
-                  </div>
-                  <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <svg
-                      class="w-4 h-4 text-ctp-subtext0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 5l7 7-7 7"
-                      ></path>
-                    </svg>
-                  </div>
-                </div>
-
-                <h3
-                  class="text-xl font-semibold text-ctp-text mb-2 group-hover:text-ctp-blue transition-colors"
-                >
-                  {workspace.name}
-                </h3>
-
-                <p class="text-ctp-subtext1 text-sm mb-4 line-clamp-2">
-                  {workspace.description || "No description available"}
-                </p>
-
-                <div class="flex items-center justify-between text-sm">
-                  <div class="flex items-center space-x-4">
-                    <span class="text-ctp-subtext0">
-                      <svg
-                        class="w-4 h-4 inline mr-1"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-                        ></path>
-                      </svg>
-                      1 member
-                    </span>
-                  </div>
-
-                  <WorkspaceRoleBadge role={workspace.role || "VIEWER"} />
-                </div>
-              </a>
-            {/each}
-          </div>
+      <!-- File listing style layout -->
+      <div class="space-y-1">
+        <!-- Header -->
+        <div class="flex items-center text-xs text-ctp-subtext0 pb-2 border-b border-ctp-surface0/20">
+          <div class="w-4">•</div>
+          <div class="flex-1">name</div>
+          <div class="w-16 text-right">role</div>
+          <div class="w-20 text-right">modified</div>
+          <div class="w-16 text-right">status</div>
         </div>
         
-        <div class="lg:col-span-1">
+        <!-- Workspace entries -->
+        {#each filteredWorkspaces as workspace, i}
+          <a
+            href={`/workspaces/${workspace.id}`}
+            class="group flex items-center text-sm hover:bg-ctp-surface0/20 px-1 py-2 transition-colors"
+          >
+            <div class="w-4 text-ctp-green text-xs">●</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate">
+                  {workspace.name}
+                </span>
+                {#if workspace.description}
+                  <span class="text-ctp-subtext1 text-xs truncate">
+                    - {workspace.description}
+                  </span>
+                {/if}
+              </div>
+            </div>
+            <div class="w-16 text-right text-xs text-ctp-subtext0">
+              <WorkspaceRoleBadge role={workspace.role || "VIEWER"} />
+            </div>
+            <div class="w-20 text-right text-xs text-ctp-subtext0">
+              {new Date(workspace.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </div>
+            <div class="w-16 text-right text-xs text-ctp-green">
+              active
+            </div>
+          </a>
+        {/each}
+        
+        <!-- Summary line -->
+        <div class="flex items-center text-xs text-ctp-subtext0 pt-2 border-t border-ctp-surface0/20">
+          <div class="flex-1">
+            {filteredWorkspaces.length} workspace{filteredWorkspaces.length !== 1 ? 's' : ''} total
+          </div>
+        </div>
+      </div>
+      
+      <!-- Recent activity section -->
+      <div class="mt-8 border-t border-ctp-surface0/20 pt-6">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="text-sm text-ctp-text font-mono">recent activity</div>
+        </div>
+        <div class="bg-ctp-surface0/10 p-4 text-xs">
           <RecentActivity experiments={data.recentExperiments} workspaces={data.recentWorkspaces} />
         </div>
       </div>
