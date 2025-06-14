@@ -7,7 +7,6 @@
     Cog,
     X,
     ArrowRight,
-    Group,
     Command,
   } from "lucide-svelte";
   import { goto } from "$app/navigation";
@@ -41,31 +40,28 @@
       const documentHeight = document.documentElement.scrollHeight;
       const windowHeight = window.innerHeight;
       const hasScroll = documentHeight > windowHeight;
-      
-      // For pages without scroll content, always keep toolbar visible
-      // and ignore rubber banding effects (negative scroll values)
+
       if (!hasScroll) {
         visible = true;
         lastScrollY = Math.max(0, currentScrollY); // Clamp to 0 to ignore rubber banding
         return;
       }
 
-      const atBottom =
-        windowHeight + currentScrollY >= documentHeight - 1;
+      const atBottom = windowHeight + currentScrollY >= documentHeight - 1;
 
       if (atBottom) {
         visible = false;
         lastScrollY = currentScrollY;
         return;
       }
-      
+
       // At top or during rubber band effect (negative scroll)
       if (currentScrollY <= 0) {
         visible = true;
         lastScrollY = Math.max(0, currentScrollY); // Clamp to 0 to ignore rubber banding
         return;
       }
-      
+
       if (Math.abs(currentScrollY - lastScrollY) > scrollThreshold) {
         visible = currentScrollY < lastScrollY;
       }
@@ -128,15 +124,6 @@
       }}
     >
       <Command size={20} />
-    </button>
-    <button
-      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
-      title="Go to workspaces"
-      onclick={() => {
-        goto("/workspaces");
-      }}
-    >
-      <Group size={20} />
     </button>
 
     {#if isWorkspacePage}

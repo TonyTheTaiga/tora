@@ -12,14 +12,30 @@ export const load: PageServerLoad = async ({ locals }) => {
   });
 
   try {
-    const workspaces = await locals.dbClient.getWorkspacesV2(locals.user.id, [
+    const { workspaces, experiments: allExperiments } = await locals.dbClient.getWorkspacesAndExperiments(locals.user.id, [
       "OWNER",
       "ADMIN",
       "EDITOR",
       "VIEWER",
     ]);
-    timer.end({ user_id: locals.user.id });
-    return { workspaces };
+
+    allExperiments.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    const recentExperiments = allExperiments.slice(0, 10);
+
+    timer.end({ 
+      user_id: locals.user.id,
+      workspaces_count: workspaces.length,
+      experiments_count: allExperiments.length
+    });
+    
+    return { 
+      workspaces,
+      recentExperiments,
+      recentWorkspaces: workspaces.slice(0, 5)
+    };
   } catch (err) {
     timer.end({
       error: err instanceof Error ? err.message : "Unknown error",

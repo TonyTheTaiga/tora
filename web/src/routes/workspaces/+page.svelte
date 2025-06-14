@@ -5,6 +5,7 @@
   } from "$lib/state/app.svelte";
   import CreateWorkspaceModal from "./create-workspace-modal.svelte";
   import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
+  import RecentActivity from "$lib/components/recent-activity.svelte";
 
   let { data } = $props();
   let { workspaces } = $derived(data);
@@ -114,79 +115,87 @@
         </div>
       </div>
     {:else}
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {#each filteredWorkspaces as workspace}
-          <a
-            href={`/workspaces/${workspace.id}`}
-            class="group bg-ctp-surface0/10 backdrop-blur-md hover:bg-ctp-surface0/20 border border-ctp-surface0/20 hover:border-ctp-surface0/40 rounded-2xl p-6 transition-all duration-200 hover:scale-105 shadow-xl"
-          >
-            <div class="flex items-start justify-between mb-4">
-              <div class="bg-ctp-blue/10 p-3 rounded-lg">
-                <svg
-                  class="w-6 h-6 text-ctp-blue"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="lg:col-span-3">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {#each filteredWorkspaces as workspace}
+              <a
+                href={`/workspaces/${workspace.id}`}
+                class="group bg-ctp-surface0/10 backdrop-blur-md hover:bg-ctp-surface0/20 border border-ctp-surface0/20 hover:border-ctp-surface0/40 rounded-2xl p-6 transition-all duration-200 hover:scale-105 shadow-xl"
+              >
+                <div class="flex items-start justify-between mb-4">
+                  <div class="bg-ctp-blue/10 p-3 rounded-lg">
+                    <svg
+                      class="w-6 h-6 text-ctp-blue"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg
+                      class="w-4 h-4 text-ctp-subtext0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                      ></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <h3
+                  class="text-xl font-semibold text-ctp-text mb-2 group-hover:text-ctp-blue transition-colors"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                  ></path>
-                </svg>
-              </div>
-              <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                <svg
-                  class="w-4 h-4 text-ctp-subtext0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 5l7 7-7 7"
-                  ></path>
-                </svg>
-              </div>
-            </div>
+                  {workspace.name}
+                </h3>
 
-            <h3
-              class="text-xl font-semibold text-ctp-text mb-2 group-hover:text-ctp-blue transition-colors"
-            >
-              {workspace.name}
-            </h3>
+                <p class="text-ctp-subtext1 text-sm mb-4 line-clamp-2">
+                  {workspace.description || "No description available"}
+                </p>
 
-            <p class="text-ctp-subtext1 text-sm mb-4 line-clamp-2">
-              {workspace.description || "No description available"}
-            </p>
+                <div class="flex items-center justify-between text-sm">
+                  <div class="flex items-center space-x-4">
+                    <span class="text-ctp-subtext0">
+                      <svg
+                        class="w-4 h-4 inline mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                        ></path>
+                      </svg>
+                      1 member
+                    </span>
+                  </div>
 
-            <div class="flex items-center justify-between text-sm">
-              <div class="flex items-center space-x-4">
-                <span class="text-ctp-subtext0">
-                  <svg
-                    class="w-4 h-4 inline mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-                    ></path>
-                  </svg>
-                  1 member
-                </span>
-              </div>
-
-              <WorkspaceRoleBadge role={workspace.role || "VIEWER"} />
-            </div>
-          </a>
-        {/each}
+                  <WorkspaceRoleBadge role={workspace.role || "VIEWER"} />
+                </div>
+              </a>
+            {/each}
+          </div>
+        </div>
+        
+        <div class="lg:col-span-1">
+          <RecentActivity experiments={data.recentExperiments} workspaces={data.recentWorkspaces} />
+        </div>
       </div>
     {/if}
   </div>
