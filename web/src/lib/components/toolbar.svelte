@@ -38,22 +38,20 @@
   const handleScroll = () => {
     if (typeof window !== "undefined" && typeof document !== "undefined") {
       const currentScrollY = window.scrollY;
+      const atBottom =
+        window.innerHeight + currentScrollY >=
+        document.documentElement.scrollHeight - 1;
 
+      if (atBottom) {
+        visible = false;
+        lastScrollY = currentScrollY;
+        return;
+      }
       if (currentScrollY <= 0) {
         visible = true;
         lastScrollY = currentScrollY;
         return;
       }
-
-      if (
-        window.innerHeight + currentScrollY >=
-        document.documentElement.scrollHeight
-      ) {
-        visible = true;
-        lastScrollY = currentScrollY;
-        return;
-      }
-
       if (Math.abs(currentScrollY - lastScrollY) > scrollThreshold) {
         visible = currentScrollY < lastScrollY;
       }
