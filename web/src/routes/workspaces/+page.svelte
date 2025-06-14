@@ -24,7 +24,7 @@
   <CreateWorkspaceModal />
 {/if}
 
-<div class="bg-gradient-to-br from-ctp-base via-ctp-base to-ctp-mantle">
+<div class="bg-ctp-base">
   <!-- Minimal top bar -->
   <div class="flex items-center justify-between p-6">
     <div class="flex items-center gap-4">

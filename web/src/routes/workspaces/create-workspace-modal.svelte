@@ -14,42 +14,33 @@
 </script>
 
 <div
-  class="fixed inset-0 bg-ctp-crust/80 backdrop-blur-md
-         flex items-center justify-center p-2 sm:p-4 z-50 overflow-hidden"
+  class="fixed inset-0 bg-ctp-base/90 backdrop-blur-sm
+         flex items-center justify-center p-4 z-50 overflow-hidden font-mono"
 >
   <div
-    class="w-full max-w-md rounded-xl border border-ctp-surface0 shadow-2xl overflow-auto max-h-[90vh] bg-ctp-mantle"
+    class="w-full max-w-md bg-ctp-base border border-ctp-surface0/30 overflow-auto max-h-[90vh]"
     role="dialog"
     aria-modal="true"
     aria-labelledby="modal-title"
   >
     <div
-      class="flex items-center justify-between px-6 py-4 border-b border-ctp-surface0"
+      class="flex items-center justify-between p-4 border-b border-ctp-surface0/20"
     >
-      <div class="flex items-center gap-2">
-        <svg
-          class="w-5 h-5 text-ctp-blue"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-          ></path>
-        </svg>
-        <h3 id="modal-title" class="text-xl font-medium text-ctp-text">
-          Create Workspace
-        </h3>
+      <div class="flex items-center gap-3">
+        <div class="w-2 h-6 bg-ctp-blue rounded-full"></div>
+        <div>
+          <h3 id="modal-title" class="text-lg font-bold text-ctp-text">
+            New Workspace
+          </h3>
+          <div class="text-xs text-ctp-subtext0">create workspace config</div>
+        </div>
       </div>
     </div>
 
     <form
       method="POST"
       action="?/createWorkspace"
-      class="flex flex-col gap-4 p-6"
+      class="p-4 space-y-4"
       use:enhance={({ formElement, formData, action, cancel }) => {
         return async ({ result, update }) => {
           if (result.type === "redirect") {
@@ -61,69 +52,49 @@
         };
       }}
     >
-      <div class="flex flex-col gap-4">
-        <div class="space-y-2">
-          <label
-            class="text-sm font-medium text-ctp-subtext0"
-            for="workspace-name"
-          >
-            Workspace Name
-          </label>
-          <input
-            name="workspace-name"
-            type="text"
-            class="w-full px-3 py-2 bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue transition-all placeholder-ctp-overlay0 shadow-sm"
-            placeholder="Enter workspace name"
-            required
-          />
-        </div>
-
-        <div class="space-y-2">
-          <label
-            class="text-sm font-medium text-ctp-subtext0"
-            for="workspace-description"
-          >
-            Description
-          </label>
-          <textarea
-            name="workspace-description"
-            rows="3"
-            class="w-full px-3 py-2 bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue transition-all resize-none placeholder-ctp-overlay0 shadow-sm"
-            placeholder="Briefly describe this workspace"
-          ></textarea>
+      <div class="space-y-3">
+        <div class="space-y-1 text-xs overflow-hidden">
+          <div class="grid grid-cols-[auto_auto_1fr] gap-1 items-center">
+            <span class="text-ctp-subtext0">name</span>
+            <span class="text-ctp-text">=</span>
+            <input
+              name="workspace-name"
+              type="text"
+              class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-xs min-w-0"
+              placeholder="workspace_name"
+              required
+            />
+          </div>
+          <div class="grid grid-cols-[auto_auto_1fr] gap-1 items-start">
+            <span class="text-ctp-subtext0">desc</span>
+            <span class="text-ctp-text">=</span>
+            <textarea
+              name="workspace-description"
+              rows="2"
+              class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all resize-none text-xs min-w-0"
+              placeholder="description (optional)"
+            ></textarea>
+          </div>
         </div>
       </div>
 
       <div
-        class="flex justify-end gap-3 pt-4 mt-2 border-t border-ctp-surface0"
+        class="flex justify-end gap-2 pt-3 mt-3 border-t border-ctp-surface0/20"
       >
         <button
           onclick={() => {
             closeCreateWorkspaceModal();
           }}
           type="button"
-          class="inline-flex items-center justify-center px-4 py-2 font-medium rounded-full bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"
+          class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text px-3 py-2 text-xs transition-all"
         >
-          Cancel
+          cancel
         </button>
         <button
           type="submit"
-          class="inline-flex items-center justify-center gap-2 px-4 py-2 font-medium rounded-full bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all"
+          class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-xs transition-all"
         >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 4v16m8-8H4"
-            ></path>
-          </svg>
-          Create Workspace
+          create
         </button>
       </div>
     </form>

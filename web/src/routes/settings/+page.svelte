@@ -101,9 +101,7 @@
   });
 </script>
 
-<div
-  class="bg-gradient-to-br from-ctp-base via-ctp-base to-ctp-mantle font-mono"
->
+<div class="bg-ctp-base font-mono">
   <!-- Header -->
   <div
     class="flex items-center justify-between p-6 border-b border-ctp-surface0/10"
@@ -121,29 +119,29 @@
   <div class="p-6 space-y-8">
     <!-- User Profile Section -->
     <div>
-      <div class="text-sm text-ctp-text mb-4">$ cat user_profile.conf</div>
-      <div class="space-y-2 text-sm">
-        <div class="flex items-center">
-          <span class="text-ctp-subtext0 w-16">user_id</span>
+      <div class="text-sm text-ctp-text mb-4">User Profile</div>
+      <div class="space-y-1 text-xs overflow-hidden">
+        <div class="grid grid-cols-[auto_auto_1fr] gap-1 items-center">
+          <span class="text-ctp-subtext0">user_id</span>
           <span class="text-ctp-text">=</span>
-          <span class="text-ctp-blue ml-2">{data?.user?.id}</span>
+          <span class="text-ctp-blue truncate min-w-0">{data?.user?.id}</span>
         </div>
-        <div class="flex items-center">
-          <span class="text-ctp-subtext0 w-16">email</span>
+        <div class="grid grid-cols-[auto_auto_1fr] gap-1 items-center">
+          <span class="text-ctp-subtext0">email</span>
           <span class="text-ctp-text">=</span>
-          <span class="text-ctp-green ml-2">"{data?.user?.email}"</span>
+          <span class="text-ctp-green truncate min-w-0">"{data?.user?.email}"</span>
         </div>
-        <div class="flex items-center">
-          <span class="text-ctp-subtext0 w-16">created</span>
+        <div class="grid grid-cols-[auto_auto_1fr] gap-1 items-center">
+          <span class="text-ctp-subtext0">created</span>
           <span class="text-ctp-text">=</span>
-          <span class="text-ctp-subtext1 ml-2">{data?.user?.created_at}</span>
+          <span class="text-ctp-subtext1 truncate min-w-0">{data?.user?.created_at}</span>
         </div>
       </div>
       <div class="mt-4">
         <form action="/logout" method="POST">
           <button
             type="submit"
-            class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 rounded-full px-4 py-2 text-sm transition-all duration-300 hover:scale-105 active:scale-95"
+            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 rounded px-3 py-2 text-sm transition-all"
             aria-label="Sign out"
           >
             <div class="flex items-center gap-2">
@@ -157,20 +155,17 @@
 
     <!-- Workspaces Section -->
     <div>
-      <div class="text-sm text-ctp-text mb-4">$ ls -la workspaces/</div>
+      <div class="text-sm text-ctp-text mb-4">Workspaces</div>
 
       <!-- Create workspace form -->
-      <div
-        class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 p-4 mb-6"
-      >
+      <div class="border border-ctp-surface0/20 p-3 mb-4">
         <form
           method="POST"
           action="?/createWorkspace"
           use:enhance
-          class="space-y-4"
+          class="space-y-3"
         >
-          <div class="text-xs text-ctp-subtext0 mb-3">create_workspace.sh</div>
-          <div class="space-y-3">
+          <div class="space-y-2">
             <div>
               <input
                 id="workspace-name"
@@ -195,11 +190,11 @@
           <button
             type="submit"
             disabled={creatingWorkspace}
-            class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 rounded-full px-4 py-2 text-sm transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-50"
+            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 rounded px-3 py-2 text-sm transition-all disabled:opacity-50"
           >
             <div class="flex items-center gap-2">
               <Plus size={14} />
-              <span>{creatingWorkspace ? "creating..." : "mkdir"}</span>
+              <span>{creatingWorkspace ? "creating..." : "create"}</span>
             </div>
           </button>
         </form>
@@ -216,27 +211,25 @@
           <div class="space-y-1">
             {#each ownedWorkspaces as workspace}
               <div
-                class="flex items-center hover:bg-ctp-surface0/10 px-2 py-2 transition-colors text-sm"
+                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
               >
-                <span class="text-ctp-blue w-4">●</span>
-                <span class="text-ctp-text flex-1 truncate"
-                  >{workspace.name}</span
-                >
+                <span class="text-ctp-blue w-3">●</span>
+                <span class="text-ctp-text flex-1 truncate min-w-0">{workspace.name}</span>
                 <WorkspaceRoleBadge role={workspace.role} />
-                <div class="flex items-center gap-1 ml-3">
+                <div class="flex items-center gap-1 ml-2">
                   <button
                     type="button"
-                    class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-blue hover:border-ctp-blue/30 rounded-full p-1 text-xs transition-all"
+                    class="text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface0/30 rounded p-1 transition-all"
                     title="Invite users"
                     onclick={() => openInviteModal(workspace)}
                   >
-                    <Users size={12} />
+                    <Users size={10} />
                   </button>
                   <form method="POST" action="?/deleteWorkspace" use:enhance>
                     <input type="hidden" name="id" value={workspace.id} />
                     <button
                       type="submit"
-                      class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-red hover:border-ctp-red/30 rounded-full p-1 text-xs transition-all"
+                      class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 rounded p-1 transition-all"
                       title="Delete workspace"
                       onclick={(e) => {
                         if (
@@ -248,7 +241,7 @@
                         }
                       }}
                     >
-                      <Trash2 size={12} />
+                      <Trash2 size={10} />
                     </button>
                   </form>
                 </div>
@@ -264,14 +257,12 @@
           <div class="space-y-1">
             {#each sharedWorkspaces as workspace}
               <div
-                class="flex items-center hover:bg-ctp-surface0/10 px-2 py-2 transition-colors text-sm"
+                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
               >
-                <span class="text-ctp-green w-4">●</span>
-                <span class="text-ctp-text flex-1 truncate"
-                  >{workspace.name}</span
-                >
+                <span class="text-ctp-green w-3">●</span>
+                <span class="text-ctp-text flex-1 truncate min-w-0">{workspace.name}</span>
                 <WorkspaceRoleBadge role={workspace.role} />
-                <div class="ml-3">
+                <div class="ml-2">
                   <form
                     method="POST"
                     action="?/removeSharedWorkspace"
@@ -285,7 +276,7 @@
                     />
                     <button
                       type="submit"
-                      class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-red hover:border-ctp-red/30 rounded-full p-1 text-xs transition-all"
+                      class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 rounded p-1 transition-all"
                       title="Leave workspace"
                       onclick={(e) => {
                         if (
@@ -297,7 +288,7 @@
                         }
                       }}
                     >
-                      <LogOut size={12} />
+                      <LogOut size={10} />
                     </button>
                   </form>
                 </div>
@@ -317,31 +308,27 @@
           <div class="space-y-1">
             {#each pendingInvitations as invitation}
               <div
-                class="flex items-center hover:bg-ctp-surface0/10 px-2 py-2 transition-colors text-sm"
+                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
               >
-                <span class="text-ctp-yellow w-4">●</span>
-                <span class="text-ctp-text flex-1 truncate"
-                  >{invitation.workspaceName}</span
-                >
-                <span class="text-xs text-ctp-subtext1"
-                  >from {invitation.fromEmail}</span
-                >
-                <div class="flex items-center gap-1 ml-3">
+                <span class="text-ctp-yellow w-3">●</span>
+                <span class="text-ctp-text flex-1 truncate min-w-0">{invitation.workspaceName}</span>
+                <span class="text-xs text-ctp-subtext1 truncate">from {invitation.fromEmail}</span>
+                <div class="flex items-center gap-1 ml-2">
                   <button
                     type="button"
-                    class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-green hover:border-ctp-green/30 rounded-full p-1 text-xs transition-all"
+                    class="text-ctp-subtext0 hover:text-ctp-green hover:bg-ctp-surface0/30 rounded p-1 transition-all"
                     title="Accept invitation"
                     onclick={() => respondToInvitation(invitation.id, true)}
                   >
-                    <Check size={12} />
+                    <Check size={10} />
                   </button>
                   <button
                     type="button"
-                    class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-red hover:border-ctp-red/30 rounded-full p-1 text-xs transition-all"
+                    class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 rounded p-1 transition-all"
                     title="Decline invitation"
                     onclick={() => respondToInvitation(invitation.id, false)}
                   >
-                    <X size={12} />
+                    <X size={10} />
                   </button>
                 </div>
               </div>
@@ -353,19 +340,16 @@
 
     <!-- API Keys Section -->
     <div>
-      <div class="text-sm text-ctp-text mb-4">$ cat api_keys.conf</div>
+      <div class="text-sm text-ctp-text mb-4">API Keys</div>
 
       <!-- Create API key form -->
-      <div
-        class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 p-4 mb-6"
-      >
+      <div class="border border-ctp-surface0/20 p-3 mb-4">
         <form
           action="?/createApiKey"
           method="POST"
           use:enhance
-          class="space-y-4"
+          class="space-y-3"
         >
-          <div class="text-xs text-ctp-subtext0 mb-3">generate_key.sh</div>
           <div>
             <input
               id="key-name"
@@ -380,7 +364,7 @@
           <button
             type="submit"
             disabled={creatingApiKey}
-            class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 rounded-full px-4 py-2 text-sm transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-50"
+            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 rounded px-3 py-2 text-sm transition-all disabled:opacity-50"
           >
             <div class="flex items-center gap-2">
               <Plus size={14} />
@@ -395,20 +379,18 @@
       {/if}
 
       {#if createdKey !== ""}
-        <div
-          class="bg-ctp-green/10 backdrop-blur-md border border-ctp-green/20 p-4 mb-6"
-        >
+        <div class="bg-ctp-green/10 border border-ctp-green/20 p-3 mb-4">
           <div class="text-xs text-ctp-green mb-2">
             key generated successfully:
           </div>
-          <div class="bg-ctp-surface0/20 p-3 mb-3">
+          <div class="bg-ctp-surface0/20 p-2 mb-2">
             <code class="text-ctp-blue text-xs break-all">{createdKey}</code>
           </div>
-          <div class="text-xs text-ctp-subtext1 mb-3">
+          <div class="text-xs text-ctp-subtext1 mb-2">
             ⚠️ save this key - it won't be shown again
           </div>
           <button
-            class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 rounded-full px-4 py-2 text-sm transition-all duration-300 hover:scale-105 active:scale-95"
+            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 rounded px-3 py-2 text-sm transition-all"
             type="button"
             onclick={() => {
               navigator.clipboard.writeText(createdKey);
@@ -424,25 +406,19 @@
       <div class="space-y-1">
         {#each data.apiKeys ? data.apiKeys : [] as apiKey}
           <div
-            class="flex items-center hover:bg-ctp-surface0/10 px-2 py-2 transition-colors text-sm"
+            class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
           >
-            <span class="text-{apiKey.revoked ? 'ctp-red' : 'ctp-green'} w-4"
-              >●</span
-            >
-            <span class="text-ctp-text flex-1 truncate">{apiKey.name}</span>
-            <span class="text-xs text-ctp-subtext1 w-20"
-              >{apiKey.revoked ? "revoked" : "active"}</span
-            >
-            <span class="text-xs text-ctp-subtext0 w-24 text-right"
-              >{apiKey.createdAt}</span
-            >
+            <span class="text-{apiKey.revoked ? 'ctp-red' : 'ctp-green'} w-3">●</span>
+            <span class="text-ctp-text flex-1 truncate min-w-0">{apiKey.name}</span>
+            <span class="text-xs text-ctp-subtext1 w-16">{apiKey.revoked ? "revoked" : "active"}</span>
+            <span class="text-xs text-ctp-subtext0 w-20 text-right truncate">{apiKey.createdAt}</span>
             {#if !apiKey.revoked}
-              <div class="ml-3">
+              <div class="ml-2">
                 <form method="POST" action="?/revokeApiKey" use:enhance>
                   <input type="hidden" name="id" value={apiKey.id} />
                   <button
                     type="submit"
-                    class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-red hover:border-ctp-red/30 rounded-full p-1 text-xs transition-all"
+                    class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 rounded p-1 transition-all"
                     title="Revoke API key"
                     onclick={(e) => {
                       if (
@@ -454,7 +430,7 @@
                       }
                     }}
                   >
-                    <Trash2 size={12} />
+                    <Trash2 size={10} />
                   </button>
                 </form>
               </div>

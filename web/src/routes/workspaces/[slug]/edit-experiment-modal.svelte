@@ -104,34 +104,37 @@
 </script>
 
 <div
-  class="fixed inset-0 bg-ctp-crust/80 backdrop-blur-md
-         flex items-center justify-center p-2 sm:p-4 z-50 overflow-hidden"
+  class="fixed inset-0 bg-ctp-base/90 backdrop-blur-sm
+         flex items-center justify-center p-4 z-50 overflow-hidden font-mono"
 >
   <!-- MODAL CONTAINER -->
   <div
-    class="bg-ctp-mantle w-full max-w-xl rounded-xl border border-ctp-surface0 shadow-2xl overflow-auto max-h-[90vh]"
+    class="bg-ctp-base w-full max-w-xl border border-ctp-surface0/30 overflow-auto max-h-[90vh]"
     role="dialog"
     aria-modal="true"
     aria-labelledby="modal-title"
   >
     <!-- HEADER -->
     <div
-      class="flex items-center justify-between px-6 py-4 border-b border-ctp-surface0"
+      class="flex items-center justify-between p-4 border-b border-ctp-surface0/20"
     >
-      <div class="flex items-center gap-2">
-        <Save size={18} class="text-ctp-mauve" />
-        <h2 id="modal-title" class="text-xl font-medium text-ctp-text">
-          Edit Experiment
-        </h2>
+      <div class="flex items-center gap-3">
+        <div class="w-2 h-6 bg-ctp-mauve rounded-full"></div>
+        <div>
+          <h2 id="modal-title" class="text-lg font-bold text-ctp-text">
+            Edit Experiment
+          </h2>
+          <div class="text-xs text-ctp-subtext0">modify experiment config</div>
+        </div>
       </div>
       <button
         onclick={() => {
           closeEditExperimentModal();
         }}
         type="button"
-        class="p-1.5 text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/10 rounded-full transition-all"
+        class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 rounded p-1 transition-all"
       >
-        <X size={18} />
+        <X size={14} />
       </button>
     </div>
 
@@ -139,7 +142,7 @@
     <form
       method="POST"
       action="?/update"
-      class="flex flex-col gap-4 p-5"
+      class="p-4 space-y-4"
       use:enhance={({ formElement, formData, action, cancel, submitter }) => {
         return async ({ result, update }) => {
           if (result.type === "success" || result.type === "redirect") {
@@ -161,99 +164,76 @@
         value={experimentCopy.id}
       />
 
-      <div class="flex flex-col gap-5">
-        <!-- Name Input -->
-        <div class="space-y-1.5">
-          <label
-            class="text-sm font-medium text-ctp-subtext0"
-            for="experiment-name">Experiment Name</label
-          >
-          <input
-            id="experiment-name"
-            name="experiment-name"
-            type="text"
-            class="w-full px-3 py-2 bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-mauve transition-all placeholder-ctp-overlay0 shadow-sm"
-            placeholder="Enter experiment name"
-            bind:value={experimentCopy.name}
-            required
-          />
-        </div>
-
-        <!-- Description Input -->
-        <div class="space-y-1.5">
-          <label
-            class="text-sm font-medium text-ctp-subtext0"
-            for="experiment-description"
-          >
-            Description
-          </label>
-          <textarea
-            id="experiment-description"
-            name="experiment-description"
-            rows="2"
-            class="w-full px-3 py-2 bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue transition-all resize-none placeholder-ctp-overlay0 shadow-sm"
-            placeholder="Briefly describe this experiment"
-            bind:value={experimentCopy.description}
-            required
-          ></textarea>
+      <div class="space-y-3">
+        <!-- Basic config -->
+        <div class="space-y-1 text-xs overflow-hidden">
+          <div class="grid grid-cols-[auto_auto_1fr] gap-1 items-center">
+            <span class="text-ctp-subtext0">name</span>
+            <span class="text-ctp-text">=</span>
+            <input
+              id="experiment-name"
+              name="experiment-name"
+              type="text"
+              class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-mauve focus:border-ctp-mauve transition-all text-xs min-w-0"
+              placeholder="experiment_name"
+              bind:value={experimentCopy.name}
+              required
+            />
+          </div>
+          <div class="grid grid-cols-[auto_auto_1fr] gap-1 items-start">
+            <span class="text-ctp-subtext0">desc</span>
+            <span class="text-ctp-text">=</span>
+            <textarea
+              id="experiment-description"
+              name="experiment-description"
+              rows="2"
+              class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-mauve focus:border-ctp-mauve transition-all resize-none text-xs min-w-0"
+              placeholder="description"
+              bind:value={experimentCopy.description}
+              required
+            ></textarea>
+          </div>
         </div>
 
         <!-- Visibility Setting -->
-        <div class="space-y-1.5">
-          <label
-            id="edit-visibility-label"
-            class="text-sm font-medium text-ctp-subtext0"
-            for="visibility">Visibility</label
-          >
+        <div class="space-y-1">
+          <div class="text-sm text-ctp-text">Visibility</div>
           <input
             type="hidden"
             id="edit-visibility-input"
             name="visibility"
             bind:value={experimentCopy.visibility}
-            aria-labelledby="edit-visibility-label"
           />
 
-          <div
-            class="flex gap-3"
-            role="radiogroup"
-            aria-labelledby="edit-visibility-label"
-          >
+          <div class="flex gap-2 text-xs">
             <button
               type="button"
-              id="edit-visibility-public"
-              role="radio"
-              aria-checked={experimentCopy.visibility === "PUBLIC"}
-              class={"flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors " +
+              class={"flex items-center gap-1 px-2 py-1 transition-colors " +
                 (experimentCopy.visibility === "PUBLIC"
                   ? "bg-ctp-green/20 text-ctp-green border border-ctp-green/30"
-                  : "bg-ctp-surface0/50 text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text")}
+                  : "bg-ctp-surface0/20 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text border border-ctp-surface0/30")}
               onclick={() => (experimentCopy.visibility = "PUBLIC")}
             >
-              <Globe size={14} />
-              <span>Public</span>
+              <Globe size={10} />
+              <span>public</span>
             </button>
 
             <button
               type="button"
-              id="edit-visibility-private"
-              role="radio"
-              aria-checked={experimentCopy.visibility === "PRIVATE" ||
-                !experimentCopy.visibility}
-              class={"flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors " +
-                (experimentCopy.visibility === "PRIVATE" ||
-                !experimentCopy.visibility
+              class={"flex items-center gap-1 px-2 py-1 transition-colors " +
+                (experimentCopy.visibility === "PRIVATE" || !experimentCopy.visibility
                   ? "bg-ctp-red/20 text-ctp-red border border-ctp-red/30"
-                  : "bg-ctp-surface0/50 text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text")}
+                  : "bg-ctp-surface0/20 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text border border-ctp-surface0/30")}
               onclick={() => (experimentCopy.visibility = "PRIVATE")}
             >
-              <Lock size={14} />
-              <span>Private</span>
+              <Lock size={10} />
+              <span>private</span>
             </button>
           </div>
         </div>
 
-        <!-- Collapsible Sections -->
-        <div class="flex flex-col gap-4 mt-2">
+        <!-- Advanced config sections -->
+        <div class="space-y-3">
           <!-- Tags Section -->
           <details class="group">
             <summary
@@ -431,23 +411,22 @@
 
       <!-- Footer -->
       <div
-        class="flex justify-end gap-3 pt-4 mt-2 border-t border-ctp-surface0"
+        class="flex justify-end gap-2 pt-3 mt-3 border-t border-ctp-surface0/20"
       >
         <button
           onclick={() => {
             closeEditExperimentModal();
           }}
           type="button"
-          class="inline-flex items-center justify-center px-4 py-2 font-medium rounded-full bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"
+          class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text px-3 py-2 text-xs transition-all"
         >
-          Cancel
+          cancel
         </button>
         <button
           type="submit"
-          class="inline-flex items-center justify-center gap-2 px-4 py-2 font-medium rounded-full bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all"
+          class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-mauve hover:bg-ctp-mauve/10 hover:border-ctp-mauve/30 px-3 py-2 text-xs transition-all"
         >
-          <Save size={16} />
-          Update
+          update
         </button>
       </div>
     </form>
