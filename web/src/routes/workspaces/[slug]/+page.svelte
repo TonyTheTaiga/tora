@@ -37,4 +37,6 @@
   <EditExperimentModal experiment={editExperimentModal} />
 {/if}
 
-<ExperimentsList bind:experiments />
+<div class="p-4">
+  <ExperimentsList bind:experiments />
+</div>
