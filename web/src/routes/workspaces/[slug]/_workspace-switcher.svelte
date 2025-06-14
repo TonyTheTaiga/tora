@@ -1,15 +1,12 @@
-<!-- might need to remove this component -->
-
 <script lang="ts">
   import { ChevronDown, Plus, Briefcase } from "lucide-svelte";
   import type { Workspace } from "$lib/types";
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
-  import WorkspaceRoleBadge from "./workspace-role-badge.svelte";
+  import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
 
   let {
-    currentWorkspace = $bindable(),
     workspaces = [],
   }: {
     currentWorkspace: Workspace | null;

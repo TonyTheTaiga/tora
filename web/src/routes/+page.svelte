@@ -8,4 +8,8 @@
 
 {#if !user}
   <LandingPage />
+{:else}
+  <div class="text-ctp-text">
+    <a href="/workspaces">Workspaces</a>
+  </div>
 {/if}
