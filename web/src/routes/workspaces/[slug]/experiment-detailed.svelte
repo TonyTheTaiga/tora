@@ -219,7 +219,9 @@
     <!-- Primary info - name as filename -->
     <div class="flex items-center gap-2">
       <div class="text-ctp-green text-sm">●</div>
-      <div class="text-sm text-ctp-text font-mono font-semibold break-words min-w-0">
+      <div
+        class="text-sm text-ctp-text font-mono font-semibold break-words min-w-0"
+      >
         {experiment.name}
       </div>
       <div class="text-xs text-ctp-subtext0 font-mono ml-auto">
@@ -258,7 +260,7 @@
           {/if}
         </button>
       </div>
-      
+
       {#if experiment.description}
         <div class="flex gap-2">
           <span class="text-ctp-subtext0 w-8 flex-shrink-0">desc:</span>
@@ -382,7 +384,9 @@
             >
               <X size={10} />
             </button>
-            <div class="text-xs text-ctp-lavender mb-1 font-mono">ai_recommendation:</div>
+            <div class="text-xs text-ctp-lavender mb-1 font-mono">
+              ai_recommendation:
+            </div>
             <div class="text-xs text-ctp-text leading-relaxed pr-4 font-mono">
               {activeRecommendation}
             </div>

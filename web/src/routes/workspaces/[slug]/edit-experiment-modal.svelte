@@ -14,7 +14,12 @@
   import { onMount, onDestroy } from "svelte";
   import { closeEditExperimentModal } from "$lib/state/app.svelte.js";
 
-  let { experiment, workspace, experiments }: { experiment: Experiment, workspace: any, experiments: Experiment[] } = $props();
+  let {
+    experiment,
+    workspace,
+    experiments,
+  }: { experiment: Experiment; workspace: any; experiments: Experiment[] } =
+    $props();
 
   let experimentCopy = $state<Experiment>({
     id: experiment.id,
@@ -34,12 +39,13 @@
   let tag = $state<string | null>(null);
   let reference = $state<Experiment | null>(null);
   let searchInput = $state<string>("");
-  
+
   let filteredExperiments = $derived(
-    experiments.filter(exp => 
-      exp.id !== experiment.id && 
-      exp.name.toLowerCase().includes(searchInput.toLowerCase())
-    )
+    experiments.filter(
+      (exp) =>
+        exp.id !== experiment.id &&
+        exp.name.toLowerCase().includes(searchInput.toLowerCase()),
+    ),
   );
 
   onMount(async () => {
@@ -221,7 +227,8 @@
             <button
               type="button"
               class={"flex items-center gap-1 px-2 py-1 transition-colors " +
-                (experimentCopy.visibility === "PRIVATE" || !experimentCopy.visibility
+                (experimentCopy.visibility === "PRIVATE" ||
+                !experimentCopy.visibility
                   ? "bg-ctp-red/20 text-ctp-red border border-ctp-red/30"
                   : "bg-ctp-surface0/20 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text border border-ctp-surface0/30")}
               onclick={() => (experimentCopy.visibility = "PRIVATE")}
@@ -387,8 +394,12 @@
                         class="w-full flex items-center gap-2 p-2 hover:bg-ctp-surface1 rounded cursor-pointer text-left"
                         onclick={() => selectReference(exp)}
                       >
-                        <div class="w-2 h-2 rounded-full bg-ctp-lavender flex-shrink-0"></div>
-                        <span class="text-sm text-ctp-text truncate">{exp.name}</span>
+                        <div
+                          class="w-2 h-2 rounded-full bg-ctp-lavender flex-shrink-0"
+                        ></div>
+                        <span class="text-sm text-ctp-text truncate"
+                          >{exp.name}</span
+                        >
                       </button>
                     {/each}
 

@@ -16,7 +16,10 @@
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
 
-  let { workspace, experiments }: { workspace: any, experiments: Experiment[] } = $props();
+  let {
+    workspace,
+    experiments,
+  }: { workspace: any; experiments: Experiment[] } = $props();
 
   let hyperparams = $state<HyperParam[]>([]);
   let addingNewTag = $state<boolean>(false);
@@ -34,11 +37,11 @@
 
   let reference = $state<Experiment | null>(null);
   let searchInput = $state<string>("");
-  
+
   let filteredExperiments = $derived(
-    experiments.filter(exp => 
-      exp.name.toLowerCase().includes(searchInput.toLowerCase())
-    )
+    experiments.filter((exp) =>
+      exp.name.toLowerCase().includes(searchInput.toLowerCase()),
+    ),
   );
 
   function selectReference(exp: Experiment) {
@@ -132,11 +135,7 @@
         <!-- Visibility Setting -->
         <div class="space-y-1">
           <div class="text-sm text-ctp-text">Visibility</div>
-          <input
-            type="hidden"
-            name="visibility"
-            value={visibility}
-          />
+          <input type="hidden" name="visibility" value={visibility} />
 
           <div class="flex gap-2 text-xs">
             <button
@@ -377,8 +376,12 @@
                         class="w-full flex items-center gap-2 p-2 hover:bg-ctp-surface1 rounded cursor-pointer text-left"
                         onclick={() => selectReference(exp)}
                       >
-                        <div class="w-2 h-2 rounded-full bg-ctp-lavender flex-shrink-0"></div>
-                        <span class="text-sm text-ctp-text truncate">{exp.name}</span>
+                        <div
+                          class="w-2 h-2 rounded-full bg-ctp-lavender flex-shrink-0"
+                        ></div>
+                        <span class="text-sm text-ctp-text truncate"
+                          >{exp.name}</span
+                        >
                       </button>
                     {/each}
 

@@ -120,19 +120,23 @@
     <!-- User Profile Section -->
     <div>
       <div class="text-sm text-ctp-text font-medium mb-4">user profile</div>
-      
+
       <!-- Primary info - email as filename -->
       <div class="flex items-center gap-2 mb-3">
         <div class="text-ctp-green text-sm">●</div>
-        <div class="text-sm text-ctp-text font-mono font-semibold break-words min-w-0">
+        <div
+          class="text-sm text-ctp-text font-mono font-semibold break-words min-w-0"
+        >
           {data?.user?.email}
         </div>
         <div class="text-xs text-ctp-subtext0 font-mono ml-auto">
-          {data?.user?.created_at ? new Date(data.user.created_at).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric", 
-            year: "2-digit",
-          }) : ""}
+          {data?.user?.created_at
+            ? new Date(data.user.created_at).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "2-digit",
+              })
+            : ""}
         </div>
       </div>
 
@@ -197,7 +201,7 @@
           <button
             type="submit"
             disabled={creatingWorkspace}
-            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30  px-3 py-2 text-sm transition-all disabled:opacity-50"
+            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all disabled:opacity-50"
           >
             <div class="flex items-center gap-2">
               <Plus size={14} />
@@ -221,7 +225,7 @@
                 class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
               >
                 <span class="text-ctp-blue w-3">●</span>
-                <a 
+                <a
                   href="/workspaces/{workspace.id}"
                   class="text-ctp-text hover:text-ctp-blue flex-1 truncate min-w-0 transition-colors"
                 >
@@ -231,7 +235,7 @@
                 <div class="flex items-center gap-1 ml-2">
                   <button
                     type="button"
-                    class="text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface0/30  p-1 transition-all"
+                    class="text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface0/30 p-1 transition-all"
                     title="Invite users"
                     onclick={(e) => {
                       e.preventDefault();
@@ -245,7 +249,7 @@
                     <input type="hidden" name="id" value={workspace.id} />
                     <button
                       type="submit"
-                      class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30  p-1 transition-all"
+                      class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 p-1 transition-all"
                       title="Delete workspace"
                       onclick={(e) => {
                         e.stopPropagation();
@@ -277,7 +281,7 @@
                 class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
               >
                 <span class="text-ctp-green w-3">●</span>
-                <a 
+                <a
                   href="/workspaces/{workspace.id}"
                   class="text-ctp-text hover:text-ctp-blue flex-1 truncate min-w-0 transition-colors"
                 >
@@ -298,7 +302,7 @@
                     />
                     <button
                       type="submit"
-                      class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30  p-1 transition-all"
+                      class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 p-1 transition-all"
                       title="Leave workspace"
                       onclick={(e) => {
                         e.stopPropagation();
@@ -334,12 +338,16 @@
                 class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
               >
                 <span class="text-ctp-yellow w-3">●</span>
-                <span class="text-ctp-text flex-1 truncate min-w-0">{invitation.workspaceName}</span>
-                <span class="text-xs text-ctp-subtext1 truncate">from {invitation.fromEmail}</span>
+                <span class="text-ctp-text flex-1 truncate min-w-0"
+                  >{invitation.workspaceName}</span
+                >
+                <span class="text-xs text-ctp-subtext1 truncate"
+                  >from {invitation.fromEmail}</span
+                >
                 <div class="flex items-center gap-1 ml-2">
                   <button
                     type="button"
-                    class="text-ctp-subtext0 hover:text-ctp-green hover:bg-ctp-surface0/30  p-1 transition-all"
+                    class="text-ctp-subtext0 hover:text-ctp-green hover:bg-ctp-surface0/30 p-1 transition-all"
                     title="Accept invitation"
                     onclick={() => respondToInvitation(invitation.id, true)}
                   >
@@ -347,7 +355,7 @@
                   </button>
                   <button
                     type="button"
-                    class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30  p-1 transition-all"
+                    class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 p-1 transition-all"
                     title="Decline invitation"
                     onclick={() => respondToInvitation(invitation.id, false)}
                   >
@@ -387,7 +395,7 @@
           <button
             type="submit"
             disabled={creatingApiKey}
-            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30  px-3 py-2 text-sm transition-all disabled:opacity-50"
+            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 px-3 py-2 text-sm transition-all disabled:opacity-50"
           >
             <div class="flex items-center gap-2">
               <Plus size={14} />
@@ -413,7 +421,7 @@
             ⚠️ save this key - it won't be shown again
           </div>
           <button
-            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30  px-3 py-2 text-sm transition-all"
+            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 px-3 py-2 text-sm transition-all"
             type="button"
             onclick={() => {
               navigator.clipboard.writeText(createdKey);
@@ -431,17 +439,25 @@
           <div
             class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
           >
-            <span class="text-{apiKey.revoked ? 'ctp-red' : 'ctp-green'} w-3">●</span>
-            <span class="text-ctp-text flex-1 truncate min-w-0">{apiKey.name}</span>
-            <span class="text-xs text-ctp-subtext1 w-16">{apiKey.revoked ? "revoked" : "active"}</span>
-            <span class="text-xs text-ctp-subtext0 w-20 text-right truncate">{apiKey.createdAt}</span>
+            <span class="text-{apiKey.revoked ? 'ctp-red' : 'ctp-green'} w-3"
+              >●</span
+            >
+            <span class="text-ctp-text flex-1 truncate min-w-0"
+              >{apiKey.name}</span
+            >
+            <span class="text-xs text-ctp-subtext1 w-16"
+              >{apiKey.revoked ? "revoked" : "active"}</span
+            >
+            <span class="text-xs text-ctp-subtext0 w-20 text-right truncate"
+              >{apiKey.createdAt}</span
+            >
             {#if !apiKey.revoked}
               <div class="ml-2">
                 <form method="POST" action="?/revokeApiKey" use:enhance>
                   <input type="hidden" name="id" value={apiKey.id} />
                   <button
                     type="submit"
-                    class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30  p-1 transition-all"
+                    class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 p-1 transition-all"
                     title="Revoke API key"
                     onclick={(e) => {
                       if (

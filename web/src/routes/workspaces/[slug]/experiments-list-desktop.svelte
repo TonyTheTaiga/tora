@@ -1,8 +1,24 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
-  import { getMode, addExperiment, selectedForComparison } from "$lib/state/comparison.svelte.js";
-  import { setSelectedExperiment, openEditExperimentModal, openDeleteExperimentModal } from "$lib/state/app.svelte.js";
-  import { Eye, EyeClosed, Globe, GlobeLock, Tag, Trash2, Edit } from "lucide-svelte";
+  import {
+    getMode,
+    addExperiment,
+    selectedForComparison,
+  } from "$lib/state/comparison.svelte.js";
+  import {
+    setSelectedExperiment,
+    openEditExperimentModal,
+    openDeleteExperimentModal,
+  } from "$lib/state/app.svelte.js";
+  import {
+    Eye,
+    EyeClosed,
+    Globe,
+    GlobeLock,
+    Tag,
+    Trash2,
+    Edit,
+  } from "lucide-svelte";
   import { page } from "$app/state";
 
   interface Props {
@@ -12,7 +28,8 @@
     formatDate: (date: Date) => string;
   }
 
-  let { experiments, highlighted, onToggleHighlight, formatDate }: Props = $props();
+  let { experiments, highlighted, onToggleHighlight, formatDate }: Props =
+    $props();
 
   let currentWorkspace = $derived(page.data.currentWorkspace);
   let canDeleteExperiment = $derived(
@@ -22,7 +39,9 @@
 
 <div class="hidden md:block space-y-1">
   <!-- Header -->
-  <div class="flex items-center text-xs text-ctp-subtext0 pb-2 border-b border-ctp-surface0/20">
+  <div
+    class="flex items-center text-xs text-ctp-subtext0 pb-2 border-b border-ctp-surface0/20"
+  >
     <div class="w-4">•</div>
     <div class="flex-1">name</div>
     <div class="w-16 text-right">visibility</div>
@@ -34,8 +53,12 @@
   {#each experiments as experiment}
     <div
       class="group flex items-center text-sm hover:bg-ctp-surface0/20 px-1 py-2 transition-colors
-        {highlighted.length > 0 && !highlighted.includes(experiment.id) ? 'opacity-40' : ''}
-        {selectedForComparison(experiment.id) ? 'bg-ctp-blue/10 border-l-2 border-ctp-blue' : ''}"
+        {highlighted.length > 0 && !highlighted.includes(experiment.id)
+        ? 'opacity-40'
+        : ''}
+        {selectedForComparison(experiment.id)
+        ? 'bg-ctp-blue/10 border-l-2 border-ctp-blue'
+        : ''}"
     >
       <button
         onclick={() => {
@@ -50,7 +73,9 @@
         <div class="w-4 text-ctp-green text-xs">●</div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
-            <span class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate">
+            <span
+              class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate"
+            >
               {experiment.name}
             </span>
             {#if experiment.description}
@@ -64,12 +89,16 @@
               <Tag class="w-3 h-3 text-ctp-overlay1" />
               <div class="flex gap-1">
                 {#each experiment.tags.slice(0, 3) as tag}
-                  <span class="text-[10px] bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-1 py-px rounded-full">
+                  <span
+                    class="text-[10px] bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-1 py-px rounded-full"
+                  >
                     {tag}
                   </span>
                 {/each}
                 {#if experiment.tags.length > 3}
-                  <span class="text-[10px] text-ctp-subtext0">+{experiment.tags.length - 3}</span>
+                  <span class="text-[10px] text-ctp-subtext0"
+                    >+{experiment.tags.length - 3}</span
+                  >
                 {/if}
               </div>
             </div>

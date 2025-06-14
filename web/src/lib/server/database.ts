@@ -364,7 +364,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
           }
 
           // Get all experiments for these workspaces in a single query
-          const workspaceIds = workspaces.map(w => w.id);
+          const workspaceIds = workspaces.map((w) => w.id);
           const { data: experimentData, error: experimentError } = await client
             .from("workspace_experiments")
             .select(
@@ -384,19 +384,21 @@ export function createDbClient(client: SupabaseClient<Database>) {
             .in("workspace_id", workspaceIds);
 
           handleError(experimentError, "Failed to get experiments");
-          
+
           // Map and deduplicate experiments
           const experiments: Experiment[] = [];
           const seenExperimentIds = new Set<string>();
-          
-          experimentData?.forEach(item => {
+
+          experimentData?.forEach((item) => {
             if (item.experiment && !seenExperimentIds.has(item.experiment.id)) {
               seenExperimentIds.add(item.experiment.id);
               experiments.push({
                 id: item.experiment.id,
                 name: item.experiment.name,
                 description: item.experiment.description ?? "",
-                hyperparams: (item.experiment.hyperparams as unknown as HyperParam[]) ?? [],
+                hyperparams:
+                  (item.experiment.hyperparams as unknown as HyperParam[]) ??
+                  [],
                 tags: item.experiment.tags ?? [],
                 createdAt: new Date(item.experiment.created_at),
                 updatedAt: new Date(item.experiment.updated_at),

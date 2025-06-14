@@ -185,14 +185,14 @@
       </div>
     {:else}
       <!-- Responsive experiment layouts -->
-      <ExperimentsListMobile 
+      <ExperimentsListMobile
         experiments={filteredExperiments}
         {highlighted}
         onToggleHighlight={toggleHighlight}
         {formatDate}
       />
-      
-      <ExperimentsListDesktop 
+
+      <ExperimentsListDesktop
         experiments={filteredExperiments}
         {highlighted}
         onToggleHighlight={toggleHighlight}
@@ -200,9 +200,14 @@
       />
 
       <!-- Summary line -->
-      <div class="flex items-center text-xs text-ctp-subtext0 pt-2 border-t border-ctp-surface0/20 mt-4">
+      <div
+        class="flex items-center text-xs text-ctp-subtext0 pt-2 border-t border-ctp-surface0/20 mt-4"
+      >
         <div class="flex-1">
-          {filteredExperiments.length} experiment{filteredExperiments.length !== 1 ? "s" : ""} total
+          {filteredExperiments.length} experiment{filteredExperiments.length !==
+          1
+            ? "s"
+            : ""} total
         </div>
       </div>
     {/if}

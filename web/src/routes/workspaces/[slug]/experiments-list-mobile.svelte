@@ -1,8 +1,24 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
-  import { getMode, addExperiment, selectedForComparison } from "$lib/state/comparison.svelte.js";
-  import { setSelectedExperiment, openEditExperimentModal, openDeleteExperimentModal } from "$lib/state/app.svelte.js";
-  import { Eye, EyeClosed, Globe, GlobeLock, Tag, Trash2, Edit } from "lucide-svelte";
+  import {
+    getMode,
+    addExperiment,
+    selectedForComparison,
+  } from "$lib/state/comparison.svelte.js";
+  import {
+    setSelectedExperiment,
+    openEditExperimentModal,
+    openDeleteExperimentModal,
+  } from "$lib/state/app.svelte.js";
+  import {
+    Eye,
+    EyeClosed,
+    Globe,
+    GlobeLock,
+    Tag,
+    Trash2,
+    Edit,
+  } from "lucide-svelte";
   import { page } from "$app/state";
 
   interface Props {
@@ -12,7 +28,8 @@
     formatDate: (date: Date) => string;
   }
 
-  let { experiments, highlighted, onToggleHighlight, formatDate }: Props = $props();
+  let { experiments, highlighted, onToggleHighlight, formatDate }: Props =
+    $props();
 
   let currentWorkspace = $derived(page.data.currentWorkspace);
   let canDeleteExperiment = $derived(
@@ -24,10 +41,16 @@
   {#each experiments as experiment}
     <div
       class="group transition-colors
-        {highlighted.length > 0 && !highlighted.includes(experiment.id) ? 'opacity-40' : ''}
-        {selectedForComparison(experiment.id) ? 'bg-ctp-blue/10 border-l-2 border-ctp-blue' : ''}"
+        {highlighted.length > 0 && !highlighted.includes(experiment.id)
+        ? 'opacity-40'
+        : ''}
+        {selectedForComparison(experiment.id)
+        ? 'bg-ctp-blue/10 border-l-2 border-ctp-blue'
+        : ''}"
     >
-      <div class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 p-3 hover:bg-ctp-surface0/20 transition-colors">
+      <div
+        class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 p-3 hover:bg-ctp-surface0/20 transition-colors"
+      >
         <button
           onclick={() => {
             if (getMode()) {
@@ -42,7 +65,9 @@
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2 min-w-0 flex-1">
               <div class="text-ctp-green text-xs">●</div>
-              <h3 class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate text-sm">
+              <h3
+                class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate text-sm"
+              >
                 {experiment.name}
               </h3>
             </div>
@@ -52,7 +77,9 @@
               {:else}
                 <GlobeLock class="w-3 h-3 text-ctp-red" />
               {/if}
-              <span class="text-xs text-ctp-subtext0">{formatDate(experiment.createdAt)}</span>
+              <span class="text-xs text-ctp-subtext0"
+                >{formatDate(experiment.createdAt)}</span
+              >
             </div>
           </div>
 
@@ -69,12 +96,16 @@
               <Tag class="w-3 h-3 text-ctp-overlay1" />
               <div class="flex gap-1 flex-wrap">
                 {#each experiment.tags.slice(0, 3) as tag}
-                  <span class="text-[10px] bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-1 py-px rounded-full">
+                  <span
+                    class="text-[10px] bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-1 py-px rounded-full"
+                  >
                     {tag}
                   </span>
                 {/each}
                 {#if experiment.tags.length > 3}
-                  <span class="text-[10px] text-ctp-subtext0">+{experiment.tags.length - 3}</span>
+                  <span class="text-[10px] text-ctp-subtext0"
+                    >+{experiment.tags.length - 3}</span
+                  >
                 {/if}
               </div>
             </div>
@@ -82,7 +113,9 @@
         </button>
 
         <!-- Actions row -->
-        <div class="flex items-center justify-end gap-1 pt-2 border-t border-ctp-surface0/20">
+        <div
+          class="flex items-center justify-end gap-1 pt-2 border-t border-ctp-surface0/20"
+        >
           <button
             onclick={(e) => {
               e.stopPropagation();
