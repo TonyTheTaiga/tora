@@ -25,32 +25,47 @@
   import { page } from "$app/state";
 
   let theme = $derived.by(() => getTheme());
-  let isAtBottom = $state(false);
   let isComparisonMode = $derived.by(() => getMode());
   let selectedExperiments = $derived.by(() =>
     getExperimentsSelectedForComparision(),
   );
   let isWorkspacePage = $derived(page.url.pathname.startsWith("/workspaces/"));
 
+  let visible = $state(true);
+  let lastScrollY = $state(0);
+  const scrollThreshold = 10;
+
   const handleScroll = () => {
     if (typeof window !== "undefined" && typeof document !== "undefined") {
-      const pageIsScrollable =
-        document.documentElement.scrollHeight > window.innerHeight;
-      const atActualBottom =
-        window.innerHeight + Math.ceil(window.scrollY) >=
-        document.documentElement.scrollHeight - 1;
+      const currentScrollY = window.scrollY;
 
-      if (pageIsScrollable && atActualBottom) {
-        isAtBottom = true;
-      } else {
-        isAtBottom = false;
+      if (currentScrollY <= 0) {
+        visible = true;
+        lastScrollY = currentScrollY;
+        return;
       }
+
+      if (
+        window.innerHeight + currentScrollY >=
+        document.documentElement.scrollHeight
+      ) {
+        visible = true;
+        lastScrollY = currentScrollY;
+        return;
+      }
+
+      if (Math.abs(currentScrollY - lastScrollY) > scrollThreshold) {
+        visible = currentScrollY < lastScrollY;
+      }
+
+      lastScrollY = currentScrollY;
     }
   };
 
   onMount(() => {
     if (typeof window !== "undefined") {
-      window.addEventListener("scroll", handleScroll);
+      lastScrollY = window.scrollY;
+      window.addEventListener("scroll", handleScroll, { passive: true });
       window.addEventListener("resize", handleScroll);
       handleScroll();
     }
@@ -65,9 +80,9 @@
 </script>
 
 <div
-  class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 transition-all duration-300 {isAtBottom
-    ? 'opacity-0 translate-y-full pointer-events-none'
-    : 'opacity-100'}"
+  class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 transition-all duration-300 {visible
+    ? 'opacity-100'
+    : 'opacity-0 translate-y-full pointer-events-none'}"
 >
   <div
     class="flex items-center bg-ctp-surface1/30 backdrop-blur-xl border border-ctp-surface0/20 rounded-full p-1 shadow-2xl hover:bg-ctp-surface1/40 hover:scale-105 transition-all duration-200"
