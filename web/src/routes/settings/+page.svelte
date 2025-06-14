@@ -107,7 +107,7 @@
     class="flex items-center justify-between p-6 border-b border-ctp-surface0/10"
   >
     <div class="flex items-center gap-4">
-      <div class="w-2 h-8 bg-ctp-blue -full"></div>
+      <div class="w-2 h-8 bg-ctp-blue rounded-full"></div>
       <div>
         <h1 class="text-xl font-bold text-ctp-text">Settings</h1>
         <div class="text-xs text-ctp-subtext0">system configuration</div>
@@ -221,14 +221,23 @@
                 class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
               >
                 <span class="text-ctp-blue w-3">●</span>
-                <span class="text-ctp-text flex-1 truncate min-w-0">{workspace.name}</span>
+                <a 
+                  href="/workspaces/{workspace.id}"
+                  class="text-ctp-text hover:text-ctp-blue flex-1 truncate min-w-0 transition-colors"
+                >
+                  {workspace.name}
+                </a>
                 <WorkspaceRoleBadge role={workspace.role} />
                 <div class="flex items-center gap-1 ml-2">
                   <button
                     type="button"
                     class="text-ctp-subtext0 hover:text-ctp-blue hover:bg-ctp-surface0/30  p-1 transition-all"
                     title="Invite users"
-                    onclick={() => openInviteModal(workspace)}
+                    onclick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openInviteModal(workspace);
+                    }}
                   >
                     <Users size={10} />
                   </button>
@@ -239,6 +248,7 @@
                       class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30  p-1 transition-all"
                       title="Delete workspace"
                       onclick={(e) => {
+                        e.stopPropagation();
                         if (
                           !confirm(
                             "Are you sure you want to delete this workspace?",
@@ -267,7 +277,12 @@
                 class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
               >
                 <span class="text-ctp-green w-3">●</span>
-                <span class="text-ctp-text flex-1 truncate min-w-0">{workspace.name}</span>
+                <a 
+                  href="/workspaces/{workspace.id}"
+                  class="text-ctp-text hover:text-ctp-blue flex-1 truncate min-w-0 transition-colors"
+                >
+                  {workspace.name}
+                </a>
                 <WorkspaceRoleBadge role={workspace.role} />
                 <div class="ml-2">
                   <form
@@ -286,6 +301,7 @@
                       class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30  p-1 transition-all"
                       title="Leave workspace"
                       onclick={(e) => {
+                        e.stopPropagation();
                         if (
                           !confirm(
                             "Are you sure you want to leave this workspace?",
