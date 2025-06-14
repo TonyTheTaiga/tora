@@ -4,9 +4,9 @@
     getEditExperimentModal,
     getDeleteExperimentModal,
   } from "$lib/state/app.svelte.js";
-  import ExperimentsList from "$lib/components/experiments-list.svelte";
+  import ExperimentsList from "./experiments-list.svelte";
   import CreateExperimentModal from "./create-experiment-modal.svelte";
-  import DeleteConfirmationModal from "$lib/components/delete-confirmation-modal.svelte";
+  import DeleteConfirmationModal from "./delete-confirmation-modal.svelte";
   import EditExperimentModal from "./edit-experiment-modal.svelte";
 
   let { data = $bindable() } = $props();
