@@ -38,9 +38,18 @@
   const handleScroll = () => {
     if (typeof window !== "undefined" && typeof document !== "undefined") {
       const currentScrollY = window.scrollY;
+      const documentHeight = document.documentElement.scrollHeight;
+      const windowHeight = window.innerHeight;
+      const hasScroll = documentHeight > windowHeight;
+      
+      if (!hasScroll) {
+        visible = true;
+        lastScrollY = currentScrollY;
+        return;
+      }
+
       const atBottom =
-        window.innerHeight + currentScrollY >=
-        document.documentElement.scrollHeight - 1;
+        windowHeight + currentScrollY >= documentHeight - 1;
 
       if (atBottom) {
         visible = false;
