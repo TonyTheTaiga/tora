@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Experiment, Workspace } from "$lib/types";
   import { Briefcase, TestTube } from "lucide-svelte";
+  import WorkspaceRoleBadge from "./workspace-role-badge.svelte";
   
   interface Props {
     experiments: Experiment[];
@@ -112,9 +113,7 @@
               </div>
             </div>
             <div class="flex-shrink-0 ml-4">
-              <span class="px-2 py-1 text-xs bg-ctp-mauve/10 border border-ctp-mauve/30 text-ctp-mauve rounded-full backdrop-blur-sm capitalize">
-                {workspace.role.toLowerCase()}
-              </span>
+              <WorkspaceRoleBadge role={workspace.role} />
             </div>
           </div>
         </a>
