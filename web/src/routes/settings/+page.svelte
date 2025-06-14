@@ -101,9 +101,13 @@
   });
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-ctp-base via-ctp-base to-ctp-mantle font-mono">
+<div
+  class="bg-gradient-to-br from-ctp-base via-ctp-base to-ctp-mantle font-mono"
+>
   <!-- Header -->
-  <div class="flex items-center justify-between p-6 border-b border-ctp-surface0/10">
+  <div
+    class="flex items-center justify-between p-6 border-b border-ctp-surface0/10"
+  >
     <div class="flex items-center gap-4">
       <div class="w-2 h-8 bg-ctp-blue rounded-full"></div>
       <div>
@@ -115,7 +119,6 @@
 
   <!-- Main content -->
   <div class="p-6 space-y-8">
-    
     <!-- User Profile Section -->
     <div>
       <div class="text-sm text-ctp-text mb-4">$ cat user_profile.conf</div>
@@ -155,10 +158,17 @@
     <!-- Workspaces Section -->
     <div>
       <div class="text-sm text-ctp-text mb-4">$ ls -la workspaces/</div>
-      
+
       <!-- Create workspace form -->
-      <div class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 p-4 mb-6">
-        <form method="POST" action="?/createWorkspace" use:enhance class="space-y-4">
+      <div
+        class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 p-4 mb-6"
+      >
+        <form
+          method="POST"
+          action="?/createWorkspace"
+          use:enhance
+          class="space-y-4"
+        >
           <div class="text-xs text-ctp-subtext0 mb-3">create_workspace.sh</div>
           <div class="space-y-3">
             <div>
@@ -205,9 +215,13 @@
           <div class="text-xs text-ctp-subtext0 mb-2">owned workspaces:</div>
           <div class="space-y-1">
             {#each ownedWorkspaces as workspace}
-              <div class="flex items-center hover:bg-ctp-surface0/10 px-2 py-2 transition-colors text-sm">
+              <div
+                class="flex items-center hover:bg-ctp-surface0/10 px-2 py-2 transition-colors text-sm"
+              >
                 <span class="text-ctp-blue w-4">●</span>
-                <span class="text-ctp-text flex-1 truncate">{workspace.name}</span>
+                <span class="text-ctp-text flex-1 truncate"
+                  >{workspace.name}</span
+                >
                 <WorkspaceRoleBadge role={workspace.role} />
                 <div class="flex items-center gap-1 ml-3">
                   <button
@@ -225,7 +239,11 @@
                       class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-red hover:border-ctp-red/30 rounded-full p-1 text-xs transition-all"
                       title="Delete workspace"
                       onclick={(e) => {
-                        if (!confirm("Are you sure you want to delete this workspace?")) {
+                        if (
+                          !confirm(
+                            "Are you sure you want to delete this workspace?",
+                          )
+                        ) {
                           e.preventDefault();
                         }
                       }}
@@ -240,23 +258,41 @@
         {/if}
 
         {#if sharedWorkspaces.length > 0}
-          <div class="text-xs text-ctp-subtext0 mb-2 mt-4">shared workspaces:</div>
+          <div class="text-xs text-ctp-subtext0 mb-2 mt-4">
+            shared workspaces:
+          </div>
           <div class="space-y-1">
             {#each sharedWorkspaces as workspace}
-              <div class="flex items-center hover:bg-ctp-surface0/10 px-2 py-2 transition-colors text-sm">
+              <div
+                class="flex items-center hover:bg-ctp-surface0/10 px-2 py-2 transition-colors text-sm"
+              >
                 <span class="text-ctp-green w-4">●</span>
-                <span class="text-ctp-text flex-1 truncate">{workspace.name}</span>
+                <span class="text-ctp-text flex-1 truncate"
+                  >{workspace.name}</span
+                >
                 <WorkspaceRoleBadge role={workspace.role} />
                 <div class="ml-3">
-                  <form method="POST" action="?/removeSharedWorkspace" use:enhance>
+                  <form
+                    method="POST"
+                    action="?/removeSharedWorkspace"
+                    use:enhance
+                  >
                     <input type="hidden" name="userId" value={data?.user?.id} />
-                    <input type="hidden" name="workspaceId" value={workspace.id} />
+                    <input
+                      type="hidden"
+                      name="workspaceId"
+                      value={workspace.id}
+                    />
                     <button
                       type="submit"
                       class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-red hover:border-ctp-red/30 rounded-full p-1 text-xs transition-all"
                       title="Leave workspace"
                       onclick={(e) => {
-                        if (!confirm("Are you sure you want to leave this workspace?")) {
+                        if (
+                          !confirm(
+                            "Are you sure you want to leave this workspace?",
+                          )
+                        ) {
                           e.preventDefault();
                         }
                       }}
@@ -275,13 +311,21 @@
         {/if}
 
         {#if !invitationsLoading && pendingInvitations.length > 0}
-          <div class="text-xs text-ctp-subtext0 mb-2 mt-4">pending invitations:</div>
+          <div class="text-xs text-ctp-subtext0 mb-2 mt-4">
+            pending invitations:
+          </div>
           <div class="space-y-1">
             {#each pendingInvitations as invitation}
-              <div class="flex items-center hover:bg-ctp-surface0/10 px-2 py-2 transition-colors text-sm">
+              <div
+                class="flex items-center hover:bg-ctp-surface0/10 px-2 py-2 transition-colors text-sm"
+              >
                 <span class="text-ctp-yellow w-4">●</span>
-                <span class="text-ctp-text flex-1 truncate">{invitation.workspaceName}</span>
-                <span class="text-xs text-ctp-subtext1">from {invitation.fromEmail}</span>
+                <span class="text-ctp-text flex-1 truncate"
+                  >{invitation.workspaceName}</span
+                >
+                <span class="text-xs text-ctp-subtext1"
+                  >from {invitation.fromEmail}</span
+                >
                 <div class="flex items-center gap-1 ml-3">
                   <button
                     type="button"
@@ -310,10 +354,17 @@
     <!-- API Keys Section -->
     <div>
       <div class="text-sm text-ctp-text mb-4">$ cat api_keys.conf</div>
-      
+
       <!-- Create API key form -->
-      <div class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 p-4 mb-6">
-        <form action="?/createApiKey" method="POST" use:enhance class="space-y-4">
+      <div
+        class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 p-4 mb-6"
+      >
+        <form
+          action="?/createApiKey"
+          method="POST"
+          use:enhance
+          class="space-y-4"
+        >
           <div class="text-xs text-ctp-subtext0 mb-3">generate_key.sh</div>
           <div>
             <input
@@ -344,12 +395,18 @@
       {/if}
 
       {#if createdKey !== ""}
-        <div class="bg-ctp-green/10 backdrop-blur-md border border-ctp-green/20 p-4 mb-6">
-          <div class="text-xs text-ctp-green mb-2">key generated successfully:</div>
+        <div
+          class="bg-ctp-green/10 backdrop-blur-md border border-ctp-green/20 p-4 mb-6"
+        >
+          <div class="text-xs text-ctp-green mb-2">
+            key generated successfully:
+          </div>
           <div class="bg-ctp-surface0/20 p-3 mb-3">
             <code class="text-ctp-blue text-xs break-all">{createdKey}</code>
           </div>
-          <div class="text-xs text-ctp-subtext1 mb-3">⚠️ save this key - it won't be shown again</div>
+          <div class="text-xs text-ctp-subtext1 mb-3">
+            ⚠️ save this key - it won't be shown again
+          </div>
           <button
             class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 rounded-full px-4 py-2 text-sm transition-all duration-300 hover:scale-105 active:scale-95"
             type="button"
@@ -366,11 +423,19 @@
       <!-- API Keys listings -->
       <div class="space-y-1">
         {#each data.apiKeys ? data.apiKeys : [] as apiKey}
-          <div class="flex items-center hover:bg-ctp-surface0/10 px-2 py-2 transition-colors text-sm">
-            <span class="text-{apiKey.revoked ? 'ctp-red' : 'ctp-green'} w-4">●</span>
+          <div
+            class="flex items-center hover:bg-ctp-surface0/10 px-2 py-2 transition-colors text-sm"
+          >
+            <span class="text-{apiKey.revoked ? 'ctp-red' : 'ctp-green'} w-4"
+              >●</span
+            >
             <span class="text-ctp-text flex-1 truncate">{apiKey.name}</span>
-            <span class="text-xs text-ctp-subtext1 w-20">{apiKey.revoked ? "revoked" : "active"}</span>
-            <span class="text-xs text-ctp-subtext0 w-24 text-right">{apiKey.createdAt}</span>
+            <span class="text-xs text-ctp-subtext1 w-20"
+              >{apiKey.revoked ? "revoked" : "active"}</span
+            >
+            <span class="text-xs text-ctp-subtext0 w-24 text-right"
+              >{apiKey.createdAt}</span
+            >
             {#if !apiKey.revoked}
               <div class="ml-3">
                 <form method="POST" action="?/revokeApiKey" use:enhance>
@@ -380,7 +445,11 @@
                     class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-red hover:border-ctp-red/30 rounded-full p-1 text-xs transition-all"
                     title="Revoke API key"
                     onclick={(e) => {
-                      if (!confirm("Are you sure you want to revoke this API key?")) {
+                      if (
+                        !confirm(
+                          "Are you sure you want to revoke this API key?",
+                        )
+                      ) {
                         e.preventDefault();
                       }
                     }}
