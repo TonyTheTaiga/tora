@@ -7,6 +7,7 @@
     Cog,
     X,
     ArrowRight,
+    Group,
   } from "lucide-svelte";
   import { goto } from "$app/navigation";
   import { onMount, onDestroy } from "svelte";
@@ -23,11 +24,6 @@
   import { page } from "$app/state";
 
   let theme = $derived.by(() => getTheme());
-  let currentWorkspace = $derived(page.data.currentWorkspace);
-  let canCreateExperiments = $derived(
-    currentWorkspace &&
-      ["OWNER", "ADMIN", "EDITOR"].includes(currentWorkspace.role),
-  );
   let isAtBottom = $state(false);
   let isComparisonMode = $derived.by(() => getMode());
   let selectedExperiments = $derived.by(() =>
@@ -95,17 +91,25 @@
         }
       }
     </style>
-    {#if canCreateExperiments}
-      <button
-        class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
-        title="Create a new experiment"
-        onclick={() => {
-          openCreateExperimentModal();
-        }}
-      >
-        <Plus size={20} />
-      </button>
-    {/if}
+    <button
+      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+      title="Go to workspaces"
+      onclick={() => {
+        goto("/workspaces");
+      }}
+    >
+      <Group size={20} />
+    </button>
+
+    <button
+      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+      title="Create a new experiment"
+      onclick={() => {
+        openCreateExperimentModal();
+      }}
+    >
+      <Plus size={20} />
+    </button>
 
     {#if !isComparisonMode}
       <button

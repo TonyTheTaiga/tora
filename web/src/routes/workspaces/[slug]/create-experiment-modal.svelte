@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { HyperParam, Experiment, Visibility } from "../types";
+  import type { HyperParam, Experiment, Visibility } from "$lib/types";
   import {
     Plus,
     X,
@@ -13,6 +13,10 @@
   } from "lucide-svelte";
   import { onMount, onDestroy } from "svelte";
   import { closeCreateExperimentModal } from "$lib/state/app.svelte.js";
+  import { enhance } from "$app/forms";
+  import { goto } from "$app/navigation";
+
+  let { workspace } = $props();
 
   let hyperparams = $state<HyperParam[]>([]);
   let addingNewTag = $state<boolean>(false);
@@ -136,16 +140,24 @@
           New Experiment
         </h3>
       </div>
-      <button
-        onclick={() => closeCreateExperimentModal()}
-        type="button"
-        class="p-1.5 text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/10 rounded-full transition-all"
-      >
-        <X size={18} />
-      </button>
     </div>
 
-    <form method="POST" action="?/create" class="flex flex-col gap-4 p-5">
+    <form
+      method="POST"
+      action="?/create"
+      class="flex flex-col gap-4 p-5"
+      use:enhance={({ formElement, formData, action, cancel }) => {
+        formData.append("workspace-id", workspace.id);
+        return async ({ result, update }) => {
+          if (result.type === "redirect") {
+            goto(result.location);
+          } else {
+            await update();
+            closeCreateExperimentModal();
+          }
+        };
+      }}
+    >
       <div class="flex flex-col gap-5">
         <!-- Name Input -->
         <div class="space-y-1.5">
