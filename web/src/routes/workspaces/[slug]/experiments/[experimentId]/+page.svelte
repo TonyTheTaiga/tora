@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state";
   import {
-    ArrowLeft,
     Copy,
     ClipboardCheck,
     Globe,
@@ -132,15 +131,6 @@
 
 <div class="bg-ctp-base font-mono">
   <div class="p-4 md:p-6 space-y-4 md:space-y-6">
-    <!-- Back button -->
-    <button
-      onclick={() => history.back()}
-      class="flex items-center gap-2 text-sm text-ctp-subtext0 hover:text-ctp-blue transition-colors"
-    >
-      <ArrowLeft class="w-4 h-4" />
-      back to workspace
-    </button>
-
     <!-- Primary experiment info -->
     <div class="space-y-3">
       <!-- Header section - file listing style -->

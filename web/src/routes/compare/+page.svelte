@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import Chart from "chart.js/auto";
   import type { PageData } from "./$types";
-  import { Circle, ChevronDown, ArrowLeft } from "lucide-svelte";
+  import { Circle, ChevronDown } from "lucide-svelte";
   import { reset } from "$lib/state/comparison.svelte.js";
   import { drawBarChart } from "./bar-chart.svelte";
   import { drawScatterChart } from "./scatter-chart.svelte";
@@ -247,14 +247,6 @@
   </div>
 
   <div class="p-6 space-y-6">
-    <!-- Back button -->
-    <button
-      onclick={() => history.back()}
-      class="flex items-center gap-2 text-sm text-ctp-subtext0 hover:text-ctp-blue transition-colors"
-    >
-      <ArrowLeft class="w-4 h-4" />
-      back to workspace
-    </button>
     <!-- Legend -->
     <div>
       <div class="text-sm text-ctp-text mb-3">Legend</div>

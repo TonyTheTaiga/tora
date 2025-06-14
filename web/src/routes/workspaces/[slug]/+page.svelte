@@ -19,8 +19,7 @@
   import ExperimentsListMobile from "./experiments-list-mobile.svelte";
   import ExperimentsListDesktop from "./experiments-list-desktop.svelte";
   import type { Experiment } from "$lib/types";
-  import { Plus, ArrowLeft } from "lucide-svelte";
-  import { goto } from "$app/navigation";
+  import { Plus } from "lucide-svelte";
 
   let { data = $bindable() } = $props();
   let { workspace } = $derived(data);
@@ -100,13 +99,6 @@
     class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/10"
   >
     <div class="flex items-center gap-3 md:gap-4 min-w-0 flex-1 pr-4">
-      <button
-        onclick={() => goto("/workspaces")}
-        class="text-ctp-subtext0 hover:text-ctp-text transition-colors p-1 flex-shrink-0"
-        title="back to workspaces"
-      >
-        <ArrowLeft class="w-4 h-4" />
-      </button>
       <div class="w-2 h-6 md:h-8 bg-ctp-blue rounded-full flex-shrink-0"></div>
       <div class="min-w-0 flex-1">
         <h1 class="text-lg md:text-xl text-ctp-text truncate font-mono">

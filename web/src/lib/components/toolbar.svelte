@@ -7,6 +7,7 @@
     Cog,
     X,
     ArrowRight,
+    ArrowLeft,
     Command,
   } from "lucide-svelte";
   import { goto } from "$app/navigation";
@@ -29,6 +30,13 @@
     getExperimentsSelectedForComparision(),
   );
   let isWorkspacePage = $derived(page.url.pathname.startsWith("/workspaces/"));
+  let showBackButton = $derived.by(() => {
+    const path = page.url.pathname;
+    return path !== '/' && 
+           path !== '/workspaces' &&
+           !path.startsWith('/login') && 
+           !path.startsWith('/signup');
+  });
 
   let visible = $state(true);
   let lastScrollY = $state(0);
@@ -116,6 +124,16 @@
         }
       }
     </style>
+    {#if showBackButton}
+      <button
+        class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+        title="Go back"
+        onclick={() => history.back()}
+      >
+        <ArrowLeft size={20} />
+      </button>
+    {/if}
+
     <button
       class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
       title="Go to workspaces"
