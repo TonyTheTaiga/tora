@@ -130,7 +130,7 @@
   }
 </script>
 
-<div class="bg-ctp-base font-mono min-h-screen">
+<div class="bg-ctp-base font-mono">
   <div class="p-4 md:p-6 space-y-4 md:space-y-6">
     <!-- Back button -->
     <button

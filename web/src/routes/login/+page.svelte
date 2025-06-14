@@ -3,17 +3,17 @@
   import { goto } from "$app/navigation";
 </script>
 
-<div class="flex items-center justify-center min-h-[calc(100vh-2rem)]">
+<div class="flex items-center justify-center min-h-[calc(100vh-2rem)] font-mono">
   <div class="w-full max-w-md">
     <div
-      class="bg-ctp-mantle shadow-lg rounded-xl overflow-hidden border border-ctp-surface0"
+      class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 overflow-hidden"
     >
       <!-- Header -->
       <div
         class="px-6 py-4 border-b border-ctp-surface0 flex items-center gap-2"
       >
         <User size={20} class="text-ctp-mauve" />
-        <h2 class="text-xl font-medium text-ctp-text">Sign In</h2>
+        <h2 class="text-xl text-ctp-text">sign in</h2>
       </div>
 
       <!-- Form -->
@@ -27,10 +27,10 @@
         <!-- Email field -->
         <div class="space-y-2">
           <label
-            class="text-sm font-medium text-ctp-subtext0 block"
+            class="text-sm text-ctp-subtext0 block"
             for="email"
           >
-            Email Address
+            email address
           </label>
           <div class="relative">
             <div
@@ -44,7 +44,7 @@
               type="email"
               autocomplete="email"
               required
-              class="w-full pl-10 pr-4 py-3 bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue transition-all placeholder-ctp-overlay0 shadow-sm"
+              class="w-full pl-10 pr-4 py-3 bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-text focus:outline-none focus:ring-1 focus:ring-ctp-blue transition-all placeholder-ctp-overlay0 font-mono"
               placeholder="your.email@example.com"
             />
           </div>
@@ -53,10 +53,10 @@
         <!-- Password field -->
         <div class="space-y-2">
           <label
-            class="text-sm font-medium text-ctp-subtext0 block"
+            class="text-sm text-ctp-subtext0 block"
             for="password"
           >
-            Password
+            password
           </label>
           <div class="relative">
             <div
@@ -71,8 +71,8 @@
               minlength="6"
               autocomplete="current-password"
               required
-              class="w-full pl-10 pr-4 py-3 bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-mauve transition-all placeholder-ctp-overlay0 shadow-sm"
-              placeholder="Enter your password"
+              class="w-full pl-10 pr-4 py-3 bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-text focus:outline-none focus:ring-1 focus:ring-ctp-mauve transition-all placeholder-ctp-overlay0 font-mono"
+              placeholder="enter your password"
             />
           </div>
         </div>
@@ -81,10 +81,10 @@
         <div class="pt-2">
           <button
             type="submit"
-            class="w-full flex items-center justify-center gap-2 rounded-full bg-ctp-blue/20 border border-ctp-blue/40 py-3 px-4 text-ctp-blue font-medium hover:bg-ctp-blue hover:text-ctp-crust transition-all"
+            class="w-full flex items-center justify-center gap-2 bg-ctp-blue/20 border border-ctp-blue/40 py-3 px-4 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all font-mono"
           >
             <LogIn size={18} />
-            Sign In
+            sign in
           </button>
         </div>
       </form>
@@ -93,15 +93,15 @@
       <div
         class="flex justify-end gap-3 pt-2 pb-6 px-6 border-t border-ctp-surface0"
       >
-        <p class="text-sm text-ctp-subtext0 pt-3">Don't Have an Account?</p>
+        <p class="text-sm text-ctp-subtext0 pt-3">don't have an account?</p>
         <button
           type="button"
-          class="inline-flex items-center justify-center px-5 py-2.5 font-medium rounded-full bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"
+          class="inline-flex items-center justify-center px-5 py-2.5 bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors font-mono"
           onclick={() => {
             goto("/signup");
           }}
         >
-          Sign Up
+          sign up
         </button>
       </div>
     </div>
