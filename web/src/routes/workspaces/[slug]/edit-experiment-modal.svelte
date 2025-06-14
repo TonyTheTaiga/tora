@@ -14,7 +14,7 @@
   import { onMount, onDestroy } from "svelte";
   import { closeEditExperimentModal } from "$lib/state/app.svelte.js";
 
-  let { experiment } = $props();
+  let { experiment, workspace, experiments }: { experiment: Experiment, workspace: any, experiments: Experiment[] } = $props();
 
   let experimentCopy = $state<Experiment>({
     id: experiment.id,
@@ -34,14 +34,19 @@
   let tag = $state<string | null>(null);
   let reference = $state<Experiment | null>(null);
   let searchInput = $state<string>("");
-  const charList: string[] = [];
-  let selectedIndex = $state<number>(-1);
-  let searchResults = $state<Experiment[]>([]);
+  
+  let filteredExperiments = $derived(
+    experiments.filter(exp => 
+      exp.id !== experiment.id && 
+      exp.name.toLowerCase().includes(searchInput.toLowerCase())
+    )
+  );
 
   onMount(async () => {
     document.body.classList.add("overflow-hidden");
 
     try {
+      // Load existing reference
       reference = null;
       const response = await fetch(`/api/experiments/${experiment.id}/ref`);
       if (response.ok) {
@@ -66,7 +71,7 @@
         }
       }
     } catch (error) {
-      console.error("Failed to load reference chain:", error);
+      console.error("Failed to load references:", error);
     }
   });
 
@@ -74,78 +79,15 @@
     document.body.classList.remove("overflow-hidden");
   });
 
-  async function getExperiments(query: string | null) {
-    let url = `/api/experiments`;
-    if (query) {
-      url += `?startwith=${encodeURIComponent(query)}`;
-    }
-
-    await fetch(url, { method: "GET" })
-      .then((res) => res.json())
-      .then((data) => {
-        searchResults = (data as Experiment[]).filter(
-          (exp) => exp.id !== experiment.id,
-        );
-      });
+  function selectReference(exp: Experiment) {
+    reference = exp;
   }
 
-  async function handleKeyDown(event: KeyboardEvent) {
-    const input = event.target as HTMLInputElement;
-
-    if (searchResults.length > 0) {
-      if (event.key === "ArrowDown") {
-        event.preventDefault();
-        selectedIndex = Math.min(selectedIndex + 1, searchResults.length - 1);
-        return;
-      } else if (event.key === "ArrowUp") {
-        event.preventDefault();
-        selectedIndex = Math.max(selectedIndex - 1, 0);
-        return;
-      } else if (event.key === "Enter" && selectedIndex >= 0) {
-        event.preventDefault();
-        reference = searchResults[selectedIndex];
-        selectedIndex = -1;
-        resetSearch();
-        return;
-      } else if (event.key === "Escape") {
-        event.preventDefault();
-        searchResults = [];
-        selectedIndex = -1;
-        return;
-      }
-    }
-
-    if (event.key === "Backspace") {
-      const { selectionStart, selectionEnd } = input;
-
-      if (selectionStart !== null && selectionEnd !== null) {
-        const deleteCount =
-          selectionStart !== selectionEnd ? selectionEnd - selectionStart : 1;
-        const deleteIndex =
-          selectionStart !== selectionEnd ? selectionStart : selectionStart - 1;
-
-        if (deleteIndex >= 0) charList.splice(deleteIndex, deleteCount);
-      } else {
-        charList.pop();
-      }
-    } else if (/^[a-z0-9]$/i.test(event.key)) {
-      charList.push(event.key);
-    }
-
-    if (charList.length && charList.length > 0) {
-      await getExperiments(charList.join(""));
-      selectedIndex = -1;
-    } else if (charList.length === 0) {
-      searchResults = [];
-      selectedIndex = -1;
-    }
+  function clearReference() {
+    reference = null;
   }
 
-  function resetSearch() {
-    searchResults = [];
-    while (charList.length > 0) {
-      charList.pop();
-    }
+  function clearSearch() {
     searchInput = "";
   }
 
@@ -406,7 +348,7 @@
                     <button
                       type="button"
                       class="text-ctp-lavender/70 hover:text-ctp-red transition-colors ml-1.5"
-                      onclick={() => (reference = null)}
+                      onclick={clearReference}
                       aria-label="Remove reference"
                     >
                       <X size={12} />
@@ -415,37 +357,73 @@
                 </div>
               {/if}
 
-              <div class="relative">
-                <input
-                  id="search-input"
-                  bind:value={searchInput}
-                  placeholder="Search for references..."
-                  class="w-full px-3 py-1.5 text-sm bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-lavender transition-all placeholder-ctp-overlay0 shadow-sm"
-                  onkeydown={async (event) => await handleKeyDown(event)}
-                />
-                {#if searchResults.length > 0}
-                  <div
-                    class="absolute top-full left-0 right-0 z-30 mt-1 p-2 border-0 bg-ctp-base rounded-lg shadow-xl max-h-40 overflow-y-auto"
-                  >
-                    <ul class="flex flex-col">
-                      {#each searchResults as experiment, index}
-                        <button
-                          class="{selectedIndex === index
-                            ? 'bg-ctp-lavender/10 text-ctp-lavender'
-                            : ''} hover:bg-ctp-lavender/10 text-left px-2 py-1.5 text-xs rounded-lg text-ctp-text hover:text-ctp-lavender transition-colors"
-                          onclick={(e) => {
-                            e.preventDefault();
-                            reference = experiment;
-                            resetSearch();
-                          }}
-                        >
-                          {experiment.name}
-                        </button>
-                      {/each}
-                    </ul>
+              <!-- Dropdown selector -->
+              <details class="relative">
+                <summary
+                  class="flex items-center justify-between cursor-pointer p-2 hover:bg-ctp-surface1 transition-colors rounded-lg"
+                >
+                  <span class="text-sm text-ctp-text">
+                    Select reference experiment
+                  </span>
+                  <ChevronDown size={16} class="text-ctp-subtext1" />
+                </summary>
+
+                <div
+                  class="absolute top-full left-0 right-0 mt-1 z-30 max-h-60 overflow-y-auto border border-ctp-surface1/30 bg-ctp-surface0/80 backdrop-blur-sm rounded-lg shadow-lg"
+                >
+                  <!-- Search filter -->
+                  <div class="p-2 border-b border-ctp-surface1/20">
+                    <input
+                      type="search"
+                      placeholder="Filter experiments..."
+                      bind:value={searchInput}
+                      class="w-full px-2 py-1 text-sm bg-ctp-base border border-ctp-surface1 rounded text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-lavender"
+                    />
                   </div>
-                {/if}
-              </div>
+
+                  <!-- Control buttons -->
+                  <div class="flex gap-2 p-2 border-b border-ctp-surface1/20">
+                    <button
+                      onclick={clearReference}
+                      type="button"
+                      class="px-2 py-1 text-xs bg-ctp-red/20 text-ctp-red rounded hover:bg-ctp-red/30 transition-colors"
+                    >
+                      Clear Selection
+                    </button>
+                    <button
+                      onclick={clearSearch}
+                      type="button"
+                      class="px-2 py-1 text-xs bg-ctp-blue/20 text-ctp-blue rounded hover:bg-ctp-blue/30 transition-colors"
+                    >
+                      Clear Filter
+                    </button>
+                  </div>
+
+                  <!-- Experiment list -->
+                  <div class="p-1">
+                    {#each filteredExperiments as exp}
+                      <button
+                        type="button"
+                        class="w-full flex items-center gap-2 p-2 hover:bg-ctp-surface1 rounded cursor-pointer text-left"
+                        onclick={() => selectReference(exp)}
+                      >
+                        <div class="w-2 h-2 rounded-full bg-ctp-lavender flex-shrink-0"></div>
+                        <span class="text-sm text-ctp-text truncate">{exp.name}</span>
+                      </button>
+                    {/each}
+
+                    {#if filteredExperiments.length === 0 && experiments.length > 1}
+                      <div class="p-2 text-sm text-ctp-subtext0 text-center">
+                        No experiments found
+                      </div>
+                    {:else if experiments.length <= 1}
+                      <div class="p-2 text-sm text-ctp-subtext0 text-center">
+                        No other experiments in this workspace
+                      </div>
+                    {/if}
+                  </div>
+                </div>
+              </details>
             </div>
           </details>
         </div>

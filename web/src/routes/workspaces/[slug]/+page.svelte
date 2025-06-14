@@ -23,7 +23,7 @@
 </script>
 
 {#if createExperimentModal}
-  <CreateExperimentModal {workspace} />
+  <CreateExperimentModal {workspace} {experiments} />
 {/if}
 
 {#if deleteExperimentModal}
@@ -34,7 +34,7 @@
 {/if}
 
 {#if editExperimentModal}
-  <EditExperimentModal experiment={editExperimentModal} />
+  <EditExperimentModal experiment={editExperimentModal} {workspace} {experiments} />
 {/if}
 
 <div class="p-4">

@@ -6,6 +6,7 @@ interface ModalState {
   editExperiment: Experiment | null;
   deleteExperiment: Experiment | null;
   selectedExperiment: Experiment | null;
+  createWorkspace: boolean;
 }
 
 interface AppState {
@@ -22,6 +23,7 @@ let state = $state<AppState>({
     editExperiment: null,
     deleteExperiment: null,
     selectedExperiment: null,
+    createWorkspace: false,
   },
   ui: {
     isLoading: false,
@@ -101,9 +103,22 @@ export function getUIState() {
   return state.ui;
 }
 
+export function openCreateWorkspaceModal() {
+  state.modals.createWorkspace = true;
+}
+
+export function closeCreateWorkspaceModal() {
+  state.modals.createWorkspace = false;
+}
+
+export function getCreateWorkspaceModal() {
+  return state.modals.createWorkspace;
+}
+
 export function clearAllModals() {
   state.modals.createExperiment = false;
   state.modals.editExperiment = null;
   state.modals.deleteExperiment = null;
   state.modals.selectedExperiment = null;
+  state.modals.createWorkspace = false;
 }
