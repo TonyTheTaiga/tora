@@ -5,7 +5,7 @@
     getDeleteExperimentModal,
   } from "$lib/state/app.svelte.js";
   import ExperimentsList from "$lib/components/experiments-list.svelte";
-  import CreateExperimentModal from "$lib/components/create-experiment-modal.svelte";
+  import CreateExperimentModal from "./create-experiment-modal.svelte";
   import DeleteConfirmationModal from "$lib/components/delete-confirmation-modal.svelte";
   import EditExperimentModal from "$lib/components/edit-experiment-modal.svelte";
 
@@ -23,7 +23,7 @@
 </script>
 
 {#if createExperimentModal}
-  <CreateExperimentModal />
+  <CreateExperimentModal {workspace} />
 {/if}
 
 {#if deleteExperimentModal}

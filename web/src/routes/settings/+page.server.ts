@@ -5,10 +5,9 @@ import type { Workspace, ApiKey } from "$lib/types";
 
 export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   const { session, user } = await locals.safeGetSession();
-  const { currentWorkspace } = await parent();
 
   const requestId = generateRequestId();
-  const timer = startTimer("page.home.load", { requestId });
+  const timer = startTimer("settings.load", { requestId });
   if (!user) {
     const experiments = new Array();
     return { experiments, session };
@@ -28,7 +27,8 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
     console.error("Error fetching API keys:", err);
   }
 
-  return { workspaces, apiKeys, session, currentWorkspace };
+  timer.end({});
+  return { workspaces, apiKeys, session };
 };
 
 export const actions: Actions = {

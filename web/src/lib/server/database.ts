@@ -74,7 +74,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
         hyperparams: HyperParam[];
         tags: string[];
         visibility?: Visibility;
-        workspaceId?: string;
+        workspaceId: string;
       },
     ): Promise<Experiment> {
       const { data: expData, error: expError } = await client

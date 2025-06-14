@@ -42,64 +42,10 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
   }
 };
 
-// --- Form Actions ---
 export const actions: Actions = {
-  create: async ({ request, fetch }) => handleCreate(request, fetch),
   delete: async ({ request, fetch }) => handleDelete(request, fetch),
   update: async ({ request, fetch }) => handleUpdate(request, fetch),
 };
-
-async function handleCreate(request: Request, fetch: typeof window.fetch) {
-  const form = await request.formData();
-  const data = parseFormData(form);
-
-  const {
-    "experiment-name": name,
-    "experiment-description": description,
-    "reference-id": referenceId,
-  } = data;
-
-  if (!name || !description) {
-    return fail(400, {
-      message: "Name and description are required",
-    });
-  }
-
-  const response = await fetch(API.createExperiment, {
-    method: "POST",
-    body: JSON.stringify({
-      ...data,
-      name,
-      description,
-    }),
-  });
-
-  if (!response.ok) {
-    return fail(500, {
-      message: "Failed to create experiment",
-    });
-  }
-
-  if (referenceId) {
-    const { experiment } = await response.json();
-    const refResponse = await fetch(API.createReference(experiment.id), {
-      method: "POST",
-      body: JSON.stringify({
-        referenceId,
-      }),
-    });
-
-    if (!refResponse.ok) {
-      return fail(500, {
-        message: "Failed to create reference",
-      });
-    }
-  }
-
-  return {
-    success: true,
-  };
-}
 
 async function handleDelete(request: Request, fetch: typeof window.fetch) {
   const data = await request.formData();
