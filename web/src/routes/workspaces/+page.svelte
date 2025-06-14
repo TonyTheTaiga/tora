@@ -37,10 +37,14 @@
     
     <button
       onclick={() => openCreateWorkspaceModal()}
-      class="group relative overflow-hidden bg-ctp-text text-ctp-base px-6 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 active:scale-95"
+      class="group relative bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-text hover:bg-ctp-surface0/30 hover:border-ctp-surface0/50 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 active:scale-95"
     >
-      <div class="absolute inset-0 bg-gradient-to-r from-ctp-blue to-ctp-mauve opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      <span class="relative z-10">New Workspace</span>
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        <span>New</span>
+      </div>
     </button>
   </div>
 
