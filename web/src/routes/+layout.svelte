@@ -33,4 +33,5 @@
   </header>
   <Toolbar />
 {/if}
+
 <main class="flex-1 w-full p-2">{@render children()}</main>
