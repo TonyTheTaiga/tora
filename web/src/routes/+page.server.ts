@@ -16,26 +16,18 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
       return {};
     }
 
-    const workspaces = await locals.dbClient.getWorkspacesV2(user.id, [
+    const { workspaces, experiments: allExperiments } = await locals.dbClient.getWorkspacesAndExperiments(user.id, [
       "OWNER",
       "ADMIN", 
       "EDITOR",
       "VIEWER",
     ]);
 
-    let allExperiments: Experiment[] = [];
-    let recentExperiments: Experiment[] = [];
-    
-    for (const workspace of workspaces) {
-      const experiments = await locals.dbClient.getExperiments(workspace.id);
-      allExperiments.push(...experiments);
-    }
-
     allExperiments.sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
-    recentExperiments = allExperiments.slice(0, 10);
+    const recentExperiments = allExperiments.slice(0, 10);
 
     const stats = {
       totalExperiments: allExperiments.length,

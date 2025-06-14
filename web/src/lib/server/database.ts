@@ -329,6 +329,89 @@ export function createDbClient(client: SupabaseClient<Database>) {
       return data?.map(mapToWorkspace) ?? [];
     },
 
+    async getWorkspacesAndExperiments(
+      userId: string,
+      roles: string[],
+    ): Promise<{ workspaces: Workspace[]; experiments: Experiment[] }> {
+      return timeAsync(
+        "db.getWorkspacesAndExperiments",
+        async () => {
+          // Get workspaces for the user
+          const { data: workspaceData, error: workspaceError } = await client
+            .from("workspace")
+            .select(
+              `
+              id,
+              name,
+              description,
+              created_at,
+              user_workspaces!inner (
+                user_id,
+                workspace_role (
+                  name
+                )
+              )
+            `,
+            )
+            .eq("user_workspaces.user_id", userId)
+            .in("user_workspaces.workspace_role.name", roles);
+
+          handleError(workspaceError, "Failed to get workspaces");
+          const workspaces = workspaceData?.map(mapToWorkspace) ?? [];
+
+          if (workspaces.length === 0) {
+            return { workspaces: [], experiments: [] };
+          }
+
+          // Get all experiments for these workspaces in a single query
+          const workspaceIds = workspaces.map(w => w.id);
+          const { data: experimentData, error: experimentError } = await client
+            .from("workspace_experiments")
+            .select(
+              `
+              experiment:experiment_id (
+                id,
+                name,
+                description,
+                hyperparams,
+                tags,
+                created_at,
+                updated_at,
+                visibility
+              )
+            `,
+            )
+            .in("workspace_id", workspaceIds);
+
+          handleError(experimentError, "Failed to get experiments");
+          
+          // Map and deduplicate experiments
+          const experiments: Experiment[] = [];
+          const seenExperimentIds = new Set<string>();
+          
+          experimentData?.forEach(item => {
+            if (item.experiment && !seenExperimentIds.has(item.experiment.id)) {
+              seenExperimentIds.add(item.experiment.id);
+              experiments.push({
+                id: item.experiment.id,
+                name: item.experiment.name,
+                description: item.experiment.description ?? "",
+                hyperparams: (item.experiment.hyperparams as unknown as HyperParam[]) ?? [],
+                tags: item.experiment.tags ?? [],
+                createdAt: new Date(item.experiment.created_at),
+                updatedAt: new Date(item.experiment.updated_at),
+                visibility: item.experiment.visibility,
+                availableMetrics: [], // Will be populated if needed
+              });
+            }
+          });
+
+          return { workspaces, experiments };
+        },
+        { userId },
+      );
+    },
+
     async createWorkspace(
       name: string,
       description: string | null,
