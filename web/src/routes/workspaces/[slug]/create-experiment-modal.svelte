@@ -13,7 +13,7 @@
   } from "lucide-svelte";
   import { onMount, onDestroy } from "svelte";
   import { closeCreateExperimentModal } from "$lib/state/app.svelte.js";
-  import { applyAction, enhance } from "$app/forms";
+  import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
 
   let { workspace } = $props();
@@ -140,13 +140,6 @@
           New Experiment
         </h3>
       </div>
-      <button
-        onclick={() => closeCreateExperimentModal()}
-        type="button"
-        class="p-1.5 text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/10 rounded-full transition-all"
-      >
-        <X size={18} />
-      </button>
     </div>
 
     <form
@@ -160,6 +153,7 @@
             goto(result.location);
           } else {
             await update();
+            closeCreateExperimentModal();
           }
         };
       }}
