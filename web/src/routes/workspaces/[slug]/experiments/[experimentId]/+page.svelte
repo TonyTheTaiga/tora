@@ -27,7 +27,6 @@
     scalarMetrics,
     timeSeriesMetrics,
     timeSeriesNames,
-    files,
     workspace,
   } = $derived(data);
 
@@ -488,66 +487,6 @@
       </div>
     {/if}
 
-    <!-- Files and artifacts -->
-    {#if files.length > 0}
-      <div class="space-y-2">
-        <div class="flex items-center gap-2">
-          <div class="text-sm text-ctp-text">files & artifacts</div>
-          <div class="text-xs text-ctp-subtext0 font-mono">
-            [{files.length}]
-          </div>
-        </div>
-        <div class="bg-ctp-surface0/10 border border-ctp-surface0/20">
-          {#each files as file}
-            <div
-              class="flex flex-col sm:flex-row sm:items-center hover:bg-ctp-surface0/20 px-3 py-2 transition-colors text-xs border-b border-ctp-surface0/5 last:border-b-0 gap-2 sm:gap-0"
-            >
-              <div class="flex items-center gap-2 flex-1 min-w-0">
-                {#each [getFileIcon(file.name)] as IconComponent}
-                  <IconComponent
-                    size={12}
-                    class="text-ctp-subtext0 flex-shrink-0"
-                  />
-                {/each}
-                <span class="text-ctp-text truncate" title={file.path}>
-                  {file.name}
-                </span>
-                {#if file.size}
-                  <span class="text-ctp-subtext0 font-mono text-xs">
-                    {formatFileSize(file.size)}
-                  </span>
-                {/if}
-              </div>
-              <div class="flex items-center gap-2 ml-6 sm:ml-2">
-                {#if file.url}
-                  <a
-                    href={file.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-ctp-subtext0 hover:text-ctp-blue transition-colors flex items-center gap-1"
-                    title="View file"
-                  >
-                    <ExternalLink size={10} />
-                    <span class="sm:hidden text-xs">view</span>
-                  </a>
-                {/if}
-                {#if file.downloadUrl}
-                  <a
-                    href={file.downloadUrl}
-                    download={file.name}
-                    class="text-ctp-subtext0 hover:text-ctp-green transition-colors flex items-center gap-1"
-                    title="Download file"
-                  >
-                    <Download size={10} />
-                    <span class="sm:hidden text-xs">download</span>
-                  </a>
-                {/if}
-              </div>
-            </div>
-          {/each}
-        </div>
-      </div>
-    {/if}
 
     <!-- System information -->
     <div class="space-y-2">
