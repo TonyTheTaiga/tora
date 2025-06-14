@@ -23,27 +23,41 @@
   import InteractiveChart from "../../interactive-chart.svelte";
 
   let { data }: { data: PageData } = $props();
-  let { experiment, metrics, files, workspace } = $derived(data);
+  let {
+    experiment,
+    scalarMetrics,
+    timeSeriesMetrics,
+    timeSeriesNames,
+    files,
+    workspace,
+  } = $derived(data);
 
-  // Create enhanced experiment object with available metrics for the chart
+  // Create enhanced experiment object with time series metrics for the chart
   let experimentWithMetrics = $derived({
     ...experiment,
-    availableMetrics: [...new Set(metrics.map((m: any) => m.name))].sort(),
+    availableMetrics: timeSeriesNames,
   });
 
   let copiedId = $state(false);
   let copiedMetric = $state<string | null>(null);
   let copiedParam = $state<string | null>(null);
-  let showAllMetrics = $state(false);
+  let showAllScalarMetrics = $state(false);
+  let showAllTimeSeriesMetrics = $state(false);
   let showAllParams = $state(false);
   let showAllTags = $state(false);
 
   const initialLimit = 10;
 
-  let visibleMetrics = $derived(
-    showAllMetrics || metrics.length <= initialLimit
-      ? metrics
-      : metrics.slice(0, initialLimit),
+  let visibleScalarMetrics = $derived(
+    showAllScalarMetrics || scalarMetrics.length <= initialLimit
+      ? scalarMetrics
+      : scalarMetrics.slice(0, initialLimit),
+  );
+
+  let visibleTimeSeriesMetrics = $derived(
+    showAllTimeSeriesMetrics || timeSeriesMetrics.length <= initialLimit * 2
+      ? timeSeriesMetrics
+      : timeSeriesMetrics.slice(0, initialLimit * 2),
   );
 
   let visibleParams = $derived(
@@ -116,23 +130,6 @@
 </script>
 
 <div class="bg-ctp-base font-mono min-h-screen">
-  <!-- Header -->
-  <div
-    class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/10"
-  >
-    <div class="flex items-center gap-4">
-      <div class="w-2 h-8 bg-ctp-green rounded-full"></div>
-      <div>
-        <h1 class="text-lg md:text-xl font-bold text-ctp-text">
-          Experiment Details
-        </h1>
-        <div class="text-xs text-ctp-subtext0">
-          experiment configuration and metrics
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="p-4 md:p-6 space-y-4 md:space-y-6">
     <!-- Back button -->
     <button
@@ -331,13 +328,161 @@
       </div>
     {/if}
 
-    <!-- Metrics visualization and data -->
-    {#if metrics.length > 0}
+    <!-- Scalar Metrics -->
+    {#if scalarMetrics.length > 0}
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <div class="text-sm text-ctp-text font-medium">scalar metrics</div>
+          <div class="text-xs text-ctp-subtext0 font-mono">
+            [{scalarMetrics.length}]
+          </div>
+        </div>
+        <div class="bg-ctp-surface0/10 border border-ctp-surface0/20">
+          <!-- Desktop table -->
+          <div class="hidden md:block">
+            <div
+              class="flex text-xs text-ctp-subtext0 p-3 border-b border-ctp-surface0/20 sticky top-0"
+            >
+              <div class="w-4">•</div>
+              <div class="flex-1">metric</div>
+              <div class="w-20 text-right">value</div>
+              <div class="w-20 text-right">timestamp</div>
+              <div class="w-8"></div>
+            </div>
+
+            <div
+              class="{showAllScalarMetrics ? '' : 'max-h-60'} overflow-y-auto"
+            >
+              {#each visibleScalarMetrics as metric}
+                <div
+                  class="flex text-xs hover:bg-ctp-surface0/20 p-3 transition-colors border-b border-ctp-surface0/5"
+                >
+                  <div class="w-4 text-ctp-green">●</div>
+                  <div
+                    class="flex-1 text-ctp-text truncate"
+                    title={metric.name}
+                  >
+                    {metric.name}
+                  </div>
+                  <div
+                    class="w-20 text-right text-ctp-blue font-mono"
+                    title={String(metric.value)}
+                  >
+                    {typeof metric.value === "number"
+                      ? metric.value.toFixed(4)
+                      : metric.value}
+                  </div>
+                  <div class="w-20 text-right text-ctp-subtext0 font-mono">
+                    {new Date(metric.created_at).toLocaleDateString("en-US", {
+                      month: "numeric",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </div>
+                  <div class="w-8">
+                    <button
+                      onclick={() =>
+                        copyToClipboard(
+                          String(metric.value),
+                          "metric",
+                          metric.name,
+                        )}
+                      class="text-ctp-subtext0 hover:text-ctp-text transition-colors"
+                    >
+                      {#if copiedMetric === metric.name}
+                        <ClipboardCheck size={10} class="text-ctp-green" />
+                      {:else}
+                        <Copy size={10} />
+                      {/if}
+                    </button>
+                  </div>
+                </div>
+              {/each}
+            </div>
+          </div>
+
+          <!-- Mobile card layout -->
+          <div
+            class="md:hidden {showAllScalarMetrics
+              ? ''
+              : 'max-h-60'} overflow-y-auto"
+          >
+            {#each visibleScalarMetrics as metric}
+              <div
+                class="border-b border-ctp-surface0/5 p-3 hover:bg-ctp-surface0/20 transition-colors"
+              >
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-2">
+                    <div class="text-ctp-green text-xs">●</div>
+                    <div
+                      class="text-xs text-ctp-text font-mono truncate"
+                      title={metric.name}
+                    >
+                      {metric.name}
+                    </div>
+                  </div>
+                  <button
+                    onclick={() =>
+                      copyToClipboard(
+                        String(metric.value),
+                        "metric",
+                        metric.name,
+                      )}
+                    class="text-ctp-subtext0 hover:text-ctp-text transition-colors"
+                  >
+                    {#if copiedMetric === metric.name}
+                      <ClipboardCheck size={10} class="text-ctp-green" />
+                    {:else}
+                      <Copy size={10} />
+                    {/if}
+                  </button>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                  <div
+                    class="text-ctp-blue font-mono"
+                    title={String(metric.value)}
+                  >
+                    {typeof metric.value === "number"
+                      ? metric.value.toFixed(4)
+                      : metric.value}
+                  </div>
+                  <div class="text-ctp-subtext0 font-mono">
+                    {new Date(metric.created_at).toLocaleDateString("en-US", {
+                      month: "numeric",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </div>
+                </div>
+              </div>
+            {/each}
+          </div>
+
+          {#if scalarMetrics.length > initialLimit}
+            <button
+              onclick={() => (showAllScalarMetrics = !showAllScalarMetrics)}
+              class="w-full text-xs text-ctp-subtext0 hover:text-ctp-text p-3 text-center border-t border-ctp-surface0/20 transition-colors"
+            >
+              {showAllScalarMetrics
+                ? "show less"
+                : `show ${scalarMetrics.length - initialLimit} more`}
+            </button>
+          {/if}
+        </div>
+      </div>
+    {/if}
+
+    <!-- Time Series Metrics -->
+    {#if timeSeriesNames.length > 0}
       <div class="space-y-3">
         <div class="flex items-center gap-2">
-          <div class="text-sm text-ctp-text font-medium">metrics</div>
+          <div class="text-sm text-ctp-text font-medium">
+            time series metrics
+          </div>
           <div class="text-xs text-ctp-subtext0 font-mono">
-            [{metrics.length} data points]
+            [{timeSeriesNames.length}]
           </div>
         </div>
 
@@ -348,7 +493,7 @@
           <InteractiveChart experiment={experimentWithMetrics} />
         </div>
 
-        <!-- Metrics data table -->
+        <!-- Time series data table -->
         <div class="bg-ctp-surface0/10 border border-ctp-surface0/20">
           <!-- Desktop table -->
           <div class="hidden md:block">
@@ -363,8 +508,12 @@
               <div class="w-8"></div>
             </div>
 
-            <div class="max-h-80 overflow-y-auto">
-              {#each visibleMetrics as metric}
+            <div
+              class="{showAllTimeSeriesMetrics
+                ? ''
+                : 'max-h-80'} overflow-y-auto"
+            >
+              {#each visibleTimeSeriesMetrics as metric}
                 <div
                   class="flex text-xs hover:bg-ctp-surface0/20 p-3 transition-colors border-b border-ctp-surface0/5"
                 >
@@ -417,8 +566,12 @@
           </div>
 
           <!-- Mobile card layout -->
-          <div class="md:hidden max-h-80 overflow-y-auto">
-            {#each visibleMetrics as metric}
+          <div
+            class="md:hidden {showAllTimeSeriesMetrics
+              ? ''
+              : 'max-h-80'} overflow-y-auto"
+          >
+            {#each visibleTimeSeriesMetrics as metric}
               <div
                 class="border-b border-ctp-surface0/5 p-3 hover:bg-ctp-surface0/20 transition-colors"
               >
@@ -475,14 +628,15 @@
             {/each}
           </div>
 
-          {#if metrics.length > initialLimit}
+          {#if timeSeriesMetrics.length > initialLimit * 2}
             <button
-              onclick={() => (showAllMetrics = !showAllMetrics)}
+              onclick={() =>
+                (showAllTimeSeriesMetrics = !showAllTimeSeriesMetrics)}
               class="w-full text-xs text-ctp-subtext0 hover:text-ctp-text p-3 text-center border-t border-ctp-surface0/20 transition-colors"
             >
-              {showAllMetrics
+              {showAllTimeSeriesMetrics
                 ? "show less"
-                : `show ${metrics.length - initialLimit} more`}
+                : `show ${timeSeriesMetrics.length - initialLimit * 2} more`}
             </button>
           {/if}
         </div>

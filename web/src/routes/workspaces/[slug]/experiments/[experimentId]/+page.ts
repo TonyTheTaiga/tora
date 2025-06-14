@@ -16,17 +16,41 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
     const experiment = await experimentResponse.json();
 
     // Load metrics for the experiment
-    let metrics = [];
+    let allMetrics = [];
     try {
       const metricsResponse = await fetch(
         `/api/experiments/${params.experimentId}/metrics`,
       );
       if (metricsResponse.ok) {
-        metrics = await metricsResponse.json();
+        allMetrics = await metricsResponse.json();
       }
     } catch (err) {
       console.warn("Failed to load metrics:", err);
     }
+
+    // Group metrics by name and classify as scalar vs time series
+    const metricsByName = new Map();
+    allMetrics.forEach((metric: any) => {
+      if (!metricsByName.has(metric.name)) {
+        metricsByName.set(metric.name, []);
+      }
+      metricsByName.get(metric.name).push(metric);
+    });
+
+    const scalarMetrics: any[] = [];
+    const timeSeriesMetrics: any[] = [];
+    const timeSeriesNames: string[] = [];
+
+    metricsByName.forEach((metricList: any[], name: string) => {
+      if (metricList.length === 1) {
+        // Single data point = scalar metric
+        scalarMetrics.push(metricList[0]);
+      } else {
+        // Multiple data points = time series metric
+        timeSeriesNames.push(name);
+        timeSeriesMetrics.push(...metricList);
+      }
+    });
 
     // Load experiment files/artifacts if available
     let files = [];
@@ -43,7 +67,10 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
 
     return {
       experiment,
-      metrics,
+      allMetrics,
+      scalarMetrics,
+      timeSeriesMetrics,
+      timeSeriesNames,
       files,
       workspace,
     };
