@@ -8,6 +8,7 @@
     X,
     ArrowRight,
     Group,
+    Command,
   } from "lucide-svelte";
   import { goto } from "$app/navigation";
   import { onMount, onDestroy } from "svelte";
@@ -29,7 +30,7 @@
   let selectedExperiments = $derived.by(() =>
     getExperimentsSelectedForComparision(),
   );
-  let isWorkspacePage = $derived(page.url.pathname.startsWith('/workspaces/'));
+  let isWorkspacePage = $derived(page.url.pathname.startsWith("/workspaces/"));
 
   const handleScroll = () => {
     if (typeof window !== "undefined" && typeof document !== "undefined") {
@@ -96,13 +97,22 @@
       class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
       title="Go to workspaces"
       onclick={() => {
+        goto("/");
+      }}
+    >
+      <Command size={20} />
+    </button>
+    <button
+      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+      title="Go to workspaces"
+      onclick={() => {
         goto("/workspaces");
       }}
     >
       <Group size={20} />
     </button>
 
-{#if isWorkspacePage}
+    {#if isWorkspacePage}
       <button
         class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
         title="Create a new experiment"
