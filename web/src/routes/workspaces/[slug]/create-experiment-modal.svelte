@@ -81,7 +81,7 @@
       <div class="flex items-center gap-3">
         <div class="w-2 h-6 bg-ctp-mauve rounded-full"></div>
         <div>
-          <h3 id="modal-title" class="text-lg font-bold text-ctp-text">
+          <h3 id="modal-title" class="text-lg text-ctp-text font-mono">
             New Experiment
           </h3>
           <div class="text-xs text-ctp-subtext0">create experiment config</div>
@@ -172,7 +172,7 @@
               class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
             >
               <TagIcon size={16} class="text-ctp-blue" />
-              <span class="text-sm font-medium">Tags</span>
+              <span class="text-sm">tags</span>
               <ChevronDown
                 size={16}
                 class="ml-auto text-ctp-subtext0 group-open:rotate-180"
@@ -183,7 +183,7 @@
                 {#each tags as tag, i}
                   <input type="hidden" value={tag} name="tags.{i}" />
                   <span
-                    class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-ctp-blue/10 text-ctp-blue border-0 group"
+                    class="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-ctp-blue/10 text-ctp-blue border-0 group"
                   >
                     {tag}
                     <button
@@ -245,7 +245,7 @@
               class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
             >
               <Settings size={16} class="text-ctp-sapphire" />
-              <span class="text-sm font-medium">Parameters</span>
+              <span class="text-sm">parameters</span>
               <ChevronDown
                 size={16}
                 class="ml-auto text-ctp-subtext0 group-open:rotate180"
@@ -279,7 +279,7 @@
 
                 <button
                   type="button"
-                  class="inline-flex items-center gap-1.5 py-1.5 px-3 text-sm font-medium rounded-lg bg-ctp-sapphire/10 text-ctp-sapphire border border-dashed border-ctp-sapphire/50 hover:bg-ctp-sapphire/20 transition-all"
+                  class="inline-flex items-center gap-1.5 py-1.5 px-3 text-sm rounded-lg bg-ctp-sapphire/10 text-ctp-sapphire border border-dashed border-ctp-sapphire/50 hover:bg-ctp-sapphire/20 transition-all"
                   onclick={() =>
                     (hyperparams = [...hyperparams, { key: "", value: "" }])}
                 >
@@ -296,7 +296,7 @@
               class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
             >
               <Link size={16} class="text-ctp-lavender" />
-              <span class="text-sm font-medium">References</span>
+              <span class="text-sm">references</span>
               <ChevronDown
                 size={16}
                 class="ml-auto text-ctp-subtext0 group-open:rotate-180"

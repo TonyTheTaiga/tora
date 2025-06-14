@@ -101,7 +101,7 @@
     <div class="flex items-center gap-3 md:gap-4 min-w-0 flex-1 pr-4">
       <div class="w-2 h-6 md:h-8 bg-ctp-blue rounded-full flex-shrink-0"></div>
       <div class="min-w-0 flex-1">
-        <h1 class="text-lg md:text-xl font-bold text-ctp-text truncate">
+        <h1 class="text-lg md:text-xl text-ctp-text truncate font-mono">
           {workspace?.name || "Workspace"}
         </h1>
         <div class="text-xs text-ctp-subtext0">
@@ -115,11 +115,11 @@
 
     <button
       onclick={() => openCreateExperimentModal()}
-      class="group relative bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-text hover:bg-ctp-surface0/30 hover:border-ctp-surface0/50 rounded-full px-3 py-2 md:px-4 text-sm font-medium transition-all duration-300 hover:scale-105 active:scale-95 flex-shrink-0"
+      class="group relative bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-text hover:bg-ctp-surface0/30 hover:border-ctp-surface0/50 rounded-full px-3 py-2 md:px-4 text-sm font-mono transition-all duration-300 hover:scale-105 active:scale-95 flex-shrink-0"
     >
       <div class="flex items-center gap-2">
         <Plus class="w-4 h-4" />
-        <span class="hidden sm:inline">New</span>
+        <span class="hidden sm:inline">new</span>
       </div>
     </button>
   </div>

@@ -147,9 +147,7 @@
       <div class="flex flex-col sm:flex-row sm:items-center gap-2">
         <div class="flex items-center gap-2 min-w-0 flex-1">
           <div class="text-ctp-green text-sm">●</div>
-          <div
-            class="text-base md:text-lg text-ctp-text font-semibold break-words min-w-0"
-          >
+          <div class="text-base md:text-lg text-ctp-text break-words min-w-0">
             {experiment.name}
           </div>
         </div>
@@ -248,7 +246,7 @@
     {#if experiment.tags && experiment.tags.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-2">
-          <div class="text-sm text-ctp-text font-medium">tags</div>
+          <div class="text-sm text-ctp-text">tags</div>
           <div class="text-xs text-ctp-subtext0 font-mono">
             [{experiment.tags.length}]
           </div>
@@ -279,7 +277,7 @@
     {#if experiment.hyperparams && experiment.hyperparams.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-2">
-          <div class="text-sm text-ctp-text font-medium">hyperparameters</div>
+          <div class="text-sm text-ctp-text">hyperparameters</div>
           <div class="text-xs text-ctp-subtext0 font-mono">
             [{experiment.hyperparams.length}]
           </div>
@@ -333,20 +331,24 @@
     {#if scalarMetrics.length > 0 || timeSeriesNames.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-4">
-          <div class="text-sm text-ctp-text font-medium">metrics</div>
+          <div class="text-sm text-ctp-text">metrics</div>
           <div class="text-xs text-ctp-subtext0 font-mono">
             [{scalarMetrics.length + timeSeriesNames.length}]
           </div>
           <div class="flex items-center gap-1">
             <button
               onclick={() => (metricsView = "chart")}
-              class="text-xs text-ctp-{metricsView === 'chart' ? 'blue' : 'subtext0'} hover:text-ctp-blue transition-colors"
+              class="text-xs text-ctp-{metricsView === 'chart'
+                ? 'blue'
+                : 'subtext0'} hover:text-ctp-blue transition-colors"
             >
               [chart]
             </button>
             <button
               onclick={() => (metricsView = "data")}
-              class="text-xs text-ctp-{metricsView === 'data' ? 'blue' : 'subtext0'} hover:text-ctp-blue transition-colors"
+              class="text-xs text-ctp-{metricsView === 'data'
+                ? 'blue'
+                : 'subtext0'} hover:text-ctp-blue transition-colors"
             >
               [data]
             </button>
@@ -371,7 +373,7 @@
     {#if metricsView === "data" && scalarMetrics.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-2">
-          <div class="text-sm text-ctp-text font-medium">scalar metrics</div>
+          <div class="text-sm text-ctp-text">scalar metrics</div>
           <div class="text-xs text-ctp-subtext0 font-mono">
             [{scalarMetrics.length}]
           </div>
@@ -496,12 +498,11 @@
       </div>
     {/if}
 
-
     <!-- Files and artifacts -->
     {#if files.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-2">
-          <div class="text-sm text-ctp-text font-medium">files & artifacts</div>
+          <div class="text-sm text-ctp-text">files & artifacts</div>
           <div class="text-xs text-ctp-subtext0 font-mono">
             [{files.length}]
           </div>
@@ -560,7 +561,7 @@
 
     <!-- System information -->
     <div class="space-y-2">
-      <div class="text-sm text-ctp-text font-medium">system info</div>
+      <div class="text-sm text-ctp-text">system info</div>
       <div
         class="bg-ctp-surface0/10 border border-ctp-surface0/20 p-3 space-y-2 text-xs font-mono"
       >

@@ -69,7 +69,7 @@
     >
       <div class="flex items-center gap-2">
         <AlertTriangle size={18} class="text-ctp-red" />
-        <h2 id="modal-title" class="text-xl font-medium text-ctp-text">
+        <h2 id="modal-title" class="text-xl text-ctp-text font-mono">
           Delete Experiment?
         </h2>
       </div>
@@ -105,7 +105,7 @@
         onclick={closeModal}
         type="button"
         disabled={isDeleting}
-        class="inline-flex items-center justify-center px-4 py-2 font-medium rounded-full bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-full bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors font-mono"
       >
         Cancel
       </button>
@@ -113,7 +113,7 @@
         type="button"
         onclick={deleteExperiment}
         disabled={isDeleting}
-        class="inline-flex items-center justify-center gap-2 px-4 py-2 font-medium rounded-full bg-ctp-red/20 border border-ctp-red/40 text-ctp-red hover:bg-ctp-red hover:text-ctp-crust transition-all"
+        class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-ctp-red/20 border border-ctp-red/40 text-ctp-red hover:bg-ctp-red hover:text-ctp-crust transition-all font-mono"
       >
         {#if isDeleting}
           <div class="flex items-center gap-2">

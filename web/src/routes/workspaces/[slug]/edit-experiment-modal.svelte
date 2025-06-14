@@ -127,7 +127,7 @@
       <div class="flex items-center gap-3">
         <div class="w-2 h-6 bg-ctp-mauve rounded-full"></div>
         <div>
-          <h2 id="modal-title" class="text-lg font-bold text-ctp-text">
+          <h2 id="modal-title" class="text-lg text-ctp-text font-mono">
             Edit Experiment
           </h2>
           <div class="text-xs text-ctp-subtext0">modify experiment config</div>
@@ -247,7 +247,7 @@
               class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
             >
               <TagIcon size={16} class="text-ctp-blue" />
-              <span class="text-sm font-medium">Tags</span>
+              <span class="text-sm">tags</span>
               <ChevronDown
                 size={16}
                 class="ml-auto text-ctp-subtext0 group-open:rotate-180"
@@ -259,7 +259,7 @@
                   {#each experimentCopy.tags as tag, i}
                     <input type="hidden" value={tag} name="tags.{i}" />
                     <span
-                      class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-ctp-blue/10 text-ctp-blue border-0 group"
+                      class="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-ctp-blue/10 text-ctp-blue border-0 group"
                     >
                       {tag}
                       <button
@@ -314,7 +314,7 @@
               class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
             >
               <Link size={16} class="text-ctp-lavender" />
-              <span class="text-sm font-medium">References</span>
+              <span class="text-sm">references</span>
               <ChevronDown
                 size={16}
                 class="ml-auto text-ctp-subtext0 group-open:rotate-180"

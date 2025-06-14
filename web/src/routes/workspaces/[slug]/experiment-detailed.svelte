@@ -219,9 +219,7 @@
     <!-- Primary info - name as filename -->
     <div class="flex items-center gap-2">
       <div class="text-ctp-green text-sm">●</div>
-      <div
-        class="text-sm text-ctp-text font-mono font-semibold break-words min-w-0"
-      >
+      <div class="text-sm text-ctp-text font-mono break-words min-w-0">
         {experiment.name}
       </div>
       <div class="text-xs text-ctp-subtext0 font-mono ml-auto">
@@ -307,7 +305,7 @@
   {#if experiment.hyperparams && experiment.hyperparams.length > 0}
     <div class="space-y-1">
       <div class="flex items-center justify-between">
-        <div class="text-sm text-ctp-text font-medium">hyperparams</div>
+        <div class="text-sm text-ctp-text">hyperparams</div>
         <div class="text-xs text-ctp-subtext0 font-mono">
           [{experiment.hyperparams?.length || 0}]
         </div>
@@ -400,7 +398,7 @@
   {#if availableMetrics.length > 0}
     <div class="space-y-1">
       <div class="flex items-center gap-2">
-        <div class="text-sm text-ctp-text font-medium">metrics</div>
+        <div class="text-sm text-ctp-text">metrics</div>
         <div class="flex items-center gap-1 text-xs font-mono">
           <button
             onclick={() => {

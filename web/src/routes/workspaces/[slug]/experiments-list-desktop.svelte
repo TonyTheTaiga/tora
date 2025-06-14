@@ -38,7 +38,7 @@
   );
 </script>
 
-<div class="hidden md:block space-y-1">
+<div class="hidden md:block space-y-1 font-mono">
   <!-- Header -->
   <div
     class="flex items-center text-xs text-ctp-subtext0 pb-2 border-b border-ctp-surface0/20"
@@ -66,7 +66,9 @@
           if (getMode()) {
             addExperiment(experiment.id);
           } else {
-            goto(`/workspaces/${page.params.slug}/experiments/${experiment.id}`);
+            goto(
+              `/workspaces/${page.params.slug}/experiments/${experiment.id}`,
+            );
           }
         }}
         class="flex items-center flex-1 min-w-0 text-left"
@@ -75,7 +77,7 @@
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
             <span
-              class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate"
+              class="text-ctp-text group-hover:text-ctp-blue transition-colors truncate"
             >
               {experiment.name}
             </span>
@@ -127,7 +129,7 @@
               onToggleHighlight(experiment);
             }}
             class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-teal hover:border-ctp-teal/30 rounded-full p-1 text-xs transition-all"
-            title="Show experiment chain"
+            title="show experiment chain"
           >
             {#if highlighted.includes(experiment.id)}
               <EyeClosed class="w-3 h-3" />
@@ -142,7 +144,7 @@
               openEditExperimentModal(experiment);
             }}
             class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-blue hover:border-ctp-blue/30 rounded-full p-1 text-xs transition-all"
-            title="Edit experiment"
+            title="edit experiment"
           >
             <Edit class="w-3 h-3" />
           </button>
@@ -154,7 +156,7 @@
                 openDeleteExperimentModal(experiment);
               }}
               class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-red hover:border-ctp-red/30 rounded-full p-1 text-xs transition-all"
-              title="Delete experiment"
+              title="delete experiment"
             >
               <Trash2 class="w-3 h-3" />
             </button>
