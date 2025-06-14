@@ -1,7 +1,7 @@
 import type { Actions, PageServerLoad } from "./$types";
 import { startTimer, generateRequestId } from "$lib/utils/timing";
 import type { Experiment, HyperParam } from "$lib/types";
-import { json, redirect } from "@sveltejs/kit";
+import { fail, json, redirect } from "@sveltejs/kit";
 
 interface FormDataResult {
   hyperparams: HyperParam[];
@@ -112,6 +112,20 @@ export const actions: Actions = {
       tags: tags,
       visibility: visibility,
     });
+
+    return { success: true };
+  },
+
+  delete: async ({ request, locals }) => {
+    const data = await request.formData();
+    const id = data.get("id");
+
+    if (!id || typeof id !== "string") {
+      return fail(400, {
+        message: "A valid ID is required",
+      });
+    }
+    await locals.dbClient.deleteExperiment(id);
 
     return { success: true };
   },
