@@ -30,6 +30,9 @@
     getExperimentsSelectedForComparision(),
   );
   let isWorkspacePage = $derived(page.url.pathname.startsWith("/workspaces/"));
+  let compareSupported = $derived(
+    isWorkspacePage || page.url.pathname.startsWith("/experiments/"),
+  );
   let showBackButton = $derived.by(() => {
     const path = page.url.pathname;
     return (
@@ -156,7 +159,9 @@
       >
         <Plus size={20} />
       </button>
+    {/if}
 
+    {#if compareSupported}
       {#if !isComparisonMode}
         <button
           class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"

@@ -16,6 +16,11 @@
   } from "lucide-svelte";
   import type { PageData } from "./$types";
   import InteractiveChart from "./interactive-chart.svelte";
+  import {
+    getMode,
+    addExperiment,
+    selectedForComparison,
+  } from "$lib/state/comparison.svelte.js";
 
   let { data }: { data: PageData } = $props();
   let { experiment, scalarMetrics, timeSeriesNames } = $derived(data);
@@ -24,6 +29,9 @@
     ...experiment,
     availableMetrics: timeSeriesNames,
   });
+
+  let isComparisonMode = $derived.by(() => getMode());
+  let isSelected = $derived.by(() => selectedForComparison(experiment.id));
 
   let copiedId = $state(false);
   let copiedMetric = $state<string | null>(null);
@@ -70,6 +78,10 @@
       setTimeout(() => (copiedParam = null), 1200);
     }
   }
+
+  function toggleSelection() {
+    addExperiment(experiment.id);
+  }
 </script>
 
 <div class="bg-ctp-base font-mono">
@@ -96,6 +108,14 @@
             <Globe size={12} class="text-ctp-green md:w-4 md:h-4" />
           {:else}
             <GlobeLock size={12} class="text-ctp-red md:w-4 md:h-4" />
+          {/if}
+          {#if isComparisonMode}
+            <button
+              onclick={toggleSelection}
+              class="text-xs text-ctp-{isSelected ? 'blue' : 'subtext0'} hover:text-ctp-blue transition-colors"
+            >
+              {isSelected ? "[selected]" : "[select]"}
+            </button>
           {/if}
         </div>
       </div>
