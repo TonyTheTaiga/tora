@@ -13,10 +13,22 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 
   const metrics = await locals.dbClient.getMetrics(experimentId);
 
-  const header = "name,value,step,created_at\n";
-  const rows = metrics
-    .map((m) =>
-      [m.name, m.value, m.step ?? "", m.created_at].join(","),
+  const names = Array.from(new Set(metrics.map((m) => m.name))).sort();
+  const steps = Array.from(new Set(metrics.map((m) => m.step ?? 0))).sort(
+    (a, b) => a - b,
+  );
+
+  const data = new Map<number, Record<string, number>>();
+  for (const m of metrics) {
+    const step = m.step ?? 0;
+    if (!data.has(step)) data.set(step, {});
+    data.get(step)![m.name] = m.value;
+  }
+
+  const header = ["step", ...names].join(",") + "\n";
+  const rows = steps
+    .map((step) =>
+      [step, ...names.map((n) => data.get(step)?.[n] ?? "")].join(","),
     )
     .join("\n");
 
