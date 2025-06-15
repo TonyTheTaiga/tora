@@ -9,26 +9,17 @@
     Activity,
     Settings,
     Clock,
-    Tag,
     Hash,
     User,
     Calendar,
     Eye,
-    Download,
-    ExternalLink,
   } from "lucide-svelte";
   import type { PageData } from "./$types";
-  import InteractiveChart from "../../workspaces/[slug]/interactive-chart.svelte";
+  import InteractiveChart from "./interactive-chart.svelte";
 
   let { data }: { data: PageData } = $props();
-  let {
-    experiment,
-    scalarMetrics,
-    timeSeriesMetrics,
-    timeSeriesNames,
-  } = $derived(data);
+  let { experiment, scalarMetrics, timeSeriesNames } = $derived(data);
 
-  // Create enhanced experiment object with time series metrics for the chart
   let experimentWithMetrics = $derived({
     ...experiment,
     availableMetrics: timeSeriesNames,
@@ -38,7 +29,6 @@
   let copiedMetric = $state<string | null>(null);
   let copiedParam = $state<string | null>(null);
   let showAllScalarMetrics = $state(false);
-  let showAllTimeSeriesMetrics = $state(false);
   let showAllParams = $state(false);
   let showAllTags = $state(false);
   let metricsView = $state<"chart" | "data">("chart");
@@ -49,12 +39,6 @@
     showAllScalarMetrics || scalarMetrics.length <= initialLimit
       ? scalarMetrics
       : scalarMetrics.slice(0, initialLimit),
-  );
-
-  let visibleTimeSeriesMetrics = $derived(
-    showAllTimeSeriesMetrics || timeSeriesMetrics.length <= initialLimit * 2
-      ? timeSeriesMetrics
-      : timeSeriesMetrics.slice(0, initialLimit * 2),
   );
 
   let visibleParams = $derived(
@@ -84,44 +68,6 @@
     } else if (type === "param" && key) {
       copiedParam = key;
       setTimeout(() => (copiedParam = null), 1200);
-    }
-  }
-
-  function formatFileSize(bytes: number): string {
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-  }
-
-  function getFileIcon(filename: string) {
-    const ext = filename.split(".").pop()?.toLowerCase();
-    switch (ext) {
-      case "json":
-      case "yml":
-      case "yaml":
-      case "toml":
-      case "ini":
-        return Settings;
-      case "csv":
-      case "tsv":
-      case "parquet":
-        return Database;
-      case "png":
-      case "jpg":
-      case "jpeg":
-      case "gif":
-      case "svg":
-        return Eye;
-      case "py":
-      case "js":
-      case "ts":
-      case "go":
-      case "rs":
-        return FileText;
-      default:
-        return FileText;
     }
   }
 </script>
