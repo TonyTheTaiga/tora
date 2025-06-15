@@ -258,6 +258,16 @@ export function createDbClient(client: SupabaseClient<Database>) {
       handleError(error, "Failed to batch write metrics");
     },
 
+    async getWorkspaceForExperiment(id: string): Promise<string | null> {
+      const { data, error } = await client
+        .from("workspace_experiments")
+        .select("workspace_id")
+        .eq("experiment_id", id)
+        .single();
+      handleError(error, `Failed to get workspace for experiment ${id}`);
+      return data?.workspace_id ?? null;
+    },
+
     // --- Reference Methods ---
 
     async createReference(

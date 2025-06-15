@@ -21,7 +21,10 @@
     getTheme,
     toggleTheme as toggleAppTheme,
   } from "$lib/state/theme.svelte.js";
-  import { openCreateExperimentModal } from "$lib/state/app.svelte.js";
+  import {
+    openCreateExperimentModal,
+    openCompareExperimentsModal,
+  } from "$lib/state/app.svelte.js";
   import { page } from "$app/state";
 
   let theme = $derived.by(() => getTheme());
@@ -30,6 +33,7 @@
     getExperimentsSelectedForComparision(),
   );
   let isWorkspacePage = $derived(page.url.pathname.startsWith("/workspaces/"));
+  let isExperimentPage = $derived(page.url.pathname.startsWith("/experiments/"));
   let showBackButton = $derived.by(() => {
     const path = page.url.pathname;
     return (
@@ -207,12 +211,24 @@
           </button>
         </div>
       {/if}
-    {/if}
+  {/if}
 
+  {#if isExperimentPage}
     <button
+      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+      title="compare experiments"
       onclick={() => {
-        toggleAppTheme();
+        openCompareExperimentsModal();
       }}
+    >
+      <GitCompareArrows size={20} />
+    </button>
+  {/if}
+
+  <button
+    onclick={() => {
+      toggleAppTheme();
+    }}
       class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
       aria-label={theme === "dark"
         ? "Switch to light theme"

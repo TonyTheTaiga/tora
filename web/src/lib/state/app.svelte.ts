@@ -7,6 +7,7 @@ interface ModalState {
   deleteExperiment: Experiment | null;
   selectedExperiment: Experiment | null;
   createWorkspace: boolean;
+  compareExperiments: boolean;
 }
 
 interface AppState {
@@ -24,6 +25,7 @@ let state = $state<AppState>({
     deleteExperiment: null,
     selectedExperiment: null,
     createWorkspace: false,
+    compareExperiments: false,
   },
   ui: {
     isLoading: false,
@@ -115,10 +117,23 @@ export function getCreateWorkspaceModal() {
   return state.modals.createWorkspace;
 }
 
+export function openCompareExperimentsModal() {
+  state.modals.compareExperiments = true;
+}
+
+export function closeCompareExperimentsModal() {
+  state.modals.compareExperiments = false;
+}
+
+export function getCompareExperimentsModal() {
+  return state.modals.compareExperiments;
+}
+
 export function clearAllModals() {
   state.modals.createExperiment = false;
   state.modals.editExperiment = null;
   state.modals.deleteExperiment = null;
   state.modals.selectedExperiment = null;
   state.modals.createWorkspace = false;
+  state.modals.compareExperiments = false;
 }

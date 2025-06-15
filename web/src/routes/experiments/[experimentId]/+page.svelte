@@ -16,9 +16,13 @@
   } from "lucide-svelte";
   import type { PageData } from "./$types";
   import InteractiveChart from "./interactive-chart.svelte";
+  import CompareExperimentsModal from "$lib/components/modals/compare-experiments-modal.svelte";
+  import { getCompareExperimentsModal } from "$lib/state/app.svelte.js";
 
   let { data }: { data: PageData } = $props();
-  let { experiment, scalarMetrics, timeSeriesNames } = $derived(data);
+  let { experiment, scalarMetrics, timeSeriesNames, workspaceExperiments } =
+    $derived(data);
+  let compareModalOpen = $derived(getCompareExperimentsModal());
 
   let experimentWithMetrics = $derived({
     ...experiment,
@@ -456,3 +460,9 @@
     </div>
   </div>
 </div>
+{#if compareModalOpen}
+  <CompareExperimentsModal
+    experiments={workspaceExperiments}
+    currentId={experiment.id}
+  />
+{/if}

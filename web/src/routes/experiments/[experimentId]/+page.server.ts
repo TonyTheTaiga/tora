@@ -20,6 +20,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     const data = await locals.dbClient.getExperimentsAndMetrics([
       params.experimentId,
     ]);
+    const workspaceId = await locals.dbClient.getWorkspaceForExperiment(
+      params.experimentId,
+    );
+    const workspaceExperiments = workspaceId
+      ? await locals.dbClient.getExperiments(workspaceId)
+      : [];
 
     if (!data || data.length === 0) {
       timer.end({ error: "Experiment not found" });
@@ -91,6 +97,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       scalarMetrics,
       timeSeriesMetrics,
       timeSeriesNames,
+      workspaceId,
+      workspaceExperiments,
     };
   } catch (err) {
     timer.end({ error: err instanceof Error ? err.message : "Unknown error" });
