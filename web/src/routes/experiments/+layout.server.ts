@@ -3,7 +3,7 @@ import { startTimer, generateRequestId } from "$lib/utils/timing";
 
 export const load: LayoutServerLoad = async ({ locals }) => {
   const requestId = generateRequestId();
-  const timer = startTimer("world", { requestId });
+  const timer = startTimer("experiments", { requestId });
   try {
     const experiments = await locals.dbClient.getPublicExperiments();
     timer.end({});
