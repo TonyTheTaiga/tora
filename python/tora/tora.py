@@ -129,7 +129,10 @@ class Tora:
         max_buffer_len: int = 25,
         api_key: str = TORA_API_KEY,
     ):
-        req = httpx.get(url=server_url + f"/experiments/{experiment_id}")
+        req = httpx.get(
+            url=server_url + f"/experiments/{experiment_id}",
+            headers={"x-api-key": api_key},
+        )
         req.raise_for_status()
         data = req.json()
         experiment_id = data["id"]

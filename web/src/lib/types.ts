@@ -71,10 +71,10 @@ export function isWorkspace(obj: unknown): obj is Workspace {
   const w = obj as Record<string, unknown>;
   return (
     typeof w.id === "string" &&
-    typeof w.user_id === "string" &&
+    typeof w.role === "string" &&
     typeof w.name === "string" &&
-    typeof w.description === "string" &&
-    typeof w.created_at === "string"
+    (typeof w.description === "string" || w.description === null) &&
+    typeof w.createdAt === "string"
   );
 }
 
