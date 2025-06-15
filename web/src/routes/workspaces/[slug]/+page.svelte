@@ -112,12 +112,10 @@
               <span>id:</span>
               <button
                 onclick={() => copyToClipboard(currentWorkspace.id)}
-                class="text-ctp-blue hover:text-ctp-blue/80 transition-colors truncate max-w-xs flex items-center gap-1"
+                class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex items-center gap-1"
                 title="click to copy workspace id"
               >
-                <span class="truncate max-w-24 sm:max-w-32"
-                  >{currentWorkspace.id}</span
-                >
+                <span>{currentWorkspace.id}</span>
                 {#if copiedId}
                   <ClipboardCheck size={10} class="text-ctp-green" />
                 {:else}
