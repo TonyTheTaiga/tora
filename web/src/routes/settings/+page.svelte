@@ -123,7 +123,7 @@
 
       <!-- Primary info - email as filename -->
       <div class="flex items-center gap-2 mb-3">
-        <div class="text-ctp-green text-sm">●</div>
+        <div class="text-ctp-green text-sm"></div>
         <div
           class="text-sm text-ctp-text font-mono font-semibold break-words min-w-0"
         >
@@ -224,7 +224,7 @@
               <div
                 class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
               >
-                <span class="text-ctp-blue w-3">●</span>
+                <span class="text-ctp-blue w-3"></span>
                 <a
                   href="/workspaces/{workspace.id}"
                   class="text-ctp-text hover:text-ctp-blue flex-1 truncate min-w-0 transition-colors"
@@ -280,7 +280,7 @@
               <div
                 class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
               >
-                <span class="text-ctp-green w-3">●</span>
+                <span class="text-ctp-green w-3"></span>
                 <a
                   href="/workspaces/{workspace.id}"
                   class="text-ctp-text hover:text-ctp-blue flex-1 truncate min-w-0 transition-colors"
@@ -337,7 +337,7 @@
               <div
                 class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
               >
-                <span class="text-ctp-yellow w-3">●</span>
+                <span class="text-ctp-yellow w-3"></span>
                 <span class="text-ctp-text flex-1 truncate min-w-0"
                   >{invitation.workspaceName}</span
                 >
@@ -440,8 +440,7 @@
             class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
           >
             <span class="text-{apiKey.revoked ? 'ctp-red' : 'ctp-green'} w-3"
-              >●</span
-            >
+            ></span>
             <span class="text-ctp-text flex-1 truncate min-w-0"
               >{apiKey.name}</span
             >

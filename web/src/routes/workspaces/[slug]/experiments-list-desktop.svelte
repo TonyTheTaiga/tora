@@ -73,7 +73,7 @@
         }}
         class="flex items-center flex-1 min-w-0 text-left"
       >
-        <div class="w-4 text-ctp-green text-xs">●</div>
+        <div class="w-4 text-ctp-green text-xs"></div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
             <span

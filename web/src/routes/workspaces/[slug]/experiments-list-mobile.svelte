@@ -67,7 +67,7 @@
           <!-- Header row -->
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2 min-w-0 flex-1">
-              <div class="text-ctp-green text-xs">●</div>
+              <div class="text-ctp-green text-xs"></div>
               <h3
                 class="text-ctp-text group-hover:text-ctp-blue transition-colors truncate text-sm"
               >

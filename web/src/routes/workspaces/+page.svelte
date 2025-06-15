@@ -120,7 +120,7 @@
             href={`/workspaces/${workspace.id}`}
             class="group flex items-center text-sm hover:bg-ctp-surface0/20 px-1 py-2 transition-colors"
           >
-            <div class="w-4 text-ctp-green text-xs">●</div>
+            <div class="w-4 text-ctp-green text-xs"></div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2">
                 <span
