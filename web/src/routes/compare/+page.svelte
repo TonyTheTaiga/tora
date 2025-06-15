@@ -431,15 +431,3 @@
   </div>
 </div>
 
-<style>
-  .scroll-container::-webkit-scrollbar {
-    display: none;
-  }
-
-  .chart-canvas {
-    touch-action: pan-y;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-  }
-</style>

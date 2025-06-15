@@ -50,6 +50,7 @@ export function drawRadarChart(
       responsive: true,
       maintainAspectRatio: true,
       aspectRatio: 1,
+      animation: false,
       events: [
         "mousemove",
         "mouseout",
@@ -63,13 +64,13 @@ export function drawRadarChart(
       ],
       elements: {
         line: {
-          borderWidth: 3,
-          tension: 0.1,
+          borderWidth: 2,
+          tension: 0.25,
           borderCapStyle: "round",
           borderJoinStyle: "round",
         },
         point: {
-          radius: 6,
+          radius: 5,
           hoverRadius: 10,
           borderWidth: 2,
           hoverBorderWidth: 3,

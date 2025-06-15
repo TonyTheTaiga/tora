@@ -126,39 +126,30 @@
     };
   });
 
-  // Fallback DOM listener for touchend events (Chart.js plugins don't always receive them reliably)
-  $effect(() => {
-    const currentCanvas = chartCanvas;
-
-    if (currentCanvas) {
-      const clearTooltipOnTouchEnd = () => {
-        if (chartInstance && chartInstance.tooltip) {
-          if (typeof chartInstance.tooltip.setActiveElements === "function") {
-            chartInstance.tooltip.setActiveElements([], { x: 0, y: 0 });
-            chartInstance.update("none");
-          }
+  function tooltipReset(node: HTMLCanvasElement) {
+    const clear = () => {
+      if (chartInstance && chartInstance.tooltip) {
+        if (typeof chartInstance.tooltip.setActiveElements === "function") {
+          chartInstance.tooltip.setActiveElements([], { x: 0, y: 0 });
+          chartInstance.update("none");
         }
-      };
+      }
+    };
 
-      currentCanvas.addEventListener("touchend", clearTooltipOnTouchEnd);
-      currentCanvas.addEventListener("touchcancel", clearTooltipOnTouchEnd);
-      currentCanvas.addEventListener("pointerup", clearTooltipOnTouchEnd);
-      currentCanvas.addEventListener("pointercancel", clearTooltipOnTouchEnd);
+    node.addEventListener("touchend", clear);
+    node.addEventListener("touchcancel", clear);
+    node.addEventListener("pointerup", clear);
+    node.addEventListener("pointercancel", clear);
 
-      return () => {
-        currentCanvas.removeEventListener("touchend", clearTooltipOnTouchEnd);
-        currentCanvas.removeEventListener(
-          "touchcancel",
-          clearTooltipOnTouchEnd,
-        );
-        currentCanvas.removeEventListener("pointerup", clearTooltipOnTouchEnd);
-        currentCanvas.removeEventListener(
-          "pointercancel",
-          clearTooltipOnTouchEnd,
-        );
-      };
-    }
-  });
+    return {
+      destroy() {
+        node.removeEventListener("touchend", clear);
+        node.removeEventListener("touchcancel", clear);
+        node.removeEventListener("pointerup", clear);
+        node.removeEventListener("pointercancel", clear);
+      },
+    };
+  }
 
   onDestroy(() => {
     destroyChart();
@@ -206,18 +197,9 @@
           y: values[i],
         }));
 
-        const targetSamples = 50;
-        const dataPoints =
-          rawDataPoints.length > targetSamples
-            ? rawDataPoints.filter(
-                (_, i) =>
-                  i % Math.ceil(rawDataPoints.length / targetSamples) === 0,
-              )
-            : rawDataPoints;
-
         return {
           label: metric,
-          data: dataPoints,
+          data: rawDataPoints,
           borderColor: color.border,
           backgroundColor: color.border + "20",
           fill: true,
@@ -227,9 +209,9 @@
             .getPropertyValue("--color-ctp-mauve")
             .trim(),
           pointHoverBorderColor: ui.base,
-          borderWidth: 3,
-          tension: 0.1,
-          pointRadius: 3,
+          borderWidth: 2,
+          tension: 0.25,
+          pointRadius: 2,
           pointHoverRadius: 8,
         };
       });
@@ -241,6 +223,7 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: false,
           parsing: false,
           normalized: true,
           events: [
@@ -263,10 +246,10 @@
             line: {
               borderCapStyle: "round",
               borderJoinStyle: "round",
-              borderWidth: 3,
+              borderWidth: 2,
             },
             point: {
-              radius: 3,
+              radius: 2,
               hoverRadius: 8,
             },
           },
@@ -313,6 +296,11 @@
                 },
               },
             },
+            decimation: {
+              enabled: true,
+              algorithm: "lttb",
+              samples: 50,
+            },
           },
           scales: {
             x: {
@@ -324,7 +312,9 @@
                 color: ui.axisTicks, // Updated axis title color
               },
               ticks: {
-                color: ui.axisTicks, // Updated axis ticks color
+                color: ui.axisTicks,
+                maxTicksLimit: 6,
+                autoSkip: true,
               },
               grid: {
                 color: ui.fadedGridLines, // Updated grid line color
@@ -339,7 +329,9 @@
                 color: ui.axisTicks, // Updated axis title color
               },
               ticks: {
-                color: ui.axisTicks, // Updated axis ticks color
+                color: ui.axisTicks,
+                maxTicksLimit: 6,
+                autoSkip: true,
               },
               grid: {
                 color: ui.fadedGridLines, // Updated grid line color
@@ -505,7 +497,7 @@
       class="relative h-60 sm:h-80 w-full border border-ctp-surface0/20 bg-transparent overflow-hidden"
     >
       <div class="absolute inset-0">
-        <canvas bind:this={chartCanvas} class="chart-canvas"></canvas>
+        <canvas bind:this={chartCanvas} class="chart-canvas" use:tooltipReset></canvas>
       </div>
       <button
         class="absolute top-2 right-2 text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1"
@@ -530,13 +522,3 @@
   {/if}
 </div>
 
-<style>
-  .chart-canvas {
-    background-color: transparent;
-    border-radius: 4px;
-    touch-action: pan-y;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-  }
-</style>

@@ -25,7 +25,7 @@ export function drawScatterChart(
       backgroundColor: `${color}80`,
       borderColor: color,
       borderWidth: 2,
-      pointRadius: 8,
+      pointRadius: 6,
       pointHoverRadius: 10,
     };
   });
@@ -38,6 +38,7 @@ export function drawScatterChart(
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: false,
       events: [
         "mousemove",
         "mouseout",
@@ -83,6 +84,8 @@ export function drawScatterChart(
             color:
               computedStyles.getPropertyValue("--color-ctp-subtext0").trim() ||
               "#666",
+            maxTicksLimit: 6,
+            autoSkip: true,
           },
           title: {
             display: true,
@@ -102,6 +105,8 @@ export function drawScatterChart(
             color:
               computedStyles.getPropertyValue("--color-ctp-subtext0").trim() ||
               "#666",
+            maxTicksLimit: 6,
+            autoSkip: true,
           },
           title: {
             display: true,

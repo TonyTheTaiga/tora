@@ -50,6 +50,7 @@ export function drawBarChart(
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: false,
       events: [
         "mousemove",
         "mouseout",
@@ -91,6 +92,8 @@ export function drawBarChart(
             color:
               computedStyles.getPropertyValue("--color-ctp-subtext0").trim() ||
               "#666",
+            maxTicksLimit: 6,
+            autoSkip: true,
           },
           title: {
             display: true,
@@ -110,6 +113,8 @@ export function drawBarChart(
               computedStyles.getPropertyValue("--color-ctp-subtext0").trim() ||
               "#666",
             maxRotation: 45,
+            maxTicksLimit: 6,
+            autoSkip: true,
           },
         },
       },
