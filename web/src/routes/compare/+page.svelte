@@ -437,7 +437,7 @@
   }
 
   .chart-canvas {
-    touch-action: none;
+    touch-action: pan-y;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;

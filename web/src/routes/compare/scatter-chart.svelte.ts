@@ -135,12 +135,7 @@ export function drawScatterChart(
           const event = args.event;
           const eventType = event.type as string;
 
-          // Prevent scrolling on touch events
-          if (eventType === "touchstart" || eventType === "touchmove") {
-            if (event.native) {
-              event.native.preventDefault();
-            }
-          }
+
 
           // Clear tooltips when interaction ends
           if (

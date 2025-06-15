@@ -339,12 +339,6 @@
               const event = args.event;
               const eventType = event.type as string;
 
-              if (eventType === "touchstart" || eventType === "touchmove") {
-                if (event.native) {
-                  event.native.preventDefault();
-                }
-              }
-
               if (
                 event.type === "mouseout" ||
                 eventType === "touchend" ||
@@ -517,7 +511,7 @@
   .chart-canvas {
     background-color: transparent;
     border-radius: 4px;
-    touch-action: none;
+    touch-action: pan-y;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
