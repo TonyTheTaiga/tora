@@ -5,9 +5,9 @@
     getDeleteExperimentModal,
     openCreateExperimentModal,
   } from "$lib/state/app.svelte.js";
-  import CreateExperimentModal from "./create-experiment-modal.svelte";
-  import DeleteConfirmationModal from "./delete-confirmation-modal.svelte";
-  import EditExperimentModal from "./edit-experiment-modal.svelte";
+  import CreateExperimentModal from "$lib/components/modals/create-experiment-modal.svelte";
+  import DeleteConfirmationModal from "$lib/components/modals/delete-confirmation-modal.svelte";
+  import EditExperimentModal from "$lib/components/modals/edit-experiment-modal.svelte";
   import ExperimentsListMobile from "./experiments-list-mobile.svelte";
   import ExperimentsListDesktop from "./experiments-list-desktop.svelte";
   import type { Experiment } from "$lib/types";
