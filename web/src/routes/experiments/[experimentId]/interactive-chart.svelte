@@ -212,17 +212,17 @@
           label: metric,
           data: dataPoints,
           borderColor: color.border,
-          backgroundColor: color.border + "40", // Updated background color
-          fill: true, // Enabled fill
+          backgroundColor: color.border + "20",
+          fill: true,
           pointBackgroundColor: color.point,
-          pointBorderColor: ui.base, // Updated point border color
+          pointBorderColor: ui.base,
           pointHoverBackgroundColor: getComputedStyle(document.documentElement)
             .getPropertyValue("--color-ctp-mauve")
             .trim(),
           pointHoverBorderColor: ui.base,
-          borderWidth: 2, // Updated border width
-          tension: 0.3,
-          pointRadius: 4,
+          borderWidth: 3,
+          tension: 0.1,
+          pointRadius: 3,
           pointHoverRadius: 8,
         };
       });
@@ -248,6 +248,17 @@
             mode: "nearest",
             intersect: false,
             axis: "x",
+          },
+          elements: {
+            line: {
+              borderCapStyle: "round",
+              borderJoinStyle: "round",
+              borderWidth: 3,
+            },
+            point: {
+              radius: 3,
+              hoverRadius: 8,
+            },
           },
           plugins: {
             legend: {

@@ -62,6 +62,8 @@ export function drawRadarChart(
         line: {
           borderWidth: 3,
           tension: 0.1,
+          borderCapStyle: "round",
+          borderJoinStyle: "round",
         },
         point: {
           radius: 6,
