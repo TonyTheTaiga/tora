@@ -8,13 +8,9 @@ export const load: LayoutServerLoad = async ({ locals }) => {
     const experiments = await locals.dbClient.getPublicExperiments();
     timer.end({});
 
-    return {
-      experiments,
-    };
+    return { experiments };
   } catch (err) {
-    timer.end({
-      error: err instanceof Error ? err.message : "Unknown error",
-    });
+    timer.end({ error: err instanceof Error ? err.message : "Unknown error" });
     throw err;
   }
 };

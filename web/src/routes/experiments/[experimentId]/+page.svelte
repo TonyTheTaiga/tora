@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { page } from "$app/state";
   import {
     Copy,
     ClipboardCheck,
@@ -10,27 +9,17 @@
     Activity,
     Settings,
     Clock,
-    Tag,
     Hash,
     User,
     Calendar,
     Eye,
-    Download,
-    ExternalLink,
   } from "lucide-svelte";
   import type { PageData } from "./$types";
-  import InteractiveChart from "../../interactive-chart.svelte";
+  import InteractiveChart from "./interactive-chart.svelte";
 
   let { data }: { data: PageData } = $props();
-  let {
-    experiment,
-    scalarMetrics,
-    timeSeriesMetrics,
-    timeSeriesNames,
-    workspace,
-  } = $derived(data);
+  let { experiment, scalarMetrics, timeSeriesNames } = $derived(data);
 
-  // Create enhanced experiment object with time series metrics for the chart
   let experimentWithMetrics = $derived({
     ...experiment,
     availableMetrics: timeSeriesNames,
@@ -40,7 +29,6 @@
   let copiedMetric = $state<string | null>(null);
   let copiedParam = $state<string | null>(null);
   let showAllScalarMetrics = $state(false);
-  let showAllTimeSeriesMetrics = $state(false);
   let showAllParams = $state(false);
   let showAllTags = $state(false);
   let metricsView = $state<"chart" | "data">("chart");
@@ -51,12 +39,6 @@
     showAllScalarMetrics || scalarMetrics.length <= initialLimit
       ? scalarMetrics
       : scalarMetrics.slice(0, initialLimit),
-  );
-
-  let visibleTimeSeriesMetrics = $derived(
-    showAllTimeSeriesMetrics || timeSeriesMetrics.length <= initialLimit * 2
-      ? timeSeriesMetrics
-      : timeSeriesMetrics.slice(0, initialLimit * 2),
   );
 
   let visibleParams = $derived(
@@ -88,51 +70,11 @@
       setTimeout(() => (copiedParam = null), 1200);
     }
   }
-
-  function formatFileSize(bytes: number): string {
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-  }
-
-  function getFileIcon(filename: string) {
-    const ext = filename.split(".").pop()?.toLowerCase();
-    switch (ext) {
-      case "json":
-      case "yml":
-      case "yaml":
-      case "toml":
-      case "ini":
-        return Settings;
-      case "csv":
-      case "tsv":
-      case "parquet":
-        return Database;
-      case "png":
-      case "jpg":
-      case "jpeg":
-      case "gif":
-      case "svg":
-        return Eye;
-      case "py":
-      case "js":
-      case "ts":
-      case "go":
-      case "rs":
-        return FileText;
-      default:
-        return FileText;
-    }
-  }
 </script>
 
 <div class="bg-ctp-base font-mono">
   <div class="p-4 md:p-6 space-y-4 md:space-y-6">
-    <!-- Primary experiment info -->
     <div class="space-y-3">
-      <!-- Header section - file listing style -->
       <div class="flex flex-col sm:flex-row sm:items-center gap-2">
         <div class="flex items-center gap-2 min-w-0 flex-1">
           <div class="text-ctp-green text-sm"></div>
@@ -157,12 +99,9 @@
           {/if}
         </div>
       </div>
-
-      <!-- Metadata grid -->
       <div
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pl-4 md:pl-6"
       >
-        <!-- ID -->
         <div class="space-y-1">
           <div class="text-xs text-ctp-subtext0 flex items-center gap-1">
             <Hash size={10} />
@@ -180,8 +119,6 @@
             {/if}
           </button>
         </div>
-
-        <!-- Status -->
         <div class="space-y-1">
           <div class="text-xs text-ctp-subtext0 flex items-center gap-1">
             <Activity size={10} />
@@ -201,8 +138,6 @@
             </span>
           </div>
         </div>
-
-        <!-- Duration -->
         {#if experiment.startedAt}
           <div class="space-y-1">
             <div class="text-xs text-ctp-subtext0 flex items-center gap-1">
@@ -219,8 +154,6 @@
           </div>
         {/if}
       </div>
-
-      <!-- Description -->
       {#if experiment.description}
         <div class="pl-4 md:pl-6 space-y-1">
           <div class="text-xs text-ctp-subtext0">description</div>
@@ -230,8 +163,6 @@
         </div>
       {/if}
     </div>
-
-    <!-- Tags -->
     {#if experiment.tags && experiment.tags.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-2">
@@ -261,8 +192,6 @@
         </div>
       </div>
     {/if}
-
-    <!-- Hyperparameters -->
     {#if experiment.hyperparams && experiment.hyperparams.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-2">
@@ -315,8 +244,6 @@
         </div>
       </div>
     {/if}
-
-    <!-- Metrics Section with Toggle -->
     {#if scalarMetrics.length > 0 || timeSeriesNames.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-4">
@@ -352,11 +279,8 @@
         </div>
       </div>
     {/if}
-
-    <!-- Chart View -->
     {#if metricsView === "chart" && timeSeriesNames.length > 0}
       <div class="space-y-3">
-        <!-- Interactive chart -->
         <div
           class="bg-ctp-surface0/10 border border-ctp-surface0/20 p-2 md:p-4"
         >
@@ -364,8 +288,6 @@
         </div>
       </div>
     {/if}
-
-    <!-- Data View - Scalar Metrics -->
     {#if metricsView === "data" && scalarMetrics.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-2">
@@ -375,7 +297,6 @@
           </div>
         </div>
         <div class="bg-ctp-surface0/10 border border-ctp-surface0/20">
-          <!-- Desktop table -->
           <div class="hidden md:block">
             <div
               class="flex text-xs text-ctp-subtext0 p-3 border-b border-ctp-surface0/20 sticky top-0"
@@ -429,8 +350,6 @@
               {/each}
             </div>
           </div>
-
-          <!-- Mobile card layout -->
           <div
             class="md:hidden {showAllScalarMetrics
               ? ''
@@ -493,8 +412,6 @@
         </div>
       </div>
     {/if}
-
-    <!-- System information -->
     <div class="space-y-2">
       <div class="text-sm text-ctp-text">system info</div>
       <div

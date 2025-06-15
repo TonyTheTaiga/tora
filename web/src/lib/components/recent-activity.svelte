@@ -54,7 +54,7 @@
       {#each experiments.slice(0, 5) as experiment}
         {#if experiment.workspaceId}
           <a
-            href="/workspaces/{experiment.workspaceId}/experiments/{experiment.id}"
+            href="/experiments/{experiment.id}"
             class="block hover:bg-ctp-surface0/20 px-1 py-1 transition-colors"
           >
             <div class="flex items-center gap-2">

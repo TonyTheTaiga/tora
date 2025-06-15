@@ -5,7 +5,7 @@ import { generateRequestId, startTimer } from "$lib/utils/timing";
 
 export const load: PageServerLoad = async ({ params, locals }) => {
   const requestId = generateRequestId();
-  const timer = startTimer("page.experiment.load", { requestId });
+  const timer = startTimer("experiment.load", { requestId });
 
   try {
     const userId = locals.user?.id;
@@ -91,7 +91,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       scalarMetrics,
       timeSeriesMetrics,
       timeSeriesNames,
-      workspace: null,
     };
   } catch (err) {
     timer.end({ error: err instanceof Error ? err.message : "Unknown error" });
