@@ -284,7 +284,6 @@
         <div
           class="flex items-center text-xs text-ctp-subtext0 pb-1 border-b border-ctp-surface0/20"
         >
-          <div class="w-4">•</div>
           <div class="flex-1">name</div>
           <div class="w-20 text-right">color</div>
         </div>
@@ -293,7 +292,6 @@
           <div
             class="flex items-center text-xs hover:bg-ctp-surface0/10 px-1 py-1 transition-colors"
           >
-            <div class="w-4 text-ctp-green text-xs">●</div>
             <div
               class="flex-1 text-ctp-text truncate min-w-0"
               title={experiment.name}
