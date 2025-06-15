@@ -57,9 +57,7 @@
             if (getMode()) {
               addExperiment(experiment.id);
             } else {
-              goto(
-                `/workspaces/${page.params.slug}/experiments/${experiment.id}`,
-              );
+              goto(`/experiments/${experiment.id}`);
             }
           }}
           class="w-full text-left"
