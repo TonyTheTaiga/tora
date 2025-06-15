@@ -135,7 +135,7 @@
       <!-- Header section - file listing style -->
       <div class="flex flex-col sm:flex-row sm:items-center gap-2">
         <div class="flex items-center gap-2 min-w-0 flex-1">
-          <div class="text-ctp-green text-sm">●</div>
+          <div class="text-ctp-green text-sm"></div>
           <div class="text-base md:text-lg text-ctp-text break-words min-w-0">
             {experiment.name}
           </div>
@@ -341,6 +341,13 @@
             >
               [data]
             </button>
+            <a
+              href={`/api/experiments/${experiment.id}/metrics/csv`}
+              class="text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors"
+              download
+            >
+              [csv]
+            </a>
           </div>
         </div>
       </div>
@@ -386,7 +393,7 @@
                 <div
                   class="flex text-xs hover:bg-ctp-surface0/20 p-3 transition-colors border-b border-ctp-surface0/5"
                 >
-                  <div class="w-4 text-ctp-green">●</div>
+                  <div class="w-4 text-ctp-green"></div>
                   <div
                     class="flex-1 text-ctp-text truncate"
                     title={metric.name}
@@ -435,7 +442,7 @@
               >
                 <div class="flex items-center justify-between mb-1">
                   <div class="flex items-center gap-2">
-                    <div class="text-ctp-green text-xs">●</div>
+                    <div class="text-ctp-green text-xs"></div>
                     <div
                       class="text-xs text-ctp-text font-mono truncate"
                       title={metric.name}

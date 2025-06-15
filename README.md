@@ -187,10 +187,7 @@ The Python logger is used to send experiment data from your training scripts to 
 **Configuration:**
 
 * The Python client is pre-configured to send data to `http://localhost:5173/api`. Ensure the Tora web application is running and accessible at this address.
-* The client uses hardcoded API keys for communication. For a local setup, the web application backend must be configured to accept these keys:
-  * `tosk_e5a828992e556642ba0d3edb097ca131a677188ef36d39dd` (for creating experiments)
-  * `tosk_f1477fb04daa14c007a2fa5159306df98d8891bb9eb37e05` (for logging metrics and other interactions)
-    How to configure these on the server side should be detailed in the web application's setup or API documentation.
+* The client now reads its API key from the environment variable `TORA_API_KEY`. If this variable is not set, it falls back to a built-in development key. Configure the web application backend to accept the key you provide via this environment variable.
 
 ### 2. Web Application (`web/`)
 
@@ -328,12 +325,8 @@ The Python client offers several ways to customize its behavior:
         ```
 
 * **API Key:**
-  * **Current Implementation:** The Python client currently uses hardcoded API keys:
-    * `tosk_e5a828992e556642ba0d3edb097ca131a677188ef36d39dd`: Used by the `Tora.create_experiment()` method.
-    * `tosk_f1477fb04daa14c007a2fa5159306df98d8891bb9eb37e05`: Used for other client requests (e.g., logging metrics) after an experiment is created or loaded.
-  * **Security Warning:** **These API keys are hardcoded in `python/tora/tora.py`. For any production, shared, or security-sensitive environment, it is crucial to make these keys configurable.** Avoid committing actual keys to version control.
-  * **Recommended Practice:** Modify the `Tora` class to read these keys from environment variables (e.g., `os.getenv("TORA_CREATE_API_KEY")`, `os.getenv("TORA_CLIENT_API_KEY")`) or a configuration file.
-  * **Server-Side:** The web application's backend (API endpoints) must be configured to recognize and validate these API keys (or the configurable ones you set up).
+  * The Python client reads its API key from the `TORA_API_KEY` environment variable. If not set, a development key is used by default.
+  * **Server-Side:** Configure the web application's backend to validate the key provided in the `x-api-key` header. Avoid committing real keys to version control.
 
 * **Log Buffer Size:**
   * The `Tora` class constructor accepts a `max_buffer_len` parameter, which defaults to `25`.

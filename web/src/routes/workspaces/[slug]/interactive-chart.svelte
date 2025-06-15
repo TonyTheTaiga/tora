@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Experiment, Metric } from "$lib/types";
+  import type { Experiment } from "$lib/types";
   import Chart from "chart.js/auto";
   import { ChartLine, ChevronDown } from "lucide-svelte";
   import { onMount, onDestroy } from "svelte";
@@ -7,14 +7,17 @@
 
   let chartInstance: Chart | null = null;
   let chartCanvas: HTMLCanvasElement | null = $state(null);
+  interface ExperimentWithMetricData extends Experiment {
+    metricData?: Record<string, number[]>;
+  }
+
   let {
     experiment,
     selectedMetrics = $bindable([]),
   }: {
-    experiment: Experiment;
+    experiment: ExperimentWithMetricData;
     selectedMetrics?: string[];
   } = $props();
-  let isLoading: boolean = $state(false);
   let metricsData = $state<
     Record<string, { steps: number[]; values: number[] }>
   >({});
@@ -154,27 +157,6 @@
     destroyChart();
   });
 
-  async function loadMetrics() {
-    const timer = startTimer("chart.loadMetrics", {
-      experimentId: experiment.id,
-    });
-    try {
-      isLoading = true;
-      const response = await fetch(`/api/experiments/${experiment.id}/metrics`);
-      if (!response.ok) {
-        throw new Error(`Failed to load metrics: ${response.statusText}`);
-      }
-      const data = await response.json();
-      timer.end({ metricsCount: data.length });
-      return data;
-    } catch (e) {
-      timer.end({ error: e instanceof Error ? e.message : "Unknown error" });
-      console.error("Error loading metrics:", e);
-      return null;
-    } finally {
-      isLoading = false;
-    }
-  }
 
   function destroyChart() {
     if (chartInstance) {
@@ -189,8 +171,8 @@
       selectedMetricsCount: selectedMetrics.length.toString(),
     });
 
-    destroyChart();
     if (!chartCanvas || selectedMetrics.length === 0) {
+      destroyChart();
       timer.end({ skipped: "true" });
       return;
     }
@@ -237,14 +219,13 @@
         };
       });
 
-      chartInstance = new Chart(chartCanvas, {
-        type: "line",
-        data: {
-          datasets: datasets,
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
+      if (!chartInstance) {
+        chartInstance = new Chart(chartCanvas, {
+          type: "line",
+          data: { datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
           parsing: false,
           normalized: true,
           events: [
@@ -386,8 +367,14 @@
               }
             },
           },
-        ],
-      });
+          ],
+        });
+      } else {
+        chartInstance.data.datasets = datasets;
+        chartInstance.update();
+        timer.end({ success: "true" });
+        return;
+      }
       timer.end({ success: "true" });
     } catch (error) {
       timer.end({
@@ -397,41 +384,20 @@
     }
   }
 
-  async function loadMetricData(metric: string) {
+  function loadMetricData(metric: string) {
     if (!metricsData[metric]) {
-      const metrics = (await loadMetrics()) as Metric[];
-      const metricsByName = Object.groupBy(metrics, ({ name }) => name);
-      const chart_targets = metricsByName[metric];
-      if (chart_targets && chart_targets.length > 0) {
-        chart_targets.sort((a, b) => (a.step ?? 0) - (b.step ?? 0));
-        const steps = chart_targets.map((l, index) =>
-          l.step !== undefined ? l.step : index,
-        );
-        const values = chart_targets.map((l) =>
-          typeof l.value === "number" ? l.value : parseFloat(l.value) || 0,
-        );
-
-        metricsData[metric] = { steps, values };
-      }
+      const values = experiment.metricData?.[metric] || [];
+      const steps = values.map((_, i) => i);
+      metricsData[metric] = { steps, values };
     }
   }
 
   $effect(() => {
     if (selectedMetrics.length > 0) {
-      const loadAndUpdate = async () => {
-        isLoading = true;
-        try {
-          for (const metric of selectedMetrics) {
-            await loadMetricData(metric);
-          }
-          updateChart();
-        } catch (error) {
-          console.error("Error loading metric data:", error);
-        } finally {
-          isLoading = false;
-        }
-      };
-      loadAndUpdate();
+      for (const metric of selectedMetrics) {
+        loadMetricData(metric);
+      }
+      updateChart();
     } else {
       destroyChart();
     }
@@ -513,13 +479,6 @@
     <div
       class="relative h-60 sm:h-80 w-full border border-ctp-surface0/20 bg-transparent overflow-hidden"
     >
-      {#if isLoading}
-        <div
-          class="absolute inset-0 flex items-center justify-center bg-ctp-base/80 backdrop-blur-sm"
-        >
-          <div class="animate-pulse text-ctp-blue text-xs">loading data...</div>
-        </div>
-      {/if}
       <div class="absolute inset-0">
         <canvas bind:this={chartCanvas} class="chart-canvas"></canvas>
       </div>

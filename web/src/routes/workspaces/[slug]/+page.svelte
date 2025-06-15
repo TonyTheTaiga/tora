@@ -11,32 +11,49 @@
   import ExperimentsListMobile from "./experiments-list-mobile.svelte";
   import ExperimentsListDesktop from "./experiments-list-desktop.svelte";
   import type { Experiment } from "$lib/types";
-  import { Plus } from "lucide-svelte";
+  import { Plus, Copy, ClipboardCheck } from "lucide-svelte";
 
   let { data = $bindable() } = $props();
   let { currentWorkspace } = $derived(data);
   let experiments = $state(data.experiments);
   let searchQuery = $state("");
+  let debouncedQuery = $state("");
+  let debounceHandle: number | null = null;
   let highlighted = $state<string[]>([]);
+  let copiedId = $state(false);
 
   $effect(() => {
     experiments = data.experiments;
   });
 
-  let filteredExperiments = $derived(
-    experiments.filter(
-      (experiment) =>
-        experiment.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (experiment.description &&
-          experiment.description
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())) ||
-        (experiment.tags &&
-          experiment.tags.some((tag) =>
-            tag.toLowerCase().includes(searchQuery.toLowerCase()),
-          )),
-    ),
+  let normalized = $derived(
+    experiments.map((exp) => ({
+      exp,
+      name: exp.name.toLowerCase(),
+      desc: exp.description?.toLowerCase() ?? "",
+      tags: exp.tags?.map((t) => t.toLowerCase()) ?? [],
+    })),
   );
+
+  let filteredExperiments = $derived(
+    normalized
+      .filter((entry) => {
+        const q = debouncedQuery.toLowerCase();
+        return (
+          entry.name.includes(q) ||
+          entry.desc.includes(q) ||
+          entry.tags.some((t) => t.includes(q))
+        );
+      })
+      .map((e) => e.exp),
+  );
+
+  function handleSearchInput() {
+    if (debounceHandle !== null) clearTimeout(debounceHandle);
+    debounceHandle = window.setTimeout(() => {
+      debouncedQuery = searchQuery;
+    }, 200);
+  }
 
   let createExperimentModal = $derived(getCreateExperimentModal());
   let editExperimentModal = $derived(getEditExperimentModal());
@@ -62,6 +79,12 @@
         highlighted = [...data, experiment.id];
       } catch (err) {}
     }
+  }
+
+  function copyToClipboard(id: string) {
+    navigator.clipboard.writeText(id);
+    copiedId = true;
+    setTimeout(() => (copiedId = false), 1200);
   }
 </script>
 
@@ -104,12 +127,16 @@
             <div class="flex items-center gap-2">
               <span>id:</span>
               <button
-                onclick={() =>
-                  navigator.clipboard.writeText(currentWorkspace.id)}
-                class="text-ctp-blue hover:text-ctp-blue/80 transition-colors truncate max-w-xs"
+                onclick={() => copyToClipboard(currentWorkspace.id)}
+                class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex items-center gap-1"
                 title="click to copy workspace id"
               >
-                {currentWorkspace.id}
+                <span>{currentWorkspace.id}</span>
+                {#if copiedId}
+                  <ClipboardCheck size={10} class="text-ctp-green" />
+                {:else}
+                  <Copy size={10} />
+                {/if}
               </button>
             </div>
           {/if}
@@ -136,6 +163,7 @@
           type="text"
           placeholder="Search experiments..."
           bind:value={searchQuery}
+          oninput={handleSearchInput}
           class="w-full bg-ctp-surface0/20 border-0 px-4 py-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-text/20 transition-all font-mono text-sm"
         />
         <div
