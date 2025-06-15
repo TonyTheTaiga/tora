@@ -11,13 +11,14 @@
   import ExperimentsListMobile from "./experiments-list-mobile.svelte";
   import ExperimentsListDesktop from "./experiments-list-desktop.svelte";
   import type { Experiment } from "$lib/types";
-  import { Plus } from "lucide-svelte";
+  import { Plus, Copy, ClipboardCheck } from "lucide-svelte";
 
   let { data = $bindable() } = $props();
   let { currentWorkspace } = $derived(data);
   let experiments = $state(data.experiments);
   let searchQuery = $state("");
   let highlighted = $state<string[]>([]);
+  let copiedId = $state(false);
 
   $effect(() => {
     experiments = data.experiments;
@@ -63,6 +64,12 @@
       } catch (err) {}
     }
   }
+
+  function copyToClipboard(id: string) {
+    navigator.clipboard.writeText(id);
+    copiedId = true;
+    setTimeout(() => (copiedId = false), 1200);
+  }
 </script>
 
 {#if createExperimentModal}
@@ -104,12 +111,18 @@
             <div class="flex items-center gap-2">
               <span>id:</span>
               <button
-                onclick={() =>
-                  navigator.clipboard.writeText(currentWorkspace.id)}
-                class="text-ctp-blue hover:text-ctp-blue/80 transition-colors truncate max-w-xs"
+                onclick={() => copyToClipboard(currentWorkspace.id)}
+                class="text-ctp-blue hover:text-ctp-blue/80 transition-colors truncate max-w-xs flex items-center gap-1"
                 title="click to copy workspace id"
               >
-                {currentWorkspace.id}
+                <span class="truncate max-w-24 sm:max-w-32"
+                  >{currentWorkspace.id}</span
+                >
+                {#if copiedId}
+                  <ClipboardCheck size={10} class="text-ctp-green" />
+                {:else}
+                  <Copy size={10} />
+                {/if}
               </button>
             </div>
           {/if}
