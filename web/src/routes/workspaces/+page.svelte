@@ -7,6 +7,7 @@
   import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
   import RecentActivity from "$lib/components/recent-activity.svelte";
 
+
   let { data } = $props();
   let { workspaces } = $derived(data);
   let searchQuery = $state("");
@@ -18,14 +19,27 @@
   );
 
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
+
+  let streamedMetrics = $state<{ name: string; value: number }[]>([]);
+
+  function metrics(node: HTMLElement) {
+    const es = new EventSource(`/metrics`);
+    es.onmessage = (ev) => {
+      streamedMetrics = [...streamedMetrics, JSON.parse(ev.data)];
+    };
+    return {
+      destroy() {
+        es.close();
+      },
+    };
+  }
 </script>
 
 {#if createWorkspaceModal}
   <CreateWorkspaceModal />
 {/if}
 
-<div class="bg-ctp-base font-mono">
-  <!-- Minimal top bar -->
+<div class="bg-ctp-base font-mono" use:metrics>
   <div class="flex items-center justify-between p-6">
     <div class="flex items-center gap-4">
       <div class="w-2 h-8 bg-ctp-blue rounded-full"></div>
@@ -60,7 +74,6 @@
     </button>
   </div>
 
-  <!-- Search and filter bar -->
   <div class="px-6 pb-8">
     <div class="max-w-lg">
       <div class="relative">
@@ -79,7 +92,6 @@
     </div>
   </div>
 
-  <!-- Terminal-style workspace display -->
   <div class="px-6 font-mono">
     {#if filteredWorkspaces.length === 0 && searchQuery}
       <div class="text-ctp-subtext0 text-sm">
@@ -101,9 +113,7 @@
         </div>
       </div>
     {:else}
-      <!-- File listing style layout -->
       <div class="space-y-1">
-        <!-- Header -->
         <div
           class="flex items-center text-xs text-ctp-subtext0 pb-2 border-b border-ctp-surface0/20"
         >
@@ -114,7 +124,6 @@
           <div class="w-16 text-right">status</div>
         </div>
 
-        <!-- Workspace entries -->
         {#each filteredWorkspaces as workspace}
           <a
             href={`/workspaces/${workspace.id}`}
@@ -148,7 +157,6 @@
           </a>
         {/each}
 
-        <!-- Summary line -->
         <div
           class="flex items-center text-xs text-ctp-subtext0 pt-2 border-t border-ctp-surface0/20"
         >
@@ -161,18 +169,22 @@
         </div>
       </div>
 
-      <!-- Recent activity section -->
       <div class="mt-8 border-t border-ctp-surface0/20 pt-6">
         <div class="flex items-center gap-2 mb-3">
           <div class="text-sm text-ctp-text font-mono">recent activity</div>
         </div>
-        <div class="bg-ctp-surface0/10 p-4 text-xs">
-          <RecentActivity
-            experiments={data.recentExperiments}
-            workspaces={data.recentWorkspaces}
-          />
-        </div>
+      <div class="bg-ctp-surface0/10 p-4 text-xs">
+        <RecentActivity
+          experiments={data.recentExperiments}
+          workspaces={data.recentWorkspaces}
+        />
       </div>
+      <div class="mt-6 text-xs space-y-1">
+        {#each streamedMetrics as m}
+          <div>{m.name}: {m.value}</div>
+        {/each}
+      </div>
+    </div>
     {/if}
   </div>
 </div>

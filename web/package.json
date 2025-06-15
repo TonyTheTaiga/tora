@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "start": "node build",
+    "start": "node server.js",
     "lint": "prettier --check .",
     "format": "prettier --write .",
     "sup": "supabase gen types typescript --project-id hecctslcfhdrpnwovwbc > src/lib/server/database.types.ts"
