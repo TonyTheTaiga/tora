@@ -60,7 +60,6 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
       description,
       tags,
       hyperparams,
-      rawHyperparams,
       visibility = "PRIVATE",
     } = data;
 
@@ -91,8 +90,7 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
       throw error(400, "Invalid 'hyperparams' structure.");
     }
 
-    const parsedHyperparams = normalizeHyperparams(hyperparams ?? rawHyperparams);
-
+    const parsedHyperparams = normalizeHyperparams(hyperparams);
     const experiment = await dbClient.createExperiment(user.id, {
       name,
       description,
