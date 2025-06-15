@@ -57,9 +57,7 @@
             if (getMode()) {
               addExperiment(experiment.id);
             } else {
-              goto(
-                `/workspaces/${page.params.slug}/experiments/${experiment.id}`,
-              );
+              goto(`/experiments/${experiment.id}`);
             }
           }}
           class="w-full text-left"
@@ -163,12 +161,3 @@
   {/each}
 </div>
 
-<style>
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    overflow: hidden;
-  }
-</style>

@@ -158,6 +158,24 @@ export function createDbClient(client: SupabaseClient<Database>) {
       );
     },
 
+    async getPublicExperiments(): Promise<Experiment[]> {
+      return timeAsync(
+        "getPublicExperiments",
+        async () => {
+          const { data, error } = await client
+            .from("experiment")
+            .select("*")
+            .eq("visibility", "PUBLIC");
+
+          handleError(error, "Failed to get public experiments");
+          if (!data) throw new Error("unknown error");
+          const experiments = data.map((row) => mapToExperiment(row));
+          return experiments;
+        },
+        {},
+      );
+    },
+
     async checkExperimentAccess(id: string, userId?: string): Promise<void> {
       const { data, error } = await client
         .from("experiment")
@@ -366,7 +384,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
             return { workspaces: [], experiments: [] };
           }
 
-          // Get all experiments for these workspaces in a single query
           const workspaceIds = workspaces.map((w) => w.id);
           const { data: experimentData, error: experimentError } = await client
             .from("workspace_experiments")
