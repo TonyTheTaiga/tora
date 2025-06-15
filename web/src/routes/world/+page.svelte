@@ -4,4 +4,3 @@
 </script>
 
 <PublicExperiments experiments={data.experiments} />
-

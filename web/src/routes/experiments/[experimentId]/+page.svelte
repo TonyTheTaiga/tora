@@ -128,9 +128,7 @@
 
 <div class="bg-ctp-base font-mono">
   <div class="p-4 md:p-6 space-y-4 md:space-y-6">
-    <!-- Primary experiment info -->
     <div class="space-y-3">
-      <!-- Header section - file listing style -->
       <div class="flex flex-col sm:flex-row sm:items-center gap-2">
         <div class="flex items-center gap-2 min-w-0 flex-1">
           <div class="text-ctp-green text-sm"></div>
@@ -155,12 +153,9 @@
           {/if}
         </div>
       </div>
-
-      <!-- Metadata grid -->
       <div
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pl-4 md:pl-6"
       >
-        <!-- ID -->
         <div class="space-y-1">
           <div class="text-xs text-ctp-subtext0 flex items-center gap-1">
             <Hash size={10} />
@@ -178,8 +173,6 @@
             {/if}
           </button>
         </div>
-
-        <!-- Status -->
         <div class="space-y-1">
           <div class="text-xs text-ctp-subtext0 flex items-center gap-1">
             <Activity size={10} />
@@ -199,8 +192,6 @@
             </span>
           </div>
         </div>
-
-        <!-- Duration -->
         {#if experiment.startedAt}
           <div class="space-y-1">
             <div class="text-xs text-ctp-subtext0 flex items-center gap-1">
@@ -217,8 +208,6 @@
           </div>
         {/if}
       </div>
-
-      <!-- Description -->
       {#if experiment.description}
         <div class="pl-4 md:pl-6 space-y-1">
           <div class="text-xs text-ctp-subtext0">description</div>
@@ -228,8 +217,6 @@
         </div>
       {/if}
     </div>
-
-    <!-- Tags -->
     {#if experiment.tags && experiment.tags.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-2">
@@ -259,8 +246,6 @@
         </div>
       </div>
     {/if}
-
-    <!-- Hyperparameters -->
     {#if experiment.hyperparams && experiment.hyperparams.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-2">
@@ -313,8 +298,6 @@
         </div>
       </div>
     {/if}
-
-    <!-- Metrics Section with Toggle -->
     {#if scalarMetrics.length > 0 || timeSeriesNames.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-4">
@@ -350,11 +333,8 @@
         </div>
       </div>
     {/if}
-
-    <!-- Chart View -->
     {#if metricsView === "chart" && timeSeriesNames.length > 0}
       <div class="space-y-3">
-        <!-- Interactive chart -->
         <div
           class="bg-ctp-surface0/10 border border-ctp-surface0/20 p-2 md:p-4"
         >
@@ -362,8 +342,6 @@
         </div>
       </div>
     {/if}
-
-    <!-- Data View - Scalar Metrics -->
     {#if metricsView === "data" && scalarMetrics.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-2">
@@ -373,7 +351,6 @@
           </div>
         </div>
         <div class="bg-ctp-surface0/10 border border-ctp-surface0/20">
-          <!-- Desktop table -->
           <div class="hidden md:block">
             <div
               class="flex text-xs text-ctp-subtext0 p-3 border-b border-ctp-surface0/20 sticky top-0"
@@ -427,8 +404,6 @@
               {/each}
             </div>
           </div>
-
-          <!-- Mobile card layout -->
           <div
             class="md:hidden {showAllScalarMetrics
               ? ''
@@ -491,8 +466,6 @@
         </div>
       </div>
     {/if}
-
-    <!-- System information -->
     <div class="space-y-2">
       <div class="text-sm text-ctp-text">system info</div>
       <div
