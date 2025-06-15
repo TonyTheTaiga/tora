@@ -58,6 +58,7 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
       name,
       description,
       tags,
+      hyperparams: directHyperparams,
       rawHyperparams,
       visibility = "PRIVATE",
     } = data;
@@ -70,10 +71,10 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
       );
     }
 
-    let hyperparams = rawHyperparams;
-    if (typeof rawHyperparams === "string") {
+    let hyperparams = directHyperparams ?? rawHyperparams;
+    if (typeof hyperparams === "string") {
       try {
-        hyperparams = JSON.parse(rawHyperparams);
+        hyperparams = JSON.parse(hyperparams);
       } catch (e) {
         throw error(400, "Invalid 'hyperparams' format: must be valid JSON.");
       }
