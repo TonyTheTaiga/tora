@@ -157,6 +157,14 @@
     destroyChart();
   });
 
+  function downloadChart() {
+    if (!chartCanvas) return;
+    const link = document.createElement("a");
+    link.href = chartCanvas.toDataURL("image/png");
+    link.download = `${experiment.id}-chart.png`;
+    link.click();
+  }
+
 
   function destroyChart() {
     if (chartInstance) {
@@ -482,6 +490,12 @@
       <div class="absolute inset-0">
         <canvas bind:this={chartCanvas} class="chart-canvas"></canvas>
       </div>
+      <button
+        class="absolute top-2 right-2 text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1"
+        onclick={downloadChart}
+      >
+        [png]
+      </button>
     </div>
     <!-- Empty State -->
   {:else if experiment.availableMetrics && experiment.availableMetrics.length > 0}
