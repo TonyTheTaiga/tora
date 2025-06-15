@@ -165,7 +165,6 @@
     link.click();
   }
 
-
   function destroyChart() {
     if (chartInstance) {
       chartInstance.destroy();
@@ -234,147 +233,147 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
-          parsing: false,
-          normalized: true,
-          events: [
-            "mousemove",
-            "mouseout",
-            "click",
-            "touchstart",
-            "touchmove",
-            "touchend",
-          ],
-          interaction: {
-            mode: "nearest",
-            intersect: false,
-            axis: "x",
-          },
-          plugins: {
-            legend: {
-              display: true,
-              position: "top",
-              labels: {
-                color: ui.text,
-                usePointStyle: true,
-                pointStyle: "circle",
-                padding: 15,
-                font: {
-                  size: 11,
-                },
-              },
+            parsing: false,
+            normalized: true,
+            events: [
+              "mousemove",
+              "mouseout",
+              "click",
+              "touchstart",
+              "touchmove",
+              "touchend",
+            ],
+            interaction: {
+              mode: "nearest",
+              intersect: false,
+              axis: "x",
             },
-            tooltip: {
-              enabled: true,
-              backgroundColor: ui.base + "cc", // Updated tooltip background
-              titleColor: ui.sky, // Using ui.sky from getThemeUI
-              bodyColor: ui.text,
-              borderColor: ui.overlay0 + "33", // Updated tooltip border
-              borderWidth: 1, // Added border width for tooltip
-              position: "nearest",
-              caretPadding: 12,
-              cornerRadius: 8,
-              displayColors: true,
-              titleFont: {
-                size: 13,
-                weight: "bold",
-              },
-              bodyFont: {
-                size: 12,
-              },
-              padding: 12,
-              callbacks: {
-                title: function (tooltipItems) {
-                  return `Step ${tooltipItems[0].parsed.x}`;
-                },
-                label: function (context) {
-                  const value = context.parsed.y;
-                  return `${context.dataset.label}: ${value.toFixed(4)}`;
-                },
-              },
-            },
-          },
-          scales: {
-            x: {
-              type: "linear",
-              position: "bottom",
-              title: {
+            plugins: {
+              legend: {
                 display: true,
-                text: "Step",
-                color: ui.axisTicks, // Updated axis title color
+                position: "top",
+                labels: {
+                  color: ui.text,
+                  usePointStyle: true,
+                  pointStyle: "circle",
+                  padding: 15,
+                  font: {
+                    size: 11,
+                  },
+                },
               },
-              ticks: {
-                color: ui.axisTicks, // Updated axis ticks color
-              },
-              grid: {
-                color: ui.fadedGridLines, // Updated grid line color
+              tooltip: {
+                enabled: true,
+                backgroundColor: ui.base + "cc", // Updated tooltip background
+                titleColor: ui.sky, // Using ui.sky from getThemeUI
+                bodyColor: ui.text,
+                borderColor: ui.overlay0 + "33", // Updated tooltip border
+                borderWidth: 1, // Added border width for tooltip
+                position: "nearest",
+                caretPadding: 12,
+                cornerRadius: 8,
+                displayColors: true,
+                titleFont: {
+                  size: 13,
+                  weight: "bold",
+                },
+                bodyFont: {
+                  size: 12,
+                },
+                padding: 12,
+                callbacks: {
+                  title: function (tooltipItems) {
+                    return `Step ${tooltipItems[0].parsed.x}`;
+                  },
+                  label: function (context) {
+                    const value = context.parsed.y;
+                    return `${context.dataset.label}: ${value.toFixed(4)}`;
+                  },
+                },
               },
             },
-            y: {
-              type: "logarithmic",
-              position: "left",
-              title: {
-                display: true,
-                text: "Value (log)",
-                color: ui.axisTicks, // Updated axis title color
+            scales: {
+              x: {
+                type: "linear",
+                position: "bottom",
+                title: {
+                  display: true,
+                  text: "Step",
+                  color: ui.axisTicks, // Updated axis title color
+                },
+                ticks: {
+                  color: ui.axisTicks, // Updated axis ticks color
+                },
+                grid: {
+                  color: ui.fadedGridLines, // Updated grid line color
+                },
               },
-              ticks: {
-                color: ui.axisTicks, // Updated axis ticks color
-              },
-              grid: {
-                color: ui.fadedGridLines, // Updated grid line color
+              y: {
+                type: "logarithmic",
+                position: "left",
+                title: {
+                  display: true,
+                  text: "Value (log)",
+                  color: ui.axisTicks, // Updated axis title color
+                },
+                ticks: {
+                  color: ui.axisTicks, // Updated axis ticks color
+                },
+                grid: {
+                  color: ui.fadedGridLines, // Updated grid line color
+                },
               },
             },
-          },
-          onHover: (event, activeElements) => {
-            if (event.native) {
-              (event.native.target as HTMLElement).style.cursor =
-                activeElements.length > 0 ? "pointer" : "default";
-            }
-          },
-        },
-        plugins: [
-          {
-            id: "touchAndTooltipHandler",
-            beforeEvent(chart, args) {
-              const event = args.event;
-              const eventType = event.type as string;
-
-              if (eventType === "touchstart" || eventType === "touchmove") {
-                if (event.native) {
-                  event.native.preventDefault();
-                }
+            onHover: (event, activeElements) => {
+              if (event.native) {
+                (event.native.target as HTMLElement).style.cursor =
+                  activeElements.length > 0 ? "pointer" : "default";
               }
+            },
+          },
+          plugins: [
+            {
+              id: "touchAndTooltipHandler",
+              beforeEvent(chart, args) {
+                const event = args.event;
+                const eventType = event.type as string;
 
-              if (
-                event.type === "mouseout" ||
-                eventType === "touchend" ||
-                eventType === "mouseup"
-              ) {
+                if (eventType === "touchstart" || eventType === "touchmove") {
+                  if (event.native) {
+                    event.native.preventDefault();
+                  }
+                }
+
                 if (
-                  chart.tooltip &&
-                  typeof chart.tooltip.setActiveElements === "function"
+                  event.type === "mouseout" ||
+                  eventType === "touchend" ||
+                  eventType === "mouseup"
                 ) {
-                  chart.tooltip.setActiveElements([], { x: 0, y: 0 });
-                  chart.update("none");
+                  if (
+                    chart.tooltip &&
+                    typeof chart.tooltip.setActiveElements === "function"
+                  ) {
+                    chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+                    chart.update("none");
+                  }
                 }
-              }
-            },
-            afterEvent(chart, args) {
-              const event = args.event;
-              const eventType = event.type as string;
+              },
+              afterEvent(chart, args) {
+                const event = args.event;
+                const eventType = event.type as string;
 
-              // Additional cleanup for mouse leave
-              if (eventType === "mouseleave") {
-                if (
-                  chart.tooltip &&
-                  typeof chart.tooltip.setActiveElements === "function"
-                ) {
-                  chart.tooltip.setActiveElements([], { x: 0, y: 0 });
-                  chart.update("none");
+                // Additional cleanup for mouse leave
+                if (eventType === "mouseleave") {
+                  if (
+                    chart.tooltip &&
+                    typeof chart.tooltip.setActiveElements === "function"
+                  ) {
+                    chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+                    chart.update("none");
+                  }
                 }
-              }
+              },
             },
-          },
           ],
         });
       } else {

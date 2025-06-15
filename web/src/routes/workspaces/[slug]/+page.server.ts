@@ -2,7 +2,6 @@ import type { PageServerLoad } from "./$types";
 import { startTimer, generateRequestId } from "$lib/utils/timing";
 import type { Experiment } from "$lib/types";
 
-
 export const load: PageServerLoad = async ({ locals, params, parent }) => {
   const requestId = generateRequestId();
   const { workspaces } = await parent();
@@ -25,4 +24,3 @@ export const load: PageServerLoad = async ({ locals, params, parent }) => {
     throw err;
   }
 };
-
