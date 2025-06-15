@@ -145,7 +145,6 @@ export function drawScatterChart(
 
 
 
-          // Clear tooltips when interaction ends
           if (
             event.type === "mouseout" ||
             eventType === "touchend" ||
@@ -166,7 +165,6 @@ export function drawScatterChart(
           const event = args.event;
           const eventType = event.type as string;
 
-          // Additional cleanup for mouse leave
           if (eventType === "mouseleave" || eventType === "pointerleave") {
             if (
               chart.tooltip &&

@@ -83,8 +83,7 @@
       mantle: computedStyles.getPropertyValue("--color-ctp-mantle").trim(),
       base: computedStyles.getPropertyValue("--color-ctp-base").trim(),
       overlay0: computedStyles.getPropertyValue("--color-ctp-overlay0").trim(),
-      sky: computedStyles.getPropertyValue("--color-ctp-sky").trim(), // Added for tooltip title
-      // gridLines: `${computedStyles.getPropertyValue("--color-ctp-overlay0").trim()}15`, // Old gridLines
+      sky: computedStyles.getPropertyValue("--color-ctp-sky").trim(),
       fadedGridLines:
         computedStyles.getPropertyValue("--color-ctp-surface1").trim() + "33",
       axisTicks: computedStyles.getPropertyValue("--color-ctp-subtext0").trim(),
@@ -266,15 +265,14 @@
                 },
               },
             },
-            plugins: {
-              legend: {
-                display: true,
-                position: "top",
-                labels: {
-                  color: ui.text,
-                  usePointStyle: true,
-                  pointStyle: "circle",
-                  padding: 15,
+              backgroundColor: ui.base + "cc",
+              titleColor: ui.sky,
+              borderColor: ui.overlay0 + "33",
+              borderWidth: 1,
+                color: ui.axisTicks,
+                color: ui.fadedGridLines,
+                color: ui.axisTicks,
+                color: ui.fadedGridLines,
                   font: {
                     size: 11,
                   },
