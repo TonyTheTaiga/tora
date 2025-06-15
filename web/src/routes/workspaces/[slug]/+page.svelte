@@ -18,6 +18,7 @@
   let experiments = $state(data.experiments);
   let searchQuery = $state("");
   let debouncedQuery = $state("");
+  let debounceHandle: number | null = null;
   let highlighted = $state<string[]>([]);
   let copiedId = $state(false);
 
@@ -47,10 +48,12 @@
       .map((e) => e.exp),
   );
 
-  $effect(() => {
-    const id = setTimeout(() => (debouncedQuery = searchQuery), 200);
-    return () => clearTimeout(id);
-  });
+  function handleSearchInput() {
+    if (debounceHandle !== null) clearTimeout(debounceHandle);
+    debounceHandle = window.setTimeout(() => {
+      debouncedQuery = searchQuery;
+    }, 200);
+  }
 
   let createExperimentModal = $derived(getCreateExperimentModal());
   let editExperimentModal = $derived(getEditExperimentModal());
@@ -160,6 +163,7 @@
           type="text"
           placeholder="Search experiments..."
           bind:value={searchQuery}
+          oninput={handleSearchInput}
           class="w-full bg-ctp-surface0/20 border-0 px-4 py-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-text/20 transition-all font-mono text-sm"
         />
         <div
