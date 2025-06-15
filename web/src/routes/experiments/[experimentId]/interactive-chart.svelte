@@ -163,7 +163,6 @@
     link.click();
   }
 
-
   function destroyChart() {
     if (chartInstance) {
       chartInstance.destroy();
@@ -267,32 +266,47 @@
                 },
               },
             },
-            tooltip: {
-              enabled: true,
-              backgroundColor: ui.base + "cc", // Updated tooltip background
-              titleColor: ui.sky, // Using ui.sky from getThemeUI
-              bodyColor: ui.text,
-              borderColor: ui.overlay0 + "33", // Updated tooltip border
-              borderWidth: 1, // Added border width for tooltip
-              position: "nearest",
-              caretPadding: 12,
-              cornerRadius: 8,
-              displayColors: true,
-              titleFont: {
-                size: 13,
-                weight: "bold",
-              },
-              bodyFont: {
-                size: 12,
-              },
-              padding: 12,
-              callbacks: {
-                title: function (tooltipItems) {
-                  return `Step ${tooltipItems[0].parsed.x}`;
+            plugins: {
+              legend: {
+                display: true,
+                position: "top",
+                labels: {
+                  color: ui.text,
+                  usePointStyle: true,
+                  pointStyle: "circle",
+                  padding: 15,
+                  font: {
+                    size: 11,
+                  },
                 },
-                label: function (context) {
-                  const value = context.parsed.y;
-                  return `${context.dataset.label}: ${value.toFixed(4)}`;
+              },
+              tooltip: {
+                enabled: true,
+                backgroundColor: ui.base + "cc", // Updated tooltip background
+                titleColor: ui.sky, // Using ui.sky from getThemeUI
+                bodyColor: ui.text,
+                borderColor: ui.overlay0 + "33", // Updated tooltip border
+                borderWidth: 1, // Added border width for tooltip
+                position: "nearest",
+                caretPadding: 12,
+                cornerRadius: 8,
+                displayColors: true,
+                titleFont: {
+                  size: 13,
+                  weight: "bold",
+                },
+                bodyFont: {
+                  size: 12,
+                },
+                padding: 12,
+                callbacks: {
+                  title: function (tooltipItems) {
+                    return `Step ${tooltipItems[0].parsed.x}`;
+                  },
+                  label: function (context) {
+                    const value = context.parsed.y;
+                    return `${context.dataset.label}: ${value.toFixed(4)}`;
+                  },
                 },
               },
             },
@@ -316,8 +330,20 @@
                 maxTicksLimit: 6,
                 autoSkip: true,
               },
-              grid: {
-                color: ui.fadedGridLines, // Updated grid line color
+              y: {
+                type: "logarithmic",
+                position: "left",
+                title: {
+                  display: true,
+                  text: "Value (log)",
+                  color: ui.axisTicks, // Updated axis title color
+                },
+                ticks: {
+                  color: ui.axisTicks, // Updated axis ticks color
+                },
+                grid: {
+                  color: ui.fadedGridLines, // Updated grid line color
+                },
               },
             },
             y: {
@@ -359,12 +385,19 @@
                 eventType === "mouseup" ||
                 eventType === "pointerup"
               ) {
+
                 if (
-                  chart.tooltip &&
-                  typeof chart.tooltip.setActiveElements === "function"
+                  event.type === "mouseout" ||
+                  eventType === "touchend" ||
+                  eventType === "mouseup"
                 ) {
-                  chart.tooltip.setActiveElements([], { x: 0, y: 0 });
-                  chart.update("none");
+                  if (
+                    chart.tooltip &&
+                    typeof chart.tooltip.setActiveElements === "function"
+                  ) {
+                    chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+                    chart.update("none");
+                  }
                 }
               }
             },
@@ -380,10 +413,10 @@
                 ) {
                   chart.tooltip.setActiveElements([], { x: 0, y: 0 });
                   chart.update("none");
+
                 }
-              }
+              },
             },
-          },
           ],
         });
       } else {

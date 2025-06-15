@@ -13,7 +13,7 @@
         (e.description?.toLowerCase() || "").includes(q) ||
         (e.tags || []).some((t) => t.toLowerCase().includes(q))
       );
-    })
+    }),
   );
   function formatDate(date: Date) {
     return new Date(date).toLocaleDateString("en-US", {
@@ -42,10 +42,14 @@
         >
           <div class="flex items-center justify-between">
             <div class="text-ctp-blue truncate">{experiment.name}</div>
-            <div class="text-xs text-ctp-subtext0">{formatDate(experiment.createdAt)}</div>
+            <div class="text-xs text-ctp-subtext0">
+              {formatDate(experiment.createdAt)}
+            </div>
           </div>
           {#if experiment.description}
-            <div class="text-ctp-subtext1 text-xs line-clamp-2">{experiment.description}</div>
+            <div class="text-ctp-subtext1 text-xs line-clamp-2">
+              {experiment.description}
+            </div>
           {/if}
         </a>
       {/each}

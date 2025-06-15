@@ -1,5 +1,6 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import type { HyperParam } from "$lib/types";
 import { generateRequestId, startTimer } from "$lib/utils/timing";
 
 function handleError(
@@ -58,7 +59,7 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
       name,
       description,
       tags,
-      rawHyperparams,
+      hyperparams,
       visibility = "PRIVATE",
     } = data;
 
@@ -70,19 +71,30 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
       );
     }
 
-    let hyperparams = rawHyperparams;
-    if (typeof rawHyperparams === "string") {
-      try {
-        hyperparams = JSON.parse(rawHyperparams);
-      } catch (e) {
-        throw error(400, "Invalid 'hyperparams' format: must be valid JSON.");
+    function normalizeHyperparams(src: unknown): HyperParam[] {
+      if (!src) return [];
+      if (typeof src === "string") {
+        try {
+          src = JSON.parse(src);
+        } catch {
+          throw error(400, "Invalid 'hyperparams' format: must be valid JSON.");
+        }
       }
+
+      if (Array.isArray(src)) {
+        return src as HyperParam[];
+      }
+      if (typeof src === "object" && src !== null) {
+        return Object.entries(src).map(([key, value]) => ({ key, value }));
+      }
+      throw error(400, "Invalid 'hyperparams' structure.");
     }
 
+    const parsedHyperparams = normalizeHyperparams(hyperparams);
     const experiment = await dbClient.createExperiment(user.id, {
       name,
       description,
-      hyperparams,
+      hyperparams: parsedHyperparams,
       tags,
       visibility,
       workspaceId,

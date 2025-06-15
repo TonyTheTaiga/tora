@@ -416,7 +416,6 @@
       this.starIdCounter = 0;
       this.cometIdCounter = 0;
 
-
       const now = new Date();
       const jd = 2440587.5 + now.getTime() / 86400000;
       const utc = now.getTime() / 1000 / 3600;
@@ -516,7 +515,6 @@
       this.stars.sort((a, b) => a.maxBrightness - b.maxBrightness);
 
       this.renderStaticStarsToBuffer();
-
     }
 
     private projectHorizonToScreen(
