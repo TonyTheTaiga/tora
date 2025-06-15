@@ -300,8 +300,7 @@
               <tr>
                 <th
                   class="border-b border-ctp-surface0/20 sticky left-0 z-20 bg-ctp-base px-2 py-1 w-4"
-                  >•</th
-                >
+                ></th>
                 {#each hyperparams as hyperparam}
                   <th
                     class="px-2 py-1 text-ctp-subtext0 border-b border-ctp-surface0/20 whitespace-nowrap"
