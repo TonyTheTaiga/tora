@@ -15,11 +15,12 @@
   import { closeEditExperimentModal } from "$lib/state/app.svelte.js";
 
   let {
-    experiment,
-    workspace,
-    experiments,
-  }: { experiment: Experiment; workspace: any; experiments: Experiment[] } =
-    $props();
+    experiment = $bindable(),
+    experiments = $bindable(),
+  }: {
+    experiment: Experiment;
+    experiments: Experiment[];
+  } = $props();
 
   let experimentCopy = $state<Experiment>({
     id: experiment.id,
@@ -52,17 +53,14 @@
     document.body.classList.add("overflow-hidden");
 
     try {
-      // Load existing reference
       reference = null;
       const response = await fetch(`/api/experiments/${experiment.id}/ref`);
       if (response.ok) {
         const referenceIds = await response.json();
-        // Filter out self-references
         const referencesToLoad = referenceIds.filter(
           (id: String) => id !== experiment.id,
         );
 
-        // Since we want to enforce only one reference, just use the first one
         if (referencesToLoad.length > 0) {
           try {
             const refResponse = await fetch(

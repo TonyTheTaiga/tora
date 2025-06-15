@@ -77,11 +77,7 @@
 {/if}
 
 {#if editExperimentModal}
-  <EditExperimentModal
-    experiment={editExperimentModal}
-    workspace={currentWorkspace}
-    {experiments}
-  />
+  <EditExperimentModal bind:experiment={editExperimentModal} bind:experiments />
 {/if}
 
 <div class="bg-ctp-base font-mono">
