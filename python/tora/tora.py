@@ -14,7 +14,8 @@ def hp_to_tora_format(
 def hp_from_tora_format(
     hp_list: list[dict[str, str | int | float]],
 ) -> dict[str, str | int | float]:
-    return {k: v for single in hp_list for k, v in single.items()}
+    """Convert hyperparameters from the API format to a dictionary."""
+    return {single["key"]: single["value"] for single in hp_list}
 
 
 def create_workspace(name: str, description: str = "") -> str:
