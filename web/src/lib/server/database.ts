@@ -334,7 +334,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
       roles: string[],
     ): Promise<{
       workspaces: Workspace[];
-      experiments: (Experiment & { workspaceId: string })[];
+      experiments: Experiment[];
     }> {
       return timeAsync(
         "db.getWorkspacesAndExperiments",
@@ -389,7 +389,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
 
           handleError(experimentError, "Failed to get experiments");
 
-          const experiments: (Experiment & { workspaceId: string })[] = [];
+          const experiments: Experiment[] = [];
           const seenExperimentIds = new Set<string>();
           experimentData?.forEach((item) => {
             if (item.experiment && !seenExperimentIds.has(item.experiment.id)) {

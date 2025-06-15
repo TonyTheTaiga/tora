@@ -17,6 +17,7 @@ export interface Experiment {
   updatedAt: Date;
   visibility: Visibility;
   availableMetrics: string[];
+  workspaceId?: string;
 }
 
 export interface Metric {
