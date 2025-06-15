@@ -7,6 +7,7 @@
   import { drawBarChart } from "./bar-chart.svelte";
   import { drawScatterChart } from "./scatter-chart.svelte";
   import { drawRadarChart } from "./radar-chart.svelte";
+  import type { OutputSchemaType } from "../api/ai/analysis/schema";
   reset();
 
   let { data }: { data: PageData } = $props();
@@ -37,6 +38,34 @@
       metric.toLowerCase().includes(searchFilter.toLowerCase()),
     ),
   );
+
+  let metricGroups = $derived.by(() => {
+    const groups = { scalar: [] as string[], timeseries: [] as string[] };
+    for (const metric of filteredMetrics) {
+      const multi = data.experiments.some(
+        (exp) => (exp.metricData?.[metric]?.length ?? 0) > 1,
+      );
+      if (multi) groups.timeseries.push(metric);
+      else groups.scalar.push(metric);
+    }
+    return groups;
+  });
+
+  let analysisResult = $state<OutputSchemaType | null>(null);
+  let analysisLoading = $state(false);
+
+  async function runAnalysis() {
+    if (!data.experiments?.length) return;
+    analysisLoading = true;
+    try {
+      const res = await fetch(
+        `/api/ai/analysis?experimentId=${data.experiments[0].id}`,
+      );
+      analysisResult = res.ok ? ((await res.json()) as OutputSchemaType) : null;
+    } finally {
+      analysisLoading = false;
+    }
+  }
 
   let chartType = $derived(() => {
     if (selectedMetrics.length === 1) return "bar";
@@ -381,23 +410,44 @@
                 </button>
               </div>
 
-              <!-- Metric checkboxes -->
-              <div class="p-1">
-                {#each filteredMetrics as metric}
-                  <label
-                    class="flex items-center gap-2 p-1 hover:bg-ctp-surface0/20 cursor-pointer text-xs"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedMetrics.includes(metric)}
-                      onchange={() => toggleMetric(metric)}
-                      class="text-ctp-blue focus:ring-ctp-blue focus:ring-1 w-3 h-3"
-                    />
-                    <span class="text-ctp-text">{metric}</span>
-                  </label>
-                {/each}
-
-                {#if filteredMetrics.length === 0}
+              <div>
+                {#if metricGroups.scalar.length > 0}
+                  <div class="p-1">
+                    <div class="px-1 text-xs text-ctp-subtext0">scalar</div>
+                    {#each metricGroups.scalar as metric}
+                      <label
+                        class="flex items-center gap-2 p-1 hover:bg-ctp-surface0/20 cursor-pointer text-xs"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedMetrics.includes(metric)}
+                          onchange={() => toggleMetric(metric)}
+                          class="text-ctp-blue focus:ring-ctp-blue focus:ring-1 w-3 h-3"
+                        />
+                        <span class="text-ctp-text">{metric}</span>
+                      </label>
+                    {/each}
+                  </div>
+                {/if}
+                {#if metricGroups.timeseries.length > 0}
+                  <div class="p-1">
+                    <div class="px-1 text-xs text-ctp-subtext0">time series</div>
+                    {#each metricGroups.timeseries as metric}
+                      <label
+                        class="flex items-center gap-2 p-1 hover:bg-ctp-surface0/20 cursor-pointer text-xs"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedMetrics.includes(metric)}
+                          onchange={() => toggleMetric(metric)}
+                          class="text-ctp-blue focus:ring-ctp-blue focus:ring-1 w-3 h-3"
+                        />
+                        <span class="text-ctp-text">{metric}</span>
+                      </label>
+                    {/each}
+                  </div>
+                {/if}
+                {#if metricGroups.scalar.length + metricGroups.timeseries.length === 0}
                   <div class="p-2 text-xs text-ctp-subtext0 text-center">
                     no metrics found
                   </div>
@@ -425,6 +475,30 @@
                 <div class="text-xs mb-2">$ select metrics</div>
                 <div class="text-xs text-ctp-subtext1">no data to display</div>
               </div>
+            </div>
+          {/if}
+        </div>
+        <div class="px-4 pb-4 space-y-2 border-t border-ctp-surface0/20">
+          <button
+            onclick={runAnalysis}
+            disabled={analysisLoading}
+            class="px-2 py-1 text-xs bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 transition-all"
+          >
+            {analysisLoading ? "running..." : "ai insights"}
+          </button>
+          {#if analysisResult}
+            <div class="space-y-1 text-xs text-ctp-text">
+              <p>{analysisResult.summary}</p>
+              {#if Object.keys(analysisResult.hyperparameter_recommendations).length > 0}
+                <div>
+                  <div class="pb-1">hyperparams</div>
+                  <ul class="list-disc pl-4 space-y-1">
+                    {#each Object.entries(analysisResult.hyperparameter_recommendations) as [key, rec]}
+                      <li>{key}: {rec.recommendation} ({rec.importance_level})</li>
+                    {/each}
+                  </ul>
+                </div>
+              {/if}
             </div>
           {/if}
         </div>
