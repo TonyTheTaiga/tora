@@ -4,7 +4,7 @@
   import WorkspaceRoleBadge from "./workspace-role-badge.svelte";
 
   interface Props {
-    experiments: Experiment[];
+    experiments: (Experiment & { workspaceId: string })[];
     workspaces: Workspace[];
   }
 
@@ -52,7 +52,10 @@
   <div class="space-y-0">
     {#if activeTab === "experiments"}
       {#each experiments.slice(0, 5) as experiment}
-        <div class="hover:bg-ctp-surface0/20 px-1 py-1 transition-colors">
+        <a
+          href="/workspaces/{experiment.workspaceId}/experiments/{experiment.id}"
+          class="block hover:bg-ctp-surface0/20 px-1 py-1 transition-colors"
+        >
           <div class="flex items-center gap-2">
             <span class="text-ctp-green w-1">•</span>
             <span class="text-ctp-text truncate flex-1">{experiment.name}</span>
@@ -60,7 +63,7 @@
               {formatDate(experiment.createdAt)}
             </span>
           </div>
-        </div>
+        </a>
       {/each}
 
       {#if experiments.length === 0}

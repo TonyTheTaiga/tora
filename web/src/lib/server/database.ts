@@ -332,7 +332,10 @@ export function createDbClient(client: SupabaseClient<Database>) {
     async getWorkspacesAndExperiments(
       userId: string,
       roles: string[],
-    ): Promise<{ workspaces: Workspace[]; experiments: Experiment[] }> {
+    ): Promise<{
+      workspaces: Workspace[];
+      experiments: (Experiment & { workspaceId: string })[];
+    }> {
       return timeAsync(
         "db.getWorkspacesAndExperiments",
         async () => {
@@ -369,6 +372,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
             .from("workspace_experiments")
             .select(
               `
+              workspace_id,
               experiment:experiment_id (
                 id,
                 name,
@@ -385,10 +389,8 @@ export function createDbClient(client: SupabaseClient<Database>) {
 
           handleError(experimentError, "Failed to get experiments");
 
-          // Map and deduplicate experiments
-          const experiments: Experiment[] = [];
+          const experiments: (Experiment & { workspaceId: string })[] = [];
           const seenExperimentIds = new Set<string>();
-
           experimentData?.forEach((item) => {
             if (item.experiment && !seenExperimentIds.has(item.experiment.id)) {
               seenExperimentIds.add(item.experiment.id);
@@ -403,7 +405,8 @@ export function createDbClient(client: SupabaseClient<Database>) {
                 createdAt: new Date(item.experiment.created_at),
                 updatedAt: new Date(item.experiment.updated_at),
                 visibility: item.experiment.visibility,
-                availableMetrics: [], // Will be populated if needed
+                availableMetrics: [],
+                workspaceId: item.workspace_id,
               });
             }
           });

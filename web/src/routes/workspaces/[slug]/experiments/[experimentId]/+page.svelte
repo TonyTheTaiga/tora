@@ -487,7 +487,6 @@
       </div>
     {/if}
 
-
     <!-- System information -->
     <div class="space-y-2">
       <div class="text-sm text-ctp-text">system info</div>

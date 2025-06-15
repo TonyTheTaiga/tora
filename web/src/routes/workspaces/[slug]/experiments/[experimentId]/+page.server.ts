@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
   try {
     const userId = locals.user?.id;
-    
+
     try {
       await locals.dbClient.checkExperimentAccess(params.experimentId, userId);
     } catch (err) {
@@ -17,8 +17,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       throw error(403, "Access denied");
     }
 
-    const data = await locals.dbClient.getExperimentsAndMetrics([params.experimentId]);
-    
+    const data = await locals.dbClient.getExperimentsAndMetrics([
+      params.experimentId,
+    ]);
+
     if (!data || data.length === 0) {
       timer.end({ error: "Experiment not found" });
       throw error(404, "Experiment not found");
@@ -47,13 +49,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       version: item.version,
     };
 
-    const allMetrics = Object.entries(item.metric_dict || {}).flatMap(([name, values]) =>
-      (values as number[]).map((value, index) => ({
-        name,
-        value,
-        step: index,
-        experiment_id: item.id,
-      }))
+    const allMetrics = Object.entries(item.metric_dict || {}).flatMap(
+      ([name, values]) =>
+        (values as number[]).map((value, index) => ({
+          name,
+          value,
+          step: index,
+          experiment_id: item.id,
+        })),
     );
 
     const metricsByName = new Map();

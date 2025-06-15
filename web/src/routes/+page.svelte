@@ -3,7 +3,6 @@
   import type { PageData } from "./$types";
 
   let { data }: { data: PageData } = $props();
-  let { user } = $derived(data);
 </script>
 
 <LandingPage />

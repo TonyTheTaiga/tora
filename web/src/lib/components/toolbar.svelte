@@ -32,10 +32,12 @@
   let isWorkspacePage = $derived(page.url.pathname.startsWith("/workspaces/"));
   let showBackButton = $derived.by(() => {
     const path = page.url.pathname;
-    return path !== '/' && 
-           path !== '/workspaces' &&
-           !path.startsWith('/login') && 
-           !path.startsWith('/signup');
+    return (
+      path !== "/" &&
+      path !== "/workspaces" &&
+      !path.startsWith("/login") &&
+      !path.startsWith("/signup")
+    );
   });
 
   let visible = $state(true);

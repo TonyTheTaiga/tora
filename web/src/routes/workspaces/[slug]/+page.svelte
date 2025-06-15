@@ -99,14 +99,17 @@
           <div>
             {experiments.length} experiment{experiments.length !== 1 ? "s" : ""}
             {#if currentWorkspace?.description}
-              <span class="hidden sm:inline">• {currentWorkspace.description}</span>
+              <span class="hidden sm:inline"
+                >• {currentWorkspace.description}</span
+              >
             {/if}
           </div>
           {#if currentWorkspace?.id}
             <div class="flex items-center gap-2">
               <span>id:</span>
               <button
-                onclick={() => navigator.clipboard.writeText(currentWorkspace.id)}
+                onclick={() =>
+                  navigator.clipboard.writeText(currentWorkspace.id)}
                 class="text-ctp-blue hover:text-ctp-blue/80 transition-colors truncate max-w-xs"
                 title="click to copy workspace id"
               >
