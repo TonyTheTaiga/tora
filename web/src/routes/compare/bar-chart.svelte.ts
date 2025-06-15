@@ -57,6 +57,9 @@ export function drawBarChart(
         "touchstart",
         "touchmove",
         "touchend",
+        "touchcancel",
+        "mouseup",
+        "pointerup",
       ],
       plugins: {
         legend: {
@@ -140,7 +143,9 @@ export function drawBarChart(
           if (
             event.type === "mouseout" ||
             eventType === "touchend" ||
-            eventType === "mouseup"
+            eventType === "touchcancel" ||
+            eventType === "mouseup" ||
+            eventType === "pointerup"
           ) {
             if (
               chart.tooltip &&
@@ -156,7 +161,7 @@ export function drawBarChart(
           const eventType = event.type as string;
 
           // Additional cleanup for mouse leave
-          if (eventType === "mouseleave") {
+          if (eventType === "mouseleave" || eventType === "pointerleave") {
             if (
               chart.tooltip &&
               typeof chart.tooltip.setActiveElements === "function"

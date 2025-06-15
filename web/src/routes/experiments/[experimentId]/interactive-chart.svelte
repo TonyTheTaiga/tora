@@ -142,11 +142,18 @@
 
       currentCanvas.addEventListener("touchend", clearTooltipOnTouchEnd);
       currentCanvas.addEventListener("touchcancel", clearTooltipOnTouchEnd);
+      currentCanvas.addEventListener("pointerup", clearTooltipOnTouchEnd);
+      currentCanvas.addEventListener("pointercancel", clearTooltipOnTouchEnd);
 
       return () => {
         currentCanvas.removeEventListener("touchend", clearTooltipOnTouchEnd);
         currentCanvas.removeEventListener(
           "touchcancel",
+          clearTooltipOnTouchEnd,
+        );
+        currentCanvas.removeEventListener("pointerup", clearTooltipOnTouchEnd);
+        currentCanvas.removeEventListener(
+          "pointercancel",
           clearTooltipOnTouchEnd,
         );
       };
@@ -243,6 +250,9 @@
             "touchstart",
             "touchmove",
             "touchend",
+            "touchcancel",
+            "mouseup",
+            "pointerup",
           ],
           interaction: {
             mode: "nearest",
@@ -353,7 +363,9 @@
               if (
                 event.type === "mouseout" ||
                 eventType === "touchend" ||
-                eventType === "mouseup"
+                eventType === "touchcancel" ||
+                eventType === "mouseup" ||
+                eventType === "pointerup"
               ) {
                 if (
                   chart.tooltip &&
@@ -369,7 +381,7 @@
               const eventType = event.type as string;
 
               // Additional cleanup for mouse leave
-              if (eventType === "mouseleave") {
+              if (eventType === "mouseleave" || eventType === "pointerleave") {
                 if (
                   chart.tooltip &&
                   typeof chart.tooltip.setActiveElements === "function"
