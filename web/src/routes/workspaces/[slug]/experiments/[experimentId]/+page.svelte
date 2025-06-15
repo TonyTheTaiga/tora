@@ -341,6 +341,13 @@
             >
               [data]
             </button>
+            <a
+              href={`/api/experiments/${experiment.id}/metrics/csv`}
+              class="text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors"
+              download
+            >
+              [csv]
+            </a>
           </div>
         </div>
       </div>
