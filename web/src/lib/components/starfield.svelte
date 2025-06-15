@@ -401,10 +401,12 @@
     private starIdCounter = 0;
     private cometIdCounter = 0;
     private lastCometTime = 0;
+    private nextRecalc = 600;
     private staticStarsBuffer: p5.Graphics | null = null;
 
     constructor(p: p5) {
       this.p = p;
+      this.nextRecalc = 600;
       this.generateRealStarField();
     }
 
@@ -414,9 +416,6 @@
       this.starIdCounter = 0;
       this.cometIdCounter = 0;
 
-      console.log(
-        `Generating real starfield for New York (${NEW_YORK_LAT}, ${NEW_YORK_LON})`,
-      );
 
       const now = new Date();
       const jd = 2440587.5 + now.getTime() / 86400000;
@@ -518,8 +517,6 @@
 
       this.renderStaticStarsToBuffer();
 
-      console.log(`Visible real stars loaded: ${this.stars.length}`);
-      console.log("Star distribution:", this.getStarTypes());
     }
 
     private projectHorizonToScreen(
@@ -602,7 +599,6 @@
           this.staticStarsBuffer.circle(star.x, star.y, star.size);
         }
       }
-      console.log("Static stars pre-rendered to buffer.");
     }
 
     public update(deltaTime: number): void {
@@ -620,9 +616,9 @@
         }
       }
 
-      if (this.time % 60 < deltaTime) {
-        console.log("Recalculating real star positions...");
+      if (this.time >= this.nextRecalc) {
         this.generateRealStarField();
+        this.nextRecalc = this.time + 600;
       }
 
       if (this.time - this.lastCometTime > 15 + Math.random() * 25) {
@@ -675,7 +671,6 @@
       });
 
       this.comets.push(comet);
-      console.log(`Peaceful comet spawned: ${comet.id}`);
     }
 
     public render(): void {
@@ -699,8 +694,8 @@
     }
 
     public resize(width: number, height: number): void {
-      console.log(`Resizing starfield to ${width}x${height}`);
       this.generateRealStarField();
+      this.nextRecalc = this.time + 600;
     }
 
     public getStarCount(): number {
@@ -722,7 +717,6 @@
     try {
       const p5Module = await import("p5");
       const p5 = p5Module.default;
-      console.log("p5.js loaded for starfield");
 
       const starfieldSketch = (p: p5) => {
         let starField: StarField;

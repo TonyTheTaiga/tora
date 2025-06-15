@@ -18,12 +18,8 @@ export const load: PageServerLoad = async ({ locals, params, parent }) => {
   });
   const workspaceId = params.slug;
   try {
-    let experiments: Experiment[] =
+    const experiments: Experiment[] =
       await locals.dbClient.getExperiments(workspaceId);
-    experiments = experiments.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
 
     const currentWorkspace = workspaces.find((w) => w.id === workspaceId);
     timer.end({ workspace_id: workspaceId });

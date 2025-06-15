@@ -17,6 +17,7 @@
   let { currentWorkspace } = $derived(data);
   let experiments = $state(data.experiments);
   let searchQuery = $state("");
+  let debouncedQuery = $state("");
   let highlighted = $state<string[]>([]);
   let copiedId = $state(false);
 
@@ -24,20 +25,32 @@
     experiments = data.experiments;
   });
 
-  let filteredExperiments = $derived(
-    experiments.filter(
-      (experiment) =>
-        experiment.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (experiment.description &&
-          experiment.description
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())) ||
-        (experiment.tags &&
-          experiment.tags.some((tag) =>
-            tag.toLowerCase().includes(searchQuery.toLowerCase()),
-          )),
-    ),
+  let normalized = $derived(
+    experiments.map((exp) => ({
+      exp,
+      name: exp.name.toLowerCase(),
+      desc: exp.description?.toLowerCase() ?? "",
+      tags: exp.tags?.map((t) => t.toLowerCase()) ?? [],
+    })),
   );
+
+  let filteredExperiments = $derived(
+    normalized
+      .filter((entry) => {
+        const q = debouncedQuery.toLowerCase();
+        return (
+          entry.name.includes(q) ||
+          entry.desc.includes(q) ||
+          entry.tags.some((t) => t.includes(q))
+        );
+      })
+      .map((e) => e.exp),
+  );
+
+  $effect(() => {
+    const id = setTimeout(() => (debouncedQuery = searchQuery), 200);
+    return () => clearTimeout(id);
+  });
 
   let createExperimentModal = $derived(getCreateExperimentModal());
   let editExperimentModal = $derived(getEditExperimentModal());

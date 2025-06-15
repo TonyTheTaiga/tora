@@ -171,8 +171,8 @@
       selectedMetricsCount: selectedMetrics.length.toString(),
     });
 
-    destroyChart();
     if (!chartCanvas || selectedMetrics.length === 0) {
+      destroyChart();
       timer.end({ skipped: "true" });
       return;
     }
@@ -219,14 +219,13 @@
         };
       });
 
-      chartInstance = new Chart(chartCanvas, {
-        type: "line",
-        data: {
-          datasets: datasets,
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
+      if (!chartInstance) {
+        chartInstance = new Chart(chartCanvas, {
+          type: "line",
+          data: { datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
           parsing: false,
           normalized: true,
           events: [
@@ -368,8 +367,14 @@
               }
             },
           },
-        ],
-      });
+          ],
+        });
+      } else {
+        chartInstance.data.datasets = datasets;
+        chartInstance.update();
+        timer.end({ success: "true" });
+        return;
+      }
       timer.end({ success: "true" });
     } catch (error) {
       timer.end({

@@ -110,9 +110,9 @@ export function createDbClient(client: SupabaseClient<Database>) {
       return timeAsync(
         "db.getExperiments",
         async () => {
-          const { data, error } = await client.rpc("get_user_experiments", {
-            workspace_id: workspaceId,
-          });
+          const { data, error } = await client
+            .rpc("get_user_experiments", { workspace_id: workspaceId })
+            .order("experiment_created_at", { ascending: false });
 
           handleError(error, "Failed to get experiments");
           return data?.map(mapRpcResultToExperiment) ?? [];
