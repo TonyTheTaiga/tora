@@ -30,13 +30,11 @@ export function drawRadarChart(
     return {
       label: experiment.name,
       data: dataPoints,
-      fill: false,
-      backgroundColor: `${experimentColor}30`,
+      fill: true,
+      backgroundColor: `${experimentColor}20`,
       borderColor: experimentColor,
-      pointBackgroundColor: experimentColor,
-      pointBorderColor: surfaceColor || "#fff",
-      pointHoverBackgroundColor: surfaceColor || "#fff",
-      pointHoverBorderColor: experimentColor,
+      pointRadius: 0,
+      pointHoverRadius: 0,
     };
   });
 
@@ -64,10 +62,10 @@ export function drawRadarChart(
           tension: 0.1,
         },
         point: {
-          radius: 6,
-          hoverRadius: 10,
-          borderWidth: 2,
-          hoverBorderWidth: 3,
+          radius: 0,
+          hoverRadius: 0,
+          borderWidth: 0,
+          hoverBorderWidth: 0,
         },
       },
       plugins: {

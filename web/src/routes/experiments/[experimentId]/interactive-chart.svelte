@@ -211,18 +211,12 @@
           label: metric,
           data: dataPoints,
           borderColor: color.border,
-          backgroundColor: color.border + "40", // Updated background color
-          fill: true, // Enabled fill
-          pointBackgroundColor: color.point,
-          pointBorderColor: ui.base, // Updated point border color
-          pointHoverBackgroundColor: getComputedStyle(document.documentElement)
-            .getPropertyValue("--color-ctp-mauve")
-            .trim(),
-          pointHoverBorderColor: ui.base,
-          borderWidth: 2, // Updated border width
-          tension: 0.3,
-          pointRadius: 4,
-          pointHoverRadius: 8,
+          backgroundColor: color.border + "30",
+          fill: true,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          borderWidth: 2,
+          tension: 0.2,
         };
       });
 
