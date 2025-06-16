@@ -2,6 +2,14 @@ import type { RequestHandler } from './$types';
 
 const listeners = new Map<string, Set<ReadableStreamDefaultController>>();
 
+export function broadcastMetric(id: string, body: string) {
+  const set = listeners.get(id);
+  if (!set || set.size === 0) return;
+  for (const controller of set) {
+    controller.enqueue(`data: ${body}\n\n`);
+  }
+}
+
 export const GET: RequestHandler = ({ params, request, setHeaders }) => {
   const id = params.experimentId;
   setHeaders({
@@ -25,12 +33,7 @@ export const GET: RequestHandler = ({ params, request, setHeaders }) => {
 
 export const POST: RequestHandler = async ({ params, request }) => {
   const id = params.experimentId;
-  const set = listeners.get(id);
-  if (set && set.size > 0) {
-    const body = await request.text();
-    for (const controller of set) {
-      controller.enqueue(`data: ${body}\n\n`);
-    }
-  }
+  const body = await request.text();
+  broadcastMetric(id, body);
   return new Response(null, { status: 204 });
 };

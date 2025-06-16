@@ -1,5 +1,6 @@
 import { json, type RequestEvent } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { broadcastMetric } from "../../../../metrics/[experimentId]/stream/+server";
 import type { Json } from "$lib/server/database.types";
 import type { Metric } from "$lib/types";
 
@@ -58,6 +59,10 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
     })) as Metric[];
 
     await locals.dbClient.batchCreateMetric(finalMetrics);
+
+    for (const m of metrics) {
+      broadcastMetric(experimentId, JSON.stringify(m));
+    }
 
     return json({
       success: true,
