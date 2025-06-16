@@ -1,14 +1,5 @@
 import type { RequestHandler } from './$types';
-
-const listeners = new Map<string, Set<ReadableStreamDefaultController>>();
-
-export function _broadcastMetric(id: string, body: string) {
-  const set = listeners.get(id);
-  if (!set || set.size === 0) return;
-  for (const controller of set) {
-    controller.enqueue(`data: ${body}\n\n`);
-  }
-}
+import { addListener, removeListener } from '$lib/server/broadcast';
 
 export const GET: RequestHandler = ({ params, request, setHeaders }) => {
   const id = params.experimentId;
@@ -19,21 +10,12 @@ export const GET: RequestHandler = ({ params, request, setHeaders }) => {
   });
   const stream = new ReadableStream({
     start(controller) {
-      const set = listeners.get(id) ?? new Set();
-      set.add(controller);
-      listeners.set(id, set);
+      addListener(id, controller);
       request.signal.addEventListener('abort', () => {
-        set.delete(controller);
+        removeListener(id, controller);
         controller.close();
       });
     }
   });
   return new Response(stream);
-};
-
-export const POST: RequestHandler = async ({ params, request }) => {
-  const id = params.experimentId;
-  const body = await request.text();
-  _broadcastMetric(id, body);
-  return new Response(null, { status: 204 });
 };
