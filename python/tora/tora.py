@@ -63,7 +63,7 @@ class Tora:
                 "Content-Type": "application/json",
             },
         )
-
+        
     @property
     def max_buffer_len(self) -> int:
         return self._max_buffer_len
