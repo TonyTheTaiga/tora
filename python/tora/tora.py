@@ -1,12 +1,11 @@
 import httpx
 import os
-import json
 
 
 TORA_BASE_URL = "http://localhost:5173/api"
 TORA_DEV_KEY = "tosk_e5a828992e556642ba0d3edb097ca131a677188ef36d39dd"
 TORA_API_KEY = os.getenv("TORA_API_KEY", TORA_DEV_KEY)
-TORA_SSE_URL = os.getenv("TORA_SSE_URL", "http://localhost:5173/metrics")
+TORA_SSE_URL = os.getenv("TORA_SSE_URL", "http://localhost:5173/api/metrics")
 
 
 def hp_to_tora_format(
@@ -65,7 +64,7 @@ class Tora:
                 "Content-Type": "application/json",
             },
         )
-        self._stream_url = TORA_SSE_URL
+        self._stream_url = f"{TORA_SSE_URL}/{experiment_id}/stream"
 
     @property
     def max_buffer_len(self) -> int:

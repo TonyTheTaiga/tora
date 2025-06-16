@@ -23,7 +23,9 @@
   let streamedMetrics = $state<{ name: string; value: number }[]>([]);
 
   function metrics(node: HTMLElement) {
-    const es = new EventSource(`/metrics`);
+    const id = data.recentExperiments[0]?.id;
+    if (!id) return {};
+    const es = new EventSource(`/api/metrics/${id}/stream`);
     es.onmessage = (ev) => {
       streamedMetrics = [...streamedMetrics, JSON.parse(ev.data)];
     };
