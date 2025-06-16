@@ -27,7 +27,8 @@
     if (!id) return {};
     const es = new EventSource(`/api/metrics/${id}/stream`);
     es.onmessage = (ev) => {
-      streamedMetrics = [...streamedMetrics, JSON.parse(ev.data)];
+      const metric = JSON.parse(ev.data) as { name: string; value: number };
+      streamedMetrics = [...streamedMetrics, metric].slice(-50);
     };
     return {
       destroy() {
@@ -181,9 +182,9 @@
           workspaces={data.recentWorkspaces}
         />
       </div>
-      <div class="mt-6 text-xs space-y-1">
+      <div class="mt-6 text-xs space-y-1 font-mono bg-ctp-surface0/10 p-2">
         {#each streamedMetrics as m}
-          <div>{m.name}: {m.value}</div>
+          <div class="text-ctp-subtext0">$ {m.name}: {m.value}</div>
         {/each}
       </div>
     </div>
