@@ -11,11 +11,33 @@
   import ExperimentsListMobile from "./experiments-list-mobile.svelte";
   import ExperimentsListDesktop from "./experiments-list-desktop.svelte";
   import type { Experiment } from "$lib/types";
-  import { Plus, Copy, ClipboardCheck } from "lucide-svelte";
+  import {
+    Plus,
+    Copy,
+    ClipboardCheck,
+    GitCompareArrows,
+    X,
+    ArrowRight,
+  } from "lucide-svelte";
+  import { goto } from "$app/navigation";
+  import { onMount, onDestroy } from "svelte";
+  import {
+    addToolbarButton,
+    removeToolbarButton,
+  } from "$lib/state/toolbar.svelte.js";
+  import {
+    getMode,
+    toggleMode,
+    getExperimentsSelectedForComparision,
+  } from "$lib/state/comparison.svelte.js";
 
   let { data = $bindable() } = $props();
   let { currentWorkspace } = $derived(data);
   let experiments = $state(data.experiments);
+  let isComparisonMode = $derived.by(() => getMode());
+  let selectedExperiments = $derived.by(() =>
+    getExperimentsSelectedForComparision(),
+  );
   let searchQuery = $state("");
   let debouncedQuery = $state("");
   let debounceHandle: number | null = null;
@@ -86,6 +108,58 @@
     copiedId = true;
     setTimeout(() => (copiedId = false), 1200);
   }
+
+  onMount(() => {
+    addToolbarButton({
+      id: "new-experiment",
+      icon: Plus,
+      onClick: () => openCreateExperimentModal(),
+      ariaLabel: "create a new experiment",
+      title: "create a new experiment",
+    });
+  });
+
+  $effect(() => {
+    if (!isComparisonMode) {
+      addToolbarButton({
+        id: "enter-comparison",
+        icon: GitCompareArrows,
+        onClick: () => toggleMode(),
+        ariaLabel: "enter comparison mode",
+        title: "enter comparison mode",
+      });
+      removeToolbarButton("cancel-comparison");
+      removeToolbarButton("compare-selected");
+    } else {
+      removeToolbarButton("enter-comparison");
+      addToolbarButton({
+        id: "cancel-comparison",
+        icon: X,
+        onClick: () => toggleMode(),
+        ariaLabel: "cancel comparison",
+        title: "cancel comparison",
+      });
+      addToolbarButton({
+        id: "compare-selected",
+        icon: ArrowRight,
+        onClick: () => {
+          if (selectedExperiments.length >= 2) {
+            const params = selectedExperiments.join(",");
+            goto(`/compare?ids=${params}`);
+          }
+        },
+        ariaLabel: "compare selected",
+        title: "compare selected",
+      });
+    }
+  });
+
+  onDestroy(() => {
+    removeToolbarButton("new-experiment");
+    removeToolbarButton("enter-comparison");
+    removeToolbarButton("cancel-comparison");
+    removeToolbarButton("compare-selected");
+  });
 </script>
 
 {#if createExperimentModal}
