@@ -13,6 +13,7 @@
   import type { PageData } from "./$types";
   import InteractiveChart from "./interactive-chart.svelte";
   import { source } from "sveltekit-sse";
+  import { onMount } from "svelte";
 
   let { data }: { data: PageData } = $props();
   let { experiment, scalarMetrics, timeSeriesNames } = $derived(data);
@@ -67,14 +68,9 @@
       setTimeout(() => (copiedParam = null), 1200);
     }
   }
-
-  const value = source(
-    `/experiments/${data.experiment.id}/metric-stream`,
-  ).select("message");
 </script>
 
 <div class="bg-ctp-base font-mono">
-  {$value}
   <div class="p-4 md:p-6 space-y-4 md:space-y-6">
     <div class="space-y-3">
       <div class="flex flex-col sm:flex-row sm:items-center gap-2">
