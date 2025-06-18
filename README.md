@@ -80,6 +80,7 @@ Tora provides a comprehensive ML experiment management platform with the followi
 
 **Deployment & Operations:**
 * **Cloud Deployment**: Ready-to-deploy configurations for GCP Cloud Run (secrets loaded via environment variables)
+* **Artifact Registry**: Images are pushed to `us-central1-docker.pkg.dev/$PROJECT_ID/happyplace/app` tagged with the commit SHA
 * **Docker Support**: Containerized deployment options
 * **Environment Management**: Comprehensive configuration via environment variables
 * **Migration System**: Database schema versioning with Supabase migrations

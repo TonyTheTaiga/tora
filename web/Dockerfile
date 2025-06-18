@@ -1,4 +1,3 @@
-# Build stage
 FROM node:22-slim AS build
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
@@ -6,7 +5,6 @@ RUN npm install -g pnpm && pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build
 
-# Production stage
 FROM node:22-slim
 WORKDIR /app
 ENV NODE_ENV=production
