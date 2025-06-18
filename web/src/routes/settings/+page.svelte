@@ -1,23 +1,13 @@
 <script lang="ts">
-  import {
-    Plus,
-    LogOut,
-    Trash2,
-    Crown,
-    Users,
-    Mail,
-    Check,
-    X,
-  } from "lucide-svelte";
+  import { Plus, LogOut, Trash2, Users, Check, X } from "lucide-svelte";
   import { enhance } from "$app/forms";
-  import { isWorkspace } from "$lib/types";
-  import type { ApiKey } from "$lib/types";
   import WorkspaceInviteModal from "./workspace-invite-modal.svelte";
   import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
+  import { goto } from "$app/navigation";
+  import { ApiKey } from "$lib/types";
 
   let { data } = $props();
-  let creatingWorkspace: boolean = $state(false);
-  let creatingApiKey: boolean = $state(false);
+
   let createdKey: string = $state("");
   let workspaceError: string = $state("");
   let apiKeyError: string = $state("");
@@ -182,7 +172,6 @@
                 id="workspace-name"
                 name="name"
                 placeholder="workspace_name"
-                disabled={creatingWorkspace}
                 class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
                 required
               />
@@ -192,7 +181,6 @@
                 id="workspace-description"
                 name="description"
                 placeholder="description (optional)"
-                disabled={creatingWorkspace}
                 class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
                 defaultvalue=""
               />
@@ -200,12 +188,10 @@
           </div>
           <button
             type="submit"
-            disabled={creatingWorkspace}
             class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all disabled:opacity-50"
           >
             <div class="flex items-center gap-2">
               <Plus size={14} />
-              <span>{creatingWorkspace ? "creating..." : "create"}</span>
             </div>
           </button>
         </form>
@@ -378,7 +364,21 @@
         <form
           action="?/createApiKey"
           method="POST"
-          use:enhance
+          use:enhance={() => {
+            return async ({ result, update }) => {
+              console.log(result);
+              if (result.type === "redirect") {
+                goto(result.location);
+              } else if (result.type === "success") {
+                await update();
+                console.log(result);
+                const newKey = result.data as unknown as ApiKey;
+                if (newKey.key) {
+                  createdKey = newKey.key;
+                }
+              }
+            };
+          }}
           class="space-y-3"
         >
           <div>
@@ -387,19 +387,16 @@
               type="text"
               name="name"
               placeholder="key_name"
-              disabled={creatingApiKey}
               class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
               required
             />
           </div>
           <button
             type="submit"
-            disabled={creatingApiKey}
             class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 px-3 py-2 text-sm transition-all disabled:opacity-50"
           >
             <div class="flex items-center gap-2">
               <Plus size={14} />
-              <span>{creatingApiKey ? "generating..." : "generate"}</span>
             </div>
           </button>
         </form>
