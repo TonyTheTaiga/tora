@@ -1,24 +1,26 @@
 steps:
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-    dir: "web"
-    entrypoint: "bash"
+  - name: 'gcr.io/cloud-builders/docker'
+    dir: 'web'
     args:
-      - "-c"
-      - |
-        # Create .env file
-        echo "Creating .env file from Secret Manager secrets"
-        echo "PUBLIC_SUPABASE_URL=$(gcloud secrets versions access latest --secret=SUPABASE_URL)" >> .env
-        echo "PUBLIC_SUPABASE_ANON_KEY=$(gcloud secrets versions access latest --secret=SUPABASE_KEY)" >> .env
-        echo "PRIVATE_ANTHROPIC_KEY=$(gcloud secrets versions access latest --secret=ANTHROPIC_KEY)" >> .env
-        echo "PRIVATE_SERVICE_ROLE_KEY=$(gcloud secrets versions access latest --secret=SUPABASE_SERVICE_KEY)" >> .env
-        echo ".env file created successfully"
+      - build
+      - -t
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/happyplace/app:$COMMIT_SHA'
+      - .
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - push
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/happyplace/app:$COMMIT_SHA'
 
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-    dir: "web"
-    entrypoint: "bash"
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    dir: 'web'
+    entrypoint: bash
     args:
-      [
-        "-c",
-        "gcloud config set app/cloud_build_timeout 1600 && gcloud app deploy",
-      ]
-timeout: "1600s"
+      - -c
+      - |
+        gcloud run deploy happyplace \
+          --image us-central1-docker.pkg.dev/$PROJECT_ID/happyplace/app:$COMMIT_SHA \
+          --region us-central1 \
+          --platform managed \
+          --allow-unauthenticated \
+          --set-secrets PUBLIC_SUPABASE_URL=SUPABASE_URL:latest,PUBLIC_SUPABASE_ANON_KEY=SUPABASE_KEY:latest,PRIVATE_ANTHROPIC_KEY=ANTHROPIC_KEY:latest,PRIVATE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_KEY:latest
+timeout: '1600s'

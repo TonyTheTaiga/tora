@@ -79,7 +79,8 @@ Tora provides a comprehensive ML experiment management platform with the followi
 * **AI Analysis**: Integration endpoints for intelligent recommendations
 
 **Deployment & Operations:**
-* **Cloud Deployment**: Ready-to-deploy configurations for GCP App Engine
+* **Cloud Deployment**: Ready-to-deploy configurations for GCP Cloud Run (secrets loaded via environment variables)
+* **Artifact Registry**: Images are pushed to `us-central1-docker.pkg.dev/$PROJECT_ID/happyplace/app` tagged with the commit SHA
 * **Docker Support**: Containerized deployment options
 * **Environment Management**: Comprehensive configuration via environment variables
 * **Migration System**: Database schema versioning with Supabase migrations
@@ -345,7 +346,7 @@ Configuration for the Svelte-based web application is primarily managed through 
   * **Essential Supabase Variables:**
     * `VITE_SUPABASE_URL`: The URL of your Supabase project.
     * `VITE_SUPABASE_ANON_KEY`: The anonymous public key for your Supabase project.
-  * **Other Variables:** Review `web/supabase/config.toml` and any cloud deployment configurations (e.g., `app.yaml`, `cloudbuild.yaml`) for other potential environment variables, especially if you plan to use features like:
+  * **Other Variables:** Review `web/supabase/config.toml` and any cloud deployment configurations (e.g., `Dockerfile`, `cloudbuild.yaml`) for other potential environment variables, especially if you plan to use features like:
     * Email services (e.g., for password resets, invitations) might require SMTP server details or API keys (e.g., `SENDGRID_API_KEY` if using SendGrid with Supabase).
     * Third-party OAuth providers (e.g., Google, GitHub) will require client IDs and secrets.
     * Specific Supabase features like `OPENAI_API_KEY` for Supabase AI.
