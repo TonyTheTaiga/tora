@@ -4,7 +4,7 @@
   import WorkspaceInviteModal from "./workspace-invite-modal.svelte";
   import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
   import { goto } from "$app/navigation";
-  import { ApiKey } from "$lib/types";
+  import type { ApiKey } from "$lib/types";
 
   let { data } = $props();
 
