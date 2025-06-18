@@ -68,7 +68,29 @@
       setTimeout(() => (copiedParam = null), 1200);
     }
   }
+
+  let sseData = $state("");
+
+  onMount(() => {
+    const eventSource = new EventSource(
+      `/experiments/${data.experiment.id}/metric-stream`,
+    );
+
+    eventSource.onmessage = (event) => {
+      sseData = event.data;
+    };
+
+    eventSource.onerror = (error) => {
+      console.error("SSE error:", error);
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  });
 </script>
+
+{sseData}
 
 <div class="bg-ctp-base font-mono">
   <div class="p-4 md:p-6 space-y-4 md:space-y-6">
