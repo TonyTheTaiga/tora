@@ -1,9 +1,9 @@
-import { PRIVATE_ANTHROPIC_KEY } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 import Anthropic from "@anthropic-ai/sdk";
 
 export function createAnthropicClient() {
   const client = new Anthropic({
-    apiKey: PRIVATE_ANTHROPIC_KEY,
+    apiKey: env.PRIVATE_ANTHROPIC_KEY,
   });
   return client;
 }

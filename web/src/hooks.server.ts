@@ -5,12 +5,9 @@ import { sequence } from "@sveltejs/kit/hooks";
 import { createDbClient } from "$lib/server/database";
 import { createHash } from "crypto";
 
-import {
-  PUBLIC_SUPABASE_URL,
-  PUBLIC_SUPABASE_ANON_KEY,
-} from "$env/static/public";
+import { env as publicEnv } from "$env/dynamic/public";
 
-import { PRIVATE_SERVICE_ROLE_KEY } from "$env/static/private";
+import { env as privateEnv } from "$env/dynamic/private";
 
 const supabase: Handle = async ({ event, resolve }) => {
   /**
@@ -19,8 +16,8 @@ const supabase: Handle = async ({ event, resolve }) => {
    * The Supabase client gets the Auth token from the request cookies.
    */
   event.locals.supabase = createServerClient(
-    PUBLIC_SUPABASE_URL,
-    PUBLIC_SUPABASE_ANON_KEY,
+    publicEnv.PUBLIC_SUPABASE_URL,
+    publicEnv.PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll: () => event.cookies.getAll(),
@@ -39,8 +36,8 @@ const supabase: Handle = async ({ event, resolve }) => {
   );
 
   event.locals.adminSupabaseClient = createClient(
-    PUBLIC_SUPABASE_URL,
-    PRIVATE_SERVICE_ROLE_KEY,
+    publicEnv.PUBLIC_SUPABASE_URL,
+    privateEnv.PRIVATE_SERVICE_ROLE_KEY,
     {
       auth: { autoRefreshToken: false, persistSession: false },
     },
