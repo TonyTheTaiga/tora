@@ -1,18 +1,18 @@
 steps:
-  - name: 'gcr.io/cloud-builders/docker'
-    dir: 'web'
+  - name: "gcr.io/cloud-builders/docker"
+    dir: "web"
     args:
       - build
       - -t
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/happyplace/app:$COMMIT_SHA'
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/happyplace/app:$COMMIT_SHA"
       - .
-  - name: 'gcr.io/cloud-builders/docker'
+  - name: "gcr.io/cloud-builders/docker"
     args:
       - push
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/happyplace/app:$COMMIT_SHA'
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/happyplace/app:$COMMIT_SHA"
 
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    dir: 'web'
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    dir: "web"
     entrypoint: bash
     args:
       - -c
@@ -22,5 +22,11 @@ steps:
           --region us-central1 \
           --platform managed \
           --allow-unauthenticated \
+          --cpu 0.5 \
+          --memory 512Mi \
+          --min-instances 0 \
+          --max-instances 10 \
           --set-secrets PUBLIC_SUPABASE_URL=SUPABASE_URL:latest,PUBLIC_SUPABASE_ANON_KEY=SUPABASE_KEY:latest,PRIVATE_ANTHROPIC_KEY=ANTHROPIC_KEY:latest,PRIVATE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_KEY:latest
-timeout: '1600s'
+options:
+  machineType: "E2_MEDIUM"
+timeout: "1600s"
