@@ -12,7 +12,6 @@
   } from "lucide-svelte";
   import type { PageData } from "./$types";
   import InteractiveChart from "./interactive-chart.svelte";
-  import { source } from "sveltekit-sse";
   import { onMount } from "svelte";
 
   let { data }: { data: PageData } = $props();
