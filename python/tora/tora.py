@@ -2,7 +2,7 @@ import httpx
 import os
 
 
-TORA_BASE_URL = "https://happyplace-1030250455947.us-central1.run.app"
+TORA_BASE_URL = "https://happyplace-1030250455947.us-central1.run.app/api"
 TORA_API_KEY = os.getenv("TORA_API_KEY", None)
 
 
