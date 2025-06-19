@@ -114,7 +114,7 @@
         <h1 class="text-lg md:text-xl text-ctp-text truncate font-mono">
           {currentWorkspace?.name || "Workspace"}
         </h1>
-        <div class="text-xs text-ctp-subtext0 space-y-1">
+        <div class="text-sm text-ctp-subtext0 space-y-1">
           <div>
             {experiments.length} experiment{experiments.length !== 1 ? "s" : ""}
             {#if currentWorkspace?.description}
@@ -167,7 +167,7 @@
           class="w-full bg-ctp-surface0/20 border-0 px-4 py-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-text/20 transition-all font-mono text-sm"
         />
         <div
-          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-ctp-subtext0 font-mono"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-ctp-subtext0 font-mono"
         >
           {filteredExperiments.length}/{experiments.length}
         </div>
@@ -178,19 +178,19 @@
   <!-- Terminal-style experiments display -->
   <div class="px-4 md:px-6 font-mono">
     {#if filteredExperiments.length === 0 && searchQuery}
-      <div class="text-ctp-subtext0 text-sm">
+      <div class="text-ctp-subtext0 text-base">
         <div>$ search "{searchQuery}"</div>
         <div class="text-ctp-subtext1 ml-2">no results found</div>
       </div>
     {:else if experiments.length === 0}
-      <div class="space-y-3 text-sm">
-        <div class="text-ctp-subtext0 text-xs">
+      <div class="space-y-3 text-base">
+        <div class="text-ctp-subtext0 text-sm">
           no experiments found in this workspace
         </div>
         <div class="mt-4">
           <button
             onclick={() => openCreateExperimentModal()}
-            class="text-ctp-blue hover:text-ctp-blue/80 transition-colors text-xs"
+            class="text-ctp-blue hover:text-ctp-blue/80 transition-colors text-sm"
           >
             [create experiment]
           </button>
@@ -214,7 +214,7 @@
 
       <!-- Summary line -->
       <div
-        class="flex items-center text-xs text-ctp-subtext0 pt-2 border-t border-ctp-surface0/20 mt-4"
+        class="flex items-center text-sm text-ctp-subtext0 pt-2 border-t border-ctp-surface0/20 mt-4"
       >
         <div class="flex-1">
           {filteredExperiments.length} experiment{filteredExperiments.length !==

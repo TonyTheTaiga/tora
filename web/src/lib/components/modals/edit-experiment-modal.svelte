@@ -128,7 +128,7 @@
           <h2 id="modal-title" class="text-lg text-ctp-text font-mono">
             Edit Experiment
           </h2>
-          <div class="text-xs text-ctp-subtext0">modify experiment config</div>
+          <div class="text-sm text-ctp-subtext0">modify experiment config</div>
         </div>
       </div>
       <button
@@ -170,7 +170,7 @@
 
       <div class="space-y-3">
         <!-- Basic config -->
-        <div class="space-y-1 text-xs overflow-hidden">
+        <div class="space-y-1 text-base overflow-hidden">
           <div class="grid grid-cols-[auto_auto_1fr] gap-1 items-center">
             <span class="text-ctp-subtext0">name</span>
             <span class="text-ctp-text">=</span>
@@ -178,7 +178,7 @@
               id="experiment-name"
               name="experiment-name"
               type="text"
-              class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-mauve focus:border-ctp-mauve transition-all text-xs min-w-0"
+              class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-mauve focus:border-ctp-mauve transition-all text-base min-w-0"
               placeholder="experiment_name"
               bind:value={experimentCopy.name}
               required
@@ -191,7 +191,7 @@
               id="experiment-description"
               name="experiment-description"
               rows="2"
-              class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-mauve focus:border-ctp-mauve transition-all resize-none text-xs min-w-0"
+              class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-mauve focus:border-ctp-mauve transition-all resize-none text-base min-w-0"
               placeholder="description"
               bind:value={experimentCopy.description}
               required
@@ -209,7 +209,7 @@
             bind:value={experimentCopy.visibility}
           />
 
-          <div class="flex gap-2 text-xs">
+          <div class="flex gap-2 text-sm">
             <button
               type="button"
               class={"flex items-center gap-1 px-2 py-1 transition-colors " +
@@ -257,7 +257,7 @@
                   {#each experimentCopy.tags as tag, i}
                     <input type="hidden" value={tag} name="tags.{i}" />
                     <span
-                      class="inline-flex items-center px-2 py-0.5 text-xs bg-ctp-blue/10 text-ctp-blue border-0 group"
+                      class="inline-flex items-center px-2 py-0.5 text-sm bg-ctp-blue/10 text-ctp-blue border-0 group"
                     >
                       {tag}
                       <button
@@ -296,7 +296,7 @@
                       e.preventDefault();
                       addingNewTag = true;
                     }}
-                    class="inline-flex items-center gap-1 py-0.5 px-2 text-xs bg-transparent text-ctp-blue border border-dashed border-ctp-blue/50 hover:bg-ctp-blue/10 transition-all"
+                    class="inline-flex items-center gap-1 py-0.5 px-2 text-sm bg-transparent text-ctp-blue border border-dashed border-ctp-blue/50 hover:bg-ctp-blue/10 transition-all"
                   >
                     <Plus size={12} />
                     Add Tag
@@ -327,7 +327,7 @@
                 />
                 <div class="mb-3">
                   <span
-                    class="inline-flex items-center px-2 py-1 text-xs rounded-lg bg-ctp-lavender/10 text-ctp-lavender border-0"
+                    class="inline-flex items-center px-2 py-1 text-sm rounded-lg bg-ctp-lavender/10 text-ctp-lavender border-0"
                   >
                     <span title="Referenced experiment">{reference.name}</span>
                     <button
@@ -371,14 +371,14 @@
                     <button
                       onclick={clearReference}
                       type="button"
-                      class="px-2 py-1 text-xs bg-ctp-red/20 text-ctp-red rounded hover:bg-ctp-red/30 transition-colors"
+                      class="px-2 py-1 text-sm bg-ctp-red/20 text-ctp-red rounded hover:bg-ctp-red/30 transition-colors"
                     >
                       Clear Selection
                     </button>
                     <button
                       onclick={clearSearch}
                       type="button"
-                      class="px-2 py-1 text-xs bg-ctp-blue/20 text-ctp-blue rounded hover:bg-ctp-blue/30 transition-colors"
+                      class="px-2 py-1 text-sm bg-ctp-blue/20 text-ctp-blue rounded hover:bg-ctp-blue/30 transition-colors"
                     >
                       Clear Filter
                     </button>
@@ -427,13 +427,13 @@
             closeEditExperimentModal();
           }}
           type="button"
-          class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text px-3 py-2 text-xs transition-all"
+          class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text px-3 py-2 text-sm transition-all"
         >
           cancel
         </button>
         <button
           type="submit"
-          class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-mauve hover:bg-ctp-mauve/10 hover:border-ctp-mauve/30 px-3 py-2 text-xs transition-all"
+          class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-mauve hover:bg-ctp-mauve/10 hover:border-ctp-mauve/30 px-3 py-2 text-sm transition-all"
         >
           update
         </button>

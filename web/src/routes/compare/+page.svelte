@@ -239,7 +239,7 @@
       <div class="w-2 h-8 bg-ctp-mauve rounded-full"></div>
       <div>
         <h1 class="text-xl font-bold text-ctp-text">Experiment Comparison</h1>
-        <div class="text-xs text-ctp-subtext0">
+        <div class="text-sm text-ctp-subtext0">
           {data.experiments?.length || 0} experiments selected
         </div>
       </div>
@@ -253,7 +253,7 @@
       <div class="space-y-1">
         <!-- Header -->
         <div
-          class="flex items-center text-xs text-ctp-subtext0 pb-1 border-b border-ctp-surface0/20"
+          class="flex items-center text-sm text-ctp-subtext0 pb-1 border-b border-ctp-surface0/20"
         >
           <div class="flex-1">name</div>
           <div class="w-20 text-right">color</div>
@@ -261,7 +261,7 @@
         <!-- Experiment entries -->
         {#each data.experiments as experiment}
           <div
-            class="flex items-center text-xs hover:bg-ctp-surface0/10 px-1 py-1 transition-colors"
+            class="flex items-center text-sm hover:bg-ctp-surface0/10 px-1 py-1 transition-colors"
           >
             <div
               class="flex-1 text-ctp-text truncate min-w-0"
@@ -293,7 +293,7 @@
           class="overflow-x-auto overflow-y-auto max-h-60 scroll-container"
           style="scrollbar-width: none; -ms-overflow-style: none;"
         >
-          <table class="w-full text-xs text-left font-mono">
+          <table class="w-full text-sm text-left font-mono">
             <thead class="sticky top-0 z-10 bg-ctp-base">
               <tr>
                 <th
@@ -342,7 +342,7 @@
         <div class="p-3 border-b border-ctp-surface0/20">
           <details class="relative">
             <summary
-              class="flex items-center justify-between cursor-pointer p-2 hover:bg-ctp-surface0/20 transition-colors text-xs"
+              class="flex items-center justify-between cursor-pointer p-2 hover:bg-ctp-surface0/20 transition-colors text-sm"
             >
               <span class="text-ctp-text">
                 select metrics ({selectedMetrics.length}/{commonMetrics.length})
@@ -359,7 +359,7 @@
                   type="search"
                   placeholder="filter metrics..."
                   bind:value={searchFilter}
-                  class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-xs"
+                  class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
                 />
               </div>
 
@@ -367,13 +367,13 @@
               <div class="flex gap-2 p-2 border-b border-ctp-surface0/20">
                 <button
                   onclick={selectAllMetrics}
-                  class="px-2 py-1 text-xs bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 transition-all"
+                  class="px-2 py-1 text-sm bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 transition-all"
                 >
                   all
                 </button>
                 <button
                   onclick={clearAllMetrics}
-                  class="px-2 py-1 text-xs bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 transition-all"
+                  class="px-2 py-1 text-sm bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 transition-all"
                 >
                   clear
                 </button>
@@ -383,7 +383,7 @@
               <div class="p-1">
                 {#each filteredMetrics as metric}
                   <label
-                    class="flex items-center gap-2 p-1 hover:bg-ctp-surface0/20 cursor-pointer text-xs"
+                    class="flex items-center gap-2 p-1 hover:bg-ctp-surface0/20 cursor-pointer text-sm"
                   >
                     <input
                       type="checkbox"
@@ -396,7 +396,7 @@
                 {/each}
 
                 {#if filteredMetrics.length === 0}
-                  <div class="p-2 text-xs text-ctp-subtext0 text-center">
+                  <div class="p-2 text-sm text-ctp-subtext0 text-center">
                     no metrics found
                   </div>
                 {/if}
@@ -420,8 +420,8 @@
               class="aspect-square max-w-2xl mx-auto flex items-center justify-center"
             >
               <div class="text-center text-ctp-subtext0">
-                <div class="text-xs mb-2">$ select metrics</div>
-                <div class="text-xs text-ctp-subtext1">no data to display</div>
+                <div class="text-sm mb-2">$ select metrics</div>
+                <div class="text-sm text-ctp-subtext1">no data to display</div>
               </div>
             </div>
           {/if}

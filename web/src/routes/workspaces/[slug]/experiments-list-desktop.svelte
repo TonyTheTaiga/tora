@@ -41,7 +41,7 @@
 <div class="hidden md:block space-y-1 font-mono">
   <!-- Header -->
   <div
-    class="flex items-center text-xs text-ctp-subtext0 pb-2 border-b border-ctp-surface0/20"
+    class="flex items-center text-sm text-ctp-subtext0 pb-2 border-b border-ctp-surface0/20"
   >
     <div class="w-4">•</div>
     <div class="flex-1">name</div>
@@ -53,7 +53,7 @@
   <!-- Experiment entries -->
   {#each experiments as experiment}
     <div
-      class="group flex items-center text-sm hover:bg-ctp-surface0/20 px-1 py-2 transition-colors
+      class="group flex items-center text-base hover:bg-ctp-surface0/20 px-1 py-2 transition-colors
         {highlighted.length > 0 && !highlighted.includes(experiment.id)
         ? 'opacity-40'
         : ''}
@@ -71,7 +71,7 @@
         }}
         class="flex items-center flex-1 min-w-0 text-left"
       >
-        <div class="w-4 text-ctp-green text-xs"></div>
+        <div class="w-4 text-ctp-green text-sm"></div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
             <span
@@ -80,7 +80,7 @@
               {experiment.name}
             </span>
             {#if experiment.description}
-              <span class="text-ctp-subtext1 text-xs truncate">
+              <span class="text-ctp-subtext1 text-sm truncate">
                 - {experiment.description}
               </span>
             {/if}
@@ -107,7 +107,7 @@
         </div>
       </button>
 
-      <div class="w-16 text-right text-xs">
+      <div class="w-16 text-right text-sm">
         {#if experiment.visibility === "PUBLIC"}
           <Globe class="w-3 h-3 text-ctp-green inline" />
         {:else}
@@ -115,7 +115,7 @@
         {/if}
       </div>
 
-      <div class="w-20 text-right text-xs text-ctp-subtext0">
+      <div class="w-20 text-right text-sm text-ctp-subtext0">
         {formatDate(experiment.createdAt)}
       </div>
 
@@ -126,7 +126,7 @@
               e.stopPropagation();
               onToggleHighlight(experiment);
             }}
-            class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-teal hover:border-ctp-teal/30 rounded-full p-1 text-xs transition-all"
+            class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-teal hover:border-ctp-teal/30 rounded-full p-1 text-sm transition-all"
             title="show experiment chain"
           >
             {#if highlighted.includes(experiment.id)}
@@ -141,7 +141,7 @@
               e.stopPropagation();
               openEditExperimentModal(experiment);
             }}
-            class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-blue hover:border-ctp-blue/30 rounded-full p-1 text-xs transition-all"
+            class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-blue hover:border-ctp-blue/30 rounded-full p-1 text-sm transition-all"
             title="edit experiment"
           >
             <Edit class="w-3 h-3" />
@@ -153,7 +153,7 @@
                 e.stopPropagation();
                 openDeleteExperimentModal(experiment);
               }}
-              class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-red hover:border-ctp-red/30 rounded-full p-1 text-xs transition-all"
+              class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-red hover:border-ctp-red/30 rounded-full p-1 text-sm transition-all"
               title="delete experiment"
             >
               <Trash2 class="w-3 h-3" />

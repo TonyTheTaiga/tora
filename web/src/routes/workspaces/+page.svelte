@@ -31,7 +31,7 @@
       <div class="w-2 h-8 bg-ctp-blue rounded-full"></div>
       <div>
         <h1 class="text-xl font-bold text-ctp-text">Workspaces</h1>
-        <div class="text-xs text-ctp-subtext0 font-mono">
+        <div class="text-sm text-ctp-subtext0 font-mono">
           {workspaces.length} total
         </div>
       </div>
@@ -71,7 +71,7 @@
           class="w-full bg-ctp-surface0/20 border-0 px-4 py-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-text/20 transition-all font-mono text-sm"
         />
         <div
-          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-ctp-subtext0 font-mono"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-ctp-subtext0 font-mono"
         >
           {filteredWorkspaces.length}/{workspaces.length}
         </div>
@@ -82,12 +82,12 @@
   <!-- Terminal-style workspace display -->
   <div class="px-6 font-mono">
     {#if filteredWorkspaces.length === 0 && searchQuery}
-      <div class="text-ctp-subtext0 text-sm">
+      <div class="text-ctp-subtext0 text-base">
         <div>$ search "{searchQuery}"</div>
         <div class="text-ctp-subtext1 ml-2">no results found</div>
       </div>
     {:else if workspaces.length === 0}
-      <div class="space-y-2 text-sm">
+      <div class="space-y-2 text-base">
         <div class="text-ctp-subtext0">$ ls -la workspaces/</div>
         <div class="text-ctp-subtext1 ml-2">total 0</div>
         <div class="text-ctp-subtext1 ml-2">directory empty</div>
@@ -105,7 +105,7 @@
       <div class="space-y-1">
         <!-- Header -->
         <div
-          class="flex items-center text-xs text-ctp-subtext0 pb-2 border-b border-ctp-surface0/20"
+          class="flex items-center text-sm text-ctp-subtext0 pb-2 border-b border-ctp-surface0/20"
         >
           <div class="w-4">•</div>
           <div class="flex-1">name</div>
@@ -118,9 +118,9 @@
         {#each filteredWorkspaces as workspace}
           <a
             href={`/workspaces/${workspace.id}`}
-            class="group flex items-center text-sm hover:bg-ctp-surface0/20 px-1 py-2 transition-colors"
+            class="group flex items-center text-base hover:bg-ctp-surface0/20 px-1 py-2 transition-colors"
           >
-            <div class="w-4 text-ctp-green text-xs"></div>
+            <div class="w-4 text-ctp-green text-sm"></div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2">
                 <span
@@ -129,28 +129,28 @@
                   {workspace.name}
                 </span>
                 {#if workspace.description}
-                  <span class="text-ctp-subtext1 text-xs truncate">
+                  <span class="text-ctp-subtext1 text-sm truncate">
                     - {workspace.description}
                   </span>
                 {/if}
               </div>
             </div>
-            <div class="w-16 text-right text-xs text-ctp-subtext0">
+            <div class="w-16 text-right text-sm text-ctp-subtext0">
               <WorkspaceRoleBadge role={workspace.role || "VIEWER"} />
             </div>
-            <div class="w-20 text-right text-xs text-ctp-subtext0">
+            <div class="w-20 text-right text-sm text-ctp-subtext0">
               {new Date(workspace.createdAt).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
               })}
             </div>
-            <div class="w-16 text-right text-xs text-ctp-green">active</div>
+            <div class="w-16 text-right text-sm text-ctp-green">active</div>
           </a>
         {/each}
 
         <!-- Summary line -->
         <div
-          class="flex items-center text-xs text-ctp-subtext0 pt-2 border-t border-ctp-surface0/20"
+          class="flex items-center text-sm text-ctp-subtext0 pt-2 border-t border-ctp-surface0/20"
         >
           <div class="flex-1">
             {filteredWorkspaces.length} workspace{filteredWorkspaces.length !==
@@ -164,9 +164,9 @@
       <!-- Recent activity section -->
       <div class="mt-8 border-t border-ctp-surface0/20 pt-6">
         <div class="flex items-center gap-2 mb-3">
-          <div class="text-sm text-ctp-text font-mono">recent activity</div>
+          <div class="text-base text-ctp-text font-mono">recent activity</div>
         </div>
-        <div class="bg-ctp-surface0/10 p-4 text-xs">
+        <div class="bg-ctp-surface0/10 p-4 text-sm">
           <RecentActivity
             experiments={data.recentExperiments}
             workspaces={data.recentWorkspaces}

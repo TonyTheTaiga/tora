@@ -80,7 +80,7 @@
       <div class="w-2 h-8 bg-ctp-blue rounded-full"></div>
       <div>
         <h1 class="text-xl font-bold text-ctp-text">Settings</h1>
-        <div class="text-xs text-ctp-subtext0">system configuration</div>
+        <div class="text-sm text-ctp-subtext0">system configuration</div>
       </div>
     </div>
   </div>
@@ -89,7 +89,7 @@
   <div class="p-6 space-y-8">
     <!-- User Profile Section -->
     <div>
-      <div class="text-sm text-ctp-text font-medium mb-4">user profile</div>
+      <div class="text-base text-ctp-text font-medium mb-4">user profile</div>
 
       <!-- Primary info - email as filename -->
       <div class="flex items-center gap-2 mb-3">
@@ -99,7 +99,7 @@
         >
           {data?.user?.email}
         </div>
-        <div class="text-xs text-ctp-subtext0 font-mono ml-auto">
+        <div class="text-sm text-ctp-subtext0 font-mono ml-auto">
           {data?.user?.created_at
             ? new Date(data.user.created_at).toLocaleDateString("en-US", {
                 month: "short",
@@ -111,7 +111,7 @@
       </div>
 
       <!-- Secondary metadata -->
-      <div class="pl-6 space-y-1 text-xs font-mono mb-4">
+      <div class="pl-6 space-y-1 text-sm font-mono mb-4">
         <div class="flex items-center gap-2">
           <span class="text-ctp-subtext0 w-8">id:</span>
           <span class="text-ctp-blue truncate min-w-0">{data?.user?.id}</span>
@@ -122,7 +122,7 @@
         <form action="/logout" method="POST">
           <button
             type="submit"
-            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 px-3 py-2 text-xs transition-all"
+            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 px-3 py-2 text-sm transition-all"
             aria-label="Sign out"
           >
             <div class="flex items-center gap-2">
@@ -136,7 +136,7 @@
 
     <!-- Workspaces Section -->
     <div>
-      <div class="text-sm text-ctp-text font-medium mb-4">workspaces</div>
+      <div class="text-base text-ctp-text font-medium mb-4">workspaces</div>
 
       <!-- Create workspace form -->
       <div class="border border-ctp-surface0/20 p-3 mb-4">
@@ -180,11 +180,11 @@
       <!-- Workspace listings -->
       <div class="space-y-4">
         {#if ownedWorkspaces.length > 0}
-          <div class="text-xs text-ctp-subtext0 mb-2 font-mono">owned:</div>
+          <div class="text-sm text-ctp-subtext0 mb-2 font-mono">owned:</div>
           <div class="space-y-1">
             {#each ownedWorkspaces as workspace}
               <div
-                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
+                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-sm"
               >
                 <span class="text-ctp-blue w-3"></span>
                 <a
@@ -234,13 +234,13 @@
         {/if}
 
         {#if sharedWorkspaces.length > 0}
-          <div class="text-xs text-ctp-subtext0 mb-2 mt-4 font-mono">
+          <div class="text-sm text-ctp-subtext0 mb-2 mt-4 font-mono">
             shared:
           </div>
           <div class="space-y-1">
             {#each sharedWorkspaces as workspace}
               <div
-                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
+                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-sm"
               >
                 <span class="text-ctp-green w-3"></span>
                 <a
@@ -287,23 +287,23 @@
         {/if}
 
         {#if ownedWorkspaces.length === 0 && sharedWorkspaces.length === 0}
-          <div class="text-ctp-subtext0 text-sm">no workspaces found</div>
+          <div class="text-ctp-subtext0 text-base">no workspaces found</div>
         {/if}
 
         {#if pendingInvitations.length > 0}
-          <div class="text-xs text-ctp-subtext0 mb-2 mt-4 font-mono">
+          <div class="text-sm text-ctp-subtext0 mb-2 mt-4 font-mono">
             invitations:
           </div>
           <div class="space-y-1">
             {#each pendingInvitations as invitation}
               <div
-                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
+                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-sm"
               >
                 <span class="text-ctp-yellow w-3"></span>
                 <span class="text-ctp-text flex-1 truncate min-w-0"
                   >{invitation.workspaceId}</span
                 >
-                <span class="text-xs text-ctp-subtext1 truncate"
+                <span class="text-sm text-ctp-subtext1 truncate"
                   >from {invitation.from}</span
                 >
                 <div class="flex items-center gap-1 ml-2">
@@ -333,7 +333,7 @@
 
     <!-- API Keys Section -->
     <div>
-      <div class="text-sm text-ctp-text font-medium mb-4">api keys</div>
+      <div class="text-base text-ctp-text font-medium mb-4">api keys</div>
 
       <!-- Create API key form -->
       <div class="border border-ctp-surface0/20 p-3 mb-4">
@@ -380,13 +380,13 @@
 
       {#if createdKey !== ""}
         <div class="bg-ctp-green/10 border border-ctp-green/20 p-3 mb-4">
-          <div class="text-xs text-ctp-green mb-2">
+          <div class="text-sm text-ctp-green mb-2">
             key generated successfully:
           </div>
           <div class="bg-ctp-surface0/20 p-2 mb-2">
-            <code class="text-ctp-blue text-xs break-all">{createdKey}</code>
+            <code class="text-ctp-blue text-sm break-all">{createdKey}</code>
           </div>
-          <div class="text-xs text-ctp-subtext1 mb-2">
+          <div class="text-sm text-ctp-subtext1 mb-2">
             ⚠️ save this key - it won't be shown again
           </div>
           <button
@@ -406,17 +406,17 @@
       <div class="space-y-1">
         {#each data.apiKeys ? data.apiKeys : [] as apiKey}
           <div
-            class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
+            class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-sm"
           >
             <span class="text-{apiKey.revoked ? 'ctp-red' : 'ctp-green'} w-3"
             ></span>
             <span class="text-ctp-text flex-1 truncate min-w-0"
               >{apiKey.name}</span
             >
-            <span class="text-xs text-ctp-subtext1 w-16"
+            <span class="text-sm text-ctp-subtext1 w-16"
               >{apiKey.revoked ? "revoked" : "active"}</span
             >
-            <span class="text-xs text-ctp-subtext0 w-20 text-right truncate"
+            <span class="text-sm text-ctp-subtext0 w-20 text-right truncate"
               >{apiKey.createdAt}</span
             >
             {#if !apiKey.revoked}

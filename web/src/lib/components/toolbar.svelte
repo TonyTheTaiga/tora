@@ -173,7 +173,7 @@
           style="animation: slideInRight 0.3s ease-out;"
         >
           <span
-            class="text-xs text-ctp-subtext0 px-2 whitespace-nowrap"
+            class="text-base text-ctp-subtext0 px-2 whitespace-nowrap"
             style="animation: fadeIn 0.5s ease-out 0.1s both;"
           >
             {selectedExperiments.length} selected
