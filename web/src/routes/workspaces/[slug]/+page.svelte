@@ -16,6 +16,8 @@
 
   let { data = $bindable() } = $props();
   let { currentWorkspace } = $derived(data);
+  $inspect(currentWorkspace);
+
   let experiments = $state(data.experiments);
   let searchQuery = $state("");
   let highlighted = $state<string[]>([]);
@@ -102,7 +104,7 @@
   <EditExperimentModal bind:experiment={editExperimentModal} bind:experiments />
 {/if}
 
-<div class="bg-ctp-mantle font-mono">
+<div class="font-mono">
   <!-- Header -->
   <div
     class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/10"
@@ -119,12 +121,12 @@
         </h1>
         <div class="text-sm text-ctp-subtext0 space-y-1">
           <div>
-            {experiments.length} experiment{experiments.length !== 1 ? "s" : ""}
             {#if currentWorkspace?.description}
-              <span class="hidden sm:inline"
-                >• {currentWorkspace.description}</span
-              >
+              <span>{currentWorkspace.description}</span>
             {/if}
+          </div>
+          <div>
+            {experiments.length} experiment{experiments.length !== 1 ? "s" : ""}
           </div>
           {#if currentWorkspace?.id}
             <button
