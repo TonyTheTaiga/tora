@@ -121,12 +121,12 @@
         </h1>
         <div class="text-sm text-ctp-subtext0 space-y-1">
           <div>
-            {experiments.length} experiment{experiments.length !== 1 ? "s" : ""}
             {#if currentWorkspace?.description}
-              <span class="hidden sm:inline"
-                >• {currentWorkspace.description}</span
-              >
+              <span>{currentWorkspace.description}</span>
             {/if}
+          </div>
+          <div>
+            {experiments.length} experiment{experiments.length !== 1 ? "s" : ""}
           </div>
           {#if currentWorkspace?.id}
             <button

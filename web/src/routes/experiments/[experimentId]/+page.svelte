@@ -109,8 +109,10 @@
             {:else}
               <GlobeLock size={12} class="text-ctp-red inline mr-2" />
             {/if}
+          </div>
+          <div>
             {#if experiment.description}
-              <span class="hidden sm:inline">• {experiment.description}</span>
+              <span>{experiment.description}</span>
             {/if}
           </div>
           <button
