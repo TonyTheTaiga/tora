@@ -76,9 +76,9 @@
   <div
     class="flex items-center justify-between p-6 border-b border-ctp-surface0/10"
   >
-    <div class="flex items-center gap-4">
-      <div class="w-2 h-8 bg-ctp-blue rounded-full"></div>
-      <div>
+    <div class="flex items-stretch gap-4 min-h-fit">
+      <div class="w-2 bg-ctp-blue rounded-full self-stretch"></div>
+      <div class="py-1">
         <h1 class="text-xl font-bold text-ctp-text">Settings</h1>
         <div class="text-sm text-ctp-subtext0">system configuration</div>
       </div>

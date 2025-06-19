@@ -27,9 +27,9 @@
 <div class="bg-ctp-base font-mono">
   <!-- Minimal top bar -->
   <div class="flex items-center justify-between p-6">
-    <div class="flex items-center gap-4">
-      <div class="w-2 h-8 bg-ctp-blue rounded-full"></div>
-      <div>
+    <div class="flex items-stretch gap-4 min-h-fit">
+      <div class="w-2 bg-ctp-blue rounded-full self-stretch"></div>
+      <div class="py-1">
         <h1 class="text-xl font-bold text-ctp-text">Workspaces</h1>
         <div class="text-sm text-ctp-subtext0 font-mono">
           {workspaces.length} total
@@ -91,7 +91,9 @@
       <div>
         <table class="w-full table-fixed">
           <thead>
-            <tr class="text-sm text-ctp-subtext0 border-b border-ctp-surface0/20">
+            <tr
+              class="text-sm text-ctp-subtext0 border-b border-ctp-surface0/20"
+            >
               <th class="text-left py-2 w-4">•</th>
               <th class="text-left py-2">name</th>
               <th class="text-right py-2 w-24">role</th>
@@ -101,15 +103,14 @@
           </thead>
           <tbody>
             {#each filteredWorkspaces as workspace}
-              <tr class="group text-base hover:bg-ctp-surface0/20 transition-colors">
+              <tr
+                class="group text-base hover:bg-ctp-surface0/20 transition-colors"
+              >
                 <td class="py-2 px-1 w-4">
                   <div class="text-ctp-green text-sm"></div>
                 </td>
                 <td class="py-2 px-1 min-w-0">
-                  <a
-                    href={`/workspaces/${workspace.id}`}
-                    class="block min-w-0"
-                  >
+                  <a href={`/workspaces/${workspace.id}`} class="block min-w-0">
                     <div class="truncate text-ctp-text">
                       <span
                         class="group-hover:text-ctp-blue transition-colors font-medium"
@@ -133,7 +134,9 @@
                     day: "numeric",
                   })}
                 </td>
-                <td class="py-2 px-1 text-right text-sm text-ctp-green w-20">active</td>
+                <td class="py-2 px-1 text-right text-sm text-ctp-green w-20"
+                  >active</td
+                >
               </tr>
             {/each}
           </tbody>

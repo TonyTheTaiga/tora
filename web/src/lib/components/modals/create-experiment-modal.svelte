@@ -78,9 +78,9 @@
     <div
       class="flex items-center justify-between p-4 border-b border-ctp-surface0/20"
     >
-      <div class="flex items-center gap-3">
-        <div class="w-2 h-6 bg-ctp-mauve rounded-full"></div>
-        <div>
+      <div class="flex items-stretch gap-3 min-h-fit">
+        <div class="w-2 bg-ctp-mauve rounded-full self-stretch"></div>
+        <div class="py-1">
           <h3 id="modal-title" class="text-lg text-ctp-text font-mono">
             New Experiment
           </h3>
