@@ -66,28 +66,26 @@
     }
   }
 
-  let sseData = $state("");
+  //let sseData = $state("");
 
-  onMount(() => {
-    const eventSource = new EventSource(
-      `/experiments/${data.experiment.id}/metric-stream`,
-    );
+  //onMount(() => {
+  //  const eventSource = new EventSource(
+  //    `/experiments/${data.experiment.id}/metric-stream`,
+  //  );
 
-    eventSource.onmessage = (event) => {
-      sseData = event.data;
-    };
+  //  eventSource.onmessage = (event) => {
+  //    sseData = event.data;
+  //  };
 
-    eventSource.onerror = (error) => {
-      console.error("SSE error:", error);
-    };
+  //  eventSource.onerror = (error) => {
+  //    console.error("SSE error:", error);
+  //  };
 
-    return () => {
-      eventSource.close();
-    };
-  });
+  //  return () => {
+  //    eventSource.close();
+  //  };
+  //});
 </script>
-
-{sseData}
 
 <div class="font-mono">
   <!-- Header -->
