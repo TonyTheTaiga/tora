@@ -104,15 +104,15 @@
         </h1>
         <div class="text-sm text-ctp-subtext0 space-y-1">
           <div>
+            {#if experiment.description}
+              <span>{experiment.description}</span>
+            {/if}
+          </div>
+          <div>
             {#if experiment.visibility === "PUBLIC"}
               <Globe size={12} class="text-ctp-green inline mr-2" />
             {:else}
               <GlobeLock size={12} class="text-ctp-red inline mr-2" />
-            {/if}
-          </div>
-          <div>
-            {#if experiment.description}
-              <span>{experiment.description}</span>
             {/if}
           </div>
           <button
