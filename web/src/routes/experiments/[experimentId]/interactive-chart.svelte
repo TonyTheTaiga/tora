@@ -420,7 +420,7 @@
         </summary>
 
         <div
-          class="absolute top-full left-0 right-0 mt-1 bg-ctp-base border border-ctp-surface0/30 shadow-lg z-10 max-h-60 overflow-y-auto"
+          class="absolute top-full left-0 right-0 mt-1 bg-ctp-mantle border border-ctp-surface0/30 shadow-lg z-10 max-h-60 overflow-y-auto"
         >
           <!-- Search filter -->
           <div class="p-2 border-b border-ctp-surface0/20">

@@ -70,7 +70,7 @@
          flex items-center justify-center p-4 z-50 overflow-hidden font-mono"
 >
   <div
-    class="w-full max-w-xl bg-ctp-base border border-ctp-surface0/30 overflow-auto max-h-[90vh]"
+    class="w-full max-w-xl bg-ctp-mantle border border-ctp-surface0/30 overflow-auto max-h-[90vh]"
     role="dialog"
     aria-modal="true"
     aria-labelledby="modal-title"

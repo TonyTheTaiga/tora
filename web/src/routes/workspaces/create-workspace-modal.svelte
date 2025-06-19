@@ -14,11 +14,11 @@
 </script>
 
 <div
-  class="fixed inset-0 bg-ctp-base/90 backdrop-blur-sm
+  class="fixed inset-0 bg-ctp-mantle/90 backdrop-blur-sm
          flex items-center justify-center p-4 z-50 overflow-hidden font-mono"
 >
   <div
-    class="w-full max-w-md bg-ctp-base border border-ctp-surface0/30 overflow-auto max-h-[90vh]"
+    class="w-full max-w-md bg-ctp-mantle border border-ctp-surface0/30 overflow-auto max-h-[90vh]"
     role="dialog"
     aria-modal="true"
     aria-labelledby="modal-title"

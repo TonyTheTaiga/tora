@@ -113,7 +113,7 @@
 >
   <!-- MODAL CONTAINER -->
   <div
-    class="bg-ctp-base w-full max-w-xl border border-ctp-surface0/30 overflow-auto max-h-[90vh]"
+    class="bg-ctp-mantle w-full max-w-xl border border-ctp-surface0/30 overflow-auto max-h-[90vh]"
     role="dialog"
     aria-modal="true"
     aria-labelledby="modal-title"

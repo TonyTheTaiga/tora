@@ -230,7 +230,7 @@
   });
 </script>
 
-<div class="bg-ctp-base font-mono">
+<div class="bg-ctp-mantle font-mono">
   <!-- Header -->
   <div
     class="flex items-center justify-between p-6 border-b border-ctp-surface0/10"
@@ -294,10 +294,10 @@
           style="scrollbar-width: none; -ms-overflow-style: none;"
         >
           <table class="w-full text-sm text-left font-mono">
-            <thead class="sticky top-0 z-10 bg-ctp-base">
+            <thead class="sticky top-0 z-10 bg-ctp-mantle">
               <tr>
                 <th
-                  class="border-b border-ctp-surface0/20 sticky left-0 z-20 bg-ctp-base px-2 py-1 w-4"
+                  class="border-b border-ctp-surface0/20 sticky left-0 z-20 bg-ctp-mantle px-2 py-1 w-4"
                 ></th>
                 {#each hyperparams as hyperparam}
                   <th
@@ -312,7 +312,7 @@
               {#each data.experiments as experiment}
                 <tr class="hover:bg-ctp-surface0/20 transition-colors">
                   <td
-                    class="bg-ctp-base sticky left-0 z-10 px-2 py-1 text-center border-r border-ctp-surface0/20"
+                    class="bg-ctp-mantle sticky left-0 z-10 px-2 py-1 text-center border-r border-ctp-surface0/20"
                   >
                     <Circle
                       size={8}
@@ -351,7 +351,7 @@
             </summary>
 
             <div
-              class="absolute top-full left-0 right-0 mt-1 z-10 max-h-60 overflow-y-auto border border-ctp-surface0/30 bg-ctp-base shadow-lg"
+              class="absolute top-full left-0 right-0 mt-1 z-10 max-h-60 overflow-y-auto border border-ctp-surface0/30 bg-ctp-mantle shadow-lg"
             >
               <!-- Search filter -->
               <div class="p-2 border-b border-ctp-surface0/20">

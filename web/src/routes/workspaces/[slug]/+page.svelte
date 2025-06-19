@@ -103,7 +103,7 @@
   <EditExperimentModal bind:experiment={editExperimentModal} bind:experiments />
 {/if}
 
-<div class="bg-ctp-base font-mono">
+<div class="bg-ctp-mantle font-mono">
   <!-- Header -->
   <div
     class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/10"
