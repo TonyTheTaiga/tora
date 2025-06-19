@@ -32,7 +32,7 @@
 
   let chartInstance: Chart | null = null;
   let chartCanvas: HTMLCanvasElement | null = $state(null);
-  let detailsElement: HTMLDetailsElement | null = $state(null); // For click-outside logic
+  let detailsElement: HTMLDetailsElement | null = $state(null);
 
   interface ExperimentWithMetricData extends Experiment {
     metricData?: Record<string, number[]>;
