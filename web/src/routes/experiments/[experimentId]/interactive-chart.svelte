@@ -254,15 +254,8 @@
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     mediaQuery.addEventListener("change", handleThemeChange);
 
-    const observer = new MutationObserver(() => handleThemeChange());
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
     return () => {
       mediaQuery.removeEventListener("change", handleThemeChange);
-      observer.disconnect();
       destroyChart();
     };
   });
