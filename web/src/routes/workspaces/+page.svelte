@@ -6,6 +6,7 @@
   import CreateWorkspaceModal from "./create-workspace-modal.svelte";
   import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
   import RecentActivity from "$lib/components/recent-activity.svelte";
+  import { onMount } from "svelte";
 
   let { data } = $props();
   let { workspaces } = $derived(data);
@@ -18,6 +19,20 @@
   );
 
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
+
+  const handleKeydown = (event: KeyboardEvent) => {
+    console.log(event);
+  };
+
+  onMount(() => {
+    window.addEventListener("keydown", handleKeydown);
+    const serachElement = document.querySelector("workspace-search");
+    serachElement?.focus();
+
+    return () => {
+      window.removeEventListener("keydown", handleKeydown);
+    };
+  });
 </script>
 
 {#if createWorkspaceModal}
@@ -65,7 +80,8 @@
     <div class="max-w-lg">
       <div class="relative">
         <input
-          type="text"
+          id="workspace-search"
+          type="search"
           placeholder="Search or filter workspaces..."
           bind:value={searchQuery}
           class="w-full bg-ctp-surface0/20 border-0 px-4 py-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-text/20 transition-all font-mono text-sm"
