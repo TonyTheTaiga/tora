@@ -29,7 +29,7 @@
   }
 </script>
 
-<div class="space-y-1 font-mono text-xs">
+<div class="space-y-1 font-mono text-sm">
   <div class="flex gap-4 text-ctp-subtext0 mb-2">
     <button
       onclick={() => (activeTab = "experiments")}
@@ -62,7 +62,7 @@
               <span class="text-ctp-text truncate flex-1"
                 >{experiment.name}</span
               >
-              <span class="text-ctp-subtext1 text-xs">
+              <span class="text-ctp-subtext1 text-sm">
                 {formatDate(experiment.createdAt)}
               </span>
             </div>
@@ -74,7 +74,7 @@
               <span class="text-ctp-text truncate flex-1"
                 >{experiment.name}</span
               >
-              <span class="text-ctp-subtext1 text-xs">
+              <span class="text-ctp-subtext1 text-sm">
                 {formatDate(experiment.createdAt)}
               </span>
             </div>
@@ -94,7 +94,7 @@
           <div class="flex items-center gap-2">
             <span class="text-ctp-blue w-1">•</span>
             <span class="text-ctp-text truncate flex-1">{workspace.name}</span>
-            <span class="text-ctp-subtext1 text-xs">
+            <span class="text-ctp-subtext1 text-sm">
               {formatDate(workspace.createdAt)}
             </span>
           </div>

@@ -4,11 +4,12 @@ import { error, redirect } from "@sveltejs/kit";
 import type { ApiKey } from "$lib/types";
 import { createHash } from "crypto";
 
-export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
+export const load: PageServerLoad = async ({ locals }) => {
   const { session, user } = await locals.safeGetSession();
 
   const requestId = generateRequestId();
   const timer = startTimer("settings.load", { requestId });
+
   if (!user) {
     const experiments = new Array();
     return { experiments, session };
@@ -36,8 +37,13 @@ export const load: PageServerLoad = async ({ fetch, locals, parent, url }) => {
     console.error("Error fetching API keys:", err);
   }
 
+  const invitations = await locals.dbClient.getPendingInvitationsTo(
+    user.id,
+    "PENDING",
+  );
+
   timer.end({});
-  return { workspaces, apiKeys, session };
+  return { workspaces, apiKeys, invitations, session };
 };
 
 export const actions: Actions = {

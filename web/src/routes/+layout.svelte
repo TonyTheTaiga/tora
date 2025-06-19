@@ -34,4 +34,4 @@
   <Toolbar />
 {/if}
 
-<main class="flex-1 w-full p-2">{@render children()}</main>
+<main class="flex-1 w-full max-w-7xl mx-auto p-2">{@render children()}</main>

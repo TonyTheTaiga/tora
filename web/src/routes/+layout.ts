@@ -14,21 +14,29 @@ export const load: LayoutLoad = async ({ data, depends, fetch }) => {
   depends("supabase:auth");
 
   const supabase = isBrowser()
-    ? createBrowserClient(env.PUBLIC_SUPABASE_URL, env.PUBLIC_SUPABASE_ANON_KEY, {
-        global: {
-          fetch,
-        },
-      })
-    : createServerClient(env.PUBLIC_SUPABASE_URL, env.PUBLIC_SUPABASE_ANON_KEY, {
-        global: {
-          fetch,
-        },
-        cookies: {
-          getAll() {
-            return data.cookies;
+    ? createBrowserClient(
+        env.PUBLIC_SUPABASE_URL,
+        env.PUBLIC_SUPABASE_ANON_KEY,
+        {
+          global: {
+            fetch,
           },
         },
-      });
+      )
+    : createServerClient(
+        env.PUBLIC_SUPABASE_URL,
+        env.PUBLIC_SUPABASE_ANON_KEY,
+        {
+          global: {
+            fetch,
+          },
+          cookies: {
+            getAll() {
+              return data.cookies;
+            },
+          },
+        },
+      );
 
   /**
    * It's fine to use `getSession` here, because on the client, `getSession` is

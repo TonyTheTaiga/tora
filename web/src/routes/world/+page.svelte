@@ -24,7 +24,7 @@
   }
 </script>
 
-<div class="bg-ctp-base font-mono">
+<div class="font-mono">
   <div class="p-4 space-y-4">
     <div class="max-w-lg">
       <input

@@ -65,9 +65,9 @@
           <!-- Header row -->
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2 min-w-0 flex-1">
-              <div class="text-ctp-green text-xs"></div>
+              <div class="text-ctp-green text-sm"></div>
               <h3
-                class="text-ctp-text group-hover:text-ctp-blue transition-colors truncate text-sm"
+                class="text-ctp-text group-hover:text-ctp-blue transition-colors truncate text-base"
               >
                 {experiment.name}
               </h3>
@@ -78,7 +78,7 @@
               {:else}
                 <GlobeLock class="w-3 h-3 text-ctp-red" />
               {/if}
-              <span class="text-xs text-ctp-subtext0"
+              <span class="text-sm text-ctp-subtext0"
                 >{formatDate(experiment.createdAt)}</span
               >
             </div>
@@ -86,7 +86,7 @@
 
           <!-- Description -->
           {#if experiment.description}
-            <p class="text-ctp-subtext1 text-xs mb-2 line-clamp-2">
+            <p class="text-ctp-subtext1 text-sm mb-2 line-clamp-2">
               {experiment.description}
             </p>
           {/if}
@@ -122,7 +122,7 @@
               e.stopPropagation();
               onToggleHighlight(experiment);
             }}
-            class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-teal hover:border-ctp-teal/30 rounded-full p-2 text-xs transition-all"
+            class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-teal hover:border-ctp-teal/30 rounded-full p-2 text-sm transition-all"
             title="show experiment chain"
           >
             {#if highlighted.includes(experiment.id)}
@@ -137,7 +137,7 @@
               e.stopPropagation();
               openEditExperimentModal(experiment);
             }}
-            class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-blue hover:border-ctp-blue/30 rounded-full p-2 text-xs transition-all"
+            class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-blue hover:border-ctp-blue/30 rounded-full p-2 text-sm transition-all"
             title="edit experiment"
           >
             <Edit class="w-4 h-4" />
@@ -149,7 +149,7 @@
                 e.stopPropagation();
                 openDeleteExperimentModal(experiment);
               }}
-              class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-red hover:border-ctp-red/30 rounded-full p-2 text-xs transition-all"
+              class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-red hover:border-ctp-red/30 rounded-full p-2 text-sm transition-all"
               title="delete experiment"
             >
               <Trash2 class="w-4 h-4" />

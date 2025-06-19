@@ -1,30 +1,16 @@
 <script lang="ts">
-  import {
-    Plus,
-    LogOut,
-    Trash2,
-    Crown,
-    Users,
-    Mail,
-    Check,
-    X,
-  } from "lucide-svelte";
+  import { Plus, LogOut, Trash2, Users, Check, X } from "lucide-svelte";
   import { enhance } from "$app/forms";
-  import { isWorkspace } from "$lib/types";
-  import type { ApiKey } from "$lib/types";
   import WorkspaceInviteModal from "./workspace-invite-modal.svelte";
   import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
+  import { goto } from "$app/navigation";
+  import type { ApiKey } from "$lib/types";
 
   let { data } = $props();
-  let creatingWorkspace: boolean = $state(false);
-  let creatingApiKey: boolean = $state(false);
+
   let createdKey: string = $state("");
-  let workspaceError: string = $state("");
-  let apiKeyError: string = $state("");
   let inviteModalOpen = $state(false);
   let workspaceToInvite: any = $state(null);
-  let pendingInvitations = $state<any[]>([]);
-  let invitationsLoading = $state(true);
 
   const ownedWorkspaces = $derived(
     data.workspaces?.filter((w) => w.role === "OWNER") || [],
@@ -32,6 +18,7 @@
   const sharedWorkspaces = $derived(
     data.workspaces?.filter((w) => w.role !== "OWNER") || [],
   );
+  let pendingInvitations = $derived(data.invitations ? data.invitations : []);
 
   function openInviteModal(workspace: any) {
     workspaceToInvite = workspace;
@@ -61,19 +48,6 @@
     }
   }
 
-  async function loadInvitations() {
-    try {
-      const response = await fetch("/api/workspace-invitations");
-      if (response.ok) {
-        pendingInvitations = await response.json();
-      }
-    } catch (error) {
-      console.error("Failed to load invitations:", error);
-    } finally {
-      invitationsLoading = false;
-    }
-  }
-
   async function respondToInvitation(invitationId: string, accept: boolean) {
     try {
       const response = await fetch(
@@ -95,22 +69,18 @@
       console.error("Failed to respond to invitation:", error);
     }
   }
-
-  $effect(() => {
-    loadInvitations();
-  });
 </script>
 
-<div class="bg-ctp-base font-mono">
+<div class="font-mono">
   <!-- Header -->
   <div
     class="flex items-center justify-between p-6 border-b border-ctp-surface0/10"
   >
-    <div class="flex items-center gap-4">
-      <div class="w-2 h-8 bg-ctp-blue rounded-full"></div>
-      <div>
+    <div class="flex items-stretch gap-4 min-h-fit">
+      <div class="w-2 bg-ctp-blue rounded-full self-stretch"></div>
+      <div class="py-1">
         <h1 class="text-xl font-bold text-ctp-text">Settings</h1>
-        <div class="text-xs text-ctp-subtext0">system configuration</div>
+        <div class="text-sm text-ctp-subtext0">system configuration</div>
       </div>
     </div>
   </div>
@@ -119,7 +89,7 @@
   <div class="p-6 space-y-8">
     <!-- User Profile Section -->
     <div>
-      <div class="text-sm text-ctp-text font-medium mb-4">user profile</div>
+      <div class="text-base text-ctp-text font-medium mb-4">user profile</div>
 
       <!-- Primary info - email as filename -->
       <div class="flex items-center gap-2 mb-3">
@@ -129,7 +99,7 @@
         >
           {data?.user?.email}
         </div>
-        <div class="text-xs text-ctp-subtext0 font-mono ml-auto">
+        <div class="text-sm text-ctp-subtext0 font-mono ml-auto">
           {data?.user?.created_at
             ? new Date(data.user.created_at).toLocaleDateString("en-US", {
                 month: "short",
@@ -141,7 +111,7 @@
       </div>
 
       <!-- Secondary metadata -->
-      <div class="pl-6 space-y-1 text-xs font-mono mb-4">
+      <div class="pl-6 space-y-1 text-sm font-mono mb-4">
         <div class="flex items-center gap-2">
           <span class="text-ctp-subtext0 w-8">id:</span>
           <span class="text-ctp-blue truncate min-w-0">{data?.user?.id}</span>
@@ -152,7 +122,7 @@
         <form action="/logout" method="POST">
           <button
             type="submit"
-            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 px-3 py-2 text-xs transition-all"
+            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 px-3 py-2 text-sm transition-all"
             aria-label="Sign out"
           >
             <div class="flex items-center gap-2">
@@ -166,7 +136,7 @@
 
     <!-- Workspaces Section -->
     <div>
-      <div class="text-sm text-ctp-text font-medium mb-4">workspaces</div>
+      <div class="text-base text-ctp-text font-medium mb-4">workspaces</div>
 
       <!-- Create workspace form -->
       <div class="border border-ctp-surface0/20 p-3 mb-4">
@@ -182,47 +152,39 @@
                 id="workspace-name"
                 name="name"
                 placeholder="workspace_name"
-                disabled={creatingWorkspace}
                 class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
                 required
               />
             </div>
-            <div>
+            <div class="flex gap-2">
               <input
                 id="workspace-description"
                 name="description"
                 placeholder="description (optional)"
-                disabled={creatingWorkspace}
-                class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
+                class="flex-1 bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
                 defaultvalue=""
               />
+              <button
+                type="submit"
+                class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all disabled:opacity-50"
+              >
+                <div class="flex items-center gap-2">
+                  <Plus size={14} />
+                </div>
+              </button>
             </div>
           </div>
-          <button
-            type="submit"
-            disabled={creatingWorkspace}
-            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all disabled:opacity-50"
-          >
-            <div class="flex items-center gap-2">
-              <Plus size={14} />
-              <span>{creatingWorkspace ? "creating..." : "create"}</span>
-            </div>
-          </button>
         </form>
       </div>
-
-      {#if workspaceError}
-        <div class="text-ctp-red text-sm mb-4">error: {workspaceError}</div>
-      {/if}
 
       <!-- Workspace listings -->
       <div class="space-y-4">
         {#if ownedWorkspaces.length > 0}
-          <div class="text-xs text-ctp-subtext0 mb-2 font-mono">owned:</div>
+          <div class="text-sm text-ctp-subtext0 mb-2 font-mono">owned:</div>
           <div class="space-y-1">
             {#each ownedWorkspaces as workspace}
               <div
-                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
+                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-sm"
               >
                 <span class="text-ctp-blue w-3"></span>
                 <a
@@ -272,13 +234,13 @@
         {/if}
 
         {#if sharedWorkspaces.length > 0}
-          <div class="text-xs text-ctp-subtext0 mb-2 mt-4 font-mono">
+          <div class="text-sm text-ctp-subtext0 mb-2 mt-4 font-mono">
             shared:
           </div>
           <div class="space-y-1">
             {#each sharedWorkspaces as workspace}
               <div
-                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
+                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-sm"
               >
                 <span class="text-ctp-green w-3"></span>
                 <a
@@ -325,24 +287,24 @@
         {/if}
 
         {#if ownedWorkspaces.length === 0 && sharedWorkspaces.length === 0}
-          <div class="text-ctp-subtext0 text-sm">no workspaces found</div>
+          <div class="text-ctp-subtext0 text-base">no workspaces found</div>
         {/if}
 
-        {#if !invitationsLoading && pendingInvitations.length > 0}
-          <div class="text-xs text-ctp-subtext0 mb-2 mt-4 font-mono">
+        {#if pendingInvitations.length > 0}
+          <div class="text-sm text-ctp-subtext0 mb-2 mt-4 font-mono">
             invitations:
           </div>
           <div class="space-y-1">
             {#each pendingInvitations as invitation}
               <div
-                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
+                class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-sm"
               >
                 <span class="text-ctp-yellow w-3"></span>
                 <span class="text-ctp-text flex-1 truncate min-w-0"
-                  >{invitation.workspaceName}</span
+                  >{invitation.workspaceId}</span
                 >
-                <span class="text-xs text-ctp-subtext1 truncate"
-                  >from {invitation.fromEmail}</span
+                <span class="text-sm text-ctp-subtext1 truncate"
+                  >from {invitation.from}</span
                 >
                 <div class="flex items-center gap-1 ml-2">
                   <button
@@ -371,53 +333,60 @@
 
     <!-- API Keys Section -->
     <div>
-      <div class="text-sm text-ctp-text font-medium mb-4">api keys</div>
+      <div class="text-base text-ctp-text font-medium mb-4">api keys</div>
 
       <!-- Create API key form -->
       <div class="border border-ctp-surface0/20 p-3 mb-4">
         <form
           action="?/createApiKey"
           method="POST"
-          use:enhance
+          use:enhance={() => {
+            return async ({ result, update }) => {
+              console.log(result);
+              if (result.type === "redirect") {
+                goto(result.location);
+              } else if (result.type === "success") {
+                await update();
+                console.log(result);
+                const newKey = result.data as unknown as ApiKey;
+                if (newKey.key) {
+                  createdKey = newKey.key;
+                }
+              }
+            };
+          }}
           class="space-y-3"
         >
-          <div>
+          <div class="flex gap-2">
             <input
               id="key-name"
               type="text"
               name="name"
               placeholder="key_name"
-              disabled={creatingApiKey}
-              class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
+              class="flex-1 bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
               required
             />
+            <button
+              type="submit"
+              class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 px-3 py-2 text-sm transition-all disabled:opacity-50"
+            >
+              <div class="flex items-center gap-2">
+                <Plus size={14} />
+              </div>
+            </button>
           </div>
-          <button
-            type="submit"
-            disabled={creatingApiKey}
-            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 px-3 py-2 text-sm transition-all disabled:opacity-50"
-          >
-            <div class="flex items-center gap-2">
-              <Plus size={14} />
-              <span>{creatingApiKey ? "generating..." : "generate"}</span>
-            </div>
-          </button>
         </form>
       </div>
 
-      {#if apiKeyError}
-        <div class="text-ctp-red text-sm mb-4">error: {apiKeyError}</div>
-      {/if}
-
       {#if createdKey !== ""}
         <div class="bg-ctp-green/10 border border-ctp-green/20 p-3 mb-4">
-          <div class="text-xs text-ctp-green mb-2">
+          <div class="text-sm text-ctp-green mb-2">
             key generated successfully:
           </div>
           <div class="bg-ctp-surface0/20 p-2 mb-2">
-            <code class="text-ctp-blue text-xs break-all">{createdKey}</code>
+            <code class="text-ctp-blue text-sm break-all">{createdKey}</code>
           </div>
-          <div class="text-xs text-ctp-subtext1 mb-2">
+          <div class="text-sm text-ctp-subtext1 mb-2">
             ⚠️ save this key - it won't be shown again
           </div>
           <button
@@ -437,17 +406,17 @@
       <div class="space-y-1">
         {#each data.apiKeys ? data.apiKeys : [] as apiKey}
           <div
-            class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-xs"
+            class="flex items-center hover:bg-ctp-surface0/10 px-1 py-1 transition-colors text-sm"
           >
             <span class="text-{apiKey.revoked ? 'ctp-red' : 'ctp-green'} w-3"
             ></span>
             <span class="text-ctp-text flex-1 truncate min-w-0"
               >{apiKey.name}</span
             >
-            <span class="text-xs text-ctp-subtext1 w-16"
+            <span class="text-sm text-ctp-subtext1 w-16"
               >{apiKey.revoked ? "revoked" : "active"}</span
             >
-            <span class="text-xs text-ctp-subtext0 w-20 text-right truncate"
+            <span class="text-sm text-ctp-subtext0 w-20 text-right truncate"
               >{apiKey.createdAt}</span
             >
             {#if !apiKey.revoked}

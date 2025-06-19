@@ -91,7 +91,7 @@
 
 {sseData}
 
-<div class="bg-ctp-base font-mono">
+<div class="font-mono">
   <div class="p-4 md:p-6 space-y-4 md:space-y-6">
     <div class="space-y-3">
       <div class="flex flex-col sm:flex-row sm:items-center gap-2">
@@ -102,7 +102,7 @@
           </div>
         </div>
         <div class="flex items-center gap-2 ml-6 sm:ml-0">
-          <div class="text-xs text-ctp-subtext0">
+          <div class="text-sm text-ctp-subtext0">
             {new Date(experiment.createdAt).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
@@ -122,13 +122,13 @@
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pl-4 md:pl-6"
       >
         <div class="space-y-1">
-          <div class="text-xs text-ctp-subtext0 flex items-center gap-1">
+          <div class="text-sm text-ctp-subtext0 flex items-center gap-1">
             <Hash size={10} />
             id
           </div>
           <button
             onclick={() => copyToClipboard(experiment.id, "id")}
-            class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex items-center gap-1 text-xs font-mono"
+            class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex items-center gap-1 text-sm font-mono"
           >
             <span class="truncate max-w-24 sm:max-w-32">{experiment.id}</span>
             {#if copiedId}
@@ -139,11 +139,11 @@
           </button>
         </div>
         <div class="space-y-1">
-          <div class="text-xs text-ctp-subtext0 flex items-center gap-1">
+          <div class="text-sm text-ctp-subtext0 flex items-center gap-1">
             <Activity size={10} />
             status
           </div>
-          <div class="text-xs font-mono">
+          <div class="text-sm font-mono">
             <span
               class="text-ctp-{experiment.status === 'COMPLETED'
                 ? 'green'
@@ -159,11 +159,11 @@
         </div>
         {#if experiment.startedAt}
           <div class="space-y-1">
-            <div class="text-xs text-ctp-subtext0 flex items-center gap-1">
+            <div class="text-sm text-ctp-subtext0 flex items-center gap-1">
               <Clock size={10} />
               duration
             </div>
-            <div class="text-xs text-ctp-text font-mono">
+            <div class="text-sm text-ctp-text font-mono">
               {experiment.endedAt
                 ? `${Math.round((new Date(experiment.endedAt).getTime() - new Date(experiment.startedAt).getTime()) / 1000)}s`
                 : experiment.status === "RUNNING"
@@ -175,7 +175,7 @@
       </div>
       {#if experiment.description}
         <div class="pl-4 md:pl-6 space-y-1">
-          <div class="text-xs text-ctp-subtext0">description</div>
+          <div class="text-sm text-ctp-subtext0">description</div>
           <div class="text-sm text-ctp-subtext1 break-words">
             {experiment.description}
           </div>
@@ -186,14 +186,14 @@
       <div class="space-y-2">
         <div class="flex items-center gap-2">
           <div class="text-sm text-ctp-text">tags</div>
-          <div class="text-xs text-ctp-subtext0 font-mono">
+          <div class="text-sm text-ctp-subtext0 font-mono">
             [{experiment.tags.length}]
           </div>
         </div>
         <div class="flex flex-wrap gap-1">
           {#each visibleTags as tag}
             <span
-              class="text-xs bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-2 py-0.5 font-mono"
+              class="text-sm bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-2 py-0.5 font-mono"
             >
               {tag}
             </span>
@@ -201,7 +201,7 @@
           {#if experiment.tags.length > initialLimit}
             <button
               onclick={() => (showAllTags = !showAllTags)}
-              class="text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors px-2 py-0.5"
+              class="text-sm text-ctp-subtext0 hover:text-ctp-blue transition-colors px-2 py-0.5"
             >
               {showAllTags
                 ? "less"
@@ -215,7 +215,7 @@
       <div class="space-y-2">
         <div class="flex items-center gap-2">
           <div class="text-sm text-ctp-text">hyperparameters</div>
-          <div class="text-xs text-ctp-subtext0 font-mono">
+          <div class="text-sm text-ctp-subtext0 font-mono">
             [{experiment.hyperparams.length}]
           </div>
         </div>
@@ -223,7 +223,7 @@
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
             {#each visibleParams as param}
               <div
-                class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-ctp-surface0/10 hover:bg-ctp-surface0/20 px-3 py-2 transition-colors text-xs gap-1 sm:gap-2"
+                class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-ctp-surface0/10 hover:bg-ctp-surface0/20 px-3 py-2 transition-colors text-sm gap-1 sm:gap-2"
               >
                 <span class="text-ctp-subtext0 font-mono truncate"
                   >{param.key}</span
@@ -253,7 +253,7 @@
           {#if experiment.hyperparams.length > initialLimit}
             <button
               onclick={() => (showAllParams = !showAllParams)}
-              class="w-full text-xs text-ctp-subtext0 hover:text-ctp-text px-3 py-2 text-center border-t border-ctp-surface0/20 transition-colors"
+              class="w-full text-sm text-ctp-subtext0 hover:text-ctp-text px-3 py-2 text-center border-t border-ctp-surface0/20 transition-colors"
             >
               {showAllParams
                 ? "show less"
@@ -267,13 +267,13 @@
       <div class="space-y-2">
         <div class="flex items-center gap-4">
           <div class="text-sm text-ctp-text">metrics</div>
-          <div class="text-xs text-ctp-subtext0 font-mono">
+          <div class="text-sm text-ctp-subtext0 font-mono">
             [{scalarMetrics.length + timeSeriesNames.length}]
           </div>
           <div class="flex items-center gap-1">
             <button
               onclick={() => (metricsView = "chart")}
-              class="text-xs text-ctp-{metricsView === 'chart'
+              class="text-sm text-ctp-{metricsView === 'chart'
                 ? 'blue'
                 : 'subtext0'} hover:text-ctp-blue transition-colors"
             >
@@ -281,7 +281,7 @@
             </button>
             <button
               onclick={() => (metricsView = "data")}
-              class="text-xs text-ctp-{metricsView === 'data'
+              class="text-sm text-ctp-{metricsView === 'data'
                 ? 'blue'
                 : 'subtext0'} hover:text-ctp-blue transition-colors"
             >
@@ -289,7 +289,7 @@
             </button>
             <a
               href={`/api/experiments/${experiment.id}/metrics/csv`}
-              class="text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors"
+              class="text-sm text-ctp-subtext0 hover:text-ctp-blue transition-colors"
               download
             >
               [csv]
@@ -311,14 +311,14 @@
       <div class="space-y-2">
         <div class="flex items-center gap-2">
           <div class="text-sm text-ctp-text">scalar metrics</div>
-          <div class="text-xs text-ctp-subtext0 font-mono">
+          <div class="text-sm text-ctp-subtext0 font-mono">
             [{scalarMetrics.length}]
           </div>
         </div>
         <div class="bg-ctp-surface0/10 border border-ctp-surface0/20">
           <div class="hidden md:block">
             <div
-              class="flex text-xs text-ctp-subtext0 p-3 border-b border-ctp-surface0/20 sticky top-0"
+              class="flex text-sm text-ctp-subtext0 p-3 border-b border-ctp-surface0/20 sticky top-0"
             >
               <div class="w-4">•</div>
               <div class="flex-1">metric</div>
@@ -331,7 +331,7 @@
             >
               {#each visibleScalarMetrics as metric}
                 <div
-                  class="flex text-xs hover:bg-ctp-surface0/20 p-3 transition-colors border-b border-ctp-surface0/5"
+                  class="flex text-sm hover:bg-ctp-surface0/20 p-3 transition-colors border-b border-ctp-surface0/5"
                 >
                   <div class="w-4 text-ctp-green"></div>
                   <div
@@ -380,9 +380,9 @@
               >
                 <div class="flex items-center justify-between mb-1">
                   <div class="flex items-center gap-2">
-                    <div class="text-ctp-green text-xs"></div>
+                    <div class="text-ctp-green text-sm"></div>
                     <div
-                      class="text-xs text-ctp-text font-mono truncate"
+                      class="text-sm text-ctp-text font-mono truncate"
                       title={metric.name}
                     >
                       {metric.name}
@@ -404,7 +404,7 @@
                     {/if}
                   </button>
                 </div>
-                <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center justify-between text-sm">
                   <div
                     class="text-ctp-blue font-mono"
                     title={String(metric.value)}
@@ -421,7 +421,7 @@
           {#if scalarMetrics.length > initialLimit}
             <button
               onclick={() => (showAllScalarMetrics = !showAllScalarMetrics)}
-              class="w-full text-xs text-ctp-subtext0 hover:text-ctp-text p-3 text-center border-t border-ctp-surface0/20 transition-colors"
+              class="w-full text-sm text-ctp-subtext0 hover:text-ctp-text p-3 text-center border-t border-ctp-surface0/20 transition-colors"
             >
               {showAllScalarMetrics
                 ? "show less"
@@ -434,7 +434,7 @@
     <div class="space-y-2">
       <div class="text-sm text-ctp-text">system info</div>
       <div
-        class="bg-ctp-surface0/10 border border-ctp-surface0/20 p-3 space-y-2 text-xs font-mono"
+        class="bg-ctp-surface0/10 border border-ctp-surface0/20 p-3 space-y-2 text-sm font-mono"
       >
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
           {#if experiment.createdBy}

@@ -14,6 +14,8 @@
     font-feature-settings:
       "liga" 1,
       "calt" 1; /* fix for Chrome */
+    font-size: 16px;
+    line-height: 1.5;
   }
   @supports (font-variation-settings: normal) {
     :root {
@@ -34,7 +36,7 @@
     --color-dark-ctp-overlay0: #6c7086;
     --color-dark-ctp-overlay1: #7f849c;
     --color-dark-ctp-overlay2: #9399b2;
-    --color-dark-ctp-text: #cdd6f4;
+    --color-dark-ctp-text: #e0e7ff;
     --color-dark-ctp-subtext0: #a6adc8;
     --color-dark-ctp-subtext1: #bac2de;
     --color-dark-ctp-lavender: #b4befe;
