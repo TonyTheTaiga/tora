@@ -50,7 +50,14 @@
   <ExperimentHeader {experiment} onCopyId={handleCopyId} />
 
   <div class="p-4 md:p-6 space-y-4 md:space-y-6">
-    <div class="space-y-3"></div>
+    <ExperimentMetrics
+      {experiment}
+      {scalarMetrics}
+      {timeSeriesNames}
+      {initialLimit}
+      onCopyMetric={handleCopyMetric}
+      {copiedMetric}
+    />
 
     <ExperimentTags tags={experiment.tags || []} {initialLimit} />
 
@@ -59,15 +66,6 @@
       {initialLimit}
       onCopyParam={handleCopyParam}
       {copiedParam}
-    />
-
-    <ExperimentMetrics
-      {experiment}
-      {scalarMetrics}
-      {timeSeriesNames}
-      {initialLimit}
-      onCopyMetric={handleCopyMetric}
-      {copiedMetric}
     />
 
     <ExperimentSystemInfo {experiment} />
