@@ -41,21 +41,31 @@
 {/if}
 
 <div class="font-mono">
-  <!-- Minimal top bar -->
-  <div class="flex items-center justify-between p-6">
-    <div class="flex items-stretch gap-4 min-h-fit">
-      <div class="w-2 bg-ctp-blue rounded-full self-stretch"></div>
-      <div class="py-1">
-        <h1 class="text-xl font-bold text-ctp-text">Workspaces</h1>
-        <div class="text-sm text-ctp-subtext0 font-mono">
-          {workspaces.length} total
+  <!-- Header -->
+  <div
+    class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/10"
+  >
+    <div
+      class="flex items-stretch gap-3 md:gap-4 min-w-0 flex-1 pr-4 min-h-fit"
+    >
+      <div
+        class="w-2 bg-ctp-blue rounded-full flex-shrink-0 self-stretch"
+      ></div>
+      <div class="min-w-0 flex-1 py-1">
+        <h1 class="text-lg md:text-xl text-ctp-text truncate font-mono">
+          Workspaces
+        </h1>
+        <div class="text-sm text-ctp-subtext0 space-y-1">
+          <div>
+            {workspaces.length} workspace{workspaces.length !== 1 ? "s" : ""}
+          </div>
         </div>
       </div>
     </div>
 
     <button
       onclick={() => openCreateWorkspaceModal()}
-      class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-text hover:bg-ctp-surface0/30 hover:border-ctp-surface0/50 px-4 py-2 text-sm transition-all"
+      class="group relative bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-text hover:bg-ctp-surface0/30 hover:border-ctp-surface0/50 px-3 py-2 md:px-4 text-sm font-mono transition-all flex-shrink-0"
     >
       <div class="flex items-center gap-2">
         <svg
@@ -71,13 +81,13 @@
             d="M12 4v16m8-8H4"
           ></path>
         </svg>
-        <span>New</span>
+        <span class="hidden sm:inline">New</span>
       </div>
     </button>
   </div>
 
   <!-- Search and filter bar -->
-  <div class="px-6 pb-8">
+  <div class="px-4 md:px-6 py-4">
     <div class="max-w-lg">
       <div class="relative">
         <input
@@ -97,7 +107,7 @@
   </div>
 
   <!-- Terminal-style workspace display -->
-  <div class="px-6 font-mono">
+  <div class="px-4 md:px-6 font-mono">
     {#if filteredWorkspaces.length === 0 && searchQuery}
       <div class="text-ctp-subtext0 text-base">
         <div>$ search "{searchQuery}"</div>
