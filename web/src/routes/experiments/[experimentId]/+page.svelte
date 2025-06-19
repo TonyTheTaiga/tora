@@ -4,8 +4,6 @@
     ClipboardCheck,
     Globe,
     GlobeLock,
-    Activity,
-    Clock,
     Hash,
     User,
     Calendar,
@@ -68,41 +66,38 @@
     }
   }
 
-  let sseData = $state("");
+  //let sseData = $state("");
 
-  onMount(() => {
-    const eventSource = new EventSource(
-      `/experiments/${data.experiment.id}/metric-stream`,
-    );
+  //onMount(() => {
+  //  const eventSource = new EventSource(
+  //    `/experiments/${data.experiment.id}/metric-stream`,
+  //  );
 
-    eventSource.onmessage = (event) => {
-      sseData = event.data;
-    };
+  //  eventSource.onmessage = (event) => {
+  //    sseData = event.data;
+  //  };
 
-    eventSource.onerror = (error) => {
-      console.error("SSE error:", error);
-    };
+  //  eventSource.onerror = (error) => {
+  //    console.error("SSE error:", error);
+  //  };
 
-    return () => {
-      eventSource.close();
-    };
-  });
+  //  return () => {
+  //    eventSource.close();
+  //  };
+  //});
 </script>
 
-{sseData}
-
 <div class="font-mono">
-  <div class="p-4 md:p-6 space-y-4 md:space-y-6">
-    <div class="space-y-3">
-      <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-        <div class="flex items-center gap-2 min-w-0 flex-1">
-          <div class="text-ctp-green text-sm"></div>
-          <div class="text-base md:text-lg text-ctp-text break-words min-w-0">
-            {experiment.name}
-          </div>
-        </div>
-        <div class="flex items-center gap-2 ml-6 sm:ml-0">
-          <div class="text-sm text-ctp-subtext0">
+  <!-- Header -->
+  <div
+    class="flex items-center justify-between p-6 border-b border-ctp-surface0/10"
+  >
+    <div class="flex items-stretch gap-4 min-h-fit">
+      <div class="w-2 bg-ctp-blue rounded-full self-stretch"></div>
+      <div class="py-1">
+        <h1 class="text-xl font-bold text-ctp-text">{experiment.name}</h1>
+        <div class="text-sm text-ctp-subtext0 flex items-center gap-3">
+          <span>
             {new Date(experiment.createdAt).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
@@ -110,27 +105,25 @@
               hour: "2-digit",
               minute: "2-digit",
             })}
-          </div>
+          </span>
           {#if experiment.visibility === "PUBLIC"}
-            <Globe size={12} class="text-ctp-green md:w-4 md:h-4" />
+            <Globe size={12} class="text-ctp-green" />
           {:else}
-            <GlobeLock size={12} class="text-ctp-red md:w-4 md:h-4" />
+            <GlobeLock size={12} class="text-ctp-red" />
           {/if}
         </div>
-      </div>
-      <div
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pl-4 md:pl-6"
-      >
-        <div class="space-y-1">
-          <div class="text-sm text-ctp-subtext0 flex items-center gap-1">
-            <Hash size={10} />
-            id
+        {#if experiment.description}
+          <div class="text-sm text-ctp-subtext1 mt-1 max-w-2xl">
+            {experiment.description}
           </div>
+        {/if}
+        <div class="flex items-center gap-1 mt-2">
+          <Hash size={10} class="text-ctp-subtext0" />
           <button
             onclick={() => copyToClipboard(experiment.id, "id")}
-            class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex items-center gap-1 text-sm font-mono"
+            class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex items-center gap-1 font-mono text-sm"
           >
-            <span class="truncate max-w-24 sm:max-w-32">{experiment.id}</span>
+            <span class="truncate max-w-32">{experiment.id}</span>
             {#if copiedId}
               <ClipboardCheck size={10} class="text-ctp-green" />
             {:else}
@@ -138,50 +131,12 @@
             {/if}
           </button>
         </div>
-        <div class="space-y-1">
-          <div class="text-sm text-ctp-subtext0 flex items-center gap-1">
-            <Activity size={10} />
-            status
-          </div>
-          <div class="text-sm font-mono">
-            <span
-              class="text-ctp-{experiment.status === 'COMPLETED'
-                ? 'green'
-                : experiment.status === 'RUNNING'
-                  ? 'yellow'
-                  : experiment.status === 'FAILED'
-                    ? 'red'
-                    : 'subtext0'}"
-            >
-              {experiment.status?.toLowerCase() || "unknown"}
-            </span>
-          </div>
-        </div>
-        {#if experiment.startedAt}
-          <div class="space-y-1">
-            <div class="text-sm text-ctp-subtext0 flex items-center gap-1">
-              <Clock size={10} />
-              duration
-            </div>
-            <div class="text-sm text-ctp-text font-mono">
-              {experiment.endedAt
-                ? `${Math.round((new Date(experiment.endedAt).getTime() - new Date(experiment.startedAt).getTime()) / 1000)}s`
-                : experiment.status === "RUNNING"
-                  ? `${Math.round((Date.now() - new Date(experiment.startedAt).getTime()) / 1000)}s (running)`
-                  : "n/a"}
-            </div>
-          </div>
-        {/if}
       </div>
-      {#if experiment.description}
-        <div class="pl-4 md:pl-6 space-y-1">
-          <div class="text-sm text-ctp-subtext0">description</div>
-          <div class="text-sm text-ctp-subtext1 break-words">
-            {experiment.description}
-          </div>
-        </div>
-      {/if}
     </div>
+  </div>
+
+  <div class="p-4 md:p-6 space-y-4 md:space-y-6">
+    <div class="space-y-3"></div>
     {#if experiment.tags && experiment.tags.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-2">
@@ -285,7 +240,7 @@
                 ? 'blue'
                 : 'subtext0'} hover:text-ctp-blue transition-colors"
             >
-              [data]
+              [table]
             </button>
             <a
               href={`/api/experiments/${experiment.id}/metrics/csv`}

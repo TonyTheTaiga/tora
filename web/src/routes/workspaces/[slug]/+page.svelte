@@ -12,52 +12,32 @@
   import ExperimentsListDesktop from "./experiments-list-desktop.svelte";
   import type { Experiment } from "$lib/types";
   import { Plus, Copy, ClipboardCheck } from "lucide-svelte";
+  import { onMount } from "svelte";
 
   let { data = $bindable() } = $props();
   let { currentWorkspace } = $derived(data);
   let experiments = $state(data.experiments);
   let searchQuery = $state("");
-  let debouncedQuery = $state("");
-  let debounceHandle: number | null = null;
   let highlighted = $state<string[]>([]);
   let copiedId = $state(false);
-
-  $effect(() => {
-    experiments = data.experiments;
-  });
-
-  let normalized = $derived(
-    experiments.map((exp) => ({
-      exp,
-      name: exp.name.toLowerCase(),
-      desc: exp.description?.toLowerCase() ?? "",
-      tags: exp.tags?.map((t) => t.toLowerCase()) ?? [],
-    })),
-  );
-
-  let filteredExperiments = $derived(
-    normalized
-      .filter((entry) => {
-        const q = debouncedQuery.toLowerCase();
-        return (
-          entry.name.includes(q) ||
-          entry.desc.includes(q) ||
-          entry.tags.some((t) => t.includes(q))
-        );
-      })
-      .map((e) => e.exp),
-  );
-
-  function handleSearchInput() {
-    if (debounceHandle !== null) clearTimeout(debounceHandle);
-    debounceHandle = window.setTimeout(() => {
-      debouncedQuery = searchQuery;
-    }, 200);
-  }
-
   let createExperimentModal = $derived(getCreateExperimentModal());
   let editExperimentModal = $derived(getEditExperimentModal());
   let deleteExperimentModal = $derived(getDeleteExperimentModal());
+
+  let filteredExperiments = $derived(
+    experiments
+      .map((exp) => ({
+        exp,
+        name: exp.name.toLowerCase(),
+        desc: exp.description?.toLowerCase() ?? "",
+        tags: exp.tags?.map((t) => t.toLowerCase()) ?? [],
+      }))
+      .filter((entry) => {
+        const q = searchQuery.toLowerCase();
+        return entry.name.includes(q);
+      })
+      .map((e) => e.exp),
+  );
 
   function formatDate(date: Date): string {
     return date.toLocaleDateString("en-US", {
@@ -86,6 +66,25 @@
     copiedId = true;
     setTimeout(() => (copiedId = false), 1200);
   }
+
+  const handleKeydown = (_: KeyboardEvent) => {
+    const searchElement = document.querySelector<HTMLInputElement>(
+      'input[type="search"]',
+    );
+    searchElement?.focus();
+  };
+
+  onMount(() => {
+    window.addEventListener("keydown", handleKeydown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeydown);
+    };
+  });
+
+  $effect(() => {
+    experiments = data.experiments;
+  });
 </script>
 
 {#if createExperimentModal}
@@ -103,7 +102,7 @@
   <EditExperimentModal bind:experiment={editExperimentModal} bind:experiments />
 {/if}
 
-<div class="font-mono">
+<div class="bg-ctp-mantle font-mono">
   <!-- Header -->
   <div
     class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/10"
@@ -164,10 +163,9 @@
     <div class="max-w-lg">
       <div class="relative">
         <input
-          type="text"
+          type="search"
           placeholder="Search experiments..."
           bind:value={searchQuery}
-          oninput={handleSearchInput}
           class="w-full bg-ctp-surface0/20 border-0 px-4 py-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-text/20 transition-all font-mono text-sm"
         />
         <div

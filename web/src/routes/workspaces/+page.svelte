@@ -6,6 +6,7 @@
   import CreateWorkspaceModal from "./create-workspace-modal.svelte";
   import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
   import RecentActivity from "$lib/components/recent-activity.svelte";
+  import { onMount } from "svelte";
 
   let { data } = $props();
   let { workspaces } = $derived(data);
@@ -18,6 +19,21 @@
   );
 
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
+
+  const handleKeydown = (_: KeyboardEvent) => {
+    const searchElement = document.querySelector<HTMLInputElement>(
+      'input[type="search"]',
+    );
+    searchElement?.focus();
+  };
+
+  onMount(() => {
+    window.addEventListener("keydown", handleKeydown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeydown);
+    };
+  });
 </script>
 
 {#if createWorkspaceModal}
@@ -65,7 +81,8 @@
     <div class="max-w-lg">
       <div class="relative">
         <input
-          type="text"
+          id="workspace-search"
+          type="search"
           placeholder="Search or filter workspaces..."
           bind:value={searchQuery}
           class="w-full bg-ctp-surface0/20 border-0 px-4 py-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-text/20 transition-all font-mono text-sm"
@@ -98,7 +115,6 @@
               <th class="text-left py-2">name</th>
               <th class="text-right py-2 w-24">role</th>
               <th class="text-right py-2 w-24">modified</th>
-              <th class="text-right py-2 w-20">status</th>
             </tr>
           </thead>
           <tbody>
@@ -134,9 +150,6 @@
                     day: "numeric",
                   })}
                 </td>
-                <td class="py-2 px-1 text-right text-sm text-ctp-green w-20"
-                  >active</td
-                >
               </tr>
             {/each}
           </tbody>
