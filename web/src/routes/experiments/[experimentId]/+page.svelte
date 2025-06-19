@@ -90,32 +90,37 @@
 <div class="font-mono">
   <!-- Header -->
   <div
-    class="flex items-center justify-between p-6 border-b border-ctp-surface0/10"
+    class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/10"
   >
-    <div class="flex items-stretch gap-4 min-h-fit">
-      <div class="w-2 bg-ctp-blue rounded-full self-stretch"></div>
-      <div class="py-1 min-h-0">
-        <h1 class="text-lg md:text-md text-ctp-text truncate font-mono">
+    <div
+      class="flex items-stretch gap-3 md:gap-4 min-w-0 flex-1 pr-4 min-h-fit"
+    >
+      <div
+        class="w-2 bg-ctp-blue rounded-full flex-shrink-0 self-stretch"
+      ></div>
+      <div class="min-w-0 flex-1 py-1">
+        <h1 class="text-lg md:text-xl text-ctp-text truncate font-mono">
           {experiment.name}
         </h1>
-        <div class="text-sm text-ctp-subtext0 flex items-center gap-3">
-          {#if experiment.visibility === "PUBLIC"}
-            <Globe size={12} class="text-ctp-green" />
-          {:else}
-            <GlobeLock size={12} class="text-ctp-red" />
-          {/if}
-        </div>
-        {#if experiment.description}
-          <div class="text-sm text-ctp-subtext1 mt-1 max-w-2xl truncate">
-            {experiment.description}
+        <div class="text-sm text-ctp-subtext0 space-y-1">
+          <div>
+            {#if experiment.visibility === "PUBLIC"}
+              <Globe size={12} class="text-ctp-green inline mr-2" />
+            {:else}
+              <GlobeLock size={12} class="text-ctp-red inline mr-2" />
+            {/if}
+            {#if experiment.description}
+              <span class="hidden sm:inline">• {experiment.description}</span>
+            {/if}
           </div>
-        {/if}
-        <button
-          onclick={() => copyToClipboard(experiment.id, "id")}
-          class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex text-start font-mono text-sm"
-        >
-          <span>{experiment.id}</span>
-        </button>
+          <button
+            onclick={() => copyToClipboard(experiment.id, "id")}
+            class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex text-start"
+            title="click to copy experiment id"
+          >
+            <span>{experiment.id}</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
