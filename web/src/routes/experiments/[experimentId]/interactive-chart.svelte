@@ -289,11 +289,31 @@
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     mediaQuery.addEventListener("change", handleThemeChange);
 
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.attributeName === "class" &&
+          mutation.target === document.documentElement
+        ) {
+          const classList = (mutation.target as Element).classList;
+          if (classList.contains("dark") || classList.contains("light")) {
+            handleThemeChange();
+          }
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
     window.addEventListener("keydown", handleKeydown);
 
     return () => {
       mediaQuery.removeEventListener("change", handleThemeChange);
       window.removeEventListener("keydown", handleKeydown);
+      observer.disconnect();
       destroyChart();
     };
   });
