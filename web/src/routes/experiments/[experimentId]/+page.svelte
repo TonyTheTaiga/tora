@@ -4,8 +4,6 @@
     ClipboardCheck,
     Globe,
     GlobeLock,
-    Activity,
-    Clock,
     Hash,
     User,
     Calendar,
@@ -93,7 +91,9 @@
 
 <div class="font-mono">
   <!-- Header -->
-  <div class="flex items-center justify-between p-6 border-b border-ctp-surface0/10">
+  <div
+    class="flex items-center justify-between p-6 border-b border-ctp-surface0/10"
+  >
     <div class="flex items-stretch gap-4 min-h-fit">
       <div class="w-2 bg-ctp-blue rounded-full self-stretch"></div>
       <div class="py-1">
@@ -138,8 +138,7 @@
   </div>
 
   <div class="p-4 md:p-6 space-y-4 md:space-y-6">
-    <div class="space-y-3">
-    </div>
+    <div class="space-y-3"></div>
     {#if experiment.tags && experiment.tags.length > 0}
       <div class="space-y-2">
         <div class="flex items-center gap-2">
