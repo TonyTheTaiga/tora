@@ -1,6 +1,6 @@
 import type { Actions } from "./$types";
 import { startTimer, generateRequestId } from "$lib/utils/timing";
-import { redirect, fail } from "@sveltejs/kit";
+import { redirect, fail, json } from "@sveltejs/kit";
 
 export const actions: Actions = {
   createWorkspace: async ({ request, locals }) => {
@@ -35,7 +35,7 @@ export const actions: Actions = {
         workspaceName: workspace.name,
       });
 
-      throw redirect(302, `/workspaces/${workspace.id}`);
+      return workspace;
     } catch (err) {
       if (err instanceof Response) {
         throw err;

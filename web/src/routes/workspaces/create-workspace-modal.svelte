@@ -41,11 +41,11 @@
       method="POST"
       action="?/createWorkspace"
       class="p-4 space-y-4"
-      use:enhance={({ formElement, formData, action, cancel }) => {
+      use:enhance={() => {
         return async ({ result, update }) => {
           if (result.type === "redirect") {
             goto(result.location);
-          } else {
+          } else if (result.type === "success") {
             await update();
             closeCreateWorkspaceModal();
           }
