@@ -230,7 +230,7 @@
   });
 </script>
 
-<div class="bg-ctp-mantle font-mono">
+<div class="font-mono">
   <!-- Header -->
   <div
     class="flex items-center justify-between p-6 border-b border-ctp-surface0/10"

@@ -24,7 +24,7 @@
   <CreateWorkspaceModal />
 {/if}
 
-<div class="bg-ctp-mantle font-mono">
+<div class="font-mono">
   <!-- Minimal top bar -->
   <div class="flex items-center justify-between p-6">
     <div class="flex items-stretch gap-4 min-h-fit">
