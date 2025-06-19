@@ -31,7 +31,7 @@
 
 {#if scalarMetrics.length > 0 || timeSeriesNames.length > 0}
   <div class="space-y-2">
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2">
       <div class="text-sm text-ctp-text">metrics</div>
       <div class="text-sm text-ctp-subtext0 font-mono">
         [{scalarMetrics.length + timeSeriesNames.length}]
@@ -66,7 +66,7 @@
 {/if}
 
 {#if metricsView === "chart" && timeSeriesNames.length > 0}
-  <div class="space-y-3">
+  <div class="space-y-2">
     <div class="bg-ctp-surface0/10 border border-ctp-surface0/20 p-2 md:p-4">
       <InteractiveChart experiment={experimentWithMetrics} />
     </div>
