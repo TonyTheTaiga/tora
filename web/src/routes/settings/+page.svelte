@@ -156,24 +156,24 @@
                 required
               />
             </div>
-            <div>
+            <div class="flex gap-2">
               <input
                 id="workspace-description"
                 name="description"
                 placeholder="description (optional)"
-                class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
+                class="flex-1 bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
                 defaultvalue=""
               />
+              <button
+                type="submit"
+                class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all disabled:opacity-50"
+              >
+                <div class="flex items-center gap-2">
+                  <Plus size={14} />
+                </div>
+              </button>
             </div>
           </div>
-          <button
-            type="submit"
-            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all disabled:opacity-50"
-          >
-            <div class="flex items-center gap-2">
-              <Plus size={14} />
-            </div>
-          </button>
         </form>
       </div>
 
@@ -357,24 +357,24 @@
           }}
           class="space-y-3"
         >
-          <div>
+          <div class="flex gap-2">
             <input
               id="key-name"
               type="text"
               name="name"
               placeholder="key_name"
-              class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
+              class="flex-1 bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
               required
             />
+            <button
+              type="submit"
+              class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 px-3 py-2 text-sm transition-all disabled:opacity-50"
+            >
+              <div class="flex items-center gap-2">
+                <Plus size={14} />
+              </div>
+            </button>
           </div>
-          <button
-            type="submit"
-            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 px-3 py-2 text-sm transition-all disabled:opacity-50"
-          >
-            <div class="flex items-center gap-2">
-              <Plus size={14} />
-            </div>
-          </button>
         </form>
       </div>
 
