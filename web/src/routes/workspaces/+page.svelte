@@ -20,14 +20,15 @@
 
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
 
-  const handleKeydown = (event: KeyboardEvent) => {
-    console.log(event);
+  const handleKeydown = (_: KeyboardEvent) => {
+    const serachElement = document.querySelector<HTMLInputElement>(
+      'input[type="search"]',
+    );
+    serachElement?.focus();
   };
 
   onMount(() => {
     window.addEventListener("keydown", handleKeydown);
-    const serachElement = document.querySelector("workspace-search");
-    serachElement?.focus();
 
     return () => {
       window.removeEventListener("keydown", handleKeydown);
