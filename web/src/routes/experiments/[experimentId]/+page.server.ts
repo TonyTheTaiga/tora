@@ -40,6 +40,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
             value: hp.value,
           })) as HyperParam[])
         : [],
+      availableMetrics: item.availableMetrics,
       createdAt: new Date(item.created_at),
       updatedAt: new Date(item.updated_at || item.created_at),
       status: item.status || "COMPLETED",

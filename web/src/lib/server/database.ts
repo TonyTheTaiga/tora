@@ -2,7 +2,6 @@ import { PostgrestError, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "./database.types";
 import type {
   Experiment,
-  ExperimentAndMetrics,
   HyperParam,
   Metric,
   Visibility,
@@ -131,31 +130,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
       handleError(error, `Failed to get experiment with ID ${id}`);
       if (!data) throw new Error(`Experiment with ID ${id} not found.`);
       return mapToExperiment(data);
-    },
-
-    async getExperimentAndMetrics(id: string): Promise<ExperimentAndMetrics> {
-      return timeAsync(
-        "db.getExperimentAndMetrics",
-        async () => {
-          const { data, error } = await client
-            .from("experiment")
-            .select("*, metric(*)")
-            .eq("id", id)
-            .single();
-
-          handleError(
-            error,
-            `Failed to get experiment and metrics for ID ${id}`,
-          );
-          if (!data) throw new Error(`Experiment with ID ${id} not found.`);
-
-          return {
-            experiment: mapToExperiment(data),
-            metrics: (data.metric as Metric[]) ?? [],
-          };
-        },
-        { experimentId: id },
-      );
     },
 
     async getPublicExperiments(): Promise<Experiment[]> {
