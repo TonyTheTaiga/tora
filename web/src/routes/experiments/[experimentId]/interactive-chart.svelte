@@ -246,6 +246,41 @@
     }
   }
 
+  function handleKeydown(event: KeyboardEvent) {
+    if (
+      event.target instanceof HTMLInputElement ||
+      event.target instanceof HTMLTextAreaElement
+    ) {
+      return;
+    }
+
+    switch (event.key) {
+      case "m":
+        if (detailsElement) {
+          event.preventDefault();
+          detailsElement.open = !detailsElement.open;
+        }
+        break;
+
+      case "/":
+        if (detailsElement?.open) {
+          event.preventDefault();
+          const searchInput = detailsElement.querySelector<HTMLInputElement>(
+            'input[type="search"]',
+          );
+          searchInput?.focus();
+        }
+        break;
+
+      case "Escape":
+        if (detailsElement?.open) {
+          event.preventDefault();
+          detailsElement.open = false;
+        }
+        break;
+    }
+  }
+
   onMount(() => {
     const handleThemeChange = () => {
       chartTheme = getTheme();
@@ -254,8 +289,11 @@
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     mediaQuery.addEventListener("change", handleThemeChange);
 
+    window.addEventListener("keydown", handleKeydown);
+
     return () => {
       mediaQuery.removeEventListener("change", handleThemeChange);
+      window.removeEventListener("keydown", handleKeydown);
       destroyChart();
     };
   });
