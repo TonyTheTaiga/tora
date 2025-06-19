@@ -120,15 +120,23 @@
   >
     <!-- HEADER -->
     <div
-      class="flex items-center justify-between p-4 border-b border-ctp-surface0/20"
+      class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/10"
     >
-      <div class="flex items-stretch gap-3 min-h-fit">
-        <div class="w-2 bg-ctp-mauve rounded-full self-stretch"></div>
-        <div class="py-1">
-          <h2 id="modal-title" class="text-lg text-ctp-text font-mono">
+      <div
+        class="flex items-stretch gap-3 md:gap-4 min-w-0 flex-1 pr-4 min-h-fit"
+      >
+        <div
+          class="w-2 bg-ctp-mauve rounded-full flex-shrink-0 self-stretch"
+        ></div>
+        <div class="min-w-0 flex-1 py-1">
+          <h2 id="modal-title" class="text-lg md:text-xl text-ctp-text truncate font-mono">
             Edit Experiment
           </h2>
-          <div class="text-sm text-ctp-subtext0">modify experiment config</div>
+          <div class="text-sm text-ctp-subtext0 space-y-1">
+            <div>
+              modify experiment config
+            </div>
+          </div>
         </div>
       </div>
       <button
@@ -136,7 +144,7 @@
           closeEditExperimentModal();
         }}
         type="button"
-        class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 rounded p-1 transition-all"
+        class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 rounded p-1 transition-all flex-shrink-0"
       >
         <X size={14} />
       </button>
@@ -146,7 +154,7 @@
     <form
       method="POST"
       action="/experiments?/update"
-      class="p-4 space-y-4"
+      class="px-4 md:px-6 py-4 space-y-4"
       use:enhance={({ formElement, formData, action, cancel, submitter }) => {
         return async ({ result, update }) => {
           if (result.type === "success" || result.type === "redirect") {
