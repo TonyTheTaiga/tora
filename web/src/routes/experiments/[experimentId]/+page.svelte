@@ -138,40 +138,6 @@
             {/if}
           </button>
         </div>
-        <div class="space-y-1">
-          <div class="text-sm text-ctp-subtext0 flex items-center gap-1">
-            <Activity size={10} />
-            status
-          </div>
-          <div class="text-sm font-mono">
-            <span
-              class="text-ctp-{experiment.status === 'COMPLETED'
-                ? 'green'
-                : experiment.status === 'RUNNING'
-                  ? 'yellow'
-                  : experiment.status === 'FAILED'
-                    ? 'red'
-                    : 'subtext0'}"
-            >
-              {experiment.status?.toLowerCase() || "unknown"}
-            </span>
-          </div>
-        </div>
-        {#if experiment.startedAt}
-          <div class="space-y-1">
-            <div class="text-sm text-ctp-subtext0 flex items-center gap-1">
-              <Clock size={10} />
-              duration
-            </div>
-            <div class="text-sm text-ctp-text font-mono">
-              {experiment.endedAt
-                ? `${Math.round((new Date(experiment.endedAt).getTime() - new Date(experiment.startedAt).getTime()) / 1000)}s`
-                : experiment.status === "RUNNING"
-                  ? `${Math.round((Date.now() - new Date(experiment.startedAt).getTime()) / 1000)}s (running)`
-                  : "n/a"}
-            </div>
-          </div>
-        {/if}
       </div>
       {#if experiment.description}
         <div class="pl-4 md:pl-6 space-y-1">
