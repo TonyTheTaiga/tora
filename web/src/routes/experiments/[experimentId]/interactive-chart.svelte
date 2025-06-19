@@ -4,12 +4,23 @@
   import { ChartLine, ChevronDown } from "lucide-svelte";
   import { onMount, onDestroy } from "svelte";
   import { startTimer } from "$lib/utils/timing";
+  import { browser } from "$app/environment";
 
-  let chartInstance: Chart | null = null;
-  let chartCanvas: HTMLCanvasElement | null = $state(null);
-  interface ExperimentWithMetricData extends Experiment {
-    metricData?: Record<string, number[]>;
-  }
+  const MAX_DATA_POINTS_TO_RENDER = 100;
+  const CHART_COLOR_KEYS = [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "mauve",
+    "pink",
+    "peach",
+    "teal",
+    "sky",
+    "sapphire",
+    "lavender",
+    "maroon",
+  ];
 
   let {
     experiment,
@@ -18,17 +29,30 @@
     experiment: ExperimentWithMetricData;
     selectedMetrics?: string[];
   } = $props();
+
+  let chartInstance: Chart | null = null;
+  let chartCanvas: HTMLCanvasElement | null = $state(null);
+  let detailsElement: HTMLDetailsElement | null = $state(null); // For click-outside logic
+
+  interface ExperimentWithMetricData extends Experiment {
+    metricData?: Record<string, number[]>;
+  }
+
   let metricsData = $state<
     Record<string, { steps: number[]; values: number[] }>
   >({});
-
   let searchFilter = $state<string>("");
-  let availableMetrics = $derived.by(() => experiment.availableMetrics || []);
-  let filteredMetrics = $derived.by(() =>
+
+  let chartTheme = $state(getTheme());
+
+  const availableMetrics = $derived.by(() => experiment.availableMetrics || []);
+  const filteredMetrics = $derived.by(() =>
     availableMetrics.filter((metric) =>
       metric.toLowerCase().includes(searchFilter.toLowerCase()),
     ),
   );
+
+  const chartOptions = $derived.by(() => getChartOptions(chartTheme));
 
   function selectAllMetrics() {
     selectedMetrics = [...availableMetrics];
@@ -46,136 +70,103 @@
     }
   }
 
-  const chartColorKeys = [
-    "red",
-    "blue",
-    "green",
-    "yellow",
-    "mauve",
-    "pink",
-    "peach",
-    "teal",
-    "sky",
-    "sapphire",
-    "lavender",
-    "maroon",
-  ];
-
-  function getChartColors() {
-    const computedStyles = getComputedStyle(document.documentElement);
-    return chartColorKeys.map((colorKey) => {
-      const baseColor = computedStyles
-        .getPropertyValue(`--color-ctp-${colorKey}`)
-        .trim();
+  function getTheme() {
+    if (!browser) {
       return {
-        border: baseColor,
-        bg: `${baseColor}20`,
-        point: baseColor,
+        colors: [],
+        text: "#000",
+        mantle: "#fff",
+        overlay0: "#ccc",
+        sky: "#007bff",
+        fadedGridLines: "#eee",
+        axisTicks: "#333",
       };
-    });
-  }
+    }
 
-  function getThemeUI() {
     const computedStyles = getComputedStyle(document.documentElement);
+    const colors = CHART_COLOR_KEYS.map((key) =>
+      computedStyles.getPropertyValue(`--color-ctp-${key}`).trim(),
+    );
     return {
+      colors,
       text: computedStyles.getPropertyValue("--color-ctp-text").trim(),
-      crust: computedStyles.getPropertyValue("--color-ctp-crust").trim(),
       mantle: computedStyles.getPropertyValue("--color-ctp-mantle").trim(),
-      base: computedStyles.getPropertyValue("--color-ctp-base").trim(),
       overlay0: computedStyles.getPropertyValue("--color-ctp-overlay0").trim(),
-      sky: computedStyles.getPropertyValue("--color-ctp-sky").trim(), // Added for tooltip title
-      // gridLines: `${computedStyles.getPropertyValue("--color-ctp-overlay0").trim()}15`, // Old gridLines
+      sky: computedStyles.getPropertyValue("--color-ctp-sky").trim(),
       fadedGridLines:
         computedStyles.getPropertyValue("--color-ctp-surface1").trim() + "33",
       axisTicks: computedStyles.getPropertyValue("--color-ctp-subtext0").trim(),
     };
   }
 
-  onMount(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleThemeChange = () => {
-      if (chartInstance) {
-        updateChart();
-      }
+  function getChartOptions(ui: ReturnType<typeof getTheme>) {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      parsing: false as const,
+      normalized: true,
+      interaction: {
+        mode: "nearest" as const,
+        intersect: false,
+        axis: "x" as const,
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: "top" as const,
+          labels: {
+            color: ui.text,
+            usePointStyle: true,
+            pointStyle: "circle",
+            padding: 15,
+            font: { size: 11 },
+          },
+        },
+        tooltip: {
+          enabled: true,
+          backgroundColor: ui.mantle + "cc",
+          titleColor: ui.sky,
+          bodyColor: ui.text,
+          borderColor: ui.overlay0 + "33",
+          borderWidth: 1,
+          position: "nearest" as const,
+          caretPadding: 12,
+          cornerRadius: 8,
+          displayColors: true,
+          titleFont: { size: 13, weight: "bold" as const },
+          bodyFont: { size: 12 },
+          padding: 12,
+          callbacks: {
+            title: (tooltipItems: any) => `Step ${tooltipItems[0].parsed.x}`,
+            label: (context: any) =>
+              `${context.dataset.label}: ${context.parsed.y.toFixed(4)}`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          type: "linear" as const,
+          title: { display: true, text: "Step", color: ui.axisTicks },
+          ticks: { color: ui.axisTicks },
+          grid: { color: ui.fadedGridLines },
+        },
+        y: {
+          type: "logarithmic" as const,
+          title: { display: true, text: "Value (log)", color: ui.axisTicks },
+          ticks: { color: ui.axisTicks },
+          grid: { color: ui.fadedGridLines },
+        },
+      },
+      onHover: (event: any, activeElements: any[]) => {
+        (event.native.target as HTMLElement).style.cursor =
+          activeElements.length > 0 ? "pointer" : "default";
+      },
     };
-
-    mediaQuery.addEventListener("change", handleThemeChange);
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (
-          mutation.attributeName === "class" &&
-          mutation.target === document.documentElement
-        ) {
-          const classList = (mutation.target as Element).classList;
-          if (classList.contains("dark") || classList.contains("light")) {
-            handleThemeChange();
-          }
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => {
-      mediaQuery.removeEventListener("change", handleThemeChange);
-      observer.disconnect();
-    };
-  });
-
-  // Fallback DOM listener for touchend events (Chart.js plugins don't always receive them reliably)
-  $effect(() => {
-    const currentCanvas = chartCanvas;
-
-    if (currentCanvas) {
-      const clearTooltipOnTouchEnd = () => {
-        if (chartInstance && chartInstance.tooltip) {
-          if (typeof chartInstance.tooltip.setActiveElements === "function") {
-            chartInstance.tooltip.setActiveElements([], { x: 0, y: 0 });
-            chartInstance.update("none");
-          }
-        }
-      };
-
-      currentCanvas.addEventListener("touchend", clearTooltipOnTouchEnd);
-      currentCanvas.addEventListener("touchcancel", clearTooltipOnTouchEnd);
-
-      return () => {
-        currentCanvas.removeEventListener("touchend", clearTooltipOnTouchEnd);
-        currentCanvas.removeEventListener(
-          "touchcancel",
-          clearTooltipOnTouchEnd,
-        );
-      };
-    }
-  });
-
-  onDestroy(() => {
-    destroyChart();
-  });
-
-  function downloadChart() {
-    if (!chartCanvas) return;
-    const link = document.createElement("a");
-    link.href = chartCanvas.toDataURL("image/png");
-    link.download = `${experiment.id}-chart.png`;
-    link.click();
   }
 
-  function destroyChart() {
-    if (chartInstance) {
-      chartInstance.destroy();
-      chartInstance = null;
-    }
-  }
-
-  function updateChart() {
-    const timer = startTimer("chart.updateChart", {
+  function createOrUpdateChart() {
+    const timer = startTimer("chart.createOrUpdate", {
       experimentId: experiment.id.toString(),
-      selectedMetricsCount: selectedMetrics.length.toString(),
     });
 
     if (!chartCanvas || selectedMetrics.length === 0) {
@@ -185,33 +176,32 @@
     }
 
     try {
-      const colors = getChartColors();
-      const ui = getThemeUI();
-
       const datasets = selectedMetrics.map((metric, index) => {
-        const colorIndex = index % colors.length;
-        const color = colors[colorIndex];
-        const steps = metricsData[metric]?.steps || [];
-        const values = metricsData[metric]?.values || [];
-        const rawDataPoints = steps.map((step, i) => ({
+        const color = chartTheme.colors[index % chartTheme.colors.length];
+        const metricData = metricsData[metric] || { steps: [], values: [] };
+
+        const rawDataPoints = metricData.steps.map((step, i) => ({
           x: step,
-          y: values[i],
+          y: metricData.values[i],
         }));
 
-        const targetSamples = 50;
-        const dataPoints =
-          rawDataPoints.length > targetSamples
+        const data =
+          rawDataPoints.length > MAX_DATA_POINTS_TO_RENDER
             ? rawDataPoints.filter(
                 (_, i) =>
-                  i % Math.ceil(rawDataPoints.length / targetSamples) === 0,
+                  i %
+                    Math.ceil(
+                      rawDataPoints.length / MAX_DATA_POINTS_TO_RENDER,
+                    ) ===
+                  0,
               )
             : rawDataPoints;
 
         return {
           label: metric,
-          data: dataPoints,
-          borderColor: color.border,
-          backgroundColor: color.border + "30",
+          data,
+          borderColor: color,
+          backgroundColor: color + "30",
           fill: true,
           pointRadius: 0,
           pointHoverRadius: 0,
@@ -220,196 +210,100 @@
         };
       });
 
-      if (!chartInstance) {
+      if (chartInstance) {
+        chartInstance.data.datasets = datasets;
+        chartInstance.options = chartOptions;
+        chartInstance.update();
+      } else {
         chartInstance = new Chart(chartCanvas, {
           type: "line",
           data: { datasets },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            parsing: false,
-            normalized: true,
-            events: [
-              "mousemove",
-              "mouseout",
-              "click",
-              "touchstart",
-              "touchmove",
-              "touchend",
-            ],
-            interaction: {
-              mode: "nearest",
-              intersect: false,
-              axis: "x",
-            },
-            plugins: {
-              legend: {
-                display: true,
-                position: "top",
-                labels: {
-                  color: ui.text,
-                  usePointStyle: true,
-                  pointStyle: "circle",
-                  padding: 15,
-                  font: {
-                    size: 11,
-                  },
-                },
-              },
-              tooltip: {
-                enabled: true,
-                backgroundColor: ui.base + "cc", // Updated tooltip background
-                titleColor: ui.sky, // Using ui.sky from getThemeUI
-                bodyColor: ui.text,
-                borderColor: ui.overlay0 + "33", // Updated tooltip border
-                borderWidth: 1, // Added border width for tooltip
-                position: "nearest",
-                caretPadding: 12,
-                cornerRadius: 8,
-                displayColors: true,
-                titleFont: {
-                  size: 13,
-                  weight: "bold",
-                },
-                bodyFont: {
-                  size: 12,
-                },
-                padding: 12,
-                callbacks: {
-                  title: function (tooltipItems) {
-                    return `Step ${tooltipItems[0].parsed.x}`;
-                  },
-                  label: function (context) {
-                    const value = context.parsed.y;
-                    return `${context.dataset.label}: ${value.toFixed(4)}`;
-                  },
-                },
-              },
-            },
-            scales: {
-              x: {
-                type: "linear",
-                position: "bottom",
-                title: {
-                  display: true,
-                  text: "Step",
-                  color: ui.axisTicks, // Updated axis title color
-                },
-                ticks: {
-                  color: ui.axisTicks, // Updated axis ticks color
-                },
-                grid: {
-                  color: ui.fadedGridLines, // Updated grid line color
-                },
-              },
-              y: {
-                type: "logarithmic",
-                position: "left",
-                title: {
-                  display: true,
-                  text: "Value (log)",
-                  color: ui.axisTicks, // Updated axis title color
-                },
-                ticks: {
-                  color: ui.axisTicks, // Updated axis ticks color
-                },
-                grid: {
-                  color: ui.fadedGridLines, // Updated grid line color
-                },
-              },
-            },
-            onHover: (event, activeElements) => {
-              if (event.native) {
-                (event.native.target as HTMLElement).style.cursor =
-                  activeElements.length > 0 ? "pointer" : "default";
-              }
-            },
-          },
-          plugins: [
-            {
-              id: "touchAndTooltipHandler",
-              beforeEvent(chart, args) {
-                const event = args.event;
-                const eventType = event.type as string;
-
-                if (eventType === "touchstart" || eventType === "touchmove") {
-                  if (event.native) {
-                    event.native.preventDefault();
-                  }
-                }
-
-                if (
-                  event.type === "mouseout" ||
-                  eventType === "touchend" ||
-                  eventType === "mouseup"
-                ) {
-                  if (
-                    chart.tooltip &&
-                    typeof chart.tooltip.setActiveElements === "function"
-                  ) {
-                    chart.tooltip.setActiveElements([], { x: 0, y: 0 });
-                    chart.update("none");
-                  }
-                }
-              },
-              afterEvent(chart, args) {
-                const event = args.event;
-                const eventType = event.type as string;
-
-                // Additional cleanup for mouse leave
-                if (eventType === "mouseleave") {
-                  if (
-                    chart.tooltip &&
-                    typeof chart.tooltip.setActiveElements === "function"
-                  ) {
-                    chart.tooltip.setActiveElements([], { x: 0, y: 0 });
-                    chart.update("none");
-                  }
-                }
-              },
-            },
-          ],
+          options: chartOptions,
         });
-      } else {
-        chartInstance.data.datasets = datasets;
-        chartInstance.update();
-        timer.end({ success: "true" });
-        return;
       }
       timer.end({ success: "true" });
     } catch (error) {
+      console.error("Failed to create or update chart:", error);
       timer.end({
         error: error instanceof Error ? error.message : "Unknown error",
       });
-      console.error("Failed to create chart:", error);
     }
   }
 
-  function loadMetricData(metric: string) {
-    if (!metricsData[metric]) {
-      const values = experiment.metricData?.[metric] || [];
-      const steps = values.map((_, i) => i);
-      metricsData[metric] = { steps, values };
+  function destroyChart() {
+    if (chartInstance) {
+      chartInstance.destroy();
+      chartInstance = null;
     }
   }
+
+  function downloadChart() {
+    if (chartCanvas) {
+      const link = document.createElement("a");
+      link.href = chartCanvas.toDataURL("image/png");
+      link.download = `${experiment.id}-chart.png`;
+      link.click();
+    }
+  }
+
+  onMount(() => {
+    const handleThemeChange = () => {
+      chartTheme = getTheme();
+    };
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    mediaQuery.addEventListener("change", handleThemeChange);
+
+    const observer = new MutationObserver(() => handleThemeChange());
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleThemeChange);
+      observer.disconnect();
+      destroyChart();
+    };
+  });
 
   $effect(() => {
-    if (selectedMetrics.length > 0) {
-      for (const metric of selectedMetrics) {
-        loadMetricData(metric);
+    const el = detailsElement;
+    if (!el) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (el && !el.contains(event.target as Node)) {
+        el.open = false;
       }
-      updateChart();
-    } else {
-      destroyChart();
-    }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   });
+
+  $effect(() => {
+    for (const metric of selectedMetrics) {
+      if (!metricsData[metric]) {
+        const values = experiment.metricData?.[metric] || [];
+        // Ensure values are positive for log scale. Replace 0 or negative with a small number.
+        const sanitizedValues = values.map((v) => (v > 0 ? v : 1e-9));
+        metricsData[metric] = {
+          steps: sanitizedValues.map((_, i) => i),
+          values: sanitizedValues,
+        };
+      }
+    }
+    createOrUpdateChart();
+  });
+
+  onDestroy(destroyChart);
 </script>
 
 <div class="w-full">
   <!-- Metric Selector -->
   {#if availableMetrics.length > 0}
     <div class="mb-4">
-      <details class="relative">
+      <details class="relative" bind:this={detailsElement}>
         <summary
           class="flex items-center justify-between cursor-pointer p-2 md:p-3 bg-ctp-surface0/20 border border-ctp-surface0/30 hover:bg-ctp-surface0/30 transition-colors text-xs md:text-sm"
         >
