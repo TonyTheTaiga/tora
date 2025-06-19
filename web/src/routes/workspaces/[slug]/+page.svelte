@@ -68,10 +68,10 @@
   }
 
   const handleKeydown = (_: KeyboardEvent) => {
-    const serachElement = document.querySelector<HTMLInputElement>(
+    const searchElement = document.querySelector<HTMLInputElement>(
       'input[type="search"]',
     );
-    serachElement?.focus();
+    searchElement?.focus();
   };
 
   onMount(() => {
