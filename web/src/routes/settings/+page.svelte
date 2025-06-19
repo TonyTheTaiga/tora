@@ -9,12 +9,8 @@
   let { data } = $props();
 
   let createdKey: string = $state("");
-  let workspaceError: string = $state("");
-  let apiKeyError: string = $state("");
   let inviteModalOpen = $state(false);
   let workspaceToInvite: any = $state(null);
-  let pendingInvitations = $state<any[]>([]);
-  let invitationsLoading = $state(true);
 
   const ownedWorkspaces = $derived(
     data.workspaces?.filter((w) => w.role === "OWNER") || [],
@@ -22,6 +18,7 @@
   const sharedWorkspaces = $derived(
     data.workspaces?.filter((w) => w.role !== "OWNER") || [],
   );
+  let pendingInvitations = $derived(data.invitations ? data.invitations : []);
 
   function openInviteModal(workspace: any) {
     workspaceToInvite = workspace;
@@ -51,19 +48,6 @@
     }
   }
 
-  async function loadInvitations() {
-    try {
-      const response = await fetch("/api/workspace-invitations");
-      if (response.ok) {
-        pendingInvitations = await response.json();
-      }
-    } catch (error) {
-      console.error("Failed to load invitations:", error);
-    } finally {
-      invitationsLoading = false;
-    }
-  }
-
   async function respondToInvitation(invitationId: string, accept: boolean) {
     try {
       const response = await fetch(
@@ -85,10 +69,6 @@
       console.error("Failed to respond to invitation:", error);
     }
   }
-
-  $effect(() => {
-    loadInvitations();
-  });
 </script>
 
 <div class="bg-ctp-base font-mono">
@@ -196,10 +176,6 @@
           </button>
         </form>
       </div>
-
-      {#if workspaceError}
-        <div class="text-ctp-red text-sm mb-4">error: {workspaceError}</div>
-      {/if}
 
       <!-- Workspace listings -->
       <div class="space-y-4">
@@ -314,7 +290,7 @@
           <div class="text-ctp-subtext0 text-sm">no workspaces found</div>
         {/if}
 
-        {#if !invitationsLoading && pendingInvitations.length > 0}
+        {#if pendingInvitations.length > 0}
           <div class="text-xs text-ctp-subtext0 mb-2 mt-4 font-mono">
             invitations:
           </div>
@@ -325,10 +301,10 @@
               >
                 <span class="text-ctp-yellow w-3"></span>
                 <span class="text-ctp-text flex-1 truncate min-w-0"
-                  >{invitation.workspaceName}</span
+                  >{invitation.workspaceId}</span
                 >
                 <span class="text-xs text-ctp-subtext1 truncate"
-                  >from {invitation.fromEmail}</span
+                  >from {invitation.from}</span
                 >
                 <div class="flex items-center gap-1 ml-2">
                   <button
@@ -401,10 +377,6 @@
           </button>
         </form>
       </div>
-
-      {#if apiKeyError}
-        <div class="text-ctp-red text-sm mb-4">error: {apiKeyError}</div>
-      {/if}
 
       {#if createdKey !== ""}
         <div class="bg-ctp-green/10 border border-ctp-green/20 p-3 mb-4">

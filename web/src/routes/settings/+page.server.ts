@@ -37,8 +37,13 @@ export const load: PageServerLoad = async ({ locals }) => {
     console.error("Error fetching API keys:", err);
   }
 
+  const invitations = await locals.dbClient.getPendingInvitationsTo(
+    user.id,
+    "PENDING",
+  );
+
   timer.end({});
-  return { workspaces, apiKeys, session };
+  return { workspaces, apiKeys, invitations, session };
 };
 
 export const actions: Actions = {
