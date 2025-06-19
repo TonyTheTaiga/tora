@@ -97,15 +97,6 @@
       <div class="py-1">
         <h1 class="text-xl font-bold text-ctp-text">{experiment.name}</h1>
         <div class="text-sm text-ctp-subtext0 flex items-center gap-3">
-          <span>
-            {new Date(experiment.createdAt).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "2-digit",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </span>
           {#if experiment.visibility === "PUBLIC"}
             <Globe size={12} class="text-ctp-green" />
           {:else}
@@ -117,20 +108,12 @@
             {experiment.description}
           </div>
         {/if}
-        <div class="flex items-center gap-1 mt-2">
-          <Hash size={10} class="text-ctp-subtext0" />
-          <button
-            onclick={() => copyToClipboard(experiment.id, "id")}
-            class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex items-center gap-1 font-mono text-sm"
-          >
-            <span class="truncate max-w-32">{experiment.id}</span>
-            {#if copiedId}
-              <ClipboardCheck size={10} class="text-ctp-green" />
-            {:else}
-              <Copy size={10} />
-            {/if}
-          </button>
-        </div>
+        <button
+          onclick={() => copyToClipboard(experiment.id, "id")}
+          class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex text-start font-mono text-sm"
+        >
+          <span>{experiment.id}</span>
+        </button>
       </div>
     </div>
   </div>

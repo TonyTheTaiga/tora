@@ -11,7 +11,7 @@
   import ExperimentsListMobile from "./experiments-list-mobile.svelte";
   import ExperimentsListDesktop from "./experiments-list-desktop.svelte";
   import type { Experiment } from "$lib/types";
-  import { Plus, Copy, ClipboardCheck } from "lucide-svelte";
+  import { Plus } from "lucide-svelte";
   import { onMount } from "svelte";
 
   let { data = $bindable() } = $props();
@@ -127,21 +127,13 @@
             {/if}
           </div>
           {#if currentWorkspace?.id}
-            <div class="flex items-center gap-2">
-              <span>id:</span>
-              <button
-                onclick={() => copyToClipboard(currentWorkspace.id)}
-                class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex items-center gap-1"
-                title="click to copy workspace id"
-              >
-                <span>{currentWorkspace.id}</span>
-                {#if copiedId}
-                  <ClipboardCheck size={10} class="text-ctp-green" />
-                {:else}
-                  <Copy size={10} />
-                {/if}
-              </button>
-            </div>
+            <button
+              onclick={() => copyToClipboard(currentWorkspace.id)}
+              class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex text-start"
+              title="click to copy workspace id"
+            >
+              <span>{currentWorkspace.id}</span>
+            </button>
           {/if}
         </div>
       </div>
