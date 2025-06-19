@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Copy, ClipboardCheck } from "lucide-svelte";
   import InteractiveChart from "./interactive-chart.svelte";
   import type { Experiment } from "$lib/types";
 
@@ -8,15 +7,11 @@
     scalarMetrics,
     timeSeriesNames,
     initialLimit = 10,
-    onCopyMetric,
-    copiedMetric,
   }: {
     experiment: Experiment;
     scalarMetrics: Array<{ name: string; value: any }>;
     timeSeriesNames: string[];
     initialLimit?: number;
-    onCopyMetric: (value: string, key: string) => void;
-    copiedMetric: string | null;
   } = $props();
 
   let experimentWithMetrics = $derived({
@@ -94,7 +89,6 @@
           <div class="w-4">•</div>
           <div class="flex-1">metric</div>
           <div class="w-20 text-right">value</div>
-          <div class="w-8"></div>
         </div>
 
         <div class="{showAllScalarMetrics ? '' : 'max-h-60'} overflow-y-auto">
@@ -113,19 +107,6 @@
                 {typeof metric.value === "number"
                   ? metric.value.toFixed(4)
                   : metric.value}
-              </div>
-              <div class="w-8">
-                <button
-                  onclick={() =>
-                    onCopyMetric(String(metric.value), metric.name)}
-                  class="text-ctp-subtext0 hover:text-ctp-text transition-colors"
-                >
-                  {#if copiedMetric === metric.name}
-                    <ClipboardCheck size={10} class="text-ctp-green" />
-                  {:else}
-                    <Copy size={10} />
-                  {/if}
-                </button>
               </div>
             </div>
           {/each}
@@ -150,16 +131,6 @@
                   {metric.name}
                 </div>
               </div>
-              <button
-                onclick={() => onCopyMetric(String(metric.value), metric.name)}
-                class="text-ctp-subtext0 hover:text-ctp-text transition-colors"
-              >
-                {#if copiedMetric === metric.name}
-                  <ClipboardCheck size={10} class="text-ctp-green" />
-                {:else}
-                  <Copy size={10} />
-                {/if}
-              </button>
             </div>
             <div class="flex items-center justify-between text-sm">
               <div class="text-ctp-blue font-mono" title={String(metric.value)}>

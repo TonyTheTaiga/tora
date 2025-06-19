@@ -1,17 +1,12 @@
 <script lang="ts">
-  import { Copy, ClipboardCheck } from "lucide-svelte";
   import type { HyperParam } from "$lib/types";
 
   let {
     hyperparams,
     initialLimit = 10,
-    onCopyParam,
-    copiedParam
   }: {
     hyperparams: HyperParam[];
     initialLimit?: number;
-    onCopyParam: (value: string, key: string) => void;
-    copiedParam: string | null;
   } = $props();
 
   let showAllParams = $state(false);
@@ -37,8 +32,7 @@
           <div
             class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-ctp-surface0/10 hover:bg-ctp-surface0/20 px-3 py-2 transition-colors text-sm gap-1 sm:gap-2"
           >
-            <span class="text-ctp-subtext0 font-mono truncate"
-              >{param.key}</span
+            <span class="text-ctp-subtext0 font-mono truncate">{param.key}</span
             >
             <div class="flex items-center gap-2">
               <span
@@ -47,16 +41,6 @@
               >
                 {param.value}
               </span>
-              <button
-                onclick={() => onCopyParam(String(param.value), param.key)}
-                class="text-ctp-subtext0 hover:text-ctp-text transition-colors"
-              >
-                {#if copiedParam === param.key}
-                  <ClipboardCheck size={10} class="text-ctp-green" />
-                {:else}
-                  <Copy size={10} />
-                {/if}
-              </button>
             </div>
           </div>
         {/each}
