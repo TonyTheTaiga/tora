@@ -107,300 +107,184 @@
         };
       }}
     >
-      <div class="space-y-3">
+      <div class="space-y-4">
         <!-- Basic config -->
-        <div class="space-y-1 text-base overflow-hidden">
-          <div class="grid grid-cols-[auto_auto_1fr] gap-1 items-center">
-            <span class="text-ctp-subtext0">name</span>
-            <span class="text-ctp-text">=</span>
-            <input
-              name="experiment-name"
-              type="text"
-              class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-mauve focus:border-ctp-mauve transition-all text-base min-w-0"
-              placeholder="experiment_name"
-              required
-            />
+        <div class="border border-ctp-surface0/20 p-3">
+          <div class="text-base text-ctp-text font-medium mb-3">
+            experiment config
           </div>
-          <div class="grid grid-cols-[auto_auto_1fr] gap-1 items-start">
-            <span class="text-ctp-subtext0">desc</span>
-            <span class="text-ctp-text">=</span>
-            <textarea
-              name="experiment-description"
-              rows="2"
-              class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-mauve focus:border-ctp-mauve transition-all resize-none text-base min-w-0"
-              placeholder="description"
-              required
-            ></textarea>
+          <div class="space-y-3">
+            <div>
+              <input
+                name="experiment-name"
+                type="text"
+                class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-mauve focus:border-ctp-mauve transition-all text-sm"
+                placeholder="experiment_name"
+                required
+              />
+            </div>
+            <div>
+              <textarea
+                name="experiment-description"
+                rows="2"
+                class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-mauve focus:border-ctp-mauve transition-all resize-none text-sm"
+                placeholder="description"
+                required
+              ></textarea>
+            </div>
           </div>
         </div>
 
         <!-- Visibility Setting -->
-        <div class="space-y-1">
-          <div class="text-base text-ctp-text">Visibility</div>
+        <div class="border border-ctp-surface0/20 p-3">
+          <div class="text-base text-ctp-text font-medium mb-3">visibility</div>
           <input type="hidden" name="visibility" value={visibility} />
 
-          <div class="flex gap-2 text-base">
+          <div class="flex gap-2 text-sm">
             <button
               type="button"
-              class={"flex items-center gap-1 px-2 py-1 transition-colors " +
+              class={"flex items-center gap-1 px-3 py-2 transition-colors " +
                 (visibility === "PUBLIC"
                   ? "bg-ctp-green/20 text-ctp-green border border-ctp-green/30"
                   : "bg-ctp-surface0/20 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text border border-ctp-surface0/30")}
               onclick={() => (visibility = "PUBLIC")}
             >
-              <Globe size={10} />
+              <Globe size={12} />
               <span>public</span>
             </button>
 
             <button
               type="button"
-              class={"flex items-center gap-1 px-2 py-1 transition-colors " +
+              class={"flex items-center gap-1 px-3 py-2 transition-colors " +
                 (visibility === "PRIVATE"
                   ? "bg-ctp-red/20 text-ctp-red border border-ctp-red/30"
                   : "bg-ctp-surface0/20 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text border border-ctp-surface0/30")}
               onclick={() => (visibility = "PRIVATE")}
             >
-              <Lock size={10} />
+              <Lock size={12} />
               <span>private</span>
             </button>
           </div>
         </div>
 
-        <!-- Advanced config sections -->
-        <div class="space-y-3">
-          <!-- Tags Section -->
-          <details class="group">
-            <summary
-              class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
-            >
-              <TagIcon size={16} class="text-ctp-blue" />
-              <span class="text-sm">tags</span>
-              <ChevronDown
-                size={16}
-                class="ml-auto text-ctp-subtext0 group-open:rotate-180"
-              />
-            </summary>
-            <div class="pt-2 pl-6">
-              <div class="flex flex-wrap items-center gap-2">
-                {#each tags as tag, i}
-                  <input type="hidden" value={tag} name="tags.{i}" />
-                  <span
-                    class="inline-flex items-center px-2 py-0.5 text-sm bg-ctp-blue/10 text-ctp-blue border-0 group"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      class="text-ctp-blue/70 hover:text-ctp-red transition-colors ml-1.5"
-                      onclick={() => tags.splice(i, 1)}
-                      aria-label="Remove tag"
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                {/each}
-
-                {#if addingNewTag}
-                  <div class="flex items-center gap-1">
-                    <input
-                      type="text"
-                      bind:value={tag}
-                      class="w-40 px-2 py-1.5 text-sm bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue transition-all placeholder-ctp-overlay0 shadow-sm"
-                      placeholder="New tag"
-                      onkeydown={(event) => {
-                        if (event.key === "Enter") {
-                          event.preventDefault();
-                          addTag();
-                        }
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onclick={(event) => {
-                        event.preventDefault();
-                        addTag();
-                      }}
-                      class="p-1.5 rounded-full text-ctp-blue hover:bg-ctp-blue/10 transition-all"
-                    >
-                      <Plus size={14} />
-                    </button>
-                  </div>
-                {:else}
-                  <button
-                    type="button"
-                    onclick={(event) => {
-                      event.preventDefault();
-                      addingNewTag = true;
-                    }}
-                    class="inline-flex items-center gap-1 py-0.5 px-2 text-sm bg-transparent text-ctp-blue border border-dashed border-ctp-blue/50 hover:bg-ctp-blue/10 transition-all"
-                  >
-                    <Plus size={12} />
-                    Add Tag
-                  </button>
-                {/if}
-              </div>
-            </div>
-          </details>
-
-          <!-- Parameters Section -->
-          <details class="group">
-            <summary
-              class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
-            >
-              <Settings size={16} class="text-ctp-sapphire" />
-              <span class="text-sm">parameters</span>
-              <ChevronDown
-                size={16}
-                class="ml-auto text-ctp-subtext0 group-open:rotate180"
-              />
-            </summary>
-            <div class="pt-2 pl-6">
-              <div class="space-y-3">
-                {#each hyperparams as pair, i}
-                  <div class="flex gap-2 items-center">
-                    <input
-                      class="w-full px-3 py-1.5 text-sm bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-sapphire transition-all flex-1 placeholder-ctp-overlay0 shadow-sm"
-                      name="hyperparams.{i}.key"
-                      placeholder="Parameter name"
-                      required
-                    />
-                    <input
-                      class="w-full px-3 py-1.5 text-sm bg-ctp-base border-0 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-sapphire transition-all flex-1 placeholder-ctp-overlay0 shadow-sm"
-                      name="hyperparams.{i}.value"
-                      placeholder="Value"
-                      required
-                    />
-                    <button
-                      type="button"
-                      class="p-1.5 text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-red/10 rounded-full transition-all"
-                      onclick={() => hyperparams.splice(i, 1)}
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                {/each}
-
+        <!-- Tags Section -->
+        <div class="border border-ctp-surface0/20 p-3">
+          <div class="text-base text-ctp-text font-medium mb-3">tags</div>
+          <div class="flex flex-wrap items-center gap-2">
+            {#each tags as tag, i}
+              <input type="hidden" value={tag} name="tags.{i}" />
+              <span
+                class="inline-flex items-center px-2 py-1 text-sm bg-ctp-blue/10 text-ctp-blue border border-ctp-blue/30"
+              >
+                {tag}
                 <button
                   type="button"
-                  class="inline-flex items-center gap-1.5 py-1.5 px-3 text-sm rounded-lg bg-ctp-sapphire/10 text-ctp-sapphire border border-dashed border-ctp-sapphire/50 hover:bg-ctp-sapphire/20 transition-all"
-                  onclick={() =>
-                    (hyperparams = [...hyperparams, { key: "", value: "" }])}
+                  class="text-ctp-blue/70 hover:text-ctp-red transition-colors ml-1.5"
+                  onclick={() => tags.splice(i, 1)}
+                  aria-label="Remove tag"
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            {/each}
+
+            {#if addingNewTag}
+              <div class="flex items-center gap-2">
+                <input
+                  type="text"
+                  bind:value={tag}
+                  class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
+                  placeholder="tag_name"
+                  onkeydown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      addTag();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onclick={(event) => {
+                    event.preventDefault();
+                    addTag();
+                  }}
+                  class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-2 py-1 text-sm transition-all"
                 >
                   <Plus size={14} />
-                  Add Parameter
                 </button>
               </div>
-            </div>
-          </details>
+            {:else}
+              <button
+                type="button"
+                onclick={(event) => {
+                  event.preventDefault();
+                  addingNewTag = true;
+                }}
+                class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-2 py-1 text-sm transition-all"
+              >
+                <Plus size={12} />
+              </button>
+            {/if}
+          </div>
+        </div>
 
-          <!-- References Section -->
-          <details class="group">
-            <summary
-              class="flex items-center gap-2 cursor-pointer text-ctp-subtext0 hover:text-ctp-text py-1.5"
-            >
-              <Link size={16} class="text-ctp-lavender" />
-              <span class="text-sm">references</span>
-              <ChevronDown
-                size={16}
-                class="ml-auto text-ctp-subtext0 group-open:rotate-180"
-              />
-            </summary>
-            <div class="pt-2 pl-6">
-              {#if reference}
-                <input
-                  class="hidden"
-                  name="reference-id"
-                  bind:value={reference.id}
-                />
-                <div class="mb-3">
-                  <span
-                    class="inline-flex items-center px-2 py-1 text-sm rounded-lg bg-ctp-lavender/10 text-ctp-lavender border-0"
-                  >
-                    <span title="Referenced experiment">{reference.name}</span>
-                    <button
-                      type="button"
-                      class="text-ctp-lavender/70 hover:text-ctp-red transition-colors ml-1.5"
-                      onclick={clearReference}
-                      aria-label="Remove reference"
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
+        <!-- References Section -->
+        <div class="border border-ctp-surface0/20 p-3">
+          <div class="text-base text-ctp-text font-medium mb-3">
+            reference experiment
+          </div>
+
+          {#if reference}
+            <input
+              class="hidden"
+              name="reference-id"
+              bind:value={reference.id}
+            />
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-ctp-lavender text-sm">•</span>
+              <span class="text-ctp-text text-sm">{reference.name}</span>
+              <button
+                type="button"
+                class="text-ctp-subtext0 hover:text-ctp-red transition-colors ml-auto"
+                onclick={clearReference}
+                title="Remove reference"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          {/if}
+
+          <div class="space-y-2">
+            <input
+              type="search"
+              placeholder="Search experiments..."
+              bind:value={searchInput}
+              class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-lavender focus:border-ctp-lavender transition-all text-sm"
+            />
+
+            <div class="max-h-32 overflow-y-auto space-y-1">
+              {#each filteredExperiments as exp}
+                <button
+                  type="button"
+                  class="w-full flex items-center gap-2 p-2 hover:bg-ctp-surface0/10 text-left text-sm transition-colors"
+                  onclick={() => selectReference(exp)}
+                >
+                  <span class="text-ctp-lavender">•</span>
+                  <span class="text-ctp-text truncate">{exp.name}</span>
+                </button>
+              {/each}
+
+              {#if filteredExperiments.length === 0 && experiments.length > 0}
+                <div class="p-2 text-sm text-ctp-subtext0 text-center">
+                  No experiments found
+                </div>
+              {:else if experiments.length === 0}
+                <div class="p-2 text-sm text-ctp-subtext0 text-center">
+                  No experiments in this workspace yet
                 </div>
               {/if}
-
-              <!-- Dropdown selector -->
-              <details class="relative">
-                <summary
-                  class="flex items-center justify-between cursor-pointer p-2 hover:bg-ctp-surface1 transition-colors rounded-lg"
-                >
-                  <span class="text-sm text-ctp-text">
-                    Select reference experiment
-                  </span>
-                  <ChevronDown size={16} class="text-ctp-subtext1" />
-                </summary>
-
-                <div
-                  class="absolute top-full left-0 right-0 mt-1 z-30 max-h-60 overflow-y-auto border border-ctp-surface1/30 bg-ctp-surface0/80 backdrop-blur-sm rounded-lg shadow-lg"
-                >
-                  <!-- Search filter -->
-                  <div class="p-2 border-b border-ctp-surface1/20">
-                    <input
-                      type="search"
-                      placeholder="Filter experiments..."
-                      bind:value={searchInput}
-                      class="w-full px-2 py-1 text-sm bg-ctp-base border border-ctp-surface1 rounded text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:border-ctp-lavender"
-                    />
-                  </div>
-
-                  <!-- Control buttons -->
-                  <div class="flex gap-2 p-2 border-b border-ctp-surface1/20">
-                    <button
-                      onclick={clearReference}
-                      type="button"
-                      class="px-2 py-1 text-sm bg-ctp-red/20 text-ctp-red rounded hover:bg-ctp-red/30 transition-colors"
-                    >
-                      Clear Selection
-                    </button>
-                    <button
-                      onclick={clearSearch}
-                      type="button"
-                      class="px-2 py-1 text-sm bg-ctp-blue/20 text-ctp-blue rounded hover:bg-ctp-blue/30 transition-colors"
-                    >
-                      Clear Filter
-                    </button>
-                  </div>
-
-                  <!-- Experiment list -->
-                  <div class="p-1">
-                    {#each filteredExperiments as exp}
-                      <button
-                        type="button"
-                        class="w-full flex items-center gap-2 p-2 hover:bg-ctp-surface1 rounded cursor-pointer text-left"
-                        onclick={() => selectReference(exp)}
-                      >
-                        <div
-                          class="w-2 h-2 rounded-full bg-ctp-lavender flex-shrink-0"
-                        ></div>
-                        <span class="text-sm text-ctp-text truncate"
-                          >{exp.name}</span
-                        >
-                      </button>
-                    {/each}
-
-                    {#if filteredExperiments.length === 0 && experiments.length > 0}
-                      <div class="p-2 text-sm text-ctp-subtext0 text-center">
-                        No experiments found
-                      </div>
-                    {:else if experiments.length === 0}
-                      <div class="p-2 text-sm text-ctp-subtext0 text-center">
-                        No experiments in this workspace yet
-                      </div>
-                    {/if}
-                  </div>
-                </div>
-              </details>
             </div>
-          </details>
+          </div>
         </div>
       </div>
 
