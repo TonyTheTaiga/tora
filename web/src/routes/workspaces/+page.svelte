@@ -98,7 +98,6 @@
               <th class="text-left py-2">name</th>
               <th class="text-right py-2 w-24">role</th>
               <th class="text-right py-2 w-24">modified</th>
-              <th class="text-right py-2 w-20">status</th>
             </tr>
           </thead>
           <tbody>
@@ -134,9 +133,6 @@
                     day: "numeric",
                   })}
                 </td>
-                <td class="py-2 px-1 text-right text-sm text-ctp-green w-20"
-                  >active</td
-                >
               </tr>
             {/each}
           </tbody>
