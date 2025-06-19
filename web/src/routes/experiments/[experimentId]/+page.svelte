@@ -94,8 +94,10 @@
   >
     <div class="flex items-stretch gap-4 min-h-fit">
       <div class="w-2 bg-ctp-blue rounded-full self-stretch"></div>
-      <div class="py-1">
-        <h1 class="text-xl font-bold text-ctp-text">{experiment.name}</h1>
+      <div class="py-1 min-h-0">
+        <h1 class="text-lg md:text-md text-ctp-text truncate font-mono">
+          {experiment.name}
+        </h1>
         <div class="text-sm text-ctp-subtext0 flex items-center gap-3">
           {#if experiment.visibility === "PUBLIC"}
             <Globe size={12} class="text-ctp-green" />
@@ -104,7 +106,7 @@
           {/if}
         </div>
         {#if experiment.description}
-          <div class="text-sm text-ctp-subtext1 mt-1 max-w-2xl">
+          <div class="text-sm text-ctp-subtext1 mt-1 max-w-2xl truncate">
             {experiment.description}
           </div>
         {/if}
