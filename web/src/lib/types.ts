@@ -1,10 +1,5 @@
 import type { Json } from "./server/database.types";
 
-export interface ExperimentAndMetrics {
-  experiment: Experiment;
-  metrics: Metric[];
-}
-
 export type Visibility = "PUBLIC" | "PRIVATE";
 
 export interface Experiment {
