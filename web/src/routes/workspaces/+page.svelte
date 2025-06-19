@@ -86,67 +86,58 @@
         <div>$ search "{searchQuery}"</div>
         <div class="text-ctp-subtext1 ml-2">no results found</div>
       </div>
-    {:else if workspaces.length === 0}
-      <div class="space-y-2 text-base">
-        <div class="text-ctp-subtext0">$ ls -la workspaces/</div>
-        <div class="text-ctp-subtext1 ml-2">total 0</div>
-        <div class="text-ctp-subtext1 ml-2">directory empty</div>
-        <div class="mt-4">
-          <button
-            onclick={() => openCreateWorkspaceModal()}
-            class="text-ctp-blue hover:text-ctp-blue/80 transition-colors"
-          >
-            $ mkdir new_workspace
-          </button>
-        </div>
-      </div>
     {:else}
       <!-- File listing style layout -->
-      <div class="space-y-1">
-        <!-- Header -->
-        <div
-          class="flex items-center text-sm text-ctp-subtext0 pb-2 border-b border-ctp-surface0/20"
-        >
-          <div class="w-4">•</div>
-          <div class="flex-1">name</div>
-          <div class="w-16 text-right">role</div>
-          <div class="w-20 text-right">modified</div>
-          <div class="w-16 text-right">status</div>
-        </div>
-
-        <!-- Workspace entries -->
-        {#each filteredWorkspaces as workspace}
-          <a
-            href={`/workspaces/${workspace.id}`}
-            class="group flex items-center text-base hover:bg-ctp-surface0/20 px-1 py-2 transition-colors"
-          >
-            <div class="w-4 text-ctp-green text-sm"></div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2">
-                <span
-                  class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate"
-                >
-                  {workspace.name}
-                </span>
-                {#if workspace.description}
-                  <span class="text-ctp-subtext1 text-sm truncate">
-                    - {workspace.description}
-                  </span>
-                {/if}
-              </div>
-            </div>
-            <div class="w-16 text-right text-sm text-ctp-subtext0">
-              <WorkspaceRoleBadge role={workspace.role || "VIEWER"} />
-            </div>
-            <div class="w-20 text-right text-sm text-ctp-subtext0">
-              {new Date(workspace.createdAt).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-              })}
-            </div>
-            <div class="w-16 text-right text-sm text-ctp-green">active</div>
-          </a>
-        {/each}
+      <div>
+        <table class="w-full table-fixed">
+          <thead>
+            <tr class="text-sm text-ctp-subtext0 border-b border-ctp-surface0/20">
+              <th class="text-left py-2 w-4">•</th>
+              <th class="text-left py-2">name</th>
+              <th class="text-right py-2 w-24">role</th>
+              <th class="text-right py-2 w-24">modified</th>
+              <th class="text-right py-2 w-20">status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each filteredWorkspaces as workspace}
+              <tr class="group text-base hover:bg-ctp-surface0/20 transition-colors">
+                <td class="py-2 px-1 w-4">
+                  <div class="text-ctp-green text-sm"></div>
+                </td>
+                <td class="py-2 px-1 min-w-0">
+                  <a
+                    href={`/workspaces/${workspace.id}`}
+                    class="block min-w-0"
+                  >
+                    <div class="truncate text-ctp-text">
+                      <span
+                        class="group-hover:text-ctp-blue transition-colors font-medium"
+                      >
+                        {workspace.name}
+                      </span>
+                      {#if workspace.description}
+                        <span class="text-ctp-subtext1 text-sm">
+                          - {workspace.description}
+                        </span>
+                      {/if}
+                    </div>
+                  </a>
+                </td>
+                <td class="py-2 px-1 text-right text-sm text-ctp-subtext0 w-24">
+                  <WorkspaceRoleBadge role={workspace.role || "VIEWER"} />
+                </td>
+                <td class="py-2 px-1 text-right text-sm text-ctp-subtext0 w-24">
+                  {new Date(workspace.createdAt).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </td>
+                <td class="py-2 px-1 text-right text-sm text-ctp-green w-20">active</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
 
         <!-- Summary line -->
         <div
