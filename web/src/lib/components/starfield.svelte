@@ -101,10 +101,10 @@
 
   function calculateFlickerSpeed(type: StarType): number {
     const speeds = {
-      [StarType.DISTANT]: { min: 0.2, range: 0.4 },
-      [StarType.MEDIUM]: { min: 0.15, range: 0.35 },
-      [StarType.BRIGHT]: { min: 0.1, range: 0.3 },
-      [StarType.SUPERBRIGHT]: { min: 0.08, range: 0.25 },
+      [StarType.DISTANT]: { min: 1.0, range: 2.0 },
+      [StarType.MEDIUM]: { min: 1.5, range: 2.5 },
+      [StarType.BRIGHT]: { min: 2.0, range: 3.0 },
+      [StarType.SUPERBRIGHT]: { min: 2.5, range: 3.5 },
     };
     const s = speeds[type] || speeds[StarType.DISTANT];
     return s.min + Math.random() * s.range;
@@ -191,12 +191,11 @@
 
     update(p: p5, time: number): void {
       if (this.isStatic) return;
-      const primaryNoise = p.noise(
-        time * this.flickerSpeed * 0.1 + this.noiseOffset,
-      );
+
+      const primaryNoise = p.noise(time * this.flickerSpeed + this.noiseOffset);
 
       const secondaryNoise = p.noise(
-        time * this.flickerSpeed * 2 + this.noiseOffset + 1000,
+        time * this.flickerSpeed * 3 + this.noiseOffset + 1000,
       );
 
       const combinedNoise = p.lerp(
@@ -205,9 +204,9 @@
         CONFIG.TWINKLE_EFFECT.MULTI_NOISE_FACTOR,
       );
 
-      this.spikeBrightness *= 0.85;
-      if (Math.random() < CONFIG.TWINKLE_EFFECT.SPIKE_CHANCE) {
-        this.spikeBrightness = CONFIG.TWINKLE_EFFECT.SPIKE_INTENSITY;
+      this.spikeBrightness *= 0.7;
+      if (Math.random() < CONFIG.TWINKLE_EFFECT.SPIKE_CHANCE * 10) {
+        this.spikeBrightness = CONFIG.TWINKLE_EFFECT.SPIKE_INTENSITY * 2;
       }
 
       const flickerValue = p.constrain(
@@ -216,15 +215,15 @@
         1,
       );
 
-      const brightnessRange = 0.6;
+      const brightnessRange = 0.9;
       const minBrightnessFactor = 1.0 - brightnessRange;
       this.brightness =
         this.maxBrightness *
         (minBrightnessFactor + flickerValue * brightnessRange);
 
-      const sizeFlicker = (flickerValue - 0.5) * 2; // Remap to a -1 to 1 range
+      const sizeFlicker = (flickerValue - 0.5) * 2;
       this.currentSize =
-        this.size + sizeFlicker * CONFIG.TWINKLE_EFFECT.SIZE_FLICKER_AMOUNT;
+        this.size + sizeFlicker * CONFIG.TWINKLE_EFFECT.SIZE_FLICKER_AMOUNT * 2;
       this.currentSize = Math.max(1, this.currentSize);
     }
 
@@ -445,7 +444,7 @@
           alt * (180 / Math.PI),
         );
         const type = this.determineStarTypeFromMagnitude(starData.mag);
-        const isStatic = starData.mag >= 2.0 || type === StarType.DISTANT;
+        const isStatic = starData.mag >= 3.5 || type === StarType.DISTANT;
         this.stars.push(
           new Star({
             id: starIdCounter++,
@@ -567,8 +566,9 @@
     }
 
     private spawnCometBurst(): void {
-      const numComets = Math.floor(Math.random() * CONFIG.MAX_COMETS_AT_ONCE) + 1;
-      
+      const numComets =
+        Math.floor(Math.random() * CONFIG.MAX_COMETS_AT_ONCE) + 1;
+
       for (let i = 0; i < numComets; i++) {
         this.spawnComet();
       }
