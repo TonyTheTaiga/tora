@@ -71,7 +71,7 @@ log("accuracy", 0.92)
   }
 </script>
 
-<Starfield />
+<!-- <Starfield /> -->
 
 <!-- Language Toggle Button -->
 <div
