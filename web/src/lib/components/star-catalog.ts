@@ -7,7 +7,7 @@ export interface RealStarData {
   spectralType: string;
 }
 
-export const BRIGHT_STARS_CATALOG: RealStarData[] = [
+export const KNOWN_STARS: RealStarData[] = [
   {
     id: 1,
     name: "Sirius",

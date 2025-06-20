@@ -21,8 +21,7 @@
     en: {
       line1: "Your command center for watching the loss go down.",
       line3: "Integrate in seconds. Sign up when you feel like it. Or don't.",
-      line4:
-        "Forget rigid pipelines. Tora provides a simple, shareable home for every run, from masterpiece to happy accident.",
+      line4: "",
       CTA: "Run Your First Plot",
       headline: "The Experiment Tracker You'll Actually Use.",
       header1: "Hypnotic Visuals",
@@ -32,8 +31,7 @@
     ja: {
       line1: "損失が下がるのを眺める、あなたの司令塔。",
       line3: "導入は数秒。登録は、気が向いたら。しなくてもOK。",
-      line4:
-        "厳格なパイプラインは忘れましょう。傑作から偶然の産物まで、すべての実行にシンプルで共有可能な場所を提供します。",
+      line4: "",
       CTA: "最初のプロットを実行",
       headline: "あなたが、実際に使う実験トラッカー。",
       header1: "魅惑的なビジュアル",
