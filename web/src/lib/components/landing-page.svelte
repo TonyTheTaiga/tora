@@ -19,7 +19,7 @@
 
   const copy: Record<LangKey, CopyContent> = {
     en: {
-      line1: "Your command center for watching pretty lines go down.",
+      line1: "Your command center for watching the loss go down.",
       headline: "The Experiment Tracker You'll Actually Use.",
       line3: "Integrate in seconds. Sign up when you feel like it. Or don't.",
       line4:
@@ -30,7 +30,7 @@
       header4: "Chaos, Organized",
     },
     ja: {
-      line1: "美しい線が下がるのを眺める、あなたの司令塔。",
+      line1: "損失が下がるのを眺める、あなたの司令塔。",
       headline: "あなたが、実際に使う実験トラッカー。",
       line3: "導入は数秒。登録は、気が向いたら。しなくてもOK。",
       line4:
