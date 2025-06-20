@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import * as THREE from "three";
 
-  const STAR_COUNT = 1500;
+  const STAR_COUNT = 500;
   const FIELD_DEPTH = 1500;
 
   let container: HTMLDivElement;
