@@ -17,6 +17,19 @@
 
   let currentLang: LangKey = $state("en");
 
+  const codeExample = `print('Under Construction')`;
+  function addLineNumbers(code: string): string {
+    return code
+      .split("\n")
+      .map((line, index) => {
+        const lineNum = (index + 1).toString().padStart(2, " ");
+        return `<span class="text-ctp-overlay0 select-none">${lineNum}</span>  ${line}`;
+      })
+      .join("\n");
+  }
+
+  const formattedCode = $derived(addLineNumbers(codeExample));
+
   const copy: Record<LangKey, CopyContent> = {
     en: {
       line1: "Your command center for watching the loss go down.",
@@ -131,6 +144,29 @@
           >
             {activeCopy.CTA}
           </button>
+        </div>
+
+        <div class="mt-12">
+          <div class="max-w-3xl mx-auto">
+            <div
+              class="bg-ctp-surface0/50 border border-ctp-surface1 rounded-lg p-6 backdrop-blur-sm"
+            >
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex space-x-2">
+                  <div class="w-3 h-3 rounded-full bg-ctp-red"></div>
+                  <div class="w-3 h-3 rounded-full bg-ctp-yellow"></div>
+                  <div class="w-3 h-3 rounded-full bg-ctp-green"></div>
+                </div>
+                <span class="text-xs text-ctp-subtext1 font-mono"
+                  >quick_start.py</span
+                >
+              </div>
+              <pre
+                class="text-sm md:text-base text-ctp-text font-mono leading-relaxed overflow-x-auto text-left"><code
+                  class="language-python">{@html formattedCode}</code
+                ></pre>
+            </div>
+          </div>
         </div>
       </div>
     </div>
