@@ -1,10 +1,12 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import type p5 from "p5";
-  import { BRIGHT_STARS_CATALOG } from "./star-catalog";
+  import { KNOWN_STARS } from "./star-catalog";
 
-  let starfieldContainer: HTMLDivElement;
-  let p5Instance: p5 | null = null;
+  export let latitude: number = 40.7128;
+  export let longitude: number = -74.006;
+  export let magnitudeCutoff: number = 4.5;
+  export let minStarCount: number = 350;
 
   const StarType = {
     DISTANT: "distant",
@@ -12,7 +14,6 @@
     BRIGHT: "brighter",
     SUPERBRIGHT: "superbright",
   } as const;
-
   type StarType = (typeof StarType)[keyof typeof StarType];
 
   const StarSize = {
@@ -22,7 +23,6 @@
     LARGE: 5,
     MASSIVE: 6,
   } as const;
-
   type StarSize = (typeof StarSize)[keyof typeof StarSize];
 
   const StarShape = {
@@ -32,88 +32,122 @@
     STAR: "star",
     TWINKLE: "twinkle",
   } as const;
-
   type StarShape = (typeof StarShape)[keyof typeof StarShape];
 
-  const STAR_COLORS: readonly [number, number, number][] = [
-    [245, 240, 225],
-    [255, 245, 215],
-    [255, 235, 195],
-    [255, 215, 175],
-    [170, 205, 255],
-    [255, 180, 150],
-  ] as const;
+  type StarProps = {
+    id: number;
+    name: string;
+    ra: number;
+    dec: number;
+    mag: number;
+    x: number;
+    y: number;
+    size: StarSize;
+    maxBrightness: number;
+    flickerSpeed: number;
+    noiseOffset: number;
+    color: readonly [number, number, number];
+    type: StarType;
+    shape: StarShape;
+    isStatic: boolean;
+  };
 
-  const NEW_YORK_LAT = 40.7128;
-  const NEW_YORK_LON = -74.006;
-  const NYC_MAGNITUDE_CUTOFF = 4.5;
+  type CometProps = {
+    id: number;
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+    speed: number;
+    tailLength: number;
+    brightness: number;
+    color: readonly [number, number, number];
+  };
+
+  const CONFIG = {
+    STAR_COLORS: [
+      [245, 240, 225],
+      [255, 245, 215],
+      [255, 235, 195],
+      [255, 215, 175],
+      [170, 205, 255],
+      [255, 180, 150],
+    ],
+    RECALCULATION_INTERVAL: 600,
+    COMET_SPAWN_INTERVAL_MIN: 15,
+    COMET_SPAWN_INTERVAL_MAX: 40,
+    AZIMUTH_FOV: 120,
+    TWINKLE_EFFECT: {
+      MULTI_NOISE_FACTOR: 0.7,
+      SIZE_FLICKER_AMOUNT: 0.8,
+      SPIKE_CHANCE: 0.001,
+      SPIKE_INTENSITY: 0.4,
+    },
+  } as const;
 
   function easeInOutQuad(t: number): number {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
   }
 
   function getRandomShape(isBright: boolean): StarShape {
-    if (isBright) {
-      const shapes = [
-        StarShape.CIRCLE,
-        StarShape.DIAMOND,
-        StarShape.PLUS,
-        StarShape.STAR,
-        StarShape.TWINKLE,
-      ];
-      return shapes[Math.floor(Math.random() * shapes.length)];
-    } else {
-      const shapes = [StarShape.CIRCLE, StarShape.DIAMOND, StarShape.PLUS];
-      return shapes[Math.floor(Math.random() * shapes.length)];
+    const baseShapes = [StarShape.CIRCLE, StarShape.DIAMOND, StarShape.PLUS];
+    if (!isBright) {
+      return baseShapes[Math.floor(Math.random() * baseShapes.length)];
     }
+    const brightShapes = [...baseShapes, StarShape.STAR, StarShape.TWINKLE];
+    return brightShapes[Math.floor(Math.random() * brightShapes.length)];
   }
 
   function calculateFlickerSpeed(type: StarType): number {
-    switch (type) {
-      case StarType.DISTANT:
-        return 0.2 + Math.random() * 0.4;
-      case StarType.MEDIUM:
-        return 0.15 + Math.random() * 0.35;
-      case StarType.BRIGHT:
-        return 0.1 + Math.random() * 0.3;
-      case StarType.SUPERBRIGHT:
-        return 0.08 + Math.random() * 0.25;
-      default:
-        return 0.2;
-    }
+    const speeds = {
+      [StarType.DISTANT]: { min: 0.2, range: 0.4 },
+      [StarType.MEDIUM]: { min: 0.15, range: 0.35 },
+      [StarType.BRIGHT]: { min: 0.1, range: 0.3 },
+      [StarType.SUPERBRIGHT]: { min: 0.08, range: 0.25 },
+    };
+    const s = speeds[type] || speeds[StarType.DISTANT];
+    return s.min + Math.random() * s.range;
   }
 
   function determineStarColorFromSpectralType(
     spectralType: string,
   ): readonly [number, number, number] {
-    if (!spectralType) return STAR_COLORS[0];
-
+    if (!spectralType) return CONFIG.STAR_COLORS[0];
     const typeChar = spectralType.charAt(0).toUpperCase();
-    switch (typeChar) {
-      case "O":
-        return STAR_COLORS[4];
-      case "B":
-        return STAR_COLORS[4];
-      case "A":
-        return STAR_COLORS[0];
-      case "F":
-        return STAR_COLORS[1];
-      case "G":
-        return STAR_COLORS[2];
-      case "K":
-        return STAR_COLORS[3];
-      case "M":
-        return STAR_COLORS[5];
-      default:
-        return STAR_COLORS[0];
-    }
+    const colorMap: Record<string, readonly [number, number, number]> = {
+      O: CONFIG.STAR_COLORS[4],
+      B: CONFIG.STAR_COLORS[4],
+      A: CONFIG.STAR_COLORS[0],
+      F: CONFIG.STAR_COLORS[1],
+      G: CONFIG.STAR_COLORS[2],
+      K: CONFIG.STAR_COLORS[3],
+      M: CONFIG.STAR_COLORS[5],
+    };
+    return colorMap[typeChar] || CONFIG.STAR_COLORS[0];
+  }
+
+  function dateToJulianDate(date: Date): number {
+    return date.getTime() / 86400000 + 2440587.5;
+  }
+
+  function calculateLST(jd: number, lon: number): number {
+    const T = (jd - 2451545.0) / 36525.0;
+    let gmst =
+      280.46061837 +
+      360.98564736629 * (jd - 2451545.0) +
+      0.000387933 * T * T -
+      (T * T * T) / 38710000;
+    gmst = gmst % 360;
+    if (gmst < 0) gmst += 360;
+    const lst = gmst + lon;
+    return lst / 15;
   }
 
   class Star {
     readonly id: number;
     x: number;
     y: number;
-    size: StarSize;
+    readonly size: StarSize;
     brightness: number;
     readonly maxBrightness: number;
     readonly flickerSpeed: number;
@@ -121,42 +155,17 @@
     readonly color: readonly [number, number, number];
     readonly type: StarType;
     readonly shape: StarShape;
-    twinklePhase: number;
-    pulsePhase: number;
     isStatic: boolean;
-
-    private p: p5;
     readonly name: string;
     readonly mag: number;
     readonly ra: number;
     readonly dec: number;
 
-    constructor(
-      p: p5,
-      props: {
-        id: number;
-        name: string;
-        ra: number;
-        dec: number;
-        mag: number;
-        x: number;
-        y: number;
-        size: StarSize;
-        maxBrightness: number;
-        flickerSpeed: number;
-        noiseOffset: number;
-        color: readonly [number, number, number];
-        type: StarType;
-        shape: StarShape;
-        isStatic: boolean;
-      },
-    ) {
-      this.p = p;
+    currentSize: number;
+    spikeBrightness: number;
+
+    constructor(props: StarProps) {
       this.id = props.id;
-      this.name = props.name;
-      this.ra = props.ra;
-      this.dec = props.dec;
-      this.mag = props.mag;
       this.x = props.x;
       this.y = props.y;
       this.size = props.size;
@@ -167,137 +176,135 @@
       this.type = props.type;
       this.shape = props.shape;
       this.isStatic = props.isStatic;
-      this.twinklePhase = Math.random() * this.p.TWO_PI;
-      this.pulsePhase = Math.random() * this.p.TWO_PI;
+      this.name = props.name;
+      this.mag = props.mag;
+      this.ra = props.ra;
+      this.dec = props.dec;
 
-      if (this.isStatic) {
-        this.brightness = this.maxBrightness;
-      } else {
-        this.brightness = this.maxBrightness * (0.5 + Math.random() * 0.5);
-      }
+      this.currentSize = this.size;
+      this.spikeBrightness = 0;
+      this.brightness = this.isStatic
+        ? this.maxBrightness
+        : this.maxBrightness * (0.5 + Math.random() * 0.5);
     }
 
-    update(time: number, deltaTime: number): void {
+    update(p: p5, time: number): void {
       if (this.isStatic) return;
-
-      const noiseVal = this.p.noise(
+      const primaryNoise = p.noise(
         time * this.flickerSpeed * 0.1 + this.noiseOffset,
       );
-      const primaryFlicker = this.p.map(noiseVal, 0, 1, -1, 1);
 
-      this.pulsePhase += deltaTime * this.flickerSpeed * 0.5;
-      const pulseIntensity =
-        this.size >= StarSize.MEDIUM ? Math.sin(this.pulsePhase) * 0.15 : 0;
+      const secondaryNoise = p.noise(
+        time * this.flickerSpeed * 2 + this.noiseOffset + 1000,
+      );
 
-      const combinedFlicker = primaryFlicker + pulseIntensity;
-      const normalizedFlicker = this.p.constrain(
-        (combinedFlicker + 1) * 0.5,
-        0.2,
+      const combinedNoise = p.lerp(
+        primaryNoise,
+        secondaryNoise,
+        CONFIG.TWINKLE_EFFECT.MULTI_NOISE_FACTOR,
+      );
+
+      this.spikeBrightness *= 0.85;
+      if (Math.random() < CONFIG.TWINKLE_EFFECT.SPIKE_CHANCE) {
+        this.spikeBrightness = CONFIG.TWINKLE_EFFECT.SPIKE_INTENSITY;
+      }
+
+      const flickerValue = p.constrain(
+        combinedNoise + this.spikeBrightness,
+        0,
         1,
       );
 
-      let brightnessModifier = 1;
-      switch (this.type) {
-        case StarType.DISTANT:
-          brightnessModifier = 0.6 + normalizedFlicker * 0.4;
-          break;
-        case StarType.MEDIUM:
-          brightnessModifier = 0.5 + normalizedFlicker * 0.5;
-          break;
-        case StarType.BRIGHT:
-          brightnessModifier = 0.4 + normalizedFlicker * 0.6;
-          break;
-        case StarType.SUPERBRIGHT:
-          brightnessModifier = 0.6 + normalizedFlicker * 0.4;
-          break;
-      }
-      this.brightness = this.maxBrightness * brightnessModifier;
+      const brightnessRange = 0.6;
+      const minBrightnessFactor = 1.0 - brightnessRange;
+      this.brightness =
+        this.maxBrightness *
+        (minBrightnessFactor + flickerValue * brightnessRange);
+
+      const sizeFlicker = (flickerValue - 0.5) * 2; // Remap to a -1 to 1 range
+      this.currentSize =
+        this.size + sizeFlicker * CONFIG.TWINKLE_EFFECT.SIZE_FLICKER_AMOUNT;
+      this.currentSize = Math.max(1, this.currentSize);
     }
 
-    render(): void {
+    render(p: p5): void {
       const [r, g, b] = this.color;
-      const pixelX = Math.floor(this.x);
-      const pixelY = Math.floor(this.y);
-      const size = this.size;
-      const halfSize = Math.floor(size / 2);
+      p.fill(r, g, b, this.brightness);
+      p.noStroke();
 
-      this.p.fill(r, g, b, this.brightness);
-      this.p.noStroke();
+      const size = this.currentSize;
+      const halfSize = size / 2;
 
       switch (this.shape) {
         case StarShape.CIRCLE:
-          this.p.circle(this.x, this.y, size);
+          p.circle(this.x, this.y, size);
           break;
         case StarShape.DIAMOND:
-          this.p.beginShape();
-          this.p.vertex(this.x, this.y - halfSize);
-          this.p.vertex(this.x + halfSize, this.y);
-          this.p.vertex(this.x, this.y + halfSize);
-          this.p.vertex(this.x - halfSize, this.y);
-          this.p.endShape(this.p.CLOSE);
+          p.beginShape();
+          p.vertex(this.x, this.y - halfSize);
+          p.vertex(this.x + halfSize, this.y);
+          p.vertex(this.x, this.y + halfSize);
+          p.vertex(this.x - halfSize, this.y);
+          p.endShape(p.CLOSE);
           break;
         case StarShape.PLUS:
-          this.p.rect(pixelX - halfSize, pixelY - 0.5, size, 1);
-          this.p.rect(pixelX - 0.5, pixelY - halfSize, 1, size);
+          p.rect(this.x - halfSize, this.y - 0.5, size, 1);
+          p.rect(this.x - 0.5, this.y - halfSize, 1, size);
           break;
         case StarShape.STAR:
-          this.drawStarShape(this.x, this.y, size * 0.6, size * 0.3);
+          this.drawStarShape(p, this.x, this.y, size * 0.6, size * 0.3);
           break;
         case StarShape.TWINKLE:
-          this.p.rect(pixelX - halfSize, pixelY - 0.5, size, 1);
-          this.p.rect(pixelX - 0.5, pixelY - halfSize, 1, size);
-          const diagonalLength = size * 0.7;
-          this.p.stroke(r, g, b, this.brightness);
-          this.p.strokeWeight(1);
-          this.p.line(
-            this.x - diagonalLength / 2,
-            this.y - diagonalLength / 2,
-            this.x + diagonalLength / 2,
-            this.y + diagonalLength / 2,
+          p.rect(this.x - halfSize, this.y - 0.5, size, 1);
+          p.rect(this.x - 0.5, this.y - halfSize, 1, size);
+          const d = size * 0.7;
+          p.stroke(r, g, b, this.brightness);
+          p.strokeWeight(1);
+          p.line(
+            this.x - d / 2,
+            this.y - d / 2,
+            this.x + d / 2,
+            this.y + d / 2,
           );
-          this.p.line(
-            this.x - diagonalLength / 2,
-            this.y + diagonalLength / 2,
-            this.x + diagonalLength / 2,
-            this.y - diagonalLength / 2,
+          p.line(
+            this.x - d / 2,
+            this.y + d / 2,
+            this.x + d / 2,
+            this.y - d / 2,
           );
-          this.p.noStroke();
+          p.noStroke();
           break;
       }
 
-      if (this.size >= StarSize.MEDIUM && this.brightness > 120) {
-        this.p.blendMode(this.p.ADD);
-        const glowIntensity = this.brightness * 0.2;
-        this.p.fill(r, g, b, glowIntensity);
-        this.p.circle(this.x, this.y, size * 2);
-        this.p.blendMode(this.p.BLEND);
+      if (size >= StarSize.MEDIUM && this.brightness > 120) {
+        p.blendMode(p.ADD);
+        p.fill(r, g, b, this.brightness * 0.2);
+        p.circle(this.x, this.y, size * 2);
+        p.blendMode(p.BLEND);
       }
-
       if (this.type === StarType.SUPERBRIGHT && this.brightness > 140) {
-        this.p.blendMode(this.p.ADD);
-        const outerGlow = this.brightness * 0.1;
-        this.p.fill(r, g, b, outerGlow);
-        this.p.circle(this.x, this.y, size * 3);
-        this.p.blendMode(this.p.BLEND);
+        p.blendMode(p.ADD);
+        p.fill(r, g, b, this.brightness * 0.1);
+        p.circle(this.x, this.y, size * 3);
+        p.blendMode(p.BLEND);
       }
     }
 
     private drawStarShape(
+      p: p5,
       x: number,
       y: number,
       outerRadius: number,
       innerRadius: number,
     ): void {
-      const angleStep = this.p.PI / 5;
-      this.p.beginShape();
+      const angleStep = p.PI / 5;
+      p.beginShape();
       for (let i = 0; i < 10; i++) {
-        const angle = i * angleStep - this.p.PI / 2;
+        const angle = i * angleStep - p.PI / 2;
         const radius = i % 2 === 0 ? outerRadius : innerRadius;
-        const px = x + this.p.cos(angle) * radius;
-        const py = y + this.p.sin(angle) * radius;
-        this.p.vertex(px, py);
+        p.vertex(x + p.cos(angle) * radius, y + p.sin(angle) * radius);
       }
-      this.p.endShape(this.p.CLOSE);
+      p.endShape(p.CLOSE);
     }
   }
 
@@ -316,16 +323,7 @@
     progress: number;
     active: boolean;
 
-    private p: p5;
-
-    constructor(
-      p: p5,
-      props: Omit<
-        Comet,
-        "p" | "x" | "y" | "progress" | "active" | "update" | "render"
-      >,
-    ) {
-      this.p = p;
+    constructor(props: CometProps) {
       this.id = props.id;
       this.startX = props.startX;
       this.startY = props.startY;
@@ -343,253 +341,203 @@
 
     update(deltaTime: number): void {
       if (!this.active) return;
-
       this.progress += deltaTime * this.speed;
-
       if (this.progress >= 1) {
         this.active = false;
         return;
       }
-
       const easedProgress = easeInOutQuad(this.progress);
       this.x = this.startX + (this.endX - this.startX) * easedProgress;
       this.y = this.startY + (this.endY - this.startY) * easedProgress;
     }
 
-    render(): void {
+    render(p: p5): void {
       const [r, g, b] = this.color;
-
       const dx = this.endX - this.startX;
       const dy = this.endY - this.startY;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      const tailX = -(dx / distance) * this.tailLength;
-      const tailY = -(dy / distance) * this.tailLength;
-
-      const segments = 8;
-      for (let i = 0; i < segments; i++) {
-        const t = i / segments;
-        const alpha = this.brightness * (1 - t) * 0.6;
-        const thickness = (1 - t) * 3 + 1;
-
-        this.p.stroke(r, g, b, alpha);
-        this.p.strokeWeight(thickness);
-
-        const x1 = this.x + tailX * t;
-        const y1 = this.y + tailY * t;
-        const x2 = this.x + tailX * (t + 1 / segments);
-        const y2 = this.y + tailY * (t + 1 / segments);
-
-        this.p.line(x1, y1, x2, y2);
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const tailX = -(dx / dist) * this.tailLength;
+      const tailY = -(dy / dist) * this.tailLength;
+      for (let i = 0; i < 8; i++) {
+        const t = i / 8;
+        p.stroke(r, g, b, this.brightness * (1 - t) * 0.6);
+        p.strokeWeight((1 - t) * 3 + 1);
+        p.line(
+          this.x + tailX * t,
+          this.y + tailY * t,
+          this.x + tailX * (t + 1 / 8),
+          this.y + tailY * (t + 1 / 8),
+        );
       }
-
-      this.p.blendMode(this.p.ADD);
-      this.p.noStroke();
-      this.p.fill(r, g, b, this.brightness);
-      this.p.circle(this.x, this.y, 4);
-
-      this.p.fill(255, 255, 255, this.brightness * 0.8);
-      this.p.circle(this.x, this.y, 2);
-      this.p.blendMode(this.p.BLEND);
+      p.blendMode(p.ADD);
+      p.noStroke();
+      p.fill(r, g, b, this.brightness);
+      p.circle(this.x, this.y, 4);
+      p.fill(255, 255, 255, this.brightness * 0.8);
+      p.circle(this.x, this.y, 2);
+      p.blendMode(p.BLEND);
     }
   }
 
+  type StarFieldConfig = {
+    latitude: number;
+    longitude: number;
+    magnitudeCutoff: number;
+    minStarCount: number;
+  };
+
   class StarField {
     private p: p5;
+    private config: StarFieldConfig;
     private stars: Star[] = [];
     private comets: Comet[] = [];
     private time = 0;
-    private starIdCounter = 0;
-    private cometIdCounter = 0;
     private lastCometTime = 0;
-    private nextRecalc = 600;
+    private nextRecalcTime = 0;
     private staticStarsBuffer: p5.Graphics | null = null;
+    private width: number;
+    private height: number;
 
-    constructor(p: p5) {
+    constructor(p: p5, config: StarFieldConfig) {
       this.p = p;
-      this.nextRecalc = 600;
+      this.config = config;
+      this.width = p.windowWidth;
+      this.height = p.windowHeight;
+      this.regenerate();
+    }
+
+    public updateConfig(newConfig: StarFieldConfig) {
+      this.config = { ...this.config, ...newConfig };
+    }
+
+    public regenerate(): void {
+      this.stars = [];
+      this.comets = [];
+      this.time = 0;
+      this.nextRecalcTime = CONFIG.RECALCULATION_INTERVAL;
       this.generateRealStarField();
     }
 
     private generateRealStarField(): void {
-      this.stars = [];
-      this.comets = [];
-      this.starIdCounter = 0;
-      this.cometIdCounter = 0;
-
       const now = new Date();
-      const jd = 2440587.5 + now.getTime() / 86400000;
-      const utc = now.getTime() / 1000 / 3600;
-      const lst = ((utc / 24 + NEW_YORK_LON / 360) % 1) * 24;
-
-      for (const starData of BRIGHT_STARS_CATALOG) {
-        if (starData.mag > NYC_MAGNITUDE_CUTOFF) {
-          continue;
-        }
-
-        const hourAngle = (lst * 15 - starData.ra + 360) % 360;
-
+      const jd = dateToJulianDate(now);
+      const lst = calculateLST(jd, this.config.longitude);
+      let starIdCounter = 0;
+      for (const starData of KNOWN_STARS) {
+        if (starData.mag > this.config.magnitudeCutoff) continue;
+        const hourAngle = (lst * 15 - starData.ra * 15 + 360) % 360;
+        const latRad = (this.config.latitude * Math.PI) / 180;
+        const decRad = (starData.dec * Math.PI) / 180;
+        const haRad = (hourAngle * Math.PI) / 180;
         const sinAlt =
-          Math.sin((starData.dec * Math.PI) / 180) *
-            Math.sin((NEW_YORK_LAT * Math.PI) / 180) +
-          Math.cos((starData.dec * Math.PI) / 180) *
-            Math.cos((NEW_YORK_LAT * Math.PI) / 180) *
-            Math.cos((hourAngle * Math.PI) / 180);
-        const altitude = (Math.asin(sinAlt) * 180) / Math.PI;
-
-        if (altitude < 0) {
-          continue;
-        }
-
+          Math.sin(decRad) * Math.sin(latRad) +
+          Math.cos(decRad) * Math.cos(latRad) * Math.cos(haRad);
+        const alt = Math.asin(sinAlt);
+        if (alt < 0) continue;
         const cosA =
-          (Math.sin((starData.dec * Math.PI) / 180) -
-            Math.sin((altitude * Math.PI) / 180) *
-              Math.sin((NEW_YORK_LAT * Math.PI) / 180)) /
-          (Math.cos((altitude * Math.PI) / 180) *
-            Math.cos((NEW_YORK_LAT * Math.PI) / 180));
-        let azimuth =
-          (Math.acos(Math.max(-1, Math.min(1, cosA))) * 180) / Math.PI;
-        if (Math.sin((hourAngle * Math.PI) / 180) > 0) {
-          azimuth = 360 - azimuth;
-        }
-
-        const screenCoords = this.projectHorizonToScreen(azimuth, altitude);
-
-        const size = this.mapMagnitudeToSize(starData.mag);
-        const maxBrightness = this.mapMagnitudeToBrightness(starData.mag);
+          (Math.sin(decRad) - Math.sin(alt) * Math.sin(latRad)) /
+          (Math.cos(alt) * Math.cos(latRad));
+        let az = Math.acos(this.p.constrain(cosA, -1, 1));
+        if (Math.sin(haRad) > 0) az = 2 * Math.PI - az;
+        const { x, y } = this.projectHorizonToScreen(
+          az * (180 / Math.PI),
+          alt * (180 / Math.PI),
+        );
         const type = this.determineStarTypeFromMagnitude(starData.mag);
-        const color = determineStarColorFromSpectralType(starData.spectralType);
-
-        const isStatic = starData.mag >= 2.0;
-
+        const isStatic = starData.mag >= 2.0 || type === StarType.DISTANT;
         this.stars.push(
-          new Star(this.p, {
-            id: this.starIdCounter++,
+          new Star({
+            id: starIdCounter++,
             name: starData.name,
             ra: starData.ra,
             dec: starData.dec,
             mag: starData.mag,
-            x: screenCoords.x,
-            y: screenCoords.y,
-            size,
-            maxBrightness,
+            x,
+            y,
+            size: this.mapMagnitudeToSize(starData.mag),
+            maxBrightness: this.mapMagnitudeToBrightness(starData.mag),
             flickerSpeed: calculateFlickerSpeed(type),
             noiseOffset: Math.random() * 1000,
-            color,
+            color: determineStarColorFromSpectralType(starData.spectralType),
             type,
             shape: getRandomShape(!isStatic),
             isStatic,
           }),
         );
       }
-
-      const minStarsDesired = 350;
-      if (this.stars.length < minStarsDesired) {
-        const numExtraStars = minStarsDesired - this.stars.length;
-        for (let i = 0; i < numExtraStars; i++) {
-          const x = Math.random() * this.p.windowWidth;
-          const y = Math.random() * this.p.windowHeight;
-          this.stars.push(
-            new Star(this.p, {
-              id: this.starIdCounter++,
-              name: "Distant Star",
-              ra: 0,
-              dec: 0,
-              mag: 5.0 + Math.random(),
-              x,
-              y,
-              size: StarSize.TINY,
-              maxBrightness: this.mapMagnitudeToBrightness(
-                5.5 + Math.random() * 0.5,
-              ),
-              flickerSpeed: calculateFlickerSpeed(StarType.DISTANT),
-              noiseOffset: Math.random() * 1000,
-              color: STAR_COLORS[0],
-              type: StarType.DISTANT,
-              shape: StarShape.CIRCLE,
-              isStatic: true,
-            }),
-          );
-        }
+      const numExtraStars = this.config.minStarCount - this.stars.length;
+      for (let i = 0; i < numExtraStars; i++) {
+        this.stars.push(
+          new Star({
+            id: starIdCounter++,
+            name: "Distant Star",
+            ra: 0,
+            dec: 0,
+            mag: 5.0 + Math.random(),
+            x: Math.random() * this.width,
+            y: Math.random() * this.height,
+            size: StarSize.TINY,
+            maxBrightness: this.mapMagnitudeToBrightness(
+              5.5 + Math.random() * 0.5,
+            ),
+            flickerSpeed: calculateFlickerSpeed(StarType.DISTANT),
+            noiseOffset: Math.random() * 1000,
+            color: CONFIG.STAR_COLORS[0],
+            type: StarType.DISTANT,
+            shape: StarShape.CIRCLE,
+            isStatic: true,
+          }),
+        );
       }
-
       this.stars.sort((a, b) => a.maxBrightness - b.maxBrightness);
-
       this.renderStaticStarsToBuffer();
     }
 
     private projectHorizonToScreen(
-      azimuthDegrees: number,
-      altitudeDegrees: number,
+      az: number,
+      alt: number,
     ): { x: number; y: number } {
-      const viewWidth = this.p.windowWidth;
-      const viewHeight = this.p.windowHeight;
-
-      let mappedAzimuth = azimuthDegrees;
-
-      const fovY = 90;
-      const fovX = 180;
-      const y = this.p.map(
-        altitudeDegrees,
-        0,
-        90,
-        viewHeight * 0.8,
-        viewHeight * 0.1,
-      );
-
-      let azDiff = azimuthDegrees - 0;
+      const y = this.p.map(alt, 0, 90, this.height * 0.8, this.height * 0.1);
+      let azDiff = az - 0;
       if (azDiff > 180) azDiff -= 360;
       if (azDiff < -180) azDiff += 360;
-
-      const visibleAzRange = 120;
       const x = this.p.map(
         azDiff,
-        -visibleAzRange / 2,
-        visibleAzRange / 2,
+        -CONFIG.AZIMUTH_FOV / 2,
+        CONFIG.AZIMUTH_FOV / 2,
         0,
-        viewWidth,
+        this.width,
       );
-
-      return {
-        x: x,
-        y: y,
-      };
+      return { x, y };
     }
 
-    private mapMagnitudeToSize(mag: number): StarSize {
+    private mapMagnitudeToSize = (mag: number): StarSize => {
       if (mag < -0.5) return StarSize.MASSIVE;
       if (mag < 0.5) return StarSize.LARGE;
       if (mag < 1.5) return StarSize.MEDIUM;
       if (mag < 2.5) return StarSize.SMALL;
       return StarSize.TINY;
-    }
-
-    private mapMagnitudeToBrightness(mag: number): number {
-      const maxMag = NYC_MAGNITUDE_CUTOFF;
-      const minMag = -1.5;
-
-      const constrainedMag = this.p.constrain(mag, minMag, maxMag);
-      return this.p.map(constrainedMag, maxMag, minMag, 80, 255);
-    }
-
-    private determineStarTypeFromMagnitude(mag: number): StarType {
+    };
+    private mapMagnitudeToBrightness = (mag: number): number =>
+      this.p.map(
+        this.p.constrain(mag, -1.5, this.config.magnitudeCutoff),
+        this.config.magnitudeCutoff,
+        -1.5,
+        80,
+        255,
+      );
+    private determineStarTypeFromMagnitude = (mag: number): StarType => {
       if (mag < 0) return StarType.SUPERBRIGHT;
       if (mag < 1.0) return StarType.BRIGHT;
       if (mag < 2.5) return StarType.MEDIUM;
       return StarType.DISTANT;
-    }
+    };
 
     private renderStaticStarsToBuffer(): void {
-      if (this.staticStarsBuffer) {
-        this.staticStarsBuffer.remove();
-      }
-      this.staticStarsBuffer = this.p.createGraphics(
-        this.p.windowWidth,
-        this.p.windowHeight,
-      );
-
+      if (this.staticStarsBuffer) this.staticStarsBuffer.remove();
+      this.staticStarsBuffer = this.p.createGraphics(this.width, this.height);
       this.staticStarsBuffer.clear();
       this.staticStarsBuffer.noStroke();
-
       for (const star of this.stars) {
         if (star.isStatic) {
           const [r, g, b] = star.color;
@@ -601,125 +549,107 @@
 
     public update(deltaTime: number): void {
       this.time += deltaTime;
-
-      for (const star of this.stars) {
-        star.update(this.time, deltaTime);
-      }
-
+      for (const star of this.stars) star.update(this.p, this.time);
       for (let i = this.comets.length - 1; i >= 0; i--) {
-        const comet = this.comets[i];
-        comet.update(deltaTime);
-        if (!comet.active) {
-          this.comets.splice(i, 1);
-        }
+        this.comets[i].update(deltaTime);
+        if (!this.comets[i].active) this.comets.splice(i, 1);
       }
-
-      if (this.time >= this.nextRecalc) {
-        this.generateRealStarField();
-        this.nextRecalc = this.time + 600;
-      }
-
-      if (this.time - this.lastCometTime > 15 + Math.random() * 25) {
+      if (this.time >= this.nextRecalcTime) this.regenerate();
+      const cometSpawnTime =
+        CONFIG.COMET_SPAWN_INTERVAL_MIN +
+        Math.random() *
+          (CONFIG.COMET_SPAWN_INTERVAL_MAX - CONFIG.COMET_SPAWN_INTERVAL_MIN);
+      if (this.time - this.lastCometTime > cometSpawnTime) {
         this.spawnComet();
         this.lastCometTime = this.time;
       }
     }
 
     private spawnComet(): void {
-      const edge = Math.floor(Math.random() * 4);
       let startX, startY, endX, endY;
-
+      const edge = Math.floor(Math.random() * 4);
       switch (edge) {
         case 0:
-          startX = Math.random() * this.p.width * 0.8 + this.p.width * 0.1;
+          startX = Math.random() * this.width;
           startY = -50;
-          endX = startX + (Math.random() - 0.5) * this.p.width * 0.5;
-          endY = this.p.height + 50;
+          endX = Math.random() * this.width;
+          endY = this.height + 50;
           break;
         case 1:
-          startX = this.p.width + 50;
-          startY = Math.random() * this.p.height * 0.8 + this.p.height * 0.1;
+          startX = this.width + 50;
+          startY = Math.random() * this.height;
           endX = -50;
-          endY = startY + (Math.random() - 0.5) * this.p.height * 0.5;
+          endY = Math.random() * this.height;
           break;
         case 2:
-          startX = Math.random() * this.p.width * 0.8 + this.p.width * 0.1;
-          startY = this.p.height + 50;
-          endX = startX + (Math.random() - 0.5) * this.p.width * 0.5;
+          startX = Math.random() * this.width;
+          startY = this.height + 50;
+          endX = Math.random() * this.width;
           endY = -50;
           break;
         default:
           startX = -50;
-          startY = Math.random() * this.p.height * 0.8 + this.p.height * 0.1;
-          endX = this.p.width + 50;
-          endY = startY + (Math.random() - 0.5) * this.p.height * 0.5;
+          startY = Math.random() * this.height;
+          endX = this.width + 50;
+          endY = Math.random() * this.height;
           break;
       }
-
-      const comet = new Comet(this.p, {
-        id: this.cometIdCounter++,
-        startX,
-        startY,
-        endX,
-        endY,
-        speed: 0.2 + Math.random() * 0.3,
-        tailLength: 50 + Math.random() * 80,
-        brightness: 180 + Math.random() * 75,
-        color: STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)],
-      });
-
-      this.comets.push(comet);
+      this.comets.push(
+        new Comet({
+          id: this.comets.length,
+          startX,
+          startY,
+          endX,
+          endY,
+          speed: 0.2 + Math.random() * 0.3,
+          tailLength: 50 + Math.random() * 80,
+          brightness: 180 + Math.random() * 75,
+          color:
+            CONFIG.STAR_COLORS[
+              Math.floor(Math.random() * CONFIG.STAR_COLORS.length)
+            ],
+        }),
+      );
     }
 
     public render(): void {
       this.p.clear();
-
-      if (this.staticStarsBuffer) {
-        this.p.image(this.staticStarsBuffer, 0, 0);
-      }
-
+      if (this.staticStarsBuffer) this.p.image(this.staticStarsBuffer, 0, 0);
       for (const star of this.stars) {
-        if (!star.isStatic) {
-          star.render();
-        }
+        if (!star.isStatic) star.render(this.p);
       }
-
       for (const comet of this.comets) {
-        if (comet.active) {
-          comet.render();
-        }
+        if (comet.active) comet.render(this.p);
       }
     }
 
     public resize(width: number, height: number): void {
-      this.generateRealStarField();
-      this.nextRecalc = this.time + 600;
+      this.width = width;
+      this.height = height;
+      this.regenerate();
     }
+  }
 
-    public getStarCount(): number {
-      return this.stars.length;
-    }
+  let starfieldContainer: HTMLDivElement;
+  let p5Instance: p5 | null = null;
+  let starField: StarField | null = null;
 
-    public getStarTypes(): Record<StarType, number> {
-      return this.stars.reduce(
-        (acc, star) => {
-          acc[star.type] = (acc[star.type] || 0) + 1;
-          return acc;
-        },
-        {} as Record<StarType, number>,
-      );
-    }
+  $: if (p5Instance && starField) {
+    starField.updateConfig({
+      latitude,
+      longitude,
+      magnitudeCutoff,
+      minStarCount,
+    });
+    starField.regenerate();
   }
 
   onMount(async () => {
     try {
       const p5Module = await import("p5");
       const p5 = p5Module.default;
-
       const starfieldSketch = (p: p5) => {
-        let starField: StarField;
         let lastFrameTime = 0;
-
         p.setup = () => {
           const canvas = p.createCanvas(p.windowWidth, p.windowHeight);
           canvas.parent(starfieldContainer);
@@ -728,26 +658,26 @@
           canvas.style("left", "0");
           canvas.style("z-index", "-1");
           canvas.style("pointer-events", "none");
-
-          starField = new StarField(p);
+          starField = new StarField(p, {
+            latitude,
+            longitude,
+            magnitudeCutoff,
+            minStarCount,
+          });
           lastFrameTime = p.millis();
         };
-
         p.draw = () => {
           const currentTime = p.millis();
           const deltaTime = (currentTime - lastFrameTime) / 1000;
           lastFrameTime = currentTime;
-
-          starField.update(deltaTime);
-          starField.render();
+          starField?.update(deltaTime);
+          starField?.render();
         };
-
         p.windowResized = () => {
           p.resizeCanvas(p.windowWidth, p.windowHeight);
-          starField.resize(p.windowWidth, p.windowHeight);
+          starField?.resize(p.windowWidth, p.windowHeight);
         };
       };
-
       p5Instance = new p5(starfieldSketch);
     } catch (error) {
       console.error("Failed to load starfield:", error);
@@ -758,6 +688,7 @@
     if (p5Instance) {
       p5Instance.remove();
       p5Instance = null;
+      starField = null;
     }
   });
 </script>
