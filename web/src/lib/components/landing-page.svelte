@@ -144,17 +144,20 @@
 <div
   bind:this={container}
   class="fixed inset-0 -z-10 pointer-events-none"
+  style="z-index: -1;"
 ></div>
 
 <style>
-  div {
+  .fixed {
     position: fixed;
+  }
+  .inset-0 {
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
-    z-index: -1;
+  }
+  .pointer-events-none {
     pointer-events: none;
-    background-color: #000;
   }
 </style>

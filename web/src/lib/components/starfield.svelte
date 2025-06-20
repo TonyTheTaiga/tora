@@ -1,6 +1,9 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import * as THREE from "three";
+  import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+  import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+  import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 
   const STAR_COUNT = 2000;
   const FIELD_DEPTH = 1000;
@@ -27,6 +30,18 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(new THREE.Color(0x000000), 1);
     container.appendChild(renderer.domElement);
+
+    const renderPass = new RenderPass(scene, camera);
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      1.2,
+      0.5,
+      0.0,
+    );
+
+    const composer = new EffectComposer(renderer);
+    composer.addPass(renderPass);
+    composer.addPass(bloomPass);
 
     const positions = new Float32Array(STAR_COUNT * 3);
     const colors = new Float32Array(STAR_COUNT * 3);
@@ -89,10 +104,10 @@
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
 
-          float blink = 0.7 + sin(time * 0.1 + vRandom) * 0.3;
+          float pulse = 0.7 + sin(time * 0.03 + vRandom) * 0.3;
           float alpha = 1.0 - smoothstep(0.4, 0.5, dist);
           
-          gl_FragColor = vec4(vColor, alpha * blink);
+          gl_FragColor = vec4(vColor, alpha * pulse);
         }
       `,
       blending: THREE.AdditiveBlending,
@@ -115,13 +130,14 @@
       starField.rotation.y = elapsedTime * 0.003;
       starField.rotation.x = elapsedTime * 0.001;
 
-      renderer.render(scene, camera);
+      composer.render();
     };
 
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
     };
 
     window.addEventListener("resize", handleResize);
@@ -147,6 +163,10 @@
 ></div>
 
 <style>
+  :global(body) {
+    background-color: transparent;
+  }
+
   div {
     position: fixed;
     top: 0;
@@ -155,6 +175,5 @@
     left: 0;
     z-index: -1;
     pointer-events: none;
-    background-color: #000;
   }
 </style>
