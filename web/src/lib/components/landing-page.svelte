@@ -1,163 +1,210 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
-  import * as THREE from "three";
+  import { goto } from "$app/navigation";
+  import Starfield from "./starfield.svelte";
+  import Logo from "./logo_assets/logo.svelte";
 
-  const STAR_COUNT = 2000;
-  const FIELD_DEPTH = 1000;
+  type LangKey = "en" | "ja";
+  type CopyContent = {
+    line1: string;
+    line3: string;
+    line4: string;
+    CTA: string;
+    headline: string;
+    header1: string;
+    header3: string;
+    header4: string;
+  };
 
-  let container: HTMLDivElement;
-  let animationFrameId: number;
-  let isDestroyed = false;
+  let currentLang: LangKey = $state("en");
 
-  onMount(() => {
-    if (!container) return;
+  const codeExample = `from tora import log
 
-    const scene = new THREE.Scene();
+# Track your experiments
+log("loss", 0.045)
+log("accuracy", 0.92)
 
-    const camera = new THREE.PerspectiveCamera(
-      60,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      FIELD_DEPTH + 1,
-    );
-    camera.position.z = 1;
+# That's it. No setup required.`;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(new THREE.Color(0x000000), 1);
-    container.appendChild(renderer.domElement);
+  function addLineNumbers(code: string): string {
+    return code
+      .split("\n")
+      .map((line, index) => {
+        const lineNum = (index + 1).toString().padStart(2, " ");
+        return `<span class="text-ctp-overlay0 select-none">${lineNum}</span>  ${line}`;
+      })
+      .join("\n");
+  }
 
-    const positions = new Float32Array(STAR_COUNT * 3);
-    const colors = new Float32Array(STAR_COUNT * 3);
-    const sizes = new Float32Array(STAR_COUNT);
-    const randoms = new Float32Array(STAR_COUNT);
+  const formattedCode = $derived(addLineNumbers(codeExample));
 
-    const starColors = [
-      new THREE.Color(0x9bb0ff),
-      new THREE.Color(0xaabfff),
-      new THREE.Color(0xcad7ff),
-      new THREE.Color(0xf8f7ff),
-    ];
+  const copy: Record<LangKey, CopyContent> = {
+    en: {
+      line1: "Your command center for watching the loss go down.",
+      line3: "Integrate in seconds. Sign up when you feel like it. Or don't.",
+      line4: "Turn chaos into insights with zero configuration.",
+      CTA: "Start Tracking",
+      headline: "The Experiment Tracker You'll Actually Use.",
+      header1: "Hypnotic Visuals",
+      header3: "Zero Commitment",
+      header4: "Chaos, Organized",
+    },
+    ja: {
+      line1: "損失が下がるのを眺める、あなたの司令塔。",
+      line3: "導入は数秒。登録は、気が向いたら。しなくてもOK。",
+      line4: "設定不要で混沌を洞察に変える。",
+      CTA: "トラッキング開始",
+      headline: "あなたが、実際に使う実験トラッカー。",
+      header1: "魅惑的なビジュアル",
+      header3: "一切の縛りなし",
+      header4: "混沌から秩序へ",
+    },
+  };
 
-    for (let i = 0; i < STAR_COUNT; i++) {
-      const i3 = i * 3;
+  function toggleLang() {
+    currentLang = currentLang === "en" ? "ja" : "en";
+  }
 
-      positions[i3] = (Math.random() - 0.5) * 1000;
-      positions[i3 + 1] = (Math.random() - 0.5) * 1000;
-      positions[i3 + 2] = -Math.random() * FIELD_DEPTH;
+  const activeCopy = $derived.by(() => copy[currentLang]);
 
-      const color = starColors[Math.floor(Math.random() * starColors.length)];
-      colors[i3] = color.r;
-      colors[i3 + 1] = color.g;
-      colors[i3 + 2] = color.b;
-
-      sizes[i] = Math.random() * 3.0 + 2.5;
-      randoms[i] = Math.random() * 10.0;
-    }
-
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-    geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
-    geometry.setAttribute("random", new THREE.BufferAttribute(randoms, 1));
-
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        time: { value: 0.0 },
-      },
-      vertexShader: `
-        attribute float size;
-        attribute float random;
-        varying vec3 vColor;
-        varying float vRandom;
-
-        void main() {
-          vColor = color;
-          vRandom = random;
-          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = size * (300.0 / -mvPosition.z);
-          gl_Position = projectionMatrix * mvPosition;
-        }
-      `,
-      fragmentShader: `
-        uniform float time;
-        varying vec3 vColor;
-        varying float vRandom;
-
-        void main() {
-          float dist = length(gl_PointCoord - vec2(0.5));
-          if (dist > 0.5) discard;
-
-          float pulse = 0.7 + sin(time * 0.03 + vRandom) * 0.3;
-          float alpha = 1.0 - smoothstep(0.4, 0.5, dist);
-          
-          gl_FragColor = vec4(vColor, alpha * pulse);
-        }
-      `,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-      transparent: true,
-      vertexColors: true,
-    });
-
-    const starField = new THREE.Points(geometry, material);
-    scene.add(starField);
-
-    const clock = new THREE.Clock();
-
-    const animate = () => {
-      if (isDestroyed) return;
-      animationFrameId = requestAnimationFrame(animate);
-
-      const elapsedTime = clock.getElapsedTime();
-      material.uniforms.time.value = elapsedTime;
-      starField.rotation.y = elapsedTime * 0.003;
-      starField.rotation.x = elapsedTime * 0.001;
-
-      renderer.render(scene, camera);
-    };
-
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-
-    window.addEventListener("resize", handleResize);
-    animate();
-
-    onDestroy(() => {
-      isDestroyed = true;
-      window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(animationFrameId);
-      renderer.dispose();
-      geometry.dispose();
-      material.dispose();
-      if (container && container.contains(renderer.domElement)) {
-        container.removeChild(renderer.domElement);
-      }
-    });
-  });
+  if (typeof document !== "undefined") {
+    document.body.style.backgroundColor = "#000000";
+  }
 </script>
 
-<div
-  bind:this={container}
-  class="fixed inset-0 -z-10 pointer-events-none"
-  style="z-index: -1;"
-></div>
+<Starfield />
 
-<style>
-  .fixed {
-    position: fixed;
-  }
-  .inset-0 {
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-  }
-  .pointer-events-none {
-    pointer-events: none;
-  }
-</style>
+<!-- Language Toggle Button -->
+<div
+  class="absolute top-4 right-4 z-20 flex items-center space-x-2 opacity-75 hover:opacity-100 transition-opacity duration-300 ease-in-out"
+>
+  <button
+    type="button"
+    onclick={toggleLang}
+    class="relative inline-flex h-8 w-16 items-center rounded-full bg-ctp-surface0/80 backdrop-blur-sm p-0.5 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-ctp-blue focus:ring-offset-2 focus:ring-offset-ctp-base"
+  >
+    <span class="sr-only">Toggle language</span>
+    <span
+      class={`absolute left-0.5 top-0.5 h-7 w-7 rounded-full bg-ctp-blue/90 transition-transform duration-200 ease-in-out ${currentLang === "en" ? "translate-x-0" : "translate-x-8"}`}
+      aria-hidden="true"
+    ></span>
+    <span
+      class="relative z-10 flex w-full items-center justify-between px-2 text-xs font-mono font-medium"
+    >
+      <span
+        class={`${currentLang === "en" ? "text-ctp-crust" : "text-ctp-subtext1"}`}
+        >EN</span
+      >
+      <span
+        class={`${currentLang === "ja" ? "text-ctp-crust" : "text-ctp-subtext1"}`}
+        >JP</span
+      >
+    </span>
+  </button>
+</div>
+
+<section class="min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col items-center text-center text-ctp-text font-mono">
+      <!-- Logo Section -->
+      <div class="fill-ctp-blue w-full max-w-xs sm:max-w-sm mb-8 sm:mb-12">
+        <Logo />
+      </div>
+
+      <!-- Hero Content -->
+      <div class="w-full max-w-4xl space-y-8 sm:space-y-12">
+        <!-- Headline -->
+        <div>
+          <h1
+            class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 sm:mb-6 text-ctp-text"
+          >
+            {activeCopy.headline}
+          </h1>
+          <div class="w-16 sm:w-24 h-0.5 bg-ctp-blue mx-auto"></div>
+        </div>
+
+        <!-- Code Showcase - Prominent Position -->
+        <div class="w-full max-w-3xl mx-auto">
+          <div
+            class="bg-ctp-surface0/50 border border-ctp-surface1 rounded-lg p-4 sm:p-6 backdrop-blur-sm shadow-2xl"
+          >
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex space-x-2">
+                <div class="w-3 h-3 rounded-full bg-ctp-red"></div>
+                <div class="w-3 h-3 rounded-full bg-ctp-yellow"></div>
+                <div class="w-3 h-3 rounded-full bg-ctp-green"></div>
+              </div>
+              <span class="text-xs text-ctp-subtext1 font-mono hidden sm:inline"
+                >quick_start.py</span
+              >
+            </div>
+            <div class="overflow-hidden">
+              <pre
+                class="text-xs sm:text-sm md:text-base text-ctp-text font-mono leading-relaxed overflow-x-auto text-left"><code
+                  class="language-python">{@html formattedCode}</code
+                ></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature Grid -->
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div
+            class="p-4 sm:p-6 bg-ctp-surface0/20 rounded-lg backdrop-blur-sm border border-ctp-surface1/50"
+          >
+            <h2
+              class="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4 text-ctp-sapphire"
+            >
+              {activeCopy.header1}
+            </h2>
+            <p
+              class="text-sm sm:text-base md:text-lg leading-relaxed text-ctp-subtext0"
+            >
+              {activeCopy.line1}
+            </p>
+          </div>
+
+          <div
+            class="p-4 sm:p-6 bg-ctp-surface0/20 rounded-lg backdrop-blur-sm border border-ctp-surface1/50"
+          >
+            <h2
+              class="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4 text-ctp-teal"
+            >
+              {activeCopy.header3}
+            </h2>
+            <p
+              class="text-sm sm:text-base md:text-lg leading-relaxed text-ctp-subtext0"
+            >
+              {activeCopy.line3}
+            </p>
+          </div>
+
+          <div
+            class="p-4 sm:p-6 bg-ctp-surface0/20 rounded-lg backdrop-blur-sm border border-ctp-surface1/50 sm:col-span-2 lg:col-span-1"
+          >
+            <h3
+              class="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4 text-ctp-lavender"
+            >
+              {activeCopy.header4}
+            </h3>
+            <p
+              class="text-sm sm:text-base md:text-lg leading-relaxed text-ctp-subtext0"
+            >
+              {activeCopy.line4}
+            </p>
+          </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="pt-4 sm:pt-8">
+          <button
+            type="button"
+            onclick={() => goto("/signup")}
+            class="w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg md:text-xl font-semibold bg-ctp-blue/20 text-ctp-text border-2 border-ctp-blue/60 hover:bg-ctp-blue/30 hover:border-ctp-blue/80 transition-all duration-200 rounded-lg backdrop-blur-sm shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            {activeCopy.CTA}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -34,9 +34,9 @@
     const renderPass = new RenderPass(scene, camera);
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      1.2,
-      0.5,
-      0.0,
+      1.2, // strength
+      0.5, // radius
+      0.0, // threshold
     );
 
     const composer = new EffectComposer(renderer);
@@ -163,10 +163,6 @@
 ></div>
 
 <style>
-  :global(body) {
-    background-color: transparent;
-  }
-
   div {
     position: fixed;
     top: 0;
@@ -175,5 +171,6 @@
     left: 0;
     z-index: -1;
     pointer-events: none;
+    background-color: #000;
   }
 </style>
