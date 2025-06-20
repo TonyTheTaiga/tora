@@ -24,7 +24,7 @@
       line3: "Integrate in seconds. Sign up when you feel like it. Or don't.",
       line4:
         "Forget rigid pipelines. Tora provides a simple, shareable home for every run, from masterpiece to happy accident.",
-      getStarted: "Plot Instantly",
+      getStarted: "Run Your First Plot",
       performanceHeader: "Hypnotic Visuals",
       integrationHeader: "Zero Commitment",
       automationHeader: "Chaos, Organized",
@@ -35,7 +35,7 @@
       line3: "導入は数秒。登録は、気が向いたら。しなくてもOK。",
       line4:
         "厳格なパイプラインは忘れましょう。傑作から偶然の産物まで、すべての実行にシンプルで共有可能な場所を提供します。",
-      getStarted: "すぐにプロット開始",
+      getStarted: "最初のプロットを実行",
       performanceHeader: "魅惑的なビジュアル",
       integrationHeader: "一切の縛りなし",
       automationHeader: "混沌から秩序へ",
