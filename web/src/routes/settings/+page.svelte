@@ -87,9 +87,7 @@
           Settings
         </h1>
         <div class="text-sm text-ctp-subtext0 space-y-1">
-          <div>
-            system configuration
-          </div>
+          <div>system configuration</div>
         </div>
       </div>
     </div>

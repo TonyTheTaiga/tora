@@ -129,13 +129,14 @@
           class="w-2 bg-ctp-mauve rounded-full flex-shrink-0 self-stretch"
         ></div>
         <div class="min-w-0 flex-1 py-1">
-          <h2 id="modal-title" class="text-lg md:text-xl text-ctp-text truncate font-mono">
+          <h2
+            id="modal-title"
+            class="text-lg md:text-xl text-ctp-text truncate font-mono"
+          >
             Edit Experiment
           </h2>
           <div class="text-sm text-ctp-subtext0 space-y-1">
-            <div>
-              modify experiment config
-            </div>
+            <div>modify experiment config</div>
           </div>
         </div>
       </div>

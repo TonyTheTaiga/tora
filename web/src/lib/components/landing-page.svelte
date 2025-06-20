@@ -101,7 +101,6 @@ log("accuracy", 0.92)
 <section class="min-h-screen flex items-center justify-center">
   <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex flex-col items-center text-center text-ctp-text font-mono">
-      
       <!-- Logo Section -->
       <div class="fill-ctp-blue w-full max-w-xs sm:max-w-sm mb-8 sm:mb-12">
         <Logo />
@@ -109,7 +108,6 @@ log("accuracy", 0.92)
 
       <!-- Hero Content -->
       <div class="w-full max-w-4xl space-y-8 sm:space-y-12">
-        
         <!-- Headline -->
         <div>
           <h1
@@ -146,31 +144,47 @@ log("accuracy", 0.92)
 
         <!-- Feature Grid -->
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          <div class="p-4 sm:p-6 bg-ctp-surface0/20 rounded-lg backdrop-blur-sm border border-ctp-surface1/50">
+          <div
+            class="p-4 sm:p-6 bg-ctp-surface0/20 rounded-lg backdrop-blur-sm border border-ctp-surface1/50"
+          >
             <h2
               class="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4 text-ctp-sapphire"
             >
               {activeCopy.header1}
             </h2>
-            <p class="text-sm sm:text-base md:text-lg leading-relaxed text-ctp-subtext0">
+            <p
+              class="text-sm sm:text-base md:text-lg leading-relaxed text-ctp-subtext0"
+            >
               {activeCopy.line1}
             </p>
           </div>
-          
-          <div class="p-4 sm:p-6 bg-ctp-surface0/20 rounded-lg backdrop-blur-sm border border-ctp-surface1/50">
-            <h2 class="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4 text-ctp-teal">
+
+          <div
+            class="p-4 sm:p-6 bg-ctp-surface0/20 rounded-lg backdrop-blur-sm border border-ctp-surface1/50"
+          >
+            <h2
+              class="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4 text-ctp-teal"
+            >
               {activeCopy.header3}
             </h2>
-            <p class="text-sm sm:text-base md:text-lg leading-relaxed text-ctp-subtext0">
+            <p
+              class="text-sm sm:text-base md:text-lg leading-relaxed text-ctp-subtext0"
+            >
               {activeCopy.line3}
             </p>
           </div>
 
-          <div class="p-4 sm:p-6 bg-ctp-surface0/20 rounded-lg backdrop-blur-sm border border-ctp-surface1/50 sm:col-span-2 lg:col-span-1">
-            <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4 text-ctp-lavender">
+          <div
+            class="p-4 sm:p-6 bg-ctp-surface0/20 rounded-lg backdrop-blur-sm border border-ctp-surface1/50 sm:col-span-2 lg:col-span-1"
+          >
+            <h3
+              class="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4 text-ctp-lavender"
+            >
               {activeCopy.header4}
             </h3>
-            <p class="text-sm sm:text-base md:text-lg leading-relaxed text-ctp-subtext0">
+            <p
+              class="text-sm sm:text-base md:text-lg leading-relaxed text-ctp-subtext0"
+            >
               {activeCopy.line4}
             </p>
           </div>
@@ -186,7 +200,6 @@ log("accuracy", 0.92)
             {activeCopy.CTA}
           </button>
         </div>
-
       </div>
     </div>
   </div>

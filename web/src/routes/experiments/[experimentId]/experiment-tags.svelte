@@ -1,8 +1,9 @@
 <script lang="ts">
-  let { tags, initialLimit = 10 }: { tags: string[]; initialLimit?: number } = $props();
-  
+  let { tags, initialLimit = 10 }: { tags: string[]; initialLimit?: number } =
+    $props();
+
   let showAllTags = $state(false);
-  
+
   let visibleTags = $derived(
     showAllTags || tags.length <= initialLimit
       ? tags
@@ -31,9 +32,7 @@
           onclick={() => (showAllTags = !showAllTags)}
           class="text-sm text-ctp-subtext0 hover:text-ctp-blue transition-colors px-2 py-0.5"
         >
-          {showAllTags
-            ? "less"
-            : `+${tags.length - initialLimit}`}
+          {showAllTags ? "less" : `+${tags.length - initialLimit}`}
         </button>
       {/if}
     </div>
