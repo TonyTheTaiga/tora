@@ -10,14 +10,6 @@
     line3: string;
     line4: string;
     getStarted: string;
-    feature1Title: string;
-    feature1Desc: string;
-    feature2Title: string;
-    feature2Desc: string;
-    feature3Title: string;
-    feature3Desc: string;
-    feature4Title: string;
-    feature4Desc: string;
   };
 
   let currentLang: LangKey = $state("en");
@@ -29,18 +21,6 @@
       line3: "Fast Integration, Immediate Technical Insights.",
       line4: "Streamline MLOps Pipelines with Automated Tooling.",
       getStarted: "explore tora",
-      feature1Title: "seamless tool integration",
-      feature1Desc:
-        "deploy in minutes with zero downtime. integrates with existing ml stacks via python client. compatible with ci/cd pipelines and standard experiment frameworks.",
-      feature2Title: "advanced data visualization",
-      feature2Desc:
-        "interactive dashboards display real-time metrics and experiment comparisons. supports custom chart configurations and anomaly highlighting for efficient trend analysis.",
-      feature3Title: "ai-powered experiment analysis",
-      feature3Desc:
-        "automated hyperparameter optimization suggestions based on experiment history. identifies performance bottlenecks and generates targeted improvement recommendations.",
-      feature4Title: "collaborative mlops framework",
-      feature4Desc:
-        "centralized experiment management with version control integration. supports reproducibility through detailed metadata tracking and shared workspaces for distributed teams.",
     },
     ja: {
       line1: "モデル性能と計算効率の最適化",
@@ -48,18 +28,6 @@
       line3: "迅速な導入、即時の洞察",
       line4: "MLOpsワークフローの自動化と高速化",
       getStarted: "toraを試す",
-      feature1Title: "高速統合と即時価値提供",
-      feature1Desc:
-        "数分で導入可能。既存ツールとシームレスに連携し、ダウンタイムなしでワークフローを強化します。CI/CDパイプラインへの統合も容易です。",
-      feature2Title: "高度なデータ可視化",
-      feature2Desc:
-        "インタラクティブなチャートとリアルタイムメトリクスにより、複雑な実験データを直感的に理解。異常検出や傾向分析を効率化し、データ駆動型の意思決定をサポートします。",
-      feature3Title: "AI支援の実験最適化",
-      feature3Desc:
-        "AIによる実験分析でハイパーパラメータ最適化を支援。異常値やボトルネックを自動検出し、モデルパフォーマンス向上のための具体的な提案を生成します。",
-      feature4Title: "チーム協働MLOps",
-      feature4Desc:
-        "分散チームの知識を統合し、実験管理を効率化。バージョン管理、変更追跡、再現性確保の機能により、チーム全体の生産性と実験品質を向上させます。",
     },
   };
 
@@ -69,18 +37,6 @@
 
   const activeCopy = $derived.by(() => copy[currentLang]);
 </script>
-
-{#snippet FeatureCard(title: String, content: String)}
-  <div
-    class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 hover:bg-ctp-surface0/20 hover:border-ctp-surface0/30 transition-all p-4"
-  >
-    <span class="text-ctp-lavender font-mono">{title}</span>
-    <br />
-    <span class="text-ctp-subtext0 font-mono">
-      {content}
-    </span>
-  </div>
-{/snippet}
 
 <Starfield />
 
@@ -113,81 +69,33 @@
   </button>
 </div>
 
-<!-- Desktop Version -->
-<section
-  class="hidden md:flex flex-col min-h-[calc(100vh-2rem)] text-ctp-text font-mono"
->
-  <div class="flex-[2] flex flex-col">
-    <div class="flex-none p-2">
-      <div class="w-[clamp(31rem,68vw,73rem)] fill-ctp-blue opacity-80">
+<section class="min-h-screen flex items-center justify-center">
+  <div class="max-w-4xl mx-auto px-6 md:px-8 lg:px-12">
+    <div class="flex flex-col items-center text-center text-ctp-text font-mono space-y-8">
+      <div class="fill-ctp-blue w-full max-w-md">
         <Logo />
       </div>
-    </div>
 
-    <div class="flex-1 flex justify-end p-2">
-      <div class="flex flex-col p-4 justify-center">
-        <p class="text-base leading-relaxed">{activeCopy.line1}</p>
-        <p class="text-base leading-relaxed mt-2">{activeCopy.line2}</p>
-        <p class="text-base leading-relaxed mt-2 text-ctp-sapphire">
+      <div class="flex flex-col space-y-6 max-w-2xl">
+        <p class="text-lg md:text-xl leading-relaxed">{activeCopy.line1}</p>
+        <p class="text-lg md:text-xl leading-relaxed">{activeCopy.line2}</p>
+        <p class="text-lg md:text-xl leading-relaxed text-ctp-sapphire">
           {activeCopy.line3}
         </p>
-        <p class="text-base leading-relaxed mt-2">
+        <p class="text-lg md:text-xl leading-relaxed">
           {activeCopy.line4}
         </p>
-        <button
-          type="button"
-          onclick={() => goto("/signup")}
-          class="mt-4 p-2 bg-ctp-blue/20 border border-ctp-blue/40 hover:bg-ctp-blue/30 hover:border-ctp-blue/60 transition-all hover:text-ctp-crust font-mono w-auto"
-        >
-          {activeCopy.getStarted}
-        </button>
+        
+        <div class="pt-4">
+          <button
+            type="button"
+            onclick={() => goto("/signup")}
+            class="px-8 py-4 text-lg bg-ctp-blue/20 border border-ctp-blue/40 hover:bg-ctp-blue/30 hover:border-ctp-blue/60 transition-all font-mono"
+          >
+            {activeCopy.getStarted}
+          </button>
+        </div>
       </div>
-    </div>
-  </div>
-
-  <div class="flex-[1] flex flex-col justify-center items-center">
-    <div class="flex flex-row space-x-8 p-2">
-      {@render FeatureCard(activeCopy.feature1Title, activeCopy.feature1Desc)}
-      {@render FeatureCard(activeCopy.feature2Title, activeCopy.feature2Desc)}
-      {@render FeatureCard(activeCopy.feature3Title, activeCopy.feature3Desc)}
-      {@render FeatureCard(activeCopy.feature4Title, activeCopy.feature4Desc)}
-    </div>
-  </div>
-</section>
-
-<!-- Mobile Version -->
-<section
-  class="md:hidden flex flex-col min-h-[calc(100vh-2rem)] text-ctp-text px-4 font-mono"
->
-  <div class="flex flex-col space-y-8 pt-4">
-    <div class="w-[clamp(16rem,85vw,32rem)] fill-ctp-blue opacity-80">
-      <Logo />
-    </div>
-    <div class="p-4">
-      <p class="text-base leading-relaxed">{activeCopy.line1}</p>
-      <p class="text-base leading-relaxed mt-2">{activeCopy.line2}</p>
-      <p class="text-base leading-relaxed mt-2 text-ctp-sapphire">
-        {activeCopy.line3}
-      </p>
-      <p class="text-base leading-relaxed mt-2">
-        {activeCopy.line4}
-      </p>
-      <button
-        type="button"
-        onclick={() => goto("/signup")}
-        class="mt-4 p-2 bg-ctp-blue/20 border border-ctp-blue/40 hover:bg-ctp-blue/30 hover:border-ctp-blue/60 transition-all hover:text-ctp-crust font-mono w-auto"
-      >
-        {activeCopy.getStarted}
-      </button>
-    </div>
-  </div>
-
-  <div class="flex-1 pt-10">
-    <div class="flex flex-col space-y-6">
-      {@render FeatureCard(activeCopy.feature1Title, activeCopy.feature1Desc)}
-      {@render FeatureCard(activeCopy.feature2Title, activeCopy.feature2Desc)}
-      {@render FeatureCard(activeCopy.feature3Title, activeCopy.feature3Desc)}
-      {@render FeatureCard(activeCopy.feature4Title, activeCopy.feature4Desc)}
     </div>
   </div>
 </section>
