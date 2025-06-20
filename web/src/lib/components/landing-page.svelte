@@ -10,24 +10,35 @@
     line3: string;
     line4: string;
     getStarted: string;
+    performanceHeader: string;
+    integrationHeader: string;
+    automationHeader: string;
   };
 
   let currentLang: LangKey = $state("en");
 
   const copy: Record<LangKey, CopyContent> = {
     en: {
-      line1: "Optimize Model Performance & Computational Efficiency.",
-      line2: "Tora: Visualize, Analyze, and Optimize ML Experiment Workflows.",
-      line3: "Fast Integration, Immediate Technical Insights.",
-      line4: "Streamline MLOps Pipelines with Automated Tooling.",
-      getStarted: "explore tora",
+      line1: "Your command center for watching pretty lines go down.",
+      line2: "The Experiment Tracker You'll Actually Use.",
+      line3: "Integrate in seconds. Sign up when you feel like it. Or don't.",
+      line4:
+        "Forget rigid pipelines. Tora provides a simple, shareable home for every run, from masterpiece to happy accident.",
+      getStarted: "Plot Instantly",
+      performanceHeader: "Hypnotic Visuals",
+      integrationHeader: "Zero Commitment",
+      automationHeader: "Chaos, Organized",
     },
     ja: {
-      line1: "モデル性能と計算効率の最適化",
-      line2: "Tora: ML実験の可視化・分析・最適化プラットフォーム",
-      line3: "迅速な導入、即時の洞察",
-      line4: "MLOpsワークフローの自動化と高速化",
-      getStarted: "toraを試す",
+      line1: "美しい線が下がるのを眺める、あなたの司令塔。",
+      line2: "あなたが、実際に使う実験トラッカー。",
+      line3: "導入は数秒。登録は、気が向いたら。しなくてもOK。",
+      line4:
+        "厳格なパイプラインは忘れましょう。傑作から偶然の産物まで、すべての実行にシンプルで共有可能な場所を提供します。",
+      getStarted: "すぐにプロット開始",
+      performanceHeader: "魅惑的なビジュアル",
+      integrationHeader: "一切の縛りなし",
+      automationHeader: "混沌から秩序へ",
     },
   };
 
@@ -69,28 +80,56 @@
   </button>
 </div>
 
-<section class="min-h-screen flex items-center justify-center">
-  <div class="max-w-4xl mx-auto px-6 md:px-8 lg:px-12">
-    <div class="flex flex-col items-center text-center text-ctp-text font-mono space-y-8">
-      <div class="fill-ctp-blue w-full max-w-md">
+<section class="min-h-screen flex items-center justify-center px-4">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex flex-col items-center text-center text-ctp-text font-mono">
+      <div class="fill-ctp-blue w-full max-w-sm mb-16">
         <Logo />
       </div>
-
-      <div class="flex flex-col space-y-6 max-w-2xl">
-        <p class="text-lg md:text-xl leading-relaxed">{activeCopy.line1}</p>
-        <p class="text-lg md:text-xl leading-relaxed">{activeCopy.line2}</p>
-        <p class="text-lg md:text-xl leading-relaxed text-ctp-sapphire">
-          {activeCopy.line3}
-        </p>
-        <p class="text-lg md:text-xl leading-relaxed">
-          {activeCopy.line4}
-        </p>
-        
+      <div class="p-12 md:p-16 max-w-4xl">
+        <div class="mb-12">
+          <h1
+            class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6 text-ctp-text"
+          >
+            {activeCopy.line2}
+          </h1>
+          <div class="w-24 h-0.5 bg-ctp-blue mx-auto mb-8"></div>
+        </div>
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <div class="p-6">
+            <h2
+              class="text-xl md:text-2xl font-semibold mb-4 text-ctp-sapphire"
+            >
+              {activeCopy.performanceHeader}
+            </h2>
+            <p class="text-base md:text-lg leading-relaxed text-ctp-subtext0">
+              {activeCopy.line1}
+            </p>
+          </div>
+          <div class="p-6">
+            <h2 class="text-xl md:text-2xl font-semibold mb-4 text-ctp-teal">
+              {activeCopy.integrationHeader}
+            </h2>
+            <p class="text-base md:text-lg leading-relaxed text-ctp-subtext0">
+              {activeCopy.line3}
+            </p>
+          </div>
+        </div>
+        <div class="mb-12">
+          <div class="p-6">
+            <h3 class="text-lg md:text-xl font-medium mb-3 text-ctp-lavender">
+              {activeCopy.automationHeader}
+            </h3>
+            <p class="text-base md:text-lg leading-relaxed text-ctp-subtext0">
+              {activeCopy.line4}
+            </p>
+          </div>
+        </div>
         <div class="pt-4">
           <button
             type="button"
             onclick={() => goto("/signup")}
-            class="px-8 py-4 text-lg bg-ctp-blue/20 border border-ctp-blue/40 hover:bg-ctp-blue/30 hover:border-ctp-blue/60 transition-all font-mono"
+            class="px-12 py-4 text-lg md:text-xl font-semibold bg-ctp-blue/20 text-ctp-text border-2 border-ctp-blue/60 hover:bg-ctp-blue/30 hover:border-ctp-blue/80 transition-colors duration-200 rounded-md backdrop-blur-sm"
           >
             {activeCopy.getStarted}
           </button>
