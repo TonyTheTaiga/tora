@@ -6,10 +6,10 @@
   type LangKey = "en" | "ja";
   type CopyContent = {
     line1: string;
-    headline: string;
     line3: string;
     line4: string;
     CTA: string;
+    headline: string;
     header1: string;
     header3: string;
     header4: string;
@@ -20,22 +20,22 @@
   const copy: Record<LangKey, CopyContent> = {
     en: {
       line1: "Your command center for watching the loss go down.",
-      headline: "The Experiment Tracker You'll Actually Use.",
       line3: "Integrate in seconds. Sign up when you feel like it. Or don't.",
       line4:
         "Forget rigid pipelines. Tora provides a simple, shareable home for every run, from masterpiece to happy accident.",
       CTA: "Run Your First Plot",
+      headline: "The Experiment Tracker You'll Actually Use.",
       header1: "Hypnotic Visuals",
       header3: "Zero Commitment",
       header4: "Chaos, Organized",
     },
     ja: {
       line1: "損失が下がるのを眺める、あなたの司令塔。",
-      headline: "あなたが、実際に使う実験トラッカー。",
       line3: "導入は数秒。登録は、気が向いたら。しなくてもOK。",
       line4:
         "厳格なパイプラインは忘れましょう。傑作から偶然の産物まで、すべての実行にシンプルで共有可能な場所を提供します。",
       CTA: "最初のプロットを実行",
+      headline: "あなたが、実際に使う実験トラッカー。",
       header1: "魅惑的なビジュアル",
       header3: "一切の縛りなし",
       header4: "混沌から秩序へ",
