@@ -2,21 +2,20 @@
   import { onMount, onDestroy } from "svelte";
   import * as THREE from "three";
 
+  // Configuration for maximum vibes
   const CONFIG = {
-    STAR_COUNT: 2000,
-    FIELD_SIZE: 1000,
-    CAMERA_ROTATION_SPEED: 0.001,
-    CAMERA_FORWARD_SPEED: 0.1,
-    COMET_SPAWN_INTERVAL_MIN: 3,
-    COMET_SPAWN_INTERVAL_MAX: 8,
-    MAX_COMETS_AT_ONCE: 3,
+    STAR_COUNT: 3000,
+    FIELD_SIZE: 1200,
+    CAMERA_ROTATION_SPEED: 0.0003, // Slower, more meditative
+    CAMERA_FLOAT_SPEED: 0.0001,
+    CAMERA_BREATHING_SPEED: 0.0002,
     STAR_COLORS: [
-      [0.96, 0.94, 0.88], // Warm white
-      [1.0, 0.96, 0.84], // Pale yellow
-      [1.0, 0.92, 0.76], // Light orange
-      [1.0, 0.84, 0.69], // Orange
-      [0.67, 0.8, 1.0], // Blue-white
-      [1.0, 0.71, 0.59], // Red-orange
+      [0.9, 0.85, 0.7],   // Warm amber
+      [0.8, 0.9, 1.0],    // Cool blue
+      [1.0, 0.8, 0.9],    // Soft pink
+      [0.9, 1.0, 0.8],    // Gentle green
+      [1.0, 0.9, 0.7],    // Golden
+      [0.7, 0.8, 1.0],    // Deep blue
     ],
   } as const;
 
@@ -24,62 +23,61 @@
     position: THREE.Vector3;
     originalPosition: THREE.Vector3;
     color: THREE.Color;
+    baseColor: THREE.Color;
     size: number;
+    baseSize: number;
     brightness: number;
+    baseBrightness: number;
     flickerSpeed: number;
-    noiseOffset: number;
-  };
-
-  type Comet = {
-    id: number;
-    position: THREE.Vector3;
-    velocity: THREE.Vector3;
-    trail: THREE.Vector3[];
-    life: number;
-    maxLife: number;
-    brightness: number;
-    color: THREE.Color;
+    breathingPhase: number;
+    wavePhase: number;
+    layer: number; // 0 = far, 1 = mid, 2 = near
   };
 
   class StarField3D {
-    private scene: THREE.Scene;
-    private camera: THREE.PerspectiveCamera;
-    private renderer: THREE.WebGLRenderer;
+    private scene!: THREE.Scene;
+    private camera!: THREE.PerspectiveCamera;
+    private renderer!: THREE.WebGLRenderer;
     private stars: Star[] = [];
-    private comets: Comet[] = [];
     private starMesh!: THREE.Points;
+    private nebulaMesh!: THREE.Mesh;
     private time: number = 0;
-    private lastCometTime: number = 0;
     private animationId: number | null = null;
+    private baseFOV: number = 75;
 
     constructor(container: HTMLElement) {
-      // Scene setup
+      this.initializeScene(container);
+      this.generateStars();
+      this.createNebula();
+      this.setupEventListeners();
+      this.animate();
+    }
+
+    private initializeScene(container: HTMLElement): void {
+      // Scene with subtle fog for depth
       this.scene = new THREE.Scene();
-      this.scene.fog = new THREE.Fog(0x000011, 500, 1500);
+      this.scene.fog = new THREE.Fog(0x000011, 800, 2000);
 
       // Camera setup
       this.camera = new THREE.PerspectiveCamera(
-        75,
+        this.baseFOV,
         window.innerWidth / window.innerHeight,
         0.1,
-        2000,
+        3000
       );
       this.camera.position.set(0, 0, 0);
 
-      // Renderer setup
-      this.renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: false, // Disable for performance
+      // Renderer with enhanced settings for beauty
+      this.renderer = new THREE.WebGLRenderer({ 
+        alpha: true, 
+        antialias: true,
+        powerPreference: "high-performance"
       });
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.renderer.setClearColor(0x000000, 0);
+      this.renderer.setClearColor(0x000008, 1);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
+      
       container.appendChild(this.renderer.domElement);
-
-      this.generateStars();
-      this.setupEventListeners();
-      this.animate();
     }
 
     private generateStars(): void {
@@ -88,11 +86,15 @@
       const sizes = new Float32Array(CONFIG.STAR_COUNT);
 
       for (let i = 0; i < CONFIG.STAR_COUNT; i++) {
-        // Generate random position in sphere
+        // Create stars in multiple layers for depth
+        const layer = Math.floor(Math.random() * 3); // 0, 1, or 2
+        const layerDistance = [1200, 800, 400][layer]; // Far, mid, near
+
+        // Generate position in sphere at different distances
         const phi = Math.random() * Math.PI * 2;
         const costheta = Math.random() * 2 - 1;
         const theta = Math.acos(costheta);
-        const radius = CONFIG.FIELD_SIZE * (0.3 + Math.random() * 0.7); // Vary distance
+        const radius = layerDistance * (0.5 + Math.random() * 0.5);
 
         const x = radius * Math.sin(theta) * Math.cos(phi);
         const y = radius * Math.sin(theta) * Math.sin(phi);
@@ -101,26 +103,29 @@
         const position = new THREE.Vector3(x, y, z);
         const originalPosition = position.clone();
 
-        // Star properties
-        const colorIndex = Math.floor(
-          Math.random() * CONFIG.STAR_COLORS.length,
-        );
+        // Enhanced star properties
+        const colorIndex = Math.floor(Math.random() * CONFIG.STAR_COLORS.length);
         const [r, g, b] = CONFIG.STAR_COLORS[colorIndex];
-        const color = new THREE.Color(r, g, b);
-
+        const baseColor = new THREE.Color(r, g, b);
+        const color = baseColor.clone();
+        
         const distance = position.length();
-        const size = (1.0 + Math.random() * 3.0) * (1000 / distance); // Size based on distance
-        const brightness = 0.3 + Math.random() * 0.7;
+        const baseSize = (1.5 + Math.random() * 4.0) * (800 / distance) * (layer + 1);
+        const baseBrightness = (0.3 + Math.random() * 0.7) * (layer * 0.3 + 0.4);
 
-        // Store star data
         this.stars.push({
           position,
           originalPosition,
           color,
-          size,
-          brightness,
-          flickerSpeed: 1.0 + Math.random() * 2.0,
-          noiseOffset: Math.random() * 1000,
+          baseColor,
+          size: baseSize,
+          baseSize,
+          brightness: baseBrightness,
+          baseBrightness,
+          flickerSpeed: 0.5 + Math.random() * 1.5,
+          breathingPhase: Math.random() * Math.PI * 2,
+          wavePhase: Math.random() * Math.PI * 2,
+          layer,
         });
 
         // Set geometry arrays
@@ -128,229 +133,219 @@
         positions[i3] = x;
         positions[i3 + 1] = y;
         positions[i3 + 2] = z;
-
+        
         colors[i3] = r;
         colors[i3 + 1] = g;
         colors[i3 + 2] = b;
-
-        sizes[i] = size;
+        
+        sizes[i] = baseSize;
       }
 
-      // Create star geometry and material
+      // Enhanced shader material for hypnotic effects
       const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute(
-        "position",
-        new THREE.BufferAttribute(positions, 3),
-      );
-      geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-      geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
       const material = new THREE.ShaderMaterial({
         uniforms: {
           time: { value: 0.0 },
+          breathingWave: { value: 0.0 },
+          colorShift: { value: 0.0 },
         },
         vertexShader: `
           attribute float size;
           varying vec3 vColor;
+          varying float vIntensity;
           uniform float time;
+          uniform float breathingWave;
+          uniform float colorShift;
           
-          // Simple noise function
-          float noise(float x) {
-            return fract(sin(x) * 43758.5453);
+          // Enhanced noise functions
+          vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+          
+          float snoise(vec2 v) {
+            const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                               -0.577350269189626, 0.024390243902439);
+            vec2 i  = floor(v + dot(v, C.yy) );
+            vec2 x0 = v -   i + dot(i, C.xx);
+            vec2 i1;
+            i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+            vec4 x12 = x0.xyxy + C.xxzz;
+            x12.xy -= i1;
+            i = mod(i, 289.0);
+            vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+                            + i.x + vec3(0.0, i1.x, 1.0 ));
+            vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
+                                    dot(x12.zw,x12.zw)), 0.0);
+            m = m*m ;
+            m = m*m ;
+            vec3 x = 2.0 * fract(p * C.www) - 1.0;
+            vec3 h = abs(x) - 0.5;
+            vec3 ox = floor(x + 0.5);
+            vec3 a0 = x - ox;
+            m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+            vec3 g;
+            g.x  = a0.x  * x0.x  + h.x  * x0.y;
+            g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+            return 130.0 * dot(m, g);
           }
           
           void main() {
             vColor = color;
             
-            // Twinkling effect
-            float flicker = noise(time * 2.0 + position.x * 0.01) * 0.5 + 0.5;
-            float finalSize = size * (0.5 + flicker * 0.5);
+            // Multiple layered effects
+            float baseFlicker = snoise(vec2(time * 0.3 + position.x * 0.01, position.z * 0.01)) * 0.5 + 0.5;
+            float breathingPulse = sin(time * 0.5 + breathingWave) * 0.3 + 0.7;
+            float waveEffect = sin(time * 0.2 + position.y * 0.005) * 0.2 + 0.8;
+            
+            // Combine effects
+            float finalIntensity = baseFlicker * breathingPulse * waveEffect;
+            vIntensity = finalIntensity;
+            
+            float finalSize = size * (0.6 + finalIntensity * 0.8);
             
             vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-            gl_PointSize = finalSize * (300.0 / -mvPosition.z);
+            gl_PointSize = finalSize * (400.0 / -mvPosition.z);
             gl_Position = projectionMatrix * mvPosition;
           }
         `,
         fragmentShader: `
           varying vec3 vColor;
+          varying float vIntensity;
           
           void main() {
-            float distance = length(gl_PointCoord - vec2(0.5));
-            float alpha = 1.0 - smoothstep(0.0, 0.5, distance);
+            // Create soft, glowing stars
+            vec2 center = gl_PointCoord - vec2(0.5);
+            float distance = length(center);
             
-            gl_FragColor = vec4(vColor, alpha);
+            // Soft falloff with glow
+            float alpha = 1.0 - smoothstep(0.0, 0.5, distance);
+            float glow = exp(-distance * 4.0) * 0.3;
+            
+            // Color intensity based on effects
+            vec3 finalColor = vColor * (vIntensity * 0.8 + 0.4);
+            
+            gl_FragColor = vec4(finalColor, (alpha + glow) * vIntensity);
           }
         `,
         transparent: true,
         vertexColors: true,
         blending: THREE.AdditiveBlending,
+        depthWrite: false,
       });
 
       this.starMesh = new THREE.Points(geometry, material);
       this.scene.add(this.starMesh);
     }
 
+    private createNebula(): void {
+      // Create subtle nebula background for atmosphere
+      const nebulaGeometry = new THREE.SphereGeometry(2000, 32, 32);
+      const nebulaMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          time: { value: 0.0 },
+          colorA: { value: new THREE.Color(0x001122) },
+          colorB: { value: new THREE.Color(0x000408) },
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          varying vec3 vPosition;
+          
+          void main() {
+            vUv = uv;
+            vPosition = position;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform float time;
+          uniform vec3 colorA;
+          uniform vec3 colorB;
+          varying vec2 vUv;
+          varying vec3 vPosition;
+          
+          float noise(vec3 p) {
+            return fract(sin(dot(p, vec3(12.9898, 78.233, 54.53))) * 43758.5453);
+          }
+          
+          void main() {
+            vec3 pos = vPosition * 0.001;
+            float n1 = noise(pos + time * 0.01);
+            float n2 = noise(pos * 2.0 + time * 0.005);
+            float n3 = noise(pos * 4.0 + time * 0.002);
+            
+            float combined = (n1 + n2 * 0.5 + n3 * 0.25) / 1.75;
+            
+            vec3 color = mix(colorA, colorB, combined);
+            float alpha = combined * 0.1;
+            
+            gl_FragColor = vec4(color, alpha);
+          }
+        `,
+        transparent: true,
+        side: THREE.BackSide,
+        blending: THREE.AdditiveBlending,
+      });
+
+      this.nebulaMesh = new THREE.Mesh(nebulaGeometry, nebulaMaterial);
+      this.scene.add(this.nebulaMesh);
+    }
+
     private updateCamera(): void {
-      // Slow rotation around Y axis
-      const rotationRadius = 50;
-      const rotationSpeed = this.time * CONFIG.CAMERA_ROTATION_SPEED;
-
-      this.camera.position.x = Math.cos(rotationSpeed) * rotationRadius;
-      this.camera.position.z = Math.sin(rotationSpeed) * rotationRadius;
-
-      // Gentle forward movement
-      this.camera.position.y += CONFIG.CAMERA_FORWARD_SPEED * 0.1;
-
-      // Look slightly ahead in the direction of movement
+      const time = this.time;
+      
+      // Gentle spiral motion with floating sensation
+      const rotationRadius = 100;
+      const spiralSpeed = time * CONFIG.CAMERA_ROTATION_SPEED;
+      const floatHeight = Math.sin(time * CONFIG.CAMERA_FLOAT_SPEED) * 50;
+      const spiralHeight = Math.sin(time * CONFIG.CAMERA_FLOAT_SPEED * 0.7) * 30;
+      
+      this.camera.position.x = Math.cos(spiralSpeed) * rotationRadius;
+      this.camera.position.z = Math.sin(spiralSpeed) * rotationRadius;
+      this.camera.position.y = floatHeight + spiralHeight;
+      
+      // Breathing FOV effect
+      const breathingFOV = this.baseFOV + Math.sin(time * CONFIG.CAMERA_BREATHING_SPEED) * 5;
+      this.camera.fov = breathingFOV;
+      this.camera.updateProjectionMatrix();
+      
+      // Smooth look-at with drift
       const lookTarget = new THREE.Vector3(
-        this.camera.position.x * 0.1,
-        this.camera.position.y + 100,
-        this.camera.position.z * 0.1,
+        Math.sin(spiralSpeed * 0.3) * 20,
+        floatHeight * 0.3 + Math.sin(time * 0.0003) * 15,
+        Math.cos(spiralSpeed * 0.3) * 20
       );
       this.camera.lookAt(lookTarget);
     }
 
-    private spawnCometBurst(): void {
-      const numComets =
-        Math.floor(Math.random() * CONFIG.MAX_COMETS_AT_ONCE) + 1;
-
-      for (let i = 0; i < numComets; i++) {
-        this.spawnComet();
+    private updateEffects(): void {
+      const time = this.time;
+      
+      // Update star shader uniforms
+      if (this.starMesh.material instanceof THREE.ShaderMaterial) {
+        this.starMesh.material.uniforms.time.value = time;
+        this.starMesh.material.uniforms.breathingWave.value = Math.sin(time * 0.001) * Math.PI;
+        this.starMesh.material.uniforms.colorShift.value = Math.sin(time * 0.0005) * 0.5 + 0.5;
       }
-    }
 
-    private spawnComet(): void {
-      // Random start position around the edge of view
-      const angle = Math.random() * Math.PI * 2;
-      const distance = CONFIG.FIELD_SIZE * 0.8;
-
-      const startPos = new THREE.Vector3(
-        Math.cos(angle) * distance + (Math.random() - 0.5) * 200,
-        (Math.random() - 0.5) * 400,
-        Math.sin(angle) * distance + (Math.random() - 0.5) * 200,
-      );
-
-      // Random velocity toward center with some variation
-      const velocity = new THREE.Vector3(
-        -startPos.x * 0.001 + (Math.random() - 0.5) * 0.5,
-        (Math.random() - 0.5) * 0.3,
-        -startPos.z * 0.001 + (Math.random() - 0.5) * 0.5,
-      );
-
-      const colorIndex = Math.floor(Math.random() * CONFIG.STAR_COLORS.length);
-      const [r, g, b] = CONFIG.STAR_COLORS[colorIndex];
-
-      this.comets.push({
-        id: this.comets.length,
-        position: startPos,
-        velocity,
-        trail: [],
-        life: 1.0,
-        maxLife: 1.0,
-        brightness: 0.8 + Math.random() * 0.2,
-        color: new THREE.Color(r, g, b),
-      });
-    }
-
-    private updateComets(deltaTime: number): void {
-      for (let i = this.comets.length - 1; i >= 0; i--) {
-        const comet = this.comets[i];
-
-        // Update position
-        comet.position.add(
-          comet.velocity.clone().multiplyScalar(deltaTime * 60),
-        );
-
-        // Add to trail
-        comet.trail.push(comet.position.clone());
-        if (comet.trail.length > 20) {
-          comet.trail.shift();
-        }
-
-        // Update life
-        comet.life -= deltaTime * 0.3;
-
-        // Remove if dead or too far
-        if (
-          comet.life <= 0 ||
-          comet.position.length() > CONFIG.FIELD_SIZE * 1.5
-        ) {
-          this.comets.splice(i, 1);
-        }
+      // Update nebula
+      if (this.nebulaMesh.material instanceof THREE.ShaderMaterial) {
+        this.nebulaMesh.material.uniforms.time.value = time;
       }
-    }
 
-    private renderComets(): void {
-      // Remove old comet objects
-      const cometsToRemove = this.scene.children.filter(
-        (child) => child.userData.type === "comet",
-      );
-      cometsToRemove.forEach((comet) => this.scene.remove(comet));
-
-      // Render current comets
-      this.comets.forEach((comet) => {
-        if (comet.trail.length < 2) return;
-
-        // Create comet trail geometry
-        const points = comet.trail.map((pos) => pos.clone());
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-        const material = new THREE.LineBasicMaterial({
-          color: comet.color,
-          transparent: true,
-          opacity: comet.life * comet.brightness,
-          blending: THREE.AdditiveBlending,
-        });
-
-        const line = new THREE.Line(geometry, material);
-        line.userData.type = "comet";
-        this.scene.add(line);
-
-        // Add comet head
-        const headGeometry = new THREE.SphereGeometry(2, 8, 8);
-        const headMaterial = new THREE.MeshBasicMaterial({
-          color: comet.color,
-          transparent: true,
-          opacity: comet.life * comet.brightness,
-          blending: THREE.AdditiveBlending,
-        });
-
-        const head = new THREE.Mesh(headGeometry, headMaterial);
-        head.position.copy(comet.position);
-        head.userData.type = "comet";
-        this.scene.add(head);
-      });
+      // Rotate nebula slowly
+      this.nebulaMesh.rotation.y = time * 0.00005;
+      this.nebulaMesh.rotation.x = Math.sin(time * 0.00003) * 0.1;
     }
 
     private animate = (): void => {
       this.animationId = requestAnimationFrame(this.animate);
+      
+      this.time = performance.now() * 0.001;
 
-      const currentTime = performance.now() * 0.001;
-      const deltaTime = currentTime - this.time;
-      this.time = currentTime;
-
-      // Update camera movement
       this.updateCamera();
-
-      // Update star twinkling
-      if (this.starMesh.material instanceof THREE.ShaderMaterial) {
-        this.starMesh.material.uniforms.time.value = this.time;
-      }
-
-      // Update comets
-      this.updateComets(deltaTime);
-      this.renderComets();
-
-      // Spawn new comets
-      const cometSpawnTime =
-        CONFIG.COMET_SPAWN_INTERVAL_MIN +
-        Math.random() *
-          (CONFIG.COMET_SPAWN_INTERVAL_MAX - CONFIG.COMET_SPAWN_INTERVAL_MIN);
-
-      if (this.time - this.lastCometTime > cometSpawnTime) {
-        this.spawnCometBurst();
-        this.lastCometTime = this.time;
-      }
+      this.updateEffects();
 
       this.renderer.render(this.scene, this.camera);
     };
@@ -362,21 +357,24 @@
         this.renderer.setSize(window.innerWidth, window.innerHeight);
       };
 
-      window.addEventListener("resize", handleResize);
+      window.addEventListener('resize', handleResize);
     }
 
     public destroy(): void {
       if (this.animationId) {
         cancelAnimationFrame(this.animationId);
       }
-
+      
       this.renderer.dispose();
       this.starMesh.geometry.dispose();
       if (this.starMesh.material instanceof THREE.Material) {
         this.starMesh.material.dispose();
       }
-
-      window.removeEventListener("resize", this.setupEventListeners);
+      if (this.nebulaMesh.material instanceof THREE.Material) {
+        this.nebulaMesh.material.dispose();
+      }
+      
+      window.removeEventListener('resize', this.setupEventListeners);
     }
   }
 
