@@ -66,9 +66,9 @@ log("accuracy", 0.92)
 
   const activeCopy = $derived.by(() => copy[currentLang]);
 
-  if (typeof document !== "undefined") {
-    document.body.style.backgroundColor = "#000000";
-  }
+  // if (typeof document !== "undefined") {
+  //   document.body.style.backgroundColor = "#000000";
+  // }
 </script>
 
 <!-- <Starfield /> -->
