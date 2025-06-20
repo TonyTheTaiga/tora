@@ -76,6 +76,7 @@
     RECALCULATION_INTERVAL: 600,
     COMET_SPAWN_INTERVAL_MIN: 3,
     COMET_SPAWN_INTERVAL_MAX: 10,
+    MAX_COMETS_AT_ONCE: 5,
     AZIMUTH_FOV: 120,
     TWINKLE_EFFECT: {
       MULTI_NOISE_FACTOR: 0.7,
@@ -560,8 +561,16 @@
         Math.random() *
           (CONFIG.COMET_SPAWN_INTERVAL_MAX - CONFIG.COMET_SPAWN_INTERVAL_MIN);
       if (this.time - this.lastCometTime > cometSpawnTime) {
-        this.spawnComet();
+        this.spawnCometBurst();
         this.lastCometTime = this.time;
+      }
+    }
+
+    private spawnCometBurst(): void {
+      const numComets = Math.floor(Math.random() * CONFIG.MAX_COMETS_AT_ONCE) + 1;
+      
+      for (let i = 0; i < numComets; i++) {
+        this.spawnComet();
       }
     }
 
