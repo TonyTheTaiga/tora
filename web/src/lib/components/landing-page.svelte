@@ -37,29 +37,29 @@ log("accuracy", 0.92)
 
   const formattedCode = $derived(addLineNumbers(codeExample));
 
-  const copy: Record<LangKey, CopyContent> = {
+  const copy = {
     en: {
-      line1: "Your command center for watching the loss go down.",
-      line3: "Integrate in seconds. Sign up when you feel like it. Or don't.",
-      line4: "Turn chaos into insights with zero configuration.",
-      CTA: "Start Tracking",
-      headline: "The Experiment Tracker You'll Actually Use.",
-      header1: "Hypnotic Visuals",
-      header3: "Zero Commitment",
-      header4: "Chaos, Organized",
+      line1: "Finally, a clear view of your model's performance. In real-time.",
+      line3: "No sign-up walls. No credit card. Just start tracking.",
+      line4:
+        "Go from a folder full of scripts to a dashboard of results. Instantly.",
+      CTA: "Start for Free",
+      headline: "Pure Speed. Pure Insight. Zero Overhead.",
+      header1: "Clarity, Visualized",
+      header3: "Truly Frictionless",
+      header4: "From Scripts to Dashboard",
     },
     ja: {
-      line1: "損失が下がるのを眺める、あなたの司令塔。",
-      line3: "導入は数秒。登録は、気が向いたら。しなくてもOK。",
-      line4: "設定不要で混沌を洞察に変える。",
-      CTA: "トラッキング開始",
-      headline: "あなたが、実際に使う実験トラッカー。",
-      header1: "魅惑的なビジュアル",
-      header3: "一切の縛りなし",
-      header4: "混沌から秩序へ",
+      line1: "実験の進捗を、見やすいダッシュボードで一目で把握できます。",
+      line3: "アカウント登録は不要ですぐに開始。そのままお使いいただけます。",
+      line4: "複雑な実験管理を、設定不要でシンプルに効率化します。",
+      CTA: "無料で始める",
+      headline: "実験管理をもっとシンプルに、分かりやすく。",
+      header1: "直感的で分かりやすい分析",
+      header3: "すぐに、手軽に始められる",
+      header4: "煩雑な作業を、自動で整理",
     },
   };
-
   function toggleLang() {
     currentLang = currentLang === "en" ? "ja" : "en";
   }
@@ -73,7 +73,7 @@ log("accuracy", 0.92)
 
 <!-- <Starfield /> -->
 
-<!-- Language Toggle Button -->
+<!-- Language Toggle Button
 <div
   class="absolute top-4 right-4 z-20 flex items-center space-x-2 opacity-75 hover:opacity-100 transition-opacity duration-300 ease-in-out"
 >
@@ -101,6 +101,7 @@ log("accuracy", 0.92)
     </span>
   </button>
 </div>
+-->
 
 <section class="min-h-screen flex items-center justify-center">
   <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
