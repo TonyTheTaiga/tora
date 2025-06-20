@@ -67,7 +67,8 @@
       colors[i3 + 1] = color.g;
       colors[i3 + 2] = color.b;
 
-      sizes[i] = Math.random() * 2.0 + 1.5;
+      // Changed: Increased base size and random multiplier for bigger stars
+      sizes[i] = Math.random() * 2.5 + 2.0;
       randoms[i] = Math.random() * 10.0;
     }
 
@@ -104,10 +105,11 @@
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
 
-          float pulse = 0.7 + sin(time * 0.03 + vRandom) * 0.3;
+          // Changed: Reduced time multiplier from 0.03 to 0.015 for slower flicker
+          float flicker = 0.7 + sin(time * 0.015 + vRandom) * 0.3;
           float alpha = 1.0 - smoothstep(0.4, 0.5, dist);
           
-          gl_FragColor = vec4(vColor, alpha * pulse);
+          gl_FragColor = vec4(vColor, alpha * flicker);
         }
       `,
       blending: THREE.AdditiveBlending,
