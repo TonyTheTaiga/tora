@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import Starfield from "./starfield.svelte";
-  import Logo from "./logo.svelte";
+  import Logo from "./logo_assets/logo.svelte";
 
   type LangKey = "en" | "ja";
   type CopyContent = {

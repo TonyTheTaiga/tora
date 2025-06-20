@@ -2,7 +2,7 @@
   import "../app.css";
   import { invalidate } from "$app/navigation";
   import { onMount } from "svelte";
-  import Logo from "$lib/components/logo.svelte";
+  import Logo from "$lib/components/logo_assets/logo.svelte";
   import { goto } from "$app/navigation";
   import Toolbar from "$lib/components/toolbar.svelte";
 
