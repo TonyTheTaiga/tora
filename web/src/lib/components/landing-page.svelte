@@ -6,13 +6,13 @@
   type LangKey = "en" | "ja";
   type CopyContent = {
     line1: string;
-    line2: string;
+    headline: string;
     line3: string;
     line4: string;
-    getStarted: string;
-    performanceHeader: string;
-    integrationHeader: string;
-    automationHeader: string;
+    CTA: string;
+    header1: string;
+    header3: string;
+    header4: string;
   };
 
   let currentLang: LangKey = $state("en");
@@ -20,25 +20,25 @@
   const copy: Record<LangKey, CopyContent> = {
     en: {
       line1: "Your command center for watching pretty lines go down.",
-      line2: "The Experiment Tracker You'll Actually Use.",
+      headline: "The Experiment Tracker You'll Actually Use.",
       line3: "Integrate in seconds. Sign up when you feel like it. Or don't.",
       line4:
         "Forget rigid pipelines. Tora provides a simple, shareable home for every run, from masterpiece to happy accident.",
-      getStarted: "Run Your First Plot",
-      performanceHeader: "Hypnotic Visuals",
-      integrationHeader: "Zero Commitment",
-      automationHeader: "Chaos, Organized",
+      CTA: "Run Your First Plot",
+      header1: "Hypnotic Visuals",
+      header3: "Zero Commitment",
+      header4: "Chaos, Organized",
     },
     ja: {
       line1: "美しい線が下がるのを眺める、あなたの司令塔。",
-      line2: "あなたが、実際に使う実験トラッカー。",
+      headline: "あなたが、実際に使う実験トラッカー。",
       line3: "導入は数秒。登録は、気が向いたら。しなくてもOK。",
       line4:
         "厳格なパイプラインは忘れましょう。傑作から偶然の産物まで、すべての実行にシンプルで共有可能な場所を提供します。",
-      getStarted: "最初のプロットを実行",
-      performanceHeader: "魅惑的なビジュアル",
-      integrationHeader: "一切の縛りなし",
-      automationHeader: "混沌から秩序へ",
+      CTA: "最初のプロットを実行",
+      header1: "魅惑的なビジュアル",
+      header3: "一切の縛りなし",
+      header4: "混沌から秩序へ",
     },
   };
 
@@ -91,7 +91,7 @@
           <h1
             class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6 text-ctp-text"
           >
-            {activeCopy.line2}
+            {activeCopy.headline}
           </h1>
           <div class="w-24 h-0.5 bg-ctp-blue mx-auto mb-8"></div>
         </div>
@@ -100,7 +100,7 @@
             <h2
               class="text-xl md:text-2xl font-semibold mb-4 text-ctp-sapphire"
             >
-              {activeCopy.performanceHeader}
+              {activeCopy.header1}
             </h2>
             <p class="text-base md:text-lg leading-relaxed text-ctp-subtext0">
               {activeCopy.line1}
@@ -108,7 +108,7 @@
           </div>
           <div class="p-6">
             <h2 class="text-xl md:text-2xl font-semibold mb-4 text-ctp-teal">
-              {activeCopy.integrationHeader}
+              {activeCopy.header3}
             </h2>
             <p class="text-base md:text-lg leading-relaxed text-ctp-subtext0">
               {activeCopy.line3}
@@ -118,7 +118,7 @@
         <div class="mb-12">
           <div class="p-6">
             <h3 class="text-lg md:text-xl font-medium mb-3 text-ctp-lavender">
-              {activeCopy.automationHeader}
+              {activeCopy.header4}
             </h3>
             <p class="text-base md:text-lg leading-relaxed text-ctp-subtext0">
               {activeCopy.line4}
@@ -131,7 +131,7 @@
             onclick={() => goto("/signup")}
             class="px-12 py-4 text-lg md:text-xl font-semibold bg-ctp-blue/20 text-ctp-text border-2 border-ctp-blue/60 hover:bg-ctp-blue/30 hover:border-ctp-blue/80 transition-colors duration-200 rounded-md backdrop-blur-sm"
           >
-            {activeCopy.getStarted}
+            {activeCopy.CTA}
           </button>
         </div>
       </div>
