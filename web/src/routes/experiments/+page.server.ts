@@ -59,8 +59,14 @@ export const actions: Actions = {
       description,
       hyperparams,
       tags,
-      workspaceId,
     });
+
+    if (workspaceId) {
+      await locals.dbClient.addExperimentToWorkspace(
+        workspaceId,
+        experiment.id,
+      );
+    }
 
     return { success: true };
   },

@@ -54,6 +54,11 @@ export function createDbClient(client: SupabaseClient<Database>) {
       repositories.workspaces,
     ),
 
+    addExperimentToWorkspace:
+      repositories.workspaces.addExperimentToWorkspace.bind(
+        repositories.workspaces,
+      ),
+
     // --- API Key Methods ---
     getApiKeys: repositories.apiKeys.getApiKeys.bind(repositories.apiKeys),
     createApiKey: repositories.apiKeys.createApiKey.bind(repositories.apiKeys),

@@ -169,4 +169,16 @@ export class WorkspaceRepository extends BaseRepository {
       .eq("workspace_id", workspaceID);
     handleError(error, "Failed to remove workspace role");
   }
+
+  async addExperimentToWorkspace(
+    workspaceID: string,
+    experimentId: string,
+  ): Promise<void> {
+    const { error } = await this.client.from("workspace_experiments").insert({
+      workspace_id: workspaceID,
+      experiment_id: experimentId,
+    });
+
+    handleError(error, "Failed to attach experience to workspace");
+  }
 }

@@ -16,7 +16,6 @@ export class ExperimentRepository extends BaseRepository {
       description: string;
       hyperparams: HyperParam[];
       tags: string[];
-      workspaceId: string;
     },
   ): Promise<Experiment> {
     const { data: expData, error: expError } = await this.client
@@ -32,17 +31,6 @@ export class ExperimentRepository extends BaseRepository {
 
     handleError(expError, "Failed to create experiment");
     if (!expData) throw new Error("Experiment creation returned no data.");
-
-    if (details.workspaceId) {
-      const { error: wsExpError } = await this.client
-        .from("workspace_experiments")
-        .insert({
-          workspace_id: details.workspaceId,
-          experiment_id: expData.id,
-        });
-      handleError(wsExpError, "Failed to link workspace to experiment");
-    }
-
     return mapToExperiment(expData);
   }
 

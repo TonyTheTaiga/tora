@@ -57,14 +57,6 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
     const data = await request.json();
     const { name, description, tags, hyperparams } = data;
 
-    const workspaceId = data.workspaceId || cookies.get("current_workspace");
-    if (!workspaceId) {
-      throw error(
-        400,
-        "A workspace must be specified to create an experiment.",
-      );
-    }
-
     function normalizeHyperparams(src: unknown): HyperParam[] {
       if (!src) return [];
       if (typeof src === "string") {
@@ -90,8 +82,12 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
       description,
       hyperparams: parsedHyperparams,
       tags,
-      workspaceId,
     });
+
+    const workspaceId = data.workspaceId || null;
+    if (workspaceId) {
+      await dbClient.addExperimentToWorkspace(workspaceId, experiment.id);
+    }
 
     timer.end({
       userId: user.id,
