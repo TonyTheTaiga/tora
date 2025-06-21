@@ -54,7 +54,9 @@ export class RepositoryFactory {
   }
 }
 
-export function createRepositories(client: SupabaseClient<Database>): RepositoryFactory {
+export function createRepositories(
+  client: SupabaseClient<Database>,
+): RepositoryFactory {
   return new RepositoryFactory(client);
 }
 

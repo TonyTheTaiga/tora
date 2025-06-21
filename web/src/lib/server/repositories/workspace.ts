@@ -3,10 +3,7 @@ import { timeAsync } from "$lib/utils/timing";
 import { BaseRepository, handleError, mapToWorkspace } from "./base";
 
 export class WorkspaceRepository extends BaseRepository {
-  async getWorkspacesV2(
-    userId: string,
-    roles: string[],
-  ): Promise<Workspace[]> {
+  async getWorkspacesV2(userId: string, roles: string[]): Promise<Workspace[]> {
     const { data, error } = await this.client
       .from("workspace")
       .select(
@@ -68,10 +65,11 @@ export class WorkspaceRepository extends BaseRepository {
         }
 
         const workspaceIds = workspaces.map((w) => w.id);
-        const { data: experimentData, error: experimentError } = await this.client
-          .from("workspace_experiments")
-          .select(
-            `
+        const { data: experimentData, error: experimentError } =
+          await this.client
+            .from("workspace_experiments")
+            .select(
+              `
             workspace_id,
             experiment:experiment_id (
               id,
@@ -83,8 +81,8 @@ export class WorkspaceRepository extends BaseRepository {
               updated_at
             )
           `,
-          )
-          .in("workspace_id", workspaceIds);
+            )
+            .in("workspace_id", workspaceIds);
 
         handleError(experimentError, "Failed to get experiments");
 
@@ -98,8 +96,7 @@ export class WorkspaceRepository extends BaseRepository {
               name: item.experiment.name,
               description: item.experiment.description ?? "",
               hyperparams:
-                (item.experiment.hyperparams as unknown as HyperParam[]) ??
-                [],
+                (item.experiment.hyperparams as unknown as HyperParam[]) ?? [],
               tags: item.experiment.tags ?? [],
               createdAt: new Date(item.experiment.created_at),
               updatedAt: new Date(item.experiment.updated_at),
@@ -127,8 +124,7 @@ export class WorkspaceRepository extends BaseRepository {
       .single();
 
     handleError(workspaceError, "Failed to create workspace");
-    if (!workspaceData)
-      throw new Error("Workspace creation returned no data.");
+    if (!workspaceData) throw new Error("Workspace creation returned no data.");
 
     const { data: ownerRole, error: roleError } = await this.client
       .from("workspace_role")
@@ -162,7 +158,10 @@ export class WorkspaceRepository extends BaseRepository {
     handleError(error, "Failed to delete workspace");
   }
 
-  async removeWorkspaceRole(workspaceID: string, userId: string): Promise<void> {
+  async removeWorkspaceRole(
+    workspaceID: string,
+    userId: string,
+  ): Promise<void> {
     const { error } = await this.client
       .from("user_workspaces")
       .delete()

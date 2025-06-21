@@ -1,20 +1,12 @@
 <script lang="ts">
   import type { HyperParam, Experiment } from "$lib/types";
-  import {
-    Plus,
-    X,
-    Tag as TagIcon,
-    Settings,
-    Beaker,
-  } from "lucide-svelte";
+  import { Plus, X, Tag as TagIcon, Settings, Beaker } from "lucide-svelte";
   import { onMount, onDestroy } from "svelte";
   import { closeCreateExperimentModal } from "$lib/state/app.svelte.js";
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
 
-  let {
-    workspace,
-  }: { workspace: any } = $props();
+  let { workspace }: { workspace: any } = $props();
 
   let hyperparams = $state<HyperParam[]>([]);
   let addingNewTag = $state<boolean>(false);
@@ -28,11 +20,6 @@
       addingNewTag = false;
     }
   }
-
-
-
-
-
 
   onMount(() => {
     document.body.classList.add("overflow-hidden");
@@ -180,7 +167,6 @@
             {/if}
           </div>
         </div>
-
       </div>
 
       <!-- Action Buttons -->

@@ -2,7 +2,10 @@ import { PostgrestError, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../database.types";
 import type { Experiment, HyperParam, Workspace } from "$lib/types";
 
-export function handleError(error: PostgrestError | null, context: string): void {
+export function handleError(
+  error: PostgrestError | null,
+  context: string,
+): void {
   if (error) {
     throw new Error(`${context}: ${error.message}`);
   }

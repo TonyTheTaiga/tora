@@ -1,7 +1,12 @@
 import type { Json } from "../database.types";
 import type { Experiment, HyperParam } from "$lib/types";
 import { timeAsync } from "$lib/utils/timing";
-import { BaseRepository, handleError, mapToExperiment, mapRpcResultToExperiment } from "./base";
+import {
+  BaseRepository,
+  handleError,
+  mapToExperiment,
+  mapRpcResultToExperiment,
+} from "./base";
 
 export class ExperimentRepository extends BaseRepository {
   async createExperiment(
@@ -114,7 +119,9 @@ export class ExperimentRepository extends BaseRepository {
     return timeAsync(
       "getPublicExperiments",
       async () => {
-        const { data, error } = await this.client.from("experiment").select("*");
+        const { data, error } = await this.client
+          .from("experiment")
+          .select("*");
 
         handleError(error, "Failed to get public experiments");
         if (!data) throw new Error("unknown error");
@@ -162,33 +169,11 @@ export class ExperimentRepository extends BaseRepository {
   }
 
   async deleteExperiment(id: string): Promise<void> {
-    const { error } = await this.client.from("experiment").delete().eq("id", id);
-    handleError(error, `Failed to delete experiment with ID ${id}`);
-  }
-
-  async createReference(
-    fromExperiment: string,
-    toExperiment: string,
-  ): Promise<void> {
-    const { error } = await this.client.from("experiment_references").insert({
-      from_experiment: fromExperiment,
-      to_experiment: toExperiment,
-    });
-    handleError(error, "Failed to create experiment reference");
-  }
-
-  async deleteReference(
-    fromExperiment: string,
-    toExperiment: string,
-  ): Promise<void> {
     const { error } = await this.client
-      .from("experiment_references")
+      .from("experiment")
       .delete()
-      .match({
-        from_experiment: fromExperiment,
-        to_experiment: toExperiment,
-      });
-    handleError(error, "Failed to delete experiment reference");
+      .eq("id", id);
+    handleError(error, `Failed to delete experiment with ID ${id}`);
   }
 
   async getExperimentsAndMetrics(experimentIds: string[]): Promise<any[]> {
