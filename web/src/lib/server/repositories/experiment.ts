@@ -9,15 +9,12 @@ import {
 } from "./base";
 
 export class ExperimentRepository extends BaseRepository {
-  async createExperiment(
-    userId: string,
-    details: {
-      name: string;
-      description: string;
-      hyperparams: HyperParam[];
-      tags: string[];
-    },
-  ): Promise<Experiment> {
+  async createExperiment(details: {
+    name: string;
+    description: string;
+    hyperparams: HyperParam[];
+    tags: string[];
+  }): Promise<Experiment> {
     const { data: expData, error: expError } = await this.client
       .from("experiment")
       .insert({
