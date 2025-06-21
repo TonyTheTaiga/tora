@@ -6,10 +6,6 @@
     Tag as TagIcon,
     Settings,
     Beaker,
-    Link,
-    Globe,
-    Lock,
-    ChevronDown,
   } from "lucide-svelte";
   import { onMount, onDestroy } from "svelte";
   import { closeCreateExperimentModal } from "$lib/state/app.svelte.js";
@@ -18,8 +14,7 @@
 
   let {
     workspace,
-    experiments,
-  }: { workspace: any; experiments: Experiment[] } = $props();
+  }: { workspace: any } = $props();
 
   let hyperparams = $state<HyperParam[]>([]);
   let addingNewTag = $state<boolean>(false);
@@ -34,26 +29,10 @@
     }
   }
 
-  let reference = $state<Experiment | null>(null);
-  let searchInput = $state<string>("");
 
-  let filteredExperiments = $derived(
-    experiments.filter((exp) =>
-      exp.name.toLowerCase().includes(searchInput.toLowerCase()),
-    ),
-  );
 
-  function selectReference(exp: Experiment) {
-    reference = exp;
-  }
 
-  function clearReference() {
-    reference = null;
-  }
 
-  function clearSearch() {
-    searchInput = "";
-  }
 
   onMount(() => {
     document.body.classList.add("overflow-hidden");
@@ -202,64 +181,6 @@
           </div>
         </div>
 
-        <!-- References Section -->
-        <div class="border border-ctp-surface0/20 p-3">
-          <div class="text-base text-ctp-text font-medium mb-3">
-            reference experiment
-          </div>
-
-          {#if reference}
-            <input
-              class="hidden"
-              name="reference-id"
-              bind:value={reference.id}
-            />
-            <div class="flex items-center gap-2 mb-3">
-              <span class="text-ctp-lavender text-sm">•</span>
-              <span class="text-ctp-text text-sm">{reference.name}</span>
-              <button
-                type="button"
-                class="text-ctp-subtext0 hover:text-ctp-red transition-colors ml-auto"
-                onclick={clearReference}
-                title="Remove reference"
-              >
-                <X size={12} />
-              </button>
-            </div>
-          {/if}
-
-          <div class="space-y-2">
-            <input
-              type="search"
-              placeholder="Search experiments..."
-              bind:value={searchInput}
-              class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-lavender focus:border-ctp-lavender transition-all text-sm"
-            />
-
-            <div class="max-h-32 overflow-y-auto space-y-1">
-              {#each filteredExperiments as exp}
-                <button
-                  type="button"
-                  class="w-full flex items-center gap-2 p-2 hover:bg-ctp-surface0/10 text-left text-sm transition-colors"
-                  onclick={() => selectReference(exp)}
-                >
-                  <span class="text-ctp-lavender">•</span>
-                  <span class="text-ctp-text truncate">{exp.name}</span>
-                </button>
-              {/each}
-
-              {#if filteredExperiments.length === 0 && experiments.length > 0}
-                <div class="p-2 text-sm text-ctp-subtext0 text-center">
-                  No experiments found
-                </div>
-              {:else if experiments.length === 0}
-                <div class="p-2 text-sm text-ctp-subtext0 text-center">
-                  No experiments in this workspace yet
-                </div>
-              {/if}
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Action Buttons -->

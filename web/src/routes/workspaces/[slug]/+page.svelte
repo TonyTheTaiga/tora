@@ -76,7 +76,7 @@
 </script>
 
 {#if createExperimentModal}
-  <CreateExperimentModal workspace={currentWorkspace} {experiments} />
+  <CreateExperimentModal workspace={currentWorkspace} />
 {/if}
 
 {#if deleteExperimentModal}
@@ -87,7 +87,7 @@
 {/if}
 
 {#if editExperimentModal}
-  <EditExperimentModal bind:experiment={editExperimentModal} bind:experiments />
+  <EditExperimentModal bind:experiment={editExperimentModal} />
 {/if}
 
 <div class="font-mono">
