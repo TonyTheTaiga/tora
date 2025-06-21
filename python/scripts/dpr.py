@@ -1,12 +1,13 @@
-import torch
-from torch.utils.data import DataLoader
-from datasets import load_dataset, Dataset
-from sentence_transformers import SentenceTransformer, InputExample, losses, util
-from sentence_transformers.evaluation import InformationRetrievalEvaluator
-from collections import defaultdict
-import random
 import os
+import random
+from collections import defaultdict
+
 import numpy as np  # Import numpy to handle potential numpy types
+import torch
+from datasets import Dataset, load_dataset
+from sentence_transformers import InputExample, SentenceTransformer, losses, util
+from sentence_transformers.evaluation import InformationRetrievalEvaluator
+from torch.utils.data import DataLoader
 
 from tora import Tora  # Assuming tora_client.py is in the same directory
 

@@ -9,9 +9,10 @@ from sklearn.metrics import (
     confusion_matrix,
     precision_recall_fscore_support,
 )
-from tora import Tora
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
+
+from tora import Tora
 
 
 def safe_value(value):
