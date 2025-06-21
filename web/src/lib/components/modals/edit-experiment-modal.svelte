@@ -1,10 +1,5 @@
 <script lang="ts">
-  import {
-    X,
-    Save,
-    TagIcon,
-    Plus,
-  } from "lucide-svelte";
+  import { X, Save, TagIcon, Plus } from "lucide-svelte";
   import { enhance } from "$app/forms";
   import type { Experiment } from "$lib/types";
   import { onMount, onDestroy } from "svelte";
@@ -32,7 +27,6 @@
   let addingNewTag = $state(false);
   let tag = $state<string | null>(null);
 
-
   onMount(async () => {
     document.body.classList.add("overflow-hidden");
   });
@@ -40,9 +34,6 @@
   onDestroy(() => {
     document.body.classList.remove("overflow-hidden");
   });
-
-
-
 
   function addTag(e: KeyboardEvent | MouseEvent) {
     e.preventDefault();
@@ -211,7 +202,6 @@
             {/if}
           </div>
         </div>
-
       </div>
 
       <!-- Footer -->

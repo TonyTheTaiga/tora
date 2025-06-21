@@ -3,14 +3,6 @@ import type { RequestHandler } from "./$types";
 
 export const GET: RequestHandler = async ({ params, locals }) => {
   const experimentId = params.slug;
-  const userId = locals.user?.id;
-
-  try {
-    await locals.dbClient.checkExperimentAccess(experimentId, userId);
-  } catch {
-    throw error(403, "Access denied");
-  }
-
   const metrics = await locals.dbClient.getMetrics(experimentId);
 
   const names = Array.from(new Set(metrics.map((m) => m.name))).sort();
