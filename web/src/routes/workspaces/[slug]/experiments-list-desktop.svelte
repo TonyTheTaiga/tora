@@ -107,13 +107,6 @@
               {/if}
             </button>
           </td>
-          <td class="py-2 px-1 text-center w-20">
-            {#if experiment.visibility === "PUBLIC"}
-              <Globe class="w-3 h-3 text-ctp-green inline" />
-            {:else}
-              <GlobeLock class="w-3 h-3 text-ctp-red inline" />
-            {/if}
-          </td>
           <td class="py-2 px-1 text-right text-sm text-ctp-subtext0 w-24">
             {formatDate(experiment.createdAt)}
           </td>

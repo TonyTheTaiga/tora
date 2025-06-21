@@ -73,11 +73,6 @@
               </h3>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
-              {#if experiment.visibility === "PUBLIC"}
-                <Globe class="w-3 h-3 text-ctp-green" />
-              {:else}
-                <GlobeLock class="w-3 h-3 text-ctp-red" />
-              {/if}
               <span class="text-sm text-ctp-subtext0"
                 >{formatDate(experiment.createdAt)}</span
               >

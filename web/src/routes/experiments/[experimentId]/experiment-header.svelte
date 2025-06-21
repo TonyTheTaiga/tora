@@ -25,13 +25,6 @@
             <span>{experiment.description}</span>
           {/if}
         </div>
-        <div>
-          {#if experiment.visibility === "PUBLIC"}
-            <Globe size={12} class="text-ctp-green inline mr-2" />
-          {:else}
-            <GlobeLock size={12} class="text-ctp-red inline mr-2" />
-          {/if}
-        </div>
         <button
           onclick={() => copyToClipboard(experiment.id)}
           class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex text-start"

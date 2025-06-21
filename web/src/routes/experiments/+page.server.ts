@@ -53,7 +53,6 @@ export const actions: Actions = {
       "workspace-id": workspaceId,
       tags,
       hyperparams,
-      visibility,
     } = parseFormData(await request.formData());
 
     const experiment = await locals.dbClient.createExperiment(locals.user.id, {
@@ -61,7 +60,6 @@ export const actions: Actions = {
       description,
       hyperparams,
       tags,
-      visibility,
       workspaceId,
     });
 
@@ -83,14 +81,12 @@ export const actions: Actions = {
       "reference-id": referenceId,
       tags,
       hyperparams,
-      visibility,
     } = parseFormData(await request.formData());
 
     await locals.dbClient.updateExperiment(id, {
       name,
       description,
       tags,
-      visibility,
     });
 
     if (referenceId && referenceId !== "") {

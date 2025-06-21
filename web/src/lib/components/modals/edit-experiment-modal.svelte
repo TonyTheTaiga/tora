@@ -26,7 +26,6 @@
     id: experiment.id,
     name: experiment.name,
     description: experiment.description,
-    visibility: experiment.visibility,
     tags: experiment.tags ? [...experiment.tags] : [],
     availableMetrics: experiment.availableMetrics
       ? [...experiment.availableMetrics]
@@ -161,8 +160,7 @@
           if (result.type === "success" || result.type === "redirect") {
             experiment.name = experimentCopy.name;
             experiment.description = experimentCopy.description;
-            experiment.visibility = experimentCopy.visibility;
-            experiment.tags = [...experiment.tags];
+                    experiment.tags = [...experiment.tags];
           }
           closeEditExperimentModal();
 
@@ -209,43 +207,6 @@
           </div>
         </div>
 
-        <!-- Visibility Setting -->
-        <div class="border border-ctp-surface0/20 p-3">
-          <div class="text-base text-ctp-text font-medium mb-3">visibility</div>
-          <input
-            type="hidden"
-            id="edit-visibility-input"
-            name="visibility"
-            bind:value={experimentCopy.visibility}
-          />
-
-          <div class="flex gap-2 text-sm">
-            <button
-              type="button"
-              class={"flex items-center gap-1 px-3 py-2 transition-colors " +
-                (experimentCopy.visibility === "PUBLIC"
-                  ? "bg-ctp-green/20 text-ctp-green border border-ctp-green/30"
-                  : "bg-ctp-surface0/20 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text border border-ctp-surface0/30")}
-              onclick={() => (experimentCopy.visibility = "PUBLIC")}
-            >
-              <Globe size={12} />
-              <span>public</span>
-            </button>
-
-            <button
-              type="button"
-              class={"flex items-center gap-1 px-3 py-2 transition-colors " +
-                (experimentCopy.visibility === "PRIVATE" ||
-                !experimentCopy.visibility
-                  ? "bg-ctp-red/20 text-ctp-red border border-ctp-red/30"
-                  : "bg-ctp-surface0/20 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text border border-ctp-surface0/30")}
-              onclick={() => (experimentCopy.visibility = "PRIVATE")}
-            >
-              <Lock size={12} />
-              <span>private</span>
-            </button>
-          </div>
-        </div>
 
         <!-- Tags Section -->
         <div class="border border-ctp-surface0/20 p-3">

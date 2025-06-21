@@ -96,7 +96,6 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
       description,
       hyperparams: parsedHyperparams,
       tags,
-      visibility,
       workspaceId,
     });
 

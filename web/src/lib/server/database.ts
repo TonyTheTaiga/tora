@@ -4,7 +4,6 @@ import type {
   Experiment,
   HyperParam,
   Metric,
-  Visibility,
   Workspace,
   ApiKey,
   PendingInvitation,
@@ -32,7 +31,6 @@ function mapToExperiment(data: any, userIdOverride?: string): Experiment {
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
     tags: data.tags ?? [],
-    visibility: data.visibility,
     availableMetrics: data.availableMetrics,
   };
 }
@@ -46,7 +44,6 @@ function mapRpcResultToExperiment(row: any): Experiment {
     tags: row.experiment_tags ?? [],
     createdAt: new Date(row.experiment_created_at),
     updatedAt: new Date(row.experiment_updated_at),
-    visibility: row.experiment_visibility,
     availableMetrics: row.available_metrics,
   };
 }
@@ -72,7 +69,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
         description: string;
         hyperparams: HyperParam[];
         tags: string[];
-        visibility?: Visibility;
         workspaceId: string;
       },
     ): Promise<Experiment> {
@@ -83,8 +79,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
           description: details.description,
           hyperparams: details.hyperparams as unknown as Json[],
           tags: details.tags,
-          visibility: details.visibility ?? "PRIVATE",
-          creator: userId,
         })
         .select()
         .single();
@@ -138,8 +132,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
         async () => {
           const { data, error } = await client
             .from("experiment")
-            .select("*")
-            .eq("visibility", "PUBLIC");
+            .select("*");
 
           handleError(error, "Failed to get public experiments");
           if (!data) throw new Error("unknown error");
@@ -151,28 +144,20 @@ export function createDbClient(client: SupabaseClient<Database>) {
     },
 
     async checkExperimentAccess(id: string, userId?: string): Promise<void> {
+      if (!userId) {
+        throw new Error(`Access denied to experiment with ID ${id}`);
+      }
+
       const { data, error } = await client
         .from("experiment")
         .select(
-          "visibility, creator, workspace_experiments(workspace_id, workspace(user_workspaces(user_id)))",
+          "workspace_experiments(workspace_id, workspace(user_workspaces(user_id)))",
         )
         .eq("id", id)
         .single();
 
       handleError(error, `Failed to check access for experiment ID ${id}`);
       if (!data) throw new Error(`Experiment with ID ${id} not found.`);
-
-      if (data.visibility === "PUBLIC") {
-        return;
-      }
-
-      if (!userId) {
-        throw new Error(`Access denied to experiment with ID ${id}`);
-      }
-
-      if (data.creator === userId) {
-        return;
-      }
 
       const hasWorkspaceAccess = data.workspace_experiments?.some((we) =>
         we.workspace?.user_workspaces?.some((uw) => uw.user_id === userId),
@@ -283,8 +268,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
               createdAt: new Date(item.experiment_created_at),
               updatedAt: new Date(item.experiment_updated_at),
               tags: item.experiment_tags ?? [],
-              visibility: item.experiment_visibility,
-              availableMetrics: [],
+                      availableMetrics: [],
             })) ?? []
           );
         },
@@ -371,8 +355,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
                 hyperparams,
                 tags,
                 created_at,
-                updated_at,
-                visibility
+                updated_at
               )
             `,
             )
@@ -395,7 +378,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
                 tags: item.experiment.tags ?? [],
                 createdAt: new Date(item.experiment.created_at),
                 updatedAt: new Date(item.experiment.updated_at),
-                visibility: item.experiment.visibility,
                 availableMetrics: [],
                 workspaceId: item.workspace_id,
               });
