@@ -30,7 +30,6 @@ export class MetricRepository extends BaseRepository {
 
   async batchCreateMetric(metrics: Metric[]): Promise<void> {
     const { error } = await this.client.from("metric").insert(metrics);
-    // For production apps, consider a more robust retry mechanism (e.g., using p-retry)
     handleError(error, "Failed to batch write metrics");
   }
 }
