@@ -49,7 +49,6 @@ export const actions: Actions = {
     const {
       "experiment-name": name,
       "experiment-description": description,
-      "reference-id": referenceId,
       "workspace-id": workspaceId,
       tags,
       hyperparams,
@@ -63,14 +62,6 @@ export const actions: Actions = {
       workspaceId,
     });
 
-    if (referenceId && referenceId !== "") {
-      try {
-        await locals.dbClient.createReference(experiment.id, referenceId);
-      } catch (error) {
-        console.error("Failed to create experiment reference:", error);
-      }
-    }
-
     return { success: true };
   },
   update: async ({ request, locals }) => {
@@ -78,7 +69,6 @@ export const actions: Actions = {
       "experiment-id": id,
       "experiment-name": name,
       "experiment-description": description,
-      "reference-id": referenceId,
       tags,
       hyperparams,
     } = parseFormData(await request.formData());
@@ -88,35 +78,6 @@ export const actions: Actions = {
       description,
       tags,
     });
-
-    if (referenceId && referenceId !== "") {
-      try {
-        const currentReferences = await locals.dbClient.getReferenceChain(id);
-        if (
-          currentReferences.length > 0 &&
-          currentReferences[0].id !== referenceId
-        ) {
-          await locals.dbClient.deleteReference(id, currentReferences[0].id);
-        }
-        if (
-          currentReferences.length === 0 ||
-          currentReferences[0].id !== referenceId
-        ) {
-          await locals.dbClient.createReference(id, referenceId);
-        }
-      } catch (error) {
-        console.error("Failed to update experiment reference:", error);
-      }
-    } else {
-      try {
-        const currentReferences = await locals.dbClient.getReferenceChain(id);
-        if (currentReferences.length > 0) {
-          await locals.dbClient.deleteReference(id, currentReferences[0].id);
-        }
-      } catch (error) {
-        console.error("Failed to remove experiment reference:", error);
-      }
-    }
 
     return { success: true };
   },

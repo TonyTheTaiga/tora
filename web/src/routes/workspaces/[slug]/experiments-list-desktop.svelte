@@ -6,31 +6,19 @@
     selectedForComparison,
   } from "$lib/state/comparison.svelte.js";
   import {
-    setSelectedExperiment,
     openEditExperimentModal,
     openDeleteExperimentModal,
   } from "$lib/state/app.svelte.js";
-  import {
-    Eye,
-    EyeClosed,
-    Globe,
-    GlobeLock,
-    Tag,
-    Trash2,
-    Edit,
-  } from "lucide-svelte";
+  import { Tag, Trash2, Edit } from "lucide-svelte";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
 
   interface Props {
     experiments: Experiment[];
-    highlighted: string[];
-    onToggleHighlight: (experiment: Experiment) => void;
     formatDate: (date: Date) => string;
   }
 
-  let { experiments, highlighted, onToggleHighlight, formatDate }: Props =
-    $props();
+  let { experiments, formatDate }: Props = $props();
 
   let currentWorkspace = $derived(page.data.currentWorkspace);
   let canDeleteExperiment = $derived(
@@ -53,9 +41,6 @@
       {#each experiments as experiment}
         <tr
           class="group text-base hover:bg-ctp-surface0/20 transition-colors
-            {highlighted.length > 0 && !highlighted.includes(experiment.id)
-            ? 'opacity-40'
-            : ''}
             {selectedForComparison(experiment.id)
             ? 'bg-ctp-blue/10 border-l-2 border-ctp-blue'
             : ''}"
@@ -112,21 +97,6 @@
           </td>
           <td class="py-2 px-1 text-right w-32">
             <div class="flex items-center justify-end gap-1">
-              <button
-                onclick={(e) => {
-                  e.stopPropagation();
-                  onToggleHighlight(experiment);
-                }}
-                class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-teal hover:border-ctp-teal/30 rounded-full p-1 text-sm transition-all"
-                title="show experiment chain"
-              >
-                {#if highlighted.includes(experiment.id)}
-                  <EyeClosed class="w-3 h-3" />
-                {:else}
-                  <Eye class="w-3 h-3" />
-                {/if}
-              </button>
-
               <button
                 onclick={(e) => {
                   e.stopPropagation();

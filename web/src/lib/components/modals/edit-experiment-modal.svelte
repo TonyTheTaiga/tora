@@ -160,7 +160,7 @@
           if (result.type === "success" || result.type === "redirect") {
             experiment.name = experimentCopy.name;
             experiment.description = experimentCopy.description;
-                    experiment.tags = [...experiment.tags];
+            experiment.tags = [...experiment.tags];
           }
           closeEditExperimentModal();
 
@@ -206,7 +206,6 @@
             </div>
           </div>
         </div>
-
 
         <!-- Tags Section -->
         <div class="border border-ctp-surface0/20 p-3">

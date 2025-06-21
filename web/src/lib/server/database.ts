@@ -130,9 +130,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
       return timeAsync(
         "getPublicExperiments",
         async () => {
-          const { data, error } = await client
-            .from("experiment")
-            .select("*");
+          const { data, error } = await client.from("experiment").select("*");
 
           handleError(error, "Failed to get public experiments");
           if (!data) throw new Error("unknown error");
@@ -243,40 +241,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
         });
       handleError(error, "Failed to delete experiment reference");
     },
-
-    async getReferenceChain(experimentId: string): Promise<Experiment[]> {
-      return timeAsync(
-        "db.getReferenceChain",
-        async () => {
-          const { data, error } = await client.rpc("get_experiment_chain", {
-            target_experiment_id: experimentId,
-          });
-
-          console.error(error);
-
-          handleError(
-            error,
-            `Failed to get reference chain for experiment ${experimentId}`,
-          );
-          return (
-            data?.map((item) => ({
-              id: item.experiment_id,
-              name: item.experiment_name,
-              description: item.experiment_description ?? "",
-              hyperparams:
-                (item.experiment_hyperparams as unknown as HyperParam[]) ?? [],
-              createdAt: new Date(item.experiment_created_at),
-              updatedAt: new Date(item.experiment_updated_at),
-              tags: item.experiment_tags ?? [],
-                      availableMetrics: [],
-            })) ?? []
-          );
-        },
-        { experimentId },
-      );
-    },
-
-    // --- Workspace Methods ---
 
     async getWorkspacesV2(
       userId: string,

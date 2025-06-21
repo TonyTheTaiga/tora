@@ -141,7 +141,6 @@
           </div>
         </div>
 
-
         <!-- Tags Section -->
         <div class="border border-ctp-surface0/20 p-3">
           <div class="text-base text-ctp-text font-medium mb-3">tags</div>
