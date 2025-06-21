@@ -31,6 +31,39 @@ def from_tora_hp(tora_hp: ToraHPFormat) -> HyperparamsDict:
     return {entry["key"]: entry["value"] for entry in tora_hp}
 
 
+def create_workspace(
+    name: str,
+    api_key: str,
+    description: str = "",
+    server_url: str = TORA_BASE_URL,
+) -> Dict[str, Any]:
+    """
+    Creates a new Tora workspace. Requires an API key.
+
+    Args:
+        name: The name for the new workspace.
+        description: An optional description for the workspace.
+        server_url: The base URL of the Tora server.
+
+    Returns:
+        The full JSON response for the newly created workspace.
+
+    Raises:
+        httpx.HTTPStatusError: If the API request fails.
+    """
+    resolved_api_key = Tora._get_api_key(api_key)
+    headers = {
+        "x-api-key": resolved_api_key,
+        "Content-Type": "application/json",
+    }
+    with httpx.Client(base_url=server_url, headers=headers) as client:
+        req = client.post(
+            "/workspaces", json={"name": name, "description": description}
+        )
+        req.raise_for_status()
+        return req.json()
+
+
 class Tora:
     """
     A client for creating and logging to Tora experiments.
@@ -79,39 +112,6 @@ class Tora:
         if key is None:
             print("Warning: Tora API key not provided. Operating in anonymous mode.")
         return key
-
-    @staticmethod
-    def create_workspace(
-        name: str,
-        api_key: str,
-        description: str = "",
-        server_url: str = TORA_BASE_URL,
-    ) -> Dict[str, Any]:
-        """
-        Creates a new Tora workspace. Requires an API key.
-
-        Args:
-            name: The name for the new workspace.
-            description: An optional description for the workspace.
-            server_url: The base URL of the Tora server.
-
-        Returns:
-            The full JSON response for the newly created workspace.
-
-        Raises:
-            httpx.HTTPStatusError: If the API request fails.
-        """
-        resolved_api_key = Tora._get_api_key(api_key)
-        headers = {
-            "x-api-key": resolved_api_key,
-            "Content-Type": "application/json",
-        }
-        with httpx.Client(base_url=server_url, headers=headers) as client:
-            req = client.post(
-                "/workspaces", json={"name": name, "description": description}
-            )
-            req.raise_for_status()
-            return req.json()
 
     @classmethod
     def create_experiment(
