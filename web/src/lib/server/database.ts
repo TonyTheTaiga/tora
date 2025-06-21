@@ -104,11 +104,48 @@ export function createDbClient(client: SupabaseClient<Database>) {
         "db.getExperiments",
         async () => {
           const { data, error } = await client
-            .rpc("get_user_experiments", { workspace_id: workspaceId })
-            .order("experiment_created_at", { ascending: false });
+            .from("experiment")
+            .select(`
+              id,
+              created_at,
+              updated_at,
+              name,
+              description,
+              hyperparams,
+              tags,
+              workspace_experiments!inner(workspace_id),
+              metric(name)
+            `)
+            .eq("workspace_experiments.workspace_id", workspaceId)
+            .order("created_at", { ascending: false });
 
           handleError(error, "Failed to get experiments");
-          return data?.map(mapRpcResultToExperiment) ?? [];
+          
+          if (!data) return [];
+          
+          // Group metrics by experiment and create available_metrics array
+          const experimentsWithMetrics = data.reduce((acc: any[], row: any) => {
+            const existingExp = acc.find(exp => exp.id === row.id);
+            if (existingExp) {
+              if (row.metric?.name && !existingExp.available_metrics.includes(row.metric.name)) {
+                existingExp.available_metrics.push(row.metric.name);
+              }
+            } else {
+              acc.push({
+                experiment_id: row.id,
+                experiment_created_at: row.created_at,
+                experiment_updated_at: row.updated_at,
+                experiment_name: row.name,
+                experiment_description: row.description,
+                experiment_hyperparams: row.hyperparams,
+                experiment_tags: row.tags,
+                available_metrics: row.metric?.name ? [row.metric.name] : []
+              });
+            }
+            return acc;
+          }, []);
+
+          return experimentsWithMetrics.map(mapRpcResultToExperiment);
         },
         { workspaceId },
       );
@@ -511,15 +548,54 @@ export function createDbClient(client: SupabaseClient<Database>) {
       return timeAsync(
         "db.getExperimentsAndMetrics",
         async () => {
-          const { data, error } = await client.rpc(
-            "get_experiments_and_metrics",
-            {
-              experiment_ids: experimentIds,
-            },
-          );
+          // First get the experiments
+          const { data: experiments, error: experimentsError } = await client
+            .from("experiment")
+            .select("id, name, description, created_at, updated_at, tags, hyperparams")
+            .in("id", experimentIds);
 
-          handleError(error, "Failed to get experiments and metrics");
-          return data ?? [];
+          handleError(experimentsError, "Failed to get experiments");
+          
+          if (!experiments || experiments.length === 0) return [];
+
+          // Then get all metrics for these experiments
+          const { data: metrics, error: metricsError } = await client
+            .from("metric")
+            .select("experiment_id, name, value, step, created_at")
+            .in("experiment_id", experimentIds)
+            .order("step", { ascending: true })
+            .order("created_at", { ascending: true });
+
+          handleError(metricsError, "Failed to get metrics");
+
+          // Group metrics by experiment and metric name
+          const metricsByExperiment = new Map();
+          
+          if (metrics) {
+            metrics.forEach(metric => {
+              if (!metricsByExperiment.has(metric.experiment_id)) {
+                metricsByExperiment.set(metric.experiment_id, {});
+              }
+              
+              const expMetrics = metricsByExperiment.get(metric.experiment_id);
+              if (!expMetrics[metric.name]) {
+                expMetrics[metric.name] = [];
+              }
+              expMetrics[metric.name].push(metric.value);
+            });
+          }
+
+          // Combine experiments with their metrics
+          return experiments.map(exp => ({
+            id: exp.id,
+            name: exp.name,
+            description: exp.description,
+            created_at: exp.created_at,
+            updated_at: exp.updated_at,
+            tags: exp.tags,
+            hyperparams: exp.hyperparams,
+            metric_dict: metricsByExperiment.get(exp.id) || {}
+          }));
         },
         { experimentCount: experimentIds.length.toString() },
       );
