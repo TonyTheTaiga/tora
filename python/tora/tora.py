@@ -38,8 +38,8 @@ class Tora:
 
     _experiment_id: str
     _workspace_id: Optional[str]
-    description: Optional[str]
-    hyperparams: Optional[HyperparamsDict]
+    _description: Optional[str]
+    _hyperparams: Optional[HyperparamsDict]
     tags: Optional[List[str]]
     _max_buffer_len: int
     _buffer: List[Dict[str, Any]]
@@ -59,8 +59,8 @@ class Tora:
     ):
         self._experiment_id = experiment_id
         self._workspace_id = workspace_id
-        self.description = description
-        self.hyperparams = hyperparams
+        self._description = description
+        self._hyperparams = hyperparams
         self.tags = tags
         self._max_buffer_len = max_buffer_len
         self._buffer = []
@@ -228,7 +228,6 @@ class Tora:
             self._write_logs()
 
     def _write_logs(self) -> None:
-        """Sends the buffered logs to the Tora server."""
         if not self._buffer:
             return
 
@@ -253,8 +252,6 @@ class Tora:
     def shutdown(self) -> None:
         """
         Ensures all buffered logs are sent before the program exits.
-        It's good practice to call this at the end of your script or in a
-        `finally` block.
         """
         if self._buffer:
             print(f"Tora shutting down. Sending {len(self._buffer)} remaining logs...")
