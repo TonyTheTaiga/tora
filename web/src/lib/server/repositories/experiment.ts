@@ -72,7 +72,6 @@ export class ExperimentRepository extends BaseRepository {
 
         if (!data) return [];
 
-        // Group metrics by experiment and create available_metrics array
         const experimentsWithMetrics = data.reduce((acc: any[], row: any) => {
           const existingExp = acc.find((exp) => exp.id === row.id);
           if (existingExp) {

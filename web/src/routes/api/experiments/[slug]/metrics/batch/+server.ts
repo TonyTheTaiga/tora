@@ -1,5 +1,4 @@
-import { json, type RequestEvent } from "@sveltejs/kit";
-import type { RequestHandler } from "./$types";
+import { json, error, type RequestHandler } from "@sveltejs/kit";
 import type { Json } from "$lib/server/database.types";
 import type { Metric } from "$lib/types";
 
@@ -10,82 +9,75 @@ interface MetricInput {
   metadata?: Json;
 }
 
-interface APIError {
-  message: string;
-  code: string;
-  status: number;
-}
-
 export const POST: RequestHandler = async ({ request, params, locals }) => {
-  const userId = locals.user?.id;
-  const experimentId = params.slug;
+  const { slug: experimentId } = params;
+  const { dbClient } = locals;
 
-  if (!experimentId?.trim()) {
-    throw new Error("Invalid experiment ID");
+  if (!experimentId) {
+    throw error(400, {
+      message: "Experiment ID is required",
+    });
   }
 
   try {
-    await locals.dbClient.checkExperimentAccess(experimentId, userId);
-  } catch (error) {
+    const payload = await request.json();
+
+    if (!Array.isArray(payload)) {
+      throw new Error("Request body must be an array of metrics.");
+    }
+
+    const finalMetrics = payload.map((metric: unknown, index: number) => {
+      if (!metric || typeof metric !== "object") {
+        throw new Error(
+          `Invalid metric at index ${index}: Expected an object.`,
+        );
+      }
+
+      const { name, value, step } = metric as MetricInput;
+
+      if (typeof name !== "string" || !name.trim()) {
+        throw new Error(
+          `Invalid metric at index ${index}: 'name' must be a non-empty string.`,
+        );
+      }
+      if (!Number.isFinite(value)) {
+        throw new Error(
+          `Invalid metric at index ${index}: 'value' must be a finite number.`,
+        );
+      }
+      if (step !== undefined && !Number.isFinite(step)) {
+        throw new Error(
+          `Invalid metric at index ${index}: 'step' must be a finite number if provided.`,
+        );
+      }
+
+      return {
+        ...(metric as MetricInput),
+        experiment_id: experimentId,
+      };
+    });
+
+    if (finalMetrics.length > 0) {
+      await dbClient.batchCreateMetric(finalMetrics as Metric[]);
+    }
+
     return json(
       {
-        message: "Access denied to experiment",
-        code: "ACCESS_DENIED",
+        success: true,
+        count: finalMetrics.length,
+        experimentId,
       },
-      { status: 403 },
+      { status: 201 },
     );
-  }
-  try {
-    const metrics = (await request.json()) as MetricInput[];
-    if (!Array.isArray(metrics)) {
-      throw new Error("Invalid input: expected array of metrics");
-    }
+  } catch (err) {
+    const isClientError =
+      err instanceof SyntaxError ||
+      (err instanceof Error && !(err instanceof TypeError));
+    const statusCode = isClientError ? 400 : 500;
+    const message = isClientError
+      ? err.message
+      : "An unexpected internal error occurred.";
 
-    if (!metrics.every(isValidMetric)) {
-      throw new Error("Invalid metric format");
-    }
-
-    const experimentId = params.slug;
-    if (!experimentId?.trim()) {
-      throw new Error("Invalid experiment ID");
-    }
-
-    const currentTime = new Date().toISOString();
-    const finalMetrics = metrics.map((data) => ({
-      ...data,
-      experiment_id: experimentId,
-      created_at: currentTime,
-    })) as Metric[];
-
-    await locals.dbClient.batchCreateMetric(finalMetrics);
-
-    return json({
-      success: true,
-      count: metrics.length,
-      experimentId,
-    });
-  } catch (error) {
-    const apiError: APIError = {
-      message:
-        error instanceof Error ? error.message : "Unknown error occurred",
-      code: "METRIC_CREATE_ERROR",
-      status: 400,
-    };
-
-    return json(apiError, { status: apiError.status });
+    throw error(statusCode, { message });
   }
 };
-
-function isValidMetric(metric: unknown): metric is MetricInput {
-  if (!metric || typeof metric !== "object") return false;
-
-  const m = metric as MetricInput;
-
-  return (
-    typeof m.name === "string" &&
-    m.name.trim().length > 0 &&
-    typeof m.value === "number" &&
-    (m.step === undefined || typeof m.step === "number") &&
-    (m.metadata === undefined || typeof m.metadata === "object")
-  );
-}

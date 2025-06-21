@@ -8,15 +8,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   const timer = startTimer("experiment.load", { requestId });
 
   try {
-    const userId = locals.user?.id;
-
-    try {
-      await locals.dbClient.checkExperimentAccess(params.experimentId, userId);
-    } catch (err) {
-      timer.end({ error: "Access denied" });
-      throw error(403, "Access denied");
-    }
-
     const data = await locals.dbClient.getExperimentsAndMetrics([
       params.experimentId,
     ]);
