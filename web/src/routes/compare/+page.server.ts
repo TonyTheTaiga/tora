@@ -6,7 +6,6 @@ import { generateRequestId, startTimer } from "$lib/utils/timing";
 export interface ExperimentWithMetrics {
   id: string;
   name: string;
-  visibility: string;
   description: string;
   metricData: Record<string, number[]>;
   tags: string[];
@@ -30,7 +29,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
       .map((item) => ({
         id: item.id,
         name: item.name,
-        visibility: item.visibility,
         description: item.description,
         metricData: item.metric_dict,
         tags: item.tags,

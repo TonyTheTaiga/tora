@@ -1,7 +1,5 @@
 import type { Json } from "./server/database.types";
 
-export type Visibility = "PUBLIC" | "PRIVATE";
-
 export interface Experiment {
   id: string;
   name: string;
@@ -10,7 +8,6 @@ export interface Experiment {
   tags: string[];
   createdAt: Date;
   updatedAt: Date;
-  visibility: Visibility;
   availableMetrics: string[];
   workspaceId?: string;
 }

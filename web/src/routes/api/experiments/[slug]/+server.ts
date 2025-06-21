@@ -12,7 +12,6 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
     name: data.name,
     description: data.description,
     tags: data.tags,
-    visibility: data.visibility,
   });
 
   return new Response(

@@ -6,31 +6,19 @@
     selectedForComparison,
   } from "$lib/state/comparison.svelte.js";
   import {
-    setSelectedExperiment,
     openEditExperimentModal,
     openDeleteExperimentModal,
   } from "$lib/state/app.svelte.js";
-  import {
-    Eye,
-    EyeClosed,
-    Globe,
-    GlobeLock,
-    Tag,
-    Trash2,
-    Edit,
-  } from "lucide-svelte";
+  import { Tag, Trash2, Edit } from "lucide-svelte";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
 
   interface Props {
     experiments: Experiment[];
-    highlighted: string[];
-    onToggleHighlight: (experiment: Experiment) => void;
     formatDate: (date: Date) => string;
   }
 
-  let { experiments, highlighted, onToggleHighlight, formatDate }: Props =
-    $props();
+  let { experiments, formatDate }: Props = $props();
 
   let currentWorkspace = $derived(page.data.currentWorkspace);
   let canDeleteExperiment = $derived(
@@ -42,9 +30,6 @@
   {#each experiments as experiment}
     <div
       class="group transition-colors
-        {highlighted.length > 0 && !highlighted.includes(experiment.id)
-        ? 'opacity-40'
-        : ''}
         {selectedForComparison(experiment.id)
         ? 'bg-ctp-blue/10 border-l-2 border-ctp-blue'
         : ''}"
@@ -73,11 +58,6 @@
               </h3>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
-              {#if experiment.visibility === "PUBLIC"}
-                <Globe class="w-3 h-3 text-ctp-green" />
-              {:else}
-                <GlobeLock class="w-3 h-3 text-ctp-red" />
-              {/if}
               <span class="text-sm text-ctp-subtext0"
                 >{formatDate(experiment.createdAt)}</span
               >
@@ -117,21 +97,6 @@
         <div
           class="flex items-center justify-end gap-1 pt-2 border-t border-ctp-surface0/20"
         >
-          <button
-            onclick={(e) => {
-              e.stopPropagation();
-              onToggleHighlight(experiment);
-            }}
-            class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-teal hover:border-ctp-teal/30 rounded-full p-2 text-sm transition-all"
-            title="show experiment chain"
-          >
-            {#if highlighted.includes(experiment.id)}
-              <EyeClosed class="w-4 h-4" />
-            {:else}
-              <Eye class="w-4 h-4" />
-            {/if}
-          </button>
-
           <button
             onclick={(e) => {
               e.stopPropagation();

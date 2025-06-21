@@ -6,31 +6,19 @@
     selectedForComparison,
   } from "$lib/state/comparison.svelte.js";
   import {
-    setSelectedExperiment,
     openEditExperimentModal,
     openDeleteExperimentModal,
   } from "$lib/state/app.svelte.js";
-  import {
-    Eye,
-    EyeClosed,
-    Globe,
-    GlobeLock,
-    Tag,
-    Trash2,
-    Edit,
-  } from "lucide-svelte";
+  import { Tag, Trash2, Edit } from "lucide-svelte";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
 
   interface Props {
     experiments: Experiment[];
-    highlighted: string[];
-    onToggleHighlight: (experiment: Experiment) => void;
     formatDate: (date: Date) => string;
   }
 
-  let { experiments, highlighted, onToggleHighlight, formatDate }: Props =
-    $props();
+  let { experiments, formatDate }: Props = $props();
 
   let currentWorkspace = $derived(page.data.currentWorkspace);
   let canDeleteExperiment = $derived(
@@ -44,7 +32,6 @@
       <tr class="text-sm text-ctp-subtext0 border-b border-ctp-surface0/20">
         <th class="text-left py-2 w-4">•</th>
         <th class="text-left py-2">name</th>
-        <th class="text-center py-2 w-20">visibility</th>
         <th class="text-right py-2 w-24">modified</th>
         <th class="text-right py-2 w-32">actions</th>
       </tr>
@@ -53,9 +40,6 @@
       {#each experiments as experiment}
         <tr
           class="group text-base hover:bg-ctp-surface0/20 transition-colors
-            {highlighted.length > 0 && !highlighted.includes(experiment.id)
-            ? 'opacity-40'
-            : ''}
             {selectedForComparison(experiment.id)
             ? 'bg-ctp-blue/10 border-l-2 border-ctp-blue'
             : ''}"
@@ -107,33 +91,11 @@
               {/if}
             </button>
           </td>
-          <td class="py-2 px-1 text-center w-20">
-            {#if experiment.visibility === "PUBLIC"}
-              <Globe class="w-3 h-3 text-ctp-green inline" />
-            {:else}
-              <GlobeLock class="w-3 h-3 text-ctp-red inline" />
-            {/if}
-          </td>
           <td class="py-2 px-1 text-right text-sm text-ctp-subtext0 w-24">
             {formatDate(experiment.createdAt)}
           </td>
           <td class="py-2 px-1 text-right w-32">
             <div class="flex items-center justify-end gap-1">
-              <button
-                onclick={(e) => {
-                  e.stopPropagation();
-                  onToggleHighlight(experiment);
-                }}
-                class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-teal hover:border-ctp-teal/30 rounded-full p-1 text-sm transition-all"
-                title="show experiment chain"
-              >
-                {#if highlighted.includes(experiment.id)}
-                  <EyeClosed class="w-3 h-3" />
-                {:else}
-                  <Eye class="w-3 h-3" />
-                {/if}
-              </button>
-
               <button
                 onclick={(e) => {
                   e.stopPropagation();

@@ -4,7 +4,6 @@ import type {
   Experiment,
   HyperParam,
   Metric,
-  Visibility,
   Workspace,
   ApiKey,
   PendingInvitation,
@@ -20,9 +19,6 @@ function handleError(error: PostgrestError | null, context: string): void {
 function mapToExperiment(data: any, userIdOverride?: string): Experiment {
   const finalUserId =
     userIdOverride || data.user_experiments?.[0]?.user_id || "";
-  if (!finalUserId && data.visibility !== "PUBLIC") {
-    console.warn(`[DB Client] Experiment ${data.id} is missing a user_id.`);
-  }
 
   return {
     id: data.id,
@@ -32,7 +28,6 @@ function mapToExperiment(data: any, userIdOverride?: string): Experiment {
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
     tags: data.tags ?? [],
-    visibility: data.visibility,
     availableMetrics: data.availableMetrics,
   };
 }
@@ -46,7 +41,6 @@ function mapRpcResultToExperiment(row: any): Experiment {
     tags: row.experiment_tags ?? [],
     createdAt: new Date(row.experiment_created_at),
     updatedAt: new Date(row.experiment_updated_at),
-    visibility: row.experiment_visibility,
     availableMetrics: row.available_metrics,
   };
 }
@@ -72,7 +66,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
         description: string;
         hyperparams: HyperParam[];
         tags: string[];
-        visibility?: Visibility;
         workspaceId: string;
       },
     ): Promise<Experiment> {
@@ -83,8 +76,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
           description: details.description,
           hyperparams: details.hyperparams as unknown as Json[],
           tags: details.tags,
-          visibility: details.visibility ?? "PRIVATE",
-          creator: userId,
         })
         .select()
         .single();
@@ -110,11 +101,53 @@ export function createDbClient(client: SupabaseClient<Database>) {
         "db.getExperiments",
         async () => {
           const { data, error } = await client
-            .rpc("get_user_experiments", { workspace_id: workspaceId })
-            .order("experiment_created_at", { ascending: false });
+            .from("experiment")
+            .select(
+              `
+              id,
+              created_at,
+              updated_at,
+              name,
+              description,
+              hyperparams,
+              tags,
+              workspace_experiments!inner(workspace_id),
+              metric(name)
+            `,
+            )
+            .eq("workspace_experiments.workspace_id", workspaceId)
+            .order("created_at", { ascending: false });
 
           handleError(error, "Failed to get experiments");
-          return data?.map(mapRpcResultToExperiment) ?? [];
+
+          if (!data) return [];
+
+          // Group metrics by experiment and create available_metrics array
+          const experimentsWithMetrics = data.reduce((acc: any[], row: any) => {
+            const existingExp = acc.find((exp) => exp.id === row.id);
+            if (existingExp) {
+              if (
+                row.metric?.name &&
+                !existingExp.available_metrics.includes(row.metric.name)
+              ) {
+                existingExp.available_metrics.push(row.metric.name);
+              }
+            } else {
+              acc.push({
+                experiment_id: row.id,
+                experiment_created_at: row.created_at,
+                experiment_updated_at: row.updated_at,
+                experiment_name: row.name,
+                experiment_description: row.description,
+                experiment_hyperparams: row.hyperparams,
+                experiment_tags: row.tags,
+                available_metrics: row.metric?.name ? [row.metric.name] : [],
+              });
+            }
+            return acc;
+          }, []);
+
+          return experimentsWithMetrics.map(mapRpcResultToExperiment);
         },
         { workspaceId },
       );
@@ -136,10 +169,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
       return timeAsync(
         "getPublicExperiments",
         async () => {
-          const { data, error } = await client
-            .from("experiment")
-            .select("*")
-            .eq("visibility", "PUBLIC");
+          const { data, error } = await client.from("experiment").select("*");
 
           handleError(error, "Failed to get public experiments");
           if (!data) throw new Error("unknown error");
@@ -151,28 +181,20 @@ export function createDbClient(client: SupabaseClient<Database>) {
     },
 
     async checkExperimentAccess(id: string, userId?: string): Promise<void> {
+      if (!userId) {
+        throw new Error(`Access denied to experiment with ID ${id}`);
+      }
+
       const { data, error } = await client
         .from("experiment")
         .select(
-          "visibility, creator, workspace_experiments(workspace_id, workspace(user_workspaces(user_id)))",
+          "workspace_experiments(workspace_id, workspace(user_workspaces(user_id)))",
         )
         .eq("id", id)
         .single();
 
       handleError(error, `Failed to check access for experiment ID ${id}`);
       if (!data) throw new Error(`Experiment with ID ${id} not found.`);
-
-      if (data.visibility === "PUBLIC") {
-        return;
-      }
-
-      if (!userId) {
-        throw new Error(`Access denied to experiment with ID ${id}`);
-      }
-
-      if (data.creator === userId) {
-        return;
-      }
 
       const hasWorkspaceAccess = data.workspace_experiments?.some((we) =>
         we.workspace?.user_workspaces?.some((uw) => uw.user_id === userId),
@@ -259,41 +281,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
       handleError(error, "Failed to delete experiment reference");
     },
 
-    async getReferenceChain(experimentId: string): Promise<Experiment[]> {
-      return timeAsync(
-        "db.getReferenceChain",
-        async () => {
-          const { data, error } = await client.rpc("get_experiment_chain", {
-            target_experiment_id: experimentId,
-          });
-
-          console.error(error);
-
-          handleError(
-            error,
-            `Failed to get reference chain for experiment ${experimentId}`,
-          );
-          return (
-            data?.map((item) => ({
-              id: item.experiment_id,
-              name: item.experiment_name,
-              description: item.experiment_description ?? "",
-              hyperparams:
-                (item.experiment_hyperparams as unknown as HyperParam[]) ?? [],
-              createdAt: new Date(item.experiment_created_at),
-              updatedAt: new Date(item.experiment_updated_at),
-              tags: item.experiment_tags ?? [],
-              visibility: item.experiment_visibility,
-              availableMetrics: [],
-            })) ?? []
-          );
-        },
-        { experimentId },
-      );
-    },
-
-    // --- Workspace Methods ---
-
     async getWorkspacesV2(
       userId: string,
       roles: string[],
@@ -371,8 +358,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
                 hyperparams,
                 tags,
                 created_at,
-                updated_at,
-                visibility
+                updated_at
               )
             `,
             )
@@ -395,7 +381,6 @@ export function createDbClient(client: SupabaseClient<Database>) {
                 tags: item.experiment.tags ?? [],
                 createdAt: new Date(item.experiment.created_at),
                 updatedAt: new Date(item.experiment.updated_at),
-                visibility: item.experiment.visibility,
                 availableMetrics: [],
                 workspaceId: item.workspace_id,
               });
@@ -565,15 +550,56 @@ export function createDbClient(client: SupabaseClient<Database>) {
       return timeAsync(
         "db.getExperimentsAndMetrics",
         async () => {
-          const { data, error } = await client.rpc(
-            "get_experiments_and_metrics",
-            {
-              experiment_ids: experimentIds,
-            },
-          );
+          // First get the experiments
+          const { data: experiments, error: experimentsError } = await client
+            .from("experiment")
+            .select(
+              "id, name, description, created_at, updated_at, tags, hyperparams",
+            )
+            .in("id", experimentIds);
 
-          handleError(error, "Failed to get experiments and metrics");
-          return data ?? [];
+          handleError(experimentsError, "Failed to get experiments");
+
+          if (!experiments || experiments.length === 0) return [];
+
+          // Then get all metrics for these experiments
+          const { data: metrics, error: metricsError } = await client
+            .from("metric")
+            .select("experiment_id, name, value, step, created_at")
+            .in("experiment_id", experimentIds)
+            .order("step", { ascending: true })
+            .order("created_at", { ascending: true });
+
+          handleError(metricsError, "Failed to get metrics");
+
+          // Group metrics by experiment and metric name
+          const metricsByExperiment = new Map();
+
+          if (metrics) {
+            metrics.forEach((metric) => {
+              if (!metricsByExperiment.has(metric.experiment_id)) {
+                metricsByExperiment.set(metric.experiment_id, {});
+              }
+
+              const expMetrics = metricsByExperiment.get(metric.experiment_id);
+              if (!expMetrics[metric.name]) {
+                expMetrics[metric.name] = [];
+              }
+              expMetrics[metric.name].push(metric.value);
+            });
+          }
+
+          // Combine experiments with their metrics
+          return experiments.map((exp) => ({
+            id: exp.id,
+            name: exp.name,
+            description: exp.description,
+            created_at: exp.created_at,
+            updated_at: exp.updated_at,
+            tags: exp.tags,
+            hyperparams: exp.hyperparams,
+            metric_dict: metricsByExperiment.get(exp.id) || {},
+          }));
         },
         { experimentCount: experimentIds.length.toString() },
       );

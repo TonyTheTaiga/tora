@@ -49,11 +49,9 @@ export const actions: Actions = {
     const {
       "experiment-name": name,
       "experiment-description": description,
-      "reference-id": referenceId,
       "workspace-id": workspaceId,
       tags,
       hyperparams,
-      visibility,
     } = parseFormData(await request.formData());
 
     const experiment = await locals.dbClient.createExperiment(locals.user.id, {
@@ -61,17 +59,8 @@ export const actions: Actions = {
       description,
       hyperparams,
       tags,
-      visibility,
       workspaceId,
     });
-
-    if (referenceId && referenceId !== "") {
-      try {
-        await locals.dbClient.createReference(experiment.id, referenceId);
-      } catch (error) {
-        console.error("Failed to create experiment reference:", error);
-      }
-    }
 
     return { success: true };
   },
@@ -80,47 +69,15 @@ export const actions: Actions = {
       "experiment-id": id,
       "experiment-name": name,
       "experiment-description": description,
-      "reference-id": referenceId,
       tags,
       hyperparams,
-      visibility,
     } = parseFormData(await request.formData());
 
     await locals.dbClient.updateExperiment(id, {
       name,
       description,
       tags,
-      visibility,
     });
-
-    if (referenceId && referenceId !== "") {
-      try {
-        const currentReferences = await locals.dbClient.getReferenceChain(id);
-        if (
-          currentReferences.length > 0 &&
-          currentReferences[0].id !== referenceId
-        ) {
-          await locals.dbClient.deleteReference(id, currentReferences[0].id);
-        }
-        if (
-          currentReferences.length === 0 ||
-          currentReferences[0].id !== referenceId
-        ) {
-          await locals.dbClient.createReference(id, referenceId);
-        }
-      } catch (error) {
-        console.error("Failed to update experiment reference:", error);
-      }
-    } else {
-      try {
-        const currentReferences = await locals.dbClient.getReferenceChain(id);
-        if (currentReferences.length > 0) {
-          await locals.dbClient.deleteReference(id, currentReferences[0].id);
-        }
-      } catch (error) {
-        console.error("Failed to remove experiment reference:", error);
-      }
-    }
 
     return { success: true };
   },

@@ -20,7 +20,6 @@
 
   let experiments = $state(data.experiments);
   let searchQuery = $state("");
-  let highlighted = $state<string[]>([]);
   let copiedId = $state(false);
   let createExperimentModal = $derived(getCreateExperimentModal());
   let editExperimentModal = $derived(getEditExperimentModal());
@@ -48,19 +47,6 @@
       year:
         date.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
     });
-  }
-
-  async function toggleHighlight(experiment: Experiment) {
-    if (highlighted.includes(experiment.id)) {
-      highlighted = [];
-    } else {
-      try {
-        const response = await fetch(`/api/experiments/${experiment.id}/ref`);
-        if (!response.ok) return;
-        const data = await response.json();
-        highlighted = [...data, experiment.id];
-      } catch (err) {}
-    }
   }
 
   function copyToClipboard(id: string) {
@@ -194,19 +180,9 @@
       </div>
     {:else}
       <!-- Responsive experiment layouts -->
-      <ExperimentsListMobile
-        experiments={filteredExperiments}
-        {highlighted}
-        onToggleHighlight={toggleHighlight}
-        {formatDate}
-      />
+      <ExperimentsListMobile experiments={filteredExperiments} {formatDate} />
 
-      <ExperimentsListDesktop
-        experiments={filteredExperiments}
-        {highlighted}
-        onToggleHighlight={toggleHighlight}
-        {formatDate}
-      />
+      <ExperimentsListDesktop experiments={filteredExperiments} {formatDate} />
 
       <!-- Summary line -->
       <div

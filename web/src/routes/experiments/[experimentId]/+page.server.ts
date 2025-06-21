@@ -30,7 +30,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     const experiment = {
       id: item.id,
       name: item.name,
-      visibility: item.visibility,
       description: item.description,
       metricData: item.metric_dict,
       tags: item.tags,
@@ -46,7 +45,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       status: item.status || "COMPLETED",
       startedAt: item.started_at || item.created_at,
       endedAt: item.ended_at,
-      createdBy: item.creator,
       version: item.version,
     };
 
