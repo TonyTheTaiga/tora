@@ -45,7 +45,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       status: item.status || "COMPLETED",
       startedAt: item.started_at || item.created_at,
       endedAt: item.ended_at,
-      createdBy: item.creator,
       version: item.version,
     };
 

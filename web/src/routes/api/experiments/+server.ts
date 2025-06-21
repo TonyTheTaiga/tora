@@ -55,13 +55,7 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
     }
 
     const data = await request.json();
-    const {
-      name,
-      description,
-      tags,
-      hyperparams,
-      visibility = "PRIVATE",
-    } = data;
+    const { name, description, tags, hyperparams } = data;
 
     const workspaceId = data.workspaceId || cookies.get("current_workspace");
     if (!workspaceId) {

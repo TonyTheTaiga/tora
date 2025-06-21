@@ -19,9 +19,6 @@ function handleError(error: PostgrestError | null, context: string): void {
 function mapToExperiment(data: any, userIdOverride?: string): Experiment {
   const finalUserId =
     userIdOverride || data.user_experiments?.[0]?.user_id || "";
-  if (!finalUserId && data.visibility !== "PUBLIC") {
-    console.warn(`[DB Client] Experiment ${data.id} is missing a user_id.`);
-  }
 
   return {
     id: data.id,
@@ -105,7 +102,8 @@ export function createDbClient(client: SupabaseClient<Database>) {
         async () => {
           const { data, error } = await client
             .from("experiment")
-            .select(`
+            .select(
+              `
               id,
               created_at,
               updated_at,
@@ -115,19 +113,23 @@ export function createDbClient(client: SupabaseClient<Database>) {
               tags,
               workspace_experiments!inner(workspace_id),
               metric(name)
-            `)
+            `,
+            )
             .eq("workspace_experiments.workspace_id", workspaceId)
             .order("created_at", { ascending: false });
 
           handleError(error, "Failed to get experiments");
-          
+
           if (!data) return [];
-          
+
           // Group metrics by experiment and create available_metrics array
           const experimentsWithMetrics = data.reduce((acc: any[], row: any) => {
-            const existingExp = acc.find(exp => exp.id === row.id);
+            const existingExp = acc.find((exp) => exp.id === row.id);
             if (existingExp) {
-              if (row.metric?.name && !existingExp.available_metrics.includes(row.metric.name)) {
+              if (
+                row.metric?.name &&
+                !existingExp.available_metrics.includes(row.metric.name)
+              ) {
                 existingExp.available_metrics.push(row.metric.name);
               }
             } else {
@@ -139,7 +141,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
                 experiment_description: row.description,
                 experiment_hyperparams: row.hyperparams,
                 experiment_tags: row.tags,
-                available_metrics: row.metric?.name ? [row.metric.name] : []
+                available_metrics: row.metric?.name ? [row.metric.name] : [],
               });
             }
             return acc;
@@ -551,11 +553,13 @@ export function createDbClient(client: SupabaseClient<Database>) {
           // First get the experiments
           const { data: experiments, error: experimentsError } = await client
             .from("experiment")
-            .select("id, name, description, created_at, updated_at, tags, hyperparams")
+            .select(
+              "id, name, description, created_at, updated_at, tags, hyperparams",
+            )
             .in("id", experimentIds);
 
           handleError(experimentsError, "Failed to get experiments");
-          
+
           if (!experiments || experiments.length === 0) return [];
 
           // Then get all metrics for these experiments
@@ -570,13 +574,13 @@ export function createDbClient(client: SupabaseClient<Database>) {
 
           // Group metrics by experiment and metric name
           const metricsByExperiment = new Map();
-          
+
           if (metrics) {
-            metrics.forEach(metric => {
+            metrics.forEach((metric) => {
               if (!metricsByExperiment.has(metric.experiment_id)) {
                 metricsByExperiment.set(metric.experiment_id, {});
               }
-              
+
               const expMetrics = metricsByExperiment.get(metric.experiment_id);
               if (!expMetrics[metric.name]) {
                 expMetrics[metric.name] = [];
@@ -586,7 +590,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
           }
 
           // Combine experiments with their metrics
-          return experiments.map(exp => ({
+          return experiments.map((exp) => ({
             id: exp.id,
             name: exp.name,
             description: exp.description,
@@ -594,7 +598,7 @@ export function createDbClient(client: SupabaseClient<Database>) {
             updated_at: exp.updated_at,
             tags: exp.tags,
             hyperparams: exp.hyperparams,
-            metric_dict: metricsByExperiment.get(exp.id) || {}
+            metric_dict: metricsByExperiment.get(exp.id) || {},
           }));
         },
         { experimentCount: experimentIds.length.toString() },

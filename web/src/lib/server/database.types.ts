@@ -333,7 +333,6 @@ export type Database = {
     }
     Enums: {
       user_experiment_role: "OWNER" | "EDITOR" | "VIEWER"
-      visibility: "PUBLIC" | "PRIVATE"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -450,7 +449,6 @@ export const Constants = {
   public: {
     Enums: {
       user_experiment_role: ["OWNER", "EDITOR", "VIEWER"],
-      visibility: ["PUBLIC", "PRIVATE"],
     },
   },
 } as const
