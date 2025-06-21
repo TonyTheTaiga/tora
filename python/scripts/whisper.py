@@ -1,19 +1,21 @@
+import aiohttp
+import evaluate
+import numpy as np
 import torch
 import torchaudio
-import aiohttp
 from datasets import load_dataset
-import evaluate
 from transformers import (
-    WhisperProcessor,
-    WhisperForConditionalGeneration,
-    TrainingArguments,
+    DataCollatorForSeq2Seq,
+)  # Correct for encoder-decoder models like Whisper
+from transformers import (
     Trainer,
     TrainerCallback,
-    DataCollatorForSeq2Seq,  # Correct for encoder-decoder models like Whisper
+    TrainingArguments,
+    WhisperForConditionalGeneration,
+    WhisperProcessor,
 )
-from tora import Tora
-import numpy as np
 
+from tora import Tora
 
 # --- Configuration ---
 MODEL_NAME = "openai/whisper-small"

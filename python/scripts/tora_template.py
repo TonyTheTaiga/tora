@@ -7,7 +7,6 @@ import numpy as np
 import torch
 from datasets import load_dataset
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-from tora import Tora
 from transformers import (
     AutoModelForMaskedLM,
     AutoModelForSequenceClassification,
@@ -18,6 +17,8 @@ from transformers import (
     TrainerCallback,
     TrainingArguments,
 )
+
+from tora import Tora
 
 
 def safe_value(value):

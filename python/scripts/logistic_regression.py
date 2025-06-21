@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.datasets import load_breast_cancer
 from sklearn.preprocessing import StandardScaler
+
 from tora import Tora
 
 np.random.seed(42)

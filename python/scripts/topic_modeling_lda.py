@@ -11,6 +11,7 @@ from nltk.tokenize import word_tokenize
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.feature_extraction.text import CountVectorizer
+
 from tora import Tora
 
 # Download required NLTK data
