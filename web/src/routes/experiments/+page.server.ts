@@ -54,7 +54,7 @@ export const actions: Actions = {
       hyperparams,
     } = parseFormData(await request.formData());
 
-    const experiment = await locals.dbClient.createExperiment(locals.user.id, {
+    const experiment = await locals.dbClient.createExperiment({
       name,
       description,
       hyperparams,
