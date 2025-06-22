@@ -18,16 +18,6 @@
           {new Date(experiment.createdAt).toISOString()}
         </span>
       </div>
-
-      {#if experiment.updatedAt}
-        <div class="flex items-center gap-2">
-          <Calendar size={10} class="text-ctp-subtext0" />
-          <span class="text-ctp-subtext0">updated_at:</span>
-          <span class="text-ctp-text">
-            {new Date(experiment.updatedAt).toISOString()}
-          </span>
-        </div>
-      {/if}
     </div>
   </div>
 </div>
