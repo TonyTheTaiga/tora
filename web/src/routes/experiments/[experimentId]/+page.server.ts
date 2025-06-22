@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       params.experimentId,
     ]);
 
-    if (!data || data.length === 0) {
+    if (!data) {
       timer.end({ error: "Experiment not found" });
       throw error(404, "Experiment not found");
     }
@@ -32,11 +32,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         : [],
       availableMetrics: item.availableMetrics,
       createdAt: new Date(item.created_at),
-      updatedAt: new Date(item.updated_at || item.created_at),
-      status: item.status || "COMPLETED",
-      startedAt: item.started_at || item.created_at,
-      endedAt: item.ended_at,
-      version: item.version,
+      updatedAt: new Date(item.updated_at),
     };
 
     const allMetrics = Object.entries(item.metric_dict || {}).flatMap(
