@@ -69,20 +69,9 @@ class Tora:
     A client for creating and logging to Tora experiments.
     """
 
-    _experiment_id: str
-    _workspace_id: Optional[str]
-    _description: Optional[str]
-    _hyperparams: Optional[HyperparamsDict]
-    tags: Optional[List[str]]
-    _max_buffer_len: int
-    _buffer: List[Dict[str, Any]]
-    _http_client: httpx.Client
-    _api_key: Optional[str]
-
     def __init__(
         self,
         experiment_id: str,
-        workspace_id: Optional[str] = None,
         description: Optional[str] = None,
         hyperparams: Optional[HyperparamsDict] = None,
         tags: Optional[List[str]] = None,
@@ -91,7 +80,6 @@ class Tora:
         server_url: str = TORA_BASE_URL,
     ):
         self._experiment_id = experiment_id
-        self._workspace_id = workspace_id
         self._description = description
         self._hyperparams = hyperparams
         self.tags = tags
@@ -161,7 +149,6 @@ class Tora:
 
         return cls(
             experiment_id=exp_id,
-            workspace_id=workspace_id,
             description=description,
             hyperparams=hyperparams,
             tags=tags,
@@ -175,7 +162,7 @@ class Tora:
         cls,
         experiment_id: str,
         max_buffer_len: int = 25,
-        api_key: Optional[str] = None,  # Key might be needed for private experiments
+        api_key: Optional[str] = None,
         server_url: str = TORA_BASE_URL,
     ) -> "Tora":
         """
@@ -197,7 +184,6 @@ class Tora:
 
         return cls(
             experiment_id=data["id"],
-            workspace_id=data.get("workspace_id"),
             description=data.get("description"),
             hyperparams=hyperparams,
             tags=data.get("tags"),
