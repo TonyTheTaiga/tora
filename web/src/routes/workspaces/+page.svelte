@@ -96,13 +96,18 @@
   <!-- Search and filter bar -->
   <div class="px-4 md:px-6 py-4">
     <div class="max-w-lg">
-      <input
-        id="workspace-search"
-        type="search"
-        placeholder="Find a workspace ( type / to enter search mode )"
-        bind:value={searchQuery}
-        class="w-full bg-ctp-surface0/20 border-0 px-4 py-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-text/20 transition-all font-mono text-sm"
-      />
+      <div
+        class="flex items-center bg-ctp-surface0/20 focus-within:ring-1 focus-within:ring-ctp-text/20 transition-all"
+      >
+        <span class="text-ctp-subtext0 font-mono text-sm px-4 py-3">/</span>
+        <input
+          id="workspace-search"
+          type="search"
+          placeholder="search workspaces..."
+          bind:value={searchQuery}
+          class="flex-1 bg-transparent border-0 py-3 pr-4 text-ctp-text placeholder-ctp-subtext0 focus:outline-none font-mono text-sm"
+        />
+      </div>
     </div>
   </div>
 
