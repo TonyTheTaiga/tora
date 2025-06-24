@@ -13,18 +13,25 @@
   let searchQuery = $state("");
 
   let filteredWorkspaces = $derived(
-    workspaces.filter((workspace) =>
-      workspace.name.toLowerCase().includes(searchQuery.toLowerCase()),
-    ),
+    workspaces.filter((workspace) => {
+      const query = searchQuery.toLowerCase();
+      const searchableText =
+        `${workspace.name} ${workspace.description || ""}`.toLowerCase();
+
+      return query.split(" ").every((term) => searchableText.includes(term));
+    }),
   );
 
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
 
-  const handleKeydown = (_: KeyboardEvent) => {
-    const searchElement = document.querySelector<HTMLInputElement>(
-      'input[type="search"]',
-    );
-    searchElement?.focus();
+  const handleKeydown = (event: KeyboardEvent) => {
+    if (event.key === "/") {
+      event.preventDefault();
+      const searchElement = document.querySelector<HTMLInputElement>(
+        'input[type="search"]',
+      );
+      searchElement?.focus();
+    }
   };
 
   onMount(() => {
