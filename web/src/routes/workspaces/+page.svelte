@@ -96,20 +96,13 @@
   <!-- Search and filter bar -->
   <div class="px-4 md:px-6 py-4">
     <div class="max-w-lg">
-      <div class="relative">
-        <input
-          id="workspace-search"
-          type="search"
-          placeholder="Search or filter workspaces..."
-          bind:value={searchQuery}
-          class="w-full bg-ctp-surface0/20 border-0 px-4 py-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-text/20 transition-all font-mono text-sm"
-        />
-        <div
-          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-ctp-subtext0 font-mono"
-        >
-          {filteredWorkspaces.length}/{workspaces.length}
-        </div>
-      </div>
+      <input
+        id="workspace-search"
+        type="search"
+        placeholder="Find a workspace — type / to search"
+        bind:value={searchQuery}
+        class="w-full bg-ctp-surface0/20 border-0 px-4 py-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-text/20 transition-all font-mono text-sm"
+      />
     </div>
   </div>
 

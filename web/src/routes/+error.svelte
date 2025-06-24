@@ -11,9 +11,9 @@
         something went horribly wrong
       {/if}
     </div>
-    
-    <a 
-      href="/" 
+
+    <a
+      href="/"
       class="text-ctp-blue hover:text-ctp-blue/80 transition-colors text-sm"
     >
       [back to workspace]
