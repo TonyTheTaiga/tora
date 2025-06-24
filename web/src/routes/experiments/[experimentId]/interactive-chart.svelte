@@ -369,12 +369,19 @@
         >
           <!-- Search filter -->
           <div class="p-2 border-b border-ctp-surface0/20">
-            <input
-              type="search"
-              placeholder="filter metrics..."
-              bind:value={searchFilter}
-              class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-xs"
-            />
+            <div
+              class="flex items-center bg-ctp-surface0/20 border border-ctp-surface0/30 focus-within:ring-1 focus-within:ring-ctp-blue focus-within:border-ctp-blue transition-all"
+            >
+              <span class="text-ctp-subtext0 font-mono text-xs px-2 py-1"
+                >/</span
+              >
+              <input
+                type="search"
+                placeholder="filter metrics..."
+                bind:value={searchFilter}
+                class="flex-1 bg-transparent border-0 py-1 pr-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none font-mono text-xs"
+              />
+            </div>
           </div>
 
           <!-- Control buttons -->

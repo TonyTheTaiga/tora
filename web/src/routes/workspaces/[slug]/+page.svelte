@@ -10,7 +10,6 @@
   import EditExperimentModal from "$lib/components/modals/edit-experiment-modal.svelte";
   import ExperimentsListMobile from "./experiments-list-mobile.svelte";
   import ExperimentsListDesktop from "./experiments-list-desktop.svelte";
-  import type { Experiment } from "$lib/types";
   import { Plus } from "lucide-svelte";
   import { onMount } from "svelte";
 
@@ -55,11 +54,14 @@
     setTimeout(() => (copiedId = false), 1200);
   }
 
-  const handleKeydown = (_: KeyboardEvent) => {
-    const searchElement = document.querySelector<HTMLInputElement>(
-      'input[type="search"]',
-    );
-    searchElement?.focus();
+  const handleKeydown = (event: KeyboardEvent) => {
+    if (event.key === "/") {
+      event.preventDefault();
+      const searchElement = document.querySelector<HTMLInputElement>(
+        'input[type="search"]',
+      );
+      searchElement?.focus();
+    }
   };
 
   onMount(() => {
@@ -141,18 +143,16 @@
   <!-- Search and filter bar -->
   <div class="px-4 md:px-6 py-4">
     <div class="max-w-lg">
-      <div class="relative">
+      <div
+        class="flex items-center bg-ctp-surface0/20 focus-within:ring-1 focus-within:ring-ctp-text/20 transition-all"
+      >
+        <span class="text-ctp-subtext0 font-mono text-sm px-4 py-3">/</span>
         <input
           type="search"
-          placeholder="Search experiments..."
+          placeholder="search experiments..."
           bind:value={searchQuery}
-          class="w-full bg-ctp-surface0/20 border-0 px-4 py-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-text/20 transition-all font-mono text-sm"
+          class="flex-1 bg-transparent border-0 py-3 pr-4 text-ctp-text placeholder-ctp-subtext0 focus:outline-none font-mono text-sm"
         />
-        <div
-          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-ctp-subtext0 font-mono"
-        >
-          {filteredExperiments.length}/{experiments.length}
-        </div>
       </div>
     </div>
   </div>
