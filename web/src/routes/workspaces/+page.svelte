@@ -99,7 +99,7 @@
       <input
         id="workspace-search"
         type="search"
-        placeholder="Find a workspace — type / to search"
+        placeholder="Find a workspace ( type / to enter search mode )"
         bind:value={searchQuery}
         class="w-full bg-ctp-surface0/20 border-0 px-4 py-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-text/20 transition-all font-mono text-sm"
       />
