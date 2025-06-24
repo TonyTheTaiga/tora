@@ -428,7 +428,7 @@
               class="aspect-square max-w-2xl mx-auto flex items-center justify-center"
             >
               <div class="text-center text-ctp-subtext0">
-                <div class="text-sm mb-2">$ select metrics</div>
+                <div class="text-sm mb-2">select metrics</div>
                 <div class="text-sm text-ctp-subtext1">no data to display</div>
               </div>
             </div>
