@@ -175,6 +175,22 @@
     cursor: pointer;
   }
 
+  button,
+  a {
+    transition: background-color 0.1s, color 0.1s, transform 0.05s;
+  }
+
+  button:active,
+  a:active {
+    transform: scale(0.97);
+  }
+
+  button:focus-visible,
+  a:focus-visible {
+    outline: 2px solid var(--color-ctp-blue);
+    outline-offset: 2px;
+  }
+
   *,
   ::after,
   ::before,
