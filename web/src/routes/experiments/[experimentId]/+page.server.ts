@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
     if (!data) {
       timer.end({ error: "Experiment not found" });
-      throw error(404, "Experiment not found");
+      error(404, "Experiment not found");
     }
 
     const item = data[0];
@@ -80,6 +80,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     };
   } catch (err) {
     timer.end({ error: err instanceof Error ? err.message : "Unknown error" });
-    throw err;
+    error(404, "sorry couldn't find your experiment!");
   }
 };

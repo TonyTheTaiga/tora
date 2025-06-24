@@ -110,7 +110,7 @@
   <div class="px-4 md:px-6 font-mono">
     {#if filteredWorkspaces.length === 0 && searchQuery}
       <div class="text-ctp-subtext0 text-base">
-        <div>$ search "{searchQuery}"</div>
+        <div>search "{searchQuery}"</div>
         <div class="text-ctp-subtext1 ml-2">no results found</div>
       </div>
     {:else}

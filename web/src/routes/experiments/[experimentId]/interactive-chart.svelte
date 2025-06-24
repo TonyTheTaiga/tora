@@ -445,7 +445,7 @@
         class="text-ctp-subtext0 mb-2 sm:mb-3 sm:w-6 sm:h-6"
       />
       <p class="text-ctp-subtext0 text-xs text-center max-w-md">
-        $ select metrics to view chart data
+        select metrics to view chart data
       </p>
     </div>
   {/if}
