@@ -175,20 +175,22 @@
     cursor: pointer;
   }
 
-  button,
-  a {
-    transition: background-color 0.1s, color 0.1s, transform 0.05s;
-  }
+  @media (hover: none) {
+    button,
+    a {
+      transition: background-color 0.1s, color 0.1s, transform 0.05s;
+    }
 
-  button:active,
-  a:active {
-    transform: scale(0.97);
-  }
+    button:active,
+    a:active {
+      transform: scale(0.97);
+    }
 
-  button:focus-visible,
-  a:focus-visible {
-    outline: 2px solid var(--color-ctp-blue);
-    outline-offset: 2px;
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--color-ctp-blue);
+      outline-offset: 2px;
+    }
   }
 
   *,
