@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       tags: item.tags,
       hyperparams: item.hyperparams
         ? (item.hyperparams.map((hp: any) => ({
-            key: hp.name,
+            key: hp.key,
             value: hp.value,
           })) as HyperParam[])
         : [],
