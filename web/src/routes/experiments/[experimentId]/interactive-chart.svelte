@@ -356,7 +356,7 @@
     <div class="mb-4">
       <details class="relative" bind:this={detailsElement}>
         <summary
-          class="flex items-center justify-between cursor-pointer p-2 md:p-3 bg-ctp-surface0/20 border border-ctp-surface0/30 hover:bg-ctp-surface0/30 transition-colors text-xs md:text-sm"
+          class="flex items-center justify-between cursor-pointer p-2 md:p-3 bg-ctp-surface0/20 border border-ctp-surface0/30 hover:bg-ctp-surface0/30 transition-colors text-sm md:text-sm"
         >
           <span class="text-ctp-text">
             select metrics ({selectedMetrics.length}/{availableMetrics.length})
@@ -377,9 +377,9 @@
               >
               <input
                 type="search"
-                placeholder="filter metrics..."
+                placeholder=""
                 bind:value={searchFilter}
-                class="flex-1 bg-transparent border-0 py-1 pr-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none font-mono text-xs"
+                class="flex-1 bg-transparent border-0 py-1 pr-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none font-mono text-base"
               />
             </div>
           </div>
@@ -404,7 +404,7 @@
           <div class="p-1">
             {#each filteredMetrics as metric}
               <label
-                class="flex items-center gap-2 p-1 hover:bg-ctp-surface0/20 cursor-pointer text-xs"
+                class="flex items-center gap-2 p-1 hover:bg-ctp-surface0/20 cursor-pointer text-sm"
               >
                 <input
                   type="checkbox"
