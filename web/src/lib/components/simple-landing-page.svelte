@@ -31,14 +31,11 @@ tlog("recall", 0.76)`;
 >
   <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex flex-col items-center text-center text-ctp-text">
-      <!-- Logo Section -->
       <div class="fill-ctp-blue w-full max-w-xs sm:max-w-sm mb-8 sm:mb-12">
         <Logo />
       </div>
 
-      <!-- Hero Content -->
       <div class="w-full max-w-4xl space-y-8 sm:space-y-12">
-        <!-- Headline -->
         <div>
           <h1
             class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 sm:mb-6 text-ctp-text"
@@ -48,12 +45,11 @@ tlog("recall", 0.76)`;
           <div class="w-16 sm:w-24 h-0.5 bg-ctp-blue mx-auto"></div>
         </div>
 
-        <!-- Code Showcase -->
-        <div class="w-full max-w-3xl mx-auto">
+        <article class="w-full max-w-3xl mx-auto">
           <div
             class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 overflow-hidden"
           >
-            <div
+            <header
               class="flex items-center justify-between px-4 py-3 border-b border-ctp-surface0"
             >
               <div class="flex space-x-2">
@@ -64,7 +60,8 @@ tlog("recall", 0.76)`;
               <span class="text-xs text-ctp-subtext0 font-mono hidden sm:inline"
                 >hw.py</span
               >
-            </div>
+            </header>
+
             <div class="p-4 sm:p-6">
               <pre
                 class="text-xs sm:text-sm md:text-base text-ctp-text font-mono leading-relaxed overflow-x-auto text-left"><code
@@ -72,7 +69,7 @@ tlog("recall", 0.76)`;
                 ></pre>
             </div>
 
-            <div class="flex justify-end p-4 border-t border-ctp-surface0">
+            <footer class="flex justify-end p-4 border-t border-ctp-surface0">
               <button
                 type="button"
                 onclick={() => goto("/signup")}
@@ -80,9 +77,9 @@ tlog("recall", 0.76)`;
               >
                 {CTA}
               </button>
-            </div>
+            </footer>
           </div>
-        </div>
+        </article>
       </div>
     </div>
   </div>
