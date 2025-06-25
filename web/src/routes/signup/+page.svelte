@@ -1,6 +1,9 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { User, Mail, Lock, LogIn } from "lucide-svelte";
+  import { User, Mail, Lock, LogIn, Loader2 } from "lucide-svelte";
+  import { enhance } from "$app/forms";
+
+  let submitting = $state(false);
 </script>
 
 <div
@@ -25,6 +28,15 @@
         action=""
         name="login-form"
         class="p-6 space-y-5"
+        use:enhance={() => {
+          submitting = true;
+          return async ({ result }) => {
+            submitting = false;
+            if (result.type === "redirect") {
+              goto(result.location);
+            }
+          };
+        }}
       >
         <!-- Email field -->
         <div class="space-y-2">
@@ -77,10 +89,16 @@
         <div class="pt-2">
           <button
             type="submit"
-            class="w-full flex items-center justify-center gap-2 bg-ctp-blue/20 border border-ctp-blue/40 py-3 px-4 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all font-mono"
+            class="w-full flex items-center justify-center gap-2 bg-ctp-blue/20 border border-ctp-blue/40 py-3 px-4 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all font-mono disabled:opacity-50"
+            disabled={submitting}
           >
-            <LogIn size={18} />
-            create account
+            {#if submitting}
+              <Loader2 size={18} class="animate-spin" />
+              creating...
+            {:else}
+              <LogIn size={18} />
+              create account
+            {/if}
           </button>
         </div>
       </form>
