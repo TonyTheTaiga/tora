@@ -178,7 +178,10 @@
   @media (hover: none) {
     button,
     a {
-      transition: background-color 0.1s, color 0.1s, transform 0.05s;
+      transition:
+        background-color 0.1s,
+        color 0.1s,
+        transform 0.05s;
     }
 
     button:active,
