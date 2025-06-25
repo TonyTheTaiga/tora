@@ -71,18 +71,17 @@ tlog("recall", 0.76)`;
                   class="language-python">{@html formattedCode}</code
                 ></pre>
             </div>
-          </div>
-        </div>
 
-        <!-- Call to Action -->
-        <div class="pt-4 sm:pt-8">
-          <button
-            type="button"
-            onclick={() => goto("/signup")}
-            class="w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all font-mono"
-          >
-            {CTA}
-          </button>
+            <div class="flex justify-end p-4 border-t border-ctp-surface0">
+              <button
+                type="button"
+                onclick={() => goto("/signup")}
+                class="px-6 py-2 bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all font-mono text-sm"
+              >
+                {CTA}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
