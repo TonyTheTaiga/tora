@@ -105,7 +105,7 @@
           type="search"
           placeholder="search workspaces..."
           bind:value={searchQuery}
-          class="flex-1 bg-transparent border-0 py-3 pr-4 text-ctp-text placeholder-ctp-subtext0 focus:outline-none font-mono text-sm"
+          class="flex-1 bg-transparent border-0 py-3 pr-4 text-ctp-text placeholder-ctp-subtext0 focus:outline-none font-mono text-base"
         />
       </div>
     </div>
