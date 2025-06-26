@@ -8,7 +8,7 @@
   let activeTab: "install" | "code" = "install";
 
   const headline = "Pure Speed. Pure Insight. Zero Overhead.";
-  const CTA = "start logging";
+  const CTA = "view docs";
 
   const codeExample = `from tora import setup, tlog
 
@@ -176,7 +176,7 @@ tlog("recall", 0.76)`;
                 class:opacity-50={activeTab !== "install"}
                 onclick={() => (activeTab = "install")}
               >
-                install
+                install.txt
               </button>
               <button
                 type="button"
@@ -185,7 +185,7 @@ tlog("recall", 0.76)`;
                 class:opacity-50={activeTab !== "code"}
                 onclick={() => (activeTab = "code")}
               >
-                code
+                quick_start.txt
               </button>
             </div>
 
@@ -227,7 +227,7 @@ tlog("recall", 0.76)`;
               >
               <button
                 type="button"
-                onclick={() => goto("/signup")}
+                onclick={() => goto("/docs")}
                 class="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2 bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all font-mono text-sm"
               >
                 {CTA}
