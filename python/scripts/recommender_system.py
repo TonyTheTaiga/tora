@@ -305,8 +305,7 @@ def validate(model, device, val_loader, criterion, epoch, tora, binary=True, k=1
         log_metric(tora, "val_precision", prec, epoch)
         log_metric(tora, "val_recall", rec, epoch)
         print(
-            f"Validation Loss={val_loss:.4f}, Acc={acc:.2f}%, "
-            f"Prec={prec:.2f}%, Rec={rec:.2f}%"
+            f"Validation Loss={val_loss:.4f}, Acc={acc:.2f}%, Prec={prec:.2f}%, Rec={rec:.2f}%"
         )
 
         ndcg_vals, p_at_k, r_at_k = [], [], []

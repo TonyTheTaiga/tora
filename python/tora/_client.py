@@ -1,42 +1,26 @@
-import os
-from typing import Any, Dict, List, Mapping, Optional, TypedDict, Union
+import logging
+from typing import Any, Mapping
 
-import httpx
+from ._config import TORA_API_KEY, TORA_BASE_URL
+from ._http import HttpClient, HTTPStatusError
+from ._types import HPValue
 
-TORA_BASE_URL: str = os.getenv("TORA_BASE_URL", "http://localhost:5173/api")
-TORA_API_KEY: Optional[str] = os.getenv("TORA_API_KEY", None)
-HPValue = Union[str, int, float]
+__all__ = ["Tora", "create_workspace"]
 
-
-class ToraHPEntry(TypedDict):
-    key: str
-    value: HPValue
+logger = logging.getLogger("tora")
 
 
-ToraHPFormat = List[ToraHPEntry]
-HyperparamsDict = Dict[str, HPValue]
-
-
-def to_tora_hp(hp: Mapping[str, HPValue]) -> ToraHPFormat:
-    """
-    Convert a mapping of hyperparameters to Tora’s list-of-dicts format.
-    """
+def _to_tora_hp(hp: Mapping[str, HPValue]) -> list[dict[str, HPValue]]:
     return [{"key": k, "value": v} for k, v in hp.items()]
 
 
-def from_tora_hp(tora_hp: ToraHPFormat) -> HyperparamsDict:
-    """
-    Convert Tora’s list-of-dicts back into a plain hyperparameter dict.
-    """
-    return {entry["key"]: entry["value"] for entry in tora_hp}
+def _from_tora_hp(tora_hp: list[dict[str, Any]]) -> dict[str, HPValue]:
+    return {item["key"]: item["value"] for item in tora_hp}
 
 
 def create_workspace(
-    name: str,
-    api_key: str,
-    description: str = "",
-    server_url: str = TORA_BASE_URL,
-) -> Dict[str, Any]:
+    name: str, api_key: str, description: str = "", server_url: str | None = None
+) -> dict[str, Any]:
     """
     Creates a new Tora workspace. Requires an API key.
 
@@ -49,14 +33,15 @@ def create_workspace(
         The full JSON response for the newly created workspace.
 
     Raises:
-        httpx.HTTPStatusError: If the API request fails.
+        HTTPStatusError: If the API request fails.
     """
+    server_url = server_url or TORA_BASE_URL
     resolved_api_key = Tora._get_api_key(api_key)
     headers = {
         "x-api-key": resolved_api_key,
         "Content-Type": "application/json",
     }
-    with httpx.Client(base_url=server_url, headers=headers) as client:
+    with HttpClient(base_url=server_url, headers=headers) as client:
         req = client.post(
             "/workspaces", json={"name": name, "description": description}
         )
@@ -72,12 +57,12 @@ class Tora:
     def __init__(
         self,
         experiment_id: str,
-        description: Optional[str] = None,
-        hyperparams: Optional[HyperparamsDict] = None,
-        tags: Optional[List[str]] = None,
+        description: str | None = None,
+        hyperparams: Mapping[str, HPValue] | None = None,
+        tags: list[str] | None = None,
         max_buffer_len: int = 25,
-        api_key: Optional[str] = None,
-        server_url: str = TORA_BASE_URL,
+        api_key: str | None = None,
+        server_url: str | None = None,
     ):
         self._experiment_id = experiment_id
         self._description = description
@@ -91,55 +76,48 @@ class Tora:
         if self._api_key:
             headers["x-api-key"] = self._api_key
 
-        self._http_client = httpx.Client(base_url=server_url, headers=headers)
+        server_url = server_url or TORA_BASE_URL
+        self._http_client = HttpClient(
+            base_url=server_url or TORA_BASE_URL, headers=headers
+        )
 
     @staticmethod
-    def _get_api_key(api_key: Optional[str]) -> Optional[str]:
+    def _get_api_key(api_key: str | None) -> str | None:
         """Helper to resolve API key from param or environment."""
         key = api_key or TORA_API_KEY
         if key is None:
-            print("Warning: Tora API key not provided. Operating in anonymous mode.")
+            logger.warning("Tora API key not provided. Operating in anonymous mode.")
         return key
 
     @classmethod
     def create_experiment(
         cls,
         name: str,
-        workspace_id: Optional[str] = None,
-        description: Optional[str] = None,
-        hyperparams: Optional[HyperparamsDict] = None,
-        tags: Optional[List[str]] = None,
+        workspace_id: str | None = None,
+        description: str | None = None,
+        hyperparams: Mapping[str, HPValue] | None = None,
+        tags: list[str] | None = None,
         max_buffer_len: int = 25,
-        api_key: Optional[str] = None,
-        server_url: str = TORA_BASE_URL,
+        api_key: str | None = None,
+        server_url: str | None = None,
     ) -> "Tora":
         """
         Creates a new experiment and returns a Tora instance to interact with it.
         An API key is required to create an experiment in a specific workspace.
         """
         resolved_api_key = Tora._get_api_key(api_key)
-
-        data: Dict[str, Any] = {"name": name}
-        if workspace_id:
-            data["workspaceId"] = workspace_id
-        if description:
-            data["description"] = description
-        if hyperparams:
-            data["hyperparams"] = to_tora_hp(hyperparams)
-        if tags:
-            data["tags"] = tags
-
+        data = cls._create_payload(name, workspace_id, description, hyperparams, tags)
+        server_url = server_url or TORA_BASE_URL
         url_path = (
             f"/workspaces/{workspace_id}/experiments"
             if workspace_id
             else "/experiments"
         )
-
         headers = {"Content-Type": "application/json"}
         if resolved_api_key:
             headers["x-api-key"] = resolved_api_key
 
-        with httpx.Client(base_url=server_url, headers=headers) as client:
+        with HttpClient(base_url=server_url, headers=headers) as client:
             req = client.post(url_path, json=data)
             req.raise_for_status()
             response_data = req.json()
@@ -158,28 +136,50 @@ class Tora:
         )
 
     @classmethod
+    def _create_payload(
+        cls,
+        name: str,
+        workspace_id: str | None,
+        description: str | None,
+        hyperparams: Mapping[str, HPValue] | None,
+        tags: list[str] | None,
+    ) -> dict[str, Any]:
+        data: dict[str, Any] = {"name": name}
+        if workspace_id:
+            data["workspaceId"] = workspace_id
+        if description:
+            data["description"] = description
+        if hyperparams:
+            data["hyperparams"] = _to_tora_hp(hyperparams)
+        if tags:
+            data["tags"] = tags
+        return data
+
+    @classmethod
     def load_experiment(
         cls,
         experiment_id: str,
         max_buffer_len: int = 25,
-        api_key: Optional[str] = None,
-        server_url: str = TORA_BASE_URL,
+        api_key: str | None = None,
+        server_url: str | None = None,
     ) -> "Tora":
         """
         Loads an existing experiment and returns a Tora instance to interact with it.
         """
+        server_url = server_url or TORA_BASE_URL
         resolved_api_key = Tora._get_api_key(api_key)
+
         headers = {}
         if resolved_api_key:
             headers["x-api-key"] = resolved_api_key
 
-        with httpx.Client(base_url=server_url, headers=headers) as client:
+        with HttpClient(base_url=server_url, headers=headers) as client:
             req = client.get(f"/experiments/{experiment_id}")
             req.raise_for_status()
             data = req.json()
 
         hyperparams = (
-            from_tora_hp(data["hyperparams"]) if data.get("hyperparams") else None
+            _from_tora_hp(data["hyperparams"]) if data.get("hyperparams") else None
         )
 
         return cls(
@@ -196,8 +196,8 @@ class Tora:
         self,
         name: str,
         value: Any,
-        step: Optional[int] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        step: int | None = None,
+        metadata: Mapping[str, Any] | None = None,
     ) -> None:
         """
         Logs a metric. Metrics are buffered and sent in batches.
@@ -225,22 +225,21 @@ class Tora:
             )
             req.raise_for_status()
             self._buffer = []
-        except httpx.HTTPStatusError as e:
-            # Provide a more detailed error message
-            print(
-                f"Failed to write Tora logs. Status: {e.response.status_code}. "
-                f"Response: {e.response.text}"
+        except HTTPStatusError as e:
+            logger.error(
+                f"Failed to write Tora logs. Status: {e.response.status_code}. Response: {e.response.text}"
             )
         except Exception as e:
-            # Catch other potential exceptions like timeouts
-            print(f"An unexpected error occurred while writing Tora logs: {e}")
+            logger.error(f"An unexpected error occurred while writing Tora logs: {e}")
 
     def shutdown(self) -> None:
         """
         Ensures all buffered logs are sent before the program exits.
         """
         if self._buffer:
-            print(f"Tora shutting down. Sending {len(self._buffer)} remaining logs...")
+            logger.info(
+                f"Tora shutting down. Sending {len(self._buffer)} remaining logs..."
+            )
             self._write_logs()
         self._http_client.close()
 

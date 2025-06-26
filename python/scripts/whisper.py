@@ -4,10 +4,8 @@ import numpy as np
 import torch
 import torchaudio
 from datasets import load_dataset
-from transformers import (
+from transformers import (  # Correct for encoder-decoder models like Whisper
     DataCollatorForSeq2Seq,
-)  # Correct for encoder-decoder models like Whisper
-from transformers import (
     Trainer,
     TrainerCallback,
     TrainingArguments,

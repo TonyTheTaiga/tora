@@ -190,8 +190,7 @@ def validate(model, device, loader, criterion, epoch, tora, split="val"):
     log_metric(tora, f"{prefix}_f1", f1 * 100, epoch)
 
     print(
-        f"{split.title()} set: Loss={avg_loss:.4f}, "
-        f"Acc={accuracy:.2f}%, F1={f1 * 100:.2f}%"
+        f"{split.title()} set: Loss={avg_loss:.4f}, Acc={accuracy:.2f}%, F1={f1 * 100:.2f}%"
     )
 
     return avg_loss, accuracy, precision, recall, f1
