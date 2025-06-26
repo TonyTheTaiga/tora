@@ -1,5 +1,6 @@
 build-wheel:
 	uvx --from build pyproject-build
 
-pub-wheel:
+pub-wheel: build-wheel
 	uvx twine upload --non-interactive --verbose dist/*
+	rm -rf dist
