@@ -1,10 +1,10 @@
 <script lang="ts">
-  import LeftRightStarfield from "$lib/components/left-right-starfield.svelte";
+  import StarfieldSimple from "$lib/components/starfield-simple.svelte";
   import Logo from "$lib/components/logo_assets/logo.svelte";
   import { goto } from "$app/navigation";
 </script>
 
-<LeftRightStarfield />
+<StarfieldSimple />
 
 <div
   class="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] font-mono p-4"
