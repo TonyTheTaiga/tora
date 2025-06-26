@@ -18,7 +18,7 @@ setup("hello, world!")
 tlog("precision", 0.92)
 tlog("recall", 0.76)`;
 
-  const installationCommand = "pip install tora==0.0.2";
+  const installationCommand = "pip install tora";
 
   let highlightedCode = "";
   let highlightedInstall = "";
