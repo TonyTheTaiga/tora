@@ -171,7 +171,7 @@ tlog("recall", 0.76)`;
             <div class="flex border-b border-ctp-surface0">
               <button
                 type="button"
-                class="flex-1 px-4 py-2 text-xs font-mono transition-[background-color,opacity] duration-150 border-r border-ctp-surface0"
+                class="flex-1 px-4 py-2 text-xs font-mono"
                 class:bg-ctp-surface0={activeTab === "install"}
                 class:opacity-50={activeTab !== "install"}
                 onclick={() => (activeTab = "install")}
@@ -180,7 +180,7 @@ tlog("recall", 0.76)`;
               </button>
               <button
                 type="button"
-                class="flex-1 px-4 py-2 text-xs font-mono transition-[background-color,opacity] duration-150 border-r border-ctp-surface0"
+                class="flex-1 px-4 py-2 text-xs font-mono"
                 class:bg-ctp-surface0={activeTab === "code"}
                 class:opacity-50={activeTab !== "code"}
                 onclick={() => (activeTab = "code")}
