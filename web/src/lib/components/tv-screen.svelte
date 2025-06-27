@@ -30,8 +30,8 @@
 
     const clock = new THREE.Clock();
     let velocity = new THREE.Vector2();
-    let extentX = 0;
-    let extentY = 0;
+    let logoWidth = 0;
+    let logoHeight = 0;
 
     logoLoader.load("/favicon.svg", (data) => {
       group.scale.set(0.01, -0.01, 0.01);
@@ -51,12 +51,9 @@
       group.updateMatrixWorld(true);
       const box = new THREE.Box3().setFromObject(group);
       const size = box.getSize(new THREE.Vector3());
-
       group.updateMatrixWorld(true);
-
-      extentX = size.x;
-      extentY = size.y;
-
+      logoWidth = size.x;
+      logoHeight = size.y;
       const angle = Math.PI + Math.PI / 4;
       velocity.set(Math.cos(angle), Math.sin(angle)).multiplyScalar(2);
     });
@@ -75,9 +72,9 @@
       const halfV = Math.tan(vHalf) * dist;
       const halfH = Math.tan(hHalf) * dist;
 
-      if (group.position.x + extentX > halfH) {
+      if (group.position.x + logoWidth > halfH) {
         velocity.x = -Math.abs(velocity.x);
-        group.position.x = halfH - extentX;
+        group.position.x = halfH - logoWidth;
       }
       if (group.position.x < -halfH) {
         velocity.x = Math.abs(velocity.x);
@@ -87,9 +84,9 @@
         velocity.y = -Math.abs(velocity.y);
         group.position.y = halfV;
       }
-      if (group.position.y - extentY < -halfV) {
+      if (group.position.y - logoHeight < -halfV) {
         velocity.y = Math.abs(velocity.y);
-        group.position.y = -halfV + extentY;
+        group.position.y = -halfV + logoHeight;
       }
 
       logoRenderer.render(scene, camera);
