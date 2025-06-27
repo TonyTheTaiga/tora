@@ -1,10 +1,11 @@
 <script lang="ts">
   import StarfieldSimple from "$lib/components/starfield-simple.svelte";
+  import TvScreen from "$lib/components/tv-screen.svelte";
   import Logo from "$lib/components/logo_assets/logo.svelte";
   import { goto } from "$app/navigation";
 </script>
 
-<StarfieldSimple />
+<TvScreen />
 
 <div
   class="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] font-mono p-4"
@@ -25,7 +26,7 @@
         <h1 class="text-xl md:text-2xl text-ctp-text font-bold mb-2">
           Documentation Coming Soon
         </h1>
-        <p class="text-ctp-subtext0 text-sm max-w-md">brb w some docs o7</p>
+        <p class="text-ctp-subtext0 text-sm max-w-md">brb w some docs...</p>
       </div>
     </div>
   </div>
