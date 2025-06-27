@@ -12,7 +12,7 @@
 >
   <div class="w-full max-w-3xl mx-auto">
     <div
-      class="bg-ctp-surface0/10 border border-ctp-surface0/20 overflow-hidden rounded-lg"
+      class="bg-ctp-surface0/10 border backdrop-blur-sm border-ctp-surface0/20 overflow-hidden rounded-lg"
     >
       <div
         class="p-6 sm:p-8 min-h-[240px] flex flex-col items-center justify-center text-center"
