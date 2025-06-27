@@ -142,7 +142,7 @@ tlog("recall", 0.76)`;
       <div class="w-full max-w-4xl space-y-8 sm:space-y-12">
         <div>
           <h1
-            class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 sm:mb-6 text-ctp-text"
+            class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 sm:mb-6 text-ctp-text font-mono"
           >
             {headline}
           </h1>
