@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { browser } from "$app/environment";
   import * as THREE from "three";
-  import { SVGLoader, SVGRenderer } from "three/examples/jsm/Addons.js";
+  import { SVGLoader } from "three/examples/jsm/Addons.js";
   let container: HTMLDivElement;
 
   onMount(() => {
@@ -10,7 +10,6 @@
       return;
     }
 
-    THREE.ColorManagement.enabled = false;
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0, 0, 0);
     const camera = new THREE.PerspectiveCamera(
@@ -20,7 +19,10 @@
       1000,
     );
     camera.position.z = 5;
-    const logoRenderer = new SVGRenderer();
+    const logoRenderer = new THREE.WebGLRenderer({
+      antialias: true,
+    });
+
     logoRenderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(logoRenderer.domElement);
 
@@ -34,7 +36,7 @@
     let logoHeight = 0;
 
     logoLoader.load("/favicon.svg", (data) => {
-      group.scale.set(0.01, -0.01, 0.01);
+      group.scale.set(0.015, -0.015, 0.015);
 
       data.paths.forEach((path) => {
         const material = new THREE.MeshBasicMaterial({
