@@ -4,13 +4,17 @@
   import { onMount } from "svelte";
   import { createHighlighter } from "shiki";
   import { browser } from "$app/environment";
+  import { marked } from "marked";
 
-  let activeTab: "install" | "code" = "install";
+  let activeTab: "start" | "guide" = "guide";
 
-  const headline = "Pure Speed. Pure Insight. Zero Overhead.";
+  const headline = "Pure Speed. Pure Insight. A New Experiment Tracker.";
   const CTA = "view docs";
 
-  const codeExample = `from tora import setup, tlog
+  const gettingStartedContent = `# Install Tora SDK
+$ pip install tora
+
+from tora import setup, tlog
 
 setup("hello, world!")
 
@@ -18,10 +22,75 @@ setup("hello, world!")
 tlog("precision", 0.92)
 tlog("recall", 0.76)`;
 
-  const installationCommand = "pip install tora";
+  const userGuide = `# Why Choose Tora?
 
-  let highlightedCode = "";
-  let highlightedInstall = "";
+- **Zero Configuration** - Works out of the box with sensible defaults
+- **Pure Speed** - Minimal overhead, maximum performance
+- **Smart Buffering** - Metrics batched automatically for efficiency
+- **Rich Context** - Tag experiments and add metadata effortlessly
+- **Instant Visualization** - Automatic URLs for web-based experiment tracking
+- **Flexible Auth** - Anonymous mode or team collaboration with API keys
+
+---
+
+## What is Tora?
+
+**Tora** is an experiment tracker built for speed and simplicity. Designed specifically for ML engineers and data scientists who want to track experiments without the complexity.
+
+Track metrics, hyperparameters, and experiment metadata with just 2 lines of code.
+
+---
+
+## Core APIs
+
+### **\`setup()\`** - Initialize Experiment
+
+Creates a global experiment session for simple logging workflows.
+
+**Essential Parameters:**
+- **\`name\`** *(string)* - Experiment name
+- **\`hyperparams\`** *(dict, optional)* - Hyperparameter dictionary
+- **\`tags\`** *(list, optional)* - Experiment tags
+
+**Advanced Parameters:**
+- **\`workspace_id\`** *(string, optional)* - Target workspace ID  
+- **\`description\`** *(string, optional)* - Experiment description
+- **\`api_key\`** *(string, optional)* - Authentication key
+
+Creates an experiment with immediate logging and prints the experiment URL to console.
+
+### **\`tlog()\`** - Log Metrics
+
+Simple logging function that uses the global experiment created by \`setup()\`.
+
+**Parameters:**
+- **\`name\`** *(string)* - Metric name
+- **\`value\`** *(string|float|int)* - Metric value
+- **\`step\`** *(int)* - Step number (required)
+- **\`metadata\`** *(dict, optional)* - Additional metadata
+
+**Note:** Must call \`setup()\` before using \`tlog()\`.
+
+---
+
+## Configuration
+
+### Environment Variables
+- **\`TORA_API_KEY\`** - API key for authentication
+- **\`TORA_BASE_URL\`** - Custom server URL
+
+### Authentication
+Tora operates in anonymous mode by default. For workspace features and collaboration, provide an API key via environment variable or function parameter.
+
+---
+
+## Start Tracking Now
+
+**Your experiment URL is automatically generated** - just visit it to see your metrics visualized in real-time.
+
+Ready to see your experiments come to life? Check the console output after \`setup()\` for your unique experiment URL.`;
+
+  let highlightedGettingStarted = "";
   let isHighlighting = false;
 
   function addLineNumbers(code: string): string {
@@ -34,7 +103,7 @@ tlog("recall", 0.76)`;
       .join("\n");
   }
 
-  const formattedCode = addLineNumbers(codeExample);
+  const formattedGettingStarted = addLineNumbers(gettingStartedContent);
 
   function getTheme() {
     if (!browser) return "catppuccin-mocha";
@@ -69,39 +138,35 @@ tlog("recall", 0.76)`;
         langs: ["python", "bash"],
       });
 
-      highlightedCode = highlighter.codeToHtml(codeExample, {
-        lang: "python",
-        theme: currentTheme,
-        transformers: [
-          {
-            line(node, line) {
-              node.properties["data-line"] = line;
-              node.children.unshift({
-                type: "element",
-                tagName: "span",
-                properties: {
-                  class: "line-number",
-                  style:
-                    "color: var(--color-ctp-overlay0); user-select: none; margin-right: 1em; display: inline-block; width: 2ch; text-align: right;",
-                },
-                children: [
-                  { type: "text", value: line.toString().padStart(2, " ") },
-                ],
-              });
+      highlightedGettingStarted = highlighter.codeToHtml(
+        gettingStartedContent,
+        {
+          lang: "bash",
+          theme: currentTheme,
+          transformers: [
+            {
+              line(node, line) {
+                node.properties["data-line"] = line;
+                node.children.unshift({
+                  type: "element",
+                  tagName: "span",
+                  properties: {
+                    class: "line-number",
+                    style:
+                      "color: var(--color-ctp-overlay0); user-select: none; margin-right: 1em; display: inline-block; width: 2ch; text-align: right;",
+                  },
+                  children: [
+                    { type: "text", value: line.toString().padStart(2, " ") },
+                  ],
+                });
+              },
             },
-          },
-        ],
-      });
-
-      const shellCommand = `$ ${installationCommand}`;
-      highlightedInstall = highlighter.codeToHtml(shellCommand, {
-        lang: "bash",
-        theme: currentTheme,
-      });
+          ],
+        },
+      );
     } catch (error) {
       console.error("Shiki highlighting failed:", error);
-      highlightedCode = `<pre class="text-ctp-text font-mono"><code>${formattedCode}</code></pre>`;
-      highlightedInstall = `<pre class="text-ctp-text font-mono"><code>$ ${installationCommand}</code></pre>`;
+      highlightedGettingStarted = `<pre class="text-ctp-text font-mono"><code>${formattedGettingStarted}</code></pre>`;
     }
   }
 
@@ -172,50 +237,43 @@ tlog("recall", 0.76)`;
               <button
                 type="button"
                 class="flex-1 px-4 py-2 text-xs font-mono"
-                class:bg-ctp-surface0={activeTab === "install"}
-                class:opacity-50={activeTab !== "install"}
-                onclick={() => (activeTab = "install")}
+                class:bg-ctp-surface0={activeTab === "start"}
+                class:opacity-50={activeTab !== "start"}
+                onclick={() => (activeTab = "start")}
               >
-                install.txt
+                getting_started.py
               </button>
               <button
                 type="button"
                 class="flex-1 px-4 py-2 text-xs font-mono"
-                class:bg-ctp-surface0={activeTab === "code"}
-                class:opacity-50={activeTab !== "code"}
-                onclick={() => (activeTab = "code")}
+                class:bg-ctp-surface0={activeTab === "guide"}
+                class:opacity-50={activeTab !== "guide"}
+                onclick={() => (activeTab = "guide")}
               >
-                quick_start.txt
+                user_guide.txt
               </button>
             </div>
 
-            <div class="p-4 sm:p-6 min-h-[180px] sm:min-h-[240px]">
-              {#if activeTab === "code"}
-                {#if highlightedCode}
+            <div
+              class="p-4 sm:p-6 max-h-[220px] sm:min-h-[320px] overflow-y-auto"
+            >
+              {#if activeTab === "start"}
+                {#if highlightedGettingStarted}
                   <div
                     class="text-xs sm:text-sm md:text-base leading-relaxed overflow-x-auto text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent"
                   >
-                    {@html highlightedCode}
+                    {@html highlightedGettingStarted}
                   </div>
                 {:else}
                   <pre
                     class="text-xs sm:text-sm md:text-base text-ctp-text font-mono leading-relaxed overflow-x-auto text-left"><code
-                      class="language-python">{@html formattedCode}</code
+                      >{@html formattedGettingStarted}</code
                     ></pre>
                 {/if}
-              {:else if activeTab === "install"}
-                {#if highlightedInstall}
-                  <div
-                    class="text-xs sm:text-sm md:text-base leading-relaxed overflow-x-auto text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent"
-                  >
-                    {@html highlightedInstall}
-                  </div>
-                {:else}
-                  <pre
-                    class="text-xs sm:text-sm md:text-base text-ctp-text font-mono leading-relaxed overflow-x-auto text-left"><code
-                      >$ {installationCommand}</code
-                    ></pre>
-                {/if}
+              {:else if activeTab === "guide"}
+                <div class="markdown-content">
+                  {@html marked(userGuide)}
+                </div>
               {/if}
             </div>
 
@@ -239,3 +297,73 @@ tlog("recall", 0.76)`;
     </div>
   </div>
 </div>
+
+<style lang="postcss">
+  @reference "tailwindcss";
+
+  .markdown-content {
+    @apply text-xs sm:text-sm md:text-base leading-relaxed text-left;
+    color: var(--color-ctp-text);
+  }
+
+  .markdown-content :global(h1) {
+    @apply text-lg font-bold mb-4 font-mono;
+    color: var(--color-ctp-text);
+  }
+
+  .markdown-content :global(h2) {
+    @apply text-base font-bold mb-3 mt-6 font-mono;
+    color: var(--color-ctp-blue);
+  }
+
+  .markdown-content :global(h3) {
+    @apply text-sm font-bold mb-2 mt-4 font-mono;
+    color: var(--color-ctp-mauve);
+  }
+
+  .markdown-content :global(p) {
+    @apply mb-3;
+    color: var(--color-ctp-text);
+  }
+
+  .markdown-content :global(ul) {
+    @apply mb-3 pl-4;
+  }
+
+  .markdown-content :global(li) {
+    @apply mb-1;
+    color: var(--color-ctp-text);
+  }
+
+  .markdown-content :global(strong) {
+    @apply font-bold;
+    color: var(--color-ctp-text);
+  }
+
+  /* Special styling for feature list items */
+  .markdown-content :global(li strong:first-child) {
+    color: var(--color-ctp-mauve);
+  }
+
+  .markdown-content :global(em) {
+    @apply italic;
+    color: var(--color-ctp-subtext1);
+  }
+
+  .markdown-content :global(code) {
+    @apply px-1 py-0.5 rounded font-mono text-xs;
+    background-color: rgba(var(--color-ctp-surface0), 0.3);
+    color: var(--color-ctp-green);
+  }
+
+  .markdown-content :global(hr) {
+    @apply my-6;
+    border-color: var(--color-ctp-surface0);
+  }
+
+  .markdown-content :global(blockquote) {
+    @apply border-l-2 pl-4 italic;
+    border-color: var(--color-ctp-blue);
+    color: var(--color-ctp-subtext1);
+  }
+</style>
