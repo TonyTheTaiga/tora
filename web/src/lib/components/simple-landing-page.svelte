@@ -22,27 +22,42 @@ setup("hello, world!")
 tlog("precision", 0.92)
 tlog("recall", 0.76)`;
 
-  const userGuide = `# About
+  const userGuide = `# Why Choose Tora?
 
-**Tora** is a pure speed experiment tracker designed for machine learning and data science workflows. Track metrics, hyperparameters, and experiment metadata with minimal overhead.
+- **Zero Configuration** - Works out of the box with sensible defaults
+- **Pure Speed** - Minimal overhead, maximum performance
+- **Smart Buffering** - Metrics batched automatically for efficiency
+- **Rich Context** - Tag experiments and add metadata effortlessly
+- **Instant Visualization** - Automatic URLs for web-based experiment tracking
+- **Flexible Auth** - Anonymous mode or team collaboration with API keys
 
 ---
 
-## Primary APIs
+## What is Tora?
 
-### **\`setup()\`** - Initialize Global Experiment
+**Tora** is an experiment tracker built for speed and simplicity. Designed specifically for ML engineers and data scientists who want to track experiments without the complexity.
+
+Track metrics, hyperparameters, and experiment metadata with just 2 lines of code.
+
+---
+
+## Core APIs
+
+### **\`setup()\`** - Initialize Experiment
 
 Creates a global experiment session for simple logging workflows.
 
-**Parameters:**
+**Essential Parameters:**
 - **\`name\`** *(string)* - Experiment name
+- **\`hyperparams\`** *(dict, optional)* - Hyperparameter dictionary
+- **\`tags\`** *(list, optional)* - Experiment tags
+
+**Advanced Parameters:**
 - **\`workspace_id\`** *(string, optional)* - Target workspace ID  
 - **\`description\`** *(string, optional)* - Experiment description
-- **\`hyperparams\`** *(dict, optional)* - Hyperparameter dictionary
-- **\`tags\`** *(list, optional)* - List of experiment tags
 - **\`api_key\`** *(string, optional)* - Authentication key
 
-Creates an experiment with immediate logging (buffer size = 1) and prints the experiment URL to console.
+Creates an experiment with immediate logging and prints the experiment URL to console.
 
 ### **\`tlog()\`** - Log Metrics
 
@@ -69,15 +84,11 @@ Tora operates in anonymous mode by default. For workspace features and collabora
 
 ---
 
-## Key Features
+## Start Tracking Now
 
-- **Zero Configuration** - Works out of the box with sensible defaults
-- **Automatic Buffering** - Metrics batched for optimal performance
-- **Rich Metadata** - Tag experiments and add contextual information
-- **URL Generation** - Automatic experiment URLs for web visualization
-- **Flexible Auth** - Anonymous mode or API key authentication
+**Your experiment URL is automatically generated** - just visit it to see your metrics visualized in real-time.
 
-Visit the generated experiment URL to visualize your tracked metrics and experiments.`;
+Ready to see your experiments come to life? Check the console output after \`setup()\` for your unique experiment URL.`;
 
   let highlightedGettingStarted = "";
   let isHighlighting = false;
@@ -327,6 +338,11 @@ Visit the generated experiment URL to visualize your tracked metrics and experim
   .markdown-content :global(strong) {
     @apply font-bold;
     color: var(--color-ctp-text);
+  }
+
+  /* Special styling for feature list items */
+  .markdown-content :global(li strong:first-child) {
+    color: var(--color-ctp-mauve);
   }
 
   .markdown-content :global(em) {
