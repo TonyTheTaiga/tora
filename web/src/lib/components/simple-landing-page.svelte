@@ -5,90 +5,12 @@
   import { createHighlighter } from "shiki";
   import { browser } from "$app/environment";
   import { marked } from "marked";
+  import { gettingStartedContent, userGuide } from "$lib/content";
 
   let activeTab: "start" | "guide" = "guide";
 
   const headline = "Pure Speed. Pure Insight. A New Experiment Tracker.";
   const CTA = "view docs";
-
-  const gettingStartedContent = `# Install Tora SDK
-$ pip install tora
-
-from tora import setup, tlog
-
-setup("hello, world!")
-
-# Log metrics
-tlog("precision", 0.92)
-tlog("recall", 0.76)`;
-
-  const userGuide = `# Why Choose Tora?
-
-- **Zero Configuration** - Works out of the box with sensible defaults
-- **Pure Speed** - Minimal overhead, maximum performance
-- **Smart Buffering** - Metrics batched automatically for efficiency
-- **Rich Context** - Tag experiments and add metadata effortlessly
-- **Instant Visualization** - Automatic URLs for web-based experiment tracking
-- **Flexible Auth** - Anonymous mode or team collaboration with API keys
-
----
-
-## What is Tora?
-
-**Tora** is an experiment tracker built for speed and simplicity. Designed specifically for ML engineers and data scientists who want to track experiments without the complexity.
-
-Track metrics, hyperparameters, and experiment metadata with just 2 lines of code.
-
----
-
-## Core APIs
-
-### **\`setup()\`** - Initialize Experiment
-
-Creates a global experiment session for simple logging workflows.
-
-**Essential Parameters:**
-- **\`name\`** *(string)* - Experiment name
-- **\`hyperparams\`** *(dict, optional)* - Hyperparameter dictionary
-- **\`tags\`** *(list, optional)* - Experiment tags
-
-**Advanced Parameters:**
-- **\`workspace_id\`** *(string, optional)* - Target workspace ID  
-- **\`description\`** *(string, optional)* - Experiment description
-- **\`api_key\`** *(string, optional)* - Authentication key
-
-Creates an experiment with immediate logging and prints the experiment URL to console.
-
-### **\`tlog()\`** - Log Metrics
-
-Simple logging function that uses the global experiment created by \`setup()\`.
-
-**Parameters:**
-- **\`name\`** *(string)* - Metric name
-- **\`value\`** *(string|float|int)* - Metric value
-- **\`step\`** *(int)* - Step number (required)
-- **\`metadata\`** *(dict, optional)* - Additional metadata
-
-**Note:** Must call \`setup()\` before using \`tlog()\`.
-
----
-
-## Configuration
-
-### Environment Variables
-- **\`TORA_API_KEY\`** - API key for authentication
-- **\`TORA_BASE_URL\`** - Custom server URL
-
-### Authentication
-Tora operates in anonymous mode by default. For workspace features and collaboration, provide an API key via environment variable or function parameter.
-
----
-
-## Start Tracking Now
-
-**Your experiment URL is automatically generated** - just visit it to see your metrics visualized in real-time.
-
-Ready to see your experiments come to life? Check the console output after \`setup()\` for your unique experiment URL.`;
 
   let highlightedGettingStarted = "";
   let isHighlighting = false;
