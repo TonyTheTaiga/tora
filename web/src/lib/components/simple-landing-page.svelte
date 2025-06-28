@@ -4,10 +4,11 @@
   import { onMount } from "svelte";
   import { createHighlighter } from "shiki";
   import { browser } from "$app/environment";
+  import { marked } from "marked";
 
-  let activeTab: "install" | "code" = "install";
+  let activeTab: "install" | "code" | "guide" = "guide";
 
-  const headline = "Pure Speed. Pure Insight. Zero Overhead.";
+  const headline = "Pure Speed. Pure Insight. A New Experiment Tracker.";
   const CTA = "view docs";
 
   const codeExample = `from tora import setup, tlog
@@ -19,6 +20,9 @@ tlog("precision", 0.92)
 tlog("recall", 0.76)`;
 
   const installationCommand = "pip install tora";
+
+  const userGuide = `# About
+`;
 
   let highlightedCode = "";
   let highlightedInstall = "";
@@ -185,7 +189,16 @@ tlog("recall", 0.76)`;
                 class:opacity-50={activeTab !== "code"}
                 onclick={() => (activeTab = "code")}
               >
-                quick_start.txt
+                quick_start.py
+              </button>
+              <button
+                type="button"
+                class="flex-1 px-4 py-2 text-xs font-mono"
+                class:bg-ctp-surface0={activeTab === "guide"}
+                class:opacity-50={activeTab !== "guide"}
+                onclick={() => (activeTab = "guide")}
+              >
+                user_guide.txt
               </button>
             </div>
 
@@ -216,6 +229,10 @@ tlog("recall", 0.76)`;
                       >$ {installationCommand}</code
                     ></pre>
                 {/if}
+              {:else if activeTab === "guide"}
+                <div>
+                  {@html marked(userGuide)}
+                </div>
               {/if}
             </div>
 
