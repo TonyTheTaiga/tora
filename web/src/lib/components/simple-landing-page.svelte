@@ -6,20 +6,21 @@
   import { browser } from "$app/environment";
   import { marked } from "marked";
 
-  let activeTab: "install" | "code" | "guide" = "guide";
+  let activeTab: "start" | "guide" = "guide";
 
   const headline = "Pure Speed. Pure Insight. A New Experiment Tracker.";
   const CTA = "view docs";
 
-  const codeExample = `from tora import setup, tlog
+  const gettingStartedContent = `# Install Tora SDK
+$ pip install tora
+
+from tora import setup, tlog
 
 setup("hello, world!")
 
 # Log metrics
 tlog("precision", 0.92)
 tlog("recall", 0.76)`;
-
-  const installationCommand = "pip install tora";
 
   const userGuide = `# About
 
@@ -78,8 +79,7 @@ Tora operates in anonymous mode by default. For workspace features and collabora
 
 Visit the generated experiment URL to visualize your tracked metrics and experiments.`;
 
-  let highlightedCode = "";
-  let highlightedInstall = "";
+  let highlightedGettingStarted = "";
   let isHighlighting = false;
 
   function addLineNumbers(code: string): string {
@@ -92,7 +92,7 @@ Visit the generated experiment URL to visualize your tracked metrics and experim
       .join("\n");
   }
 
-  const formattedCode = addLineNumbers(codeExample);
+  const formattedGettingStarted = addLineNumbers(gettingStartedContent);
 
   function getTheme() {
     if (!browser) return "catppuccin-mocha";
@@ -127,39 +127,35 @@ Visit the generated experiment URL to visualize your tracked metrics and experim
         langs: ["python", "bash"],
       });
 
-      highlightedCode = highlighter.codeToHtml(codeExample, {
-        lang: "python",
-        theme: currentTheme,
-        transformers: [
-          {
-            line(node, line) {
-              node.properties["data-line"] = line;
-              node.children.unshift({
-                type: "element",
-                tagName: "span",
-                properties: {
-                  class: "line-number",
-                  style:
-                    "color: var(--color-ctp-overlay0); user-select: none; margin-right: 1em; display: inline-block; width: 2ch; text-align: right;",
-                },
-                children: [
-                  { type: "text", value: line.toString().padStart(2, " ") },
-                ],
-              });
+      highlightedGettingStarted = highlighter.codeToHtml(
+        gettingStartedContent,
+        {
+          lang: "bash",
+          theme: currentTheme,
+          transformers: [
+            {
+              line(node, line) {
+                node.properties["data-line"] = line;
+                node.children.unshift({
+                  type: "element",
+                  tagName: "span",
+                  properties: {
+                    class: "line-number",
+                    style:
+                      "color: var(--color-ctp-overlay0); user-select: none; margin-right: 1em; display: inline-block; width: 2ch; text-align: right;",
+                  },
+                  children: [
+                    { type: "text", value: line.toString().padStart(2, " ") },
+                  ],
+                });
+              },
             },
-          },
-        ],
-      });
-
-      const shellCommand = `$ ${installationCommand}`;
-      highlightedInstall = highlighter.codeToHtml(shellCommand, {
-        lang: "bash",
-        theme: currentTheme,
-      });
+          ],
+        },
+      );
     } catch (error) {
       console.error("Shiki highlighting failed:", error);
-      highlightedCode = `<pre class="text-ctp-text font-mono"><code>${formattedCode}</code></pre>`;
-      highlightedInstall = `<pre class="text-ctp-text font-mono"><code>$ ${installationCommand}</code></pre>`;
+      highlightedGettingStarted = `<pre class="text-ctp-text font-mono"><code>${formattedGettingStarted}</code></pre>`;
     }
   }
 
@@ -230,20 +226,11 @@ Visit the generated experiment URL to visualize your tracked metrics and experim
               <button
                 type="button"
                 class="flex-1 px-4 py-2 text-xs font-mono"
-                class:bg-ctp-surface0={activeTab === "install"}
-                class:opacity-50={activeTab !== "install"}
-                onclick={() => (activeTab = "install")}
+                class:bg-ctp-surface0={activeTab === "start"}
+                class:opacity-50={activeTab !== "start"}
+                onclick={() => (activeTab = "start")}
               >
-                install.txt
-              </button>
-              <button
-                type="button"
-                class="flex-1 px-4 py-2 text-xs font-mono"
-                class:bg-ctp-surface0={activeTab === "code"}
-                class:opacity-50={activeTab !== "code"}
-                onclick={() => (activeTab = "code")}
-              >
-                quick_start.py
+                getting_started.py
               </button>
               <button
                 type="button"
@@ -257,32 +244,19 @@ Visit the generated experiment URL to visualize your tracked metrics and experim
             </div>
 
             <div
-              class="p-4 sm:p-6 max-h-[200px] sm:min-h-[300px] overflow-y-auto"
+              class="p-4 sm:p-6 max-h-[220px] sm:min-h-[320px] overflow-y-auto"
             >
-              {#if activeTab === "code"}
-                {#if highlightedCode}
+              {#if activeTab === "start"}
+                {#if highlightedGettingStarted}
                   <div
                     class="text-xs sm:text-sm md:text-base leading-relaxed overflow-x-auto text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent"
                   >
-                    {@html highlightedCode}
+                    {@html highlightedGettingStarted}
                   </div>
                 {:else}
                   <pre
                     class="text-xs sm:text-sm md:text-base text-ctp-text font-mono leading-relaxed overflow-x-auto text-left"><code
-                      class="language-python">{@html formattedCode}</code
-                    ></pre>
-                {/if}
-              {:else if activeTab === "install"}
-                {#if highlightedInstall}
-                  <div
-                    class="text-xs sm:text-sm md:text-base leading-relaxed overflow-x-auto text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent"
-                  >
-                    {@html highlightedInstall}
-                  </div>
-                {:else}
-                  <pre
-                    class="text-xs sm:text-sm md:text-base text-ctp-text font-mono leading-relaxed overflow-x-auto text-left"><code
-                      >$ {installationCommand}</code
+                      >{@html formattedGettingStarted}</code
                     ></pre>
                 {/if}
               {:else if activeTab === "guide"}
