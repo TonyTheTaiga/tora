@@ -60,11 +60,3 @@ Simple logging function that uses the global experiment created by `setup()`.
 ### Authentication
 
 Tora operates in anonymous mode by default. For workspace features and collaboration, provide an API key via environment variable or function parameter.
-
----
-
-## Start Tracking Now
-
-**Your experiment URL is automatically generated** - just visit it to see your metrics visualized in real-time.
-
-Ready to see your experiments come to life? Check the console output after `setup()` for your unique experiment URL.
