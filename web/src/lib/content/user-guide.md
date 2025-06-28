@@ -1,11 +1,8 @@
 # Why Choose Tora?
 
 - **Zero Configuration** - Works out of the box with sensible defaults
-- **Pure Speed** - Minimal overhead, maximum performance
-- **Smart Buffering** - Metrics batched automatically for efficiency
-- **Rich Context** - Tag experiments and add metadata effortlessly
 - **Instant Visualization** - Automatic URLs for web-based experiment tracking
-- **Flexible Auth** - Anonymous mode or team collaboration with API keys
+- **TODO** - Add more features
 
 ---
 
