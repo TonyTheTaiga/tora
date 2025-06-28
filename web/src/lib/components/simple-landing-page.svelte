@@ -22,7 +22,61 @@ tlog("recall", 0.76)`;
   const installationCommand = "pip install tora";
 
   const userGuide = `# About
-`;
+
+**Tora** is a pure speed experiment tracker designed for machine learning and data science workflows. Track metrics, hyperparameters, and experiment metadata with minimal overhead.
+
+---
+
+## Primary APIs
+
+### **\`setup()\`** - Initialize Global Experiment
+
+Creates a global experiment session for simple logging workflows.
+
+**Parameters:**
+- **\`name\`** *(string)* - Experiment name
+- **\`workspace_id\`** *(string, optional)* - Target workspace ID  
+- **\`description\`** *(string, optional)* - Experiment description
+- **\`hyperparams\`** *(dict, optional)* - Hyperparameter dictionary
+- **\`tags\`** *(list, optional)* - List of experiment tags
+- **\`api_key\`** *(string, optional)* - Authentication key
+
+Creates an experiment with immediate logging (buffer size = 1) and prints the experiment URL to console.
+
+### **\`tlog()\`** - Log Metrics
+
+Simple logging function that uses the global experiment created by \`setup()\`.
+
+**Parameters:**
+- **\`name\`** *(string)* - Metric name
+- **\`value\`** *(string|float|int)* - Metric value
+- **\`step\`** *(int)* - Step number (required)
+- **\`metadata\`** *(dict, optional)* - Additional metadata
+
+**Note:** Must call \`setup()\` before using \`tlog()\`.
+
+---
+
+## Configuration
+
+### Environment Variables
+- **\`TORA_API_KEY\`** - API key for authentication
+- **\`TORA_BASE_URL\`** - Custom server URL
+
+### Authentication
+Tora operates in anonymous mode by default. For workspace features and collaboration, provide an API key via environment variable or function parameter.
+
+---
+
+## Key Features
+
+- **Zero Configuration** - Works out of the box with sensible defaults
+- **Automatic Buffering** - Metrics batched for optimal performance
+- **Rich Metadata** - Tag experiments and add contextual information
+- **URL Generation** - Automatic experiment URLs for web visualization
+- **Flexible Auth** - Anonymous mode or API key authentication
+
+Visit the generated experiment URL to visualize your tracked metrics and experiments.`;
 
   let highlightedCode = "";
   let highlightedInstall = "";
@@ -202,7 +256,9 @@ tlog("recall", 0.76)`;
               </button>
             </div>
 
-            <div class="p-4 sm:p-6 min-h-[180px] sm:min-h-[240px]">
+            <div
+              class="p-4 sm:p-6 max-h-[200px] sm:min-h-[300px] overflow-y-auto"
+            >
               {#if activeTab === "code"}
                 {#if highlightedCode}
                   <div
@@ -230,7 +286,7 @@ tlog("recall", 0.76)`;
                     ></pre>
                 {/if}
               {:else if activeTab === "guide"}
-                <div>
+                <div class="markdown-content">
                   {@html marked(userGuide)}
                 </div>
               {/if}
@@ -256,3 +312,68 @@ tlog("recall", 0.76)`;
     </div>
   </div>
 </div>
+
+<style lang="postcss">
+  @reference "tailwindcss";
+
+  .markdown-content {
+    @apply text-xs sm:text-sm md:text-base leading-relaxed text-left;
+    color: var(--color-ctp-text);
+  }
+
+  .markdown-content :global(h1) {
+    @apply text-lg font-bold mb-4 font-mono;
+    color: var(--color-ctp-text);
+  }
+
+  .markdown-content :global(h2) {
+    @apply text-base font-bold mb-3 mt-6 font-mono;
+    color: var(--color-ctp-blue);
+  }
+
+  .markdown-content :global(h3) {
+    @apply text-sm font-bold mb-2 mt-4 font-mono;
+    color: var(--color-ctp-mauve);
+  }
+
+  .markdown-content :global(p) {
+    @apply mb-3;
+    color: var(--color-ctp-text);
+  }
+
+  .markdown-content :global(ul) {
+    @apply mb-3 pl-4;
+  }
+
+  .markdown-content :global(li) {
+    @apply mb-1;
+    color: var(--color-ctp-text);
+  }
+
+  .markdown-content :global(strong) {
+    @apply font-bold;
+    color: var(--color-ctp-text);
+  }
+
+  .markdown-content :global(em) {
+    @apply italic;
+    color: var(--color-ctp-subtext1);
+  }
+
+  .markdown-content :global(code) {
+    @apply px-1 py-0.5 rounded font-mono text-xs;
+    background-color: rgba(var(--color-ctp-surface0), 0.3);
+    color: var(--color-ctp-green);
+  }
+
+  .markdown-content :global(hr) {
+    @apply my-6;
+    border-color: var(--color-ctp-surface0);
+  }
+
+  .markdown-content :global(blockquote) {
+    @apply border-l-2 pl-4 italic;
+    border-color: var(--color-ctp-blue);
+    color: var(--color-ctp-subtext1);
+  }
+</style>
