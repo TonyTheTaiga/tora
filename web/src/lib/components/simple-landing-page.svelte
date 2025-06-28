@@ -16,7 +16,9 @@
 
   function addLineNumbers(code: string): string {
     return code
+      .trim()
       .split("\n")
+      .filter((line) => line.trim() !== "")
       .map((line, index) => {
         const lineNum = (index + 1).toString().padStart(2, " ");
         return `<span class="text-ctp-overlay0 select-none">${lineNum}</span>  ${line}`;
@@ -56,13 +58,13 @@
 
       const highlighter = await createHighlighter({
         themes: ["catppuccin-mocha", "catppuccin-latte"],
-        langs: ["python", "bash"],
+        langs: ["python"],
       });
 
       highlightedGettingStarted = highlighter.codeToHtml(
         gettingStartedContent,
         {
-          lang: "bash",
+          lang: "python",
           theme: currentTheme,
           transformers: [
             {
