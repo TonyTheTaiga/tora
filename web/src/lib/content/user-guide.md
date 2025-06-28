@@ -2,6 +2,7 @@
 
 - **Zero Configuration** - Works out of the box with sensible defaults
 - **Instant Visualization** - Automatic URLs for web-based experiment tracking
+- **No Ops** - Nothing to deploy, just start tracking.
 - **TODO** - Add more features
 
 ---
