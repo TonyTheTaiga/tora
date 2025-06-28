@@ -163,7 +163,7 @@
                 class:opacity-50={activeTab !== "start"}
                 onclick={() => (activeTab = "start")}
               >
-                getting_started.py
+                quick_start.py
               </button>
               <button
                 type="button"
@@ -172,7 +172,7 @@
                 class:opacity-50={activeTab !== "guide"}
                 onclick={() => (activeTab = "guide")}
               >
-                user_guide.txt
+                README.md
               </button>
             </div>
 
