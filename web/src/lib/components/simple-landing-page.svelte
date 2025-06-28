@@ -10,7 +10,6 @@
   let activeTab: "start" | "guide" = "guide";
 
   const headline = "Pure Speed. Pure Insight. A New Experiment Tracker.";
-  const CTA = "view docs";
 
   let highlightedGettingStarted = "";
   let isHighlighting = false;
@@ -203,14 +202,14 @@
               class="flex flex-col sm:flex-row justify-between items-center p-4 border-t border-ctp-surface0 gap-4"
             >
               <span class="text-xs text-ctp-subtext0 font-mono"
-                >no accounts or CC required</span
+                >start anonymous • sign up to store experiments</span
               >
               <button
                 type="button"
-                onclick={() => goto("/docs")}
+                onclick={() => goto("/signup")}
                 class="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2 bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all font-mono text-sm"
               >
-                {CTA}
+                sign up
               </button>
             </footer>
           </div>
