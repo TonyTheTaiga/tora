@@ -1,8 +1,24 @@
-use axum::{Router, routing::get};
-use tower_http::{services::{ServeDir, ServeFile}, cors::CorsLayer};
-mod repos;
+use axum::{Json, Router, routing::get, routing::post};
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPoolOptions;
 use std::env;
+use tower_http::{
+    cors::CorsLayer,
+    services::{ServeDir, ServeFile},
+};
+
+mod repos;
+
+#[derive(Serialize, Deserialize)]
+struct Ping {
+    msg: String,
+}
+
+async fn ping(Json(payload): Json<Ping>) -> Json<Ping> {
+    Json(Ping {
+        msg: format!("pong: {}", payload.msg),
+    })
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -26,12 +42,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("{}", row.0);
     }
 
-    // API routes
     let api_routes = Router::new()
         .route("/workspaces", get(repos::workspace::list_workspaces))
-        .route("/health", get(|| async { "OK" }));
+        .route("/health", get(|| async { "OK" }))
+        .route("/ping", post(ping));
 
-    // Static file serving for SvelteKit app
     let static_files = ServeDir::new("../web-new/build")
         .not_found_service(ServeFile::new("../web-new/build/index.html"));
 
@@ -43,7 +58,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Server starting on 0.0.0.0:8080");
     println!("API available at /api/*");
     println!("Static files served from ../web-new/build");
-    
+
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
     axum::serve(listener, app).await?;
     Ok(())

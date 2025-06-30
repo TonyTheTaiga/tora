@@ -10,8 +10,8 @@ echo "📦 Building SvelteKit application..."
 cd web-new
 pnpm run build:production
 if [ $? -ne 0 ]; then
-    echo "❌ SvelteKit build failed!"
-    exit 1
+	echo "❌ SvelteKit build failed!"
+	exit 1
 fi
 cd ..
 
@@ -22,8 +22,8 @@ echo "🦀 Building and starting Rust server..."
 cd api
 cargo build --release
 if [ $? -ne 0 ]; then
-    echo "❌ Rust build failed!"
-    exit 1
+	echo "❌ Rust build failed!"
+	exit 1
 fi
 
 echo "✅ Rust build completed successfully!"

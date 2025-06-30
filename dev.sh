@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source .env
+
 # Development script for Tora Rust + Svelte stack
 
 echo "🚀 Starting Tora Development Environment"
@@ -7,10 +9,10 @@ echo "========================================"
 
 # Function to cleanup background processes
 cleanup() {
-    echo "🛑 Shutting down development servers..."
-    kill $SVELTE_PID 2>/dev/null
-    kill $RUST_PID 2>/dev/null
-    exit 0
+	echo "🛑 Shutting down development servers..."
+	kill $SVELTE_PID 2>/dev/null
+	kill $RUST_PID 2>/dev/null
+	exit 0
 }
 
 # Set up signal handlers
