@@ -112,3 +112,6 @@ pyrightconfig.json
 
 # Special cases
 !web/src/lib
+
+# API files
+api/target
