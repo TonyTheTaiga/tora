@@ -4,5 +4,17 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-axum = "0.8.4"
-tokio = { version = "1.45.1", features = ["macros", "rt-multi-thread"] }
+axum = { version = "0.8", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+sqlx = { version = "0.8", features = [
+  "postgres",
+  "runtime-tokio-rustls",
+  "macros",
+] }
+tokio = { version = "1.45", features = [
+  "rt-multi-thread", # the scheduler
+  "macros",          # #[tokio::main]/#[tokio::test]
+  "net",             # TcpStream/UnixStream for Postgres sockets
+  "time",            # sleep(), timeouts used by sqlx’s pool
+  "sync",            # channels, Mutex, Semaphore used by sqlx
+] }
