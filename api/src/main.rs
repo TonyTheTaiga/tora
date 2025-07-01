@@ -1,4 +1,4 @@
-use axum::{Router, routing::get_service};
+use axum::Router;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use tokio::signal;
