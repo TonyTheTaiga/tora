@@ -1,5 +1,5 @@
 FROM rust:1.88-alpine AS api-builder
-RUN apk add --no-cache musl-dev
+RUN apk add --no-cache musl-dev openssl-dev
 WORKDIR /app/api
 COPY api/Cargo.toml ./
 RUN cargo generate-lockfile 2>/dev/null || true
