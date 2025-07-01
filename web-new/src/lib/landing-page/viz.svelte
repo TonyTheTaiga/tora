@@ -30,22 +30,6 @@
 
     function getTheme() {
         if (!browser) return "catppuccin-mocha";
-
-        const htmlElement = document.documentElement;
-        if (htmlElement.classList.contains("light")) {
-            return "catppuccin-latte";
-        }
-        if (htmlElement.classList.contains("dark")) {
-            return "catppuccin-mocha";
-        }
-
-        if (
-            window.matchMedia &&
-            window.matchMedia("(prefers-color-scheme: light)").matches
-        ) {
-            return "catppuccin-latte";
-        }
-
         return "catppuccin-mocha";
     }
 
@@ -55,9 +39,8 @@
 
         try {
             const currentTheme = getTheme();
-
             const highlighter = await createHighlighter({
-                themes: ["catppuccin-mocha", "catppuccin-latte"],
+                themes: ["catppuccin-mocha"],
                 langs: ["python"],
             });
 

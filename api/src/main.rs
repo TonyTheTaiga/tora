@@ -21,6 +21,31 @@ async fn ping(Json(payload): Json<Ping>) -> Json<Ping> {
     })
 }
 
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+    println!("Shutting down gracefully...");
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pool = match env::var("SUPABASE_PASSWORD") {
@@ -57,7 +82,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
 
     let static_files = ServeDir::new(&static_dir)
-        .not_found_service(ServeFile::new(format!("{static_dir}/index.html")));
+        .not_found_service(ServeFile::new(format!("{static_dir}/404.html")));
 
     let app = Router::new()
         .nest("/api", api_routes)
@@ -69,29 +94,4 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with_graceful_shutdown(shutdown_signal())
         .await?;
     Ok(())
-}
-
-async fn shutdown_signal() {
-    let ctrl_c = async {
-        signal::ctrl_c()
-            .await
-            .expect("failed to install Ctrl+C handler");
-    };
-
-    #[cfg(unix)]
-    let terminate = async {
-        signal::unix::signal(signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
-    };
-
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
-
-    tokio::select! {
-        _ = ctrl_c => {},
-        _ = terminate => {},
-    }
-    println!("Shutting down gracefully...");
 }
