@@ -12,7 +12,7 @@ pub struct Response<T> {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct CreateUser {
+pub struct Credentials {
     pub email: String,
     pub password: String,
 }
