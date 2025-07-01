@@ -7,7 +7,6 @@ const config = {
       fallback: "404.html",
       precompress: true,
     }),
-    prerender: { entries: ["*"] },
   },
 };
 
