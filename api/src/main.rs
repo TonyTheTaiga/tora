@@ -2,10 +2,7 @@ use axum::Router;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use tokio::signal;
-use tower_http::{
-    cors::CorsLayer,
-    services::{ServeDir, ServeFile},
-};
+use tower_http::services::{ServeDir, ServeFile};
 
 mod handlers;
 mod ntypes;
@@ -42,10 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .append_index_html_on_directories(true)
         .fallback(ServeFile::new(format!("{static_dir}/200.html")));
 
-    let app = Router::new()
-        .nest("/api", api_routes)
-        .fallback_service(spa)
-        .layer(CorsLayer::permissive());
+    let app = Router::new().nest("/api", api_routes).fallback_service(spa);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
     axum::serve(listener, app)
