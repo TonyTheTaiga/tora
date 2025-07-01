@@ -1,0 +1,83 @@
+# Development files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Node modules and build artifacts
+node_modules/
+web-new/node_modules/
+web/node_modules/
+python/node_modules/
+
+# Build outputs
+web-new/build/
+web/build/
+api/target/
+*/target/
+
+# Development databases and logs
+*.db
+*.sqlite
+*.log
+logs/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Testing
+coverage/
+.nyc_output/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.pytest_cache/
+.coverage
+htmlcov/
+.cache
+nosetests.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Rust
+Cargo.lock
+target/
+**/*.rs.bk
+
+# Documentation
+docs/
+README*.md
+LICENSE
+CHANGELOG.md
+
+# Development scripts
+dev.sh
+build-and-serve.sh
+scripts/
+
+# Large data directories
+python/scripts/data/

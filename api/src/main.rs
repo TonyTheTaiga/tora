@@ -2,6 +2,7 @@ use axum::{Json, Router, routing::get, routing::post};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPoolOptions;
 use std::env;
+use tokio::signal;
 use tower_http::{
     cors::CorsLayer,
     services::{ServeDir, ServeFile},
@@ -47,19 +48,50 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/health", get(|| async { "OK" }))
         .route("/ping", post(ping));
 
-    let static_files = ServeDir::new("../web-new/build")
-        .not_found_service(ServeFile::new("../web-new/build/index.html"));
+    let static_dir = env::var("STATIC_FILES_PATH").unwrap_or_else(|_| {
+        if std::path::Path::new("./static").exists() {
+            "./static".to_string()
+        } else {
+            "../web-new/build".to_string()
+        }
+    });
+
+    let static_files = ServeDir::new(&static_dir)
+        .not_found_service(ServeFile::new(format!("{static_dir}/index.html")));
 
     let app = Router::new()
         .nest("/api", api_routes)
         .fallback_service(static_files)
         .layer(CorsLayer::permissive());
 
-    println!("Server starting on 0.0.0.0:8080");
-    println!("API available at /api/*");
-    println!("Static files served from ../web-new/build");
-
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await?;
     Ok(())
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+    println!("Shutting down gracefully...");
 }

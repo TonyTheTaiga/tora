@@ -17,6 +17,7 @@ tokio = { version = "1.45", features = [
   "net",             # TcpStream/UnixStream for Postgres sockets
   "time",            # sleep(), timeouts used by sqlx’s pool
   "sync",            # channels, Mutex, Semaphore used by sqlx
+  "signal",          # tokio::signal
 ] }
 tower = "0.5"
 tower-http = { version = "0.6", features = ["fs", "cors"] }

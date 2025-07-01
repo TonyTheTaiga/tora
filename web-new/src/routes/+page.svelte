@@ -1,7 +1,5 @@
 <script>
 import { LandingPage } from "$lib";
-
-
 //     let message = "";
 //     async function send() {
 //         const res = await fetch("/api/ping", {
