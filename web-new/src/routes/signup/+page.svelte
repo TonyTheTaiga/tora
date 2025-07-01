@@ -1,9 +1,37 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { User, Mail, Lock, LogIn, Loader2 } from "@lucide/svelte";
-  import { enhance } from "$app/forms";
 
   let submitting = $state(false);
+  async function handleSubmit(event: SubmitEvent) {
+    event.preventDefault();
+
+    submitting = true;
+
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    try {
+      const response = await fetch('/api/signup', {
+        method: 'POST',
+        body: JSON.stringify({email: formData.get('email'), password: formData.get('password')}),
+        headers: {
+          "Content-Type": "application/json"
+      }
+      });
+
+      const result = await response.json();
+      console.log(result);
+      if (result.status === 200) {
+        goto("/");
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    } finally {
+      submitting = false;
+    }
+  }
+
+
 </script>
 
 <div
@@ -25,18 +53,10 @@
       <form
         method="POST"
         autocomplete="on"
-        action=""
+        action="/api/signup"
         name="login-form"
         class="p-6 space-y-5"
-        use:enhance={() => {
-          submitting = true;
-          return async ({ result }) => {
-            submitting = false;
-            if (result.type === "redirect") {
-              goto(result.location);
-            }
-          };
-        }}
+        onsubmit={handleSubmit}
       >
         <!-- Email field -->
         <div class="space-y-2">
