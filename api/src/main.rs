@@ -1,4 +1,4 @@
-use axum::Router;
+use axum::{Router, routing::get_service};
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use tokio::signal;
@@ -7,9 +7,9 @@ use tower_http::{
     services::{ServeDir, ServeFile},
 };
 
+mod handlers;
 mod ntypes;
 mod repos;
-mod handlers;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -35,20 +35,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let api_routes = handlers::api_routes();
 
-    let static_dir = env::var("STATIC_FILES_PATH").unwrap_or_else(|_| {
-        if std::path::Path::new("./static").exists() {
-            "./static".to_string()
-        } else {
-            "../web-new/build".to_string()
-        }
-    });
+    let static_dir =
+        env::var("STATIC_FILES_PATH").unwrap_or_else(|_| "../web-new/build".to_string());
 
-    let static_files = ServeDir::new(&static_dir)
-        .not_found_service(ServeFile::new(format!("{static_dir}/404.html")));
+    let spa = ServeDir::new(&static_dir)
+        .append_index_html_on_directories(true)
+        .fallback(ServeFile::new(format!("{static_dir}/200.html")));
 
     let app = Router::new()
         .nest("/api", api_routes)
-        .fallback_service(static_files)
+        .fallback_service(spa)
         .layer(CorsLayer::permissive());
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
