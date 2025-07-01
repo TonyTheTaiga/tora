@@ -24,10 +24,8 @@ RUN addgroup -g 1001 -S appgroup && \
 RUN chown -R appuser:appgroup /app
 USER appuser
 EXPOSE 8080
-# Environment variables for production
 ENV RUST_LOG=info
 ENV RUST_BACKTRACE=1
 ENV STATIC_FILES_PATH=./static
 CMD ["./api"]
-# Use STOPSIGNAL to ensure proper signal handling
 STOPSIGNAL SIGTERM
