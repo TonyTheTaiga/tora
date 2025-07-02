@@ -7,7 +7,7 @@ cleanup() {
 }
 trap cleanup SIGINT SIGTERM
 
-cd web-new
+cd web
 pnpm run build
 cd ..
 
