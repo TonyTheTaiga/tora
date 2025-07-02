@@ -8,17 +8,17 @@ RUN cargo build --release
 
 FROM node:22-alpine AS frontend-builder
 RUN npm install -g pnpm
-WORKDIR /app/web-new
-COPY web-new/package.json web-new/pnpm-lock.yaml ./
+WORKDIR /app/web
+COPY web/package.json web/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
-COPY web-new/ .
+COPY web/ .
 RUN pnpm run build:production
 FROM alpine:latest AS runtime
 RUN apk add --no-cache ca-certificates
 WORKDIR /app
 
 COPY --from=api-builder /app/api/target/release/api ./api
-COPY --from=frontend-builder /app/web-new/build ./static
+COPY --from=frontend-builder /app/web/build ./static
 RUN addgroup -g 1001 -S appgroup && \
     adduser -S appuser -u 1001 -G appgroup
 RUN chown -R appuser:appgroup /app
