@@ -1,9 +1,0 @@
-# Install Tora SDK
-$ pip install tora
-
-from tora import setup, tlog
-setup("hello, world!")
-
-# Log metrics
-tlog("precision", 0.92)
-tlog("recall", 0.76)

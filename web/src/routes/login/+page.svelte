@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { LogIn, User, Lock, Mail, Loader2 } from "lucide-svelte";
+  import { LogIn, User, Lock, Mail, Loader2 } from "@lucide/svelte";
   import { goto } from "$app/navigation";
   import { enhance } from "$app/forms";
 
