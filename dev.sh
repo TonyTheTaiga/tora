@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source .env
-
 cleanup() {
 	echo "🛑 Shutting down development servers..."
 	kill $SVELTE_PID 2>/dev/null

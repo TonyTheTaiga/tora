@@ -16,3 +16,9 @@ pub struct CreateUser {
     pub email: String,
     pub password: String,
 }
+
+#[derive(Deserialize, Serialize)]
+pub struct ConfirmQueryParams {
+    pub token_hash: String,
+    pub confirm_type: String,
+}

@@ -1,5 +1,5 @@
 use crate::ntypes;
-use axum::{Json, response::IntoResponse};
+use axum::{Json, extract::Query, response::IntoResponse, response::Redirect};
 use supabase_auth::models::AuthClient;
 
 pub async fn create_user(Json(payload): Json<ntypes::CreateUser>) -> impl IntoResponse {
@@ -23,4 +23,9 @@ pub async fn create_user(Json(payload): Json<ntypes::CreateUser>) -> impl IntoRe
             }),
         }),
     }
+}
+
+pub async fn confirm_create(Query(payload): Query<ntypes::ConfirmQueryParams>) -> Redirect {
+    println!("{}", payload.confirm_type);
+    Redirect::permanent("/")
 }
