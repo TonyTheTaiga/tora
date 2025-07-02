@@ -32,8 +32,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let api_routes = handlers::api_routes();
 
-    let static_dir = env::var("STATIC_FILES_PATH").unwrap_or_else(|_| "../web/build".to_string());
-
+    let static_dir = env::var("STATIC_FILES_PATH").expect("STATIC_FILES_PATH not set!");
     let spa = ServeDir::new(&static_dir)
         .append_index_html_on_directories(true)
         .fallback(ServeFile::new(format!("{static_dir}/200.html")));
