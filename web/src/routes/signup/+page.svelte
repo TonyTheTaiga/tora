@@ -6,9 +6,7 @@
   let submitted = $state(false);
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
-
     submitting = true;
-
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
     try {
@@ -144,6 +142,6 @@
   </div>
 {:else}
   <div>
-    <p>confirm your email to access the platform</p>
+    <p>confirm your email to access the platform!</p>
   </div>
 {/if}
