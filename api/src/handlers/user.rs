@@ -1,5 +1,11 @@
 use crate::ntypes;
-use axum::{Json, extract::Query, response::IntoResponse, response::Redirect};
+use axum::{
+    Json,
+    extract::Query,
+    http::{HeaderMap, StatusCode, header::SET_COOKIE},
+    response::{IntoResponse, Redirect},
+};
+use axum_extra::extract::cookie::{Cookie, SameSite};
 use supabase_auth::models::{AuthClient, VerifyOtpParams, VerifyTokenHashParams};
 
 fn create_client() -> AuthClient {
@@ -14,17 +20,17 @@ pub async fn create_user(Json(payload): Json<ntypes::CreateUser>) -> impl IntoRe
     {
         Ok(_response) => Json(ntypes::Response {
             status: 201,
-            data: serde_json::json!({
+            data: Some(serde_json::json!({
                 "message": "User created successfully",
                 "email": payload.email
-            }),
+            })),
         }),
         Err(err) => Json(ntypes::Response {
             status: 400,
-            data: serde_json::json!({
+            data: Some(serde_json::json!({
                 "error": "Failed to create user",
                 "message": err.to_string()
-            }),
+            })),
         }),
     }
 }
@@ -44,4 +50,25 @@ pub async fn confirm_create(Query(payload): Query<ntypes::ConfirmQueryParams>) -
     Redirect::permanent(
         &std::env::var("REDIRECT_URL_CONFIRM").expect("REDIRECT_URL_CONFIRM not set!"),
     )
+}
+
+pub async fn login(Json(payload): Json<ntypes::LoginParams>) -> impl IntoResponse {
+    let auth_client = create_client();
+    let session = auth_client
+        .login_with_email(&payload.email, &payload.password)
+        .await
+        .expect("Failed to login user! Double check password and email.");
+    let cookie = Cookie::build(("tora_auth_token", session.refresh_token.clone()))
+        .http_only(true)
+        .secure(false)
+        .same_site(SameSite::Lax)
+        .path("/");
+
+    let mut headers = HeaderMap::new();
+    headers.insert(SET_COOKIE, cookie.to_string().parse().unwrap());
+    let jbody = Json(ntypes::Response::<&str> {
+        status: 200,
+        data: None,
+    });
+    (StatusCode::OK, headers, jbody).into_response()
 }

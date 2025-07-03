@@ -8,6 +8,8 @@ mod handlers;
 mod ntypes;
 mod repos;
 
+fn auth_handler() {}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pool = match env::var("SUPABASE_PASSWORD") {
@@ -38,7 +40,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .append_index_html_on_directories(true)
         .fallback(ServeFile::new(format!("{static_dir}/200.html")));
 
-    let app = Router::new().nest("/api", api_routes).fallback_service(spa);
+    let app = Router::new()
+        .nest("/api", api_routes)
+        .nest_service("/", spa);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
     axum::serve(listener, app)

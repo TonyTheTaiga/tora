@@ -15,6 +15,7 @@ pub fn api_routes() -> Router {
         .route("/ping", post(ping::ping))
         .route("/signup", post(user::create_user))
         .route("/signup/confirm", get(user::confirm_create))
+        .route("/login", post(user::login))
         .layer(
             ServiceBuilder::new()
                 .layer(TraceLayer::new_for_http())
