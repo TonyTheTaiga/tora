@@ -29,7 +29,7 @@ echo -e "${BLUE}🚀 Starting Tora development with hot reloading...${NC}"
 # Start Rust API server
 echo -e "${GREEN}🦀 Starting Rust API server on http://localhost:8080${NC}"
 cd api
-STATIC_FILES_PATH="NULL" cargo watch -x run &
+STATIC_FILES_PATH="NULL" REDIRECT_URL_CONFIRM="http://localhost:5173" cargo watch -x run &
 RUST_PID=$!
 cd ..
 

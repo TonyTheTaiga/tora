@@ -4,6 +4,8 @@
 
   let submitting = $state(false);
   let submitted = $state(false);
+  let submitFailed = $state(false);
+
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
     submitting = true;
@@ -23,6 +25,9 @@
       const result = await response.json();
       if (result.status === 201) {
         submitted = true;
+      } else {
+        submitted = true;
+        submitFailed = true;
       }
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -140,8 +145,16 @@
       </div>
     </div>
   </div>
+{:else if !submitFailed}
+  <div
+    class="h-full flex justify-center items-center text-center text-ctp-text"
+  >
+    <p>Check your inbox for a confirmation email.</p>
+  </div>
 {:else}
-  <div>
-    <p>confirm your email to access the platform!</p>
+  <div
+    class="h-full flex justify-center items-center text-center text-ctp-text"
+  >
+    <p>Something went wrong!</p>
   </div>
 {/if}
