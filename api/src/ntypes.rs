@@ -30,3 +30,28 @@ pub struct LoginParams {
     pub email: String,
     pub password: String,
 }
+
+#[derive(Serialize)]
+pub struct AuthStatus {
+    pub authenticated: bool,
+    pub user: Option<UserInfo>,
+}
+
+#[derive(Serialize)]
+pub struct UserInfo {
+    pub id: String,
+    pub email: String,
+}
+
+#[derive(sqlx::FromRow)]
+pub struct ApiKeyRecord {
+    pub id: String,
+    pub user_id: String,
+    pub name: String,
+    pub key_hash: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub last_used: chrono::DateTime<chrono::Utc>,
+    pub revoked: bool,
+    // User info from JOIN
+    pub user_email: String,
+}

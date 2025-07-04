@@ -1,5 +1,5 @@
 FROM rust:1.88-alpine AS api-builder
-RUN apk add --no-cache musl-dev openssl-dev
+RUN apk add --no-cache musl-dev openssl-dev openssl-dev openssl-libs-static pkgconfig
 WORKDIR /app/api
 COPY api/Cargo.toml ./
 RUN cargo generate-lockfile 2>/dev/null || true
@@ -28,5 +28,6 @@ ENV RUST_LOG=info
 ENV RUST_BACKTRACE=1
 ENV STATIC_FILES_PATH=./static
 ENV REDIRECT_URL_CONFIRM="https://tora-rust-1030250455947.us-central1.run.app"
+ENV RUST_ENV="production"
 CMD ["./api"]
 STOPSIGNAL SIGTERM
