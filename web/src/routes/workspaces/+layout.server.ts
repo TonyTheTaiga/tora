@@ -24,6 +24,20 @@ interface ExperimentData {
   tags: string[];
   hyperparams: any[];
   workspace_id: string;
+  available_metrics: string[];
+}
+
+interface DashboardOverview {
+  workspaces: {
+    id: string;
+    name: string;
+    description: string | null;
+    created_at: string;
+    role: string;
+    experiment_count: number;
+    recent_experiment_count: number;
+  }[];
+  recent_experiments: ExperimentData[];
 }
 
 export const load: LayoutServerLoad = async ({ locals }) => {
@@ -39,50 +53,44 @@ export const load: LayoutServerLoad = async ({ locals }) => {
   const timer = startTimer("workspaces.load", { requestId });
 
   try {
-    const workspacesResponse =
-      await locals.apiClient.get<ApiResponse<WorkspaceData[]>>(
-        "/api/workspaces",
+    // Use the new optimized dashboard endpoint
+    const dashboardResponse =
+      await locals.apiClient.get<ApiResponse<DashboardOverview>>(
+        "/api/dashboard/overview",
       );
 
-    if (workspacesResponse.status !== 200) {
-      error(500, "Failed to fetch workspaces");
+    if (dashboardResponse.status !== 200) {
+      error(500, "Failed to fetch dashboard overview");
     }
 
-    const rawWorkspaces = workspacesResponse.data || [];
-    const workspaces = rawWorkspaces.map((workspace) => ({
+    const dashboardData = dashboardResponse.data;
+    if (!dashboardData) {
+      error(500, "No dashboard data received");
+    }
+
+    const workspaces = dashboardData.workspaces.map((workspace) => ({
       id: workspace.id,
       name: workspace.name,
       description: workspace.description,
       createdAt: new Date(workspace.created_at),
       role: workspace.role,
+      experimentCount: workspace.experiment_count,
+      recentExperimentCount: workspace.recent_experiment_count,
     }));
 
-    // Fetch recent experiments across all workspaces
-    let recentExperiments: any[] = [];
-    try {
-      const experimentsResponse = await locals.apiClient.get<ApiResponse<ExperimentData[]>>("/api/experiments");
-      
-      if (experimentsResponse.status === 200) {
-        const rawExperiments = experimentsResponse.data || [];
-        recentExperiments = rawExperiments
-          .map(exp => ({
-            id: exp.id,
-            name: exp.name,
-            description: exp.description || "",
-            hyperparams: exp.hyperparams || [],
-            tags: exp.tags || [],
-            createdAt: new Date(exp.created_at),
-            updatedAt: new Date(exp.updated_at),
-            availableMetrics: [], // TODO: Implement when metrics API is ready
-            workspaceId: exp.workspace_id
-          }))
-          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-          .slice(0, 10); // Get 10 most recent experiments
-      }
-    } catch (expErr) {
-      console.error("Error fetching recent experiments:", expErr);
-      // Don't fail the whole page if experiments fail to load
-    }
+    const recentExperiments = dashboardData.recent_experiments
+      .map((exp) => ({
+        id: exp.id,
+        name: exp.name,
+        description: exp.description || "",
+        hyperparams: exp.hyperparams || [],
+        tags: exp.tags || [],
+        createdAt: new Date(exp.created_at),
+        updatedAt: new Date(exp.updated_at),
+        availableMetrics: exp.available_metrics || [],
+        workspaceId: exp.workspace_id,
+      }))
+      .slice(0, 5);
 
     timer.end({
       workspaces_count: workspaces.length,
@@ -100,12 +108,12 @@ export const load: LayoutServerLoad = async ({ locals }) => {
       error: err instanceof Error ? err.message : "Unknown error",
     });
 
-    console.error("Error loading workspaces:", err);
+    console.error("Error loading dashboard overview:", err);
 
     if (err instanceof Error && err.message.includes("401")) {
       error(401, "Authentication required");
     }
 
-    error(500, "Failed to load workspaces");
+    error(500, "Failed to load dashboard overview");
   }
 };

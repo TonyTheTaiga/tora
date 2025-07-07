@@ -7,14 +7,6 @@ interface ApiResponse<T> {
   data: T;
 }
 
-interface WorkspaceData {
-  id: string;
-  name: string;
-  description: string | null;
-  created_at: string;
-  role: string;
-}
-
 interface ExperimentData {
   id: string;
   name: string;

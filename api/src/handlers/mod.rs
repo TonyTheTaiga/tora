@@ -11,6 +11,7 @@ use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 
 mod api_key;
+mod dashboard;
 mod experiment;
 mod invitation;
 mod metric;
@@ -85,6 +86,8 @@ pub fn api_routes() -> Router<sqlx::PgPool> {
             "/experiments/{id}/metrics/csv",
             protected_route(get(metric::export_metrics_csv)),
         )
+        // Dashboard
+        .route("/dashboard/overview", protected_route(get(dashboard::get_dashboard_overview)))
         // Settings and user management
         .route("/settings", protected_route(get(user::get_settings)))
         // API Keys
