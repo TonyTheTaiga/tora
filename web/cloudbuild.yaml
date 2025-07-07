@@ -1,0 +1,33 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    dir: "web"
+    args:
+      - build
+      - -t
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA"
+      - .
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - push
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA"
+
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    dir: "web"
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud run deploy tora-web \
+          --image us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA \
+          --region us-central1 \
+          --platform managed \
+          --allow-unauthenticated \
+          --cpu 1.0 \
+          --memory 512Mi \
+          --min-instances 0 \
+          --max-instances 5 \
+          --set-env-vars PUBLIC_API_BASE_URL=https://tora-api-1030250455947.us-central1.run.app \
+          --port 3000
+options:
+  machineType: "E2_MEDIUM"
+timeout: "1600s"
