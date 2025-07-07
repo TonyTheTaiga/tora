@@ -1,32 +1,11 @@
 <script lang="ts">
   import { LogIn, User, Lock, Mail, Loader2 } from "@lucide/svelte";
+  import type { PageProps } from "./$types";
   import { goto } from "$app/navigation";
-  import { apiClient } from "$lib/api";
+  import { enhance } from "$app/forms";
 
+  let { form }: PageProps = $props();
   let submitting = $state(false);
-  let error = $state("");
-
-  async function handleSubmit(event: SubmitEvent) {
-    event?.preventDefault();
-    submitting = true;
-    error = "";
-
-    const form = event.target as HTMLFormElement;
-    const formData = new FormData(form);
-
-    try {
-      const result = await apiClient.post("/api/login", {
-        email: formData.get("email"),
-        password: formData.get("password"),
-      });
-
-      goto("/workspaces");
-    } catch (err: any) {
-      error = err.message || "Network error";
-    } finally {
-      submitting = false;
-    }
-  }
 </script>
 
 <div
@@ -36,7 +15,6 @@
     <div
       class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 overflow-hidden"
     >
-      <!-- Header -->
       <div
         class="px-6 py-4 border-b border-ctp-surface0 flex items-center gap-2"
       >
@@ -44,14 +22,21 @@
         <h2 class="text-xl text-ctp-text">sign in</h2>
       </div>
 
-      <!-- Form -->
       <form
         method="POST"
         autocomplete="on"
-        action="/api/login"
         name="login-form"
         class="p-6 space-y-5"
-        onsubmit={handleSubmit}
+        use:enhance={() => {
+          submitting = true;
+          return async ({ update, result }) => {
+            if (result.type === "redirect") {
+              await update();
+              submitting = false;
+              goto(result.location);
+            }
+          };
+        }}
       >
         <!-- Email field -->
         <div class="space-y-2">
@@ -101,11 +86,11 @@
         </div>
 
         <!-- Error message -->
-        {#if error}
+        {#if form?.error}
           <div
             class="text-sm text-ctp-red bg-ctp-red/10 border border-ctp-red/20 p-3"
           >
-            {error}
+            {form.error}
           </div>
         {/if}
 

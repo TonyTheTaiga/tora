@@ -1,55 +1,109 @@
+use crate::middleware::auth::protected_route;
 use axum::{
     Router,
-    routing::{get, post, put, delete},
+    http::{HeaderValue, Method},
+    routing::{delete, get, post, put},
 };
+use http::header::{AUTHORIZATION, CONTENT_TYPE};
+use std::env;
 use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
-use crate::middleware::auth::protected_route;
 
+mod api_key;
+mod experiment;
+mod invitation;
+mod metric;
 mod ping;
 mod user;
-mod experiment;
-mod metric;
-mod api_key;
-mod invitation;
 
 pub fn api_routes() -> Router {
     let protected_routes = Router::new()
         // Workspaces
-        .route("/workspaces", protected_route(get(crate::repos::workspace::list_workspaces)))
-        .route("/workspaces", protected_route(post(crate::repos::workspace::create_workspace)))
-        .route("/workspaces/{id}", protected_route(get(crate::repos::workspace::get_workspace)))
-        .route("/workspaces/{id}", protected_route(delete(crate::repos::workspace::delete_workspace)))
-        .route("/workspaces/{id}/leave", protected_route(post(crate::repos::workspace::leave_workspace)))
-        .route("/workspaces/{id}/members", protected_route(get(crate::repos::workspace::get_workspace_members)))
-        
+        .route(
+            "/workspaces",
+            protected_route(get(crate::repos::workspace::list_workspaces)),
+        )
+        .route(
+            "/workspaces",
+            protected_route(post(crate::repos::workspace::create_workspace)),
+        )
+        .route(
+            "/workspaces/{id}",
+            protected_route(get(crate::repos::workspace::get_workspace)),
+        )
+        .route(
+            "/workspaces/{id}",
+            protected_route(delete(crate::repos::workspace::delete_workspace)),
+        )
+        .route(
+            "/workspaces/{id}/leave",
+            protected_route(post(crate::repos::workspace::leave_workspace)),
+        )
+        .route(
+            "/workspaces/{id}/members",
+            protected_route(get(crate::repos::workspace::get_workspace_members)),
+        )
         // Experiments
-        .route("/experiments", protected_route(get(experiment::list_experiments)))
-        .route("/experiments", protected_route(post(experiment::create_experiment)))
-        .route("/experiments/{id}", protected_route(get(experiment::get_experiment)))
-        .route("/experiments/{id}", protected_route(put(experiment::update_experiment)))
-        .route("/experiments/{id}", protected_route(delete(experiment::delete_experiment)))
-        
+        .route(
+            "/experiments",
+            protected_route(get(experiment::list_experiments)),
+        )
+        .route(
+            "/experiments",
+            protected_route(post(experiment::create_experiment)),
+        )
+        .route(
+            "/experiments/{id}",
+            protected_route(get(experiment::get_experiment)),
+        )
+        .route(
+            "/experiments/{id}",
+            protected_route(put(experiment::update_experiment)),
+        )
+        .route(
+            "/experiments/{id}",
+            protected_route(delete(experiment::delete_experiment)),
+        )
         // Metrics
-        .route("/experiments/{id}/metrics", protected_route(get(metric::get_metrics)))
-        .route("/experiments/{id}/metrics", protected_route(post(metric::create_metric)))
-        .route("/experiments/{id}/metrics/batch", protected_route(post(metric::batch_create_metrics)))
-        .route("/experiments/{id}/metrics/csv", protected_route(get(metric::export_metrics_csv)))
-        
+        .route(
+            "/experiments/{id}/metrics",
+            protected_route(get(metric::get_metrics)),
+        )
+        .route(
+            "/experiments/{id}/metrics",
+            protected_route(post(metric::create_metric)),
+        )
+        .route(
+            "/experiments/{id}/metrics/batch",
+            protected_route(post(metric::batch_create_metrics)),
+        )
+        .route(
+            "/experiments/{id}/metrics/csv",
+            protected_route(get(metric::export_metrics_csv)),
+        )
         // Settings and user management
         .route("/settings", protected_route(get(user::get_settings)))
-        
         // API Keys
         .route("/api-keys", protected_route(get(api_key::list_api_keys)))
         .route("/api-keys", protected_route(post(api_key::create_api_key)))
-        .route("/api-keys/{id}", protected_route(delete(api_key::revoke_api_key)))
-        
+        .route(
+            "/api-keys/{id}",
+            protected_route(delete(api_key::revoke_api_key)),
+        )
         // Workspace Invitations
-        .route("/workspace-invitations", protected_route(post(invitation::create_invitation)))
-        .route("/workspace-invitations", protected_route(get(invitation::list_invitations)))
-        .route("/workspaces/any/invitations", protected_route(put(invitation::respond_to_invitation)))
-        
+        .route(
+            "/workspace-invitations",
+            protected_route(post(invitation::create_invitation)),
+        )
+        .route(
+            "/workspace-invitations",
+            protected_route(get(invitation::list_invitations)),
+        )
+        .route(
+            "/workspaces/any/invitations",
+            protected_route(put(invitation::respond_to_invitation)),
+        )
         // Other protected routes
         .route("/ping", protected_route(post(ping::ping)))
         .route("/logout", protected_route(post(user::logout)))
@@ -66,6 +120,17 @@ pub fn api_routes() -> Router {
         .layer(
             ServiceBuilder::new()
                 .layer(TraceLayer::new_for_http())
-                .layer(CorsLayer::permissive()),
+                .layer(
+                    CorsLayer::new()
+                        .allow_origin(
+                            env::var("FRONTEND_URL")
+                                .expect("FRONTEND_URL not set!")
+                                .parse::<HeaderValue>()
+                                .unwrap(),
+                        )
+                        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
+                        .allow_headers([AUTHORIZATION, CONTENT_TYPE])
+                        .allow_credentials(true),
+                ),
         )
 }

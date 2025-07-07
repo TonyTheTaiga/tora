@@ -7,7 +7,6 @@ use axum::{
     response::{IntoResponse, Redirect},
 };
 use axum_extra::extract::cookie::{Cookie, SameSite};
-use base64::prelude::*;
 use supabase_auth::models::{AuthClient, VerifyOtpParams, VerifyTokenHashParams};
 
 fn create_client() -> AuthClient {
@@ -61,6 +60,7 @@ pub async fn login(Json(payload): Json<ntypes::LoginParams>) -> impl IntoRespons
         .await
         .expect("Failed to login user! Double check password and email.");
 
+    // Return tokens in response body for SSR
     let session_payload = serde_json::json!({
         "access_token": session.access_token,
         "token_type": "bearer",
@@ -70,24 +70,10 @@ pub async fn login(Json(payload): Json<ntypes::LoginParams>) -> impl IntoRespons
         "user": session.user
     });
 
-    let payload_json = serde_json::to_string(&session_payload).unwrap();
-    let payload_base64 = BASE64_STANDARD.encode(payload_json.as_bytes());
-
-    let is_production =
-        std::env::var("RUST_ENV").unwrap_or_else(|_| "development".to_string()) == "production";
-    let cookie = Cookie::build(("tora_auth_token", payload_base64))
-        .http_only(true)
-        .secure(is_production)
-        .same_site(SameSite::Lax)
-        .path("/");
-
-    let mut headers = HeaderMap::new();
-    headers.insert(SET_COOKIE, cookie.to_string().parse().unwrap());
-    let jbody = Json(ntypes::Response::<&str> {
+    Json(ntypes::Response {
         status: 200,
-        data: None,
-    });
-    (StatusCode::OK, headers, jbody).into_response()
+        data: Some(session_payload),
+    })
 }
 
 pub async fn logout(Extension(user): Extension<AuthenticatedUser>) -> impl IntoResponse {
@@ -143,7 +129,7 @@ pub async fn get_settings(
     Extension(user): Extension<AuthenticatedUser>,
 ) -> Json<ntypes::SettingsData> {
     use crate::repos::workspace::Workspace;
-    
+
     // Mock data - will be replaced with database queries
     let workspaces = vec![
         Workspace {
@@ -179,16 +165,14 @@ pub async fn get_settings(
         },
     ];
 
-    let invitations = vec![
-        ntypes::WorkspaceInvitation {
-            id: "inv_1".to_string(),
-            workspace_id: "Data Science Team".to_string(),
-            email: user.email.clone(),
-            role: "ADMIN".to_string(),
-            from: "john@example.com".to_string(),
-            created_at: chrono::Utc::now(),
-        }
-    ];
+    let invitations = vec![ntypes::WorkspaceInvitation {
+        id: "inv_1".to_string(),
+        workspace_id: "Data Science Team".to_string(),
+        email: user.email.clone(),
+        role: "ADMIN".to_string(),
+        from: "john@example.com".to_string(),
+        created_at: chrono::Utc::now(),
+    }];
 
     Json(ntypes::SettingsData {
         user: ntypes::UserInfo {

@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   api:
@@ -11,12 +11,11 @@ services:
       - RUST_LOG=info
       - RUST_BACKTRACE=1
       - RUST_ENV=dev
-    # Add secrets/environment variables as needed
-    # - SUPABASE_PASSWORD=${SUPABASE_PASSWORD}
-    # - PUBLIC_SUPABASE_URL=${PUBLIC_SUPABASE_URL}
-    # - PUBLIC_SUPABASE_ANON_KEY=${PUBLIC_SUPABASE_ANON_KEY}
-    # - PRIVATE_ANTHROPIC_KEY=${PRIVATE_ANTHROPIC_KEY}
-    # - PRIVATE_SERVICE_ROLE_KEY=${PRIVATE_SERVICE_ROLE_KEY}
+      - SUPABASE_PASSWORD=${SUPABASE_PASSWORD}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_API_KEY=${SUPABASE_API_KEY}
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - FRONTEND_URL=http://localhost:3000
     networks:
       - tora-network
 
@@ -27,8 +26,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
-      - PUBLIC_API_BASE_URL=http://api:8080
+      - NODE_ENV=dev
+      - PUBLIC_API_BASE_URL=http://localhost:8080
     depends_on:
       - api
     networks:

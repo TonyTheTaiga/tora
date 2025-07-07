@@ -47,6 +47,7 @@ dependencies = [
  "axum-extra",
  "base64",
  "chrono",
+ "http",
  "rand",
  "serde",
  "serde_json",
