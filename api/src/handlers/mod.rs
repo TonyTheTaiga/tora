@@ -112,7 +112,8 @@ pub fn api_routes() -> Router {
     let public_routes = Router::new()
         .route("/signup", post(user::create_user))
         .route("/signup/confirm", get(user::confirm_create))
-        .route("/login", post(user::login));
+        .route("/login", post(user::login))
+        .route("/refresh", post(user::refresh_token));
 
     Router::new()
         .merge(protected_routes)

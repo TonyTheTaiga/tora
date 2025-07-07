@@ -3,10 +3,9 @@ use crate::ntypes;
 use axum::{
     Extension, Json,
     extract::Query,
-    http::{HeaderMap, StatusCode, header::SET_COOKIE},
+    http::StatusCode,
     response::{IntoResponse, Redirect},
 };
-use axum_extra::extract::cookie::{Cookie, SameSite};
 use supabase_auth::models::{AuthClient, VerifyOtpParams, VerifyTokenHashParams};
 
 fn create_client() -> AuthClient {
@@ -76,55 +75,6 @@ pub async fn login(Json(payload): Json<ntypes::LoginParams>) -> impl IntoRespons
     })
 }
 
-pub async fn logout(Extension(user): Extension<AuthenticatedUser>) -> impl IntoResponse {
-    let auth_client = create_client();
-
-    match auth_client.logout(None, &user.refresh_token).await {
-        Ok(_) => {
-            let is_production = std::env::var("RUST_ENV")
-                .unwrap_or_else(|_| "development".to_string())
-                == "production";
-            let cookie = Cookie::build(("tora_auth_token", ""))
-                .http_only(true)
-                .secure(is_production)
-                .same_site(SameSite::Lax)
-                .path("/")
-                .max_age(time::Duration::seconds(0));
-
-            let mut headers = HeaderMap::new();
-            headers.insert(SET_COOKIE, cookie.to_string().parse().unwrap());
-
-            let jbody = Json(ntypes::Response::<&str> {
-                status: 200,
-                data: Some("Logged out successfully"),
-            });
-            (StatusCode::OK, headers, jbody).into_response()
-        }
-        Err(err) => {
-            let jbody = Json(ntypes::Response {
-                status: 500,
-                data: Some(serde_json::json!({
-                    "error": "Logout failed",
-                    "message": err.to_string()
-                })),
-            });
-            (StatusCode::INTERNAL_SERVER_ERROR, jbody).into_response()
-        }
-    }
-}
-
-pub async fn auth_status(
-    Extension(user): Extension<AuthenticatedUser>,
-) -> Json<ntypes::AuthStatus> {
-    Json(ntypes::AuthStatus {
-        authenticated: true,
-        user: Some(ntypes::UserInfo {
-            id: user.id,
-            email: user.email,
-        }),
-    })
-}
-
 pub async fn get_settings(
     Extension(user): Extension<AuthenticatedUser>,
 ) -> Json<ntypes::SettingsData> {
@@ -183,4 +133,59 @@ pub async fn get_settings(
         api_keys,
         invitations,
     })
+}
+pub async fn logout(
+    Extension(user): Extension<AuthenticatedUser>,
+) -> impl IntoResponse {
+    let auth_client = create_client();
+
+    // Attempt to revoke the refresh token
+    let _ = auth_client.logout(None, &user.refresh_token).await;
+
+    Json(ntypes::Response::<&str> {
+        status: 200,
+        data: None,
+    })
+}
+
+pub async fn auth_status(
+    Extension(user): Extension<AuthenticatedUser>,
+) -> Json<ntypes::Response<ntypes::UserInfo>> {
+    Json(ntypes::Response {
+        status: 200,
+        data: Some(ntypes::UserInfo {
+            id: user.id,
+            email: user.email,
+        }),
+    })
+}
+
+pub async fn refresh_token(
+    Json(payload): Json<ntypes::RefreshTokenRequest>,
+) -> impl IntoResponse {
+    let auth_client = create_client();
+    
+    match auth_client.refresh_session(&payload.refresh_token).await {
+        Ok(session) => {
+            let session_payload = serde_json::json!({
+                "access_token": session.access_token,
+                "token_type": "bearer",
+                "expires_in": session.expires_in,
+                "expires_at": session.expires_at,
+                "refresh_token": session.refresh_token,
+                "user": session.user
+            });
+
+            Json(ntypes::Response {
+                status: 200,
+                data: Some(session_payload),
+            }).into_response()
+        }
+        Err(_) => {
+            (StatusCode::UNAUTHORIZED, Json(ntypes::Response::<&str> {
+                status: 401,
+                data: None,
+            })).into_response()
+        }
+    }
 }

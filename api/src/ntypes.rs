@@ -31,6 +31,11 @@ pub struct LoginParams {
     pub password: String,
 }
 
+#[derive(Deserialize, Debug)]
+pub struct RefreshTokenRequest {
+    pub refresh_token: String,
+}
+
 #[derive(Serialize)]
 pub struct AuthStatus {
     pub authenticated: bool,
