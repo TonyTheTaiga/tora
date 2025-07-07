@@ -105,9 +105,7 @@ pub fn api_routes() -> Router {
             protected_route(put(invitation::respond_to_invitation)),
         )
         // Other protected routes
-        .route("/ping", protected_route(post(ping::ping)))
-        .route("/logout", protected_route(post(user::logout)))
-        .route("/auth/status", protected_route(get(user::auth_status)));
+        .route("/ping", protected_route(post(ping::ping)));
 
     let public_routes = Router::new()
         .route("/signup", post(user::create_user))

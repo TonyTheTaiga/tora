@@ -66,13 +66,50 @@ pub async fn login(Json(payload): Json<ntypes::LoginParams>) -> impl IntoRespons
         "expires_in": session.expires_in,
         "expires_at": session.expires_at,
         "refresh_token": session.refresh_token,
-        "user": session.user
+        "user": {
+            "id": session.user.id,
+            "email": session.user.email,
+        }
     });
 
     Json(ntypes::Response {
         status: 200,
         data: Some(session_payload),
     })
+}
+
+pub async fn refresh_token(Json(payload): Json<ntypes::RefreshTokenRequest>) -> impl IntoResponse {
+    let auth_client = create_client();
+
+    match auth_client.refresh_session(&payload.refresh_token).await {
+        Ok(session) => {
+            let session_payload = serde_json::json!({
+                "access_token": session.access_token,
+                "token_type": "bearer",
+                "expires_in": session.expires_in,
+                "expires_at": session.expires_at,
+                "refresh_token": session.refresh_token,
+                "user": {
+                    "id": session.user.id,
+                    "email": session.user.email,
+                }
+            });
+
+            Json(ntypes::Response {
+                status: 200,
+                data: Some(session_payload),
+            })
+            .into_response()
+        }
+        Err(_) => (
+            StatusCode::UNAUTHORIZED,
+            Json(ntypes::Response::<&str> {
+                status: 401,
+                data: None,
+            }),
+        )
+            .into_response(),
+    }
 }
 
 pub async fn get_settings(
@@ -133,59 +170,4 @@ pub async fn get_settings(
         api_keys,
         invitations,
     })
-}
-pub async fn logout(
-    Extension(user): Extension<AuthenticatedUser>,
-) -> impl IntoResponse {
-    let auth_client = create_client();
-
-    // Attempt to revoke the refresh token
-    let _ = auth_client.logout(None, &user.refresh_token).await;
-
-    Json(ntypes::Response::<&str> {
-        status: 200,
-        data: None,
-    })
-}
-
-pub async fn auth_status(
-    Extension(user): Extension<AuthenticatedUser>,
-) -> Json<ntypes::Response<ntypes::UserInfo>> {
-    Json(ntypes::Response {
-        status: 200,
-        data: Some(ntypes::UserInfo {
-            id: user.id,
-            email: user.email,
-        }),
-    })
-}
-
-pub async fn refresh_token(
-    Json(payload): Json<ntypes::RefreshTokenRequest>,
-) -> impl IntoResponse {
-    let auth_client = create_client();
-    
-    match auth_client.refresh_session(&payload.refresh_token).await {
-        Ok(session) => {
-            let session_payload = serde_json::json!({
-                "access_token": session.access_token,
-                "token_type": "bearer",
-                "expires_in": session.expires_in,
-                "expires_at": session.expires_at,
-                "refresh_token": session.refresh_token,
-                "user": session.user
-            });
-
-            Json(ntypes::Response {
-                status: 200,
-                data: Some(session_payload),
-            }).into_response()
-        }
-        Err(_) => {
-            (StatusCode::UNAUTHORIZED, Json(ntypes::Response::<&str> {
-                status: 401,
-                data: None,
-            })).into_response()
-        }
-    }
 }

@@ -17,10 +17,7 @@ use supabase_auth::models::AuthClient;
 pub struct AuthenticatedUser {
     pub id: String,
     pub email: String,
-    pub refresh_token: String,
 }
-
-
 
 #[derive(Debug)]
 pub struct AuthError {
@@ -56,7 +53,6 @@ pub async fn auth_middleware(
         }
     }
 
-    // Check for Bearer token in Authorization header
     if let Some(auth_header) = headers.get("authorization") {
         if let Ok(auth_str) = auth_header.to_str() {
             if let Some(token) = auth_str.strip_prefix("Bearer ") {
@@ -65,13 +61,11 @@ pub async fn auth_middleware(
                     status_code: StatusCode::INTERNAL_SERVER_ERROR,
                 })?;
 
-                // For SSR, the token should be the access_token directly
                 match auth_client.get_user(token).await {
                     Ok(user) => {
                         let authenticated_user = AuthenticatedUser {
                             id: user.id.to_string(),
                             email: user.email,
-                            refresh_token: String::new(), // Not available from access token
                         };
                         req.extensions_mut().insert(authenticated_user);
                         return Ok(next.run(req).await);
@@ -93,7 +87,6 @@ pub async fn auth_middleware(
     })
 }
 
-
 async fn create_db_pool() -> Result<PgPool, sqlx::Error> {
     let password = env::var("SUPABASE_PASSWORD")
         .map_err(|_| sqlx::Error::Configuration("SUPABASE_PASSWORD not set".into()))?;
@@ -113,20 +106,6 @@ fn extract_api_key(headers: &HeaderMap) -> Option<String> {
             return Some(key_str.to_string());
         }
     }
-
-    // if let Some(auth) = headers.get("authorization") {
-    //     if let Ok(auth_str) = auth.to_str() {
-    //         if let Some(key) = auth_str.strip_prefix("ApiKey ") {
-    //             return Some(key.to_string());
-    //         }
-    //         if let Some(key) = auth_str.strip_prefix("Bearer ") {
-    //             // Only if it starts with "ak_" (API key prefix)
-    //             if key.starts_with("ak_") {
-    //                 return Some(key.to_string());
-    //             }
-    //         }
-    //     }
-    // }
 
     None
 }
@@ -175,7 +154,6 @@ async fn validate_api_key(api_key: &str) -> Result<AuthenticatedUser, AuthError>
             Ok(AuthenticatedUser {
                 id: api_key_record.user_id,
                 email: api_key_record.user_email,
-                refresh_token: String::new(), // Empty for API key auth
             })
         }
         None => Err(AuthError {
