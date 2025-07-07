@@ -1,8 +1,6 @@
 use axum::Router;
 // use sqlx::postgres::PgPoolOptions;
-use std::env;
 use tokio::signal;
-use tower_http::services::{ServeDir, ServeFile};
 
 mod handlers;
 mod middleware;
@@ -32,21 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // }
 
     let api_routes = handlers::api_routes();
-    let static_dir = env::var("STATIC_FILES_PATH").expect("STATIC_FILES_PATH not set.");
-    let spa = ServeDir::new(&static_dir)
-        .append_index_html_on_directories(true)
-        .fallback(ServeFile::new(format!("{static_dir}/200.html")));
-
-    let protected_spa = Router::new()
-        .fallback_service(spa)
-        .layer(axum::middleware::from_fn(
-            crate::middleware::auth::ui_auth_middleware,
-        ));
-
-    let app = Router::new()
-        .nest("/api", api_routes)
-        .fallback_service(protected_spa);
-
+    let app = Router::new().nest("/api", api_routes);
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())

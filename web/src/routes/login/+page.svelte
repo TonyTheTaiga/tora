@@ -1,6 +1,7 @@
 <script lang="ts">
   import { LogIn, User, Lock, Mail, Loader2 } from "@lucide/svelte";
   import { goto } from "$app/navigation";
+  import { apiClient } from "$lib/api";
 
   let submitting = $state(false);
   let error = $state("");
@@ -14,27 +15,14 @@
     const formData = new FormData(form);
 
     try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        body: JSON.stringify({
-          email: formData.get("email"),
-          password: formData.get("password"),
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
+      const result = await apiClient.post("/api/login", {
+        email: formData.get("email"),
+        password: formData.get("password"),
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        goto("/workspaces");
-      } else {
-        error = result.message || "Login failed";
-      }
-    } catch (err) {
-      error = "Network error";
+      goto("/workspaces");
+    } catch (err: any) {
+      error = err.message || "Network error";
     } finally {
       submitting = false;
     }

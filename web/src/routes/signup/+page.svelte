@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { User, Mail, Lock, LogIn, Loader2 } from "@lucide/svelte";
+  import { apiClient } from "$lib/api";
 
   let submitting = $state(false);
   let submitted = $state(false);
@@ -15,27 +16,14 @@
     const formData = new FormData(form);
 
     try {
-      const response = await fetch("/api/signup", {
-        method: "POST",
-        body: JSON.stringify({
-          email: formData.get("email"),
-          password: formData.get("password"),
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
+      const result = await apiClient.post("/api/signup", {
+        email: formData.get("email"),
+        password: formData.get("password"),
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        submitted = true;
-      } else {
-        error = result.message || "Signup failed";
-      }
-    } catch (err) {
-      error = "Network error";
+      submitted = true;
+    } catch (err: any) {
+      error = err.message || "Network error";
     } finally {
       submitting = false;
     }
