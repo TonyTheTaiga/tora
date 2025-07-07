@@ -56,3 +56,46 @@ pub struct ApiKeyRecord {
     // User info from JOIN
     pub user_email: String,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct ApiKey {
+    pub id: String,
+    pub name: String,
+    pub created_at: String,
+    pub revoked: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>, // Only present when creating
+}
+
+#[derive(Deserialize)]
+pub struct CreateApiKeyRequest {
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct WorkspaceInvitation {
+    pub id: String,
+    pub workspace_id: String,
+    pub email: String,
+    pub role: String,
+    pub from: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(Deserialize)]
+pub struct CreateInvitationRequest {
+    #[serde(rename = "workspaceId")]
+    pub workspace_id: String,
+    pub email: String,
+    #[serde(rename = "roleId")]
+    pub role_id: String,
+}
+
+#[derive(Serialize)]
+pub struct SettingsData {
+    pub user: UserInfo,
+    pub workspaces: Vec<crate::repos::workspace::Workspace>,
+    #[serde(rename = "apiKeys")]
+    pub api_keys: Vec<ApiKey>,
+    pub invitations: Vec<WorkspaceInvitation>,
+}

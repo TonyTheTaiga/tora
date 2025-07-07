@@ -138,3 +138,65 @@ pub async fn auth_status(
         }),
     })
 }
+
+pub async fn get_settings(
+    Extension(user): Extension<AuthenticatedUser>,
+) -> Json<ntypes::SettingsData> {
+    use crate::repos::workspace::Workspace;
+    
+    // Mock data - will be replaced with database queries
+    let workspaces = vec![
+        Workspace {
+            id: "ws_1".to_string(),
+            name: "ML Research".to_string(),
+            description: Some("Machine learning experiments and research".to_string()),
+            created_at: chrono::Utc::now(),
+            role: "OWNER".to_string(),
+        },
+        Workspace {
+            id: "ws_2".to_string(),
+            name: "NLP Project".to_string(),
+            description: Some("Natural language processing experiments".to_string()),
+            created_at: chrono::Utc::now(),
+            role: "ADMIN".to_string(),
+        },
+    ];
+
+    let api_keys = vec![
+        ntypes::ApiKey {
+            id: "key_1".to_string(),
+            name: "Development Key".to_string(),
+            created_at: "Dec 15".to_string(),
+            revoked: false,
+            key: None,
+        },
+        ntypes::ApiKey {
+            id: "key_2".to_string(),
+            name: "Production Key".to_string(),
+            created_at: "Dec 10".to_string(),
+            revoked: true,
+            key: None,
+        },
+    ];
+
+    let invitations = vec![
+        ntypes::WorkspaceInvitation {
+            id: "inv_1".to_string(),
+            workspace_id: "Data Science Team".to_string(),
+            email: user.email.clone(),
+            role: "ADMIN".to_string(),
+            from: "john@example.com".to_string(),
+            created_at: chrono::Utc::now(),
+        }
+    ];
+
+    Json(ntypes::SettingsData {
+        user: ntypes::UserInfo {
+            id: user.id,
+            email: user.email,
+        },
+        workspaces,
+        api_keys,
+        invitations,
+    })
+}

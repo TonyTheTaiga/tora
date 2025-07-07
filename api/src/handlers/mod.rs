@@ -11,6 +11,8 @@ mod ping;
 mod user;
 mod experiment;
 mod metric;
+mod api_key;
+mod invitation;
 
 pub fn api_routes() -> Router {
     let protected_routes = Router::new()
@@ -18,6 +20,8 @@ pub fn api_routes() -> Router {
         .route("/workspaces", protected_route(get(crate::repos::workspace::list_workspaces)))
         .route("/workspaces", protected_route(post(crate::repos::workspace::create_workspace)))
         .route("/workspaces/{id}", protected_route(get(crate::repos::workspace::get_workspace)))
+        .route("/workspaces/{id}", protected_route(delete(crate::repos::workspace::delete_workspace)))
+        .route("/workspaces/{id}/leave", protected_route(post(crate::repos::workspace::leave_workspace)))
         .route("/workspaces/{id}/members", protected_route(get(crate::repos::workspace::get_workspace_members)))
         
         // Experiments
@@ -32,6 +36,19 @@ pub fn api_routes() -> Router {
         .route("/experiments/{id}/metrics", protected_route(post(metric::create_metric)))
         .route("/experiments/{id}/metrics/batch", protected_route(post(metric::batch_create_metrics)))
         .route("/experiments/{id}/metrics/csv", protected_route(get(metric::export_metrics_csv)))
+        
+        // Settings and user management
+        .route("/settings", protected_route(get(user::get_settings)))
+        
+        // API Keys
+        .route("/api-keys", protected_route(get(api_key::list_api_keys)))
+        .route("/api-keys", protected_route(post(api_key::create_api_key)))
+        .route("/api-keys/{id}", protected_route(delete(api_key::revoke_api_key)))
+        
+        // Workspace Invitations
+        .route("/workspace-invitations", protected_route(post(invitation::create_invitation)))
+        .route("/workspace-invitations", protected_route(get(invitation::list_invitations)))
+        .route("/workspaces/any/invitations", protected_route(put(invitation::respond_to_invitation)))
         
         // Other protected routes
         .route("/ping", protected_route(post(ping::ping)))

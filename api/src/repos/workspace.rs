@@ -118,3 +118,29 @@ pub async fn get_workspace_members(
     })
 }
 
+pub async fn delete_workspace(
+    Extension(_user): Extension<AuthenticatedUser>,
+    Path(workspace_id): Path<String>,
+) -> impl IntoResponse {
+    // Mock - will be replaced with database deletion
+    println!("Deleting workspace: {}", workspace_id);
+
+    Json(Response {
+        status: 200,
+        data: Some("Workspace deleted successfully"),
+    })
+}
+
+pub async fn leave_workspace(
+    Extension(_user): Extension<AuthenticatedUser>,
+    Path(workspace_id): Path<String>,
+) -> impl IntoResponse {
+    // Mock - will be replaced with database update to remove user from workspace
+    println!("User leaving workspace: {}", workspace_id);
+
+    Json(Response {
+        status: 200,
+        data: Some("Left workspace successfully"),
+    })
+}
+
