@@ -14,7 +14,6 @@ mod api_key;
 mod experiment;
 mod invitation;
 mod metric;
-mod ping;
 mod user;
 
 pub fn api_routes() -> Router {
@@ -103,9 +102,7 @@ pub fn api_routes() -> Router {
         .route(
             "/workspaces/any/invitations",
             protected_route(put(invitation::respond_to_invitation)),
-        )
-        // Other protected routes
-        .route("/ping", protected_route(post(ping::ping)));
+        );
 
     let public_routes = Router::new()
         .route("/signup", post(user::create_user))

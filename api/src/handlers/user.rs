@@ -117,6 +117,7 @@ pub async fn get_settings(
 ) -> Json<ntypes::SettingsData> {
     use crate::repos::workspace::Workspace;
 
+    println!("user: {user:?}");
     // Mock data - will be replaced with database queries
     let workspaces = vec![
         Workspace {
