@@ -7,14 +7,6 @@ interface ApiResponse<T> {
   data: T;
 }
 
-interface WorkspaceData {
-  id: string;
-  name: string;
-  description: string | null;
-  created_at: string;
-  role: string;
-}
-
 interface ExperimentData {
   id: string;
   name: string;
@@ -53,11 +45,9 @@ export const load: LayoutServerLoad = async ({ locals }) => {
   const timer = startTimer("workspaces.load", { requestId });
 
   try {
-    // Use the new optimized dashboard endpoint
-    const dashboardResponse =
-      await locals.apiClient.get<ApiResponse<DashboardOverview>>(
-        "/api/dashboard/overview",
-      );
+    const dashboardResponse = await locals.apiClient.get<
+      ApiResponse<DashboardOverview>
+    >("/api/dashboard/overview");
 
     if (dashboardResponse.status !== 200) {
       error(500, "Failed to fetch dashboard overview");
