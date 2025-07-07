@@ -13,27 +13,12 @@
   import { Plus } from "@lucide/svelte";
   import { onMount } from "svelte";
 
-  // Mock data for now - will be replaced with Rust backend data
-  let currentWorkspace = $state({
-    id: "1",
-    name: "ML Research",
-    description: "Machine learning experiments and research",
-    role: "OWNER"
-  });
+  import type { Experiment } from "$lib/types";
 
-  let experiments = $state([
-    {
-      id: "exp_1",
-      name: "Baseline Model",
-      description: "Initial baseline experiment",
-      hyperparams: [],
-      tags: ["baseline", "initial"],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      availableMetrics: ["accuracy", "loss"],
-      workspaceId: "1"
-    }
-  ]);
+  let { data } = $props();
+
+  let currentWorkspace = $derived(data.currentWorkspace);
+  let experiments: Experiment[] = $derived(data.experiments || []);
   let searchQuery = $state("");
   let copiedId = $state(false);
   let createExperimentModal = $derived(getCreateExperimentModal());
@@ -46,7 +31,7 @@
         exp,
         name: exp.name.toLowerCase(),
         desc: exp.description?.toLowerCase() ?? "",
-        tags: exp.tags?.map((t) => t.toLowerCase()) ?? [],
+        tags: exp.tags?.map((t: string) => t.toLowerCase()) ?? [],
       }))
       .filter((entry) => {
         const q = searchQuery.toLowerCase();
@@ -102,7 +87,9 @@
     onDelete={async (experimentId) => {
       // This would need to be implemented with a server action
       // For now, just throw an error to indicate it needs implementation
-      throw new Error("Delete experiment functionality needs to be implemented with server actions");
+      throw new Error(
+        "Delete experiment functionality needs to be implemented with server actions",
+      );
     }}
   />
 {/if}
@@ -124,7 +111,7 @@
       ></div>
       <div class="min-w-0 flex-1 py-1">
         <h1 class="text-lg md:text-xl text-ctp-text truncate font-mono">
-          {currentWorkspace?.name || "Workspace"}
+          {currentWorkspace?.name || "Loading..."}
         </h1>
         <div class="text-sm text-ctp-subtext0 space-y-1">
           <div>

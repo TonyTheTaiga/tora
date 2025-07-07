@@ -8,26 +8,11 @@
   import RecentActivity from "$lib/components/recent-activity.svelte";
   import { onMount } from "svelte";
 
-  // Mock data for now - will be replaced with Rust backend data
-  let workspaces = $state([
-    {
-      id: "1",
-      name: "ML Research",
-      description: "Machine learning experiments and research",
-      createdAt: new Date(),
-      role: "OWNER",
-    },
-    {
-      id: "2",
-      name: "NLP Project",
-      description: "Natural language processing experiments",
-      createdAt: new Date(),
-      role: "ADMIN",
-    },
-  ]);
+  let { data } = $props();
+  let { workspaces } = $derived(data);
 
-  let recentExperiments = $state([]);
-  let recentWorkspaces = $state(workspaces);
+  let recentExperiments = $derived(data.recentExperiments || []);
+  let recentWorkspaces = $derived(data.recentWorkspaces);
   let searchQuery = $state("");
 
   let filteredWorkspaces = $derived(
@@ -60,11 +45,6 @@
     };
   });
 </script>
-
-<svelte:head>
-  <title>Tora - Workspaces</title>
-  <meta name="description" content="High-performance experiment tracking" />
-</svelte:head>
 
 {#if createWorkspaceModal}
   <CreateWorkspaceModal />

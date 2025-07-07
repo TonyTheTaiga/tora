@@ -16,7 +16,7 @@ mod invitation;
 mod metric;
 mod user;
 
-pub fn api_routes() -> Router {
+pub fn api_routes() -> Router<sqlx::PgPool> {
     let protected_routes = Router::new()
         // Workspaces
         .route(
@@ -42,6 +42,10 @@ pub fn api_routes() -> Router {
         .route(
             "/workspaces/{id}/members",
             protected_route(get(crate::repos::workspace::get_workspace_members)),
+        )
+        .route(
+            "/workspaces/{id}/experiments",
+            protected_route(get(experiment::list_workspace_experiments)),
         )
         // Experiments
         .route(
