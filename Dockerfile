@@ -28,6 +28,6 @@ ENV RUST_LOG=info
 ENV RUST_BACKTRACE=1
 ENV STATIC_FILES_PATH=./static
 ENV REDIRECT_URL_CONFIRM="https://tora-rust-1030250455947.us-central1.run.app"
-ENV RUST_ENV="production"
+ENV RUST_ENV="dev"
 CMD ["./api"]
 STOPSIGNAL SIGTERM

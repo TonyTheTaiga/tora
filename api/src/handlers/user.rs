@@ -7,6 +7,7 @@ use axum::{
     response::{IntoResponse, Redirect},
 };
 use axum_extra::extract::cookie::{Cookie, SameSite};
+use base64::prelude::*;
 use supabase_auth::models::{AuthClient, VerifyOtpParams, VerifyTokenHashParams};
 
 fn create_client() -> AuthClient {
@@ -59,9 +60,22 @@ pub async fn login(Json(payload): Json<ntypes::LoginParams>) -> impl IntoRespons
         .login_with_email(&payload.email, &payload.password)
         .await
         .expect("Failed to login user! Double check password and email.");
+
+    let session_payload = serde_json::json!({
+        "access_token": session.access_token,
+        "token_type": "bearer",
+        "expires_in": session.expires_in,
+        "expires_at": session.expires_at,
+        "refresh_token": session.refresh_token,
+        "user": session.user
+    });
+
+    let payload_json = serde_json::to_string(&session_payload).unwrap();
+    let payload_base64 = BASE64_STANDARD.encode(payload_json.as_bytes());
+
     let is_production =
         std::env::var("RUST_ENV").unwrap_or_else(|_| "development".to_string()) == "production";
-    let cookie = Cookie::build(("tora_auth_token", session.refresh_token.clone()))
+    let cookie = Cookie::build(("tora_auth_token", payload_base64))
         .http_only(true)
         .secure(is_production)
         .same_site(SameSite::Lax)

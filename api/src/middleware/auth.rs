@@ -2,16 +2,19 @@ use crate::ntypes;
 use axum::{
     Json,
     extract::Request,
-    http::{HeaderMap, StatusCode},
+    http::{HeaderMap, StatusCode, header::SET_COOKIE},
     middleware::{self, Next},
     response::{IntoResponse, Redirect, Response},
     routing::MethodRouter,
 };
 use axum_extra::extract::CookieJar;
+use axum_extra::extract::cookie::{Cookie, SameSite};
+use base64::prelude::*;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use sqlx::PgPool;
 use std::env;
+use std::time::{SystemTime, UNIX_EPOCH};
 use supabase_auth::models::{AuthClient, User};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -19,6 +22,16 @@ pub struct AuthenticatedUser {
     pub id: String,
     pub email: String,
     pub refresh_token: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct TokenPayload {
+    pub access_token: String,
+    pub token_type: String,
+    pub expires_in: u64,
+    pub expires_at: i64,
+    pub refresh_token: String,
+    pub user: User,
 }
 
 impl AuthenticatedUser {
@@ -56,7 +69,6 @@ pub async fn auth_middleware(
     mut req: Request,
     next: Next,
 ) -> Result<Response, AuthError> {
-    // check api key in headers first
     if let Some(api_key) = extract_api_key(&headers) {
         match validate_api_key(&api_key).await {
             Ok(authenticated_user) => {
@@ -67,29 +79,120 @@ pub async fn auth_middleware(
         }
     }
 
-    // check for valid token in http cookies
     if let Some(cookie) = jar.get("tora_auth_token") {
-        let token = cookie.value();
-
+        let token_b64 = cookie.value();
         let auth_client = AuthClient::new_from_env().map_err(|e| AuthError {
             message: format!("Failed to create auth client: {e}"),
             status_code: StatusCode::INTERNAL_SERVER_ERROR,
         })?;
 
-        let user = auth_client.get_user(token).await.map_err(|e| AuthError {
-            message: format!("Invalid or expired token: {e}"),
-            status_code: StatusCode::UNAUTHORIZED,
-        })?;
+        match decode_and_validate_token(token_b64, &auth_client).await {
+            Ok(payload) => {
+                let authenticated_user =
+                    AuthenticatedUser::new(payload.user.clone(), payload.refresh_token.clone());
+                req.extensions_mut().insert(authenticated_user);
 
-        let authenticated_user = AuthenticatedUser::new(user, token.to_string());
-        req.extensions_mut().insert(authenticated_user);
-        return Ok(next.run(req).await);
+                let current_time = SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs();
+
+                if current_time as i64 >= payload.expires_at - 300 {
+                    let new_payload = serde_json::json!({
+                        "access_token": payload.access_token,
+                        "token_type": "bearer",
+                        "expires_in": payload.expires_in,
+                        "expires_at": payload.expires_at,
+                        "refresh_token": payload.refresh_token,
+                        "user": payload.user
+                    });
+
+                    let payload_json = serde_json::to_string(&new_payload).unwrap();
+                    let payload_base64 = BASE64_STANDARD.encode(payload_json.as_bytes());
+
+                    let is_production = std::env::var("RUST_ENV")
+                        .unwrap_or_else(|_| "development".to_string())
+                        == "production";
+                    let cookie = Cookie::build(("tora_auth_token", payload_base64))
+                        .http_only(true)
+                        .secure(is_production)
+                        .same_site(SameSite::Lax)
+                        .path("/");
+
+                    let mut response = next.run(req).await;
+                    response
+                        .headers_mut()
+                        .insert(SET_COOKIE, cookie.to_string().parse().unwrap());
+                    return Ok(response);
+                }
+
+                return Ok(next.run(req).await);
+            }
+            Err(auth_error) => {
+                if auth_error.status_code == StatusCode::UNAUTHORIZED {
+                    return Err(auth_error);
+                }
+                return Err(auth_error);
+            }
+        }
     }
 
     Err(AuthError {
         message: "Missing authentication credentials".to_string(),
         status_code: StatusCode::UNAUTHORIZED,
     })
+}
+
+async fn decode_and_validate_token(
+    token_b64: &str,
+    auth_client: &AuthClient,
+) -> Result<TokenPayload, AuthError> {
+    let token_json = BASE64_STANDARD.decode(token_b64).map_err(|e| AuthError {
+        message: format!("Invalid token format: {e}"),
+        status_code: StatusCode::UNAUTHORIZED,
+    })?;
+
+    let token_str = String::from_utf8(token_json).map_err(|e| AuthError {
+        message: format!("Invalid token encoding: {e}"),
+        status_code: StatusCode::UNAUTHORIZED,
+    })?;
+
+    let mut payload: TokenPayload = serde_json::from_str(&token_str).map_err(|e| AuthError {
+        message: format!("Invalid token payload: {e}"),
+        status_code: StatusCode::UNAUTHORIZED,
+    })?;
+
+    let current_time = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+
+    if current_time as i64 >= payload.expires_at {
+        match auth_client.refresh_session(&payload.refresh_token).await {
+            Ok(new_session) => {
+                payload.access_token = new_session.access_token;
+                payload.expires_at = new_session.expires_at as i64;
+                payload.expires_in = new_session.expires_in as u64;
+                payload.refresh_token = new_session.refresh_token;
+                payload.user = new_session.user;
+                Ok(payload)
+            }
+            Err(e) => Err(AuthError {
+                message: format!("Failed to refresh token: {e}"),
+                status_code: StatusCode::UNAUTHORIZED,
+            }),
+        }
+    } else {
+        let user = auth_client
+            .get_user(&payload.access_token)
+            .await
+            .map_err(|e| AuthError {
+                message: format!("Invalid access token: {e}"),
+                status_code: StatusCode::UNAUTHORIZED,
+            })?;
+        payload.user = user;
+        Ok(payload)
+    }
 }
 
 async fn create_db_pool() -> Result<PgPool, sqlx::Error> {
@@ -193,14 +296,37 @@ pub async fn ui_auth_middleware(
 
     let protected_paths = ["/settings", "/app"];
     if protected_paths.iter().any(|p| path.starts_with(p)) {
-        if let Some(token) = jar.get("tora_auth_token") {
+        if let Some(cookie) = jar.get("tora_auth_token") {
             if let Ok(auth_client) = AuthClient::new_from_env() {
-                if auth_client.get_user(token.value()).await.is_ok() {
+                if let Ok(_payload) = decode_and_validate_token(cookie.value(), &auth_client).await
+                {
                     return Ok(next.run(req).await);
                 }
             }
         }
         return Ok(Redirect::to("/login").into_response());
+    }
+
+    Ok(next.run(req).await)
+}
+
+pub async fn redirect_if_authenticated_middleware(
+    jar: CookieJar,
+    req: Request,
+    next: Next,
+) -> Result<Response, Response> {
+    let path = req.uri().path();
+
+    let auth_paths = ["/", "/login", "/signup"];
+    if auth_paths.iter().any(|p| path.starts_with(p)) {
+        if let Some(cookie) = jar.get("tora_auth_token") {
+            if let Ok(auth_client) = AuthClient::new_from_env() {
+                if let Ok(_payload) = decode_and_validate_token(cookie.value(), &auth_client).await
+                {
+                    return Ok(Redirect::to("/app").into_response());
+                }
+            }
+        }
     }
 
     Ok(next.run(req).await)
