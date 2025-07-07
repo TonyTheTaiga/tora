@@ -2,7 +2,7 @@
   import { Plus, LogOut, Trash2, Users, Check, X } from "@lucide/svelte";
   import WorkspaceInviteModal from "./workspace-invite-modal.svelte";
   import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
-  import { apiClient } from "$lib/api";
+  import { enhance } from "$app/forms";
 
   let { data } = $props();
 
@@ -23,107 +23,109 @@
     inviteModalOpen = true;
   }
 
-  async function sendInvitation(email: string, roleId: string) {
+  function sendInvitation(email: string, roleId: string) {
     if (!workspaceToInvite || !data.user) return;
 
-    try {
-      await apiClient.post("/api/workspace-invitations", {
-        workspaceId: workspaceToInvite.id,
-        email,
-        roleId,
-      });
-
-      inviteModalOpen = false;
-      workspaceToInvite = null;
-    } catch (error) {
-      console.error("Failed to send invitation:", error);
-    }
+    // Create and submit form programmatically
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '?/sendInvitation';
+    
+    const workspaceIdInput = document.createElement('input');
+    workspaceIdInput.type = 'hidden';
+    workspaceIdInput.name = 'workspaceId';
+    workspaceIdInput.value = workspaceToInvite.id;
+    form.appendChild(workspaceIdInput);
+    
+    const emailInput = document.createElement('input');
+    emailInput.type = 'hidden';
+    emailInput.name = 'email';
+    emailInput.value = email;
+    form.appendChild(emailInput);
+    
+    const roleIdInput = document.createElement('input');
+    roleIdInput.type = 'hidden';
+    roleIdInput.name = 'roleId';
+    roleIdInput.value = roleId;
+    form.appendChild(roleIdInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+    
+    inviteModalOpen = false;
+    workspaceToInvite = null;
   }
 
-  async function createWorkspace(event: SubmitEvent) {
-    event.preventDefault();
-    const form = event.target as HTMLFormElement;
-    const formData = new FormData(form);
-
-    try {
-      await apiClient.post("/api/workspaces", {
-        name: formData.get("name"),
-        description: formData.get("description"),
-      });
-
-      window.location.reload();
-    } catch (error) {
-      console.error("Failed to create workspace:", error);
-    }
-  }
-
-  async function deleteWorkspace(workspaceId: string) {
+  function deleteWorkspace(workspaceId: string) {
     if (!confirm("Are you sure you want to delete this workspace?")) return;
 
-    try {
-      await apiClient.delete(`/api/workspaces/${workspaceId}`);
-      window.location.reload();
-    } catch (error) {
-      console.error("Failed to delete workspace:", error);
-    }
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '?/deleteWorkspace';
+    
+    const workspaceIdInput = document.createElement('input');
+    workspaceIdInput.type = 'hidden';
+    workspaceIdInput.name = 'workspaceId';
+    workspaceIdInput.value = workspaceId;
+    form.appendChild(workspaceIdInput);
+    
+    document.body.appendChild(form);
+    form.submit();
   }
 
-  async function leaveWorkspace(workspaceId: string) {
+  function leaveWorkspace(workspaceId: string) {
     if (!confirm("Are you sure you want to leave this workspace?")) return;
 
-    try {
-      await apiClient.post(`/api/workspaces/${workspaceId}/leave`);
-      window.location.reload();
-    } catch (error) {
-      console.error("Failed to leave workspace:", error);
-    }
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '?/leaveWorkspace';
+    
+    const workspaceIdInput = document.createElement('input');
+    workspaceIdInput.type = 'hidden';
+    workspaceIdInput.name = 'workspaceId';
+    workspaceIdInput.value = workspaceId;
+    form.appendChild(workspaceIdInput);
+    
+    document.body.appendChild(form);
+    form.submit();
   }
 
-  async function createApiKey(event: SubmitEvent) {
-    event.preventDefault();
-    const form = event.target as HTMLFormElement;
-    const formData = new FormData(form);
-
-    try {
-      const result = await apiClient.post<{ data: { key: string } }>("/api/api-keys", {
-        name: formData.get("name"),
-      });
-      
-      if (result.data && result.data.key) {
-        createdKey = result.data.key;
-      }
-      form.reset();
-    } catch (error) {
-      console.error("Failed to create API key:", error);
-    }
-  }
-
-  async function revokeApiKey(keyId: string) {
+  function revokeApiKey(keyId: string) {
     if (!confirm("Are you sure you want to revoke this API key?")) return;
 
-    try {
-      await apiClient.delete(`/api/api-keys/${keyId}`);
-      window.location.reload();
-    } catch (error) {
-      console.error("Failed to revoke API key:", error);
-    }
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '?/revokeApiKey';
+    
+    const keyIdInput = document.createElement('input');
+    keyIdInput.type = 'hidden';
+    keyIdInput.name = 'keyId';
+    keyIdInput.value = keyId;
+    form.appendChild(keyIdInput);
+    
+    document.body.appendChild(form);
+    form.submit();
   }
 
-  async function respondToInvitation(invitationId: string, accept: boolean) {
-    try {
-      await apiClient.put(
-        `/api/workspaces/any/invitations?invitationId=${invitationId}&action=${accept ? "accept" : "deny"}`,
-      );
-
-      pendingInvitations = pendingInvitations.filter(
-        (inv: any) => inv.id !== invitationId,
-      );
-      if (accept) {
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error("Failed to respond to invitation:", error);
-    }
+  function respondToInvitation(invitationId: string, accept: boolean) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '?/respondToInvitation';
+    
+    const invitationIdInput = document.createElement('input');
+    invitationIdInput.type = 'hidden';
+    invitationIdInput.name = 'invitationId';
+    invitationIdInput.value = invitationId;
+    form.appendChild(invitationIdInput);
+    
+    const actionInput = document.createElement('input');
+    actionInput.type = 'hidden';
+    actionInput.name = 'action';
+    actionInput.value = accept ? 'accept' : 'deny';
+    form.appendChild(actionInput);
+    
+    document.body.appendChild(form);
+    form.submit();
   }
 </script>
 
@@ -205,7 +207,9 @@
       <!-- Create workspace form -->
       <div class="border border-ctp-surface0/20 p-3 mb-4">
         <form
-          onsubmit={createWorkspace}
+          method="POST"
+          action="?/createWorkspace"
+          use:enhance
           class="space-y-3"
         >
           <div class="space-y-2">
@@ -373,7 +377,16 @@
       <!-- Create API key form -->
       <div class="border border-ctp-surface0/20 p-3 mb-4">
         <form
-          onsubmit={createApiKey}
+          method="POST"
+          action="?/createApiKey"
+          use:enhance={() => {
+            return async ({ result, update }) => {
+              if (result.type === 'success' && result.data?.key) {
+                createdKey = result.data.key as string;
+              }
+              await update({ reset: true });
+            };
+          }}
           class="space-y-3"
         >
           <div class="flex gap-2">
@@ -460,5 +473,6 @@
 <WorkspaceInviteModal
   bind:isOpen={inviteModalOpen}
   workspace={workspaceToInvite}
+  workspaceRoles={data.workspaceRoles || []}
   onInvite={sendInvitation}
 />

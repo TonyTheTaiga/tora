@@ -1,51 +1,31 @@
 <script lang="ts">
   import { Users } from "@lucide/svelte";
-  import { apiClient } from "$lib/api";
 
   let {
     isOpen = $bindable(false),
     workspace,
     onInvite,
+    workspaceRoles = [],
   }: {
     isOpen: boolean;
     workspace: any;
-    onInvite: (email: string, roleId: string) => Promise<void>;
+    onInvite: (email: string, roleId: string) => void;
+    workspaceRoles: Array<{ id: string; name: string }>;
   } = $props();
 
-  let workspaceRoles = $state<Array<{ id: string; name: string }>>([]);
-  let loading = $state(false);
-
-  async function loadRoles() {
-    if (!isOpen) return;
-
-    loading = true;
-    try {
-      workspaceRoles = await apiClient.get("/api/workspace-roles");
-    } catch (error) {
-      console.error("Failed to load roles:", error);
-    } finally {
-      loading = false;
-    }
-  }
-
-  $effect(() => {
-    if (isOpen) {
-      loadRoles();
-    }
-  });
 
   function closeModal() {
     isOpen = false;
   }
 
-  async function handleSubmit(e: Event) {
+  function handleSubmit(e: Event) {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const email = formData.get("email");
     const roleId = formData.get("roleId");
 
     if (email && roleId) {
-      await onInvite(email.toString(), roleId.toString());
+      onInvite(email.toString(), roleId.toString());
       closeModal();
     }
   }
@@ -65,13 +45,6 @@
         </h3>
       </div>
 
-      {#if loading}
-        <div class="flex items-center justify-center py-8">
-          <div
-            class="w-6 h-6 border-2 border-ctp-blue/30 border-t-ctp-blue rounded-full animate-spin"
-          ></div>
-        </div>
-      {:else}
         <form onsubmit={handleSubmit}>
           <div class="space-y-4">
             <div>
@@ -126,7 +99,6 @@
             </button>
           </div>
         </form>
-      {/if}
     </div>
   </div>
 {/if}

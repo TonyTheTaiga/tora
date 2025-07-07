@@ -6,12 +6,17 @@ export class ApiClient {
   private baseUrl: string;
   private accessToken?: string;
 
-  constructor(baseUrl?: string) {
+  constructor(baseUrl?: string, accessToken?: string) {
     this.baseUrl = baseUrl || API_BASE_URL;
+    this.accessToken = accessToken;
   }
 
   setAccessToken(token: string | null) {
     this.accessToken = token || undefined;
+  }
+
+  hasElevatedPermissions(): boolean {
+    return !!this.accessToken;
   }
 
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -67,5 +72,3 @@ export class ApiClient {
     return this.request<T>(endpoint, { method: "DELETE" });
   }
 }
-
-export const apiClient = new ApiClient();

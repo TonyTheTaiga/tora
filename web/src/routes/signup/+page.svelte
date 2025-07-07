@@ -1,33 +1,12 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { User, Mail, Lock, LogIn, Loader2 } from "@lucide/svelte";
-  import { apiClient } from "$lib/api";
+  import { enhance } from "$app/forms";
+
+  let { form } = $props();
 
   let submitting = $state(false);
   let submitted = $state(false);
-  let error = $state("");
-
-  async function handleSubmit(event: SubmitEvent) {
-    event.preventDefault();
-    submitting = true;
-    error = "";
-
-    const form = event.target as HTMLFormElement;
-    const formData = new FormData(form);
-
-    try {
-      const result = await apiClient.post("/api/signup", {
-        email: formData.get("email"),
-        password: formData.get("password"),
-      });
-
-      submitted = true;
-    } catch (err: any) {
-      error = err.message || "Network error";
-    } finally {
-      submitting = false;
-    }
-  }
 </script>
 
 {#if !submitted}
@@ -50,10 +29,18 @@
         <form
           method="POST"
           autocomplete="on"
-          action="/api/signup"
           name="login-form"
           class="p-6 space-y-5"
-          onsubmit={handleSubmit}
+          use:enhance={({ submitter }) => {
+            submitting = true;
+            return async ({ result, update }) => {
+              submitting = false;
+              if (result.type === 'success') {
+                submitted = true;
+              }
+              await update();
+            };
+          }}
         >
           <!-- Email field -->
           <div class="space-y-2">
@@ -103,11 +90,11 @@
           </div>
 
           <!-- Error message -->
-          {#if error}
+          {#if form?.error}
             <div
               class="text-sm text-ctp-red bg-ctp-red/10 border border-ctp-red/20 p-3"
             >
-              {error}
+              {form.error}
             </div>
           {/if}
 

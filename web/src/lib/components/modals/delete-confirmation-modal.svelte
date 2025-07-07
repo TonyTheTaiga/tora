@@ -3,14 +3,15 @@
   import { AlertTriangle, X, Loader2 } from "@lucide/svelte";
   import { onMount, onDestroy } from "svelte";
   import { closeDeleteExperimentModal } from "$lib/state/app.svelte.js";
-  import { apiClient } from "$lib/api";
 
   let {
     experiment,
     experiments = $bindable(),
+    onDelete,
   }: {
     experiment: Experiment;
     experiments: Experiment[];
+    onDelete: (experimentId: string) => Promise<void>;
   } = $props();
 
   let isDeleting = $state(false);
@@ -29,7 +30,7 @@
     isDeleting = true;
 
     try {
-      await apiClient.delete(`/api/experiments/${experiment.id}`);
+      await onDelete(experiment.id);
       
       const experimentId = experiment.id;
       experiments = experiments.filter((exp) => exp.id !== experimentId);

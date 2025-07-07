@@ -1,6 +1,5 @@
 import { redirect, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
-import { apiClient } from "$lib/api";
 import { dev } from "$app/environment";
 import type { SessionData } from "$lib/types";
 
@@ -10,7 +9,7 @@ type LoginResponse = {
 };
 
 export const actions: Actions = {
-  default: async ({ request, cookies }) => {
+  default: async ({ request, cookies, locals }) => {
     const data = await request.formData();
     const email = data.get("email") as string;
     const password = data.get("password") as string;
@@ -20,7 +19,7 @@ export const actions: Actions = {
       });
     }
 
-    const response = await apiClient.post<LoginResponse>("/api/login", {
+    const response = await locals.apiClient.post<LoginResponse>("/api/login", {
       email,
       password,
     });
