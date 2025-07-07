@@ -85,9 +85,9 @@ pub async fn list_experiments(
         };
 
         // List experiments for a specific workspace
-        sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>)>(
+        sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String)>(
             r#"
-            SELECT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at
+            SELECT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text
             FROM experiment e
             JOIN workspace_experiments we ON e.id = we.experiment_id
             JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
@@ -101,9 +101,9 @@ pub async fn list_experiments(
         .await
     } else {
         // List all experiments the user has access to
-        sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>)>(
+        sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String)>(
             r#"
-            SELECT DISTINCT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at
+            SELECT DISTINCT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text
             FROM experiment e
             JOIN workspace_experiments we ON e.id = we.experiment_id
             JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
@@ -121,7 +121,7 @@ pub async fn list_experiments(
             let experiments: Vec<Experiment> = rows
                 .into_iter()
                 .map(
-                    |(id, name, description, hyperparams, tags, created_at, updated_at)| {
+                    |(id, name, description, hyperparams, tags, created_at, updated_at, workspace_id)| {
                         Experiment {
                             id,
                             name,
@@ -131,7 +131,7 @@ pub async fn list_experiments(
                             created_at,
                             updated_at,
                             available_metrics: vec![], // TODO: Fetch from metrics table
-                            workspace_id: query.workspace.clone(),
+                            workspace_id: Some(workspace_id),
                         }
                     },
                 )

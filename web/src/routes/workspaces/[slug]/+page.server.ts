@@ -23,6 +23,7 @@ interface ExperimentData {
   updated_at: string;
   tags: string[];
   hyperparams: any[];
+  workspace_id: string;
 }
 
 export const load: PageServerLoad = async ({ locals, params, parent }) => {

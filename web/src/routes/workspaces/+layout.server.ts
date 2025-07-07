@@ -23,6 +23,7 @@ interface ExperimentData {
   updated_at: string;
   tags: string[];
   hyperparams: any[];
+  workspace_id: string;
 }
 
 export const load: LayoutServerLoad = async ({ locals }) => {
@@ -56,11 +57,36 @@ export const load: LayoutServerLoad = async ({ locals }) => {
       role: workspace.role,
     }));
 
-    // TODO: Implement experiments fetching when the endpoint is ready
-    const recentExperiments: any[] = [];
+    // Fetch recent experiments across all workspaces
+    let recentExperiments: any[] = [];
+    try {
+      const experimentsResponse = await locals.apiClient.get<ApiResponse<ExperimentData[]>>("/api/experiments");
+      
+      if (experimentsResponse.status === 200) {
+        const rawExperiments = experimentsResponse.data || [];
+        recentExperiments = rawExperiments
+          .map(exp => ({
+            id: exp.id,
+            name: exp.name,
+            description: exp.description || "",
+            hyperparams: exp.hyperparams || [],
+            tags: exp.tags || [],
+            createdAt: new Date(exp.created_at),
+            updatedAt: new Date(exp.updated_at),
+            availableMetrics: [], // TODO: Implement when metrics API is ready
+            workspaceId: exp.workspace_id
+          }))
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+          .slice(0, 10); // Get 10 most recent experiments
+      }
+    } catch (expErr) {
+      console.error("Error fetching recent experiments:", expErr);
+      // Don't fail the whole page if experiments fail to load
+    }
 
     timer.end({
       workspaces_count: workspaces.length,
+      recent_experiments_count: recentExperiments.length,
       user_id: locals.session.user.id,
     });
 
