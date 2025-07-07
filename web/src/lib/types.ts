@@ -56,18 +56,6 @@ export interface PendingInvitation {
   createdAt: Date;
 }
 
-export function isWorkspace(obj: unknown): obj is Workspace {
-  if (typeof obj !== "object" || obj === null) return false;
-  const w = obj as Record<string, unknown>;
-  return (
-    typeof w.id === "string" &&
-    typeof w.role === "string" &&
-    typeof w.name === "string" &&
-    (typeof w.description === "string" || w.description === null) &&
-    typeof w.createdAt === "string"
-  );
-}
-
 export interface ApiKey {
   id: string;
   key?: string;
@@ -75,4 +63,15 @@ export interface ApiKey {
   createdAt: Date;
   lastUsed: Date;
   revoked: boolean;
+}
+
+export interface SessionData {
+  access_token: string;
+  expires_in: number;
+  expires_at: number;
+  refresh_token: string;
+  user: {
+    id: string;
+    email: string;
+  };
 }

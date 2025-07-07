@@ -30,9 +30,8 @@
         use:enhance={() => {
           submitting = true;
           return async ({ update, result }) => {
+            submitting = false;
             if (result.type === "redirect") {
-              await update();
-              submitting = false;
               goto(result.location);
             }
           };

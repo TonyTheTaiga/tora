@@ -286,52 +286,6 @@ async fn validate_api_key(api_key: &str) -> Result<AuthenticatedUser, AuthError>
     }
 }
 
-pub async fn ui_auth_middleware(
-    jar: CookieJar,
-    req: Request,
-    next: Next,
-) -> Result<Response, Response> {
-    let path = req.uri().path();
-    println!("path to navigate to {path}");
-
-    let protected_paths = ["/settings", "/app"];
-    if protected_paths.iter().any(|p| path.starts_with(p)) {
-        if let Some(cookie) = jar.get("tora_auth_token") {
-            if let Ok(auth_client) = AuthClient::new_from_env() {
-                if let Ok(_payload) = decode_and_validate_token(cookie.value(), &auth_client).await
-                {
-                    return Ok(next.run(req).await);
-                }
-            }
-        }
-        return Ok(Redirect::to("/login").into_response());
-    }
-
-    Ok(next.run(req).await)
-}
-
-pub async fn redirect_if_authenticated_middleware(
-    jar: CookieJar,
-    req: Request,
-    next: Next,
-) -> Result<Response, Response> {
-    let path = req.uri().path();
-
-    let auth_paths = ["/", "/login", "/signup"];
-    if auth_paths.iter().any(|p| path.starts_with(p)) {
-        if let Some(cookie) = jar.get("tora_auth_token") {
-            if let Ok(auth_client) = AuthClient::new_from_env() {
-                if let Ok(_payload) = decode_and_validate_token(cookie.value(), &auth_client).await
-                {
-                    return Ok(Redirect::to("/workspaces").into_response());
-                }
-            }
-        }
-    }
-
-    Ok(next.run(req).await)
-}
-
 pub fn protected_route<T>(method_router: MethodRouter<T>) -> MethodRouter<T>
 where
     T: Clone + Send + Sync + 'static,
