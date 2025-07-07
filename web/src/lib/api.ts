@@ -4,20 +4,29 @@ const API_BASE_URL = env.PUBLIC_API_BASE_URL || "http://localhost:8080";
 
 export class ApiClient {
   private baseUrl: string;
+  private accessToken?: string;
 
   constructor(baseUrl?: string) {
     this.baseUrl = baseUrl || API_BASE_URL;
   }
 
+  setAccessToken(token: string | null) {
+    this.accessToken = token || undefined;
+  }
+
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 
+    const headers = new Headers(options.headers);
+    headers.set("Content-Type", "application/json");
+
+    if (this.accessToken) {
+      headers.set("Authorization", `Bearer ${this.accessToken}`);
+    }
+
     const defaultOptions: RequestInit = {
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
+      headers,
     };
 
     const response = await fetch(url, { ...defaultOptions, ...options });
