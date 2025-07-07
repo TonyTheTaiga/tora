@@ -10,14 +10,30 @@
   import EditExperimentModal from "$lib/components/modals/edit-experiment-modal.svelte";
   import ExperimentsListMobile from "./experiments-list-mobile.svelte";
   import ExperimentsListDesktop from "./experiments-list-desktop.svelte";
-  import { Plus } from "lucide-svelte";
+  import { Plus } from "@lucide/svelte";
   import { onMount } from "svelte";
 
-  let { data = $bindable() } = $props();
-  let { currentWorkspace } = $derived(data);
-  $inspect(currentWorkspace);
+  // Mock data for now - will be replaced with Rust backend data
+  let currentWorkspace = $state({
+    id: "1",
+    name: "ML Research",
+    description: "Machine learning experiments and research",
+    role: "OWNER"
+  });
 
-  let experiments = $state(data.experiments);
+  let experiments = $state([
+    {
+      id: "exp_1",
+      name: "Baseline Model",
+      description: "Initial baseline experiment",
+      hyperparams: [],
+      tags: ["baseline", "initial"],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      availableMetrics: ["accuracy", "loss"],
+      workspaceId: "1"
+    }
+  ]);
   let searchQuery = $state("");
   let copiedId = $state(false);
   let createExperimentModal = $derived(getCreateExperimentModal());
@@ -72,9 +88,7 @@
     };
   });
 
-  $effect(() => {
-    experiments = data.experiments;
-  });
+  // No longer needed - using static mock data
 </script>
 
 {#if createExperimentModal}

@@ -4,13 +4,16 @@
 
   let submitting = $state(false);
   let submitted = $state(false);
-  let submitFailed = $state(false);
+  let error = $state("");
 
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
     submitting = true;
+    error = "";
+
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
+
     try {
       const response = await fetch("/api/signup", {
         method: "POST",
@@ -21,16 +24,18 @@
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
       });
+
       const result = await response.json();
-      if (result.status === 201) {
+
+      if (response.ok) {
         submitted = true;
       } else {
-        submitted = true;
-        submitFailed = true;
+        error = result.message || "Signup failed";
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
+    } catch (err) {
+      error = "Network error";
     } finally {
       submitting = false;
     }
@@ -109,6 +114,15 @@
             </div>
           </div>
 
+          <!-- Error message -->
+          {#if error}
+            <div
+              class="text-sm text-ctp-red bg-ctp-red/10 border border-ctp-red/20 p-3"
+            >
+              {error}
+            </div>
+          {/if}
+
           <!-- Button actions -->
           <div class="pt-2">
             <button
@@ -145,16 +159,10 @@
       </div>
     </div>
   </div>
-{:else if !submitFailed}
-  <div
-    class="h-full flex justify-center items-center text-center text-ctp-text"
-  >
-    <p>Check your inbox for a confirmation email.</p>
-  </div>
 {:else}
   <div
     class="h-full flex justify-center items-center text-center text-ctp-text"
   >
-    <p>Something went wrong!</p>
+    <p>Check your inbox for a confirmation email.</p>
   </div>
 {/if}

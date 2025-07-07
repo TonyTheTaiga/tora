@@ -244,7 +244,7 @@ async fn validate_api_key(api_key: &str) -> Result<AuthenticatedUser, AuthError>
 
     let record = sqlx::query_as::<_, ntypes::ApiKeyRecord>(
         r#"
-        SELECT 
+        SELECT
             ak.id::text,
             ak.user_id::text,
             ak.name,
@@ -323,7 +323,7 @@ pub async fn redirect_if_authenticated_middleware(
             if let Ok(auth_client) = AuthClient::new_from_env() {
                 if let Ok(_payload) = decode_and_validate_token(cookie.value(), &auth_client).await
                 {
-                    return Ok(Redirect::to("/app").into_response());
+                    return Ok(Redirect::to("/workspaces").into_response());
                 }
             }
         }

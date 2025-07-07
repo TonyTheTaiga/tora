@@ -2,14 +2,32 @@
   import {
     openCreateWorkspaceModal,
     getCreateWorkspaceModal,
-  } from "$lib/state/app.svelte";
+  } from "$lib/state/app.svelte.js";
   import CreateWorkspaceModal from "./create-workspace-modal.svelte";
-  import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
+  import WorkspaceRoleBadge from "$lib/workspace-role-badge.svelte";
   import RecentActivity from "$lib/components/recent-activity.svelte";
   import { onMount } from "svelte";
 
-  let { data } = $props();
-  let { workspaces } = $derived(data);
+  // Mock data for now - will be replaced with Rust backend data
+  let workspaces = $state([
+    {
+      id: "1",
+      name: "ML Research",
+      description: "Machine learning experiments and research",
+      createdAt: new Date(),
+      role: "OWNER",
+    },
+    {
+      id: "2",
+      name: "NLP Project",
+      description: "Natural language processing experiments",
+      createdAt: new Date(),
+      role: "ADMIN",
+    },
+  ]);
+
+  let recentExperiments = $state([]);
+  let recentWorkspaces = $state(workspaces);
   let searchQuery = $state("");
 
   let filteredWorkspaces = $derived(
@@ -42,6 +60,11 @@
     };
   });
 </script>
+
+<svelte:head>
+  <title>Tora - Workspaces</title>
+  <meta name="description" content="High-performance experiment tracking" />
+</svelte:head>
 
 {#if createWorkspaceModal}
   <CreateWorkspaceModal />
@@ -190,8 +213,8 @@
         </div>
         <div class="bg-ctp-surface0/10 p-4 text-sm">
           <RecentActivity
-            experiments={data.recentExperiments}
-            workspaces={data.recentWorkspaces}
+            experiments={recentExperiments}
+            workspaces={recentWorkspaces}
           />
         </div>
       </div>

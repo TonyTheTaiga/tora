@@ -9,7 +9,7 @@
     openEditExperimentModal,
     openDeleteExperimentModal,
   } from "$lib/state/app.svelte.js";
-  import { Tag, Trash2, Edit } from "lucide-svelte";
+  import { Tag, Trash2, Edit } from "@lucide/svelte";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
 

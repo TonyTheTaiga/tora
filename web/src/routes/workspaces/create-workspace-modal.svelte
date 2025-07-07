@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import { closeCreateWorkspaceModal } from "$lib/state/app.svelte";
+  import { closeCreateWorkspaceModal } from "$lib/state/app.svelte.js";
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
 

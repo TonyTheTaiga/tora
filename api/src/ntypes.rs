@@ -44,6 +44,7 @@ pub struct UserInfo {
 }
 
 #[derive(sqlx::FromRow)]
+#[allow(dead_code)]
 pub struct ApiKeyRecord {
     pub id: String,
     pub user_id: String,

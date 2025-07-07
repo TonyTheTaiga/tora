@@ -41,9 +41,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .fallback_service(spa)
         .layer(axum::middleware::from_fn(
             crate::middleware::auth::ui_auth_middleware,
-        ))
-        .layer(axum::middleware::from_fn(
-            crate::middleware::auth::redirect_if_authenticated_middleware,
         ));
 
     let app = Router::new()

@@ -3,25 +3,41 @@
   import { goto } from "$app/navigation";
 
   let submitting = $state(false);
+  let error = $state("");
 
   async function handleSubmit(event: SubmitEvent) {
     event?.preventDefault();
+    submitting = true;
+    error = "";
 
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
-    const response = await fetch("/api/login", {
-      method: "POST",
-      body: JSON.stringify({
-        email: formData.get("email"),
-        password: formData.get("password"),
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-    console.log(await response.json());
-    goto("/");
+
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        body: JSON.stringify({
+          email: formData.get("email"),
+          password: formData.get("password"),
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        goto("/workspaces");
+      } else {
+        error = result.message || "Login failed";
+      }
+    } catch (err) {
+      error = "Network error";
+    } finally {
+      submitting = false;
+    }
   }
 </script>
 
@@ -95,6 +111,15 @@
             />
           </div>
         </div>
+
+        <!-- Error message -->
+        {#if error}
+          <div
+            class="text-sm text-ctp-red bg-ctp-red/10 border border-ctp-red/20 p-3"
+          >
+            {error}
+          </div>
+        {/if}
 
         <!-- Button actions -->
         <div class="pt-2">
