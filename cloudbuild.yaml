@@ -62,6 +62,6 @@ steps:
           --set-env-vars PUBLIC_API_BASE_URL=https://tora-api-1030250455947.us-central1.run.app \
           --port 3000
 
+timeout: "1600s"
 options:
   machineType: "E2_MEDIUM"
-  timeout: "1600s"
