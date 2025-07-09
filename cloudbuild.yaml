@@ -124,8 +124,9 @@ steps:
           done
 
 timeout: "1600s"
+logsBucket: "gs://artifacts.taigaishida-217622.appspot.com/logs"
 options:
   machineType: "E2_HIGHCPU_8"
-  logging: LEGACY
+  logging: GCS_ONLY
   env:
     - "DOCKER_BUILDKIT=1"
