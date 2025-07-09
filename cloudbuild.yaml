@@ -96,7 +96,6 @@ steps:
           --set-env-vars PUBLIC_API_BASE_URL=https://tora-api-1030250455947.us-central1.run.app \
           --port 3000
 
-  # Cleanup (runs after both deployments complete)
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     id: "cleanup"
     waitFor: ["deploy-api", "deploy-web"]
@@ -104,20 +103,28 @@ steps:
     args:
       - "-c"
       - |
-        # Clean up API images (keep 5 most recent, excluding cache)
+        # Clean up API images (keep 3 most recent)
         gcloud artifacts docker images list us-central1-docker.pkg.dev/$PROJECT_ID/tora/api \
-          --filter="NOT tags:cache" \
           --sort-by=~CREATE_TIME --limit=999 --format="value(IMAGE)" | \
-          tail -n +6 | xargs -r gcloud artifacts docker images delete --quiet || true
+          tail -n +4 | \
+          while read image; do
+            if [ -n "$image" ]; then
+              gcloud artifacts docker images delete "$image" --quiet --async || true
+            fi
+          done
 
-        # Clean up web images (keep 5 most recent, excluding cache)
+        # Clean up web images (keep 3 most recent)
         gcloud artifacts docker images list us-central1-docker.pkg.dev/$PROJECT_ID/tora/web \
-          --filter="NOT tags:cache" \
           --sort-by=~CREATE_TIME --limit=999 --format="value(IMAGE)" | \
-          tail -n +6 | xargs -r gcloud artifacts docker images delete --quiet || true
+          tail -n +4 | \
+          while read image; do
+            if [ -n "$image" ]; then
+              gcloud artifacts docker images delete "$image" --quiet --async || true
+            fi
+          done
 
 timeout: "1600s"
 options:
-  machineType: "E2_HIGHCPU_8" # More CPU cores for faster builds
+  machineType: "E2_HIGHCPU_8"
   env:
     - "DOCKER_BUILDKIT=1"
