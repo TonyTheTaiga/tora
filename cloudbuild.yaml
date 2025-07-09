@@ -59,7 +59,7 @@ steps:
           --memory 512Mi \
           --min-instances 0 \
           --max-instances 2 \
-          --set-env-vars PUBLIC_API_BASE_URL=https://tora-api-1030250455947.us-central1.run.app \
+          --set-env-vars PUBLIC_API_BASE_URL=https://tora-api-$PROJECT_ID.us-central1.run.app \
           --port 3000
 
 timeout: "1600s"
