@@ -1,6 +1,8 @@
 steps:
-  # Build and push API
+  # API pipeline
   - name: "gcr.io/cloud-builders/docker"
+    id: "build-api"
+    waitFor: ["-"]
     dir: "api"
     args:
       - "build"
@@ -8,25 +10,14 @@ steps:
       - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/api:$COMMIT_SHA"
       - "."
   - name: "gcr.io/cloud-builders/docker"
+    id: "push-api"
+    waitFor: ["build-api"]
     args:
       - "push"
       - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/api:$COMMIT_SHA"
-
-  # Build and push Web
-  - name: "gcr.io/cloud-builders/docker"
-    dir: "web"
-    args:
-      - "build"
-      - "-t"
-      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA"
-      - "."
-  - name: "gcr.io/cloud-builders/docker"
-    args:
-      - "push"
-      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA"
-
-  # Deploy API
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    id: "deploy-api"
+    waitFor: ["push-api"]
     dir: "api"
     entrypoint: "bash"
     args:
@@ -40,11 +31,28 @@ steps:
           --cpu 1.0 \
           --memory 512Mi \
           --min-instances 0 \
-          --max-instances 4 \
+          --max-instances 5 \
           --set-secrets SUPABASE_URL=SUPABASE_URL:latest,SUPABASE_API_KEY=SUPABASE_KEY:latest,PRIVATE_ANTHROPIC_KEY=ANTHROPIC_KEY:latest,SUPABASE_JWT_SECRET=SUPABASE_JWT_SECRET:latest
 
-  # Deploy Web
+  # Web pipeline
+  - name: "gcr.io/cloud-builders/docker"
+    id: "build-web"
+    waitFor: ["-"]
+    dir: "web"
+    args:
+      - "build"
+      - "-t"
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA"
+      - "."
+  - name: "gcr.io/cloud-builders/docker"
+    id: "push-web"
+    waitFor: ["build-web"]
+    args:
+      - "push"
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA"
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    id: "deploy-web"
+    waitFor: ["push-web"]
     dir: "web"
     entrypoint: "bash"
     args:
@@ -58,9 +66,20 @@ steps:
           --cpu 1.0 \
           --memory 512Mi \
           --min-instances 0 \
-          --max-instances 2 \
-          --set-env-vars PUBLIC_API_BASE_URL=https://tora-api-$PROJECT_ID.us-central1.run.app \
+          --max-instances 5 \
+          --set-env-vars PUBLIC_API_BASE_URL=https://tora-api-1030250455947.us-central1.run.app \
           --port 3000
+
+  # Clean up old images
+  - name: "gcr.io/gcp-runtimes/gcr-cleaner"
+    waitFor: ["deploy-api", "deploy-web"]
+    args:
+      - "-repo"
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/api"
+      - "-repo"
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web"
+      - "-keep"
+      - "5"
 
 timeout: "1600s"
 options:
