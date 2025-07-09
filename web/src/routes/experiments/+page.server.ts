@@ -71,10 +71,13 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   const timer = startTimer("experiments.load", { requestId });
 
   try {
-    const workspace = url.searchParams.get('workspace');
-    const apiUrl = workspace ? `/api/experiments?workspace=${workspace}` : '/api/experiments';
-    
-    const experimentsResponse = await locals.apiClient.get<ApiResponse<ExperimentData[]>>(apiUrl);
+    const workspace = url.searchParams.get("workspace");
+    const apiUrl = workspace
+      ? `/api/experiments?workspace=${workspace}`
+      : "/api/experiments";
+
+    const experimentsResponse =
+      await locals.apiClient.get<ApiResponse<ExperimentData[]>>(apiUrl);
 
     if (experimentsResponse.status !== 200) {
       error(500, "Failed to fetch experiments");
@@ -96,7 +99,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
     timer.end({
       experiments_count: experiments.length,
       user_id: locals.session.user.id,
-      workspace_filter: workspace || 'all',
+      workspace_filter: workspace || "all",
     });
 
     return {
@@ -152,7 +155,9 @@ export const actions: Actions = {
         });
       }
 
-      const createResponse = await locals.apiClient.post<ApiResponse<ExperimentData>>("/api/experiments", {
+      const createResponse = await locals.apiClient.post<
+        ApiResponse<ExperimentData>
+      >("/api/experiments", {
         "experiment-name": name,
         "experiment-description": description || "",
         "workspace-id": workspaceId,
@@ -207,7 +212,9 @@ export const actions: Actions = {
         });
       }
 
-      const updateResponse = await locals.apiClient.put<ApiResponse<ExperimentData>>(`/api/experiments/${id}`, {
+      const updateResponse = await locals.apiClient.put<
+        ApiResponse<ExperimentData>
+      >(`/api/experiments/${id}`, {
         "experiment-id": id,
         "experiment-name": name,
         "experiment-description": description || "",
@@ -252,7 +259,9 @@ export const actions: Actions = {
         });
       }
 
-      const deleteResponse = await locals.apiClient.delete<ApiResponse<void>>(`/api/experiments/${id}`);
+      const deleteResponse = await locals.apiClient.delete<ApiResponse<void>>(
+        `/api/experiments/${id}`,
+      );
 
       if (deleteResponse.status !== 204) {
         return fail(deleteResponse.status, {

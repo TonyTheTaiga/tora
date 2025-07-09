@@ -13,7 +13,6 @@
     workspaceRoles: Array<{ id: string; name: string }>;
   } = $props();
 
-
   function closeModal() {
     isOpen = false;
   }
@@ -45,60 +44,60 @@
         </h3>
       </div>
 
-        <form onsubmit={handleSubmit}>
-          <div class="space-y-4">
-            <div>
-              <label
-                for="invite-email"
-                class="text-sm font-medium text-ctp-subtext0 block mb-2"
-                >Email Address</label
-              >
-              <input
-                id="invite-email"
-                type="email"
-                name="email"
-                required
-                placeholder="colleague@example.com"
-                class="w-full px-4 py-3 bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface0/40 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue/50 focus:border-ctp-blue/50 transition-all placeholder-ctp-overlay0"
-              />
-            </div>
-
-            <div>
-              <label
-                for="invite-role"
-                class="text-sm font-medium text-ctp-subtext0 block mb-2"
-                >Role</label
-              >
-              <select
-                id="invite-role"
-                name="roleId"
-                required
-                class="w-full px-4 py-3 bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface0/40 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue/50 focus:border-ctp-blue/50 transition-all"
-              >
-                <option value="">Select a role...</option>
-                {#each workspaceRoles as role}
-                  <option value={role.id}>{role.name}</option>
-                {/each}
-              </select>
-            </div>
+      <form onsubmit={handleSubmit}>
+        <div class="space-y-4">
+          <div>
+            <label
+              for="invite-email"
+              class="text-sm font-medium text-ctp-subtext0 block mb-2"
+              >Email Address</label
+            >
+            <input
+              id="invite-email"
+              type="email"
+              name="email"
+              required
+              placeholder="colleague@example.com"
+              class="w-full px-4 py-3 bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface0/40 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue/50 focus:border-ctp-blue/50 transition-all placeholder-ctp-overlay0"
+            />
           </div>
 
-          <div class="flex gap-3 mt-6">
-            <button
-              type="button"
-              class="flex-1 px-4 py-2 border border-ctp-surface0/40 rounded-lg text-ctp-subtext0 hover:bg-ctp-surface0/20 transition-colors"
-              onclick={closeModal}
+          <div>
+            <label
+              for="invite-role"
+              class="text-sm font-medium text-ctp-subtext0 block mb-2"
+              >Role</label
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="flex-1 px-4 py-2 bg-ctp-blue/20 border border-ctp-blue/40 rounded-lg text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all"
+            <select
+              id="invite-role"
+              name="roleId"
+              required
+              class="w-full px-4 py-3 bg-ctp-surface0/30 backdrop-blur-sm border border-ctp-surface0/40 rounded-lg text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-blue/50 focus:border-ctp-blue/50 transition-all"
             >
-              Send Invitation
-            </button>
+              <option value="">Select a role...</option>
+              {#each workspaceRoles as role}
+                <option value={role.id}>{role.name}</option>
+              {/each}
+            </select>
           </div>
-        </form>
+        </div>
+
+        <div class="flex gap-3 mt-6">
+          <button
+            type="button"
+            class="flex-1 px-4 py-2 border border-ctp-surface0/40 rounded-lg text-ctp-subtext0 hover:bg-ctp-surface0/20 transition-colors"
+            onclick={closeModal}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="flex-1 px-4 py-2 bg-ctp-blue/20 border border-ctp-blue/40 rounded-lg text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all"
+          >
+            Send Invitation
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 {/if}

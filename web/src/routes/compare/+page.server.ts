@@ -68,12 +68,14 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     const experimentPromises = ids.map(async (id) => {
       try {
         // Fetch experiment details
-        const experimentResponse = await locals.apiClient.get<ApiResponse<ExperimentData>>(
-          `/api/experiments/${id}`
-        );
+        const experimentResponse = await locals.apiClient.get<
+          ApiResponse<ExperimentData>
+        >(`/api/experiments/${id}`);
 
         if (experimentResponse.status !== 200) {
-          console.warn(`Failed to fetch experiment ${id}: status ${experimentResponse.status}`);
+          console.warn(
+            `Failed to fetch experiment ${id}: status ${experimentResponse.status}`,
+          );
           return null;
         }
 
@@ -86,15 +88,18 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         // Fetch metrics for this experiment
         let metricsData: MetricData[] = [];
         try {
-          const metricsResponse = await locals.apiClient.get<ApiResponse<MetricData[]>>(
-            `/api/experiments/${id}/metrics`
-          );
+          const metricsResponse = await locals.apiClient.get<
+            ApiResponse<MetricData[]>
+          >(`/api/experiments/${id}/metrics`);
 
           if (metricsResponse.status === 200) {
             metricsData = metricsResponse.data || [];
           }
         } catch (metricsErr) {
-          console.warn(`Failed to fetch metrics for experiment ${id}:`, metricsErr);
+          console.warn(
+            `Failed to fetch metrics for experiment ${id}:`,
+            metricsErr,
+          );
           // Continue without metrics
         }
 
@@ -112,7 +117,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         metricsByName.forEach((metricList, name) => {
           metricData[name] = metricList
             .sort((a, b) => (a.step || 0) - (b.step || 0))
-            .map(m => m.value);
+            .map((m) => m.value);
         });
 
         return {
@@ -154,7 +159,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     return { experiments };
   } catch (err) {
     timer.end({ error: err instanceof Error ? err.message : "Unknown error" });
-    
+
     if (err instanceof Error) {
       if (err.message.includes("401")) {
         error(401, "Authentication required");
@@ -163,7 +168,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         throw err; // Re-throw 400 errors as they are
       }
     }
-    
+
     console.error("Error loading comparison data:", err);
     error(500, "Failed to load comparison data");
   }

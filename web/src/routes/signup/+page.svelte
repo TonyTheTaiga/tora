@@ -35,7 +35,7 @@
             submitting = true;
             return async ({ result, update }) => {
               submitting = false;
-              if (result.type === 'success') {
+              if (result.type === "success") {
                 submitted = true;
               }
               await update();

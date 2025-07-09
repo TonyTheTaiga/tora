@@ -70,7 +70,9 @@ export class ServerApiClient {
 }
 
 // Helper function to create an authenticated API client from session data
-export function createAuthenticatedApiClient(sessionData?: SessionData | null): ServerApiClient {
+export function createAuthenticatedApiClient(
+  sessionData?: SessionData | null,
+): ServerApiClient {
   return new ServerApiClient(API_BASE_URL, sessionData?.access_token);
 }
 

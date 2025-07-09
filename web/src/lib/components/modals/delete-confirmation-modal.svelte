@@ -31,7 +31,7 @@
 
     try {
       await onDelete(experiment.id);
-      
+
       const experimentId = experiment.id;
       experiments = experiments.filter((exp) => exp.id !== experimentId);
       closeDeleteExperimentModal();

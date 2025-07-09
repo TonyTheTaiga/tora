@@ -11,8 +11,6 @@ type LoginResponse = {
 export const actions: Actions = {
   default: async ({ request, cookies, locals }) => {
     const data = await request.formData();
-    console.log(data);
-
     const email = data.get("email") as string;
     const password = data.get("password") as string;
     if (!email || !password) {

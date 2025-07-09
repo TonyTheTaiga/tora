@@ -44,9 +44,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
   try {
     // Fetch experiment details
-    const experimentResponse = await locals.apiClient.get<ApiResponse<ExperimentData>>(
-      `/api/experiments/${params.experimentId}`
-    );
+    const experimentResponse = await locals.apiClient.get<
+      ApiResponse<ExperimentData>
+    >(`/api/experiments/${params.experimentId}`);
 
     if (experimentResponse.status === 404) {
       timer.end({ error: "Experiment not found" });
@@ -67,9 +67,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     // Fetch metrics for the experiment
     let metricsData: MetricData[] = [];
     try {
-      const metricsResponse = await locals.apiClient.get<ApiResponse<MetricData[]>>(
-        `/api/experiments/${params.experimentId}/metrics`
-      );
+      const metricsResponse = await locals.apiClient.get<
+        ApiResponse<MetricData[]>
+      >(`/api/experiments/${params.experimentId}/metrics`);
 
       if (metricsResponse.status === 200) {
         metricsData = metricsResponse.data || [];
@@ -114,7 +114,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         scalarMetrics.push(metricList[0]);
       } else {
         timeSeriesNames.push(name);
-        timeSeriesMetrics.push(...metricList.sort((a, b) => (a.step || 0) - (b.step || 0)));
+        timeSeriesMetrics.push(
+          ...metricList.sort((a, b) => (a.step || 0) - (b.step || 0)),
+        );
       }
     });
 
@@ -123,7 +125,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     metricsByName.forEach((metricList, name) => {
       metricData[name] = metricList
         .sort((a, b) => (a.step || 0) - (b.step || 0))
-        .map(m => m.value);
+        .map((m) => m.value);
     });
 
     timer.end({
@@ -146,15 +148,15 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   } catch (err) {
     timer.end({ error: err instanceof Error ? err.message : "Unknown error" });
     console.error("Error loading experiment:", err);
-    
+
     if (err instanceof Error && err.message.includes("404")) {
       error(404, "Experiment not found");
     }
-    
+
     if (err instanceof Error && err.message.includes("401")) {
       error(401, "Authentication required");
     }
-    
+
     error(500, "Failed to load experiment");
   }
 };

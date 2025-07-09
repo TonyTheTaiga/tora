@@ -27,31 +27,31 @@
     if (!workspaceToInvite || !data.user) return;
 
     // Create and submit form programmatically
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '?/sendInvitation';
-    
-    const workspaceIdInput = document.createElement('input');
-    workspaceIdInput.type = 'hidden';
-    workspaceIdInput.name = 'workspaceId';
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "?/sendInvitation";
+
+    const workspaceIdInput = document.createElement("input");
+    workspaceIdInput.type = "hidden";
+    workspaceIdInput.name = "workspaceId";
     workspaceIdInput.value = workspaceToInvite.id;
     form.appendChild(workspaceIdInput);
-    
-    const emailInput = document.createElement('input');
-    emailInput.type = 'hidden';
-    emailInput.name = 'email';
+
+    const emailInput = document.createElement("input");
+    emailInput.type = "hidden";
+    emailInput.name = "email";
     emailInput.value = email;
     form.appendChild(emailInput);
-    
-    const roleIdInput = document.createElement('input');
-    roleIdInput.type = 'hidden';
-    roleIdInput.name = 'roleId';
+
+    const roleIdInput = document.createElement("input");
+    roleIdInput.type = "hidden";
+    roleIdInput.name = "roleId";
     roleIdInput.value = roleId;
     form.appendChild(roleIdInput);
-    
+
     document.body.appendChild(form);
     form.submit();
-    
+
     inviteModalOpen = false;
     workspaceToInvite = null;
   }
@@ -59,16 +59,16 @@
   function deleteWorkspace(workspaceId: string) {
     if (!confirm("Are you sure you want to delete this workspace?")) return;
 
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '?/deleteWorkspace';
-    
-    const workspaceIdInput = document.createElement('input');
-    workspaceIdInput.type = 'hidden';
-    workspaceIdInput.name = 'workspaceId';
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "?/deleteWorkspace";
+
+    const workspaceIdInput = document.createElement("input");
+    workspaceIdInput.type = "hidden";
+    workspaceIdInput.name = "workspaceId";
     workspaceIdInput.value = workspaceId;
     form.appendChild(workspaceIdInput);
-    
+
     document.body.appendChild(form);
     form.submit();
   }
@@ -76,16 +76,16 @@
   function leaveWorkspace(workspaceId: string) {
     if (!confirm("Are you sure you want to leave this workspace?")) return;
 
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '?/leaveWorkspace';
-    
-    const workspaceIdInput = document.createElement('input');
-    workspaceIdInput.type = 'hidden';
-    workspaceIdInput.name = 'workspaceId';
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "?/leaveWorkspace";
+
+    const workspaceIdInput = document.createElement("input");
+    workspaceIdInput.type = "hidden";
+    workspaceIdInput.name = "workspaceId";
     workspaceIdInput.value = workspaceId;
     form.appendChild(workspaceIdInput);
-    
+
     document.body.appendChild(form);
     form.submit();
   }
@@ -93,37 +93,37 @@
   function revokeApiKey(keyId: string) {
     if (!confirm("Are you sure you want to revoke this API key?")) return;
 
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '?/revokeApiKey';
-    
-    const keyIdInput = document.createElement('input');
-    keyIdInput.type = 'hidden';
-    keyIdInput.name = 'keyId';
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "?/revokeApiKey";
+
+    const keyIdInput = document.createElement("input");
+    keyIdInput.type = "hidden";
+    keyIdInput.name = "keyId";
     keyIdInput.value = keyId;
     form.appendChild(keyIdInput);
-    
+
     document.body.appendChild(form);
     form.submit();
   }
 
   function respondToInvitation(invitationId: string, accept: boolean) {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '?/respondToInvitation';
-    
-    const invitationIdInput = document.createElement('input');
-    invitationIdInput.type = 'hidden';
-    invitationIdInput.name = 'invitationId';
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "?/respondToInvitation";
+
+    const invitationIdInput = document.createElement("input");
+    invitationIdInput.type = "hidden";
+    invitationIdInput.name = "invitationId";
     invitationIdInput.value = invitationId;
     form.appendChild(invitationIdInput);
-    
-    const actionInput = document.createElement('input');
-    actionInput.type = 'hidden';
-    actionInput.name = 'action';
-    actionInput.value = accept ? 'accept' : 'deny';
+
+    const actionInput = document.createElement("input");
+    actionInput.type = "hidden";
+    actionInput.name = "action";
+    actionInput.value = accept ? "accept" : "deny";
     form.appendChild(actionInput);
-    
+
     document.body.appendChild(form);
     form.submit();
   }
@@ -381,7 +381,7 @@
           action="?/createApiKey"
           use:enhance={() => {
             return async ({ result, update }) => {
-              if (result.type === 'success' && result.data?.key) {
+              if (result.type === "success" && result.data?.key) {
                 createdKey = result.data.key as string;
               }
               await update({ reset: true });
