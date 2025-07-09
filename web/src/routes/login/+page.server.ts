@@ -1,5 +1,5 @@
 import { redirect, fail } from "@sveltejs/kit";
-import type { Actions, PageServerLoad } from "./$types";
+import type { Actions } from "./$types";
 import { dev } from "$app/environment";
 import type { SessionData } from "$lib/types";
 
@@ -11,6 +11,8 @@ type LoginResponse = {
 export const actions: Actions = {
   default: async ({ request, cookies, locals }) => {
     const data = await request.formData();
+    console.log(data);
+
     const email = data.get("email") as string;
     const password = data.get("password") as string;
     if (!email || !password) {
