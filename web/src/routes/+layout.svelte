@@ -16,7 +16,7 @@
   );
 </script>
 
-<div class="min-h-screen bg-ctp-base text-ctp-text" data-theme={theme}>
+<div class="min-h-screen text-ctp-text" data-theme={theme}>
   {#if showNavigation}
     <Header />
     <Toolbar />
