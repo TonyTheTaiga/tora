@@ -1,23 +1,46 @@
 steps:
-  # API pipeline
+  # API pipeline with cache
   - name: "gcr.io/cloud-builders/docker"
     id: "build-api"
     waitFor: ["-"]
     dir: "api"
     args:
+      - "buildx"
       - "build"
+      - "--cache-from=type=registry,ref=us-central1-docker.pkg.dev/$PROJECT_ID/tora/api:cache"
+      - "--cache-to=type=registry,ref=us-central1-docker.pkg.dev/$PROJECT_ID/tora/api:cache,mode=max"
+      - "--push"
       - "-t"
       - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/api:$COMMIT_SHA"
+      - "-t"
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/api:latest"
       - "."
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  # Web pipeline with cache (parallel)
   - name: "gcr.io/cloud-builders/docker"
-    id: "push-api"
-    waitFor: ["build-api"]
+    id: "build-web"
+    waitFor: ["-"]
+    dir: "web"
     args:
-      - "push"
-      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/api:$COMMIT_SHA"
+      - "buildx"
+      - "build"
+      - "--cache-from=type=registry,ref=us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:cache"
+      - "--cache-to=type=registry,ref=us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:cache,mode=max"
+      - "--push"
+      - "-t"
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA"
+      - "-t"
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:latest"
+      - "."
+    env:
+      - "DOCKER_BUILDKIT=1"
+
+  # Deploy API (no longer needs separate push step)
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     id: "deploy-api"
-    waitFor: ["push-api"]
+    waitFor: ["build-api"]
     dir: "api"
     entrypoint: "bash"
     args:
@@ -35,25 +58,10 @@ steps:
           --set-secrets DATABASE_URL=DATABASE_URL:latest,SUPABASE_URL=SUPABASE_URL:latest,SUPABASE_API_KEY=SUPABASE_KEY:latest,PRIVATE_ANTHROPIC_KEY=ANTHROPIC_KEY:latest,SUPABASE_JWT_SECRET=SUPABASE_JWT_SECRET:latest \
           --set-env-vars FRONTEND_URL=https://tora-web-1030250455947.us-central1.run.app
 
-  # Web pipeline
-  - name: "gcr.io/cloud-builders/docker"
-    id: "build-web"
-    waitFor: ["-"]
-    dir: "web"
-    args:
-      - "build"
-      - "-t"
-      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA"
-      - "."
-  - name: "gcr.io/cloud-builders/docker"
-    id: "push-web"
-    waitFor: ["build-web"]
-    args:
-      - "push"
-      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA"
+  # Deploy Web (no longer needs separate push step)
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     id: "deploy-web"
-    waitFor: ["push-web"]
+    waitFor: ["build-web"]
     dir: "web"
     entrypoint: "bash"
     args:
@@ -71,22 +79,28 @@ steps:
           --set-env-vars PUBLIC_API_BASE_URL=https://tora-api-1030250455947.us-central1.run.app \
           --port 3000
 
+  # Cleanup (runs after both deployments complete)
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    id: "cleanup"
     waitFor: ["deploy-api", "deploy-web"]
     entrypoint: "bash"
     args:
       - "-c"
       - |
-        # Clean up API images (keep 3 most recent)
+        # Clean up API images (keep 5 most recent, excluding cache)
         gcloud artifacts docker images list us-central1-docker.pkg.dev/$PROJECT_ID/tora/api \
+          --filter="NOT tags:cache" \
           --sort-by=~CREATE_TIME --limit=999 --format="value(IMAGE)" | \
-          tail -n +3 | xargs -r gcloud artifacts docker images delete --quiet || true
+          tail -n +6 | xargs -r gcloud artifacts docker images delete --quiet || true
 
-        # Clean up web images (keep 3 most recent)
+        # Clean up web images (keep 5 most recent, excluding cache)
         gcloud artifacts docker images list us-central1-docker.pkg.dev/$PROJECT_ID/tora/web \
+          --filter="NOT tags:cache" \
           --sort-by=~CREATE_TIME --limit=999 --format="value(IMAGE)" | \
-          tail -n +3 | xargs -r gcloud artifacts docker images delete --quiet || true
+          tail -n +6 | xargs -r gcloud artifacts docker images delete --quiet || true
 
-timeout: "1600s"
+timeout: "3200s"
 options:
-  machineType: "E2_MEDIUM"
+  machineType: "E2_HIGHCPU_8" # More CPU cores for faster builds
+  env:
+    - "DOCKER_BUILDKIT=1"
