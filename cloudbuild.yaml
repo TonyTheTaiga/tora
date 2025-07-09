@@ -1,0 +1,67 @@
+steps:
+  # Build and push API
+  - name: "gcr.io/cloud-builders/docker"
+    dir: "api"
+    args:
+      - "build"
+      - "-t"
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/api:$COMMIT_SHA"
+      - "."
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - "push"
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/api:$COMMIT_SHA"
+
+  # Build and push Web
+  - name: "gcr.io/cloud-builders/docker"
+    dir: "web"
+    args:
+      - "build"
+      - "-t"
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA"
+      - "."
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - "push"
+      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA"
+
+  # Deploy API
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    dir: "api"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        gcloud run deploy tora-api \
+          --image us-central1-docker.pkg.dev/$PROJECT_ID/tora/api:$COMMIT_SHA \
+          --region us-central1 \
+          --platform managed \
+          --allow-unauthenticated \
+          --cpu 1.0 \
+          --memory 512Mi \
+          --min-instances 0 \
+          --max-instances 4 \
+          --set-secrets SUPABASE_URL=SUPABASE_URL:latest,SUPABASE_API_KEY=SUPABASE_KEY:latest,PRIVATE_ANTHROPIC_KEY=ANTHROPIC_KEY:latest,SUPABASE_JWT_SECRET=SUPABASE_JWT_SECRET:latest
+
+  # Deploy Web
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    dir: "web"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        gcloud run deploy tora-web \
+          --image us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA \
+          --region us-central1 \
+          --platform managed \
+          --allow-unauthenticated \
+          --cpu 1.0 \
+          --memory 512Mi \
+          --min-instances 0 \
+          --max-instances 2 \
+          --set-env-vars PUBLIC_API_BASE_URL=https://tora-api-1030250455947.us-central1.run.app \
+          --port 3000
+
+options:
+  machineType: "E2_MEDIUM"
+  timeout: "1600s"
