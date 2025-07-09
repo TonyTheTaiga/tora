@@ -2,7 +2,6 @@ steps:
   # API pipeline
   - name: "gcr.io/cloud-builders/docker"
     id: "build-api"
-    waitFor: ["-"]
     dir: "api"
     args:
       - "build"
@@ -37,7 +36,6 @@ steps:
   # Web pipeline
   - name: "gcr.io/cloud-builders/docker"
     id: "build-web"
-    waitFor: ["-"]
     dir: "web"
     args:
       - "build"
