@@ -26,7 +26,7 @@ steps:
           --memory 512Mi \
           --min-instances 0 \
           --max-instances 5 \
-          --set-secrets PUBLIC_SUPABASE_URL=SUPABASE_URL:latest,PUBLIC_SUPABASE_ANON_KEY=SUPABASE_KEY:latest,PRIVATE_ANTHROPIC_KEY=ANTHROPIC_KEY:latest,PRIVATE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_KEY:latest
+          --set-secrets SUPABASE_URL=SUPABASE_URL:latest,SUPABASE_API_KEY=SUPABASE_KEY:latest,PRIVATE_ANTHROPIC_KEY=ANTHROPIC_KEY:latest,SUPABASE_JWT_SECRET=SUPABASE_JWT_SECRET:latest
 options:
   machineType: "E2_MEDIUM"
 timeout: "1600s"
