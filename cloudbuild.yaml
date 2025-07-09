@@ -96,33 +96,6 @@ steps:
           --set-env-vars PUBLIC_API_BASE_URL=https://tora-api-1030250455947.us-central1.run.app \
           --port 3000
 
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-    id: "cleanup"
-    waitFor: ["deploy-api", "deploy-web"]
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - |
-        # Clean up API images (keep 3 most recent)
-        gcloud artifacts docker images list us-central1-docker.pkg.dev/$PROJECT_ID/tora/api \
-          --sort-by=~CREATE_TIME --limit=999 --format="value(IMAGE)" | \
-          tail -n +4 | \
-          while read image; do
-            if [ -n "$image" ]; then
-              gcloud artifacts docker images delete "$image" --quiet --async || true
-            fi
-          done
-
-        # Clean up web images (keep 3 most recent)
-        gcloud artifacts docker images list us-central1-docker.pkg.dev/$PROJECT_ID/tora/web \
-          --sort-by=~CREATE_TIME --limit=999 --format="value(IMAGE)" | \
-          tail -n +4 | \
-          while read image; do
-            if [ -n "$image" ]; then
-              gcloud artifacts docker images delete "$image" --quiet --async || true
-            fi
-          done
-
 timeout: "1600s"
 logsBucket: "gs://artifacts.taigaishida-217622.appspot.com/logs"
 options:
