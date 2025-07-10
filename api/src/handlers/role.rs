@@ -28,4 +28,3 @@ pub async fn list_workspace_roles(State(pool): State<PgPool>) -> impl IntoRespon
         }
     }
 }
-
