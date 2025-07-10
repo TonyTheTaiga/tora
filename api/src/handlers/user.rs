@@ -2,11 +2,12 @@ use crate::middleware::auth::AuthenticatedUser;
 use crate::ntypes;
 use axum::{
     Extension, Json,
-    extract::Query,
+    extract::{Query, State},
     http::StatusCode,
     response::{IntoResponse, Redirect},
 };
 use supabase_auth::models::{AuthClient, VerifyOtpParams, VerifyTokenHashParams};
+use sqlx::PgPool;
 
 fn create_client() -> AuthClient {
     AuthClient::new_from_env().unwrap()
@@ -114,61 +115,130 @@ pub async fn refresh_token(Json(payload): Json<ntypes::RefreshTokenRequest>) -> 
 
 pub async fn get_settings(
     Extension(user): Extension<AuthenticatedUser>,
-) -> Json<ntypes::SettingsData> {
+    State(pool): State<PgPool>,
+) -> impl IntoResponse {
     use crate::repos::workspace::Workspace;
+    use crate::ntypes::{ApiKey, WorkspaceInvitation, SettingsData, UserInfo, Response};
+    use sqlx::PgPool;
+    use uuid::Uuid;
 
-    println!("user: {user:?}");
-    // Mock data - will be replaced with database queries
-    let workspaces = vec![
-        Workspace {
-            id: "ws_1".to_string(),
-            name: "ML Research".to_string(),
-            description: Some("Machine learning experiments and research".to_string()),
-            created_at: chrono::Utc::now(),
-            role: "OWNER".to_string(),
-        },
-        Workspace {
-            id: "ws_2".to_string(),
-            name: "NLP Project".to_string(),
-            description: Some("Natural language processing experiments".to_string()),
-            created_at: chrono::Utc::now(),
-            role: "ADMIN".to_string(),
-        },
-    ];
+    let user_uuid = match Uuid::parse_str(&user.id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid user ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
 
-    let api_keys = vec![
-        ntypes::ApiKey {
-            id: "key_1".to_string(),
-            name: "Development Key".to_string(),
-            created_at: "Dec 15".to_string(),
-            revoked: false,
-            key: None,
-        },
-        ntypes::ApiKey {
-            id: "key_2".to_string(),
-            name: "Production Key".to_string(),
-            created_at: "Dec 10".to_string(),
-            revoked: true,
-            key: None,
-        },
-    ];
+    // Fetch user's workspaces
+    let workspaces_result = sqlx::query_as::<_, (String, String, Option<String>, chrono::DateTime<chrono::Utc>, String)>(
+        r#"
+        SELECT w.id::text, w.name, w.description, w.created_at, wr.name as role
+        FROM workspace w
+        JOIN user_workspaces uw ON w.id = uw.workspace_id
+        JOIN workspace_role wr ON uw.role_id = wr.id
+        WHERE uw.user_id = $1
+        ORDER BY w.created_at DESC
+        "#,
+    )
+    .bind(user_uuid)
+    .fetch_all(&pool)
+    .await;
 
-    let invitations = vec![ntypes::WorkspaceInvitation {
-        id: "inv_1".to_string(),
-        workspace_id: "Data Science Team".to_string(),
-        email: user.email.clone(),
-        role: "ADMIN".to_string(),
-        from: "john@example.com".to_string(),
-        created_at: chrono::Utc::now(),
-    }];
+    // Fetch user's API keys
+    let api_keys_result = sqlx::query_as::<_, (String, String, chrono::DateTime<chrono::Utc>, bool)>(
+        "SELECT id::text, name, created_at, revoked FROM api_keys WHERE user_id = $1 ORDER BY created_at DESC",
+    )
+    .bind(user_uuid)
+    .fetch_all(&pool)
+    .await;
 
-    Json(ntypes::SettingsData {
-        user: ntypes::UserInfo {
-            id: user.id,
-            email: user.email,
-        },
-        workspaces,
-        api_keys,
-        invitations,
-    })
+    // Fetch pending invitations for the user
+    let invitations_result = sqlx::query_as::<_, (String, String, String, String, chrono::DateTime<chrono::Utc>)>(
+        r#"
+        SELECT wi.id::text, w.name as workspace_name, u.email as from_email, wr.name as role_name, wi.created_at
+        FROM workspace_invitations wi
+        JOIN workspace w ON wi.workspace_id = w.id
+        JOIN auth.users u ON wi."from" = u.id
+        JOIN workspace_role wr ON wi.role_id = wr.id
+        WHERE wi."to" = $1 AND wi.status = 'pending'
+        ORDER BY wi.created_at DESC
+        "#,
+    )
+    .bind(user_uuid)
+    .fetch_all(&pool)
+    .await;
+
+    match (workspaces_result, api_keys_result, invitations_result) {
+        (Ok(workspace_rows), Ok(api_key_rows), Ok(invitation_rows)) => {
+            let workspaces: Vec<Workspace> = workspace_rows
+                .into_iter()
+                .map(|(id, name, description, created_at, role)| Workspace {
+                    id,
+                    name,
+                    description,
+                    created_at,
+                    role,
+                })
+                .collect();
+
+            let api_keys: Vec<ApiKey> = api_key_rows
+                .into_iter()
+                .map(|(id, name, created_at, revoked)| ApiKey {
+                    id,
+                    name,
+                    created_at: created_at.format("%b %d").to_string(),
+                    revoked,
+                    key: None, // Never include actual key in settings
+                })
+                .collect();
+
+            let invitations: Vec<WorkspaceInvitation> = invitation_rows
+                .into_iter()
+                .map(|(id, workspace_name, from_email, role_name, created_at)| {
+                    WorkspaceInvitation {
+                        id,
+                        workspace_id: workspace_name,
+                        email: user.email.clone(),
+                        role: role_name,
+                        from: from_email,
+                        created_at,
+                    }
+                })
+                .collect();
+
+            let settings_data = SettingsData {
+                user: UserInfo {
+                    id: user.id,
+                    email: user.email,
+                },
+                workspaces,
+                api_keys,
+                invitations,
+            };
+
+            Json(Response {
+                status: 200,
+                data: Some(settings_data),
+            })
+                .into_response()
+        }
+        (Err(e), _, _) | (_, Err(e), _) | (_, _, Err(e)) => {
+            eprintln!("Database error: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to fetch settings data".to_string()),
+                }),
+            )
+                .into_response()
+        }
+    }
 }

@@ -109,6 +109,11 @@ pub fn api_routes() -> Router<sqlx::PgPool> {
         .route(
             "/workspaces/any/invitations",
             protected_route(put(invitation::respond_to_invitation)),
+        )
+        // Workspace Roles
+        .route(
+            "/workspace-roles",
+            protected_route(get(crate::repos::workspace::list_workspace_roles)),
         );
 
     let public_routes = Router::new()

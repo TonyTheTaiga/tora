@@ -415,6 +415,48 @@ pub async fn get_workspace_members(
     }
 }
 
+#[derive(Serialize)]
+pub struct WorkspaceRole {
+    pub id: String,
+    pub name: String,
+}
+
+pub async fn list_workspace_roles(
+    State(pool): State<PgPool>,
+) -> impl IntoResponse {
+    let result = sqlx::query_as::<_, (String, String)>(
+        "SELECT id::text, name FROM workspace_role ORDER BY name",
+    )
+    .fetch_all(&pool)
+    .await;
+
+    match result {
+        Ok(rows) => {
+            let roles: Vec<WorkspaceRole> = rows
+                .into_iter()
+                .map(|(id, name)| WorkspaceRole { id, name })
+                .collect();
+
+            Json(Response {
+                status: 200,
+                data: Some(roles),
+            })
+                .into_response()
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to fetch workspace roles".to_string()),
+                }),
+            )
+                .into_response()
+        }
+    }
+}
+
 pub async fn delete_workspace(
     Extension(user): Extension<AuthenticatedUser>,
     State(pool): State<PgPool>,
