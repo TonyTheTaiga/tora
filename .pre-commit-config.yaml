@@ -19,8 +19,7 @@ repos:
     hooks:
       - id: rustfmt-api
         name: rustfmt (api)
-        entry: cargo fmt --all
+        entry: bash -c 'cd api && cargo fmt --all'
         language: system
         files: ^api/
         pass_filenames: false
-        chdir: api
