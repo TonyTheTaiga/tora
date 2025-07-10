@@ -5,6 +5,7 @@
   import { enhance } from "$app/forms";
 
   let { data } = $props();
+  console.log(data.workspaceRoles);
 
   let createdKey: string = $state("");
   let inviteModalOpen = $state(false);
@@ -26,7 +27,6 @@
   function sendInvitation(email: string, roleId: string) {
     if (!workspaceToInvite || !data.user) return;
 
-    // Create and submit form programmatically
     const form = document.createElement("form");
     form.method = "POST";
     form.action = "?/sendInvitation";

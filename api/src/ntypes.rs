@@ -5,7 +5,7 @@ pub struct Ping {
     pub msg: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Response<T> {
     pub status: i16,
 
@@ -62,13 +62,14 @@ pub struct ApiKeyRecord {
     pub user_email: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, sqlx::FromRow, Debug)]
 pub struct ApiKey {
     pub id: String,
     pub name: String,
-    pub created_at: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
     pub revoked: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[sqlx(skip)]
     pub key: Option<String>, // Only present when creating
 }
 
@@ -77,7 +78,7 @@ pub struct CreateApiKeyRequest {
     pub name: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, sqlx::FromRow)]
 pub struct WorkspaceInvitation {
     pub id: String,
     pub workspace_id: String,
@@ -103,4 +104,10 @@ pub struct SettingsData {
     #[serde(rename = "apiKeys")]
     pub api_keys: Vec<ApiKey>,
     pub invitations: Vec<WorkspaceInvitation>,
+}
+
+#[derive(Serialize, Deserialize, sqlx::FromRow)]
+pub struct WorkspaceRole {
+    pub id: String,
+    pub name: String,
 }

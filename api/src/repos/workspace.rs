@@ -96,7 +96,7 @@ pub async fn list_workspaces(
             .into_response()
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -117,7 +117,7 @@ pub async fn create_workspace(
     let mut tx = match pool.begin().await {
         Ok(tx) => tx,
         Err(e) => {
-            eprintln!("Failed to begin transaction: {}", e);
+            eprintln!("Failed to begin transaction: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -140,7 +140,7 @@ pub async fn create_workspace(
     let (workspace_id, name, description, created_at) = match workspace_result {
         Ok(row) => row,
         Err(e) => {
-            eprintln!("Failed to create workspace: {}", e);
+            eprintln!("Failed to create workspace: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -160,7 +160,7 @@ pub async fn create_workspace(
     let (owner_role_id,) = match owner_role_result {
         Ok(row) => row,
         Err(e) => {
-            eprintln!("Failed to get OWNER role: {}", e);
+            eprintln!("Failed to get OWNER role: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -196,7 +196,7 @@ pub async fn create_workspace(
     .await;
 
     if let Err(e) = user_workspace_result {
-        eprintln!("Failed to add user to workspace: {}", e);
+        eprintln!("Failed to add user to workspace: {e}");
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(Response {
@@ -208,7 +208,7 @@ pub async fn create_workspace(
     }
 
     if let Err(e) = tx.commit().await {
-        eprintln!("Failed to commit transaction: {}", e);
+        eprintln!("Failed to commit transaction: {e}");
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(Response {
@@ -304,7 +304,7 @@ pub async fn get_workspace(
         )
             .into_response(),
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -345,7 +345,7 @@ pub async fn get_workspace_members(
     .await;
 
     match access_check {
-        Ok((count,)) if count == 0 => {
+        Ok((0,)) => {
             return (
                 StatusCode::FORBIDDEN,
                 Json(Response {
@@ -356,7 +356,7 @@ pub async fn get_workspace_members(
                 .into_response();
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -402,7 +402,7 @@ pub async fn get_workspace_members(
             .into_response()
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -448,7 +448,7 @@ pub async fn delete_workspace(
     .await;
 
     match owner_check {
-        Ok((count,)) if count == 0 => {
+        Ok((0,)) => {
             return (
                 StatusCode::FORBIDDEN,
                 Json(Response {
@@ -459,7 +459,7 @@ pub async fn delete_workspace(
                 .into_response();
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -485,7 +485,7 @@ pub async fn delete_workspace(
         })
         .into_response(),
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -551,7 +551,7 @@ pub async fn leave_workspace(
             }
         }
         (Err(e), _) | (_, Err(e)) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -591,7 +591,7 @@ pub async fn leave_workspace(
             }
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {

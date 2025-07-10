@@ -2,10 +2,12 @@ use crate::middleware::auth::AuthenticatedUser;
 use crate::ntypes;
 use axum::{
     Extension, Json,
-    extract::Query,
+    body::to_bytes,
+    extract::{Query, State},
     http::StatusCode,
     response::{IntoResponse, Redirect},
 };
+use sqlx::PgPool;
 use supabase_auth::models::{AuthClient, VerifyOtpParams, VerifyTokenHashParams};
 
 fn create_client() -> AuthClient {
@@ -114,53 +116,57 @@ pub async fn refresh_token(Json(payload): Json<ntypes::RefreshTokenRequest>) -> 
 
 pub async fn get_settings(
     Extension(user): Extension<AuthenticatedUser>,
+    State(pool): State<PgPool>,
 ) -> Json<ntypes::SettingsData> {
-    use crate::repos::workspace::Workspace;
+    use crate::handlers::{api_key, invitation};
+    use crate::repos::workspace;
 
     println!("user: {user:?}");
-    // Mock data - will be replaced with database queries
-    let workspaces = vec![
-        Workspace {
-            id: "ws_1".to_string(),
-            name: "ML Research".to_string(),
-            description: Some("Machine learning experiments and research".to_string()),
-            created_at: chrono::Utc::now(),
-            role: "OWNER".to_string(),
-        },
-        Workspace {
-            id: "ws_2".to_string(),
-            name: "NLP Project".to_string(),
-            description: Some("Natural language processing experiments".to_string()),
-            created_at: chrono::Utc::now(),
-            role: "ADMIN".to_string(),
-        },
-    ];
 
-    let api_keys = vec![
-        ntypes::ApiKey {
-            id: "key_1".to_string(),
-            name: "Development Key".to_string(),
-            created_at: "Dec 15".to_string(),
-            revoked: false,
-            key: None,
-        },
-        ntypes::ApiKey {
-            id: "key_2".to_string(),
-            name: "Production Key".to_string(),
-            created_at: "Dec 10".to_string(),
-            revoked: true,
-            key: None,
-        },
-    ];
+    let workspaces_response =
+        workspace::list_workspaces(Extension(user.clone()), State(pool.clone()))
+            .await
+            .into_response();
+    let workspaces: Vec<workspace::Workspace> = if workspaces_response.status().is_success() {
+        let body = to_bytes(workspaces_response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        let response_data: ntypes::Response<Vec<workspace::Workspace>> =
+            serde_json::from_slice(&body).unwrap();
+        response_data.data.unwrap_or_default()
+    } else {
+        vec![]
+    };
 
-    let invitations = vec![ntypes::WorkspaceInvitation {
-        id: "inv_1".to_string(),
-        workspace_id: "Data Science Team".to_string(),
-        email: user.email.clone(),
-        role: "ADMIN".to_string(),
-        from: "john@example.com".to_string(),
-        created_at: chrono::Utc::now(),
-    }];
+    let api_keys_response = api_key::list_api_keys(Extension(user.clone()), State(pool.clone()))
+        .await
+        .into_response();
+    let api_keys: Vec<ntypes::ApiKey> = if api_keys_response.status().is_success() {
+        let body = to_bytes(api_keys_response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        let response_data: ntypes::Response<Vec<ntypes::ApiKey>> =
+            serde_json::from_slice(&body).unwrap();
+        response_data.data.unwrap_or_default()
+    } else {
+        vec![]
+    };
+
+    let invitations_response =
+        invitation::list_invitations(Extension(user.clone()), State(pool.clone()))
+            .await
+            .into_response();
+    let invitations: Vec<ntypes::WorkspaceInvitation> =
+        if invitations_response.status().is_success() {
+            let body = to_bytes(invitations_response.into_body(), usize::MAX)
+                .await
+                .unwrap();
+            let response_data: ntypes::Response<Vec<ntypes::WorkspaceInvitation>> =
+                serde_json::from_slice(&body).unwrap();
+            response_data.data.unwrap_or_default()
+        } else {
+            vec![]
+        };
 
     Json(ntypes::SettingsData {
         user: ntypes::UserInfo {

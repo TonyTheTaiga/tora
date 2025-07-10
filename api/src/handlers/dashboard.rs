@@ -1,15 +1,10 @@
-use axum::{
-    Extension, Json,
-    extract::State,
-    http::StatusCode,
-    response::IntoResponse,
-};
+use crate::handlers::experiment::Experiment;
+use crate::middleware::auth::AuthenticatedUser;
+use crate::ntypes::Response;
+use axum::{Extension, Json, extract::State, http::StatusCode, response::IntoResponse};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use uuid::Uuid;
-use crate::middleware::auth::AuthenticatedUser;
-use crate::ntypes::Response;
-use crate::handlers::experiment::Experiment;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WorkspaceSummary {
@@ -90,8 +85,8 @@ pub async fn get_dashboard_overview(
         (Ok(workspace_rows), Ok(experiment_rows)) => {
             let workspaces: Vec<WorkspaceSummary> = workspace_rows
                 .into_iter()
-                .map(|(id, name, description, created_at, role, experiment_count, recent_experiment_count)| {
-                    WorkspaceSummary {
+                .map(
+                    |(
                         id,
                         name,
                         description,
@@ -99,25 +94,47 @@ pub async fn get_dashboard_overview(
                         role,
                         experiment_count,
                         recent_experiment_count,
-                    }
-                })
+                    )| {
+                        WorkspaceSummary {
+                            id,
+                            name,
+                            description,
+                            created_at,
+                            role,
+                            experiment_count,
+                            recent_experiment_count,
+                        }
+                    },
+                )
                 .collect();
 
             let recent_experiments: Vec<Experiment> = experiment_rows
                 .into_iter()
-                .map(|(id, name, description, hyperparams, tags, created_at, updated_at, workspace_id, available_metrics)| {
-                    Experiment {
+                .map(
+                    |(
                         id,
                         name,
                         description,
-                        hyperparams: hyperparams.unwrap_or_default(),
-                        tags: tags.unwrap_or_default(),
+                        hyperparams,
+                        tags,
                         created_at,
                         updated_at,
-                        available_metrics: available_metrics.unwrap_or_default(),
-                        workspace_id: Some(workspace_id),
-                    }
-                })
+                        workspace_id,
+                        available_metrics,
+                    )| {
+                        Experiment {
+                            id,
+                            name,
+                            description,
+                            hyperparams: hyperparams.unwrap_or_default(),
+                            tags: tags.unwrap_or_default(),
+                            created_at,
+                            updated_at,
+                            available_metrics: available_metrics.unwrap_or_default(),
+                            workspace_id: Some(workspace_id),
+                        }
+                    },
+                )
                 .collect();
 
             let overview = DashboardOverview {
@@ -132,7 +149,7 @@ pub async fn get_dashboard_overview(
             .into_response()
         }
         (Err(e), _) | (_, Err(e)) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {

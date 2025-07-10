@@ -1,3 +1,5 @@
+use crate::middleware::auth::AuthenticatedUser;
+use crate::ntypes::Response;
 use axum::{
     Extension, Json,
     extract::{Path, State},
@@ -7,8 +9,6 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use uuid::Uuid;
-use crate::middleware::auth::AuthenticatedUser;
-use crate::ntypes::Response;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Metric {
@@ -83,7 +83,7 @@ pub async fn get_metrics(
     .await;
 
     match access_check {
-        Ok((count,)) if count == 0 => {
+        Ok((0,)) => {
             return (
                 StatusCode::FORBIDDEN,
                 Json(Response {
@@ -94,7 +94,7 @@ pub async fn get_metrics(
                 .into_response();
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -119,8 +119,8 @@ pub async fn get_metrics(
         Ok(rows) => {
             let metrics: Vec<Metric> = rows
                 .into_iter()
-                .map(|(id, experiment_id, name, value, step, metadata, created_at)| {
-                    Metric {
+                .map(
+                    |(id, experiment_id, name, value, step, metadata, created_at)| Metric {
                         id,
                         experiment_id,
                         name,
@@ -128,8 +128,8 @@ pub async fn get_metrics(
                         step: step.map(|s| s as i64),
                         metadata,
                         created_at,
-                    }
-                })
+                    },
+                )
                 .collect();
 
             Json(Response {
@@ -139,7 +139,7 @@ pub async fn get_metrics(
             .into_response()
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -202,7 +202,7 @@ pub async fn create_metric(
     .await;
 
     match access_check {
-        Ok((count,)) if count == 0 => {
+        Ok((0,)) => {
             return (
                 StatusCode::FORBIDDEN,
                 Json(Response {
@@ -213,7 +213,7 @@ pub async fn create_metric(
                 .into_response();
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -260,7 +260,7 @@ pub async fn create_metric(
                 .into_response()
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -323,7 +323,7 @@ pub async fn batch_create_metrics(
     .await;
 
     match access_check {
-        Ok((count,)) if count == 0 => {
+        Ok((0,)) => {
             return (
                 StatusCode::FORBIDDEN,
                 Json(Response {
@@ -334,7 +334,7 @@ pub async fn batch_create_metrics(
                 .into_response();
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -350,7 +350,7 @@ pub async fn batch_create_metrics(
     let mut tx = match pool.begin().await {
         Ok(tx) => tx,
         Err(e) => {
-            eprintln!("Failed to begin transaction: {}", e);
+            eprintln!("Failed to begin transaction: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -389,7 +389,7 @@ pub async fn batch_create_metrics(
                 });
             }
             Err(e) => {
-                eprintln!("Failed to create metric: {}", e);
+                eprintln!("Failed to create metric: {e}");
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Json(Response {
@@ -403,7 +403,7 @@ pub async fn batch_create_metrics(
     }
 
     if let Err(e) = tx.commit().await {
-        eprintln!("Failed to commit transaction: {}", e);
+        eprintln!("Failed to commit transaction: {e}");
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(Response {
@@ -431,7 +431,7 @@ pub async fn export_metrics_csv(
     Path(experiment_id): Path<String>,
 ) -> impl IntoResponse {
     use axum::http::HeaderMap;
-    
+
     let user_uuid = match Uuid::parse_str(&user.id) {
         Ok(uuid) => uuid,
         Err(_) => {
@@ -475,7 +475,7 @@ pub async fn export_metrics_csv(
     .await;
 
     match access_check {
-        Ok((count,)) if count == 0 => {
+        Ok((0,)) => {
             return (
                 StatusCode::FORBIDDEN,
                 Json(Response {
@@ -486,7 +486,7 @@ pub async fn export_metrics_csv(
                 .into_response();
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -509,25 +509,41 @@ pub async fn export_metrics_csv(
 
     match result {
         Ok(rows) => {
-            let mut csv_data = String::from("id,experiment_id,name,value,step,metadata,created_at\n");
-            
+            let mut csv_data =
+                String::from("id,experiment_id,name,value,step,metadata,created_at\n");
+
             for (id, exp_id, name, value, step, metadata, created_at) in rows {
-                let step_str = step.map(|s| s.to_string()).unwrap_or_else(|| "null".to_string());
-                let metadata_str = metadata.map(|m| m.to_string()).unwrap_or_else(|| "null".to_string());
+                let step_str = step
+                    .map(|s| s.to_string())
+                    .unwrap_or_else(|| "null".to_string());
+                let metadata_str = metadata
+                    .map(|m| m.to_string())
+                    .unwrap_or_else(|| "null".to_string());
                 csv_data.push_str(&format!(
                     "{},{},{},{},{},{},{}\n",
-                    id, exp_id, name, value, step_str, metadata_str, created_at.to_rfc3339()
+                    id,
+                    exp_id,
+                    name,
+                    value,
+                    step_str,
+                    metadata_str,
+                    created_at.to_rfc3339()
                 ));
             }
 
             let mut headers = HeaderMap::new();
             headers.insert("Content-Type", "text/csv".parse().unwrap());
-            headers.insert("Content-Disposition", format!("attachment; filename=\"metrics_{}.csv\"", experiment_id).parse().unwrap());
-            
+            headers.insert(
+                "Content-Disposition",
+                format!("attachment; filename=\"metrics_{experiment_id}.csv\"",)
+                    .parse()
+                    .unwrap(),
+            );
+
             (StatusCode::OK, headers, csv_data).into_response()
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {

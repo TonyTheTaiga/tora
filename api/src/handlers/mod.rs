@@ -15,6 +15,7 @@ mod dashboard;
 mod experiment;
 mod invitation;
 mod metric;
+mod role;
 mod user;
 
 pub fn api_routes() -> Router<sqlx::PgPool> {
@@ -87,9 +88,13 @@ pub fn api_routes() -> Router<sqlx::PgPool> {
             protected_route(get(metric::export_metrics_csv)),
         )
         // Dashboard
-        .route("/dashboard/overview", protected_route(get(dashboard::get_dashboard_overview)))
+        .route(
+            "/dashboard/overview",
+            protected_route(get(dashboard::get_dashboard_overview)),
+        )
         // Settings and user management
         .route("/settings", protected_route(get(user::get_settings)))
+        .route("/workspace-roles", get(role::list_workspace_roles))
         // API Keys
         .route("/api-keys", protected_route(get(api_key::list_api_keys)))
         .route("/api-keys", protected_route(post(api_key::create_api_key)))

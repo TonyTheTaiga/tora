@@ -127,7 +127,17 @@ pub async fn list_experiments(
             let experiments: Vec<Experiment> = rows
                 .into_iter()
                 .map(
-                    |(id, name, description, hyperparams, tags, created_at, updated_at, workspace_id, available_metrics)| {
+                    |(
+                        id,
+                        name,
+                        description,
+                        hyperparams,
+                        tags,
+                        created_at,
+                        updated_at,
+                        workspace_id,
+                        available_metrics,
+                    )| {
                         Experiment {
                             id,
                             name,
@@ -150,7 +160,7 @@ pub async fn list_experiments(
             .into_response()
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -200,7 +210,7 @@ pub async fn create_experiment(
     let mut tx = match pool.begin().await {
         Ok(tx) => tx,
         Err(e) => {
-            eprintln!("Failed to begin transaction: {}", e);
+            eprintln!("Failed to begin transaction: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -222,7 +232,7 @@ pub async fn create_experiment(
     .await;
 
     match access_check {
-        Ok((count,)) if count == 0 => {
+        Ok((0,)) => {
             return (
                 StatusCode::FORBIDDEN,
                 Json(Response {
@@ -233,7 +243,7 @@ pub async fn create_experiment(
                 .into_response();
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -252,7 +262,7 @@ pub async fn create_experiment(
     )
     .bind(&request.name)
     .bind(if request.description.is_empty() { None } else { Some(&request.description) })
-    .bind(&request.tags.unwrap_or_default())
+    .bind(request.tags.unwrap_or_default())
     .fetch_one(&mut *tx)
     .await;
 
@@ -260,7 +270,7 @@ pub async fn create_experiment(
         match experiment_result {
             Ok(row) => row,
             Err(e) => {
-                eprintln!("Failed to create experiment: {}", e);
+                eprintln!("Failed to create experiment: {e}");
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Json(Response {
@@ -282,7 +292,7 @@ pub async fn create_experiment(
     .await;
 
     if let Err(e) = workspace_experiment_result {
-        eprintln!("Failed to add experiment to workspace: {}", e);
+        eprintln!("Failed to add experiment to workspace: {e}");
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(Response {
@@ -294,7 +304,7 @@ pub async fn create_experiment(
     }
 
     if let Err(e) = tx.commit().await {
-        eprintln!("Failed to commit transaction: {}", e);
+        eprintln!("Failed to commit transaction: {e}");
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(Response {
@@ -379,7 +389,17 @@ pub async fn get_experiment(
     .await;
 
     match result {
-        Ok((id, name, description, hyperparams, tags, created_at, updated_at, workspace_id, available_metrics)) => {
+        Ok((
+            id,
+            name,
+            description,
+            hyperparams,
+            tags,
+            created_at,
+            updated_at,
+            workspace_id,
+            available_metrics,
+        )) => {
             let experiment = Experiment {
                 id,
                 name,
@@ -407,7 +427,7 @@ pub async fn get_experiment(
         )
             .into_response(),
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -469,7 +489,7 @@ pub async fn update_experiment(
     .await;
 
     match access_check {
-        Ok((count,)) if count == 0 => {
+        Ok((0,)) => {
             return (
                 StatusCode::FORBIDDEN,
                 Json(Response {
@@ -480,7 +500,7 @@ pub async fn update_experiment(
                 .into_response();
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -499,7 +519,7 @@ pub async fn update_experiment(
     )
     .bind(&request.name)
     .bind(if request.description.is_empty() { None } else { Some(&request.description) })
-    .bind(&request.tags.unwrap_or_default())
+    .bind(request.tags.unwrap_or_default())
     .bind(experiment_uuid)
     .fetch_one(&pool)
     .await;
@@ -525,7 +545,7 @@ pub async fn update_experiment(
             .into_response()
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -588,7 +608,7 @@ pub async fn delete_experiment(
     .await;
 
     match access_check {
-        Ok((count,)) if count == 0 => {
+        Ok((0,)) => {
             return (
                 StatusCode::FORBIDDEN,
                 Json(Response {
@@ -602,7 +622,7 @@ pub async fn delete_experiment(
                 .into_response();
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -644,7 +664,7 @@ pub async fn delete_experiment(
             }
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -701,7 +721,7 @@ pub async fn list_workspace_experiments(
     .await;
 
     match access_check {
-        Ok((count,)) if count == 0 => {
+        Ok((0,)) => {
             return (
                 StatusCode::FORBIDDEN,
                 Json(Response {
@@ -712,7 +732,7 @@ pub async fn list_workspace_experiments(
                 .into_response();
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -759,7 +779,16 @@ pub async fn list_workspace_experiments(
             let experiments: Vec<Experiment> = rows
                 .into_iter()
                 .map(
-                    |(id, name, description, hyperparams, tags, created_at, updated_at, available_metrics)| {
+                    |(
+                        id,
+                        name,
+                        description,
+                        hyperparams,
+                        tags,
+                        created_at,
+                        updated_at,
+                        available_metrics,
+                    )| {
                         Experiment {
                             id,
                             name,
@@ -782,7 +811,7 @@ pub async fn list_workspace_experiments(
             .into_response()
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
