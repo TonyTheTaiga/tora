@@ -1,12 +1,8 @@
+import { redirect } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 
-export const load: LayoutServerLoad = async ({
-  locals: { safeGetSession },
-  cookies,
-}) => {
-  const { session } = await safeGetSession();
-  return {
-    session,
-    cookies: cookies.getAll(),
-  };
+export const load: LayoutServerLoad = async ({ locals, url }) => {
+  if (locals.session && url.pathname === "/") {
+    throw redirect(302, "/workspaces");
+  }
 };

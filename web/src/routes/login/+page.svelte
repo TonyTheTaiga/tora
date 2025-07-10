@@ -1,8 +1,10 @@
 <script lang="ts">
-  import { LogIn, User, Lock, Mail, Loader2 } from "lucide-svelte";
+  import { LogIn, User, Lock, Mail, Loader2 } from "@lucide/svelte";
+  import type { PageProps } from "./$types";
   import { goto } from "$app/navigation";
   import { enhance } from "$app/forms";
 
+  let { form }: PageProps = $props();
   let submitting = $state(false);
 </script>
 
@@ -13,7 +15,6 @@
     <div
       class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 overflow-hidden"
     >
-      <!-- Header -->
       <div
         class="px-6 py-4 border-b border-ctp-surface0 flex items-center gap-2"
       >
@@ -21,16 +22,14 @@
         <h2 class="text-xl text-ctp-text">sign in</h2>
       </div>
 
-      <!-- Form -->
       <form
         method="POST"
         autocomplete="on"
-        action=""
         name="login-form"
         class="p-6 space-y-5"
         use:enhance={() => {
           submitting = true;
-          return async ({ result }) => {
+          return async ({ update, result }) => {
             submitting = false;
             if (result.type === "redirect") {
               goto(result.location);
@@ -84,6 +83,15 @@
             />
           </div>
         </div>
+
+        <!-- Error message -->
+        {#if form?.error}
+          <div
+            class="text-sm text-ctp-red bg-ctp-red/10 border border-ctp-red/20 p-3"
+          >
+            {form.error}
+          </div>
+        {/if}
 
         <!-- Button actions -->
         <div class="pt-2">

@@ -1,15 +1,17 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
-  import { AlertTriangle, X, Loader2 } from "lucide-svelte";
+  import { AlertTriangle, X, Loader2 } from "@lucide/svelte";
   import { onMount, onDestroy } from "svelte";
   import { closeDeleteExperimentModal } from "$lib/state/app.svelte.js";
 
   let {
     experiment,
     experiments = $bindable(),
+    onDelete,
   }: {
     experiment: Experiment;
     experiments: Experiment[];
+    onDelete: (experimentId: string) => Promise<void>;
   } = $props();
 
   let isDeleting = $state(false);
@@ -28,17 +30,11 @@
     isDeleting = true;
 
     try {
-      const response = await fetch(`/api/experiments/${experiment.id}`, {
-        method: "DELETE",
-      });
+      await onDelete(experiment.id);
 
-      if (response.ok) {
-        const experimentId = experiment.id;
-        experiments = experiments.filter((exp) => exp.id !== experimentId);
-        closeDeleteExperimentModal();
-      } else {
-        console.error("Failed to delete experiment");
-      }
+      const experimentId = experiment.id;
+      experiments = experiments.filter((exp) => exp.id !== experimentId);
+      closeDeleteExperimentModal();
     } catch (error) {
       console.error("Error deleting experiment:", error);
     } finally {

@@ -1,0 +1,557 @@
+use crate::middleware::auth::AuthenticatedUser;
+use crate::ntypes::Response;
+use axum::{
+    Extension, Json,
+    extract::{Path, State},
+    http::StatusCode,
+    response::IntoResponse,
+};
+use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
+use uuid::Uuid;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Metric {
+    pub id: i64,
+    pub experiment_id: String,
+    pub name: String,
+    pub value: f64,
+    pub step: Option<i64>,
+    pub metadata: Option<serde_json::Value>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(Deserialize)]
+pub struct CreateMetricRequest {
+    pub name: String,
+    pub value: f64,
+    pub step: Option<i64>,
+    pub metadata: Option<serde_json::Value>,
+}
+
+#[derive(Deserialize)]
+pub struct BatchCreateMetricsRequest {
+    pub metrics: Vec<CreateMetricRequest>,
+}
+
+// Get metrics for an experiment
+pub async fn get_metrics(
+    Extension(user): Extension<AuthenticatedUser>,
+    State(pool): State<PgPool>,
+    Path(experiment_id): Path<String>,
+) -> impl IntoResponse {
+    let user_uuid = match Uuid::parse_str(&user.id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid user ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    let experiment_uuid = match Uuid::parse_str(&experiment_id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid experiment ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    // Check if user has access to this experiment
+    let access_check = sqlx::query_as::<_, (i64,)>(
+        r#"
+        SELECT COUNT(*) FROM experiment e
+        JOIN workspace_experiments we ON e.id = we.experiment_id
+        JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
+        WHERE e.id = $1 AND uw.user_id = $2
+        "#,
+    )
+    .bind(experiment_uuid)
+    .bind(user_uuid)
+    .fetch_one(&pool)
+    .await;
+
+    match access_check {
+        Ok((0,)) => {
+            return (
+                StatusCode::FORBIDDEN,
+                Json(Response {
+                    status: 403,
+                    data: Some("Access denied to experiment".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        Err(e) => {
+            eprintln!("Database error: {e}");
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to check experiment access".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        _ => {}
+    }
+
+    // Fetch metrics for the experiment
+    let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
+        "SELECT id, experiment_id::text, name, value::float8, step::float8, metadata, created_at FROM metric WHERE experiment_id = $1 ORDER BY created_at DESC",
+    )
+    .bind(experiment_uuid)
+    .fetch_all(&pool)
+    .await;
+
+    match result {
+        Ok(rows) => {
+            let metrics: Vec<Metric> = rows
+                .into_iter()
+                .map(
+                    |(id, experiment_id, name, value, step, metadata, created_at)| Metric {
+                        id,
+                        experiment_id,
+                        name,
+                        value,
+                        step: step.map(|s| s as i64),
+                        metadata,
+                        created_at,
+                    },
+                )
+                .collect();
+
+            Json(Response {
+                status: 200,
+                data: Some(metrics),
+            })
+            .into_response()
+        }
+        Err(e) => {
+            eprintln!("Database error: {e}");
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to fetch metrics".to_string()),
+                }),
+            )
+                .into_response()
+        }
+    }
+}
+
+// Create single metric
+pub async fn create_metric(
+    Extension(user): Extension<AuthenticatedUser>,
+    State(pool): State<PgPool>,
+    Path(experiment_id): Path<String>,
+    Json(request): Json<CreateMetricRequest>,
+) -> impl IntoResponse {
+    let user_uuid = match Uuid::parse_str(&user.id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid user ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    let experiment_uuid = match Uuid::parse_str(&experiment_id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid experiment ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    // Check if user has access to this experiment
+    let access_check = sqlx::query_as::<_, (i64,)>(
+        r#"
+        SELECT COUNT(*) FROM experiment e
+        JOIN workspace_experiments we ON e.id = we.experiment_id
+        JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
+        WHERE e.id = $1 AND uw.user_id = $2
+        "#,
+    )
+    .bind(experiment_uuid)
+    .bind(user_uuid)
+    .fetch_one(&pool)
+    .await;
+
+    match access_check {
+        Ok((0,)) => {
+            return (
+                StatusCode::FORBIDDEN,
+                Json(Response {
+                    status: 403,
+                    data: Some("Access denied to experiment".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        Err(e) => {
+            eprintln!("Database error: {e}");
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to check experiment access".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        _ => {}
+    }
+
+    // Create the metric
+    let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
+        "INSERT INTO metric (experiment_id, name, value, step, metadata) VALUES ($1, $2, $3, $4, $5) RETURNING id, experiment_id::text, name, value::float8, step::float8, metadata, created_at",
+    )
+    .bind(experiment_uuid)
+    .bind(&request.name)
+    .bind(request.value)
+    .bind(request.step.map(|s| s as f64))
+    .bind(&request.metadata)
+    .fetch_one(&pool)
+    .await;
+
+    match result {
+        Ok((id, experiment_id, name, value, step, metadata, created_at)) => {
+            let metric = Metric {
+                id,
+                experiment_id,
+                name,
+                value,
+                step: step.map(|s| s as i64),
+                metadata,
+                created_at,
+            };
+
+            (
+                StatusCode::CREATED,
+                Json(Response {
+                    status: 201,
+                    data: Some(metric),
+                }),
+            )
+                .into_response()
+        }
+        Err(e) => {
+            eprintln!("Database error: {e}");
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to create metric".to_string()),
+                }),
+            )
+                .into_response()
+        }
+    }
+}
+
+// Batch create metrics
+pub async fn batch_create_metrics(
+    Extension(user): Extension<AuthenticatedUser>,
+    State(pool): State<PgPool>,
+    Path(experiment_id): Path<String>,
+    Json(request): Json<BatchCreateMetricsRequest>,
+) -> impl IntoResponse {
+    let user_uuid = match Uuid::parse_str(&user.id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid user ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    let experiment_uuid = match Uuid::parse_str(&experiment_id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid experiment ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    // Check if user has access to this experiment
+    let access_check = sqlx::query_as::<_, (i64,)>(
+        r#"
+        SELECT COUNT(*) FROM experiment e
+        JOIN workspace_experiments we ON e.id = we.experiment_id
+        JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
+        WHERE e.id = $1 AND uw.user_id = $2
+        "#,
+    )
+    .bind(experiment_uuid)
+    .bind(user_uuid)
+    .fetch_one(&pool)
+    .await;
+
+    match access_check {
+        Ok((0,)) => {
+            return (
+                StatusCode::FORBIDDEN,
+                Json(Response {
+                    status: 403,
+                    data: Some("Access denied to experiment".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        Err(e) => {
+            eprintln!("Database error: {e}");
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to check experiment access".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        _ => {}
+    }
+
+    let mut tx = match pool.begin().await {
+        Ok(tx) => tx,
+        Err(e) => {
+            eprintln!("Failed to begin transaction: {e}");
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to create metrics".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    let mut created_metrics = Vec::new();
+
+    for metric_request in request.metrics {
+        let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
+            "INSERT INTO metric (experiment_id, name, value, step, metadata) VALUES ($1, $2, $3, $4, $5) RETURNING id, experiment_id::text, name, value::float8, step::float8, metadata, created_at",
+        )
+        .bind(experiment_uuid)
+        .bind(&metric_request.name)
+        .bind(metric_request.value)
+        .bind(metric_request.step.map(|s| s as f64))
+        .bind(&metric_request.metadata)
+        .fetch_one(&mut *tx)
+        .await;
+
+        match result {
+            Ok((id, experiment_id, name, value, step, metadata, created_at)) => {
+                created_metrics.push(Metric {
+                    id,
+                    experiment_id,
+                    name,
+                    value,
+                    step: step.map(|s| s as i64),
+                    metadata,
+                    created_at,
+                });
+            }
+            Err(e) => {
+                eprintln!("Failed to create metric: {e}");
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(Response {
+                        status: 500,
+                        data: Some("Failed to create metrics".to_string()),
+                    }),
+                )
+                    .into_response();
+            }
+        }
+    }
+
+    if let Err(e) = tx.commit().await {
+        eprintln!("Failed to commit transaction: {e}");
+        return (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(Response {
+                status: 500,
+                data: Some("Failed to create metrics".to_string()),
+            }),
+        )
+            .into_response();
+    }
+
+    (
+        StatusCode::CREATED,
+        Json(Response {
+            status: 201,
+            data: Some(created_metrics),
+        }),
+    )
+        .into_response()
+}
+
+// Export metrics as CSV
+pub async fn export_metrics_csv(
+    Extension(user): Extension<AuthenticatedUser>,
+    State(pool): State<PgPool>,
+    Path(experiment_id): Path<String>,
+) -> impl IntoResponse {
+    use axum::http::HeaderMap;
+
+    let user_uuid = match Uuid::parse_str(&user.id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid user ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    let experiment_uuid = match Uuid::parse_str(&experiment_id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid experiment ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    // Check if user has access to this experiment
+    let access_check = sqlx::query_as::<_, (i64,)>(
+        r#"
+        SELECT COUNT(*) FROM experiment e
+        JOIN workspace_experiments we ON e.id = we.experiment_id
+        JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
+        WHERE e.id = $1 AND uw.user_id = $2
+        "#,
+    )
+    .bind(experiment_uuid)
+    .bind(user_uuid)
+    .fetch_one(&pool)
+    .await;
+
+    match access_check {
+        Ok((0,)) => {
+            return (
+                StatusCode::FORBIDDEN,
+                Json(Response {
+                    status: 403,
+                    data: Some("Access denied to experiment".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        Err(e) => {
+            eprintln!("Database error: {e}");
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to check experiment access".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        _ => {}
+    }
+
+    // Fetch metrics for CSV export
+    let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
+        "SELECT id, experiment_id::text, name, value::float8, step::float8, metadata, created_at FROM metric WHERE experiment_id = $1 ORDER BY created_at ASC",
+    )
+    .bind(experiment_uuid)
+    .fetch_all(&pool)
+    .await;
+
+    match result {
+        Ok(rows) => {
+            let mut csv_data =
+                String::from("id,experiment_id,name,value,step,metadata,created_at\n");
+
+            for (id, exp_id, name, value, step, metadata, created_at) in rows {
+                let step_str = step
+                    .map(|s| s.to_string())
+                    .unwrap_or_else(|| "null".to_string());
+                let metadata_str = metadata
+                    .map(|m| m.to_string())
+                    .unwrap_or_else(|| "null".to_string());
+                csv_data.push_str(&format!(
+                    "{},{},{},{},{},{},{}\n",
+                    id,
+                    exp_id,
+                    name,
+                    value,
+                    step_str,
+                    metadata_str,
+                    created_at.to_rfc3339()
+                ));
+            }
+
+            let mut headers = HeaderMap::new();
+            headers.insert("Content-Type", "text/csv".parse().unwrap());
+            headers.insert(
+                "Content-Disposition",
+                format!("attachment; filename=\"metrics_{experiment_id}.csv\"",)
+                    .parse()
+                    .unwrap(),
+            );
+
+            (StatusCode::OK, headers, csv_data).into_response()
+        }
+        Err(e) => {
+            eprintln!("Database error: {e}");
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to export metrics".to_string()),
+                }),
+            )
+                .into_response()
+        }
+    }
+}

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Globe, GlobeLock } from "lucide-svelte";
+  import { Globe, GlobeLock } from "@lucide/svelte";
   import type { Experiment } from "$lib/types";
 
   let { experiment }: { experiment: Experiment } = $props();

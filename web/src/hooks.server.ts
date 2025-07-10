@@ -1,154 +1,48 @@
-import { createServerClient } from "@supabase/ssr";
-import { createClient } from "@supabase/supabase-js";
-import { type Handle } from "@sveltejs/kit";
-import { sequence } from "@sveltejs/kit/hooks";
-import { createDbClient } from "$lib/server/database";
-import { createHash } from "crypto";
+import type { Handle } from "@sveltejs/kit";
+import type { SessionData } from "$lib/types";
+import { ApiClient } from "$lib/api";
 
-import { env as publicEnv } from "$env/dynamic/public";
-
-import { env as privateEnv } from "$env/dynamic/private";
-
-const supabase: Handle = async ({ event, resolve }) => {
-  /**
-   * Creates a Supabase client specific to this server request.
-   *
-   * The Supabase client gets the Auth token from the request cookies.
-   */
-  event.locals.supabase = createServerClient(
-    publicEnv.PUBLIC_SUPABASE_URL,
-    publicEnv.PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll: () => event.cookies.getAll(),
-        /**
-         * SvelteKit's cookies API requires `path` to be explicitly set in
-         * the cookie options. Setting `path` to `/` replicates previous/
-         * standard behavior.
-         */
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            event.cookies.set(name, value, { ...options, path: "/" });
-          });
-        },
-      },
-    },
-  );
-
-  event.locals.adminSupabaseClient = createClient(
-    publicEnv.PUBLIC_SUPABASE_URL,
-    privateEnv.PRIVATE_SERVICE_ROLE_KEY,
-    {
-      auth: { autoRefreshToken: false, persistSession: false },
-    },
-  );
-
-  event.locals.dbClient = createDbClient(event.locals.supabase);
-
-  /**
-   * Unlike `supabase.auth.getSession()`, which returns the session _without_
-   * validating the JWT, this function also calls `getUser()` to validate the
-   * JWT before returning the session.
-   */
-  event.locals.safeGetSession = async () => {
-    const {
-      data: { session },
-    } = await event.locals.supabase.auth.getSession();
-    if (!session) {
-      return { session: null, user: null };
-    }
-
-    const {
-      data: { user },
-      error,
-    } = await event.locals.supabase.auth.getUser();
-    if (error) {
-      // JWT validation has failed
-      return { session: null, user: null };
-    }
-
-    return { session, user };
-  };
-
-  return resolve(event, {
-    filterSerializedResponseHeaders(name) {
-      /**
-       * Supabase libraries use the `content-range` and `x-supabase-api-version`
-       * headers, so we need to tell SvelteKit to pass it through.
-       */
-      return name === "content-range" || name === "x-supabase-api-version";
-    },
-  });
+type RefreshResponse = {
+  status: number;
+  data: SessionData;
 };
 
-const finalize: Handle = async ({ event, resolve }) => {
-  const { session, user } = await event.locals.safeGetSession();
-  event.locals.session = session;
-  event.locals.user = user;
-
-  if (
-    event.url.pathname.startsWith("/api") &&
-    !event.locals.user &&
-    event.request.headers.get("x-api-key")
-  ) {
-    const apiKey = event.request.headers.get("x-api-key");
-
-    try {
-      if (apiKey) {
-        const keyHash = createHash("sha256").update(apiKey).digest("hex");
-
-        const keyData = await event.locals.dbClient.lookupApiKey(keyHash);
-
-        if (keyData && keyData.user_id) {
-          event.locals.user = {
-            id: keyData.user_id,
-          };
-
-          try {
-            await event.locals.dbClient.updateApiKeyLastUsed(keyHash);
-          } catch (updateErr) {
-            console.warn(
-              `Failed to update API key last_used for user_id: ${keyData.user_id}:`,
-              updateErr instanceof Error ? updateErr.message : updateErr,
-            );
-          }
-        } else {
-          console.warn(
-            "API key provided, but no valid user found or key is revoked.",
-          );
-        }
-      } else {
-        console.warn("API key header was present but empty.");
+export const handle: Handle = async ({ event, resolve }) => {
+  const auth_token = event.cookies.get("tora_auth_token");
+  let apiClient: ApiClient;
+  if (auth_token) {
+    const sessionJson = atob(auth_token);
+    const sessionData: SessionData = JSON.parse(sessionJson);
+    const now = Math.floor(Date.now() / 1000);
+    if (sessionData.expires_at > now) {
+      event.locals.session = sessionData;
+      apiClient = new ApiClient(undefined, sessionData.access_token);
+    } else {
+      apiClient = new ApiClient();
+      const response = await apiClient.post<RefreshResponse>("/api/refresh", {
+        refresh_token: sessionData.refresh_token,
+      });
+      if (response.status === 200) {
+        const newSessionData: SessionData = {
+          access_token: response.data.access_token,
+          refresh_token: response.data.refresh_token,
+          expires_in: response.data.expires_in,
+          expires_at: response.data.expires_at,
+          user: {
+            id: response.data.user.id,
+            email: response.data.user.email,
+          },
+        };
+        event.locals.session = newSessionData;
+        apiClient = new ApiClient(undefined, newSessionData.access_token);
+      } else if (response.status === 401) {
+        event.cookies.delete("tora_auth_token", { path: "/" });
       }
-    } catch (err) {
-      console.error(
-        "Unexpected error during API key validation:",
-        err instanceof Error ? err.message : err,
-        err instanceof Error ? err.stack : "",
-      );
     }
+  } else {
+    apiClient = new ApiClient();
   }
 
+  event.locals.apiClient = apiClient;
   return resolve(event);
 };
-
-// const authGuard: Handle = async ({ event, resolve }) => {
-//   if (event.url.pathname.startsWith("/api")) {
-//     return resolve(event);
-//   }
-
-//   const { session, user } = await event.locals.safeGetSession();
-//   event.locals.session = session;
-//   event.locals.user = user;
-
-//   if (!event.locals.session && event.url.pathname.startsWith("/private")) {
-//     redirect(303, "/auth");
-//   }
-
-//   if (event.locals.session && event.url.pathname === "/auth") {
-//     redirect(303, "/private");
-//   }
-//   return resolve(event);
-// };
-
-export const handle: Handle = sequence(supabase, finalize);

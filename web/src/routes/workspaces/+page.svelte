@@ -2,14 +2,17 @@
   import {
     openCreateWorkspaceModal,
     getCreateWorkspaceModal,
-  } from "$lib/state/app.svelte";
+  } from "$lib/state/app.svelte.js";
   import CreateWorkspaceModal from "./create-workspace-modal.svelte";
-  import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
+  import WorkspaceRoleBadge from "$lib/workspace-role-badge.svelte";
   import RecentActivity from "$lib/components/recent-activity.svelte";
   import { onMount } from "svelte";
 
   let { data } = $props();
   let { workspaces } = $derived(data);
+
+  let recentExperiments = $derived(data.recentExperiments || []);
+  let recentWorkspaces = $derived(data.recentWorkspaces);
   let searchQuery = $state("");
 
   let filteredWorkspaces = $derived(
@@ -190,8 +193,8 @@
         </div>
         <div class="bg-ctp-surface0/10 p-4 text-sm">
           <RecentActivity
-            experiments={data.recentExperiments}
-            workspaces={data.recentWorkspaces}
+            experiments={recentExperiments}
+            workspaces={recentWorkspaces}
           />
         </div>
       </div>

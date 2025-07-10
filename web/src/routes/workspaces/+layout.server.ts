@@ -1,36 +1,91 @@
 import type { LayoutServerLoad } from "./$types";
-import { startTimer, generateRequestId } from "$lib/utils/timing";
 import { error } from "@sveltejs/kit";
+import { startTimer, generateRequestId } from "$lib/utils/timing";
+
+interface ApiResponse<T> {
+  status: number;
+  data: T;
+}
+
+interface ExperimentData {
+  id: string;
+  name: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  tags: string[];
+  hyperparams: any[];
+  workspace_id: string;
+  available_metrics: string[];
+}
+
+interface DashboardOverview {
+  workspaces: {
+    id: string;
+    name: string;
+    description: string | null;
+    created_at: string;
+    role: string;
+    experiment_count: number;
+    recent_experiment_count: number;
+  }[];
+  recent_experiments: ExperimentData[];
+}
 
 export const load: LayoutServerLoad = async ({ locals }) => {
-  if (!locals.user) {
-    error(501, "user required");
+  if (!locals.session) {
+    error(401, "Authentication required");
   }
+
+  if (!locals.apiClient) {
+    error(500, "API client not available");
+  }
+
   const requestId = generateRequestId();
-  const timer = startTimer("workspaces.load", {
-    requestId,
-  });
+  const timer = startTimer("workspaces.load", { requestId });
 
   try {
-    const { workspaces, experiments: allExperiments } =
-      await locals.dbClient.getWorkspacesAndExperiments(locals.user.id, [
-        "OWNER",
-        "ADMIN",
-        "EDITOR",
-        "VIEWER",
-      ]);
+    const dashboardResponse = await locals.apiClient.get<
+      ApiResponse<DashboardOverview>
+    >("/api/dashboard/overview");
 
-    allExperiments.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
+    if (dashboardResponse.status !== 200) {
+      error(500, "Failed to fetch dashboard overview");
+    }
 
-    const recentExperiments = allExperiments.slice(0, 10);
+    const dashboardData = dashboardResponse.data;
+    if (!dashboardData) {
+      error(500, "No dashboard data received");
+    }
+
+    const workspaces = dashboardData.workspaces.map((workspace) => ({
+      id: workspace.id,
+      name: workspace.name,
+      description: workspace.description,
+      createdAt: new Date(workspace.created_at),
+      role: workspace.role,
+      experimentCount: workspace.experiment_count,
+      recentExperimentCount: workspace.recent_experiment_count,
+    }));
+
+    const recentExperiments = dashboardData.recent_experiments
+      .map((exp) => ({
+        id: exp.id,
+        name: exp.name,
+        description: exp.description || "",
+        hyperparams: exp.hyperparams || [],
+        tags: exp.tags || [],
+        createdAt: new Date(exp.created_at),
+        updatedAt: new Date(exp.updated_at),
+        availableMetrics: exp.available_metrics || [],
+        workspaceId: exp.workspace_id,
+      }))
+      .slice(0, 5);
 
     timer.end({
-      user_id: locals.user.id,
       workspaces_count: workspaces.length,
-      experiments_count: allExperiments.length,
+      recent_experiments_count: recentExperiments.length,
+      user_id: locals.session.user.id,
     });
 
     return {
@@ -42,6 +97,13 @@ export const load: LayoutServerLoad = async ({ locals }) => {
     timer.end({
       error: err instanceof Error ? err.message : "Unknown error",
     });
-    throw err;
+
+    console.error("Error loading dashboard overview:", err);
+
+    if (err instanceof Error && err.message.includes("401")) {
+      error(401, "Authentication required");
+    }
+
+    error(500, "Failed to load dashboard overview");
   }
 };

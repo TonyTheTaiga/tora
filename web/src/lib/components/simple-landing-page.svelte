@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import Logo from "./logo_assets/logo.svelte";
+  import Logo from "$lib/logo_assets/logo.svelte";
   import { onMount } from "svelte";
   import { createHighlighter } from "shiki";
   import { browser } from "$app/environment";

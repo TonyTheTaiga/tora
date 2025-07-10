@@ -1,22 +1,19 @@
 <script lang="ts">
-  import { Plus, LogOut, Trash2, Users, Check, X } from "lucide-svelte";
-  import { enhance } from "$app/forms";
+  import { Plus, LogOut, Trash2, Users, Check, X } from "@lucide/svelte";
   import WorkspaceInviteModal from "./workspace-invite-modal.svelte";
   import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
-  import { goto } from "$app/navigation";
-  import type { ApiKey } from "$lib/types";
+  import { enhance } from "$app/forms";
 
   let { data } = $props();
-
   let createdKey: string = $state("");
   let inviteModalOpen = $state(false);
   let workspaceToInvite: any = $state(null);
 
   const ownedWorkspaces = $derived(
-    data.workspaces?.filter((w) => w.role === "OWNER") || [],
+    data.workspaces?.filter((w: any) => w.role === "OWNER") || [],
   );
   const sharedWorkspaces = $derived(
-    data.workspaces?.filter((w) => w.role !== "OWNER") || [],
+    data.workspaces?.filter((w: any) => w.role !== "OWNER") || [],
   );
   let pendingInvitations = $derived(data.invitations ? data.invitations : []);
 
@@ -25,49 +22,108 @@
     inviteModalOpen = true;
   }
 
-  async function sendInvitation(email: string, roleId: string) {
+  function sendInvitation(email: string, roleId: string) {
     if (!workspaceToInvite || !data.user) return;
 
-    try {
-      const response = await fetch("/api/workspace-invitations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          workspaceId: workspaceToInvite.id,
-          email,
-          roleId,
-        }),
-      });
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "?/sendInvitation";
 
-      if (response.ok) {
-        inviteModalOpen = false;
-        workspaceToInvite = null;
-      }
-    } catch (error) {
-      console.error("Failed to send invitation:", error);
-    }
+    const workspaceIdInput = document.createElement("input");
+    workspaceIdInput.type = "hidden";
+    workspaceIdInput.name = "workspaceId";
+    workspaceIdInput.value = workspaceToInvite.id;
+    form.appendChild(workspaceIdInput);
+
+    const emailInput = document.createElement("input");
+    emailInput.type = "hidden";
+    emailInput.name = "email";
+    emailInput.value = email;
+    form.appendChild(emailInput);
+
+    const roleIdInput = document.createElement("input");
+    roleIdInput.type = "hidden";
+    roleIdInput.name = "roleId";
+    roleIdInput.value = roleId;
+    form.appendChild(roleIdInput);
+
+    document.body.appendChild(form);
+    form.submit();
+
+    inviteModalOpen = false;
+    workspaceToInvite = null;
   }
 
-  async function respondToInvitation(invitationId: string, accept: boolean) {
-    try {
-      const response = await fetch(
-        `/api/workspaces/any/invitations?invitationId=${invitationId}&action=${accept ? "accept" : "deny"}`,
-        {
-          method: "PATCH",
-        },
-      );
+  function deleteWorkspace(workspaceId: string) {
+    if (!confirm("Are you sure you want to delete this workspace?")) return;
 
-      if (response.ok) {
-        pendingInvitations = pendingInvitations.filter(
-          (inv) => inv.id !== invitationId,
-        );
-        if (accept) {
-          window.location.reload();
-        }
-      }
-    } catch (error) {
-      console.error("Failed to respond to invitation:", error);
-    }
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "?/deleteWorkspace";
+
+    const workspaceIdInput = document.createElement("input");
+    workspaceIdInput.type = "hidden";
+    workspaceIdInput.name = "workspaceId";
+    workspaceIdInput.value = workspaceId;
+    form.appendChild(workspaceIdInput);
+
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  function leaveWorkspace(workspaceId: string) {
+    if (!confirm("Are you sure you want to leave this workspace?")) return;
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "?/leaveWorkspace";
+
+    const workspaceIdInput = document.createElement("input");
+    workspaceIdInput.type = "hidden";
+    workspaceIdInput.name = "workspaceId";
+    workspaceIdInput.value = workspaceId;
+    form.appendChild(workspaceIdInput);
+
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  function revokeApiKey(keyId: string) {
+    if (!confirm("Are you sure you want to revoke this API key?")) return;
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "?/revokeApiKey";
+
+    const keyIdInput = document.createElement("input");
+    keyIdInput.type = "hidden";
+    keyIdInput.name = "keyId";
+    keyIdInput.value = keyId;
+    form.appendChild(keyIdInput);
+
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  function respondToInvitation(invitationId: string, accept: boolean) {
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "?/respondToInvitation";
+
+    const invitationIdInput = document.createElement("input");
+    invitationIdInput.type = "hidden";
+    invitationIdInput.name = "invitationId";
+    invitationIdInput.value = invitationId;
+    form.appendChild(invitationIdInput);
+
+    const actionInput = document.createElement("input");
+    actionInput.type = "hidden";
+    actionInput.name = "action";
+    actionInput.value = accept ? "accept" : "deny";
+    form.appendChild(actionInput);
+
+    document.body.appendChild(form);
+    form.submit();
   }
 </script>
 
@@ -215,26 +271,17 @@
                   >
                     <Users size={10} />
                   </button>
-                  <form method="POST" action="?/deleteWorkspace" use:enhance>
-                    <input type="hidden" name="id" value={workspace.id} />
-                    <button
-                      type="submit"
-                      class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 p-1 transition-all"
-                      title="Delete workspace"
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        if (
-                          !confirm(
-                            "Are you sure you want to delete this workspace?",
-                          )
-                        ) {
-                          e.preventDefault();
-                        }
-                      }}
-                    >
-                      <Trash2 size={10} />
-                    </button>
-                  </form>
+                  <button
+                    type="button"
+                    class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 p-1 transition-all"
+                    title="Delete workspace"
+                    onclick={(e) => {
+                      e.stopPropagation();
+                      deleteWorkspace(workspace.id);
+                    }}
+                  >
+                    <Trash2 size={10} />
+                  </button>
                 </div>
               </div>
             {/each}
@@ -259,35 +306,17 @@
                 </a>
                 <WorkspaceRoleBadge role={workspace.role} />
                 <div class="ml-2">
-                  <form
-                    method="POST"
-                    action="?/removeSharedWorkspace"
-                    use:enhance
+                  <button
+                    type="button"
+                    class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 p-1 transition-all"
+                    title="Leave workspace"
+                    onclick={(e) => {
+                      e.stopPropagation();
+                      leaveWorkspace(workspace.id);
+                    }}
                   >
-                    <input type="hidden" name="userId" value={data?.user?.id} />
-                    <input
-                      type="hidden"
-                      name="workspaceId"
-                      value={workspace.id}
-                    />
-                    <button
-                      type="submit"
-                      class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 p-1 transition-all"
-                      title="Leave workspace"
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        if (
-                          !confirm(
-                            "Are you sure you want to leave this workspace?",
-                          )
-                        ) {
-                          e.preventDefault();
-                        }
-                      }}
-                    >
-                      <LogOut size={10} />
-                    </button>
-                  </form>
+                    <LogOut size={10} />
+                  </button>
                 </div>
               </div>
             {/each}
@@ -346,21 +375,14 @@
       <!-- Create API key form -->
       <div class="border border-ctp-surface0/20 p-3 mb-4">
         <form
-          action="?/createApiKey"
           method="POST"
+          action="?/createApiKey"
           use:enhance={() => {
             return async ({ result, update }) => {
-              console.log(result);
-              if (result.type === "redirect") {
-                goto(result.location);
-              } else if (result.type === "success") {
-                await update();
-                console.log(result);
-                const newKey = result.data as unknown as ApiKey;
-                if (newKey.key) {
-                  createdKey = newKey.key;
-                }
+              if (result.type === "success" && result.data?.key) {
+                createdKey = result.data.key as string;
               }
+              await update({ reset: true });
             };
           }}
           class="space-y-3"
@@ -429,25 +451,14 @@
             >
             {#if !apiKey.revoked}
               <div class="ml-2">
-                <form method="POST" action="?/revokeApiKey" use:enhance>
-                  <input type="hidden" name="id" value={apiKey.id} />
-                  <button
-                    type="submit"
-                    class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 p-1 transition-all"
-                    title="Revoke API key"
-                    onclick={(e) => {
-                      if (
-                        !confirm(
-                          "Are you sure you want to revoke this API key?",
-                        )
-                      ) {
-                        e.preventDefault();
-                      }
-                    }}
-                  >
-                    <Trash2 size={10} />
-                  </button>
-                </form>
+                <button
+                  type="button"
+                  class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 p-1 transition-all"
+                  title="Revoke API key"
+                  onclick={() => revokeApiKey(apiKey.id)}
+                >
+                  <Trash2 size={10} />
+                </button>
               </div>
             {/if}
           </div>
@@ -460,5 +471,6 @@
 <WorkspaceInviteModal
   bind:isOpen={inviteModalOpen}
   workspace={workspaceToInvite}
+  workspaceRoles={data.workspaceRoles || []}
   onInvite={sendInvitation}
 />

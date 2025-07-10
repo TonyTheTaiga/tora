@@ -1,0 +1,163 @@
+use crate::handlers::experiment::Experiment;
+use crate::middleware::auth::AuthenticatedUser;
+use crate::ntypes::Response;
+use axum::{Extension, Json, extract::State, http::StatusCode, response::IntoResponse};
+use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
+use uuid::Uuid;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WorkspaceSummary {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub role: String,
+    pub experiment_count: i64,
+    pub recent_experiment_count: i64,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct DashboardOverview {
+    pub workspaces: Vec<WorkspaceSummary>,
+    pub recent_experiments: Vec<Experiment>,
+}
+
+// Get dashboard overview with workspaces and recent experiments in a single call
+pub async fn get_dashboard_overview(
+    Extension(user): Extension<AuthenticatedUser>,
+    State(pool): State<PgPool>,
+) -> impl IntoResponse {
+    let user_uuid = match Uuid::parse_str(&user.id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid user ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    // Fetch workspaces with experiment counts
+    let workspaces_result = sqlx::query_as::<_, (String, String, Option<String>, chrono::DateTime<chrono::Utc>, String, i64, i64)>(
+        r#"
+        SELECT w.id::text, w.name, w.description, w.created_at, wr.name as role,
+               COUNT(DISTINCT we.experiment_id) as experiment_count,
+               COUNT(DISTINCT CASE WHEN e.created_at > NOW() - INTERVAL '7 days' THEN we.experiment_id END) as recent_experiment_count
+        FROM workspace w
+        JOIN user_workspaces uw ON w.id = uw.workspace_id
+        JOIN workspace_role wr ON uw.role_id = wr.id
+        LEFT JOIN workspace_experiments we ON w.id = we.workspace_id
+        LEFT JOIN experiment e ON we.experiment_id = e.id
+        WHERE uw.user_id = $1
+        GROUP BY w.id, w.name, w.description, w.created_at, wr.name
+        ORDER BY w.created_at DESC
+        "#,
+    )
+    .bind(user_uuid)
+    .fetch_all(&pool)
+    .await;
+
+    // Fetch recent experiments with metrics
+    let experiments_result = sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String, Option<Vec<String>>)>(
+        r#"
+        SELECT DISTINCT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text,
+               ARRAY_AGG(DISTINCT m.name) FILTER (WHERE m.name IS NOT NULL) as available_metrics
+        FROM experiment e
+        JOIN workspace_experiments we ON e.id = we.experiment_id
+        JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
+        LEFT JOIN metric m ON e.id = m.experiment_id
+        WHERE uw.user_id = $1
+        GROUP BY e.id, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id
+        ORDER BY e.created_at DESC
+        LIMIT 10
+        "#,
+    )
+    .bind(user_uuid)
+    .fetch_all(&pool)
+    .await;
+
+    match (workspaces_result, experiments_result) {
+        (Ok(workspace_rows), Ok(experiment_rows)) => {
+            let workspaces: Vec<WorkspaceSummary> = workspace_rows
+                .into_iter()
+                .map(
+                    |(
+                        id,
+                        name,
+                        description,
+                        created_at,
+                        role,
+                        experiment_count,
+                        recent_experiment_count,
+                    )| {
+                        WorkspaceSummary {
+                            id,
+                            name,
+                            description,
+                            created_at,
+                            role,
+                            experiment_count,
+                            recent_experiment_count,
+                        }
+                    },
+                )
+                .collect();
+
+            let recent_experiments: Vec<Experiment> = experiment_rows
+                .into_iter()
+                .map(
+                    |(
+                        id,
+                        name,
+                        description,
+                        hyperparams,
+                        tags,
+                        created_at,
+                        updated_at,
+                        workspace_id,
+                        available_metrics,
+                    )| {
+                        Experiment {
+                            id,
+                            name,
+                            description,
+                            hyperparams: hyperparams.unwrap_or_default(),
+                            tags: tags.unwrap_or_default(),
+                            created_at,
+                            updated_at,
+                            available_metrics: available_metrics.unwrap_or_default(),
+                            workspace_id: Some(workspace_id),
+                        }
+                    },
+                )
+                .collect();
+
+            let overview = DashboardOverview {
+                workspaces,
+                recent_experiments,
+            };
+
+            Json(Response {
+                status: 200,
+                data: Some(overview),
+            })
+            .into_response()
+        }
+        (Err(e), _) | (_, Err(e)) => {
+            eprintln!("Database error: {e}");
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to fetch dashboard overview".to_string()),
+                }),
+            )
+                .into_response()
+        }
+    }
+}

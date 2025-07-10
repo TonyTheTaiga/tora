@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { X, Save, TagIcon, Plus } from "lucide-svelte";
+  import { X, Save, TagIcon, Plus } from "@lucide/svelte";
   import { enhance } from "$app/forms";
   import type { Experiment } from "$lib/types";
   import { onMount, onDestroy } from "svelte";

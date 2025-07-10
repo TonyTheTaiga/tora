@@ -10,14 +10,15 @@
   import EditExperimentModal from "$lib/components/modals/edit-experiment-modal.svelte";
   import ExperimentsListMobile from "./experiments-list-mobile.svelte";
   import ExperimentsListDesktop from "./experiments-list-desktop.svelte";
-  import { Plus } from "lucide-svelte";
+  import { Plus } from "@lucide/svelte";
   import { onMount } from "svelte";
 
-  let { data = $bindable() } = $props();
-  let { currentWorkspace } = $derived(data);
-  $inspect(currentWorkspace);
+  import type { Experiment } from "$lib/types";
 
-  let experiments = $state(data.experiments);
+  let { data } = $props();
+
+  let currentWorkspace = $derived(data.currentWorkspace);
+  let experiments: Experiment[] = $derived(data.experiments || []);
   let searchQuery = $state("");
   let copiedId = $state(false);
   let createExperimentModal = $derived(getCreateExperimentModal());
@@ -30,7 +31,7 @@
         exp,
         name: exp.name.toLowerCase(),
         desc: exp.description?.toLowerCase() ?? "",
-        tags: exp.tags?.map((t) => t.toLowerCase()) ?? [],
+        tags: exp.tags?.map((t: string) => t.toLowerCase()) ?? [],
       }))
       .filter((entry) => {
         const q = searchQuery.toLowerCase();
@@ -72,9 +73,7 @@
     };
   });
 
-  $effect(() => {
-    experiments = data.experiments;
-  });
+  // No longer needed - using static mock data
 </script>
 
 {#if createExperimentModal}
@@ -85,6 +84,13 @@
   <DeleteConfirmationModal
     experiment={deleteExperimentModal}
     bind:experiments
+    onDelete={async (experimentId) => {
+      // This would need to be implemented with a server action
+      // For now, just throw an error to indicate it needs implementation
+      throw new Error(
+        "Delete experiment functionality needs to be implemented with server actions",
+      );
+    }}
   />
 {/if}
 
@@ -105,7 +111,7 @@
       ></div>
       <div class="min-w-0 flex-1 py-1">
         <h1 class="text-lg md:text-xl text-ctp-text truncate font-mono">
-          {currentWorkspace?.name || "Workspace"}
+          {currentWorkspace?.name || "Loading..."}
         </h1>
         <div class="text-sm text-ctp-subtext0 space-y-1">
           <div>

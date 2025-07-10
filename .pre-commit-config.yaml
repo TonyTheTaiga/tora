@@ -1,7 +1,25 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.8
+    rev: v0.12.2
     hooks:
       - id: ruff-format
         name: format
         files: ^python/
+        chdir: python
+  - repo: local
+    hooks:
+      - id: prettier-web
+        name: prettier (web)
+        entry: pnpm --prefix web format
+        language: system
+        files: ^web/
+        pass_filenames: false
+        chdir: web
+  - repo: local
+    hooks:
+      - id: rustfmt-api
+        name: rustfmt (api)
+        entry: bash -c 'cd api && cargo fmt --all'
+        language: system
+        files: ^api/
+        pass_filenames: false

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
   import Chart from "chart.js/auto";
-  import { ChartLine, ChevronDown } from "lucide-svelte";
+  import { ChartLine, ChevronDown } from "@lucide/svelte";
   import { onMount, onDestroy } from "svelte";
   import { startTimer } from "$lib/utils/timing";
   import { browser } from "$app/environment";

@@ -1,17 +1,44 @@
 import type { Actions } from "./$types";
+import { error, fail } from "@sveltejs/kit";
 import { startTimer, generateRequestId } from "$lib/utils/timing";
-import { redirect, fail, json } from "@sveltejs/kit";
+
+interface ApiResponse<T> {
+  status: number;
+  data: T;
+}
+
+interface WorkspaceData {
+  id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+  role: string;
+}
+
+interface ExperimentData {
+  id: string;
+  name: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  tags: string[];
+  hyperparams: any[];
+}
 
 export const actions: Actions = {
   createWorkspace: async ({ request, locals }) => {
-    if (!locals.user) {
+    if (!locals.session) {
       return fail(401, { error: "Authentication required" });
+    }
+
+    if (!locals.apiClient) {
+      return fail(500, { error: "API client not available" });
     }
 
     const requestId = generateRequestId();
     const timer = startTimer("workspace.create", {
       requestId,
-      userId: locals.user.id,
+      userId: locals.session.user.id,
     });
 
     try {
@@ -24,26 +51,42 @@ export const actions: Actions = {
         return fail(400, { error: "Workspace name is required" });
       }
 
-      const workspace = await locals.dbClient.createWorkspace(
-        name.trim(),
-        description?.trim() || null,
-        locals.user.id,
+      const response = await locals.apiClient.post<ApiResponse<WorkspaceData>>(
+        "/api/workspaces",
+        {
+          "workspace-name": name.trim(),
+          "workspace-description": description?.trim() || null,
+        },
       );
+
+      if (response.status !== 201) {
+        return fail(500, { error: "Failed to create workspace" });
+      }
+
+      const workspace = response.data;
 
       timer.end({
         workspaceId: workspace.id,
         workspaceName: workspace.name,
       });
 
-      return workspace;
+      return {
+        id: workspace.id,
+        name: workspace.name,
+        description: workspace.description,
+        createdAt: new Date(workspace.created_at),
+        role: workspace.role,
+      };
     } catch (err) {
-      if (err instanceof Response) {
-        throw err;
-      }
-
       timer.end({
         error: err instanceof Error ? err.message : "Unknown error",
       });
+
+      console.error("Error creating workspace:", err);
+
+      if (err instanceof Error && err.message.includes("401")) {
+        return fail(401, { error: "Authentication required" });
+      }
 
       return fail(500, {
         error: "Failed to create workspace. Please try again.",

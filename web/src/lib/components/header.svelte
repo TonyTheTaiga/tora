@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import Logo from "./logo_assets/logo.svelte";
+  import Logo from "$lib/logo_assets/logo.svelte";
 </script>
 
 <header class="sticky top-0 z-30">

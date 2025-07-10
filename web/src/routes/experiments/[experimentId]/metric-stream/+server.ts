@@ -1,5 +1,5 @@
 export function GET() {
-  let intervalId: NodeJS.Timeout | null = null;
+  let intervalId: ReturnType<typeof setInterval> | null = null;
 
   const stream = new ReadableStream({
     start(controller) {

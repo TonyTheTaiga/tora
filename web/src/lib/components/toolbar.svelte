@@ -9,7 +9,7 @@
     ArrowRight,
     ArrowLeft,
     Command,
-  } from "lucide-svelte";
+  } from "@lucide/svelte";
   import { goto } from "$app/navigation";
   import { onMount, onDestroy } from "svelte";
   import {
