@@ -5,8 +5,6 @@
   import { enhance } from "$app/forms";
 
   let { data } = $props();
-  console.log(data.workspaceRoles);
-
   let createdKey: string = $state("");
   let inviteModalOpen = $state(false);
   let workspaceToInvite: any = $state(null);
