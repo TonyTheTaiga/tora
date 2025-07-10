@@ -53,7 +53,7 @@ def create_workspace(
         )
         try:
             req.raise_for_status()
-            return req.json()
+            return req.json()["data"]
         except Exception as e:
             print(req.status_code)
             logger.exception(e)
@@ -128,6 +128,7 @@ class Tora:
             headers["x-api-key"] = resolved_api_key
 
         with HttpClient(base_url=server_url, headers=headers) as client:
+            print(data)
             req = client.post(url_path, json=data)
             req.raise_for_status()
             response_data = req.json()
@@ -156,7 +157,7 @@ class Tora:
     ) -> dict[str, Any]:
         data: dict[str, Any] = {"name": name}
         if workspace_id:
-            data["workspaceId"] = workspace_id
+            data["workspace_id"] = workspace_id
         if description:
             data["description"] = description
         if hyperparams:
