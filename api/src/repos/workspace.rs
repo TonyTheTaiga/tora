@@ -21,9 +21,7 @@ pub struct Workspace {
 
 #[derive(Deserialize)]
 pub struct CreateWorkspaceRequest {
-    #[serde(rename = "workspace-name")]
     pub name: String,
-    #[serde(rename = "workspace-description")]
     pub description: Option<String>,
 }
 
@@ -114,6 +112,8 @@ pub async fn create_workspace(
     State(pool): State<PgPool>,
     Json(request): Json<CreateWorkspaceRequest>,
 ) -> impl IntoResponse {
+    println!("starting create workspace...");
+
     let mut tx = match pool.begin().await {
         Ok(tx) => tx,
         Err(e) => {
@@ -434,7 +434,6 @@ pub async fn delete_workspace(
         }
     };
 
-    // Check if user is the owner of this workspace
     let owner_check = sqlx::query_as::<_, (i64,)>(
         r#"
         SELECT COUNT(*) FROM user_workspaces uw
@@ -563,7 +562,6 @@ pub async fn leave_workspace(
         }
     }
 
-    // Remove user from workspace
     let delete_result =
         sqlx::query("DELETE FROM user_workspaces WHERE workspace_id = $1 AND user_id = $2")
             .bind(workspace_uuid)

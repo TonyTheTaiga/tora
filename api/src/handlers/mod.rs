@@ -18,102 +18,107 @@ mod metric;
 mod role;
 mod user;
 
-pub fn api_routes() -> Router<sqlx::PgPool> {
+pub fn api_routes(pool: &sqlx::PgPool) -> Router<sqlx::PgPool> {
     let protected_routes = Router::new()
         // Workspaces
         .route(
             "/workspaces",
-            protected_route(get(crate::repos::workspace::list_workspaces)),
+            protected_route(get(crate::repos::workspace::list_workspaces), pool),
         )
         .route(
             "/workspaces",
-            protected_route(post(crate::repos::workspace::create_workspace)),
+            protected_route(post(crate::repos::workspace::create_workspace), pool),
         )
         .route(
             "/workspaces/{id}",
-            protected_route(get(crate::repos::workspace::get_workspace)),
+            protected_route(get(crate::repos::workspace::get_workspace), pool),
         )
         .route(
             "/workspaces/{id}",
-            protected_route(delete(crate::repos::workspace::delete_workspace)),
+            protected_route(delete(crate::repos::workspace::delete_workspace), pool),
         )
         .route(
             "/workspaces/{id}/leave",
-            protected_route(post(crate::repos::workspace::leave_workspace)),
+            protected_route(post(crate::repos::workspace::leave_workspace), pool),
         )
         .route(
             "/workspaces/{id}/members",
-            protected_route(get(crate::repos::workspace::get_workspace_members)),
+            protected_route(get(crate::repos::workspace::get_workspace_members), pool),
         )
         .route(
             "/workspaces/{id}/experiments",
-            protected_route(get(experiment::list_workspace_experiments)),
+            protected_route(get(experiment::list_workspace_experiments), pool),
         )
         // Experiments
         .route(
             "/experiments",
-            protected_route(get(experiment::list_experiments)),
+            protected_route(get(experiment::list_experiments), pool),
         )
         .route(
             "/experiments",
-            protected_route(post(experiment::create_experiment)),
+            protected_route(post(experiment::create_experiment), pool),
         )
         .route(
             "/experiments/{id}",
-            protected_route(get(experiment::get_experiment)),
+            protected_route(get(experiment::get_experiment), pool),
         )
         .route(
             "/experiments/{id}",
-            protected_route(put(experiment::update_experiment)),
+            protected_route(put(experiment::update_experiment), pool),
         )
         .route(
             "/experiments/{id}",
-            protected_route(delete(experiment::delete_experiment)),
+            protected_route(delete(experiment::delete_experiment), pool),
         )
         // Metrics
         .route(
             "/experiments/{id}/metrics",
-            protected_route(get(metric::get_metrics)),
+            protected_route(get(metric::get_metrics), pool),
         )
         .route(
             "/experiments/{id}/metrics",
-            protected_route(post(metric::create_metric)),
+            protected_route(post(metric::create_metric), pool),
         )
         .route(
             "/experiments/{id}/metrics/batch",
-            protected_route(post(metric::batch_create_metrics)),
+            protected_route(post(metric::batch_create_metrics), pool),
         )
         .route(
             "/experiments/{id}/metrics/csv",
-            protected_route(get(metric::export_metrics_csv)),
+            protected_route(get(metric::export_metrics_csv), pool),
         )
         // Dashboard
         .route(
             "/dashboard/overview",
-            protected_route(get(dashboard::get_dashboard_overview)),
+            protected_route(get(dashboard::get_dashboard_overview), pool),
         )
         // Settings and user management
-        .route("/settings", protected_route(get(user::get_settings)))
+        .route("/settings", protected_route(get(user::get_settings), pool))
         .route("/workspace-roles", get(role::list_workspace_roles))
         // API Keys
-        .route("/api-keys", protected_route(get(api_key::list_api_keys)))
-        .route("/api-keys", protected_route(post(api_key::create_api_key)))
+        .route(
+            "/api-keys",
+            protected_route(get(api_key::list_api_keys), pool),
+        )
+        .route(
+            "/api-keys",
+            protected_route(post(api_key::create_api_key), pool),
+        )
         .route(
             "/api-keys/{id}",
-            protected_route(delete(api_key::revoke_api_key)),
-        )
-        // Workspace Invitations
-        .route(
-            "/workspace-invitations",
-            protected_route(post(invitation::create_invitation)),
+            protected_route(delete(api_key::revoke_api_key), pool),
         )
         .route(
             "/workspace-invitations",
-            protected_route(get(invitation::list_invitations)),
+            protected_route(post(invitation::create_invitation), pool),
+        )
+        .route(
+            "/workspace-invitations",
+            protected_route(get(invitation::list_invitations), pool),
         )
         .route(
             "/workspaces/any/invitations",
-            protected_route(put(invitation::respond_to_invitation)),
+            protected_route(put(invitation::respond_to_invitation), pool),
         );
 
     let public_routes = Router::new()

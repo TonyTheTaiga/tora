@@ -93,7 +93,6 @@
       </div>
     </div>
 
-    <!-- FOOTER -->
     <div
       class="flex justify-end gap-3 pt-4 px-5 pb-5 border-t border-ctp-surface0"
     >

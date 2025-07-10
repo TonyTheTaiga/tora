@@ -55,7 +55,7 @@ export const load: PageServerLoad = async ({ locals, params, parent }) => {
           tags: exp.tags || [],
           createdAt: new Date(exp.created_at),
           updatedAt: new Date(exp.updated_at),
-          availableMetrics: [], // TODO: Implement when metrics API is ready
+          availableMetrics: [],
           workspaceId: workspaceId,
         }));
       }

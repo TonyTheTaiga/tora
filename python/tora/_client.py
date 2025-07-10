@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Mapping
+from typing import Any, Mapping, Optional
 
 from ._config import TORA_API_KEY, TORA_BASE_URL
 from ._http import HttpClient, HTTPStatusError
@@ -19,7 +19,10 @@ def _from_tora_hp(tora_hp: list[dict[str, Any]]) -> dict[str, HPValue]:
 
 
 def create_workspace(
-    name: str, api_key: str, description: str = "", server_url: str | None = None
+    name: str,
+    description: Optional[str] = None,
+    api_key: Optional[str] = None,
+    server_url: str | None = None,
 ) -> dict[str, Any]:
     """
     Creates a new Tora workspace. Requires an API key.
@@ -36,7 +39,10 @@ def create_workspace(
         HTTPStatusError: If the API request fails.
     """
     server_url = server_url or TORA_BASE_URL
-    resolved_api_key = Tora._get_api_key(api_key)
+    resolved_api_key = api_key or TORA_API_KEY
+    if not resolved_api_key:
+        raise RuntimeWarning("API key is required to create a workspace")
+
     headers = {
         "x-api-key": resolved_api_key,
         "Content-Type": "application/json",
@@ -45,8 +51,13 @@ def create_workspace(
         req = client.post(
             "/workspaces", json={"name": name, "description": description}
         )
-        req.raise_for_status()
-        return req.json()
+        try:
+            req.raise_for_status()
+            return req.json()
+        except Exception as e:
+            print(req.status_code)
+            logger.exception(e)
+            raise e
 
 
 class Tora:
@@ -102,8 +113,7 @@ class Tora:
         server_url: str | None = None,
     ) -> "Tora":
         """
-        Creates a new experiment and returns a Tora instance to interact with it.
-        An API key is required to create an experiment in a specific workspace.
+        An API key is required to create an experiment in a specific workspace
         """
         resolved_api_key = Tora._get_api_key(api_key)
         data = cls._create_payload(name, workspace_id, description, hyperparams, tags)

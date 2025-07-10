@@ -1,7 +1,7 @@
 use crate::ntypes;
 use axum::{
     Json,
-    extract::Request,
+    extract::{Request, State},
     http::{HeaderMap, StatusCode},
     middleware::{self, Next},
     response::{IntoResponse, Response},
@@ -10,7 +10,6 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use sqlx::PgPool;
-use std::env;
 use supabase_auth::models::AuthClient;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -40,11 +39,12 @@ impl IntoResponse for AuthError {
 
 pub async fn auth_middleware(
     headers: HeaderMap,
+    State(pool): State<PgPool>,
     mut req: Request,
     next: Next,
 ) -> Result<Response, AuthError> {
     if let Some(api_key) = extract_api_key(&headers) {
-        match validate_api_key(&api_key).await {
+        match validate_api_key(pool, &api_key).await {
             Ok(authenticated_user) => {
                 req.extensions_mut().insert(authenticated_user);
                 return Ok(next.run(req).await);
@@ -87,19 +87,6 @@ pub async fn auth_middleware(
     })
 }
 
-async fn create_db_pool() -> Result<PgPool, sqlx::Error> {
-    let password = env::var("SUPABASE_PASSWORD")
-        .map_err(|_| sqlx::Error::Configuration("SUPABASE_PASSWORD not set".into()))?;
-
-    let connection_string = format!(
-        "postgresql://postgres.hecctslcfhdrpnwovwbc:{password}@aws-0-us-east-1.compute-1.amazonaws.com:5432/postgres"
-    );
-
-    sqlx::postgres::PgPoolOptions::new()
-        .connect(&connection_string)
-        .await
-}
-
 fn extract_api_key(headers: &HeaderMap) -> Option<String> {
     if let Some(key) = headers.get("x-api-key") {
         if let Ok(key_str) = key.to_str() {
@@ -110,16 +97,13 @@ fn extract_api_key(headers: &HeaderMap) -> Option<String> {
     None
 }
 
-async fn validate_api_key(api_key: &str) -> Result<AuthenticatedUser, AuthError> {
-    let pool = create_db_pool().await.map_err(|e| AuthError {
-        message: format!("Database connection failed: {e}"),
-        status_code: StatusCode::INTERNAL_SERVER_ERROR,
-    })?;
-
+async fn validate_api_key(
+    pool: sqlx::PgPool,
+    api_key: &str,
+) -> Result<AuthenticatedUser, AuthError> {
     let mut hasher = Sha256::new();
     hasher.update(api_key.as_bytes());
     let key_hash = format!("{:x}", hasher.finalize());
-
     let record = sqlx::query_as::<_, ntypes::ApiKeyRecord>(
         r#"
         SELECT
@@ -163,9 +147,12 @@ async fn validate_api_key(api_key: &str) -> Result<AuthenticatedUser, AuthError>
     }
 }
 
-pub fn protected_route<T>(method_router: MethodRouter<T>) -> MethodRouter<T>
+pub fn protected_route<T>(method_router: MethodRouter<T>, pool: &sqlx::PgPool) -> MethodRouter<T>
 where
     T: Clone + Send + Sync + 'static,
 {
-    method_router.layer(middleware::from_fn(auth_middleware))
+    method_router.layer(middleware::from_fn_with_state(
+        pool.clone(),
+        auth_middleware,
+    ))
 }

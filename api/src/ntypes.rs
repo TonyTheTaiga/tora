@@ -48,7 +48,7 @@ pub struct UserInfo {
     pub email: String,
 }
 
-#[derive(sqlx::FromRow)]
+#[derive(sqlx::FromRow, Debug)]
 #[allow(dead_code)]
 pub struct ApiKeyRecord {
     pub id: String,
@@ -58,7 +58,6 @@ pub struct ApiKeyRecord {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub last_used: chrono::DateTime<chrono::Utc>,
     pub revoked: bool,
-    // User info from JOIN
     pub user_email: String,
 }
 

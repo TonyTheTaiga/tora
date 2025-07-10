@@ -120,7 +120,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       }
     });
 
-    // Create metric data structure for charts
     const metricData: { [key: string]: number[] } = {};
     metricsByName.forEach((metricList, name) => {
       metricData[name] = metricList

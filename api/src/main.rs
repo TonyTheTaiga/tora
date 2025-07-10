@@ -22,7 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             return Err("DATABASE_URL not set".into());
         }
     };
-    let api_routes = handlers::api_routes();
+    let api_routes = handlers::api_routes(&pool);
     let app = Router::new().nest("/api", api_routes).with_state(pool);
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
     axum::serve(listener, app)

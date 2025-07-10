@@ -61,7 +61,6 @@ pub async fn login(Json(payload): Json<ntypes::LoginParams>) -> impl IntoRespons
         .await
         .expect("Failed to login user! Double check password and email.");
 
-    // Return tokens in response body for SSR
     let session_payload = serde_json::json!({
         "access_token": session.access_token,
         "token_type": "bearer",

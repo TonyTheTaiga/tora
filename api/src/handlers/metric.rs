@@ -34,7 +34,6 @@ pub struct BatchCreateMetricsRequest {
     pub metrics: Vec<CreateMetricRequest>,
 }
 
-// Get metrics for an experiment
 pub async fn get_metrics(
     Extension(user): Extension<AuthenticatedUser>,
     State(pool): State<PgPool>,
@@ -107,7 +106,6 @@ pub async fn get_metrics(
         _ => {}
     }
 
-    // Fetch metrics for the experiment
     let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
         "SELECT id, experiment_id::text, name, value::float8, step::float8, metadata, created_at FROM metric WHERE experiment_id = $1 ORDER BY created_at DESC",
     )
@@ -226,7 +224,6 @@ pub async fn create_metric(
         _ => {}
     }
 
-    // Create the metric
     let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
         "INSERT INTO metric (experiment_id, name, value, step, metadata) VALUES ($1, $2, $3, $4, $5) RETURNING id, experiment_id::text, name, value::float8, step::float8, metadata, created_at",
     )
@@ -273,7 +270,6 @@ pub async fn create_metric(
     }
 }
 
-// Batch create metrics
 pub async fn batch_create_metrics(
     Extension(user): Extension<AuthenticatedUser>,
     State(pool): State<PgPool>,
@@ -424,7 +420,6 @@ pub async fn batch_create_metrics(
         .into_response()
 }
 
-// Export metrics as CSV
 pub async fn export_metrics_csv(
     Extension(user): Extension<AuthenticatedUser>,
     State(pool): State<PgPool>,
@@ -499,7 +494,6 @@ pub async fn export_metrics_csv(
         _ => {}
     }
 
-    // Fetch metrics for CSV export
     let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
         "SELECT id, experiment_id::text, name, value::float8, step::float8, metadata, created_at FROM metric WHERE experiment_id = $1 ORDER BY created_at ASC",
     )

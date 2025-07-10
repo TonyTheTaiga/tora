@@ -76,5 +76,4 @@ export function createAuthenticatedApiClient(
   return new ServerApiClient(API_BASE_URL, sessionData?.access_token);
 }
 
-// Default client for non-authenticated requests
 export const serverApiClient = new ServerApiClient();
