@@ -181,7 +181,7 @@ pub async fn create_invitation(
                     status: 201,
                     data: Some(invitation),
                 }),
-            )
+            ).into_response()
         }
         Err(e) => {
             eprintln!("Database error: {}", e);
@@ -191,7 +191,7 @@ pub async fn create_invitation(
                     status: 500,
                     data: Some("Failed to create invitation".to_string()),
                 }),
-            )
+            ).into_response()
         }
     }
 }
@@ -264,7 +264,7 @@ pub async fn list_invitations(
             Json(Response {
                 status: 200,
                 data: Some(invitations),
-            })
+            }).into_response()
         }
         Err(e) => {
             eprintln!("Database error: {}", e);

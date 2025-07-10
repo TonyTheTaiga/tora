@@ -1,11 +1,11 @@
+use crate::middleware::auth::AuthenticatedUser;
+use crate::ntypes::{ApiKey, CreateApiKeyRequest, Response};
 use axum::{
     Extension, Json,
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
 };
-use crate::middleware::auth::AuthenticatedUser;
-use crate::ntypes::{ApiKey, CreateApiKeyRequest, Response};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -29,8 +29,11 @@ pub async fn create_api_key(
     };
 
     // Generate a secure API key
-    let key_value = format!("tora_key_{}", Uuid::new_v4().to_string().replace("-", "")[0..32]);
-    
+    let key_value = format!(
+        "tora_key_{}",
+        &Uuid::new_v4().to_string().replace("-", "")[0..32]
+    );
+
     // Create the API key in the database
     let api_key_result = sqlx::query_as::<_, (String, String, chrono::DateTime<chrono::Utc>)>(
         r#"
@@ -62,9 +65,10 @@ pub async fn create_api_key(
                     data: Some(api_key),
                 }),
             )
+                .into_response()
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -72,6 +76,7 @@ pub async fn create_api_key(
                     data: Some("Failed to create API key".to_string()),
                 }),
             )
+                .into_response()
         }
     }
 }
@@ -94,17 +99,18 @@ pub async fn list_api_keys(
         }
     };
 
-    let api_keys_result = sqlx::query_as::<_, (String, String, chrono::DateTime<chrono::Utc>, bool)>(
-        r#"
+    let api_keys_result =
+        sqlx::query_as::<_, (String, String, chrono::DateTime<chrono::Utc>, bool)>(
+            r#"
         SELECT id::text, name, created_at, revoked
-        FROM api_key
+        FROM api_keys
         WHERE user_id = $1
         ORDER BY created_at DESC
         "#,
-    )
-    .bind(user_uuid)
-    .fetch_all(&pool)
-    .await;
+        )
+        .bind(user_uuid)
+        .fetch_all(&pool)
+        .await;
 
     match api_keys_result {
         Ok(rows) => {
@@ -123,6 +129,7 @@ pub async fn list_api_keys(
                 status: 200,
                 data: Some(api_keys),
             })
+            .into_response()
         }
         Err(e) => {
             eprintln!("Database error: {}", e);
@@ -172,16 +179,15 @@ pub async fn revoke_api_key(
     };
 
     // Check if the API key belongs to the user
-    let ownership_check = sqlx::query_as::<_, (i64,)>(
-        "SELECT COUNT(*) FROM api_key WHERE id = $1 AND user_id = $2",
-    )
-    .bind(key_uuid)
-    .bind(user_uuid)
-    .fetch_one(&pool)
-    .await;
+    let ownership_check =
+        sqlx::query_as::<_, (i64,)>("SELECT COUNT(*) FROM api_keys WHERE id = $1 AND user_id = $2")
+            .bind(key_uuid)
+            .bind(user_uuid)
+            .fetch_one(&pool)
+            .await;
 
     match ownership_check {
-        Ok((count,)) if count == 0 => {
+        Ok(_count) => {
             return (
                 StatusCode::NOT_FOUND,
                 Json(Response {
@@ -192,7 +198,7 @@ pub async fn revoke_api_key(
                 .into_response();
         }
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -206,20 +212,19 @@ pub async fn revoke_api_key(
     }
 
     // Revoke the API key
-    let revoke_result = sqlx::query(
-        "UPDATE api_key SET revoked = true WHERE id = $1",
-    )
-    .bind(key_uuid)
-    .execute(&pool)
-    .await;
+    let revoke_result = sqlx::query("UPDATE api_key SET revoked = true WHERE id = $1")
+        .bind(key_uuid)
+        .execute(&pool)
+        .await;
 
     match revoke_result {
         Ok(_) => Json(Response {
             status: 200,
             data: Some("API key revoked successfully"),
-        }),
+        })
+        .into_response(),
         Err(e) => {
-            eprintln!("Database error: {}", e);
+            eprintln!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -231,3 +236,4 @@ pub async fn revoke_api_key(
         }
     }
 }
+

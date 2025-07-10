@@ -1,11 +1,10 @@
 use crate::middleware::auth::AuthenticatedUser;
 use crate::ntypes;
 use axum::{
-    Extension, Json,
-    extract::Query,
-    http::StatusCode,
     response::{IntoResponse, Redirect},
-    State,
+    extract::{Query, State},
+    Extension, Json,
+    http::StatusCode,
 };
 use supabase_auth::models::{AuthClient, VerifyOtpParams, VerifyTokenHashParams};
 
@@ -289,5 +288,5 @@ pub async fn get_settings(
             api_keys,
             invitations,
         }),
-    })
+    }).into_response()
 }

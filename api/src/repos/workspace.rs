@@ -681,24 +681,25 @@ pub async fn update_workspace(
         _ => {}
     }
 
-    // Build dynamic update query
     let mut query_parts = Vec::new();
-    let mut params: Vec<Box<dyn sqlx::Encode<'_, sqlx::Postgres> + Send + Sync>> = Vec::new();
-    let mut param_count = 1;
+    let mut current_param_index = 1;
+
+    let mut query_base = "UPDATE workspace SET ".to_string();
+    let mut has_updates = false;
 
     if let Some(name) = &request.name {
-        query_parts.push(format!("name = ${}", param_count));
-        params.push(Box::new(name.clone()));
-        param_count += 1;
+        query_parts.push(format!("name = ${}", current_param_index));
+        current_param_index += 1;
+        has_updates = true;
     }
 
     if let Some(description) = &request.description {
-        query_parts.push(format!("description = ${}", param_count));
-        params.push(Box::new(description.clone()));
-        param_count += 1;
+        query_parts.push(format!("description = ${}", current_param_index));
+        current_param_index += 1;
+        has_updates = true;
     }
 
-    if query_parts.is_empty() {
+    if !has_updates {
         return (
             StatusCode::BAD_REQUEST,
             Json(Response {
@@ -709,19 +710,22 @@ pub async fn update_workspace(
             .into_response();
     }
 
-    // Add workspace_id as the last parameter
-    params.push(Box::new(workspace_uuid));
+    query_base.push_str(&query_parts.join(", "));
+    query_base.push_str(&format!(" WHERE id = ${} RETURNING id::text, name, description, created_at", current_param_index));
 
-    let query = format!(
-        "UPDATE workspace SET {} WHERE id = ${} RETURNING id::text, name, description, created_at",
-        query_parts.join(", "),
-        param_count
-    );
+    let mut query_executor = sqlx::query_as::<_, (String, String, Option<String>, chrono::DateTime<chrono::Utc>)>(&query_base);
 
-    let update_result = sqlx::query_as::<_, (String, String, Option<String>, chrono::DateTime<chrono::Utc>)>(&query)
-        .bind_all(params)
-        .fetch_one(&pool)
-        .await;
+    if let Some(name) = &request.name {
+        query_executor = query_executor.bind(name);
+    }
+
+    if let Some(description) = &request.description {
+        query_executor = query_executor.bind(description);
+    }
+
+    query_executor = query_executor.bind(workspace_uuid);
+
+    let update_result = query_executor.fetch_one(&pool).await;
 
     match update_result {
         Ok((id, name, description, created_at)) => {
