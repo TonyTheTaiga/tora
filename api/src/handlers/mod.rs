@@ -37,8 +37,16 @@ pub fn api_routes() -> Router<sqlx::PgPool> {
             protected_route(delete(crate::repos::workspace::delete_workspace)),
         )
         .route(
+            "/workspaces/{id}",
+            protected_route(put(crate::repos::workspace::update_workspace)),
+        )
+        .route(
             "/workspaces/{id}/leave",
             protected_route(post(crate::repos::workspace::leave_workspace)),
+        )
+        .route(
+            "/workspaces/{workspace_id}/members/{member_id}/role",
+            protected_route(put(crate::repos::workspace::update_member_role)),
         )
         .route(
             "/workspaces/{id}/members",
@@ -109,6 +117,10 @@ pub fn api_routes() -> Router<sqlx::PgPool> {
         .route(
             "/workspaces/any/invitations",
             protected_route(put(invitation::respond_to_invitation)),
+        )
+        .route(
+            "/workspace-roles",
+            protected_route(get(crate::repos::workspace::list_workspace_roles)),
         );
 
     let public_routes = Router::new()

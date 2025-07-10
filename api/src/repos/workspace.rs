@@ -35,6 +35,25 @@ pub struct WorkspaceMember {
     pub joined_at: chrono::DateTime<chrono::Utc>,
 }
 
+#[derive(Deserialize)]
+pub struct UpdateWorkspaceRequest {
+    #[serde(rename = "workspace-name")]
+    pub name: Option<String>,
+    #[serde(rename = "workspace-description")]
+    pub description: Option<String>,
+}
+
+#[derive(Serialize)]
+pub struct WorkspaceRole {
+    pub id: String,
+    pub name: String,
+}
+
+#[derive(Deserialize)]
+pub struct UpdateMemberRoleRequest {
+    pub role_id: String,
+}
+
 pub async fn list_workspaces(
     Extension(user): Extension<AuthenticatedUser>,
     State(pool): State<PgPool>,
@@ -597,6 +616,356 @@ pub async fn leave_workspace(
                 Json(Response {
                     status: 500,
                     data: Some("Failed to leave workspace".to_string()),
+                }),
+            )
+                .into_response()
+        }
+    }
+}
+
+pub async fn update_workspace(
+    Extension(user): Extension<AuthenticatedUser>,
+    State(pool): State<PgPool>,
+    Path(workspace_id): Path<String>,
+    Json(request): Json<UpdateWorkspaceRequest>,
+) -> impl IntoResponse {
+    let workspace_uuid = match Uuid::parse_str(&workspace_id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid workspace ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    // Check if user has permission to update this workspace (OWNER or ADMIN)
+    let permission_check = sqlx::query_as::<_, (i64,)>(
+        r#"
+        SELECT COUNT(*) FROM user_workspaces uw
+        JOIN workspace_role wr ON uw.role_id = wr.id
+        WHERE uw.workspace_id = $1 AND uw.user_id = $2 AND wr.name IN ('OWNER', 'ADMIN')
+        "#,
+    )
+    .bind(workspace_uuid)
+    .bind(Uuid::parse_str(&user.id).unwrap())
+    .fetch_one(&pool)
+    .await;
+
+    match permission_check {
+        Ok((count,)) if count == 0 => {
+            return (
+                StatusCode::FORBIDDEN,
+                Json(Response {
+                    status: 403,
+                    data: Some("Insufficient permissions to update workspace".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to check permissions".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        _ => {}
+    }
+
+    // Build dynamic update query
+    let mut query_parts = Vec::new();
+    let mut params: Vec<Box<dyn sqlx::Encode<'_, sqlx::Postgres> + Send + Sync>> = Vec::new();
+    let mut param_count = 1;
+
+    if let Some(name) = &request.name {
+        query_parts.push(format!("name = ${}", param_count));
+        params.push(Box::new(name.clone()));
+        param_count += 1;
+    }
+
+    if let Some(description) = &request.description {
+        query_parts.push(format!("description = ${}", param_count));
+        params.push(Box::new(description.clone()));
+        param_count += 1;
+    }
+
+    if query_parts.is_empty() {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(Response {
+                status: 400,
+                data: Some("No fields to update".to_string()),
+            }),
+        )
+            .into_response();
+    }
+
+    // Add workspace_id as the last parameter
+    params.push(Box::new(workspace_uuid));
+
+    let query = format!(
+        "UPDATE workspace SET {} WHERE id = ${} RETURNING id::text, name, description, created_at",
+        query_parts.join(", "),
+        param_count
+    );
+
+    let update_result = sqlx::query_as::<_, (String, String, Option<String>, chrono::DateTime<chrono::Utc>)>(&query)
+        .bind_all(params)
+        .fetch_one(&pool)
+        .await;
+
+    match update_result {
+        Ok((id, name, description, created_at)) => {
+            let workspace = Workspace {
+                id,
+                name,
+                description,
+                created_at,
+                role: "".to_string(), // We don't need role for update response
+            };
+
+            Json(Response {
+                status: 200,
+                data: Some(workspace),
+            })
+            .into_response()
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to update workspace".to_string()),
+                }),
+            )
+                .into_response()
+        }
+    }
+}
+
+pub async fn list_workspace_roles(
+    Extension(_user): Extension<AuthenticatedUser>,
+    State(pool): State<PgPool>,
+) -> impl IntoResponse {
+    let result = sqlx::query_as::<_, (String, String)>(
+        "SELECT id::text, name FROM workspace_role ORDER BY name",
+    )
+    .fetch_all(&pool)
+    .await;
+
+    match result {
+        Ok(rows) => {
+            let roles: Vec<WorkspaceRole> = rows
+                .into_iter()
+                .map(|(id, name)| WorkspaceRole { id, name })
+                .collect();
+
+            Json(Response {
+                status: 200,
+                data: Some(roles),
+            })
+            .into_response()
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to fetch workspace roles".to_string()),
+                }),
+            )
+                .into_response()
+        }
+    }
+}
+
+pub async fn update_member_role(
+    Extension(user): Extension<AuthenticatedUser>,
+    State(pool): State<PgPool>,
+    Path((workspace_id, member_id)): Path<(String, String)>,
+    Json(request): Json<UpdateMemberRoleRequest>,
+) -> impl IntoResponse {
+    let workspace_uuid = match Uuid::parse_str(&workspace_id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid workspace ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    let member_uuid = match Uuid::parse_str(&member_id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid member ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    let role_uuid = match Uuid::parse_str(&request.role_id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid role ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    // Check if user has permission to update member roles (OWNER or ADMIN)
+    let permission_check = sqlx::query_as::<_, (i64,)>(
+        r#"
+        SELECT COUNT(*) FROM user_workspaces uw
+        JOIN workspace_role wr ON uw.role_id = wr.id
+        WHERE uw.workspace_id = $1 AND uw.user_id = $2 AND wr.name IN ('OWNER', 'ADMIN')
+        "#,
+    )
+    .bind(workspace_uuid)
+    .bind(Uuid::parse_str(&user.id).unwrap())
+    .fetch_one(&pool)
+    .await;
+
+    match permission_check {
+        Ok((count,)) if count == 0 => {
+            return (
+                StatusCode::FORBIDDEN,
+                Json(Response {
+                    status: 403,
+                    data: Some("Insufficient permissions to update member roles".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to check permissions".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        _ => {}
+    }
+
+    // Check if the member exists in the workspace
+    let member_check = sqlx::query_as::<_, (i64,)>(
+        "SELECT COUNT(*) FROM user_workspaces WHERE workspace_id = $1 AND user_id = $2",
+    )
+    .bind(workspace_uuid)
+    .bind(member_uuid)
+    .fetch_one(&pool)
+    .await;
+
+    match member_check {
+        Ok((count,)) if count == 0 => {
+            return (
+                StatusCode::NOT_FOUND,
+                Json(Response {
+                    status: 404,
+                    data: Some("Member not found in workspace".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to check member".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        _ => {}
+    }
+
+    // Check if the role exists
+    let role_check = sqlx::query_as::<_, (i64,)>(
+        "SELECT COUNT(*) FROM workspace_role WHERE id = $1",
+    )
+    .bind(role_uuid)
+    .fetch_one(&pool)
+    .await;
+
+    match role_check {
+        Ok((count,)) if count == 0 => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid role ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to check role".to_string()),
+                }),
+            )
+                .into_response();
+        }
+        _ => {}
+    }
+
+    // Update the member's role
+    let update_result = sqlx::query(
+        "UPDATE user_workspaces SET role_id = $1 WHERE workspace_id = $2 AND user_id = $3",
+    )
+    .bind(role_uuid)
+    .bind(workspace_uuid)
+    .bind(member_uuid)
+    .execute(&pool)
+    .await;
+
+    match update_result {
+        Ok(_) => Json(Response {
+            status: 200,
+            data: Some("Member role updated successfully"),
+        })
+        .into_response(),
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to update member role".to_string()),
                 }),
             )
                 .into_response()

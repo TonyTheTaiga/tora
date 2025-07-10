@@ -5,6 +5,7 @@ use axum::{
     extract::Query,
     http::StatusCode,
     response::{IntoResponse, Redirect},
+    State,
 };
 use supabase_auth::models::{AuthClient, VerifyOtpParams, VerifyTokenHashParams};
 
@@ -114,61 +115,179 @@ pub async fn refresh_token(Json(payload): Json<ntypes::RefreshTokenRequest>) -> 
 
 pub async fn get_settings(
     Extension(user): Extension<AuthenticatedUser>,
-) -> Json<ntypes::SettingsData> {
-    use crate::repos::workspace::Workspace;
+    State(pool): State<sqlx::PgPool>,
+) -> impl IntoResponse {
+    let user_uuid = match uuid::Uuid::parse_str(&user.id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(ntypes::Response {
+                    status: 400,
+                    data: Some("Invalid user ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
 
-    println!("user: {user:?}");
-    // Mock data - will be replaced with database queries
-    let workspaces = vec![
-        Workspace {
-            id: "ws_1".to_string(),
-            name: "ML Research".to_string(),
-            description: Some("Machine learning experiments and research".to_string()),
-            created_at: chrono::Utc::now(),
-            role: "OWNER".to_string(),
-        },
-        Workspace {
-            id: "ws_2".to_string(),
-            name: "NLP Project".to_string(),
-            description: Some("Natural language processing experiments".to_string()),
-            created_at: chrono::Utc::now(),
-            role: "ADMIN".to_string(),
-        },
-    ];
+    // Fetch user's workspaces
+    let workspaces_result = sqlx::query_as::<
+        _,
+        (
+            String,
+            String,
+            Option<String>,
+            chrono::DateTime<chrono::Utc>,
+            String,
+        ),
+    >(
+        r#"
+        SELECT w.id::text, w.name, w.description, w.created_at, wr.name as role
+        FROM workspace w
+        JOIN user_workspaces uw ON w.id = uw.workspace_id
+        JOIN workspace_role wr ON uw.role_id = wr.id
+        WHERE uw.user_id = $1
+        ORDER BY w.created_at DESC
+        "#,
+    )
+    .bind(user_uuid)
+    .fetch_all(&pool)
+    .await;
 
-    let api_keys = vec![
-        ntypes::ApiKey {
-            id: "key_1".to_string(),
-            name: "Development Key".to_string(),
-            created_at: "Dec 15".to_string(),
-            revoked: false,
-            key: None,
-        },
-        ntypes::ApiKey {
-            id: "key_2".to_string(),
-            name: "Production Key".to_string(),
-            created_at: "Dec 10".to_string(),
-            revoked: true,
-            key: None,
-        },
-    ];
+    let workspaces = match workspaces_result {
+        Ok(rows) => rows
+            .into_iter()
+            .map(|(id, name, description, created_at, role)| crate::repos::workspace::Workspace {
+                id,
+                name,
+                description,
+                created_at,
+                role,
+            })
+            .collect(),
+        Err(e) => {
+            eprintln!("Database error fetching workspaces: {}", e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ntypes::Response {
+                    status: 500,
+                    data: Some("Failed to fetch workspaces".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
 
-    let invitations = vec![ntypes::WorkspaceInvitation {
-        id: "inv_1".to_string(),
-        workspace_id: "Data Science Team".to_string(),
-        email: user.email.clone(),
-        role: "ADMIN".to_string(),
-        from: "john@example.com".to_string(),
-        created_at: chrono::Utc::now(),
-    }];
+    // Fetch user's API keys
+    let api_keys_result = sqlx::query_as::<
+        _,
+        (String, String, chrono::DateTime<chrono::Utc>, bool),
+    >(
+        r#"
+        SELECT id::text, name, created_at, revoked
+        FROM api_key
+        WHERE user_id = $1
+        ORDER BY created_at DESC
+        "#,
+    )
+    .bind(user_uuid)
+    .fetch_all(&pool)
+    .await;
 
-    Json(ntypes::SettingsData {
-        user: ntypes::UserInfo {
-            id: user.id,
-            email: user.email,
-        },
-        workspaces,
-        api_keys,
-        invitations,
+    let api_keys = match api_keys_result {
+        Ok(rows) => rows
+            .into_iter()
+            .map(|(id, name, created_at, revoked)| ntypes::ApiKey {
+                id,
+                name,
+                created_at: created_at.format("%b %d").to_string(),
+                revoked,
+                key: None, // Never return the actual key
+            })
+            .collect(),
+        Err(e) => {
+            eprintln!("Database error fetching API keys: {}", e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ntypes::Response {
+                    status: 500,
+                    data: Some("Failed to fetch API keys".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    // Fetch pending invitations for the user
+    let invitations_result = sqlx::query_as::<
+        _,
+        (
+            String,
+            String,
+            String,
+            String,
+            String,
+            chrono::DateTime<chrono::Utc>,
+        ),
+    >(
+        r#"
+        SELECT 
+            wi.id::text,
+            w.name as workspace_name,
+            wi.email,
+            wr.name as role,
+            u.email as from_email,
+            wi.created_at
+        FROM workspace_invitation wi
+        JOIN workspace w ON wi.workspace_id = w.id
+        JOIN workspace_role wr ON wi.role_id = wr.id
+        JOIN "user" u ON wi.invited_by = u.id
+        WHERE wi.email = $1 AND wi.status = 'PENDING'
+        ORDER BY wi.created_at DESC
+        "#,
+    )
+    .bind(&user.email)
+    .fetch_all(&pool)
+    .await;
+
+    let invitations = match invitations_result {
+        Ok(rows) => rows
+            .into_iter()
+            .map(|(id, workspace_name, email, role, from_email, created_at)| {
+                ntypes::WorkspaceInvitation {
+                    id,
+                    workspace_id: workspace_name,
+                    email,
+                    role,
+                    from: from_email,
+                    created_at,
+                }
+            })
+            .collect(),
+        Err(e) => {
+            eprintln!("Database error fetching invitations: {}", e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ntypes::Response {
+                    status: 500,
+                    data: Some("Failed to fetch invitations".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    Json(ntypes::Response {
+        status: 200,
+        data: Some(ntypes::SettingsData {
+            user: ntypes::UserInfo {
+                id: user.id,
+                email: user.email,
+            },
+            workspaces,
+            api_keys,
+            invitations,
+        }),
     })
 }
