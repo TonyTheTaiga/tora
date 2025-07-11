@@ -7,3 +7,4 @@ export { default as EditExperimentModal } from "./edit-experiment-modal.svelte";
 export { default as DeleteConfirmationModal } from "./delete-confirmation-modal.svelte";
 export { default as CreateWorkspaceModal } from "./create-workspace-modal.svelte";
 export { default as WorkspaceInviteModal } from "./workspace-invite-modal.svelte";
+export { default as DeleteWorkspaceModal } from "./delete-workspace-modal.svelte";

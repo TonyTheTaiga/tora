@@ -117,6 +117,7 @@ Or import specific modals:
     DeleteConfirmationModal,
     CreateWorkspaceModal,
     WorkspaceInviteModal,
+    DeleteWorkspaceModal,
   } from "$lib/components/modals";
 </script>
 ```

@@ -1,0 +1,93 @@
+<script lang="ts">
+  import { AlertTriangle, Loader2 } from "@lucide/svelte";
+  import { enhance } from "$app/forms";
+  import { BaseModal } from "$lib/components/modals";
+
+  let {
+    workspace,
+    isOpen = $bindable(false),
+    onDeleted,
+  }: {
+    workspace: any;
+    isOpen: boolean;
+    onDeleted?: () => void;
+  } = $props();
+
+  let isDeleting = $state(false);
+
+  function closeModal() {
+    if (isDeleting) return;
+    isOpen = false;
+  }
+</script>
+
+{#if isOpen && workspace}
+  <BaseModal title="Delete Workspace?">
+    {#snippet children()}
+      <div class="space-y-4">
+        <!-- Warning content -->
+        <div class="flex items-start gap-3">
+          <AlertTriangle size={20} class="text-ctp-red mt-0.5 flex-shrink-0" />
+          <div class="space-y-3">
+            <div class="bg-ctp-red/10 border border-ctp-red/30 p-3">
+              <p class="text-sm text-ctp-text">
+                Are you sure you want to delete <strong
+                  >{workspace?.name}</strong
+                >?
+              </p>
+              <p class="text-sm text-ctp-subtext0 mt-2">
+                This action is permanent and cannot be undone. All workspace
+                data, including experiments, metrics, and member access, will be
+                deleted.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <form
+          method="POST"
+          action="?/deleteWorkspace"
+          class="flex justify-end gap-2 pt-3 mt-3 border-t border-ctp-surface0/20"
+          use:enhance={() => {
+            isDeleting = true;
+            return async ({ result, update }) => {
+              isDeleting = false;
+              if (result.type === "success") {
+                onDeleted?.();
+                closeModal();
+              } else {
+                console.error("Error deleting workspace:", result);
+                await update();
+              }
+            };
+          }}
+        >
+          <input type="hidden" name="workspaceId" value={workspace.id} />
+          <button
+            onclick={closeModal}
+            type="button"
+            disabled={isDeleting}
+            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text px-3 py-2 text-sm transition-all"
+          >
+            cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isDeleting}
+            class="bg-ctp-red/20 border border-ctp-red/40 text-ctp-red hover:bg-ctp-red hover:text-ctp-crust px-3 py-2 text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {#if isDeleting}
+              <div class="flex items-center gap-2">
+                <Loader2 size={14} class="animate-spin" />
+                deleting...
+              </div>
+            {:else}
+              delete
+            {/if}
+          </button>
+        </form>
+      </div>
+    {/snippet}
+  </BaseModal>
+{/if}

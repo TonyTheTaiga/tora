@@ -1,6 +1,9 @@
 <script lang="ts">
   import { Plus, LogOut, Trash2, Users, Check, X } from "@lucide/svelte";
-  import WorkspaceInviteModal from "$lib/components/modals/workspace-invite-modal.svelte";
+  import {
+    WorkspaceInviteModal,
+    DeleteWorkspaceModal,
+  } from "$lib/components/modals";
   import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
   import { enhance } from "$app/forms";
 
@@ -8,6 +11,8 @@
   let createdKey: string = $state("");
   let inviteModalOpen = $state(false);
   let workspaceToInvite: any = $state(null);
+  let deleteModalOpen = $state(false);
+  let workspaceToDelete: any = $state(null);
 
   const ownedWorkspaces = $derived(
     data.workspaces?.filter((w: any) => w.role === "OWNER") || [],
@@ -20,6 +25,11 @@
   function openInviteModal(workspace: any) {
     workspaceToInvite = workspace;
     inviteModalOpen = true;
+  }
+
+  function openDeleteModal(workspace: any) {
+    workspaceToDelete = workspace;
+    deleteModalOpen = true;
   }
 
   function sendInvitation(email: string, roleId: string) {
@@ -54,21 +64,9 @@
     workspaceToInvite = null;
   }
 
-  function deleteWorkspace(workspaceId: string) {
-    if (!confirm("Are you sure you want to delete this workspace?")) return;
-
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "?/deleteWorkspace";
-
-    const workspaceIdInput = document.createElement("input");
-    workspaceIdInput.type = "hidden";
-    workspaceIdInput.name = "workspaceId";
-    workspaceIdInput.value = workspaceId;
-    form.appendChild(workspaceIdInput);
-
-    document.body.appendChild(form);
-    form.submit();
+  function onWorkspaceDeleted() {
+    // Refresh the page to update the workspace list
+    window.location.reload();
   }
 
   function leaveWorkspace(workspaceId: string) {
@@ -276,7 +274,7 @@
                     title="Delete workspace"
                     onclick={(e) => {
                       e.stopPropagation();
-                      deleteWorkspace(workspace.id);
+                      openDeleteModal(workspace);
                     }}
                   >
                     <Trash2 size={10} />
@@ -472,4 +470,10 @@
   workspace={workspaceToInvite}
   workspaceRoles={data.workspaceRoles || []}
   onInvite={sendInvitation}
+/>
+
+<DeleteWorkspaceModal
+  bind:isOpen={deleteModalOpen}
+  workspace={workspaceToDelete}
+  onDeleted={onWorkspaceDeleted}
 />
