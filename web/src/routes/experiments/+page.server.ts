@@ -50,17 +50,16 @@ export const actions: Actions = {
     } = parseFormData(await request.formData());
 
     const payload: any = {
-      "experiment-name": name,
-      "experiment-description": description || "",
+      name: name,
+      description: description || "",
       tags,
     };
 
     if (workspaceId) {
-      payload["workspace-id"] = workspaceId;
+      payload["workspace_id"] = workspaceId;
     }
 
     await locals.apiClient.post("/api/experiments", payload);
-
     return { success: true };
   },
   update: async ({ request, locals }) => {
