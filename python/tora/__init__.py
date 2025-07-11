@@ -1,5 +1,5 @@
 """
-Tora Python SDK - ML Experiment Tracking
+Tora Python SDK - ML Experiment Tracking.
 
 A Python SDK for the Tora ML experiment tracking platform.
 Provides easy-to-use APIs for logging metrics, managing experiments,

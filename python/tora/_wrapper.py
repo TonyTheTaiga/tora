@@ -11,7 +11,7 @@ import logging
 from typing import Dict, List, Optional, Union
 
 from ._client import Tora
-from ._exceptions import ToraError, ToraValidationError
+from ._exceptions import ToraError
 from ._types import HPValue, MetricMetadata
 
 __all__ = [
@@ -57,9 +57,12 @@ def setup(
         description: Optional description of the experiment
         hyperparams: Optional hyperparameters for the experiment
         tags: Optional list of tags for the experiment
-        api_key: API key for authentication. Uses TORA_API_KEY env var if not provided
-        server_url: Base URL for the Tora API. Uses TORA_BASE_URL env var if not provided
-        max_buffer_len: Maximum number of metrics to buffer before sending (default: 1 for immediate sending)
+        api_key: API key for authentication. Uses TORA_API_KEY env var if not
+            provided
+        server_url: Base URL for the Tora API. Uses TORA_BASE_URL env var if not
+            provided
+        max_buffer_len: Maximum number of metrics to buffer before sending
+            (default: 1 for immediate sending)
 
     Returns:
         The experiment ID of the created experiment
@@ -93,13 +96,16 @@ def setup(
         # Register cleanup function
         atexit.register(shutdown)
 
-        experiment_url = f"https://tora-web-1030250455947.us-central1.run.app/experiments/{_CLIENT.experiment_id}"
+        experiment_url = (
+            f"https://tora-web-1030250455947.us-central1.run.app/experiments/"  # noqa
+            f"{_CLIENT.experiment_id}"
+        )
         logger.info(f"Tora experiment created: {experiment_url}")
         print(f"Tora experiment: {experiment_url}")
 
         return _CLIENT.experiment_id
 
-    except Exception as e:
+    except Exception:
         _CLIENT = None  # Reset on error
         raise
 
@@ -187,5 +193,8 @@ def get_experiment_url() -> Optional[str]:
     """
     experiment_id = get_experiment_id()
     if experiment_id:
-        return f"https://tora-web-1030250455947.us-central1.run.app/experiments/{experiment_id}"
+        return (
+            f"https://tora-web-1030250455947.us-central1.run.app/experiments/"  # noqa
+            f"{experiment_id}"
+        )
     return None

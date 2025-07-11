@@ -2,9 +2,10 @@
 Pytest configuration and fixtures for Tora SDK tests.
 """
 
+from typing import Any, Dict
+from unittest.mock import MagicMock, Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
-from typing import Dict, Any
 
 from tora._http import HttpClient, HttpResponse
 

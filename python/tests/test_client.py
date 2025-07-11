@@ -2,17 +2,19 @@
 Tests for the main Tora client.
 """
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+
 from tora import Tora, create_workspace
 from tora._exceptions import (
-    ToraValidationError,
-    ToraAuthenticationError,
+    HTTPStatusError,
     ToraAPIError,
+    ToraAuthenticationError,
+    ToraConfigurationError,
     ToraExperimentError,
     ToraMetricError,
-    ToraConfigurationError,
-    HTTPStatusError,
+    ToraValidationError,
 )
 
 

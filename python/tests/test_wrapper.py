@@ -2,11 +2,13 @@
 Tests for the wrapper module (global client functions).
 """
 
-import pytest
 from unittest.mock import Mock, patch
-from tora import setup, tlog, flush, shutdown, is_initialized
-from tora._exceptions import ToraError, ToraValidationError
+
+import pytest
+
 import tora._wrapper
+from tora import flush, is_initialized, setup, shutdown, tlog
+from tora._exceptions import ToraError, ToraValidationError
 
 
 class TestSetup:

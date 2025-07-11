@@ -3,18 +3,19 @@ Tests for the exceptions module.
 """
 
 import pytest
+
 from tora._exceptions import (
-    ToraError,
-    ToraConfigurationError,
-    ToraAuthenticationError,
-    ToraValidationError,
-    ToraNetworkError,
+    HTTPStatusError,
     ToraAPIError,
-    ToraTimeoutError,
+    ToraAuthenticationError,
+    ToraConfigurationError,
+    ToraError,
     ToraExperimentError,
     ToraMetricError,
+    ToraNetworkError,
+    ToraTimeoutError,
+    ToraValidationError,
     ToraWorkspaceError,
-    HTTPStatusError,
 )
 
 

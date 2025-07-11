@@ -229,7 +229,8 @@ def validate_metric_name(name: str) -> str:
 
     if not re.match(r"^[a-zA-Z0-9_\-./]+$", name):
         raise ToraValidationError(
-            "Metric name can only contain letters, numbers, underscore, hyphen, dot, and slash"
+            "Metric name can only contain letters, numbers, underscore, hyphen, "
+            "dot, and slash"
         )
 
     return name

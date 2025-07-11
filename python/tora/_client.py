@@ -20,7 +20,7 @@ from ._exceptions import (
     ToraValidationError,
 )
 from ._http import HttpClient
-from ._types import ExperimentResponse, HPValue, MetricMetadata
+from ._types import HPValue, MetricMetadata
 from ._validation import (
     validate_experiment_name,
     validate_hyperparams,
@@ -58,7 +58,8 @@ def create_workspace(
     Args:
         name: The name for the new workspace
         description: An optional description for the workspace
-        api_key: API key for authentication. If not provided, uses TORA_API_KEY environment variable
+        api_key: API key for authentication. If not provided, uses TORA_API_KEY
+            environment variable
         server_url: The base URL of the Tora server. If not provided, uses TORA_BASE_URL
 
     Returns:
@@ -158,9 +159,12 @@ class Tora:
             description: Optional description of the experiment
             hyperparams: Optional hyperparameters for the experiment
             tags: Optional list of tags for the experiment
-            max_buffer_len: Maximum number of metrics to buffer before sending (default: 25)
-            api_key: API key for authentication. Uses TORA_API_KEY env var if not provided
-            server_url: Base URL for the Tora API. Uses TORA_BASE_URL env var if not provided
+            max_buffer_len: Maximum number of metrics to buffer before sending
+                (default: 25)
+            api_key: API key for authentication. Uses TORA_API_KEY env var if not
+                provided
+            server_url: Base URL for the Tora API. Uses TORA_BASE_URL env var if not
+                provided
 
         Raises:
             ToraValidationError: If experiment_id is invalid
@@ -186,7 +190,8 @@ class Tora:
             server_url = TORA_BASE_URL
         if not server_url:
             raise ToraConfigurationError(
-                "Server URL must be provided via parameter or TORA_BASE_URL environment variable"
+                "Server URL must be provided via parameter or TORA_BASE_URL "
+                "environment variable"
             )
 
         try:
@@ -233,9 +238,12 @@ class Tora:
             description: Optional description of the experiment
             hyperparams: Optional hyperparameters for the experiment
             tags: Optional list of tags for the experiment
-            max_buffer_len: Maximum number of metrics to buffer before sending (default: 25)
-            api_key: API key for authentication. Uses TORA_API_KEY env var if not provided
-            server_url: Base URL for the Tora API. Uses TORA_BASE_URL env var if not provided
+            max_buffer_len: Maximum number of metrics to buffer before sending
+                (default: 25)
+            api_key: API key for authentication. Uses TORA_API_KEY env var if not
+                provided
+            server_url: Base URL for the Tora API. Uses TORA_BASE_URL env var if not
+                provided
 
         Returns:
             A Tora client instance for the created experiment
@@ -355,9 +363,12 @@ class Tora:
 
         Args:
             experiment_id: ID of the experiment to load
-            max_buffer_len: Maximum number of metrics to buffer before sending (default: 25)
-            api_key: API key for authentication. Uses TORA_API_KEY env var if not provided
-            server_url: Base URL for the Tora API. Uses TORA_BASE_URL env var if not provided
+            max_buffer_len: Maximum number of metrics to buffer before sending
+                (default: 25)
+            api_key: API key for authentication. Uses TORA_API_KEY env var if not
+                provided
+            server_url: Base URL for the Tora API. Uses TORA_BASE_URL env var if not
+                provided
 
         Returns:
             A Tora client instance for the loaded experiment
@@ -490,7 +501,8 @@ class Tora:
         """
         Write buffered metrics to the API.
 
-        This method is called automatically when the buffer is full or during shutdown.
+        This method is called automatically when the buffer is full or during
+        shutdown.
         It handles errors gracefully and logs them without raising exceptions.
         """
         if not self._buffer or self._closed:
@@ -500,7 +512,8 @@ class Tora:
 
         try:
             logger.debug(
-                f"Sending {len(metrics_to_send)} metrics for experiment {self._experiment_id}"
+                f"Sending {len(metrics_to_send)} metrics for experiment "
+                f"{self._experiment_id}"
             )
 
             response = self._http_client.post(
@@ -517,10 +530,11 @@ class Tora:
         except HTTPStatusError as e:
             error_msg = f"Failed to write metrics (HTTP {e.status_code})"
             if hasattr(e, "response") and hasattr(e.response, "text"):
-                error_msg += f": {e.response.text[:200]}"
+                error_msg += f": {e.response.text[: 200]}"
             logger.error(error_msg)
 
-            # Don't clear buffer on error - metrics will be retried on next flush/shutdown
+            # Don't clear buffer on error - metrics will be retried on next
+            # flush/shutdown
 
         except ToraNetworkError as e:
             logger.error(f"Network error writing metrics: {e}")
@@ -628,14 +642,20 @@ class Tora:
 
     def get_experiment_url(self) -> str:
         """
-        Get the web URL for this experiment.
+        Return the web URL for this experiment.
 
         Returns:
             The experiment URL for viewing in the web dashboard
         """
-        return f"https://tora-web-1030250455947.us-central1.run.app/experiments/{self.experiment_id}"
+        return (
+            f"https://tora-web-1030250455947.us-central1.run.app/experiments/"  # noqa
+            f"{self.experiment_id}"
+        )
 
     def __repr__(self) -> str:
-        """String representation of the Tora client."""
+        """Return string representation of the Tora client."""
         status = "closed" if self.is_closed else "open"
-        return f"Tora(experiment_id='{self.experiment_id}', status='{status}', buffer_size={self.buffer_size})"
+        return (
+            f"Tora(experiment_id='{self.experiment_id}', status='{status}', "
+            f"buffer_size={self.buffer_size})"
+        )

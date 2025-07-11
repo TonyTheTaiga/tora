@@ -9,7 +9,7 @@ import http.client
 import json as _json
 import socket
 import ssl
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Type, Union
 from urllib.parse import urlparse
 
 from ._exceptions import HTTPStatusError, ToraNetworkError, ToraTimeoutError
@@ -50,7 +50,7 @@ class HttpResponse:
         return self._text
 
     def json(self) -> Any:
-        """Returns the JSON-decoded content of the response."""
+        """Return the JSON-decoded content of the response."""
         if self._json is None:
             try:
                 self._json = _json.loads(self.text)
@@ -65,17 +65,16 @@ class HttpResponse:
         return self._json
 
     def raise_for_status(self) -> None:
-        """Raises appropriate exception for 4xx and 5xx responses."""
+        """Raise appropriate exception for 4xx and 5xx responses."""
         if 400 <= self.status_code < 600:
             error_msg = f"HTTP {self.status_code} {self.reason} for url '{self._url}'"
 
-            # Try to extract error details from response
-            error_details = {}
+            # Try to extract error details from response (for future use)
             try:
                 if self.headers.get("content-type", "").startswith("application/json"):
-                    json_data = self.json()
-                    if isinstance(json_data, dict):
-                        error_details = json_data
+                    _ = (
+                        self.json()
+                    )  # Could use for enhanced error reporting in the future
             except Exception:
                 pass  # Ignore JSON parsing errors for error responses
 
@@ -109,6 +108,9 @@ class HttpClient:
         self.base_path = parsed_url.path.rstrip("/")
         self.timeout = timeout or 30  # Default 30 second timeout
 
+        self.conn_class: Type[
+            Union[http.client.HTTPConnection, http.client.HTTPSConnection]
+        ]
         if self.scheme == "https":
             self.conn_class = http.client.HTTPSConnection
         elif self.scheme == "http":
@@ -144,7 +146,7 @@ class HttpClient:
         """Make an HTTP request with comprehensive error handling."""
         conn = self._get_conn(timeout=timeout)
         full_path = self.base_path + path
-        url = f"{self.scheme}://{self.netloc}{full_path}"
+        url = f"{self.scheme}://{self.netloc}{full_path}"  # noqa: E231
 
         final_headers = self.headers.copy()
         if headers:

@@ -2,11 +2,13 @@
 Tests for the HTTP client module.
 """
 
-import pytest
 import json
-from unittest.mock import Mock, patch, MagicMock
-from tora._http import HttpClient, HttpResponse
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
+
 from tora._exceptions import ToraNetworkError, ToraTimeoutError
+from tora._http import HttpClient, HttpResponse
 
 
 class TestHttpResponse:

@@ -3,16 +3,17 @@ Tests for the validation module.
 """
 
 import pytest
+
+from tora._exceptions import ToraValidationError
 from tora._validation import (
     validate_experiment_name,
-    validate_workspace_id,
     validate_hyperparams,
-    validate_tags,
     validate_metric_name,
     validate_metric_value,
     validate_step,
+    validate_tags,
+    validate_workspace_id,
 )
-from tora._exceptions import ToraValidationError
 
 
 class TestValidateExperimentName:

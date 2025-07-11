@@ -11,8 +11,9 @@ This example demonstrates how to integrate Tora with PyTorch training:
 
 import random
 import time
+from typing import Any, Dict
+
 import tora
-from typing import Dict, Any
 
 
 class MockModel:
