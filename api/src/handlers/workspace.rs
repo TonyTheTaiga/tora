@@ -89,8 +89,6 @@ pub async fn create_workspace(
     State(pool): State<PgPool>,
     Json(request): Json<CreateWorkspaceRequest>,
 ) -> impl IntoResponse {
-    println!("starting create workspace...");
-
     let mut tx = match pool.begin().await {
         Ok(tx) => tx,
         Err(e) => {
