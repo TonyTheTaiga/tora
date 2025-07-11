@@ -41,6 +41,12 @@ jobs:
         uv python install ${{ matrix.python-version }}
         uv sync --dev
 
+    - name: Verify environment
+      working-directory: ./python
+      run: |
+        uv run python --version
+        uv run python -c "import pytest; print(f'pytest version: {pytest.__version__}')"
+
     - name: Run tests
       working-directory: ./python
       run: |
@@ -88,13 +94,28 @@ jobs:
         uv python install 3.11
         uv sync --dev
 
-    - name: Install pre-commit
+    - name: Verify linting tools
+      working-directory: ./python
       run: |
-        uv tool install pre-commit
+        uv run python --version
+        uv run black --version
+        uv run ruff --version
+        uv run flake8 --version
 
-    - name: Run pre-commit hooks
+    - name: Run Black formatting check
+      working-directory: ./python
       run: |
-        uv tool run pre-commit run --all-files --files python/**
+        uv run black --check tora tests
+
+    - name: Run Ruff import sorting check
+      working-directory: ./python
+      run: |
+        uv run ruff check --select=I tora tests
+
+    - name: Run Flake8 linting
+      working-directory: ./python
+      run: |
+        uv run flake8 tora tests
 
   type-check:
     runs-on: ubuntu-latest
@@ -117,6 +138,12 @@ jobs:
       run: |
         uv python install 3.11
         uv sync --dev
+
+    - name: Verify mypy installation
+      working-directory: ./python
+      run: |
+        uv run python --version
+        uv run mypy --version
 
     - name: Run type checking
       working-directory: ./python
