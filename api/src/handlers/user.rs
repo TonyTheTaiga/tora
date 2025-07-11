@@ -1,3 +1,4 @@
+use crate::handlers::{api_key, invitation, workspace};
 use crate::middleware::auth::AuthenticatedUser;
 use crate::types;
 use axum::{
@@ -81,7 +82,6 @@ pub async fn login(Json(payload): Json<types::LoginParams>) -> impl IntoResponse
 
 pub async fn refresh_token(Json(payload): Json<types::RefreshTokenRequest>) -> impl IntoResponse {
     let auth_client = create_client();
-
     match auth_client.refresh_session(&payload.refresh_token).await {
         Ok(session) => {
             let session_payload = serde_json::json!({
@@ -117,10 +117,6 @@ pub async fn get_settings(
     Extension(user): Extension<AuthenticatedUser>,
     State(pool): State<PgPool>,
 ) -> Json<types::SettingsData> {
-    use crate::handlers::{api_key, invitation, workspace};
-
-    println!("user: {user:?}");
-
     let workspaces_response =
         workspace::list_workspaces(Extension(user.clone()), State(pool.clone()))
             .await
