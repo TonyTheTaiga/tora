@@ -41,9 +41,12 @@ export class ApiClient {
         `API request failed: ${response.status} ${response.statusText}`,
       );
     }
-
     const contentType = response.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
+    if (
+      contentType &&
+      contentType.includes("application/json") &&
+      response.status !== 204
+    ) {
       return response.json();
     }
 

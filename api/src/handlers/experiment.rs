@@ -593,7 +593,6 @@ pub async fn delete_experiment(
         _ => {}
     }
 
-    // Delete the experiment (CASCADE will handle related records)
     let delete_result = sqlx::query("DELETE FROM experiment WHERE id = $1")
         .bind(experiment_uuid)
         .execute(&pool)

@@ -84,13 +84,6 @@
   <DeleteConfirmationModal
     experiment={deleteExperimentModal}
     bind:experiments
-    onDelete={async (experimentId) => {
-      // This would need to be implemented with a server action
-      // For now, just throw an error to indicate it needs implementation
-      throw new Error(
-        "Delete experiment functionality needs to be implemented with server actions",
-      );
-    }}
   />
 {/if}
 

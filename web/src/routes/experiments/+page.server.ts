@@ -86,8 +86,7 @@ export const actions: Actions = {
         message: "A valid ID is required",
       });
     }
-    await locals.apiClient.delete(`/api/experiments/${id}`);
-
+    await locals.apiClient.delete<null>(`/api/experiments/${id}`);
     return { success: true };
   },
 };

@@ -3,15 +3,14 @@
   import { AlertTriangle, X, Loader2 } from "@lucide/svelte";
   import { onMount, onDestroy } from "svelte";
   import { closeDeleteExperimentModal } from "$lib/state/app.svelte.js";
+  import { enhance } from "$app/forms";
 
   let {
     experiment,
     experiments = $bindable(),
-    onDelete,
   }: {
     experiment: Experiment;
     experiments: Experiment[];
-    onDelete: (experimentId: string) => Promise<void>;
   } = $props();
 
   let isDeleting = $state(false);
@@ -23,24 +22,6 @@
   onDestroy(() => {
     document.body.classList.remove("overflow-hidden");
   });
-
-  async function deleteExperiment() {
-    if (isDeleting || !experiment) return;
-
-    isDeleting = true;
-
-    try {
-      await onDelete(experiment.id);
-
-      const experimentId = experiment.id;
-      experiments = experiments.filter((exp) => exp.id !== experimentId);
-      closeDeleteExperimentModal();
-    } catch (error) {
-      console.error("Error deleting experiment:", error);
-    } finally {
-      isDeleting = false;
-    }
-  }
 
   function closeModal() {
     if (isDeleting) return;
@@ -93,9 +74,27 @@
       </div>
     </div>
 
-    <div
+    <form
+      method="POST"
+      action="/experiments?/delete"
       class="flex justify-end gap-3 pt-4 px-5 pb-5 border-t border-ctp-surface0"
+      use:enhance={() => {
+        isDeleting = true;
+        return async ({ result, update }) => {
+          isDeleting = false;
+          console.log(result);
+          if (result.type === "success") {
+            const experimentId = experiment.id;
+            experiments = experiments.filter((exp) => exp.id !== experimentId);
+            closeDeleteExperimentModal();
+          } else {
+            console.error("Error deleting experiment:", result);
+            await update();
+          }
+        };
+      }}
     >
+      <input type="hidden" name="id" value={experiment.id} />
       <button
         onclick={closeModal}
         type="button"
@@ -105,8 +104,7 @@
         Cancel
       </button>
       <button
-        type="button"
-        onclick={deleteExperiment}
+        type="submit"
         disabled={isDeleting}
         class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-ctp-red/20 border border-ctp-red/40 text-ctp-red hover:bg-ctp-red hover:text-ctp-crust transition-all font-mono"
       >
@@ -119,6 +117,6 @@
           Delete
         {/if}
       </button>
-    </div>
+    </form>
   </div>
 </div>
