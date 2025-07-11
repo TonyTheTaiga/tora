@@ -6,11 +6,13 @@ on:
     paths:
       - 'python/**'
       - '.github/workflows/python-tests.yml'
+      - '.pre-commit-config.yaml'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'python/**'
       - '.github/workflows/python-tests.yml'
+      - '.pre-commit-config.yaml'
   workflow_dispatch:
 
 jobs:
@@ -86,71 +88,23 @@ jobs:
       with:
         python-version: "3.11"
 
-    - name: Cache pip dependencies
+    - name: Cache pre-commit
       uses: actions/cache@v4
       with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-3.11-${{ hashFiles('python/pyproject.toml') }}
+        path: ~/.cache/pre-commit
+        key: ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
         restore-keys: |
-          ${{ runner.os }}-pip-3.11-
+          ${{ runner.os }}-pre-commit-
 
-    - name: Install dependencies
-      working-directory: ./python
+    - name: Install pre-commit
       run: |
         python -m pip install --upgrade pip
-        pip install -e ".[dev]"
+        pip install pre-commit
 
-    - name: Verify linting tools
-      working-directory: ./python
+    - name: Run pre-commit
       run: |
-        python --version
-        ruff --version
+        pre-commit run --all-files --show-diff-on-failure
 
-    - name: Run Ruff formatting check
-      working-directory: ./python
-      run: |
-        ruff format --check tora tests
-
-    - name: Run Ruff linting
-      working-directory: ./python
-      run: |
-        ruff check tora tests
-
-  type-check:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-
-    - name: Cache pip dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-3.11-${{ hashFiles('python/pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-3.11-
-
-    - name: Install dependencies
-      working-directory: ./python
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
-
-    - name: Verify mypy installation
-      working-directory: ./python
-      run: |
-        python --version
-        mypy --version
-
-    - name: Run type checking
-      working-directory: ./python
-      run: |
-        mypy --ignore-missing-imports --no-strict-optional --allow-any-generics tora
 
   build-test:
     runs-on: ubuntu-latest

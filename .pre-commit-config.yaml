@@ -30,6 +30,14 @@ repos:
       - id: debug-statements
         files: ^python/tora/
 
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        files: ^python/tora/
+        args: ["--ignore-missing-imports", "--no-strict-optional", "--allow-any-generics"]
+        additional_dependencies: [types-requests]
+
   # Web formatting (TypeScript/JavaScript)
   - repo: local
     hooks:
