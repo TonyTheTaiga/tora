@@ -147,6 +147,21 @@
         </div>
       </div>
     </div>
+
+    <div class="pl-6">
+      <form action="/logout" method="POST">
+        <button
+          type="submit"
+          class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 px-3 py-2 text-sm transition-all"
+          aria-label="Sign out"
+        >
+          <div class="flex items-center gap-2">
+            <LogOut size={12} />
+            <span>logout</span>
+          </div>
+        </button>
+      </form>
+    </div>
   </div>
 
   <!-- Main content -->
@@ -180,21 +195,6 @@
           <span class="text-ctp-subtext0 w-8">id:</span>
           <span class="text-ctp-blue truncate min-w-0">{data?.user?.id}</span>
         </div>
-      </div>
-
-      <div class="pl-6">
-        <form action="/logout" method="POST">
-          <button
-            type="submit"
-            class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 px-3 py-2 text-sm transition-all"
-            aria-label="Sign out"
-          >
-            <div class="flex items-center gap-2">
-              <LogOut size={12} />
-              <span>logout</span>
-            </div>
-          </button>
-        </form>
       </div>
     </div>
 
