@@ -118,11 +118,7 @@ class Tora:
         resolved_api_key = Tora._get_api_key(api_key)
         data = cls._create_payload(name, workspace_id, description, hyperparams, tags)
         server_url = server_url or TORA_BASE_URL
-        url_path = (
-            f"/workspaces/{workspace_id}/experiments"
-            if workspace_id
-            else "/experiments"
-        )
+        url_path = "/experiments"
         headers = {"Content-Type": "application/json"}
         if resolved_api_key:
             headers["x-api-key"] = resolved_api_key
@@ -131,13 +127,11 @@ class Tora:
             print(data)
             req = client.post(url_path, json=data)
             req.raise_for_status()
-            response_data = req.json()
-            exp_id = response_data.get("experiment", {}).get("id") or response_data.get(
-                "id"
-            )
+            res = req.json()
+            experiment_id = res["data"]["id"]
 
         return cls(
-            experiment_id=exp_id,
+            experiment_id=experiment_id,
             description=description,
             hyperparams=hyperparams,
             tags=tags,
@@ -211,14 +205,9 @@ class Tora:
         metadata: Mapping[str, Any] | None = None,
     ) -> None:
         """
-        Logs a metric. Metrics are buffered and sent in batches.
+        Logs a metric. Metrics are buffered and sent in batches. Specified by max_buffer_len.
         """
-        log_entry = {"name": name, "value": value}
-        if step is not None:
-            log_entry["step"] = step
-        if metadata is not None:
-            log_entry["metadata"] = metadata
-
+        log_entry = {"name": name, "value": value, "step": step, "metadata": metadata}
         self._buffer.append(log_entry)
 
         if len(self._buffer) >= self._max_buffer_len:
@@ -229,9 +218,11 @@ class Tora:
             return
 
         try:
+            print(self._experiment_id)
+
             req = self._http_client.post(
                 f"/experiments/{self._experiment_id}/metrics/batch",
-                json=self._buffer,
+                json={"metrics": self._buffer},
                 timeout=120,
             )
             req.raise_for_status()

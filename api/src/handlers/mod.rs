@@ -80,7 +80,7 @@ pub fn api_routes(pool: &sqlx::PgPool) -> Router<sqlx::PgPool> {
             protected_route(post(metric::create_metric), pool),
         )
         .route(
-            "/experiments/{id}/metrics/batch",
+            "/experiments/{experiment_id}/metrics/batch",
             protected_route(post(metric::batch_create_metrics), pool),
         )
         .route(

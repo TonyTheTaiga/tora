@@ -304,7 +304,6 @@ pub async fn batch_create_metrics(
         }
     };
 
-    // Check if user has access to this experiment
     let access_check = sqlx::query_as::<_, (i64,)>(
         r#"
         SELECT COUNT(*) FROM experiment e
@@ -359,7 +358,6 @@ pub async fn batch_create_metrics(
     };
 
     let mut created_metrics = Vec::new();
-
     for metric_request in request.metrics {
         let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
             "INSERT INTO metric (experiment_id, name, value, step, metadata) VALUES ($1, $2, $3, $4, $5) RETURNING id, experiment_id::text, name, value::float8, step::float8, metadata, created_at",
@@ -412,9 +410,9 @@ pub async fn batch_create_metrics(
 
     (
         StatusCode::CREATED,
-        Json(Response {
+        Json(Response::<String> {
             status: 201,
-            data: Some(created_metrics),
+            data: None,
         }),
     )
         .into_response()

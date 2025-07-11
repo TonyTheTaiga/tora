@@ -23,26 +23,26 @@ pub struct Experiment {
     pub workspace_id: Option<String>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub enum HyperparamValue {
     Float(f32),
     Integer(i64),
     String(String),
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Hyperparam {
     pub key: String,
     pub value: HyperparamValue,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct CreateExperimentRequest {
     pub name: String,
     pub description: String,
     pub workspace_id: String,
     pub tags: Option<Vec<String>>,
-    pub hyperparams: Option<Vec<Hyperparam>>,
+    pub hyperparams: Option<Vec<serde_json::Value>>,
 }
 
 #[derive(Deserialize)]
@@ -63,8 +63,6 @@ pub async fn create_experiment(
     State(pool): State<PgPool>,
     Json(request): Json<CreateExperimentRequest>,
 ) -> impl IntoResponse {
-    println!("request: {request:?}");
-
     let user_uuid = match Uuid::parse_str(&user.id) {
         Ok(uuid) => uuid,
         Err(_) => {
@@ -142,7 +140,7 @@ pub async fn create_experiment(
     }
 
     let experiment_result = sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>)>(
-        "INSERT INTO experiment (name, description, tags) VALUES ($1, $2, $3, $4) RETURNING id::text, name, description, hyperparams, tags, created_at, updated_at",
+        "INSERT INTO experiment (name, description, tags, hyperparams) VALUES ($1, $2, $3, $4) RETURNING id::text, name, description, hyperparams, tags, created_at, updated_at",
     )
     .bind(&request.name)
     .bind(if request.description.is_empty() { None } else { Some(&request.description) })
