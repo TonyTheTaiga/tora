@@ -23,7 +23,6 @@ pip install tora
 
 ```bash
 export TORA_API_KEY="your-api-key"
-export TORA_BASE_URL="https://your-tora-instance.com/api"  # Optional
 ```
 
 ### 2. Basic usage
