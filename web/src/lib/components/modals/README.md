@@ -115,6 +115,8 @@ Or import specific modals:
     CreateExperimentModal,
     EditExperimentModal,
     DeleteConfirmationModal,
+    CreateWorkspaceModal,
+    WorkspaceInviteModal,
   } from "$lib/components/modals";
 </script>
 ```
