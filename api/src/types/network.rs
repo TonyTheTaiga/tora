@@ -140,21 +140,6 @@ pub struct ErrorResponse {
 }
 
 #[derive(Debug)]
-pub enum AppError {
-    BadRequest(String),
-    Unauthorized(String),
-    Forbidden(String),
-    NotFound(String),
-    Conflict(String),
-    UnprocessableEntity(String),
-    Internal(String),
-    Database(sqlx::Error),
-    Validation(String),
-    InvalidUuid(String),
-    AuthenticationFailed(String),
-}
-
-#[derive(Debug)]
 pub struct AuthError {
     pub message: String,
     pub status_code: StatusCode,
@@ -172,5 +157,3 @@ impl IntoResponse for AuthError {
         (self.status_code, body).into_response()
     }
 }
-
-pub type AppResult<T> = Result<T, AppError>;
