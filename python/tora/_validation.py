@@ -70,6 +70,12 @@ def validate_workspace_id(workspace_id: Optional[str]) -> Optional[str]:
     if not workspace_id:
         raise ToraValidationError("Workspace ID cannot be empty")
 
+    # Validate workspace ID format - should be UUID format or alphanumeric with hyphens
+    if not re.match(r"^[a-zA-Z0-9\-]+$", workspace_id):
+        raise ToraValidationError(
+            "Workspace ID must contain only letters, numbers, and hyphens"
+        )
+
     return workspace_id
 
 

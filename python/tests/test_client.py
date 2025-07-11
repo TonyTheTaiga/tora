@@ -43,8 +43,11 @@ class TestCreateWorkspace:
             json={"name": "test-workspace", "description": "Test description"},
         )
 
-    def test_create_workspace_no_api_key(self):
+    def test_create_workspace_no_api_key(self, monkeypatch):
         """Test workspace creation without API key."""
+        # Clear any existing API key from environment
+        monkeypatch.delenv("TORA_API_KEY", raising=False)
+
         with pytest.raises(ToraAuthenticationError, match="API key is required"):
             create_workspace("test-workspace")
 
