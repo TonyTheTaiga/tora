@@ -61,10 +61,6 @@ def create_workspace(
 
 
 class Tora:
-    """
-    A client for creating and logging to Tora experiments.
-    """
-
     def __init__(
         self,
         experiment_id: str,

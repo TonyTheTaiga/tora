@@ -34,7 +34,10 @@ def setup(
         api_key=api_key,
         max_buffer_len=1,
     )
-    logger.info("http://localhost:5173/experiments/" + _CLIENT._experiment_id)
+    print(
+        "https://tora-web-1030250455947.us-central1.run.app/experiments/"
+        + _CLIENT._experiment_id
+    )
 
 
 def tlog(
