@@ -41,7 +41,7 @@ def validate_experiment_name(name: str) -> str:
     # Check for invalid characters (basic validation)
     if re.search(r'[<>:"/\\|?*\x00-\x1f]', name):
         raise ToraValidationError(
-            "Experiment name contains invalid characters. " 'Avoid: < > : " / \\ | ? * and control characters',
+            'Experiment name contains invalid characters. Avoid: < > : " / \\ | ? * and control characters',
         )
 
     return name
@@ -115,7 +115,7 @@ def validate_hyperparams(
 
         if not isinstance(value, str | int | float):
             raise ToraValidationError(
-                f"Hyperparameter '{key}' has invalid type {type(value)}. " "Must be str, int, or float",
+                f"Hyperparameter '{key}' has invalid type {type(value)}. Must be str, int, or float",
             )
 
         if isinstance(value, float):
@@ -181,7 +181,7 @@ def validate_tags(tags: list[str] | None) -> list[str] | None:
         # Check for invalid characters
         if re.search(r'[<>:"/\\|?*\x00-\x1f,;]', tag):
             raise ToraValidationError(
-                f"Tag '{tag}' contains invalid characters. " 'Avoid: < > : " / \\ | ? * , ; and control characters',
+                f"Tag '{tag}' contains invalid characters. Avoid: < > : \" / \\ | ? * , ; and control characters",
             )
 
         tag_lower = tag.lower()

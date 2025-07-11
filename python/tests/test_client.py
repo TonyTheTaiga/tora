@@ -17,10 +17,16 @@ from tora._exceptions import (
 )
 
 
+# Test configuration to ensure we never hit production
+TEST_API_KEY = "test-api-key-12345"
+TEST_BASE_URL = "https://test-api.example.com/api"
+
+
 class TestCreateWorkspace:
     """Tests for create_workspace function."""
 
     @patch("tora._client.HttpClient")
+    @patch("tora._config.TORA_BASE_URL", TEST_BASE_URL)
     def test_create_workspace_success(self, mock_http_client_class, sample_workspace_data):
         """Test successful workspace creation."""
         # Setup mock
@@ -30,8 +36,13 @@ class TestCreateWorkspace:
         mock_client.post.return_value = mock_response
         mock_http_client_class.return_value.__enter__.return_value = mock_client
 
-        # Test
-        result = create_workspace("test-workspace", "Test description", "test-api-key")
+        # Test with explicit test API key and URL
+        result = create_workspace(
+            "test-workspace",
+            "Test description",
+            api_key=TEST_API_KEY,
+            server_url=TEST_BASE_URL
+        )
 
         # Assertions
         assert result == sample_workspace_data
@@ -39,11 +50,18 @@ class TestCreateWorkspace:
             "/workspaces",
             json={"name": "test-workspace", "description": "Test description"},
         )
+        # Verify HttpClient was initialized with test URL, not production
+        mock_http_client_class.assert_called_once_with(
+            base_url=TEST_BASE_URL,
+            headers={"x-api-key": TEST_API_KEY}
+        )
 
     def test_create_workspace_no_api_key(self, monkeypatch):
         """Test workspace creation without API key."""
         # Clear any existing API key from environment
         monkeypatch.delenv("TORA_API_KEY", raising=False)
+        # Set test URL to avoid production
+        monkeypatch.setenv("TORA_BASE_URL", TEST_BASE_URL)
 
         with pytest.raises(ToraAuthenticationError, match="API key is required"):
             create_workspace("test-workspace")
@@ -51,15 +69,16 @@ class TestCreateWorkspace:
     def test_create_workspace_invalid_name(self):
         """Test workspace creation with invalid name."""
         with pytest.raises(ToraValidationError, match="must be a non-empty string"):
-            create_workspace("", api_key="test-key")
+            create_workspace("", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
     def test_create_workspace_name_too_long(self):
         """Test workspace creation with name too long."""
         long_name = "a" * 256
         with pytest.raises(ToraValidationError, match="cannot exceed 255 characters"):
-            create_workspace(long_name, api_key="test-key")
+            create_workspace(long_name, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
     @patch("tora._client.HttpClient")
+    @patch("tora._config.TORA_BASE_URL", TEST_BASE_URL)
     def test_create_workspace_api_error(self, mock_http_client_class):
         """Test workspace creation API error."""
         # Setup mock to raise HTTP error
@@ -71,7 +90,13 @@ class TestCreateWorkspace:
         mock_http_client_class.return_value.__enter__.return_value = mock_client
 
         with pytest.raises(ToraValidationError, match="Invalid workspace data"):
-            create_workspace("test-workspace", api_key="test-key")
+            create_workspace("test-workspace", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
+
+        # Verify we're using test URL, not production
+        mock_http_client_class.assert_called_once_with(
+            base_url=TEST_BASE_URL,
+            headers={"x-api-key": TEST_API_KEY}
+        )
 
 
 class TestToraInit:
@@ -79,7 +104,7 @@ class TestToraInit:
 
     def test_init_success(self):
         """Test successful initialization."""
-        tora = Tora("exp-123", api_key="test-key")
+        tora = Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
         assert tora.experiment_id == "exp-123"
         assert tora.max_buffer_len == 25
         assert not tora.is_closed
@@ -87,24 +112,24 @@ class TestToraInit:
     def test_init_invalid_experiment_id(self):
         """Test initialization with invalid experiment ID."""
         with pytest.raises(ToraValidationError, match="must be a non-empty string"):
-            Tora("")
+            Tora("", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
         with pytest.raises(ToraValidationError, match="must be a non-empty string"):
-            Tora(None)
+            Tora(None, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
     def test_init_no_server_url(self):
         """Test initialization without server URL."""
         with pytest.raises(ToraConfigurationError, match="Server URL must be provided"):
-            Tora("exp-123", server_url="")
+            Tora("exp-123", server_url="", api_key=TEST_API_KEY)
 
     def test_init_custom_buffer_len(self):
         """Test initialization with custom buffer length."""
-        tora = Tora("exp-123", max_buffer_len=10, api_key="test-key")
+        tora = Tora("exp-123", max_buffer_len=10, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
         assert tora.max_buffer_len == 10
 
     def test_init_buffer_len_minimum(self):
         """Test initialization with buffer length less than 1."""
-        tora = Tora("exp-123", max_buffer_len=0, api_key="test-key")
+        tora = Tora("exp-123", max_buffer_len=0, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
         assert tora.max_buffer_len == 1  # Should be set to minimum of 1
 
 

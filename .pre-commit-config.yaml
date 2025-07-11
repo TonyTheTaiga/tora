@@ -14,7 +14,7 @@ repos:
         files: \.(toml)$
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.4
+    rev: v0.9.0
     hooks:
       - id: ruff
         name: ruff-linting
@@ -22,7 +22,7 @@ repos:
         args: ["--fix"]
       - id: ruff-format
         name: ruff-formatting
-        files: ^python/
+        files: ^python/tora/
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -31,7 +31,7 @@ repos:
         files: ^python/tora/
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
+    rev: v1.9.0
     hooks:
       - id: mypy
         files: ^python/tora/

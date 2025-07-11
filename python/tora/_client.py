@@ -510,7 +510,7 @@ class Tora:
         except HTTPStatusError as e:
             error_msg = f"Failed to write metrics (HTTP {e.status_code})"
             if hasattr(e, "response") and hasattr(e.response, "text"):
-                error_msg += f": {e.response.text[: 200]}"
+                error_msg += f": {e.response.text[:200]}"
             logger.error(error_msg)
 
             # Don't clear buffer on error - metrics will be retried on next
