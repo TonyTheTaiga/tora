@@ -1,27 +1,11 @@
-use crate::handlers::experiment::Experiment;
 use crate::middleware::auth::AuthenticatedUser;
-use crate::ntypes::Response;
+use crate::types::{DashboardOverview, Experiment, Response, WorkspaceSummary};
 use axum::{Extension, Json, extract::State, http::StatusCode, response::IntoResponse};
-use serde::{Deserialize, Serialize};
+
 use sqlx::PgPool;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct WorkspaceSummary {
-    pub id: String,
-    pub name: String,
-    pub description: Option<String>,
-    pub created_at: chrono::DateTime<chrono::Utc>,
-    pub role: String,
-    pub experiment_count: i64,
-    pub recent_experiment_count: i64,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct DashboardOverview {
-    pub workspaces: Vec<WorkspaceSummary>,
-    pub recent_experiments: Vec<Experiment>,
-}
+// Types are now imported from crate::types
 
 // Get dashboard overview with workspaces and recent experiments in a single call
 pub async fn get_dashboard_overview(

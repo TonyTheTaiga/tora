@@ -1,37 +1,16 @@
 use crate::middleware::auth::AuthenticatedUser;
-use crate::ntypes::Response;
+use crate::types::{CreateWorkspaceRequest, Response, Workspace, WorkspaceMember};
 use axum::{
     Extension, Json,
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
 };
-use serde::{Deserialize, Serialize};
+
 use sqlx::PgPool;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Workspace {
-    pub id: String,
-    pub name: String,
-    pub description: Option<String>,
-    pub created_at: chrono::DateTime<chrono::Utc>,
-    pub role: String,
-}
-
-#[derive(Deserialize)]
-pub struct CreateWorkspaceRequest {
-    pub name: String,
-    pub description: Option<String>,
-}
-
-#[derive(Serialize)]
-pub struct WorkspaceMember {
-    pub id: String,
-    pub email: String,
-    pub role: String,
-    pub joined_at: chrono::DateTime<chrono::Utc>,
-}
+// Types are now imported from crate::types
 
 pub async fn list_workspaces(
     Extension(user): Extension<AuthenticatedUser>,

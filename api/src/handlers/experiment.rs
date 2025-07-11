@@ -1,62 +1,18 @@
 use crate::middleware::auth::AuthenticatedUser;
-use crate::ntypes::Response;
+use crate::types::{
+    CreateExperimentRequest, Experiment, ListExperimentsQuery, Response, UpdateExperimentRequest,
+};
 use axum::{
     Extension, Json,
     extract::{Path, Query, State},
     http::StatusCode,
     response::IntoResponse,
 };
-use serde::{Deserialize, Serialize};
+
 use sqlx::PgPool;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Experiment {
-    pub id: String,
-    pub name: String,
-    pub description: Option<String>,
-    pub hyperparams: Vec<serde_json::Value>,
-    pub tags: Vec<String>,
-    pub created_at: chrono::DateTime<chrono::Utc>,
-    pub updated_at: chrono::DateTime<chrono::Utc>,
-    pub available_metrics: Vec<String>,
-    pub workspace_id: Option<String>,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub enum HyperparamValue {
-    Float(f32),
-    Integer(i64),
-    String(String),
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Hyperparam {
-    pub key: String,
-    pub value: HyperparamValue,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct CreateExperimentRequest {
-    pub name: String,
-    pub description: String,
-    pub workspace_id: String,
-    pub tags: Option<Vec<String>>,
-    pub hyperparams: Option<Vec<serde_json::Value>>,
-}
-
-#[derive(Deserialize)]
-pub struct UpdateExperimentRequest {
-    pub id: String,
-    pub name: String,
-    pub description: String,
-    pub tags: Option<Vec<String>>,
-}
-
-#[derive(Deserialize)]
-pub struct ListExperimentsQuery {
-    pub workspace: Option<String>,
-}
+// Types are now imported from crate::types
 
 pub async fn create_experiment(
     Extension(user): Extension<AuthenticatedUser>,

@@ -1,4 +1,4 @@
-use crate::ntypes;
+use crate::types;
 use axum::{
     Json,
     extract::{Request, State},
@@ -26,7 +26,7 @@ pub struct AuthError {
 
 impl IntoResponse for AuthError {
     fn into_response(self) -> Response {
-        let body = Json(ntypes::Response {
+        let body = Json(types::Response {
             status: self.status_code.as_u16() as i16,
             data: Some(serde_json::json!({
                 "error": "Authentication failed",
@@ -104,7 +104,7 @@ async fn validate_api_key(
     let mut hasher = Sha256::new();
     hasher.update(api_key.as_bytes());
     let key_hash = format!("{:x}", hasher.finalize());
-    let record = sqlx::query_as::<_, ntypes::ApiKeyRecord>(
+    let record = sqlx::query_as::<_, types::ApiKeyRecord>(
         r#"
         SELECT
             ak.id::text,

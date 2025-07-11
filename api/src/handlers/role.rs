@@ -1,4 +1,4 @@
-use crate::ntypes::{Response, WorkspaceRole};
+use crate::types::{Response, WorkspaceRole};
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
 use sqlx::PgPool;
 

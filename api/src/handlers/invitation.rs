@@ -1,21 +1,16 @@
 use crate::middleware::auth::AuthenticatedUser;
-use crate::ntypes::{CreateInvitationRequest, Response, WorkspaceInvitation};
+use crate::types::{CreateInvitationRequest, InvitationActionQuery, Response, WorkspaceInvitation};
 use axum::{
     Extension, Json,
     extract::{Query, State},
     http::StatusCode,
     response::IntoResponse,
 };
-use serde::Deserialize;
+
 use sqlx::PgPool;
 use uuid::Uuid;
 
-#[derive(Deserialize)]
-pub struct InvitationActionQuery {
-    #[serde(rename = "invitationId")]
-    pub invitation_id: String,
-    pub action: String, // "accept" or "deny"
-}
+// Types are now imported from crate::types
 
 pub async fn create_invitation(
     Extension(user): Extension<AuthenticatedUser>,

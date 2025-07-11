@@ -19,8 +19,6 @@ mod role;
 mod user;
 mod workspace;
 
-pub use workspace::Workspace;
-
 pub fn api_routes(pool: &sqlx::PgPool) -> Router<sqlx::PgPool> {
     let protected_routes = Router::new()
         // Workspaces

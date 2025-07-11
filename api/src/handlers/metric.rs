@@ -1,38 +1,16 @@
 use crate::middleware::auth::AuthenticatedUser;
-use crate::ntypes::Response;
+use crate::types::{BatchCreateMetricsRequest, CreateMetricRequest, Metric, Response};
 use axum::{
     Extension, Json,
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
 };
-use serde::{Deserialize, Serialize};
+
 use sqlx::PgPool;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Metric {
-    pub id: i64,
-    pub experiment_id: String,
-    pub name: String,
-    pub value: f64,
-    pub step: Option<i64>,
-    pub metadata: Option<serde_json::Value>,
-    pub created_at: chrono::DateTime<chrono::Utc>,
-}
-
-#[derive(Deserialize)]
-pub struct CreateMetricRequest {
-    pub name: String,
-    pub value: f64,
-    pub step: Option<i64>,
-    pub metadata: Option<serde_json::Value>,
-}
-
-#[derive(Deserialize)]
-pub struct BatchCreateMetricsRequest {
-    pub metrics: Vec<CreateMetricRequest>,
-}
+// Types are now imported from crate::types
 
 pub async fn get_metrics(
     Extension(user): Extension<AuthenticatedUser>,
