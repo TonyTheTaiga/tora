@@ -21,7 +21,6 @@ repos:
       - id: black
         language_version: python3
         files: ^python/tora/
-        args: [--config=python/pyproject.toml]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.6
@@ -45,7 +44,8 @@ repos:
       - id: mypy
         files: ^python/tora/
         additional_dependencies: [types-requests]
-        args: [--ignore-missing-imports, --no-strict-optional, --allow-any-generics]
+        args:
+          [--ignore-missing-imports, --no-strict-optional, --allow-any-generics]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
