@@ -6,8 +6,8 @@
   import { page } from "$app/state";
 
   let { children } = $props();
-  let theme = $derived.by(() => getTheme());
 
+  let theme = $derived.by(() => getTheme());
   let showNavigation = $derived(
     page.url.pathname !== "/" &&
       page.url.pathname !== "/login" &&

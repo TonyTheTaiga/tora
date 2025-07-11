@@ -9,6 +9,7 @@ type RefreshResponse = {
 
 export const handle: Handle = async ({ event, resolve }) => {
   const auth_token = event.cookies.get("tora_auth_token");
+  console.log("auth_token", auth_token);
   let apiClient: ApiClient;
   if (auth_token) {
     const sessionJson = atob(auth_token);
