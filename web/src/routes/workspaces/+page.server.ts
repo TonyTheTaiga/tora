@@ -1,5 +1,5 @@
 import type { Actions } from "./$types";
-import { error, fail } from "@sveltejs/kit";
+import { fail } from "@sveltejs/kit";
 import { startTimer, generateRequestId } from "$lib/utils/timing";
 
 interface ApiResponse<T> {
