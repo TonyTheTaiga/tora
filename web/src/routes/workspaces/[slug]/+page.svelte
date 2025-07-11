@@ -10,6 +10,7 @@
     DeleteConfirmationModal,
     EditExperimentModal,
   } from "$lib/components/modals";
+  import { PageHeader } from "$lib/components";
   import ExperimentsListMobile from "./experiments-list-mobile.svelte";
   import ExperimentsListDesktop from "./experiments-list-desktop.svelte";
   import { Plus } from "@lucide/svelte";
@@ -22,7 +23,6 @@
   let currentWorkspace = $derived(data.currentWorkspace);
   let experiments: Experiment[] = $derived(data.experiments || []);
   let searchQuery = $state("");
-  let copiedId = $state(false);
   let createExperimentModal = $derived(getCreateExperimentModal());
   let editExperimentModal = $derived(getEditExperimentModal());
   let deleteExperimentModal = $derived(getDeleteExperimentModal());
@@ -53,8 +53,6 @@
 
   function copyToClipboard(id: string) {
     navigator.clipboard.writeText(id);
-    copiedId = true;
-    setTimeout(() => (copiedId = false), 1200);
   }
 
   const handleKeydown = (event: KeyboardEvent) => {
@@ -93,51 +91,30 @@
 
 <div class="font-mono">
   <!-- Header -->
-  <div
-    class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/10"
+  <PageHeader
+    title={currentWorkspace?.name || "Loading..."}
+    description={currentWorkspace?.description || undefined}
+    subtitle="{experiments.length} experiment{experiments.length !== 1
+      ? 's'
+      : ''}"
+    additionalInfo={currentWorkspace?.id || undefined}
+    onAdditionalInfoClick={currentWorkspace?.id
+      ? () => copyToClipboard(currentWorkspace.id)
+      : undefined}
+    additionalInfoTitle="click to copy workspace id"
   >
-    <div
-      class="flex items-stretch gap-3 md:gap-4 min-w-0 flex-1 pr-4 min-h-fit"
-    >
-      <div
-        class="w-2 bg-ctp-blue rounded-full flex-shrink-0 self-stretch"
-      ></div>
-      <div class="min-w-0 flex-1 py-1">
-        <h1 class="text-lg md:text-xl text-ctp-text truncate font-mono">
-          {currentWorkspace?.name || "Loading..."}
-        </h1>
-        <div class="text-sm text-ctp-subtext0 space-y-1">
-          <div>
-            {#if currentWorkspace?.description}
-              <span>{currentWorkspace.description}</span>
-            {/if}
-          </div>
-          <div>
-            {experiments.length} experiment{experiments.length !== 1 ? "s" : ""}
-          </div>
-          {#if currentWorkspace?.id}
-            <button
-              onclick={() => copyToClipboard(currentWorkspace.id)}
-              class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex text-start"
-              title="click to copy workspace id"
-            >
-              <span>{currentWorkspace.id}</span>
-            </button>
-          {/if}
+    {#snippet actionButton()}
+      <button
+        onclick={() => openCreateExperimentModal()}
+        class="group relative bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-text hover:bg-ctp-surface0/30 hover:border-ctp-surface0/50 px-3 py-2 md:px-4 text-sm font-mono transition-all flex-shrink-0"
+      >
+        <div class="flex items-center gap-2">
+          <Plus class="w-4 h-4" />
+          <span class="hidden sm:inline">new</span>
         </div>
-      </div>
-    </div>
-
-    <button
-      onclick={() => openCreateExperimentModal()}
-      class="group relative bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-text hover:bg-ctp-surface0/30 hover:border-ctp-surface0/50 px-3 py-2 md:px-4 text-sm font-mono transition-all flex-shrink-0"
-    >
-      <div class="flex items-center gap-2">
-        <Plus class="w-4 h-4" />
-        <span class="hidden sm:inline">new</span>
-      </div>
-    </button>
-  </div>
+      </button>
+    {/snippet}
+  </PageHeader>
 
   <!-- Search and filter bar -->
   <div class="px-4 md:px-6 py-4">

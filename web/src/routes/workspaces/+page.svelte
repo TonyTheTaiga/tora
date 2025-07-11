@@ -4,6 +4,7 @@
     getCreateWorkspaceModal,
   } from "$lib/state/app.svelte.js";
   import { CreateWorkspaceModal } from "$lib/components/modals";
+  import { PageHeader } from "$lib/components";
   import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
   import RecentActivity from "$lib/components/recent-activity.svelte";
   import { onMount } from "svelte";
@@ -52,49 +53,34 @@
 
 <div class="font-mono">
   <!-- Header -->
-  <div
-    class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/10"
+  <PageHeader
+    title="Workspaces"
+    subtitle="{workspaces.length} workspace{workspaces.length !== 1 ? 's' : ''}"
   >
-    <div
-      class="flex items-stretch gap-3 md:gap-4 min-w-0 flex-1 pr-4 min-h-fit"
-    >
-      <div
-        class="w-2 bg-ctp-blue rounded-full flex-shrink-0 self-stretch"
-      ></div>
-      <div class="min-w-0 flex-1 py-1">
-        <h1 class="text-lg md:text-xl text-ctp-text truncate font-mono">
-          Workspaces
-        </h1>
-        <div class="text-sm text-ctp-subtext0 space-y-1">
-          <div>
-            {workspaces.length} workspace{workspaces.length !== 1 ? "s" : ""}
-          </div>
+    {#snippet actionButton()}
+      <button
+        onclick={() => openCreateWorkspaceModal()}
+        class="group relative bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-text hover:bg-ctp-surface0/30 hover:border-ctp-surface0/50 px-3 py-2 md:px-4 text-sm font-mono transition-all flex-shrink-0"
+      >
+        <div class="flex items-center gap-2">
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4v16m8-8H4"
+            ></path>
+          </svg>
+          <span class="hidden sm:inline">New</span>
         </div>
-      </div>
-    </div>
-
-    <button
-      onclick={() => openCreateWorkspaceModal()}
-      class="group relative bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-text hover:bg-ctp-surface0/30 hover:border-ctp-surface0/50 px-3 py-2 md:px-4 text-sm font-mono transition-all flex-shrink-0"
-    >
-      <div class="flex items-center gap-2">
-        <svg
-          class="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4v16m8-8H4"
-          ></path>
-        </svg>
-        <span class="hidden sm:inline">New</span>
-      </div>
-    </button>
-  </div>
+      </button>
+    {/snippet}
+  </PageHeader>
 
   <!-- Search and filter bar -->
   <div class="px-4 md:px-6 py-4">

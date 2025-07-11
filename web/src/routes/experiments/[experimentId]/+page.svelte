@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from "./$types";
-  import ExperimentHeader from "./experiment-header.svelte";
+  import { PageHeader } from "$lib/components";
   import ExperimentTags from "./experiment-tags.svelte";
   import ExperimentHyperparams from "./experiment-hyperparams.svelte";
   import ExperimentMetrics from "./experiment-metrics.svelte";
@@ -10,10 +10,20 @@
   let { experiment, scalarMetrics, timeSeriesNames } = $derived(data);
 
   const initialLimit = 10;
+
+  function copyToClipboard(text: string) {
+    navigator.clipboard.writeText(text);
+  }
 </script>
 
 <div class="font-mono">
-  <ExperimentHeader {experiment} />
+  <PageHeader
+    title={experiment.name}
+    description={experiment.description || undefined}
+    additionalInfo={experiment.id}
+    onAdditionalInfoClick={() => copyToClipboard(experiment.id)}
+    additionalInfoTitle="click to copy experiment id"
+  />
 
   <div class="p-4 md:p-6 space-y-4 md:space-y-6">
     <ExperimentMetrics

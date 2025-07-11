@@ -1,7 +1,5 @@
 <script lang="ts">
   import type { Experiment, Workspace } from "$lib/types";
-  import { Briefcase, TestTube } from "@lucide/svelte";
-  import WorkspaceRoleBadge from "$lib/workspace-role-badge.svelte";
 
   interface Props {
     experiments: Experiment[];
