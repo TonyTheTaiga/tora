@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { HyperParam, Experiment } from "$lib/types";
-  import { Plus, X, Tag as TagIcon, Settings, Beaker } from "@lucide/svelte";
+  import type { HyperParam } from "$lib/types";
+  import { Plus, X } from "@lucide/svelte";
   import { onMount, onDestroy } from "svelte";
   import { closeCreateExperimentModal } from "$lib/state/app.svelte.js";
   import { enhance } from "$app/forms";
