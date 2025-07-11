@@ -129,7 +129,7 @@
             <tr
               class="text-sm text-ctp-subtext0 border-b border-ctp-surface0/20"
             >
-              <th class="text-left py-2 w-4">•</th>
+              <th class="text-left py-2 w-4"></th>
               <th class="text-left py-2">name</th>
               <th class="text-right py-2 w-24">role</th>
               <th class="text-right py-2 w-24">modified</th>
