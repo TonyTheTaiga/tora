@@ -1,6 +1,5 @@
 import { error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { ApiClient } from "$lib/api";
 
 export const GET: RequestHandler = async ({ params, locals }) => {
   if (!locals.session) {
