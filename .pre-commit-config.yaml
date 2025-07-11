@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
         exclude: ^(web/|api/)
@@ -25,7 +25,7 @@ repos:
         files: ^python/
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v5.0.0
     hooks:
       - id: debug-statements
         files: ^python/tora/
@@ -47,7 +47,6 @@ repos:
         language: system
         files: ^web/
         pass_filenames: false
-        chdir: web
 
   # Rust formatting (API)
   - repo: local
