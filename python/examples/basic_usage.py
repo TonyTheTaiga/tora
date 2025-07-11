@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Basic usage example for the Tora Python SDK.
+"""Basic usage example for the Tora Python SDK.
 
 This example demonstrates the core functionality of the Tora SDK:
 - Creating experiments

@@ -3,7 +3,7 @@ Tests for the HTTP client module.
 """
 
 import json
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -67,11 +67,9 @@ class TestHttpResponse:
         raw_response = Mock()
         raw_response.status = 200
         raw_response.reason = "OK"
-        raw_response.getheaders.return_value = [
-            ("content-type", "text/plain; charset=utf-8")
-        ]
+        raw_response.getheaders.return_value = [("content-type", "text/plain; charset=utf-8")]
 
-        data = "Hello, 世界!".encode("utf-8")
+        data = "Hello, 世界!".encode()
         response = HttpResponse(raw_response, data, "https://api.example.com")
 
         assert response.text == "Hello, 世界!"
@@ -110,9 +108,7 @@ class TestHttpResponse:
         raw_response.reason = "Not Found"
         raw_response.getheaders.return_value = []
 
-        response = HttpResponse(
-            raw_response, b"Not found", "https://api.example.com/test"
-        )
+        response = HttpResponse(raw_response, b"Not found", "https://api.example.com/test")
 
         with pytest.raises(Exception) as exc_info:
             response.raise_for_status()
@@ -126,9 +122,7 @@ class TestHttpClient:
 
     def test_init_success(self):
         """Test successful client initialization."""
-        client = HttpClient(
-            "https://api.example.com", headers={"Authorization": "Bearer token"}
-        )
+        client = HttpClient("https://api.example.com", headers={"Authorization": "Bearer token"})
 
         assert client.scheme == "https"
         assert client.netloc == "api.example.com"
@@ -178,9 +172,7 @@ class TestHttpClient:
         mock_connection_class.assert_called_once_with("api.example.com", timeout=30)
 
         # Verify request
-        mock_conn.request.assert_called_once_with(
-            "GET", "/test", None, headers={"Custom": "header"}
-        )
+        mock_conn.request.assert_called_once_with("GET", "/test", None, headers={"Custom": "header"})
 
         assert response.status_code == 200
 
@@ -228,12 +220,10 @@ class TestHttpClient:
         mock_connection_class.return_value = mock_conn
 
         client = HttpClient("https://api.example.com")
-        response = client.post("/upload", data=b"binary data")
+        client.post("/upload", data=b"binary data")
 
         # Verify request
-        mock_conn.request.assert_called_once_with(
-            "POST", "/upload", b"binary data", headers={}
-        )
+        mock_conn.request.assert_called_once_with("POST", "/upload", b"binary data", headers={})
 
     def test_post_invalid_json(self):
         """Test POST request with invalid JSON data."""
@@ -268,11 +258,10 @@ class TestHttpClient:
     @patch("tora._http.http.client.HTTPSConnection")
     def test_timeout_error_handling(self, mock_connection_class):
         """Test timeout error handling."""
-        import socket
 
         # Setup mock to raise timeout
         mock_conn = Mock()
-        mock_conn.request.side_effect = socket.timeout("Request timed out")
+        mock_conn.request.side_effect = TimeoutError("Request timed out")
         mock_connection_class.return_value = mock_conn
 
         client = HttpClient("https://api.example.com")

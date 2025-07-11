@@ -58,9 +58,7 @@ class TestSetup:
     def test_setup_failure_resets_client(self, mock_tora_class):
         """Test that client is reset on setup failure."""
         # Setup mock to raise error
-        mock_tora_class.create_experiment.side_effect = ToraValidationError(
-            "Invalid name"
-        )
+        mock_tora_class.create_experiment.side_effect = ToraValidationError("Invalid name")
 
         with pytest.raises(ToraValidationError):
             setup("", api_key="test-key")

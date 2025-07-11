@@ -1,20 +1,21 @@
-"""
-Input validation utilities for the Tora SDK.
+"""Input validation utilities for the Tora SDK.
 
 This module provides validation functions to ensure data integrity
 and provide clear error messages for invalid inputs.
 """
 
+from __future__ import annotations
+
 import re
-from typing import Any, Dict, List, Mapping, Optional, Union
+from collections.abc import Mapping
+from typing import Any
 
 from ._exceptions import ToraValidationError
 from ._types import HPValue
 
 
 def validate_experiment_name(name: str) -> str:
-    """
-    Validate experiment name.
+    """Validate experiment name.
 
     Args:
         name: The experiment name to validate
@@ -24,6 +25,7 @@ def validate_experiment_name(name: str) -> str:
 
     Raises:
         ToraValidationError: If the name is invalid
+
     """
     if not isinstance(name, str):
         raise ToraValidationError("Experiment name must be a string")
@@ -39,16 +41,14 @@ def validate_experiment_name(name: str) -> str:
     # Check for invalid characters (basic validation)
     if re.search(r'[<>:"/\\|?*\x00-\x1f]', name):
         raise ToraValidationError(
-            "Experiment name contains invalid characters. "
-            'Avoid: < > : " / \\ | ? * and control characters'
+            "Experiment name contains invalid characters. " 'Avoid: < > : " / \\ | ? * and control characters',
         )
 
     return name
 
 
-def validate_workspace_id(workspace_id: Optional[str]) -> Optional[str]:
-    """
-    Validate workspace ID.
+def validate_workspace_id(workspace_id: str | None) -> str | None:
+    """Validate workspace ID.
 
     Args:
         workspace_id: The workspace ID to validate
@@ -58,6 +58,7 @@ def validate_workspace_id(workspace_id: Optional[str]) -> Optional[str]:
 
     Raises:
         ToraValidationError: If the workspace ID is invalid
+
     """
     if workspace_id is None:
         return None
@@ -72,18 +73,15 @@ def validate_workspace_id(workspace_id: Optional[str]) -> Optional[str]:
 
     # Validate workspace ID format - should be UUID format or alphanumeric with hyphens
     if not re.match(r"^[a-zA-Z0-9\-]+$", workspace_id):
-        raise ToraValidationError(
-            "Workspace ID must contain only letters, numbers, and hyphens"
-        )
+        raise ToraValidationError("Workspace ID must contain only letters, numbers, and hyphens")
 
     return workspace_id
 
 
 def validate_hyperparams(
-    hyperparams: Optional[Mapping[str, HPValue]],
-) -> Optional[Dict[str, HPValue]]:
-    """
-    Validate hyperparameters.
+    hyperparams: Mapping[str, HPValue] | None,
+) -> dict[str, HPValue] | None:
+    """Validate hyperparameters.
 
     Args:
         hyperparams: The hyperparameters to validate
@@ -93,6 +91,7 @@ def validate_hyperparams(
 
     Raises:
         ToraValidationError: If hyperparameters are invalid
+
     """
     if hyperparams is None:
         return None
@@ -104,9 +103,7 @@ def validate_hyperparams(
 
     for key, value in hyperparams.items():
         if not isinstance(key, str):
-            raise ToraValidationError(
-                f"Hyperparameter key must be string, got {type(key)}"
-            )
+            raise ToraValidationError(f"Hyperparameter key must be string, got {type(key)}")
 
         if not key.strip():
             raise ToraValidationError("Hyperparameter key cannot be empty")
@@ -114,14 +111,11 @@ def validate_hyperparams(
         key = key.strip()
 
         if len(key) > 100:
-            raise ToraValidationError(
-                f"Hyperparameter key '{key}' exceeds 100 characters"
-            )
+            raise ToraValidationError(f"Hyperparameter key '{key}' exceeds 100 characters")
 
-        if not isinstance(value, (str, int, float)):
+        if not isinstance(value, str | int | float):
             raise ToraValidationError(
-                f"Hyperparameter '{key}' has invalid type {type(value)}. "
-                "Must be str, int, or float"
+                f"Hyperparameter '{key}' has invalid type {type(value)}. " "Must be str, int, or float",
             )
 
         if isinstance(value, float):
@@ -132,30 +126,23 @@ def validate_hyperparams(
                 raise ToraValidationError(f"Hyperparameter '{key}' cannot be infinite")
 
             if not (-1e308 <= value <= 1e308):
-                raise ToraValidationError(
-                    f"Hyperparameter '{key}' float value out of range"
-                )
+                raise ToraValidationError(f"Hyperparameter '{key}' float value out of range")
 
         elif isinstance(value, int):
             if not (-(2**63) <= value <= 2**63 - 1):
-                raise ToraValidationError(
-                    f"Hyperparameter '{key}' integer value out of range"
-                )
+                raise ToraValidationError(f"Hyperparameter '{key}' integer value out of range")
 
         elif isinstance(value, str):
             if len(value) > 1000:
-                raise ToraValidationError(
-                    f"Hyperparameter '{key}' string value exceeds 1000 characters"
-                )
+                raise ToraValidationError(f"Hyperparameter '{key}' string value exceeds 1000 characters")
 
         validated[key] = value
 
     return validated
 
 
-def validate_tags(tags: Optional[List[str]]) -> Optional[List[str]]:
-    """
-    Validate tags.
+def validate_tags(tags: list[str] | None) -> list[str] | None:
+    """Validate tags.
 
     Args:
         tags: The tags to validate
@@ -165,6 +152,7 @@ def validate_tags(tags: Optional[List[str]]) -> Optional[List[str]]:
 
     Raises:
         ToraValidationError: If tags are invalid
+
     """
     if tags is None:
         return None
@@ -180,9 +168,7 @@ def validate_tags(tags: Optional[List[str]]) -> Optional[List[str]]:
 
     for i, tag in enumerate(tags):
         if not isinstance(tag, str):
-            raise ToraValidationError(
-                f"Tag at index {i} must be a string, got {type(tag)}"
-            )
+            raise ToraValidationError(f"Tag at index {i} must be a string, got {type(tag)}")
 
         tag = tag.strip()
 
@@ -195,8 +181,7 @@ def validate_tags(tags: Optional[List[str]]) -> Optional[List[str]]:
         # Check for invalid characters
         if re.search(r'[<>:"/\\|?*\x00-\x1f,;]', tag):
             raise ToraValidationError(
-                f"Tag '{tag}' contains invalid characters. "
-                'Avoid: < > : " / \\ | ? * , ; and control characters'
+                f"Tag '{tag}' contains invalid characters. " 'Avoid: < > : " / \\ | ? * , ; and control characters',
             )
 
         tag_lower = tag.lower()
@@ -210,8 +195,7 @@ def validate_tags(tags: Optional[List[str]]) -> Optional[List[str]]:
 
 
 def validate_metric_name(name: str) -> str:
-    """
-    Validate metric name.
+    """Validate metric name.
 
     Args:
         name: The metric name to validate
@@ -221,6 +205,7 @@ def validate_metric_name(name: str) -> str:
 
     Raises:
         ToraValidationError: If the name is invalid
+
     """
     if not isinstance(name, str):
         raise ToraValidationError("Metric name must be a string")
@@ -235,16 +220,14 @@ def validate_metric_name(name: str) -> str:
 
     if not re.match(r"^[a-zA-Z0-9_\-./]+$", name):
         raise ToraValidationError(
-            "Metric name can only contain letters, numbers, underscore, hyphen, "
-            "dot, and slash"
+            "Metric name can only contain letters, numbers, underscore, hyphen, dot, and slash",
         )
 
     return name
 
 
-def validate_metric_value(value: Any) -> Union[int, float]:
-    """
-    Validate metric value.
+def validate_metric_value(value: Any) -> int | float:
+    """Validate metric value.
 
     Args:
         value: The metric value to validate
@@ -254,17 +237,16 @@ def validate_metric_value(value: Any) -> Union[int, float]:
 
     Raises:
         ToraValidationError: If the value is invalid
+
     """
     if isinstance(value, bool):
         return int(value)
 
-    if not isinstance(value, (int, float)):
+    if not isinstance(value, int | float):
         try:
             value = float(value)
-        except (ValueError, TypeError):
-            raise ToraValidationError(
-                f"Metric value must be numeric, got {type(value)}"
-            )
+        except (ValueError, TypeError) as e:
+            raise ToraValidationError(f"Metric value must be numeric, got {type(value)}") from e
 
     if isinstance(value, float):
         if value != value:
@@ -283,9 +265,8 @@ def validate_metric_value(value: Any) -> Union[int, float]:
     return value
 
 
-def validate_step(step: Optional[int]) -> Optional[int]:
-    """
-    Validate step number.
+def validate_step(step: int | None) -> int | None:
+    """Validate step number.
 
     Args:
         step: The step number to validate
@@ -295,6 +276,7 @@ def validate_step(step: Optional[int]) -> Optional[int]:
 
     Raises:
         ToraValidationError: If the step is invalid
+
     """
     if step is None:
         return None
@@ -302,8 +284,8 @@ def validate_step(step: Optional[int]) -> Optional[int]:
     if not isinstance(step, int):
         try:
             step = int(step)
-        except (ValueError, TypeError):
-            raise ToraValidationError("Step must be an integer")
+        except (ValueError, TypeError) as e:
+            raise ToraValidationError("Step must be an integer") from e
 
     if step < 0:
         raise ToraValidationError("Step must be non-negative")

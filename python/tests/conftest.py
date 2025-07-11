@@ -2,8 +2,8 @@
 Pytest configuration and fixtures for Tora SDK tests.
 """
 
-from typing import Any, Dict
-from unittest.mock import MagicMock, Mock
+import contextlib
+from unittest.mock import Mock
 
 import pytest
 
@@ -112,10 +112,8 @@ def reset_global_client():
     yield
     # Cleanup after test
     if tora._wrapper._CLIENT:
-        try:
+        with contextlib.suppress(Exception):
             tora._wrapper._CLIENT.shutdown()
-        except Exception:
-            pass
         tora._wrapper._CLIENT = None
 
 

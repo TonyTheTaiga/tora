@@ -2,8 +2,6 @@
 Tests for the exceptions module.
 """
 
-import pytest
-
 from tora._exceptions import (
     HTTPStatusError,
     ToraAPIError,
@@ -109,9 +107,7 @@ class TestToraNetworkError:
     def test_network_error_full(self):
         """Test network error with all parameters."""
         details = {"url": "https://api.example.com"}
-        error = ToraNetworkError(
-            "Network error", status_code=404, response_text="Not found", details=details
-        )
+        error = ToraNetworkError("Network error", status_code=404, response_text="Not found", details=details)
 
         error_str = str(error)
         assert "Network error" in error_str

@@ -1,31 +1,31 @@
-"""
-Global wrapper functions for simplified Tora usage.
+"""Global wrapper functions for simplified Tora usage.
 
 This module provides a simplified global interface for Tora that maintains
 a single global client instance. This is convenient for simple use cases
 but the main Tora class is recommended for more complex scenarios.
 """
 
+from __future__ import annotations
+
 import atexit
 import logging
-from typing import Dict, List, Optional, Union
 
 from ._client import Tora
 from ._exceptions import ToraError
 from ._types import HPValue, MetricMetadata
 
 __all__ = [
-    "setup",
-    "tlog",
     "flush",
-    "shutdown",
-    "is_initialized",
     "get_experiment_id",
     "get_experiment_url",
+    "is_initialized",
+    "setup",
+    "shutdown",
+    "tlog",
 ]
 
 logger = logging.getLogger("tora")
-_CLIENT: Optional[Tora] = None
+_CLIENT: Tora | None = None
 
 
 def _get_client() -> Tora:
@@ -37,16 +37,15 @@ def _get_client() -> Tora:
 
 def setup(
     name: str,
-    workspace_id: Optional[str] = None,
-    description: Optional[str] = None,
-    hyperparams: Optional[Dict[str, HPValue]] = None,
-    tags: Optional[List[str]] = None,
-    api_key: Optional[str] = None,
-    server_url: Optional[str] = None,
+    workspace_id: str | None = None,
+    description: str | None = None,
+    hyperparams: dict[str, HPValue] | None = None,
+    tags: list[str] | None = None,
+    api_key: str | None = None,
+    server_url: str | None = None,
     max_buffer_len: int = 1,
 ) -> str:
-    """
-    Set up the global Tora client with a new experiment.
+    """Set up the global Tora client with a new experiment.
 
     This creates a new experiment and initializes the global client.
     After calling this function, you can use tlog() to log metrics.
@@ -73,13 +72,12 @@ def setup(
         ToraAuthenticationError: If authentication fails
         ToraAPIError: If the API request fails
         ToraNetworkError: If there's a network error
+
     """
     global _CLIENT
 
     if _CLIENT is not None:
-        raise ToraError(
-            "Tora client already initialized. Call shutdown() first to reinitialize."
-        )
+        raise ToraError("Tora client already initialized. Call shutdown() first to reinitialize.")
 
     try:
         _CLIENT = Tora.create_experiment(
@@ -96,10 +94,7 @@ def setup(
         # Register cleanup function
         atexit.register(shutdown)
 
-        experiment_url = (
-            f"https://tora-web-1030250455947.us-central1.run.app/experiments/"  # noqa
-            f"{_CLIENT.experiment_id}"
-        )
+        experiment_url = f"https://tora-web-1030250455947.us-central1.run.app/experiments/{_CLIENT.experiment_id}"
         logger.info(f"Tora experiment created: {experiment_url}")
         print(f"Tora experiment: {experiment_url}")
 
@@ -112,12 +107,11 @@ def setup(
 
 def tlog(
     name: str,
-    value: Union[int, float],
-    step: Optional[int] = None,
-    metadata: Optional[MetricMetadata] = None,
+    value: int | float,
+    step: int | None = None,
+    metadata: MetricMetadata | None = None,
 ) -> None:
-    """
-    Log a metric using the global Tora client.
+    """Log a metric using the global Tora client.
 
     Args:
         name: Name of the metric
@@ -129,25 +123,25 @@ def tlog(
         ToraError: If the global client is not initialized
         ToraValidationError: If input validation fails
         ToraMetricError: If logging fails
+
     """
     client = _get_client()
     client.log(name, value, step, metadata)
 
 
 def flush() -> None:
-    """
-    Flush all buffered metrics using the global client.
+    """Flush all buffered metrics using the global client.
 
     Raises:
         ToraError: If the global client is not initialized
+
     """
     if _CLIENT is not None:
         _CLIENT.flush()
 
 
 def shutdown() -> None:
-    """
-    Shutdown the global Tora client and flush all metrics.
+    """Shutdown the global Tora client and flush all metrics.
 
     After calling this function, you need to call setup() again
     to reinitialize the client.
@@ -163,38 +157,35 @@ def shutdown() -> None:
 
 
 def is_initialized() -> bool:
-    """
-    Check if the global Tora client is initialized.
+    """Check if the global Tora client is initialized.
 
     Returns:
         True if the client is initialized, False otherwise
+
     """
     return _CLIENT is not None and not _CLIENT.is_closed
 
 
-def get_experiment_id() -> Optional[str]:
-    """
-    Get the experiment ID of the global client.
+def get_experiment_id() -> str | None:
+    """Get the experiment ID of the global client.
 
     Returns:
         The experiment ID if initialized, None otherwise
+
     """
     if _CLIENT is not None and not _CLIENT.is_closed:
         return _CLIENT.experiment_id
     return None
 
 
-def get_experiment_url() -> Optional[str]:
-    """
-    Get the web URL for the current experiment.
+def get_experiment_url() -> str | None:
+    """Get the web URL for the current experiment.
 
     Returns:
         The experiment URL if initialized, None otherwise
+
     """
     experiment_id = get_experiment_id()
     if experiment_id:
-        return (
-            f"https://tora-web-1030250455947.us-central1.run.app/experiments/"  # noqa
-            f"{experiment_id}"
-        )
+        return f"https://tora-web-1030250455947.us-central1.run.app/experiments/{experiment_id}"
     return None

@@ -66,14 +66,8 @@ class TestValidateWorkspaceId:
 
     def test_valid_workspace_id(self):
         """Test valid workspace IDs."""
-        assert (
-            validate_workspace_id("12345678-1234-1234-1234-123456789012")
-            == "12345678-1234-1234-1234-123456789012"
-        )
-        assert (
-            validate_workspace_id("12345678123412341234123456789012")
-            == "12345678123412341234123456789012"
-        )
+        assert validate_workspace_id("12345678-1234-1234-1234-123456789012") == "12345678-1234-1234-1234-123456789012"
+        assert validate_workspace_id("12345678123412341234123456789012") == "12345678123412341234123456789012"
         assert validate_workspace_id(None) is None
 
     def test_invalid_workspace_id_type(self):
@@ -91,9 +85,7 @@ class TestValidateWorkspaceId:
 
     def test_invalid_workspace_id_format(self):
         """Test invalid workspace ID formats."""
-        with pytest.raises(
-            ToraValidationError, match="must contain only letters, numbers, and hyphens"
-        ):
+        with pytest.raises(ToraValidationError, match="must contain only letters, numbers, and hyphens"):
             validate_workspace_id("invalid@workspace")
 
 

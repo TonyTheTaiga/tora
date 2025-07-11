@@ -2,14 +2,13 @@
 Tests for the main Tora client.
 """
 
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
 from tora import Tora, create_workspace
 from tora._exceptions import (
     HTTPStatusError,
-    ToraAPIError,
     ToraAuthenticationError,
     ToraConfigurationError,
     ToraExperimentError,
@@ -22,9 +21,7 @@ class TestCreateWorkspace:
     """Tests for create_workspace function."""
 
     @patch("tora._client.HttpClient")
-    def test_create_workspace_success(
-        self, mock_http_client_class, sample_workspace_data
-    ):
+    def test_create_workspace_success(self, mock_http_client_class, sample_workspace_data):
         """Test successful workspace creation."""
         # Setup mock
         mock_client = Mock()
@@ -69,9 +66,7 @@ class TestCreateWorkspace:
         mock_client = Mock()
         mock_response = Mock()
         mock_response.status_code = 400
-        mock_response.raise_for_status.side_effect = HTTPStatusError(
-            "Bad Request", mock_response
-        )
+        mock_response.raise_for_status.side_effect = HTTPStatusError("Bad Request", mock_response)
         mock_client.post.return_value = mock_response
         mock_http_client_class.return_value.__enter__.return_value = mock_client
 
@@ -117,9 +112,7 @@ class TestToraCreateExperiment:
     """Tests for Tora.create_experiment class method."""
 
     @patch("tora._client.HttpClient")
-    def test_create_experiment_success(
-        self, mock_http_client_class, sample_experiment_data
-    ):
+    def test_create_experiment_success(self, mock_http_client_class, sample_experiment_data):
         """Test successful experiment creation."""
         # Setup mock
         mock_client = Mock()
@@ -154,9 +147,7 @@ class TestToraCreateExperiment:
     def test_create_experiment_invalid_hyperparams(self):
         """Test experiment creation with invalid hyperparams."""
         with pytest.raises(ToraValidationError):
-            Tora.create_experiment(
-                "test", hyperparams={"": "value"}, api_key="test-key"
-            )
+            Tora.create_experiment("test", hyperparams={"": "value"}, api_key="test-key")
 
     @patch("tora._client.HttpClient")
     def test_create_experiment_auth_error(self, mock_http_client_class):
@@ -165,9 +156,7 @@ class TestToraCreateExperiment:
         mock_client = Mock()
         mock_response = Mock()
         mock_response.status_code = 401
-        mock_response.raise_for_status.side_effect = HTTPStatusError(
-            "Unauthorized", mock_response
-        )
+        mock_response.raise_for_status.side_effect = HTTPStatusError("Unauthorized", mock_response)
         mock_client.post.return_value = mock_response
         mock_http_client_class.return_value.__enter__.return_value = mock_client
 
@@ -179,9 +168,7 @@ class TestToraLoadExperiment:
     """Tests for Tora.load_experiment class method."""
 
     @patch("tora._client.HttpClient")
-    def test_load_experiment_success(
-        self, mock_http_client_class, sample_experiment_data
-    ):
+    def test_load_experiment_success(self, mock_http_client_class, sample_experiment_data):
         """Test successful experiment loading."""
         # Setup mock
         mock_client = Mock()
@@ -213,9 +200,7 @@ class TestToraLoadExperiment:
         mock_client = Mock()
         mock_response = Mock()
         mock_response.status_code = 404
-        mock_response.raise_for_status.side_effect = HTTPStatusError(
-            "Not Found", mock_response
-        )
+        mock_response.raise_for_status.side_effect = HTTPStatusError("Not Found", mock_response)
         mock_client.get.return_value = mock_response
         mock_http_client_class.return_value.__enter__.return_value = mock_client
 

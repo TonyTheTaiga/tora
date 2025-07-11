@@ -1,17 +1,16 @@
-"""
-Exception classes for the Tora SDK.
+"""Exception classes for the Tora SDK.
 
 This module defines custom exception types used throughout the Tora SDK
 to provide clear error handling and debugging information.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class ToraError(Exception):
     """Base exception class for all Tora SDK errors."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
         super().__init__(message)
         self.message = message
         self.details = details or {}
@@ -25,19 +24,13 @@ class ToraError(Exception):
 class ToraConfigurationError(ToraError):
     """Raised when there's a configuration issue."""
 
-    pass
-
 
 class ToraAuthenticationError(ToraError):
     """Raised when authentication fails."""
 
-    pass
-
 
 class ToraValidationError(ToraError):
     """Raised when input validation fails."""
-
-    pass
 
 
 class ToraNetworkError(ToraError):
@@ -46,9 +39,9 @@ class ToraNetworkError(ToraError):
     def __init__(
         self,
         message: str,
-        status_code: Optional[int] = None,
-        response_text: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
+        status_code: int | None = None,
+        response_text: str | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         super().__init__(message, details)
         self.status_code = status_code
@@ -68,31 +61,21 @@ class ToraNetworkError(ToraError):
 class ToraAPIError(ToraNetworkError):
     """Raised when the Tora API returns an error response."""
 
-    pass
-
 
 class ToraTimeoutError(ToraNetworkError):
     """Raised when a network operation times out."""
-
-    pass
 
 
 class ToraExperimentError(ToraError):
     """Raised when experiment operations fail."""
 
-    pass
-
 
 class ToraMetricError(ToraError):
     """Raised when metric operations fail."""
 
-    pass
-
 
 class ToraWorkspaceError(ToraError):
     """Raised when workspace operations fail."""
-
-    pass
 
 
 # Legacy exception for backward compatibility

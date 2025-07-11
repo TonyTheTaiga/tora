@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-PyTorch integration example for the Tora Python SDK.
+"""PyTorch integration example for the Tora Python SDK.
 
 This example demonstrates how to integrate Tora with PyTorch training:
 - Logging training and validation metrics
@@ -11,7 +10,7 @@ This example demonstrates how to integrate Tora with PyTorch training:
 
 import random
 import time
-from typing import Any, Dict
+from typing import Any
 
 import tora
 
@@ -19,9 +18,7 @@ import tora
 class MockModel:
     """Mock PyTorch model for demonstration."""
 
-    def __init__(
-        self, input_size: int = 784, hidden_size: int = 128, num_classes: int = 10
-    ):
+    def __init__(self, input_size: int = 784, hidden_size: int = 128, num_classes: int = 10):
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_classes = num_classes
@@ -29,11 +26,9 @@ class MockModel:
 
     def train(self):
         """Set model to training mode."""
-        pass
 
     def eval(self):
         """Set model to evaluation mode."""
-        pass
 
 
 class MockOptimizer:
@@ -44,11 +39,9 @@ class MockOptimizer:
 
     def zero_grad(self):
         """Zero gradients."""
-        pass
 
     def step(self):
         """Optimizer step."""
-        pass
 
 
 class MockDataLoader:
@@ -68,7 +61,7 @@ class MockDataLoader:
         return self.num_batches
 
 
-def simulate_forward_pass() -> Dict[str, float]:
+def simulate_forward_pass() -> dict[str, float]:
     """Simulate a forward pass and return loss and accuracy."""
     # Simulate training that improves over time
     base_loss = random.uniform(0.1, 0.8)
@@ -77,9 +70,7 @@ def simulate_forward_pass() -> Dict[str, float]:
     return {"loss": base_loss, "accuracy": base_acc}
 
 
-def train_epoch(
-    model, train_loader, optimizer, tora_client, epoch: int
-) -> Dict[str, float]:
+def train_epoch(model, train_loader, optimizer, tora_client, epoch: int) -> dict[str, float]:
     """Train for one epoch."""
     model.train()
 
@@ -87,7 +78,7 @@ def train_epoch(
     total_accuracy = 0.0
     num_batches = len(train_loader)
 
-    for batch_idx, batch in enumerate(train_loader):
+    for batch_idx, _batch in enumerate(train_loader):
         # Simulate training step
         optimizer.zero_grad()
 
@@ -109,10 +100,7 @@ def train_epoch(
             tora_client.log("batch_loss", loss, step=global_step)
             tora_client.log("batch_accuracy", accuracy, step=global_step)
 
-            print(
-                f"Epoch {epoch}, Batch {batch_idx}/{num_batches}: "
-                f"loss={loss:.4f}, acc={accuracy:.4f}"
-            )
+            print(f"Epoch {epoch}, Batch {batch_idx}/{num_batches}: loss={loss:.4f}, acc={accuracy:.4f}")
 
         # Simulate training time
         time.sleep(0.01)
@@ -124,7 +112,7 @@ def train_epoch(
     }
 
 
-def validate_epoch(model, val_loader, tora_client, epoch: int) -> Dict[str, float]:
+def validate_epoch(model, val_loader, tora_client, epoch: int) -> dict[str, float]:
     """Validate for one epoch."""
     model.eval()
 
@@ -133,7 +121,7 @@ def validate_epoch(model, val_loader, tora_client, epoch: int) -> Dict[str, floa
     num_batches = len(val_loader)
 
     # Simulate validation (no gradients)
-    for batch_idx, batch in enumerate(val_loader):
+    for _batch_idx, _batch in enumerate(val_loader):
         # Simulate forward pass
         metrics = simulate_forward_pass()
         # Validation typically has slightly different metrics
@@ -177,17 +165,11 @@ def pytorch_training_example():
             print(f"Created experiment: {tora_client.experiment_id}")
 
             # Initialize model, optimizer, and data loaders
-            model = MockModel(
-                input_size=784, hidden_size=hyperparams["hidden_size"], num_classes=10
-            )
+            model = MockModel(input_size=784, hidden_size=hyperparams["hidden_size"], num_classes=10)
             optimizer = MockOptimizer(lr=hyperparams["learning_rate"])
 
-            train_loader = MockDataLoader(
-                dataset_size=50000, batch_size=hyperparams["batch_size"]
-            )
-            val_loader = MockDataLoader(
-                dataset_size=10000, batch_size=hyperparams["batch_size"]
-            )
+            train_loader = MockDataLoader(dataset_size=50000, batch_size=hyperparams["batch_size"])
+            val_loader = MockDataLoader(dataset_size=10000, batch_size=hyperparams["batch_size"])
 
             # Log model information
             tora_client.log(
@@ -212,9 +194,7 @@ def pytorch_training_example():
                 print("-" * 40)
 
                 # Training
-                train_metrics = train_epoch(
-                    model, train_loader, optimizer, tora_client, epoch
-                )
+                train_metrics = train_epoch(model, train_loader, optimizer, tora_client, epoch)
 
                 # Validation
                 val_metrics = validate_epoch(model, val_loader, tora_client, epoch)
@@ -240,12 +220,9 @@ def pytorch_training_example():
 
                 print(
                     f"Train Loss: {train_metrics['train_loss']:.4f}, "
-                    f"Train Acc: {train_metrics['train_accuracy']:.4f}"
+                    f"Train Acc: {train_metrics['train_accuracy']:.4f}",
                 )
-                print(
-                    f"Val Loss: {val_metrics['val_loss']:.4f}, "
-                    f"Val Acc: {val_metrics['val_accuracy']:.4f}"
-                )
+                print(f"Val Loss: {val_metrics['val_loss']:.4f}, Val Acc: {val_metrics['val_accuracy']:.4f}")
 
             # Log final results
             tora_client.log(
@@ -259,7 +236,7 @@ def pytorch_training_example():
                 },
             )
 
-            print(f"\nTraining completed!")
+            print("\nTraining completed!")
             print(f"Best validation accuracy: {best_val_acc:.4f}")
 
     except tora.ToraError as e:
@@ -280,22 +257,22 @@ def pytorch_callback_example():
             self.log_frequency = log_frequency
             self.step = 0
 
-        def on_batch_end(self, metrics: Dict[str, float]):
+        def on_batch_end(self, metrics: dict[str, float]):
             """Called at the end of each batch."""
             if self.step % self.log_frequency == 0:
                 for name, value in metrics.items():
                     self.tora.log(f"batch_{name}", value, step=self.step)
             self.step += 1
 
-        def on_epoch_end(self, epoch: int, metrics: Dict[str, float]):
+        def on_epoch_end(self, epoch: int, metrics: dict[str, float]):
             """Called at the end of each epoch."""
             for name, value in metrics.items():
                 self.tora.log(name, value, step=epoch)
 
-        def on_training_end(self, final_metrics: Dict[str, Any]):
+        def on_training_end(self, final_metrics: dict[str, Any]):
             """Called when training is complete."""
             for name, value in final_metrics.items():
-                if isinstance(value, (int, float)):
+                if isinstance(value, int | float):
                     self.tora.log(f"final_{name}", value)
                 else:
                     # Log as metadata for non-numeric values
@@ -319,7 +296,7 @@ def pytorch_callback_example():
                 print(f"Epoch {epoch}")
 
                 # Simulate batches
-                for batch in range(20):
+                for _batch in range(20):
                     batch_metrics = {
                         "loss": random.uniform(0.1, 0.5),
                         "accuracy": random.uniform(0.8, 0.95),

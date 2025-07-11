@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13"]
 
     steps:
     - name: Checkout code
@@ -104,24 +104,17 @@ jobs:
       working-directory: ./python
       run: |
         python --version
-        black --version
         ruff --version
-        flake8 --version
 
-    - name: Run Black formatting check
+    - name: Run Ruff formatting check
       working-directory: ./python
       run: |
-        black --check --config=pyproject.toml tora tests
+        ruff format --check tora tests
 
-    - name: Run Ruff import sorting check
+    - name: Run Ruff linting
       working-directory: ./python
       run: |
-        ruff check --select=I tora tests
-
-    - name: Run Flake8 linting
-      working-directory: ./python
-      run: |
-        flake8 --config=.flake8 tora tests
+        ruff check tora tests
 
   type-check:
     runs-on: ubuntu-latest

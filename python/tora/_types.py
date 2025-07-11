@@ -1,22 +1,18 @@
-"""
-Type definitions for the Tora SDK.
+"""Type definitions for the Tora SDK.
 
 This module contains type aliases and protocol definitions used throughout
 the Tora SDK for better type safety and documentation.
 """
 
-from typing import Any, Dict, List, Optional, Protocol, Union
+from typing import Any, Protocol
 
 try:
     from typing import TypedDict
 except ImportError:
     from typing_extensions import TypedDict
 
-# Hyperparameter value types
-HPValue = Union[str, float, int]
-
-# Metric metadata type
-MetricMetadata = Dict[str, Any]
+HPValue = str | float | int
+MetricMetadata = dict[str, Any]
 
 
 # API response types
@@ -25,13 +21,13 @@ class ExperimentResponse(TypedDict, total=False):
 
     id: str
     name: str
-    description: Optional[str]
-    hyperparams: List[Dict[str, Any]]
-    tags: List[str]
+    description: str | None
+    hyperparams: list[dict[str, Any]]
+    tags: list[str]
     created_at: str
     updated_at: str
-    available_metrics: List[str]
-    workspace_id: Optional[str]
+    available_metrics: list[str]
+    workspace_id: str | None
 
 
 class MetricResponse(TypedDict):
@@ -41,8 +37,8 @@ class MetricResponse(TypedDict):
     experiment_id: str
     name: str
     value: float
-    step: Optional[int]
-    metadata: Optional[Dict[str, Any]]
+    step: int | None
+    metadata: dict[str, Any] | None
     created_at: str
 
 
@@ -51,7 +47,7 @@ class WorkspaceResponse(TypedDict, total=False):
 
     id: str
     name: str
-    description: Optional[str]
+    description: str | None
     created_at: str
     updated_at: str
 
@@ -67,29 +63,29 @@ class APIResponse(TypedDict):
 class ToraConfig(TypedDict, total=False):
     """Configuration options for Tora client."""
 
-    api_key: Optional[str]
-    base_url: Optional[str]
-    timeout: Optional[int]
-    max_retries: Optional[int]
-    retry_delay: Optional[float]
-    debug: Optional[bool]
+    api_key: str | None
+    base_url: str | None
+    timeout: int | None
+    max_retries: int | None
+    retry_delay: float | None
+    debug: bool | None
 
 
 # Protocol for HTTP client interface
 class HTTPClient(Protocol):
     """Protocol for HTTP client implementations."""
 
-    def get(self, path: str, headers: Optional[Dict[str, str]] = None) -> Any:
+    def get(self, path: str, headers: dict[str, str] | None = None) -> Any:
         """Send GET request."""
         ...
 
     def post(
         self,
         path: str,
-        json: Optional[Any] = None,
-        data: Optional[Any] = None,
-        headers: Optional[Dict[str, str]] = None,
-        timeout: Optional[int] = None,
+        json: Any | None = None,
+        data: Any | None = None,
+        headers: dict[str, str] | None = None,
+        timeout: int | None = None,
     ) -> Any:
         """Send POST request."""
         ...
@@ -106,9 +102,9 @@ class MetricCallback(Protocol):
     def __call__(
         self,
         name: str,
-        value: Union[int, float],
-        step: Optional[int] = None,
-        metadata: Optional[MetricMetadata] = None,
+        value: int | float,
+        step: int | None = None,
+        metadata: MetricMetadata | None = None,
     ) -> None:
         """Log a metric."""
         ...
