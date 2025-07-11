@@ -1,16 +1,7 @@
 name: Python SDK Tests
 
 on:
-  push:
-    branches: [ main, develop ]
-    paths:
-      - 'python/**'
-      - '.github/workflows/python-tests.yml'
-  pull_request:
-    branches: [ main, develop ]
-    paths:
-      - 'python/**'
-      - '.github/workflows/python-tests.yml'
+  workflow_call:
   workflow_dispatch:
 
 jobs:
