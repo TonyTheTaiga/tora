@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Mapping
+from typing import Any, Mapping, Optional
 
 from ._config import TORA_API_KEY, TORA_BASE_URL
 from ._http import HttpClient, HTTPStatusError
@@ -19,7 +19,10 @@ def _from_tora_hp(tora_hp: list[dict[str, Any]]) -> dict[str, HPValue]:
 
 
 def create_workspace(
-    name: str, api_key: str, description: str = "", server_url: str | None = None
+    name: str,
+    description: Optional[str] = None,
+    api_key: Optional[str] = None,
+    server_url: str | None = None,
 ) -> dict[str, Any]:
     """
     Creates a new Tora workspace. Requires an API key.
@@ -36,7 +39,10 @@ def create_workspace(
         HTTPStatusError: If the API request fails.
     """
     server_url = server_url or TORA_BASE_URL
-    resolved_api_key = Tora._get_api_key(api_key)
+    resolved_api_key = api_key or TORA_API_KEY
+    if not resolved_api_key:
+        raise RuntimeWarning("API key is required to create a workspace")
+
     headers = {
         "x-api-key": resolved_api_key,
         "Content-Type": "application/json",
@@ -45,8 +51,13 @@ def create_workspace(
         req = client.post(
             "/workspaces", json={"name": name, "description": description}
         )
-        req.raise_for_status()
-        return req.json()
+        try:
+            req.raise_for_status()
+            return req.json()["data"]
+        except Exception as e:
+            print(req.status_code)
+            logger.exception(e)
+            raise e
 
 
 class Tora:
@@ -102,31 +113,25 @@ class Tora:
         server_url: str | None = None,
     ) -> "Tora":
         """
-        Creates a new experiment and returns a Tora instance to interact with it.
-        An API key is required to create an experiment in a specific workspace.
+        An API key is required to create an experiment in a specific workspace
         """
         resolved_api_key = Tora._get_api_key(api_key)
         data = cls._create_payload(name, workspace_id, description, hyperparams, tags)
         server_url = server_url or TORA_BASE_URL
-        url_path = (
-            f"/workspaces/{workspace_id}/experiments"
-            if workspace_id
-            else "/experiments"
-        )
+        url_path = "/experiments"
         headers = {"Content-Type": "application/json"}
         if resolved_api_key:
             headers["x-api-key"] = resolved_api_key
 
         with HttpClient(base_url=server_url, headers=headers) as client:
+            print(data)
             req = client.post(url_path, json=data)
             req.raise_for_status()
-            response_data = req.json()
-            exp_id = response_data.get("experiment", {}).get("id") or response_data.get(
-                "id"
-            )
+            res = req.json()
+            experiment_id = res["data"]["id"]
 
         return cls(
-            experiment_id=exp_id,
+            experiment_id=experiment_id,
             description=description,
             hyperparams=hyperparams,
             tags=tags,
@@ -146,7 +151,7 @@ class Tora:
     ) -> dict[str, Any]:
         data: dict[str, Any] = {"name": name}
         if workspace_id:
-            data["workspaceId"] = workspace_id
+            data["workspace_id"] = workspace_id
         if description:
             data["description"] = description
         if hyperparams:
@@ -200,14 +205,9 @@ class Tora:
         metadata: Mapping[str, Any] | None = None,
     ) -> None:
         """
-        Logs a metric. Metrics are buffered and sent in batches.
+        Logs a metric. Metrics are buffered and sent in batches. Specified by max_buffer_len.
         """
-        log_entry = {"name": name, "value": value}
-        if step is not None:
-            log_entry["step"] = step
-        if metadata is not None:
-            log_entry["metadata"] = metadata
-
+        log_entry = {"name": name, "value": value, "step": step, "metadata": metadata}
         self._buffer.append(log_entry)
 
         if len(self._buffer) >= self._max_buffer_len:
@@ -218,9 +218,11 @@ class Tora:
             return
 
         try:
+            print(self._experiment_id)
+
             req = self._http_client.post(
                 f"/experiments/{self._experiment_id}/metrics/batch",
-                json=self._buffer,
+                json={"metrics": self._buffer},
                 timeout=120,
             )
             req.raise_for_status()

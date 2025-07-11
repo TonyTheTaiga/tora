@@ -352,6 +352,31 @@ CREATE INDEX "idx_workspace_experiments_experiment_id" ON "public"."workspace_ex
 CREATE INDEX "idx_workspace_experiments_workspace_id" ON "public"."workspace_experiments" USING "btree" ("workspace_id");
 
 
+-- Additional indexes to optimize dashboard queries
+CREATE INDEX "idx_user_workspaces_user_id" ON "public"."user_workspaces" USING "btree" ("user_id");
+
+
+CREATE INDEX "idx_user_workspaces_user_workspace" ON "public"."user_workspaces" USING "btree" ("user_id", "workspace_id");
+
+
+CREATE INDEX "idx_experiment_created_at" ON "public"."experiment" USING "btree" ("created_at" DESC);
+
+
+CREATE INDEX "idx_workspace_created_at" ON "public"."workspace" USING "btree" ("created_at" DESC);
+
+
+-- Composite index for the workspace query join path
+CREATE INDEX "idx_user_workspaces_composite" ON "public"."user_workspaces" USING "btree" ("user_id", "workspace_id", "role_id");
+
+
+-- Index to optimize the recent experiments query
+CREATE INDEX "idx_experiment_workspace_created" ON "public"."workspace_experiments" USING "btree" ("workspace_id", "experiment_id");
+
+
+-- Index for metric aggregation in dashboard queries
+CREATE INDEX "idx_metric_experiment_name" ON "public"."metric" USING "btree" ("experiment_id", "name");
+
+
 
 CREATE OR REPLACE TRIGGER "trigger_set_updated_at" BEFORE UPDATE ON "public"."experiment" FOR EACH ROW EXECUTE FUNCTION "public"."set_updated_at"();
 

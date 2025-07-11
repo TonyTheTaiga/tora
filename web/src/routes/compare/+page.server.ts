@@ -164,9 +164,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
       if (err.message.includes("401")) {
         error(401, "Authentication required");
       }
-      if (err.message.includes("400")) {
-        throw err; // Re-throw 400 errors as they are
-      }
     }
 
     console.error("Error loading comparison data:", err);

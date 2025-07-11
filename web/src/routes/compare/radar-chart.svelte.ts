@@ -8,9 +8,6 @@ export function drawRadarChart(
   experimentColors: Map<string, string>,
 ): Chart | null {
   const computedStyles = getComputedStyle(document.documentElement);
-  const surfaceColor = computedStyles
-    .getPropertyValue("--color-ctp-surface0")
-    .trim();
 
   const datasets = experiments.map((experiment) => {
     const experimentColor = experimentColors.get(experiment.id);

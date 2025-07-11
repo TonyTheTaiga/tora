@@ -1,6 +1,6 @@
 import { env } from "$env/dynamic/public";
 
-const API_BASE_URL = env.PUBLIC_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL = env.PUBLIC_API_BASE_URL;
 
 export class ApiClient {
   private baseUrl: string;
@@ -41,9 +41,12 @@ export class ApiClient {
         `API request failed: ${response.status} ${response.statusText}`,
       );
     }
-
     const contentType = response.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
+    if (
+      contentType &&
+      contentType.includes("application/json") &&
+      response.status !== 204
+    ) {
       return response.json();
     }
 

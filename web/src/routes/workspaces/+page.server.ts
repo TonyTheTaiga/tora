@@ -1,5 +1,5 @@
 import type { Actions } from "./$types";
-import { error, fail } from "@sveltejs/kit";
+import { fail } from "@sveltejs/kit";
 import { startTimer, generateRequestId } from "$lib/utils/timing";
 
 interface ApiResponse<T> {
@@ -13,16 +13,6 @@ interface WorkspaceData {
   description: string | null;
   created_at: string;
   role: string;
-}
-
-interface ExperimentData {
-  id: string;
-  name: string;
-  description: string;
-  created_at: string;
-  updated_at: string;
-  tags: string[];
-  hyperparams: any[];
 }
 
 export const actions: Actions = {
@@ -43,8 +33,8 @@ export const actions: Actions = {
 
     try {
       const formData = await request.formData();
-      const name = formData.get("workspace-name") as string;
-      const description = formData.get("workspace-description") as string;
+      const name = formData.get("name") as string;
+      const description = formData.get("description") as string;
 
       if (!name || name.trim().length === 0) {
         timer.end({ error: "Invalid name" });
@@ -54,8 +44,8 @@ export const actions: Actions = {
       const response = await locals.apiClient.post<ApiResponse<WorkspaceData>>(
         "/api/workspaces",
         {
-          "workspace-name": name.trim(),
-          "workspace-description": description?.trim() || null,
+          name: name.trim(),
+          description: description?.trim() || null,
         },
       );
 

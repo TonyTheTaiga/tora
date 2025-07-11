@@ -1,5 +1,5 @@
 use crate::middleware::auth::AuthenticatedUser;
-use crate::ntypes::{ApiKey, CreateApiKeyRequest, Response};
+use crate::types::{ApiKey, CreateApiKeyRequest, Response};
 use axum::{
     Extension, Json,
     extract::{Path, State},

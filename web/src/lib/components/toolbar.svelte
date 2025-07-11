@@ -140,7 +140,7 @@
       class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
       title="Go to workspaces"
       onclick={() => {
-        goto("/");
+        goto("/workspaces");
       }}
     >
       <Command size={20} />

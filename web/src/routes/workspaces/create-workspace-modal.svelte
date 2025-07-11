@@ -43,6 +43,7 @@
       class="p-4 space-y-4"
       use:enhance={() => {
         return async ({ result, update }) => {
+          console.log(result);
           if (result.type === "redirect") {
             goto(result.location);
           } else if (result.type === "success") {
@@ -58,10 +59,10 @@
             <span class="text-ctp-subtext0">name</span>
             <span class="text-ctp-text">=</span>
             <input
-              name="workspace-name"
+              name="name"
               type="text"
               class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm min-w-0"
-              placeholder="workspace_name"
+              placeholder="workspace name"
               required
             />
           </div>
@@ -69,10 +70,10 @@
             <span class="text-ctp-subtext0">desc</span>
             <span class="text-ctp-text">=</span>
             <textarea
-              name="workspace-description"
+              name="description"
               rows="2"
               class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all resize-none text-sm min-w-0"
-              placeholder="description (optional)"
+              placeholder="description"
             ></textarea>
           </div>
         </div>

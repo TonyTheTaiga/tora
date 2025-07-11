@@ -18,7 +18,6 @@ export const actions: Actions = {
         error: "Email and password are required",
       });
     }
-
     const response = await locals.apiClient.post<LoginResponse>("/api/login", {
       email,
       password,
@@ -43,6 +42,6 @@ export const actions: Actions = {
       maxAge: response.data.expires_in,
     });
 
-    redirect(303, "/");
+    redirect(303, "/workspaces");
   },
 };

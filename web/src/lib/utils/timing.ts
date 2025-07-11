@@ -5,11 +5,11 @@ export function generateRequestId(): string {
   );
 }
 
-export function startTimer(action?: string, metadata?: any) {
+export function startTimer(_action?: string, _metadata?: any) {
   const start = performance.now();
   return {
     stop: () => performance.now() - start,
     elapsed: () => performance.now() - start,
-    end: (endMetadata?: any) => performance.now() - start,
+    end: (_endMetadata?: any) => performance.now() - start,
   };
 }

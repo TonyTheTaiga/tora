@@ -1,39 +1,14 @@
 use crate::middleware::auth::AuthenticatedUser;
-use crate::ntypes::Response;
+use crate::types::{CreateWorkspaceRequest, Response, Workspace, WorkspaceMember};
 use axum::{
     Extension, Json,
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
 };
-use serde::{Deserialize, Serialize};
+
 use sqlx::PgPool;
 use uuid::Uuid;
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Workspace {
-    pub id: String,
-    pub name: String,
-    pub description: Option<String>,
-    pub created_at: chrono::DateTime<chrono::Utc>,
-    pub role: String,
-}
-
-#[derive(Deserialize)]
-pub struct CreateWorkspaceRequest {
-    #[serde(rename = "workspace-name")]
-    pub name: String,
-    #[serde(rename = "workspace-description")]
-    pub description: Option<String>,
-}
-
-#[derive(Serialize)]
-pub struct WorkspaceMember {
-    pub id: String,
-    pub email: String,
-    pub role: String,
-    pub joined_at: chrono::DateTime<chrono::Utc>,
-}
 
 pub async fn list_workspaces(
     Extension(user): Extension<AuthenticatedUser>,
@@ -434,7 +409,6 @@ pub async fn delete_workspace(
         }
     };
 
-    // Check if user is the owner of this workspace
     let owner_check = sqlx::query_as::<_, (i64,)>(
         r#"
         SELECT COUNT(*) FROM user_workspaces uw
@@ -563,7 +537,6 @@ pub async fn leave_workspace(
         }
     }
 
-    // Remove user from workspace
     let delete_result =
         sqlx::query("DELETE FROM user_workspaces WHERE workspace_id = $1 AND user_id = $2")
             .bind(workspace_uuid)

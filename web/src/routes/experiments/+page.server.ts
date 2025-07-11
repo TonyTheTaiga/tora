@@ -50,17 +50,16 @@ export const actions: Actions = {
     } = parseFormData(await request.formData());
 
     const payload: any = {
-      "experiment-name": name,
-      "experiment-description": description || "",
+      name: name,
+      description: description || "",
       tags,
     };
 
     if (workspaceId) {
-      payload["workspace-id"] = workspaceId;
+      payload["workspaceId"] = workspaceId;
     }
 
     await locals.apiClient.post("/api/experiments", payload);
-
     return { success: true };
   },
   update: async ({ request, locals }) => {
@@ -70,10 +69,9 @@ export const actions: Actions = {
       "experiment-description": description,
       tags,
     } = parseFormData(await request.formData());
-
     await locals.apiClient.put(`/api/experiments/${id}`, {
-      "experiment-name": name,
-      "experiment-description": description || "",
+      name: name,
+      description: description || "",
       tags,
     });
 
@@ -88,8 +86,7 @@ export const actions: Actions = {
         message: "A valid ID is required",
       });
     }
-    await locals.apiClient.delete(`/api/experiments/${id}`);
-
+    await locals.apiClient.delete<null>(`/api/experiments/${id}`);
     return { success: true };
   },
 };

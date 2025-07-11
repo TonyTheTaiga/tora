@@ -1,5 +1,6 @@
+use crate::handlers::{api_key, invitation, workspace};
 use crate::middleware::auth::AuthenticatedUser;
-use crate::ntypes;
+use crate::types;
 use axum::{
     Extension, Json,
     body::to_bytes,
@@ -14,20 +15,20 @@ fn create_client() -> AuthClient {
     AuthClient::new_from_env().unwrap()
 }
 
-pub async fn create_user(Json(payload): Json<ntypes::CreateUser>) -> impl IntoResponse {
+pub async fn create_user(Json(payload): Json<types::CreateUser>) -> impl IntoResponse {
     let auth_client = create_client();
     match auth_client
         .sign_up_with_email_and_password(&payload.email, &payload.password, None)
         .await
     {
-        Ok(_response) => Json(ntypes::Response {
+        Ok(_response) => Json(types::Response {
             status: 201,
             data: Some(serde_json::json!({
                 "message": "User created successfully",
                 "email": payload.email
             })),
         }),
-        Err(err) => Json(ntypes::Response {
+        Err(err) => Json(types::Response {
             status: 400,
             data: Some(serde_json::json!({
                 "error": "Failed to create user",
@@ -37,7 +38,7 @@ pub async fn create_user(Json(payload): Json<ntypes::CreateUser>) -> impl IntoRe
     }
 }
 
-pub async fn confirm_create(Query(payload): Query<ntypes::ConfirmQueryParams>) -> Redirect {
+pub async fn confirm_create(Query(payload): Query<types::ConfirmQueryParams>) -> Redirect {
     let auth_client = create_client();
     let params = VerifyTokenHashParams {
         token_hash: payload.token_hash,
@@ -54,14 +55,13 @@ pub async fn confirm_create(Query(payload): Query<ntypes::ConfirmQueryParams>) -
     )
 }
 
-pub async fn login(Json(payload): Json<ntypes::LoginParams>) -> impl IntoResponse {
+pub async fn login(Json(payload): Json<types::LoginParams>) -> impl IntoResponse {
     let auth_client = create_client();
     let session = auth_client
         .login_with_email(&payload.email, &payload.password)
         .await
         .expect("Failed to login user! Double check password and email.");
 
-    // Return tokens in response body for SSR
     let session_payload = serde_json::json!({
         "access_token": session.access_token,
         "token_type": "bearer",
@@ -74,15 +74,14 @@ pub async fn login(Json(payload): Json<ntypes::LoginParams>) -> impl IntoRespons
         }
     });
 
-    Json(ntypes::Response {
+    Json(types::Response {
         status: 200,
         data: Some(session_payload),
     })
 }
 
-pub async fn refresh_token(Json(payload): Json<ntypes::RefreshTokenRequest>) -> impl IntoResponse {
+pub async fn refresh_token(Json(payload): Json<types::RefreshTokenRequest>) -> impl IntoResponse {
     let auth_client = create_client();
-
     match auth_client.refresh_session(&payload.refresh_token).await {
         Ok(session) => {
             let session_payload = serde_json::json!({
@@ -97,7 +96,7 @@ pub async fn refresh_token(Json(payload): Json<ntypes::RefreshTokenRequest>) -> 
                 }
             });
 
-            Json(ntypes::Response {
+            Json(types::Response {
                 status: 200,
                 data: Some(session_payload),
             })
@@ -105,7 +104,7 @@ pub async fn refresh_token(Json(payload): Json<ntypes::RefreshTokenRequest>) -> 
         }
         Err(_) => (
             StatusCode::UNAUTHORIZED,
-            Json(ntypes::Response::<&str> {
+            Json(types::Response::<&str> {
                 status: 401,
                 data: None,
             }),
@@ -117,21 +116,16 @@ pub async fn refresh_token(Json(payload): Json<ntypes::RefreshTokenRequest>) -> 
 pub async fn get_settings(
     Extension(user): Extension<AuthenticatedUser>,
     State(pool): State<PgPool>,
-) -> Json<ntypes::SettingsData> {
-    use crate::handlers::{api_key, invitation};
-    use crate::repos::workspace;
-
-    println!("user: {user:?}");
-
+) -> Json<types::SettingsData> {
     let workspaces_response =
         workspace::list_workspaces(Extension(user.clone()), State(pool.clone()))
             .await
             .into_response();
-    let workspaces: Vec<workspace::Workspace> = if workspaces_response.status().is_success() {
+    let workspaces: Vec<types::Workspace> = if workspaces_response.status().is_success() {
         let body = to_bytes(workspaces_response.into_body(), usize::MAX)
             .await
             .unwrap();
-        let response_data: ntypes::Response<Vec<workspace::Workspace>> =
+        let response_data: types::Response<Vec<types::Workspace>> =
             serde_json::from_slice(&body).unwrap();
         response_data.data.unwrap_or_default()
     } else {
@@ -141,11 +135,11 @@ pub async fn get_settings(
     let api_keys_response = api_key::list_api_keys(Extension(user.clone()), State(pool.clone()))
         .await
         .into_response();
-    let api_keys: Vec<ntypes::ApiKey> = if api_keys_response.status().is_success() {
+    let api_keys: Vec<types::ApiKey> = if api_keys_response.status().is_success() {
         let body = to_bytes(api_keys_response.into_body(), usize::MAX)
             .await
             .unwrap();
-        let response_data: ntypes::Response<Vec<ntypes::ApiKey>> =
+        let response_data: types::Response<Vec<types::ApiKey>> =
             serde_json::from_slice(&body).unwrap();
         response_data.data.unwrap_or_default()
     } else {
@@ -156,20 +150,20 @@ pub async fn get_settings(
         invitation::list_invitations(Extension(user.clone()), State(pool.clone()))
             .await
             .into_response();
-    let invitations: Vec<ntypes::WorkspaceInvitation> =
-        if invitations_response.status().is_success() {
-            let body = to_bytes(invitations_response.into_body(), usize::MAX)
-                .await
-                .unwrap();
-            let response_data: ntypes::Response<Vec<ntypes::WorkspaceInvitation>> =
-                serde_json::from_slice(&body).unwrap();
-            response_data.data.unwrap_or_default()
-        } else {
-            vec![]
-        };
+    let invitations: Vec<types::WorkspaceInvitation> = if invitations_response.status().is_success()
+    {
+        let body = to_bytes(invitations_response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        let response_data: types::Response<Vec<types::WorkspaceInvitation>> =
+            serde_json::from_slice(&body).unwrap();
+        response_data.data.unwrap_or_default()
+    } else {
+        vec![]
+    };
 
-    Json(ntypes::SettingsData {
-        user: ntypes::UserInfo {
+    Json(types::SettingsData {
+        user: types::UserInfo {
             id: user.id,
             email: user.email,
         },
