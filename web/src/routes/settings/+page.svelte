@@ -215,7 +215,7 @@
               <input
                 id="workspace-name"
                 name="name"
-                placeholder="workspace_name"
+                placeholder="name"
                 class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
                 required
               />
@@ -224,9 +224,8 @@
               <input
                 id="workspace-description"
                 name="description"
-                placeholder="description (optional)"
+                placeholder="description"
                 class="flex-1 bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
-                defaultvalue=""
               />
               <button
                 type="submit"
