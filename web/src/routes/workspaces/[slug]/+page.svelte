@@ -5,9 +5,11 @@
     getDeleteExperimentModal,
     openCreateExperimentModal,
   } from "$lib/state/app.svelte.js";
-  import CreateExperimentModal from "$lib/components/modals/create-experiment-modal.svelte";
-  import DeleteConfirmationModal from "$lib/components/modals/delete-confirmation-modal.svelte";
-  import EditExperimentModal from "$lib/components/modals/edit-experiment-modal.svelte";
+  import {
+    CreateExperimentModal,
+    DeleteConfirmationModal,
+    EditExperimentModal,
+  } from "$lib/components/modals";
   import ExperimentsListMobile from "./experiments-list-mobile.svelte";
   import ExperimentsListDesktop from "./experiments-list-desktop.svelte";
   import { Plus } from "@lucide/svelte";
@@ -72,8 +74,6 @@
       window.removeEventListener("keydown", handleKeydown);
     };
   });
-
-  // No longer needed - using static mock data
 </script>
 
 {#if createExperimentModal}
@@ -178,12 +178,8 @@
         </div>
       </div>
     {:else}
-      <!-- Responsive experiment layouts -->
       <ExperimentsListMobile experiments={filteredExperiments} {formatDate} />
-
       <ExperimentsListDesktop experiments={filteredExperiments} {formatDate} />
-
-      <!-- Summary line -->
       <div
         class="flex items-center text-sm text-ctp-subtext0 pt-2 border-t border-ctp-surface0/20 mt-4"
       >

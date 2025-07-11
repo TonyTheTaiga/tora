@@ -3,7 +3,7 @@
     openCreateWorkspaceModal,
     getCreateWorkspaceModal,
   } from "$lib/state/app.svelte.js";
-  import CreateWorkspaceModal from "./create-workspace-modal.svelte";
+  import { CreateWorkspaceModal } from "$lib/components/modals";
   import WorkspaceRoleBadge from "$lib/workspace-role-badge.svelte";
   import RecentActivity from "$lib/components/recent-activity.svelte";
   import { onMount } from "svelte";
