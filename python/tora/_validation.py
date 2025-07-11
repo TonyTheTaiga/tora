@@ -175,8 +175,8 @@ def validate_tags(tags: Optional[List[str]]) -> Optional[List[str]]:
     if len(tags) > 50:
         raise ToraValidationError("Cannot have more than 50 tags")
 
-    validated = []
-    seen = set()
+    validated: list[str] = []
+    seen: set[str] = set()
 
     for i, tag in enumerate(tags):
         if not isinstance(tag, str):
