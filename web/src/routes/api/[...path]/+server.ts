@@ -2,7 +2,7 @@ import { env } from "$env/dynamic/public";
 import { error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
-const RUST_API_BASE_URL = env.PUBLIC_API_BASE_URL || "http://localhost:8080";
+const RUST_API_BASE_URL = env.PUBLIC_API_BASE_URL;
 
 export const GET: RequestHandler = async ({ request, params, fetch }) => {
   return proxyRequest(request, params.path, fetch);
@@ -30,8 +30,7 @@ async function proxyRequest(
   fetch: typeof globalThis.fetch,
 ) {
   const url = new URL(request.url);
-  const rustBackendUrl = `${RUST_API_BASE_URL}/${path}${url.search}`;
-
+  const rustBackendUrl = `${RUST_API_BASE_URL}/api/${path}${url.search}`;
   const headers = new Headers(request.headers);
   // Remove host header as it will be set automatically by the fetch to the backend
   headers.delete("host");
@@ -44,7 +43,6 @@ async function proxyRequest(
       request.method === "GET" || request.method === "HEAD"
         ? null
         : await request.arrayBuffer(),
-    duplex: "half", // Required for streaming bodies
   };
 
   try {
