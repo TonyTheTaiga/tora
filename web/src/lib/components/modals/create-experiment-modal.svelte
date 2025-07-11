@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { HyperParam } from "$lib/types";
   import { Plus, X } from "@lucide/svelte";
   import { onMount, onDestroy } from "svelte";
   import { closeCreateExperimentModal } from "$lib/state/app.svelte.js";
@@ -8,7 +7,6 @@
 
   let { workspace }: { workspace: any } = $props();
 
-  let hyperparams = $state<HyperParam[]>([]);
   let addingNewTag = $state<boolean>(false);
   let tag = $state<string | null>(null);
   let tags = $state<string[]>([]);
@@ -31,7 +29,7 @@
 </script>
 
 <div
-  class="fixed inset-0 bg-ctp-base/90 backdrop-blur-sm
+  class="fixed inset-0 bg-ctp-mantle/90 backdrop-blur-sm
          flex items-center justify-center p-4 z-50 overflow-hidden font-mono"
 >
   <div
@@ -41,25 +39,12 @@
     aria-labelledby="modal-title"
   >
     <div
-      class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/10"
+      class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/20"
     >
-      <div
-        class="flex items-stretch gap-3 md:gap-4 min-w-0 flex-1 pr-4 min-h-fit"
-      >
-        <div
-          class="w-2 bg-ctp-mauve rounded-full flex-shrink-0 self-stretch"
-        ></div>
-        <div class="min-w-0 flex-1 py-1">
-          <h3
-            id="modal-title"
-            class="text-lg md:text-xl text-ctp-text truncate font-mono"
-          >
-            New Experiment
-          </h3>
-          <div class="text-sm text-ctp-subtext0 space-y-1">
-            <div>create experiment config</div>
-          </div>
-        </div>
+      <div class="flex items-center gap-3">
+        <h3 id="modal-title" class="text-lg font-bold text-ctp-text">
+          New Experiment
+        </h3>
       </div>
     </div>
 
@@ -67,7 +52,7 @@
       method="POST"
       action="/experiments?/create"
       class="px-4 md:px-6 py-4 space-y-4"
-      use:enhance={({ formElement, formData, action, cancel }) => {
+      use:enhance={({ formData }) => {
         formData.append("workspace-id", workspace.id);
         return async ({ result, update }) => {
           if (result.type === "redirect") {
@@ -90,7 +75,7 @@
               <input
                 name="experiment-name"
                 type="text"
-                class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-mauve focus:border-ctp-mauve transition-all text-sm"
+                class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
                 placeholder="experiment_name"
                 required
               />
@@ -99,7 +84,7 @@
               <textarea
                 name="experiment-description"
                 rows="2"
-                class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-mauve focus:border-ctp-mauve transition-all resize-none text-sm"
+                class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all resize-none text-sm"
                 placeholder="description"
                 required
               ></textarea>
@@ -183,7 +168,7 @@
         </button>
         <button
           type="submit"
-          class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-mauve hover:bg-ctp-mauve/10 hover:border-ctp-mauve/30 px-3 py-2 text-sm transition-all"
+          class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all"
         >
           create
         </button>

@@ -48,47 +48,23 @@
 </script>
 
 <div
-  class="fixed inset-0 bg-ctp-base/90 backdrop-blur-sm
+  class="fixed inset-0 bg-ctp-mantle/90 backdrop-blur-sm
          flex items-center justify-center p-4 z-50 overflow-hidden font-mono"
 >
-  <!-- MODAL CONTAINER -->
   <div
-    class="bg-ctp-mantle w-full max-w-xl border border-ctp-surface0/30 overflow-auto max-h-[90vh]"
+    class="w-full max-w-xl bg-ctp-mantle border border-ctp-surface0/30 overflow-auto max-h-[90vh]"
     role="dialog"
     aria-modal="true"
     aria-labelledby="modal-title"
   >
-    <!-- HEADER -->
     <div
-      class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/10"
+      class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/20"
     >
-      <div
-        class="flex items-stretch gap-3 md:gap-4 min-w-0 flex-1 pr-4 min-h-fit"
-      >
-        <div
-          class="w-2 bg-ctp-mauve rounded-full flex-shrink-0 self-stretch"
-        ></div>
-        <div class="min-w-0 flex-1 py-1">
-          <h2
-            id="modal-title"
-            class="text-lg md:text-xl text-ctp-text truncate font-mono"
-          >
-            Edit Experiment
-          </h2>
-          <div class="text-sm text-ctp-subtext0 space-y-1">
-            <div>modify experiment config</div>
-          </div>
-        </div>
+      <div class="flex items-center gap-3">
+        <h3 id="modal-title" class="text-lg font-bold text-ctp-text">
+          Edit Experiment
+        </h3>
       </div>
-      <button
-        onclick={() => {
-          closeEditExperimentModal();
-        }}
-        type="button"
-        class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 rounded p-1 transition-all flex-shrink-0"
-      >
-        <X size={14} />
-      </button>
     </div>
 
     <!-- FORM -->
@@ -96,7 +72,7 @@
       method="POST"
       action="/experiments?/update"
       class="px-4 md:px-6 py-4 space-y-4"
-      use:enhance={({ formElement, formData, action, cancel, submitter }) => {
+      use:enhance={() => {
         return async ({ result, update }) => {
           if (result.type === "success" || result.type === "redirect") {
             experiment.name = experimentCopy.name;
@@ -127,7 +103,7 @@
                 id="experiment-name"
                 name="experiment-name"
                 type="text"
-                class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-mauve focus:border-ctp-mauve transition-all text-sm"
+                class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
                 placeholder="experiment_name"
                 bind:value={experimentCopy.name}
                 required
@@ -138,7 +114,7 @@
                 id="experiment-description"
                 name="experiment-description"
                 rows="2"
-                class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-mauve focus:border-ctp-mauve transition-all resize-none text-sm"
+                class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all resize-none text-sm"
                 placeholder="description"
                 bind:value={experimentCopy.description}
                 required
@@ -225,7 +201,7 @@
         </button>
         <button
           type="submit"
-          class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-mauve hover:bg-ctp-mauve/10 hover:border-ctp-mauve/30 px-3 py-2 text-sm transition-all"
+          class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all"
         >
           update
         </button>
