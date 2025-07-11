@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Plus, LogOut, Trash2, Users, Check, X } from "@lucide/svelte";
-  import WorkspaceInviteModal from "./workspace-invite-modal.svelte";
+  import WorkspaceInviteModal from "$lib/components/modals/workspace-invite-modal.svelte";
   import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
   import { enhance } from "$app/forms";
 
