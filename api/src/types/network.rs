@@ -5,15 +5,6 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-// ============================================================================
-// Generic API Response Types
-// ============================================================================
-
-#[derive(Serialize, Deserialize)]
-pub struct Ping {
-    pub msg: String,
-}
-
 #[derive(Serialize, Deserialize)]
 pub struct Response<T> {
     pub status: i16,
@@ -70,10 +61,11 @@ pub struct CreateWorkspaceRequest {
     pub description: Option<String>,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Debug)]
 pub struct CreateExperimentRequest {
     pub name: String,
     pub description: String,
+    #[serde(rename = "workspaceId")]
     pub workspace_id: String,
     pub tags: Option<Vec<String>>,
     pub hyperparams: Option<Vec<serde_json::Value>>,
@@ -81,7 +73,6 @@ pub struct CreateExperimentRequest {
 
 #[derive(Deserialize)]
 pub struct UpdateExperimentRequest {
-    pub id: String,
     pub name: String,
     pub description: String,
     pub tags: Option<Vec<String>>,

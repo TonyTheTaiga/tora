@@ -56,7 +56,7 @@ export const actions: Actions = {
     };
 
     if (workspaceId) {
-      payload["workspace_id"] = workspaceId;
+      payload["workspaceId"] = workspaceId;
     }
 
     await locals.apiClient.post("/api/experiments", payload);
@@ -69,10 +69,9 @@ export const actions: Actions = {
       "experiment-description": description,
       tags,
     } = parseFormData(await request.formData());
-
     await locals.apiClient.put(`/api/experiments/${id}`, {
-      "experiment-name": name,
-      "experiment-description": description || "",
+      name: name,
+      description: description || "",
       tags,
     });
 

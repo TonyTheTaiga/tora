@@ -24,14 +24,14 @@ pub async fn get_dashboard_overview(
         }
     };
 
-    // Fetch workspaces with experiment counts
+    // Fetch workspaces with experiment counts - optimized query
     let workspaces_result = sqlx::query_as::<_, (String, String, Option<String>, chrono::DateTime<chrono::Utc>, String, i64, i64)>(
         r#"
         SELECT w.id::text, w.name, w.description, w.created_at, wr.name as role,
-               COUNT(DISTINCT we.experiment_id) as experiment_count,
-               COUNT(DISTINCT CASE WHEN e.created_at > NOW() - INTERVAL '7 days' THEN we.experiment_id END) as recent_experiment_count
-        FROM workspace w
-        JOIN user_workspaces uw ON w.id = uw.workspace_id
+               COALESCE(COUNT(DISTINCT we.experiment_id), 0) as experiment_count,
+               COALESCE(COUNT(DISTINCT CASE WHEN e.created_at > NOW() - INTERVAL '7 days' THEN we.experiment_id END), 0) as recent_experiment_count
+        FROM user_workspaces uw
+        JOIN workspace w ON uw.workspace_id = w.id
         JOIN workspace_role wr ON uw.role_id = wr.id
         LEFT JOIN workspace_experiments we ON w.id = we.workspace_id
         LEFT JOIN experiment e ON we.experiment_id = e.id
@@ -44,14 +44,14 @@ pub async fn get_dashboard_overview(
     .fetch_all(&pool)
     .await;
 
-    // Fetch recent experiments with metrics
+    // Fetch recent experiments with metrics - optimized query
     let experiments_result = sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String, Option<Vec<String>>)>(
         r#"
         SELECT DISTINCT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text,
                ARRAY_AGG(DISTINCT m.name) FILTER (WHERE m.name IS NOT NULL) as available_metrics
-        FROM experiment e
-        JOIN workspace_experiments we ON e.id = we.experiment_id
-        JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
+        FROM user_workspaces uw
+        JOIN workspace_experiments we ON uw.workspace_id = we.workspace_id
+        JOIN experiment e ON we.experiment_id = e.id
         LEFT JOIN metric m ON e.id = m.experiment_id
         WHERE uw.user_id = $1
         GROUP BY e.id, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id

@@ -398,10 +398,10 @@ pub async fn get_experiment(
     }
 }
 
-// Update experiment
 pub async fn update_experiment(
     Extension(user): Extension<AuthenticatedUser>,
     State(pool): State<PgPool>,
+    Path(id): Path<String>,
     Json(request): Json<UpdateExperimentRequest>,
 ) -> impl IntoResponse {
     let user_uuid = match Uuid::parse_str(&user.id) {
@@ -418,7 +418,7 @@ pub async fn update_experiment(
         }
     };
 
-    let experiment_uuid = match Uuid::parse_str(&request.id) {
+    let experiment_uuid = match Uuid::parse_str(&id) {
         Ok(uuid) => uuid,
         Err(_) => {
             return (
