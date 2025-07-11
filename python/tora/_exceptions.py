@@ -1,9 +1,3 @@
-"""Exception classes for the Tora SDK.
-
-This module defines custom exception types used throughout the Tora SDK
-to provide clear error handling and debugging information.
-"""
-
 from typing import Any
 
 
@@ -78,12 +72,10 @@ class ToraWorkspaceError(ToraError):
     """Raised when workspace operations fail."""
 
 
-# Legacy exception for backward compatibility
 class HTTPStatusError(ToraNetworkError):
     """Legacy exception for HTTP errors. Use ToraNetworkError instead."""
 
     def __init__(self, message: str, response: Any) -> None:
-        # Extract status code and response text if available
         status_code = getattr(response, "status_code", None)
         response_text = getattr(response, "text", None)
 

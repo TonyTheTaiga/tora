@@ -1,27 +1,3 @@
-"""Tora Python SDK - ML Experiment Tracking.
-
-A Python SDK for the Tora ML experiment tracking platform.
-Provides easy-to-use APIs for logging metrics, managing experiments,
-and tracking machine learning workflows.
-
-Example:
-    >>> import tora
-    >>>
-    >>> # Create an experiment
-    >>> client = tora.Tora.create_experiment(
-    ...     name="my-experiment",
-    ...     workspace_id="workspace-123"
-    ... )
-    >>>
-    >>> # Log metrics
-    >>> client.log("accuracy", 0.95, step=100)
-    >>> client.log("loss", 0.05, step=100)
-    >>>
-    >>> # Ensure all metrics are sent
-    >>> client.shutdown()
-
-"""
-
 from ._client import Tora, create_workspace
 from ._exceptions import (
     ToraAPIError,

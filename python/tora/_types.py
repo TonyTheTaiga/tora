@@ -1,9 +1,3 @@
-"""Type definitions for the Tora SDK.
-
-This module contains type aliases and protocol definitions used throughout
-the Tora SDK for better type safety and documentation.
-"""
-
 from typing import Any, Protocol
 
 try:
@@ -15,7 +9,6 @@ HPValue = str | float | int
 MetricMetadata = dict[str, Any]
 
 
-# API response types
 class ExperimentResponse(TypedDict, total=False):
     """Type definition for experiment API response."""
 
@@ -59,7 +52,6 @@ class APIResponse(TypedDict):
     data: Any
 
 
-# Configuration types
 class ToraConfig(TypedDict, total=False):
     """Configuration options for Tora client."""
 
@@ -71,7 +63,6 @@ class ToraConfig(TypedDict, total=False):
     debug: bool | None
 
 
-# Protocol for HTTP client interface
 class HTTPClient(Protocol):
     """Protocol for HTTP client implementations."""
 
@@ -95,7 +86,6 @@ class HTTPClient(Protocol):
         ...
 
 
-# Callback protocol for metric logging
 class MetricCallback(Protocol):
     """Protocol for metric logging callbacks."""
 

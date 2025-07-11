@@ -1,9 +1,3 @@
-"""Main client implementation for the Tora SDK.
-
-This module contains the core Tora client class and related functionality
-for experiment tracking and metric logging.
-"""
-
 import logging
 from collections.abc import Mapping
 from typing import Any
@@ -71,7 +65,6 @@ def create_workspace(
         ToraNetworkError: If there's a network error
 
     """
-    # Validate inputs
     if not name or not isinstance(name, str):
         raise ToraValidationError("Workspace name must be a non-empty string")
 
@@ -114,7 +107,7 @@ def create_workspace(
             raise ToraValidationError("Invalid workspace data") from e
         raise ToraAPIError(f"API error: {e}") from e
     except ToraNetworkError:
-        raise  # Re-raise network errors as-is
+        raise
     except Exception as e:
         logger.exception("Unexpected error creating workspace")
         raise ToraAPIError(f"Unexpected error creating workspace: {e}") from e
@@ -130,8 +123,7 @@ class Tora:
     Example:
         >>> tora = Tora.create_experiment("my-experiment", workspace_id="workspace-123")
         >>> tora.log("accuracy", 0.95, step=100)
-        >>> tora.shutdown()  # Flush remaining logs
-
+        >>> tora.shutdown()
     """
 
     def __init__(
@@ -169,7 +161,7 @@ class Tora:
         self._experiment_id = experiment_id.strip()
         self._description = description
         self._hyperparams = hyperparams
-        self.tags = tags
+        self._tags = tags
         self._max_buffer_len = max(1, int(max_buffer_len))
         self._buffer: list[dict[str, Any]] = []
         self._api_key = api_key or TORA_API_KEY
@@ -181,6 +173,7 @@ class Tora:
 
         if server_url is None:
             server_url = TORA_BASE_URL
+
         if not server_url:
             raise ToraConfigurationError(
                 "Server URL must be provided via parameter or TORA_BASE_URL environment variable",
@@ -244,7 +237,6 @@ class Tora:
             ToraNetworkError: If there's a network error
 
         """
-        # Validate inputs
         name = validate_experiment_name(name)
         workspace_id = validate_workspace_id(workspace_id)
         hyperparams = validate_hyperparams(hyperparams)
@@ -287,7 +279,7 @@ class Tora:
                 raise ToraValidationError("Workspace not found") from e
             raise ToraAPIError(f"API error: {e}") from e
         except ToraNetworkError:
-            raise  # Re-raise network errors as-is
+            raise
         except Exception as e:
             logger.exception("Unexpected error creating experiment")
             raise ToraAPIError(f"Unexpected error creating experiment: {e}") from e
@@ -399,12 +391,11 @@ class Tora:
                 raise ToraAuthenticationError("Invalid API key") from e
             raise ToraAPIError(f"API error loading experiment: {e}") from e
         except ToraNetworkError:
-            raise  # Re-raise network errors as-is
+            raise
         except Exception as e:
             logger.exception("Unexpected error loading experiment")
             raise ToraAPIError(f"Unexpected error loading experiment: {e}") from e
 
-        # Parse hyperparameters
         hyperparams = None
         if data.get("hyperparams"):
             try:
@@ -448,22 +439,19 @@ class Tora:
         if self._closed:
             raise ToraMetricError("Cannot log metrics on a closed Tora client")
 
-        # Validate inputs
         name = validate_metric_name(name)
         value = validate_metric_value(value)
         step = validate_step(step)
 
-        # Validate metadata if provided
         if metadata is not None:
             if not isinstance(metadata, dict):
                 raise ToraValidationError("Metadata must be a dictionary")
 
-            # Basic validation of metadata size
             try:
                 import json
 
                 metadata_str = json.dumps(metadata)
-                if len(metadata_str) > 10000:  # 10KB limit
+                if len(metadata_str) > 10000:
                     raise ToraValidationError("Metadata too large (max 10KB)")
             except (TypeError, ValueError) as e:
                 raise ToraValidationError(f"Metadata must be JSON serializable: {e}") from e
@@ -495,15 +483,12 @@ class Tora:
 
         try:
             logger.debug(f"Sending {len(metrics_to_send)} metrics for experiment {self._experiment_id}")
-
             response = self._http_client.post(
                 f"/experiments/{self._experiment_id}/metrics/batch",
                 json={"metrics": metrics_to_send},
                 timeout=120,
             )
             response.raise_for_status()
-
-            # Only clear buffer if successful
             self._buffer = []
             logger.debug(f"Successfully sent {len(metrics_to_send)} metrics")
 
@@ -513,16 +498,11 @@ class Tora:
                 error_msg += f": {e.response.text[:200]}"
             logger.error(error_msg)
 
-            # Don't clear buffer on error - metrics will be retried on next
-            # flush/shutdown
-
         except ToraNetworkError as e:
             logger.error(f"Network error writing metrics: {e}")
-            # Don't clear buffer on network error
 
         except Exception as e:
             logger.error(f"Unexpected error writing metrics: {e}")
-            # Don't clear buffer on unexpected error
 
     def flush(self) -> None:
         """Immediately send all buffered metrics to the API.
@@ -596,7 +576,7 @@ class Tora:
         """Enter context manager."""
         return self
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    def __exit__(self, _exc_type: Any, _exc_val: Any, _exc_tb: Any) -> None:
         """Exit context manager, ensuring logs are flushed."""
         self.shutdown()
 

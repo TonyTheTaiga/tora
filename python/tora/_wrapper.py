@@ -1,12 +1,3 @@
-"""Global wrapper functions for simplified Tora usage.
-
-This module provides a simplified global interface for Tora that maintains
-a single global client instance. This is convenient for simple use cases
-but the main Tora class is recommended for more complex scenarios.
-"""
-
-from __future__ import annotations
-
 import atexit
 import logging
 
@@ -75,7 +66,6 @@ def setup(
 
     """
     global _CLIENT
-
     if _CLIENT is not None:
         raise ToraError("Tora client already initialized. Call shutdown() first to reinitialize.")
 
@@ -90,18 +80,14 @@ def setup(
             server_url=server_url,
             max_buffer_len=max_buffer_len,
         )
-
-        # Register cleanup function
         atexit.register(shutdown)
-
         experiment_url = f"https://tora-web-1030250455947.us-central1.run.app/experiments/{_CLIENT.experiment_id}"
         logger.info(f"Tora experiment created: {experiment_url}")
         print(f"Tora experiment: {experiment_url}")
-
         return _CLIENT.experiment_id
 
     except Exception:
-        _CLIENT = None  # Reset on error
+        _CLIENT = None
         raise
 
 

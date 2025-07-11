@@ -1,11 +1,3 @@
-"""Input validation utilities for the Tora SDK.
-
-This module provides validation functions to ensure data integrity
-and provide clear error messages for invalid inputs.
-"""
-
-from __future__ import annotations
-
 import re
 from collections.abc import Mapping
 from typing import Any
@@ -34,11 +26,9 @@ def validate_experiment_name(name: str) -> str:
         raise ToraValidationError("Experiment name cannot be empty")
 
     name = name.strip()
-
     if len(name) > 255:
         raise ToraValidationError("Experiment name cannot exceed 255 characters")
 
-    # Check for invalid characters (basic validation)
     if re.search(r'[<>:"/\\|?*\x00-\x1f]', name):
         raise ToraValidationError(
             'Experiment name contains invalid characters. Avoid: < > : " / \\ | ? * and control characters',
@@ -67,11 +57,9 @@ def validate_workspace_id(workspace_id: str | None) -> str | None:
         raise ToraValidationError("Workspace ID must be a string")
 
     workspace_id = workspace_id.strip()
-
     if not workspace_id:
         raise ToraValidationError("Workspace ID cannot be empty")
 
-    # Validate workspace ID format - should be UUID format or alphanumeric with hyphens
     if not re.match(r"^[a-zA-Z0-9\-]+$", workspace_id):
         raise ToraValidationError("Workspace ID must contain only letters, numbers, and hyphens")
 
@@ -109,7 +97,6 @@ def validate_hyperparams(
             raise ToraValidationError("Hyperparameter key cannot be empty")
 
         key = key.strip()
-
         if len(key) > 100:
             raise ToraValidationError(f"Hyperparameter key '{key}' exceeds 100 characters")
 
@@ -171,14 +158,12 @@ def validate_tags(tags: list[str] | None) -> list[str] | None:
             raise ToraValidationError(f"Tag at index {i} must be a string, got {type(tag)}")
 
         tag = tag.strip()
-
         if not tag:
             raise ToraValidationError(f"Tag at index {i} cannot be empty")
 
         if len(tag) > 50:
             raise ToraValidationError(f"Tag '{tag}' exceeds 50 characters")
 
-        # Check for invalid characters
         if re.search(r'[<>:"/\\|?*\x00-\x1f,;]', tag):
             raise ToraValidationError(
                 f"Tag '{tag}' contains invalid characters. Avoid: < > : \" / \\ | ? * , ; and control characters",
@@ -214,7 +199,6 @@ def validate_metric_name(name: str) -> str:
         raise ToraValidationError("Metric name cannot be empty")
 
     name = name.strip()
-
     if len(name) > 100:
         raise ToraValidationError("Metric name cannot exceed 100 characters")
 

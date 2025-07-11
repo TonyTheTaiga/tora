@@ -32,16 +32,14 @@ class HttpResponse:
         """Returns the text content of the response."""
         if self._text is None:
             try:
-                # Try to get encoding from content-type header
                 content_type = self.headers.get("content-type", "")
-                encoding = "utf-8"  # Default encoding
+                encoding = "utf-8"
 
                 if "charset=" in content_type:
                     encoding = content_type.split("charset=")[1].split(";")[0].strip()
 
                 self._text = self._data.decode(encoding)
             except UnicodeDecodeError:
-                # Fallback to utf-8 with error handling
                 self._text = self._data.decode("utf-8", errors="replace")
 
         return self._text
@@ -64,12 +62,11 @@ class HttpResponse:
         if 400 <= self.status_code < 600:
             error_msg = f"HTTP {self.status_code} {self.reason} for url '{self._url}'"
 
-            # Try to extract error details from response (for future use)
             try:
                 if self.headers.get("content-type", "").startswith("application/json"):
-                    _ = self.json()  # Could use for enhanced error reporting in the future
+                    _ = self.json()
             except Exception:
-                pass  # Ignore JSON parsing errors for error responses
+                pass
 
             raise HTTPStatusError(
                 message=error_msg,
@@ -98,7 +95,7 @@ class HttpClient:
         self.scheme = parsed_url.scheme
         self.netloc = parsed_url.netloc
         self.base_path = parsed_url.path.rstrip("/")
-        self.timeout = timeout or 30  # Default 30 second timeout
+        self.timeout = timeout or 30
 
         self.conn_class: type[http.client.HTTPConnection | http.client.HTTPSConnection]
         if self.scheme == "https":
@@ -210,7 +207,7 @@ class HttpClient:
             try:
                 self.conn.close()
             except Exception:
-                pass  # Ignore errors when closing
+                pass
             finally:
                 self.conn = None
 
@@ -219,6 +216,6 @@ class HttpClient:
         self.conn = self._get_conn()
         return self
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    def __exit__(self, _exc_type: Any, _exc_val: Any, _exc_tb: Any) -> None:
         """Exit context manager."""
         self.close()
