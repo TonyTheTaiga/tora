@@ -1,0 +1,40 @@
+name: Main CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  precommit:
+    name: "Code Quality Checks"
+    uses: ./.github/workflows/precommit-trigger.yml
+
+  python-tests:
+    name: "Python SDK Tests"
+    uses: ./.github/workflows/python-tests.yml
+    needs: precommit
+
+  ci-summary:
+    name: "CI Summary"
+    runs-on: ubuntu-latest
+    needs: [precommit, python-tests]
+    if: always()
+    steps:
+    - name: Check overall status
+      run: |
+        echo "=== CI Pipeline Summary ==="
+        echo "Pre-commit checks: ${{ needs.precommit.result }}"
+        echo "Python tests: ${{ needs.python-tests.result }}"
+
+        if [[ "${{ needs.precommit.result }}" == "failure" || "${{ needs.python-tests.result }}" == "failure" ]]; then
+          echo "❌ CI Pipeline failed"
+          exit 1
+        elif [[ "${{ needs.precommit.result }}" == "cancelled" || "${{ needs.python-tests.result }}" == "cancelled" ]]; then
+          echo "⚠️ CI Pipeline was cancelled"
+          exit 1
+        else
+          echo "✅ CI Pipeline passed successfully"
+        fi

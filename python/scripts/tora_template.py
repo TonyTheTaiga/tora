@@ -22,10 +22,8 @@ from tora import Tora
 
 
 def safe_value(value):
-    """
-    Convert a value to a safe float or int, handling NaN, inf, bool, and non-numeric values.
-    """
-    if isinstance(value, (int, float)):
+    """Convert a value to a safe float or int, handling NaN, inf, bool, and non-numeric values."""
+    if isinstance(value, int | float):
         if np.isnan(value) or np.isinf(value):
             return 0.0
         return float(value)
@@ -40,39 +38,29 @@ def safe_value(value):
 
 
 def log_metric(client, name, value, step):
-    """
-    Safely log a metric value to the Tora client.
-    """
+    """Safely log a metric value to the Tora client."""
     value = safe_value(value)
     if value is not None:
         client.log(name=name, value=value, step=step)
 
 
 class ToraCallback(TrainerCallback):
-    """
-    Hugging Face Trainer callback to log metrics to Tora.
-    """
+    """Hugging Face Trainer callback to log metrics to Tora."""
 
     def __init__(self, tora_client):
         self.tora = tora_client
 
     def on_log(self, args, state, control, logs=None, **kwargs):
-        """
-        Log training loss and learning rate on each step.
-        """
+        """Log training loss and learning rate on each step."""
         if not logs:
             return
         if "loss" in logs:
             log_metric(self.tora, "train_loss", logs["loss"], state.global_step)
         if "learning_rate" in logs:
-            log_metric(
-                self.tora, "learning_rate", logs["learning_rate"], state.global_step
-            )
+            log_metric(self.tora, "learning_rate", logs["learning_rate"], state.global_step)
 
     def on_evaluate(self, args, state, control, metrics=None, **kwargs):
-        """
-        Log evaluation metrics prefixed with 'eval_'.
-        """
+        """Log evaluation metrics prefixed with 'eval_'."""
         if not metrics:
             return
         for key, value in metrics.items():
@@ -81,11 +69,11 @@ class ToraCallback(TrainerCallback):
 
 
 def load_and_tokenize_dataset(config):
-    """
-    Load a Hugging Face dataset and tokenize based on task type.
+    """Load a Hugging Face dataset and tokenize based on task type.
 
     Returns:
         train_dataset, val_dataset, test_dataset, num_labels, text_field, label_field
+
     """
     print(f"Loading dataset: {config['dataset_name']}")
     dataset = load_dataset(config["dataset_name"])
@@ -154,19 +142,17 @@ def load_and_tokenize_dataset(config):
     if config["task_type"] == "classification":
         feat = dataset["train"].features[label_field]
         label_names = getattr(feat, "names", None)
-        num_labels = (
-            len(label_names) if label_names else max(dataset["train"][label_field]) + 1
-        )
+        num_labels = len(label_names) if label_names else max(dataset["train"][label_field]) + 1
 
     return train_ds, val_ds, test_ds, num_labels, text_field, label_field
 
 
 def load_model_and_collator(config, num_labels=None):
-    """
-    Load a Hugging Face model and appropriate data collator.
+    """Load a Hugging Face model and appropriate data collator.
 
     Returns:
         model, tokenizer, data_collator
+
     """
     print(f"Loading model: {config['model_name']}")
     tokenizer = AutoTokenizer.from_pretrained(config["model_name"])
@@ -179,9 +165,7 @@ def load_model_and_collator(config, num_labels=None):
             mlm_probability=config.get("mlm_probability", 0.15),
         )
     else:
-        model = AutoModelForSequenceClassification.from_pretrained(
-            config["model_name"], num_labels=num_labels
-        )
+        model = AutoModelForSequenceClassification.from_pretrained(config["model_name"], num_labels=num_labels)
         collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
     total_params = sum(p.numel() for p in model.parameters())
@@ -198,11 +182,11 @@ def train_and_evaluate(
     val_dataset,
     test_dataset=None,
 ):
-    """
-    Train and evaluate the model using Hugging Face Trainer with Tora logging.
+    """Train and evaluate the model using Hugging Face Trainer with Tora logging.
 
     Returns:
         trainer, model, tokenizer
+
     """
     os.makedirs(config["output_dir"], exist_ok=True)
     config.update(
@@ -211,7 +195,7 @@ def train_and_evaluate(
             "val_samples": len(val_dataset),
             "test_samples": len(test_dataset) if test_dataset else len(val_dataset),
             "model_parameters": sum(p.numel() for p in model.parameters()),
-        }
+        },
     )
 
     tora = Tora.create_experiment(
@@ -228,22 +212,17 @@ def train_and_evaluate(
             preds = pred.predictions.argmax(-1)
             return {
                 "accuracy": accuracy_score(labels, preds),
-                "precision": precision_score(
-                    labels, preds, average="weighted", zero_division=0
-                ),
-                "recall": recall_score(
-                    labels, preds, average="weighted", zero_division=0
-                ),
+                "precision": precision_score(labels, preds, average="weighted", zero_division=0),
+                "recall": recall_score(labels, preds, average="weighted", zero_division=0),
                 "f1": f1_score(labels, preds, average="weighted", zero_division=0),
             }
+
     else:
         perplexity = evaluate.load("perplexity")
 
         def compute_metrics(pred):
             try:
-                res = perplexity.compute(
-                    predictions=pred.predictions, model_id=config["model_name"]
-                )
+                res = perplexity.compute(predictions=pred.predictions, model_id=config["model_name"])
                 return {"perplexity": res.get("perplexity", 0.0)}
             except Exception as e:
                 print(f"Perplexity error: {e}")
@@ -306,9 +285,7 @@ def train_and_evaluate(
     print("Training complete!")
     print(f"Model saved to {final_dir}")
     if config["task_type"] == "classification":
-        print(
-            f"Accuracy: {eval_results.get('eval_accuracy')}  F1: {eval_results.get('eval_f1')}"
-        )
+        print(f"Accuracy: {eval_results.get('eval_accuracy')}  F1: {eval_results.get('eval_f1')}")
     else:
         print(f"Perplexity: {eval_results.get('eval_perplexity')}")
     print(f"Total time: {training_time:.2f}s")
@@ -317,9 +294,7 @@ def train_and_evaluate(
 
 
 def setup_device_and_seed(seed):
-    """
-    Configure device (GPU/TPU/CPU) and set random seeds.
-    """
+    """Configure device (GPU/TPU/CPU) and set random seeds."""
     if torch.cuda.is_available():
         device = torch.device("cuda")
         torch.cuda.manual_seed_all(seed)
@@ -333,12 +308,8 @@ def setup_device_and_seed(seed):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Train transformer models with Tora integration"
-    )
-    parser.add_argument(
-        "--task_type", choices=["classification", "mlm"], default="classification"
-    )
+    parser = argparse.ArgumentParser(description="Train transformer models with Tora integration")
+    parser.add_argument("--task_type", choices=["classification", "mlm"], default="classification")
     parser.add_argument("--dataset_name", default="imdb")
     parser.add_argument("--model_name", default="distilbert-base-uncased")
     parser.add_argument("--output_dir", default="results/model")
