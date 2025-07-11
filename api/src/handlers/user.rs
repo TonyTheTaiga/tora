@@ -117,8 +117,7 @@ pub async fn get_settings(
     Extension(user): Extension<AuthenticatedUser>,
     State(pool): State<PgPool>,
 ) -> Json<ntypes::SettingsData> {
-    use crate::handlers::{api_key, invitation};
-    use crate::repos::workspace;
+    use crate::handlers::{api_key, invitation, workspace};
 
     println!("user: {user:?}");
 

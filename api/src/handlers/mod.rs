@@ -17,33 +17,36 @@ mod invitation;
 mod metric;
 mod role;
 mod user;
+mod workspace;
+
+pub use workspace::Workspace;
 
 pub fn api_routes(pool: &sqlx::PgPool) -> Router<sqlx::PgPool> {
     let protected_routes = Router::new()
         // Workspaces
         .route(
             "/workspaces",
-            protected_route(get(crate::repos::workspace::list_workspaces), pool),
+            protected_route(get(workspace::list_workspaces), pool),
         )
         .route(
             "/workspaces",
-            protected_route(post(crate::repos::workspace::create_workspace), pool),
+            protected_route(post(workspace::create_workspace), pool),
         )
         .route(
             "/workspaces/{id}",
-            protected_route(get(crate::repos::workspace::get_workspace), pool),
+            protected_route(get(workspace::get_workspace), pool),
         )
         .route(
             "/workspaces/{id}",
-            protected_route(delete(crate::repos::workspace::delete_workspace), pool),
+            protected_route(delete(workspace::delete_workspace), pool),
         )
         .route(
             "/workspaces/{id}/leave",
-            protected_route(post(crate::repos::workspace::leave_workspace), pool),
+            protected_route(post(workspace::leave_workspace), pool),
         )
         .route(
             "/workspaces/{id}/members",
-            protected_route(get(crate::repos::workspace::get_workspace_members), pool),
+            protected_route(get(workspace::get_workspace_members), pool),
         )
         .route(
             "/workspaces/{id}/experiments",

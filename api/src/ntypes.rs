@@ -69,7 +69,7 @@ pub struct ApiKey {
     pub revoked: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[sqlx(skip)]
-    pub key: Option<String>, // Only present when creating
+    pub key: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -99,7 +99,7 @@ pub struct CreateInvitationRequest {
 #[derive(Serialize)]
 pub struct SettingsData {
     pub user: UserInfo,
-    pub workspaces: Vec<crate::repos::workspace::Workspace>,
+    pub workspaces: Vec<crate::handlers::Workspace>,
     #[serde(rename = "apiKeys")]
     pub api_keys: Vec<ApiKey>,
     pub invitations: Vec<WorkspaceInvitation>,
