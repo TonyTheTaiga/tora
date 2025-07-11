@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { X, Save, TagIcon, Plus } from "@lucide/svelte";
+  import { X, Plus } from "@lucide/svelte";
   import { enhance } from "$app/forms";
   import type { Experiment } from "$lib/types";
   import { onMount, onDestroy } from "svelte";
@@ -35,14 +35,14 @@
     document.body.classList.remove("overflow-hidden");
   });
 
-  function addTag(e: KeyboardEvent | MouseEvent) {
-    e.preventDefault();
-    if (tag && tag !== "") {
+  function addTag() {
+    if (tag && tag.trim() !== "") {
       if (!experimentCopy.tags) {
         experimentCopy.tags = [];
       }
-      experimentCopy.tags.push(tag);
+      experimentCopy.tags.push(tag.trim());
       tag = null;
+      addingNewTag = false;
     }
   }
 </script>
@@ -104,7 +104,6 @@
             experiment.tags = [...experiment.tags];
           }
           closeEditExperimentModal();
-
           await update();
         };
       }}
@@ -178,11 +177,19 @@
                   bind:value={tag}
                   class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
                   placeholder="tag_name"
-                  onkeydown={addTag}
+                  onkeydown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      addTag();
+                    }
+                  }}
                 />
                 <button
                   type="button"
-                  onclick={addTag}
+                  onclick={(event) => {
+                    event.preventDefault();
+                    addTag();
+                  }}
                   class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-2 py-1 text-sm transition-all"
                 >
                   <Plus size={14} />
@@ -191,8 +198,8 @@
             {:else}
               <button
                 type="button"
-                onclick={(e) => {
-                  e.preventDefault();
+                onclick={(event) => {
+                  event.preventDefault();
                   addingNewTag = true;
                 }}
                 class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-2 py-1 text-sm transition-all"
