@@ -117,3 +117,4 @@ pyrightconfig.json
 api/target
 
 web.old
+supabase
