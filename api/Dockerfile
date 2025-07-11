@@ -1,7 +1,7 @@
 FROM rust:1.88-alpine AS builder
 RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static pkgconfig
 WORKDIR /app
-COPY Cargo.toml ./ 
+COPY Cargo.toml ./
 RUN cargo generate-lockfile 2>/dev/null || true
 COPY src/ ./src/
 RUN cargo build --release

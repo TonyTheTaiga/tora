@@ -236,6 +236,7 @@ def train_and_evaluate(
                 ),
                 "f1": f1_score(labels, preds, average="weighted", zero_division=0),
             }
+
     else:
         perplexity = evaluate.load("perplexity")
 
