@@ -1,5 +1,4 @@
 repos:
-  # General file hygiene hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -14,13 +13,12 @@ repos:
       - id: check-toml
         files: \.(toml)$
 
-  # Python formatting and linting (for python/tora/ directory)
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.4
     hooks:
       - id: ruff
         name: ruff-linting
-        files: ^python/
+        files: ^python/tora/
         args: ["--fix"]
       - id: ruff-format
         name: ruff-formatting
