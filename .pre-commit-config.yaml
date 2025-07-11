@@ -38,7 +38,6 @@ repos:
         args: ["--ignore-missing-imports", "--no-strict-optional", "--allow-any-generics"]
         additional_dependencies: [types-requests]
 
-  # Web formatting (TypeScript/JavaScript)
   - repo: local
     hooks:
       - id: prettier-web
@@ -48,7 +47,6 @@ repos:
         files: ^web/
         pass_filenames: false
 
-  # Rust formatting (API)
   - repo: local
     hooks:
       - id: rustfmt-api

@@ -117,6 +117,18 @@ def reset_global_client():
         tora._wrapper._CLIENT = None
 
 
+@pytest.fixture(autouse=True)
+def isolate_environment(monkeypatch):
+    """Isolate environment variables to prevent production access."""
+    # Clear any existing production environment variables
+    monkeypatch.delenv("TORA_API_KEY", raising=False)
+    monkeypatch.delenv("TORA_BASE_URL", raising=False)
+
+    # Set safe test defaults
+    monkeypatch.setenv("TORA_API_KEY", "test-api-key-isolated")
+    monkeypatch.setenv("TORA_BASE_URL", "https://test-isolated.example.com/api")
+
+
 @pytest.fixture
 def env_vars(monkeypatch):
     """Set up environment variables for testing."""

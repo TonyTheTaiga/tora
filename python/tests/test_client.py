@@ -53,7 +53,7 @@ class TestCreateWorkspace:
         # Verify HttpClient was initialized with test URL, not production
         mock_http_client_class.assert_called_once_with(
             base_url=TEST_BASE_URL,
-            headers={"x-api-key": TEST_API_KEY}
+            headers={"x-api-key": TEST_API_KEY, "Content-Type": "application/json"}
         )
 
     def test_create_workspace_no_api_key(self, monkeypatch):
@@ -95,7 +95,7 @@ class TestCreateWorkspace:
         # Verify we're using test URL, not production
         mock_http_client_class.assert_called_once_with(
             base_url=TEST_BASE_URL,
-            headers={"x-api-key": TEST_API_KEY}
+            headers={"x-api-key": TEST_API_KEY, "Content-Type": "application/json"}
         )
 
 
@@ -137,6 +137,7 @@ class TestToraCreateExperiment:
     """Tests for Tora.create_experiment class method."""
 
     @patch("tora._client.HttpClient")
+    @patch("tora._config.TORA_BASE_URL", TEST_BASE_URL)
     def test_create_experiment_success(self, mock_http_client_class, sample_experiment_data):
         """Test successful experiment creation."""
         # Setup mock
@@ -149,32 +150,42 @@ class TestToraCreateExperiment:
         mock_client.post.return_value = mock_response
         mock_http_client_class.return_value.__enter__.return_value = mock_client
 
-        # Test
+        # Test with explicit test parameters
         tora = Tora.create_experiment(
             "test-experiment",
             workspace_id="ws-123",
             description="Test description",
             hyperparams={"lr": 0.01},
             tags=["test"],
-            api_key="test-key",
+            api_key=TEST_API_KEY,
+            server_url=TEST_BASE_URL,
         )
 
         # Assertions
         assert isinstance(tora, Tora)
         assert tora.experiment_id == "exp-123"
         mock_client.post.assert_called_once()
+        # Verify we're using test URL, not production (called twice: once for create, once for init)
+        expected_headers = {"x-api-key": TEST_API_KEY, "Content-Type": "application/json"}
+        mock_http_client_class.assert_called_with(
+            base_url=TEST_BASE_URL,
+            headers=expected_headers
+        )
+        # Should be called twice: once for experiment creation, once for Tora init
+        assert mock_http_client_class.call_count == 2
 
     def test_create_experiment_invalid_name(self):
         """Test experiment creation with invalid name."""
         with pytest.raises(ToraValidationError):
-            Tora.create_experiment("", api_key="test-key")
+            Tora.create_experiment("", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
     def test_create_experiment_invalid_hyperparams(self):
         """Test experiment creation with invalid hyperparams."""
         with pytest.raises(ToraValidationError):
-            Tora.create_experiment("test", hyperparams={"": "value"}, api_key="test-key")
+            Tora.create_experiment("test", hyperparams={"": "value"}, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
     @patch("tora._client.HttpClient")
+    @patch("tora._config.TORA_BASE_URL", TEST_BASE_URL)
     def test_create_experiment_auth_error(self, mock_http_client_class):
         """Test experiment creation with authentication error."""
         # Setup mock to raise 401 error
@@ -186,13 +197,20 @@ class TestToraCreateExperiment:
         mock_http_client_class.return_value.__enter__.return_value = mock_client
 
         with pytest.raises(ToraAuthenticationError, match="Invalid API key"):
-            Tora.create_experiment("test", api_key="invalid-key")
+            Tora.create_experiment("test", api_key="invalid-key", server_url=TEST_BASE_URL)
+
+        # Verify we're using test URL, not production
+        mock_http_client_class.assert_called_once_with(
+            base_url=TEST_BASE_URL,
+            headers={"x-api-key": "invalid-key", "Content-Type": "application/json"}
+        )
 
 
 class TestToraLoadExperiment:
     """Tests for Tora.load_experiment class method."""
 
     @patch("tora._client.HttpClient")
+    @patch("tora._config.TORA_BASE_URL", TEST_BASE_URL)
     def test_load_experiment_success(self, mock_http_client_class, sample_experiment_data):
         """Test successful experiment loading."""
         # Setup mock
@@ -205,20 +223,29 @@ class TestToraLoadExperiment:
         mock_client.get.return_value = mock_response
         mock_http_client_class.return_value.__enter__.return_value = mock_client
 
-        # Test
-        tora = Tora.load_experiment("exp-123", api_key="test-key")
+        # Test with explicit test parameters
+        tora = Tora.load_experiment("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
         # Assertions
         assert isinstance(tora, Tora)
         assert tora.experiment_id == "exp-123"
         mock_client.get.assert_called_once_with("/experiments/exp-123")
+        # Verify we're using test URL, not production (called twice: once for load, once for init)
+        expected_headers = {"x-api-key": TEST_API_KEY, "Content-Type": "application/json"}
+        mock_http_client_class.assert_called_with(
+            base_url=TEST_BASE_URL,
+            headers=expected_headers
+        )
+        # Should be called twice: once for experiment loading, once for Tora init
+        assert mock_http_client_class.call_count == 2
 
     def test_load_experiment_invalid_id(self):
         """Test loading experiment with invalid ID."""
         with pytest.raises(ToraValidationError, match="must be a non-empty string"):
-            Tora.load_experiment("")
+            Tora.load_experiment("", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
     @patch("tora._client.HttpClient")
+    @patch("tora._config.TORA_BASE_URL", TEST_BASE_URL)
     def test_load_experiment_not_found(self, mock_http_client_class):
         """Test loading non-existent experiment."""
         # Setup mock to raise 404 error
@@ -230,7 +257,13 @@ class TestToraLoadExperiment:
         mock_http_client_class.return_value.__enter__.return_value = mock_client
 
         with pytest.raises(ToraExperimentError, match="not found"):
-            Tora.load_experiment("nonexistent", api_key="test-key")
+            Tora.load_experiment("nonexistent", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
+
+        # Verify we're using test URL, not production
+        mock_http_client_class.assert_called_once_with(
+            base_url=TEST_BASE_URL,
+            headers={"x-api-key": TEST_API_KEY}
+        )
 
 
 class TestToraLogging:
@@ -238,7 +271,7 @@ class TestToraLogging:
 
     def test_log_metric_success(self):
         """Test successful metric logging."""
-        tora = Tora("exp-123", max_buffer_len=5, api_key="test-key")
+        tora = Tora("exp-123", max_buffer_len=5, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
         # Log a metric
         tora.log("accuracy", 0.95, step=100)
@@ -251,7 +284,7 @@ class TestToraLogging:
 
     def test_log_metric_validation(self):
         """Test metric logging validation."""
-        tora = Tora("exp-123", api_key="test-key")
+        tora = Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
         # Invalid metric name
         with pytest.raises(ToraValidationError):
@@ -267,7 +300,7 @@ class TestToraLogging:
 
     def test_log_metric_closed_client(self):
         """Test logging on closed client."""
-        tora = Tora("exp-123", api_key="test-key")
+        tora = Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
         tora.shutdown()
 
         with pytest.raises(ToraMetricError, match="closed Tora client"):
@@ -276,7 +309,7 @@ class TestToraLogging:
     @patch("tora._client.Tora._write_logs")
     def test_log_metric_auto_flush(self, mock_write_logs):
         """Test automatic flushing when buffer is full."""
-        tora = Tora("exp-123", max_buffer_len=2, api_key="test-key")
+        tora = Tora("exp-123", max_buffer_len=2, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
         # Log metrics to fill buffer
         tora.log("metric1", 1.0)
@@ -287,7 +320,7 @@ class TestToraLogging:
 
     def test_log_metric_with_metadata(self):
         """Test logging metric with metadata."""
-        tora = Tora("exp-123", api_key="test-key")
+        tora = Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
         metadata = {"epoch": 1, "batch": 10}
 
         tora.log("loss", 0.5, metadata=metadata)
@@ -296,7 +329,7 @@ class TestToraLogging:
 
     def test_log_metric_invalid_metadata(self):
         """Test logging with invalid metadata."""
-        tora = Tora("exp-123", api_key="test-key")
+        tora = Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
         # Non-dict metadata
         with pytest.raises(ToraValidationError, match="must be a dictionary"):
@@ -309,7 +342,7 @@ class TestToraFlushAndShutdown:
     @patch("tora._client.Tora._write_logs")
     def test_flush(self, mock_write_logs):
         """Test manual flush."""
-        tora = Tora("exp-123", api_key="test-key")
+        tora = Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
         tora.log("accuracy", 0.95)
 
         tora.flush()
@@ -317,7 +350,7 @@ class TestToraFlushAndShutdown:
 
     def test_flush_closed_client(self):
         """Test flush on closed client."""
-        tora = Tora("exp-123", api_key="test-key")
+        tora = Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
         tora.shutdown()
 
         with pytest.raises(ToraMetricError, match="closed Tora client"):
@@ -326,7 +359,7 @@ class TestToraFlushAndShutdown:
     @patch("tora._client.Tora._write_logs")
     def test_shutdown(self, mock_write_logs):
         """Test shutdown."""
-        tora = Tora("exp-123", api_key="test-key")
+        tora = Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
         tora.log("accuracy", 0.95)
 
         tora.shutdown()
@@ -336,7 +369,7 @@ class TestToraFlushAndShutdown:
 
     def test_shutdown_idempotent(self):
         """Test that shutdown can be called multiple times."""
-        tora = Tora("exp-123", api_key="test-key")
+        tora = Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
         tora.shutdown()
         tora.shutdown()  # Should not raise error
@@ -346,7 +379,7 @@ class TestToraFlushAndShutdown:
     @patch("tora._client.Tora._write_logs")
     def test_context_manager(self, mock_write_logs):
         """Test context manager usage."""
-        with Tora("exp-123", api_key="test-key") as tora:
+        with Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL) as tora:
             tora.log("accuracy", 0.95)
 
         # Should auto-shutdown
@@ -359,7 +392,7 @@ class TestToraProperties:
 
     def test_max_buffer_len_property(self):
         """Test max_buffer_len property."""
-        tora = Tora("exp-123", api_key="test-key")
+        tora = Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
         assert tora.max_buffer_len == 25
 
@@ -368,7 +401,7 @@ class TestToraProperties:
 
     def test_max_buffer_len_validation(self):
         """Test max_buffer_len validation."""
-        tora = Tora("exp-123", api_key="test-key")
+        tora = Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
         with pytest.raises(ToraValidationError, match="positive integer"):
             tora.max_buffer_len = 0
@@ -378,12 +411,12 @@ class TestToraProperties:
 
     def test_experiment_id_property(self):
         """Test experiment_id property."""
-        tora = Tora("exp-123", api_key="test-key")
+        tora = Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
         assert tora.experiment_id == "exp-123"
 
     def test_buffer_size_property(self):
         """Test buffer_size property."""
-        tora = Tora("exp-123", api_key="test-key")
+        tora = Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
         assert tora.buffer_size == 0
 
         tora.log("metric", 1.0)
@@ -391,7 +424,7 @@ class TestToraProperties:
 
     def test_is_closed_property(self):
         """Test is_closed property."""
-        tora = Tora("exp-123", api_key="test-key")
+        tora = Tora("exp-123", api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
         assert not tora.is_closed
 
         tora.shutdown()

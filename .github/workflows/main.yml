@@ -8,18 +8,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Pre-commit checks for all repositories
   precommit:
     name: "Code Quality Checks"
     uses: ./.github/workflows/precommit-trigger.yml
 
-  # Python SDK tests and build
   python-tests:
     name: "Python SDK Tests"
     uses: ./.github/workflows/python-tests.yml
     needs: precommit
 
-  # Summary job to provide overall status
   ci-summary:
     name: "CI Summary"
     runs-on: ubuntu-latest

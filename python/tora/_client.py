@@ -86,7 +86,7 @@ def create_workspace(
             raise ToraValidationError("Workspace description cannot exceed 1000 characters")
 
     server_url = server_url or TORA_BASE_URL
-    resolved_api_key = api_key or TORA_API_KEY
+    resolved_api_key = Tora._get_api_key(api_key)
 
     if not resolved_api_key:
         raise ToraAuthenticationError("API key is required to create a workspace")
