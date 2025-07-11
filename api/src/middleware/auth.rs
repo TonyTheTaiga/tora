@@ -37,12 +37,25 @@ impl IntoResponse for AuthError {
     }
 }
 
+pub fn protected_route<T>(method_router: MethodRouter<T>, pool: &sqlx::PgPool) -> MethodRouter<T>
+where
+    T: Clone + Send + Sync + 'static,
+{
+    method_router.layer(middleware::from_fn_with_state(
+        pool.clone(),
+        auth_middleware,
+    ))
+}
+
 pub async fn auth_middleware(
     headers: HeaderMap,
     State(pool): State<PgPool>,
     mut req: Request,
     next: Next,
 ) -> Result<Response, AuthError> {
+    /*
+    First check for API key
+    */
     if let Some(api_key) = extract_api_key(&headers) {
         match validate_api_key(pool, &api_key).await {
             Ok(authenticated_user) => {
@@ -53,6 +66,9 @@ pub async fn auth_middleware(
         }
     }
 
+    /*
+    Then check for access token
+    */
     if let Some(auth_header) = headers.get("authorization") {
         if let Ok(auth_str) = auth_header.to_str() {
             if let Some(token) = auth_str.strip_prefix("Bearer ") {
@@ -145,14 +161,4 @@ async fn validate_api_key(
             status_code: StatusCode::UNAUTHORIZED,
         }),
     }
-}
-
-pub fn protected_route<T>(method_router: MethodRouter<T>, pool: &sqlx::PgPool) -> MethodRouter<T>
-where
-    T: Clone + Send + Sync + 'static,
-{
-    method_router.layer(middleware::from_fn_with_state(
-        pool.clone(),
-        auth_middleware,
-    ))
 }

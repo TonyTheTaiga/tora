@@ -1,50 +1,80 @@
 import { env } from "$env/dynamic/public";
-import { error } from "@sveltejs/kit";
+import { error, type Cookies } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import type { SessionData } from "$lib/types";
 
 const RUST_API_BASE_URL = env.PUBLIC_API_BASE_URL;
 
-export const GET: RequestHandler = async ({ request, params, fetch }) => {
-  return proxyRequest(request, params.path, fetch);
+export const GET: RequestHandler = async ({
+  request,
+  params,
+  fetch,
+  cookies,
+}) => {
+  return proxyRequest(request, params.path, fetch, cookies);
 };
 
-export const POST: RequestHandler = async ({ request, params, fetch }) => {
-  return proxyRequest(request, params.path, fetch);
+export const POST: RequestHandler = async ({
+  request,
+  params,
+  fetch,
+  cookies,
+}) => {
+  return proxyRequest(request, params.path, fetch, cookies);
 };
 
-export const PUT: RequestHandler = async ({ request, params, fetch }) => {
-  return proxyRequest(request, params.path, fetch);
+export const PUT: RequestHandler = async ({
+  request,
+  params,
+  fetch,
+  cookies,
+}) => {
+  return proxyRequest(request, params.path, fetch, cookies);
 };
 
-export const DELETE: RequestHandler = async ({ request, params, fetch }) => {
-  return proxyRequest(request, params.path, fetch);
+export const DELETE: RequestHandler = async ({
+  request,
+  params,
+  fetch,
+  cookies,
+}) => {
+  return proxyRequest(request, params.path, fetch, cookies);
 };
 
-export const PATCH: RequestHandler = async ({ request, params, fetch }) => {
-  return proxyRequest(request, params.path, fetch);
+export const PATCH: RequestHandler = async ({
+  request,
+  params,
+  fetch,
+  cookies,
+}) => {
+  return proxyRequest(request, params.path, fetch, cookies);
 };
 
 async function proxyRequest(
   request: Request,
   path: string,
   fetch: typeof globalThis.fetch,
+  cookies: Cookies,
 ) {
   const url = new URL(request.url);
   const rustBackendUrl = `${RUST_API_BASE_URL}/api/${path}${url.search}`;
   const headers = new Headers(request.headers);
-  // Remove host header as it will be set automatically by the fetch to the backend
   headers.delete("host");
-
+  headers.delete("cookie");
+  const auth_token = cookies.get("tora_auth_token");
+  if (auth_token) {
+    const sessionJson = atob(auth_token);
+    const sessionData: SessionData = JSON.parse(sessionJson);
+    headers.set("Authorization", `Bearer ${sessionData.access_token}`);
+  }
   const options: RequestInit = {
     method: request.method,
     headers: headers,
-    // For GET/HEAD requests, body should be null
     body:
       request.method === "GET" || request.method === "HEAD"
         ? null
         : await request.arrayBuffer(),
   };
-
   try {
     const response = await fetch(rustBackendUrl, options);
 

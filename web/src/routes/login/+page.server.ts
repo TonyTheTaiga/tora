@@ -18,7 +18,6 @@ export const actions: Actions = {
         error: "Email and password are required",
       });
     }
-
     const response = await locals.apiClient.post<LoginResponse>("/api/login", {
       email,
       password,
