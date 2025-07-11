@@ -56,7 +56,7 @@ publish-test:  ## Publish to Test PyPI
 publish:  ## Publish to PyPI
 	twine upload dist/*
 
-pub-wheel: build check-build publish clean  ## Build and publish wheel (legacy target)
+pub-wheel: build-wheel check-build publish clean
 
 dev-setup:  ## Set up development environment
 	pip install -e ".[dev]"
