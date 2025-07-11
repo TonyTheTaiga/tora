@@ -252,6 +252,17 @@ pub async fn batch_create_metrics(
     Path(experiment_id): Path<String>,
     Json(request): Json<BatchCreateMetricsRequest>,
 ) -> impl IntoResponse {
+    if request.metrics.is_empty() {
+        return (
+            StatusCode::CREATED,
+            Json(Response::<String> {
+                status: 201,
+                data: None,
+            }),
+        )
+            .into_response();
+    }
+
     let user_uuid = match Uuid::parse_str(&user.id) {
         Ok(uuid) => uuid,
         Err(_) => {
@@ -333,33 +344,33 @@ pub async fn batch_create_metrics(
         }
     };
 
-    let mut created_metrics = Vec::new();
-    for metric_request in request.metrics {
-        let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-            "INSERT INTO metric (experiment_id, name, value, step, metadata) VALUES ($1, $2, $3, $4, $5) RETURNING id, experiment_id::text, name, value::float8, step::float8, metadata, created_at",
-        )
-        .bind(experiment_uuid)
-        .bind(&metric_request.name)
-        .bind(metric_request.value)
-        .bind(metric_request.step.map(|s| s as f64))
-        .bind(&metric_request.metadata)
-        .fetch_one(&mut *tx)
-        .await;
+    let names: Vec<String> = request.metrics.iter().map(|m| m.name.clone()).collect();
+    let values: Vec<f64> = request.metrics.iter().map(|m| m.value).collect();
+    let steps: Vec<Option<f64>> = request
+        .metrics
+        .iter()
+        .map(|m| m.step.map(|s| s as f64))
+        .collect();
+    let metadata_values: Vec<Option<serde_json::Value>> =
+        request.metrics.iter().map(|m| m.metadata.clone()).collect();
+    let result = sqlx::query(
+        r#"
+        INSERT INTO metric (experiment_id, name, value, step, metadata)
+        SELECT $1, unnest($2::text[]), unnest($3::float8[]), unnest($4::float8[]), unnest($5::jsonb[])
+        "#,
+    )
+    .bind(experiment_uuid)
+    .bind(&names)
+    .bind(&values)
+    .bind(&steps)
+    .bind(&metadata_values)
+    .execute(&mut *tx)
+    .await;
 
-        match result {
-            Ok((id, experiment_id, name, value, step, metadata, created_at)) => {
-                created_metrics.push(Metric {
-                    id,
-                    experiment_id,
-                    name,
-                    value,
-                    step: step.map(|s| s as i64),
-                    metadata,
-                    created_at,
-                });
-            }
-            Err(e) => {
-                eprintln!("Failed to create metric: {e}");
+    match result {
+        Ok(_) => {
+            if let Err(e) = tx.commit().await {
+                eprintln!("Failed to commit transaction: {e}");
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Json(Response {
@@ -370,18 +381,18 @@ pub async fn batch_create_metrics(
                     .into_response();
             }
         }
-    }
-
-    if let Err(e) = tx.commit().await {
-        eprintln!("Failed to commit transaction: {e}");
-        return (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(Response {
-                status: 500,
-                data: Some("Failed to create metrics".to_string()),
-            }),
-        )
-            .into_response();
+        Err(e) => {
+            eprintln!("Failed to create metrics: {e}");
+            let _ = tx.rollback().await;
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to create metrics".to_string()),
+                }),
+            )
+                .into_response();
+        }
     }
 
     (
@@ -429,7 +440,6 @@ pub async fn export_metrics_csv(
         }
     };
 
-    // Check if user has access to this experiment
     let access_check = sqlx::query_as::<_, (i64,)>(
         r#"
         SELECT COUNT(*) FROM experiment e

@@ -1,6 +1,7 @@
 use axum::Router;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
+use std::time::Duration;
 use tokio::signal;
 
 mod handlers;
@@ -12,7 +13,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pool = match env::var("DATABASE_URL") {
         Ok(database_url) => {
             PgPoolOptions::new()
-                .max_connections(5)
+                .max_connections(20) // Increase based on load
+                .min_connections(5)
+                .acquire_timeout(Duration::from_secs(30))
                 .connect(&database_url)
                 .await?
         }
