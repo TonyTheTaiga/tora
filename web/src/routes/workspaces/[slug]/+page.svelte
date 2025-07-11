@@ -11,8 +11,7 @@
     EditExperimentModal,
   } from "$lib/components/modals";
   import { PageHeader } from "$lib/components";
-  import ExperimentsListMobile from "./experiments-list-mobile.svelte";
-  import ExperimentsListDesktop from "./experiments-list-desktop.svelte";
+  import { ExperimentList } from "$lib/components/lists";
   import { Plus } from "@lucide/svelte";
   import { onMount } from "svelte";
 
@@ -26,21 +25,6 @@
   let createExperimentModal = $derived(getCreateExperimentModal());
   let editExperimentModal = $derived(getEditExperimentModal());
   let deleteExperimentModal = $derived(getDeleteExperimentModal());
-
-  let filteredExperiments = $derived(
-    experiments
-      .map((exp) => ({
-        exp,
-        name: exp.name.toLowerCase(),
-        desc: exp.description?.toLowerCase() ?? "",
-        tags: exp.tags?.map((t: string) => t.toLowerCase()) ?? [],
-      }))
-      .filter((entry) => {
-        const q = searchQuery.toLowerCase();
-        return entry.name.includes(q);
-      })
-      .map((e) => e.exp),
-  );
 
   function formatDate(date: Date): string {
     return date.toLocaleDateString("en-US", {
@@ -135,12 +119,7 @@
 
   <!-- Terminal-style experiments display -->
   <div class="px-4 md:px-6 font-mono">
-    {#if filteredExperiments.length === 0 && searchQuery}
-      <div class="text-ctp-subtext0 text-base">
-        <div>search "{searchQuery}"</div>
-        <div class="text-ctp-subtext1 ml-2">no results found</div>
-      </div>
-    {:else if experiments.length === 0}
+    {#if experiments.length === 0}
       <div class="space-y-3 text-base">
         <div class="text-ctp-subtext0 text-sm">
           no experiments found in this workspace
@@ -155,18 +134,7 @@
         </div>
       </div>
     {:else}
-      <ExperimentsListMobile experiments={filteredExperiments} {formatDate} />
-      <ExperimentsListDesktop experiments={filteredExperiments} {formatDate} />
-      <div
-        class="flex items-center text-sm text-ctp-subtext0 pt-2 border-t border-ctp-surface0/20 mt-4"
-      >
-        <div class="flex-1">
-          {filteredExperiments.length} experiment{filteredExperiments.length !==
-          1
-            ? "s"
-            : ""} total
-        </div>
-      </div>
+      <ExperimentList {experiments} {searchQuery} {formatDate} />
     {/if}
   </div>
 </div>

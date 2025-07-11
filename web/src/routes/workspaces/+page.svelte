@@ -5,7 +5,7 @@
   } from "$lib/state/app.svelte.js";
   import { CreateWorkspaceModal } from "$lib/components/modals";
   import { PageHeader } from "$lib/components";
-  import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
+  import { WorkspaceList } from "$lib/components/lists";
   import RecentActivity from "$lib/components/recent-activity.svelte";
   import { onMount } from "svelte";
 
@@ -15,16 +15,6 @@
   let recentExperiments = $derived(data.recentExperiments || []);
   let recentWorkspaces = $derived(data.recentWorkspaces);
   let searchQuery = $state("");
-
-  let filteredWorkspaces = $derived(
-    workspaces.filter((workspace) => {
-      const query = searchQuery.toLowerCase();
-      const searchableText =
-        `${workspace.name} ${workspace.description || ""}`.toLowerCase();
-
-      return query.split(" ").every((term) => searchableText.includes(term));
-    }),
-  );
 
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
 
@@ -102,88 +92,19 @@
 
   <!-- Terminal-style workspace display -->
   <div class="px-4 md:px-6 font-mono">
-    {#if filteredWorkspaces.length === 0 && searchQuery}
-      <div class="text-ctp-subtext0 text-base">
-        <div>search "{searchQuery}"</div>
-        <div class="text-ctp-subtext1 ml-2">no results found</div>
-      </div>
-    {:else}
-      <!-- File listing style layout -->
-      <div>
-        <table class="w-full table-fixed">
-          <thead>
-            <tr
-              class="text-sm text-ctp-subtext0 border-b border-ctp-surface0/20"
-            >
-              <th class="text-left py-2 w-4"></th>
-              <th class="text-left py-2">name</th>
-              <th class="text-right py-2 w-24">role</th>
-              <th class="text-right py-2 w-24">modified</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each filteredWorkspaces as workspace}
-              <tr
-                class="group text-base hover:bg-ctp-surface0/20 transition-colors"
-              >
-                <td class="py-2 px-1 w-4">
-                  <div class="text-ctp-green text-sm"></div>
-                </td>
-                <td class="py-2 px-1 min-w-0">
-                  <a href={`/workspaces/${workspace.id}`} class="block min-w-0">
-                    <div class="truncate text-ctp-text">
-                      <span
-                        class="group-hover:text-ctp-blue transition-colors font-medium"
-                      >
-                        {workspace.name}
-                      </span>
-                      {#if workspace.description}
-                        <span class="text-ctp-subtext1 text-sm">
-                          - {workspace.description}
-                        </span>
-                      {/if}
-                    </div>
-                  </a>
-                </td>
-                <td class="py-2 px-1 text-right text-sm text-ctp-subtext0 w-24">
-                  <WorkspaceRoleBadge role={workspace.role || "VIEWER"} />
-                </td>
-                <td class="py-2 px-1 text-right text-sm text-ctp-subtext0 w-24">
-                  {new Date(workspace.createdAt).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
+    <WorkspaceList {workspaces} {searchQuery} />
 
-        <!-- Summary line -->
-        <div
-          class="flex items-center text-sm text-ctp-subtext0 pt-2 border-t border-ctp-surface0/20"
-        >
-          <div class="flex-1">
-            {filteredWorkspaces.length} workspace{filteredWorkspaces.length !==
-            1
-              ? "s"
-              : ""} total
-          </div>
-        </div>
+    <!-- Recent activity section -->
+    <div class="mt-8 border-t border-ctp-surface0/20 pt-6">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="text-base text-ctp-text font-mono">recent activity</div>
       </div>
-
-      <!-- Recent activity section -->
-      <div class="mt-8 border-t border-ctp-surface0/20 pt-6">
-        <div class="flex items-center gap-2 mb-3">
-          <div class="text-base text-ctp-text font-mono">recent activity</div>
-        </div>
-        <div class="bg-ctp-surface0/10 p-4 text-sm">
-          <RecentActivity
-            experiments={recentExperiments}
-            workspaces={recentWorkspaces}
-          />
-        </div>
+      <div class="bg-ctp-surface0/10 p-4 text-sm">
+        <RecentActivity
+          experiments={recentExperiments}
+          workspaces={recentWorkspaces}
+        />
       </div>
-    {/if}
+    </div>
   </div>
 </div>
