@@ -12,8 +12,6 @@ use axum::{
 use sqlx::PgPool;
 use uuid::Uuid;
 
-// Types are now imported from crate::types
-
 pub async fn create_experiment(
     Extension(user): Extension<AuthenticatedUser>,
     State(pool): State<PgPool>,

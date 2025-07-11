@@ -5,8 +5,6 @@ use axum::{Extension, Json, extract::State, http::StatusCode, response::IntoResp
 use sqlx::PgPool;
 use uuid::Uuid;
 
-// Types are now imported from crate::types
-
 // Get dashboard overview with workspaces and recent experiments in a single call
 pub async fn get_dashboard_overview(
     Extension(user): Extension<AuthenticatedUser>,
