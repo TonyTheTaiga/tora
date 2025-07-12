@@ -12,7 +12,6 @@
   import { Trash2, Edit } from "@lucide/svelte";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
-  import TerminalCard from "./TerminalCard.svelte";
   import EmptyState from "./EmptyState.svelte";
 
   interface Props {
@@ -71,83 +70,177 @@
       .filter((exp) => selectedForComparison(exp.id))
       .map((exp) => exp.id),
   );
+
+  function isSelected(experimentId: string): boolean {
+    return selectedExperimentIds.includes(experimentId);
+  }
+
+  function formatTime(date: Date): string {
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  }
+
+  function getTimelineItemClass(experiment: Experiment): string {
+    const baseClass =
+      "group transition-colors cursor-pointer hover:bg-ctp-surface0/10 relative";
+    const selectedClass = isSelected(experiment.id)
+      ? "bg-ctp-blue/10 border-l-2 border-ctp-blue"
+      : "";
+
+    return `${baseClass} ${selectedClass}`.trim();
+  }
 </script>
 
 {#if filteredExperiments.length === 0 && searchQuery}
   <EmptyState type="search" {searchQuery} />
 {:else}
-  <TerminalCard
-    items={filteredExperiments}
-    selectedItems={selectedExperimentIds}
-  >
-    {#snippet children(experiment)}
-      <button
-        onclick={() => handleExperimentClick(experiment)}
-        class="flex items-center justify-between min-w-0 flex-1 group text-left"
-      >
-        <span
-          class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate"
+  <!-- Timeline/Activity Feed Layout -->
+  <div class="space-y-1 font-mono">
+    {#each filteredExperiments as experiment, index}
+      <!-- Timeline item with relative positioning for actions -->
+      <div class={getTimelineItemClass(experiment)}>
+        <!-- Main clickable area -->
+        <button
+          onclick={() => handleExperimentClick(experiment)}
+          class="w-full text-left"
         >
-          {experiment.name}
-        </span>
-        <div class="flex items-center gap-2 text-xs text-ctp-subtext0">
-          {#if experiment.tags && experiment.tags.length > 0}
-            <div class="flex items-center gap-1">
-              {#each experiment.tags.slice(0, 2) as tag}
-                <span
-                  class="text-[10px] bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-1 py-px"
-                >
-                  {tag}
-                </span>
-              {/each}
-              {#if experiment.tags.length > 2}
-                <span class="text-[10px] text-ctp-subtext0"
-                  >+{experiment.tags.length - 2}</span
-                >
+          <div class="flex gap-3 md:gap-4 p-3 md:p-4">
+            <!-- Timeline indicator -->
+            <div class="flex flex-col items-center flex-shrink-0">
+              <!-- Square dot instead of round -->
+              <div
+                class="w-2 h-2 transition-colors {isSelected(experiment.id)
+                  ? 'bg-ctp-blue'
+                  : 'bg-ctp-green'}"
+              ></div>
+              {#if index < filteredExperiments.length - 1}
+                <div
+                  class="w-px bg-ctp-surface0/30 flex-1 mt-2 min-h-[1rem]"
+                ></div>
               {/if}
             </div>
-            <span>|</span>
-          {/if}
-          <span>
-            {formatDate(experiment.createdAt)}
-          </span>
-        </div>
-      </button>
-    {/snippet}
 
-    {#snippet actions(experiment)}
-      <div class="flex items-center justify-end gap-1">
-        <button
-          onclick={(e) => {
-            e.stopPropagation();
-            openEditExperimentModal(experiment);
-          }}
-          class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-blue hover:border-ctp-blue/30 rounded-full p-1 text-sm transition-all"
-          title="edit experiment"
-        >
-          <Edit class="w-3 h-3" />
+            <!-- Content - Mobile-first responsive layout -->
+            <div class="flex-1 min-w-0">
+              <!-- Header: Name and date -->
+              <div
+                class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 mb-2"
+              >
+                <h3
+                  class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate"
+                >
+                  {experiment.name}
+                </h3>
+                <div
+                  class="flex items-center gap-2 text-xs text-ctp-subtext0 flex-shrink-0"
+                >
+                  <span>{formatDate(experiment.createdAt)}</span>
+                  <span class="hidden sm:inline text-ctp-subtext1"
+                    >{formatTime(experiment.createdAt)}</span
+                  >
+                </div>
+              </div>
+
+              <!-- Description -->
+              {#if experiment.description}
+                <p
+                  class="text-ctp-subtext1 text-sm mb-2 line-clamp-2 sm:line-clamp-none"
+                >
+                  {experiment.description}
+                </p>
+              {/if}
+
+              <!-- Tags and metadata - Stack on mobile -->
+              <div
+                class="flex flex-col sm:flex-row sm:items-center gap-2 text-xs"
+              >
+                <!-- Tags -->
+                {#if experiment.tags && experiment.tags.length > 0}
+                  <div class="flex items-center gap-1 flex-wrap">
+                    {#each experiment.tags.slice(0, 3) as tag}
+                      <span
+                        class="bg-ctp-surface0/30 text-ctp-subtext0 px-2 py-1 text-[10px]"
+                      >
+                        {tag}
+                      </span>
+                    {/each}
+                    {#if experiment.tags.length > 3}
+                      <span class="text-ctp-subtext1 text-[10px]">
+                        +{experiment.tags.length - 3}
+                      </span>
+                    {/if}
+                  </div>
+                {/if}
+
+                <!-- Metadata -->
+                <div class="flex items-center gap-2 text-ctp-subtext1">
+                  {#if experiment.hyperparams && experiment.hyperparams.length > 0}
+                    <span>
+                      {experiment.hyperparams.length} param{experiment
+                        .hyperparams.length !== 1
+                        ? "s"
+                        : ""}
+                    </span>
+                  {/if}
+
+                  {#if experiment.availableMetrics && experiment.availableMetrics.length > 0}
+                    {#if experiment.hyperparams && experiment.hyperparams.length > 0}
+                      <span>•</span>
+                    {/if}
+                    <span>
+                      {experiment.availableMetrics.length} metric{experiment
+                        .availableMetrics.length !== 1
+                        ? "s"
+                        : ""}
+                    </span>
+                  {/if}
+                </div>
+              </div>
+            </div>
+          </div>
         </button>
 
-        {#if canDeleteExperiment}
-          <button
-            onclick={(e) => {
-              e.stopPropagation();
-              openDeleteExperimentModal(experiment);
-            }}
-            class="bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-subtext0 hover:text-ctp-red hover:border-ctp-red/30 rounded-full p-1 text-sm transition-all"
-            title="delete experiment"
-          >
-            <Trash2 class="w-3 h-3" />
-          </button>
-        {/if}
+        <!-- Action buttons - Bottom row for both mobile and desktop -->
+        <div class="border-t border-ctp-surface0/20 px-3 py-2">
+          <div class="flex items-center justify-end gap-2">
+            <button
+              onclick={(e) => {
+                e.stopPropagation();
+                openEditExperimentModal(experiment);
+              }}
+              class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-blue/30 sm:p-1"
+              title="edit experiment"
+            >
+              <Edit class="w-3 h-3" />
+              <span class="sm:hidden">Edit</span>
+            </button>
+
+            {#if canDeleteExperiment}
+              <button
+                onclick={(e) => {
+                  e.stopPropagation();
+                  openDeleteExperimentModal(experiment);
+                }}
+                class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-red/30 sm:p-1"
+                title="delete experiment"
+              >
+                <Trash2 class="w-3 h-3" />
+                <span class="sm:hidden">Delete</span>
+              </button>
+            {/if}
+          </div>
+        </div>
       </div>
-    {/snippet}
-  </TerminalCard>
+    {/each}
+  </div>
 
   <!-- Summary line -->
   {#if showSummary}
     <div
-      class="flex items-center text-sm text-ctp-subtext0 pt-2 border-t border-ctp-surface0/20 mt-4"
+      class="flex items-center text-sm text-ctp-subtext0 pt-4 border-t border-ctp-surface0/20 mt-6"
     >
       <div class="flex-1">
         {filteredExperiments.length} experiment{filteredExperiments.length !== 1
