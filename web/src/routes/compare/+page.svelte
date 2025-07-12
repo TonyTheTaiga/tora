@@ -2,11 +2,12 @@
   import { onMount, onDestroy } from "svelte";
   import Chart from "chart.js/auto";
   import type { PageData } from "./$types";
-  import { Circle, ChevronDown } from "@lucide/svelte";
+  import { Circle } from "@lucide/svelte";
   import { reset } from "$lib/state/comparison.svelte.js";
   import { drawBarChart } from "./bar-chart.svelte";
   import { drawScatterChart } from "./scatter-chart.svelte";
   import { drawRadarChart } from "./radar-chart.svelte";
+  import { SearchDropdown } from "$lib/components";
   reset();
 
   let { data }: { data: PageData } = $props();
@@ -31,12 +32,6 @@
 
     return Array.from(intersection).sort();
   });
-
-  let filteredMetrics = $derived(
-    commonMetrics.filter((metric) =>
-      metric.toLowerCase().includes(searchFilter.toLowerCase()),
-    ),
-  );
 
   let chartType = $derived(() => {
     if (selectedMetrics.length === 1) return "bar";
@@ -119,22 +114,6 @@
     l = Math.min(1, l * lightnessAdjust);
 
     return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
-  }
-
-  function selectAllMetrics() {
-    selectedMetrics = [...commonMetrics];
-  }
-
-  function clearAllMetrics() {
-    selectedMetrics = [];
-  }
-
-  function toggleMetric(metric: string) {
-    if (selectedMetrics.includes(metric)) {
-      selectedMetrics = selectedMetrics.filter((m) => m !== metric);
-    } else {
-      selectedMetrics = [...selectedMetrics, metric];
-    }
   }
 
   let chartCanvas = $state<HTMLCanvasElement>();
@@ -348,69 +327,14 @@
       <div class="bg-ctp-surface0/10 border border-ctp-surface0/20">
         <!-- Metric Selector -->
         <div class="p-3 border-b border-ctp-surface0/20">
-          <details class="relative">
-            <summary
-              class="flex items-center justify-between cursor-pointer p-2 hover:bg-ctp-surface0/20 transition-colors text-sm"
-            >
-              <span class="text-ctp-text">
-                select metrics ({selectedMetrics.length}/{commonMetrics.length})
-              </span>
-              <ChevronDown size={12} class="text-ctp-subtext0" />
-            </summary>
-
-            <div
-              class="absolute top-full left-0 right-0 mt-1 z-10 max-h-60 overflow-y-auto border border-ctp-surface0/30 bg-ctp-mantle shadow-lg"
-            >
-              <!-- Search filter -->
-              <div class="p-2 border-b border-ctp-surface0/20">
-                <input
-                  type="search"
-                  placeholder="filter metrics..."
-                  bind:value={searchFilter}
-                  class="w-full bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
-                />
-              </div>
-
-              <!-- Control buttons -->
-              <div class="flex gap-2 p-2 border-b border-ctp-surface0/20">
-                <button
-                  onclick={selectAllMetrics}
-                  class="px-2 py-1 text-sm bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 transition-all"
-                >
-                  all
-                </button>
-                <button
-                  onclick={clearAllMetrics}
-                  class="px-2 py-1 text-sm bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 transition-all"
-                >
-                  clear
-                </button>
-              </div>
-
-              <!-- Metric checkboxes -->
-              <div class="p-1">
-                {#each filteredMetrics as metric}
-                  <label
-                    class="flex items-center gap-2 p-1 hover:bg-ctp-surface0/20 cursor-pointer text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedMetrics.includes(metric)}
-                      onchange={() => toggleMetric(metric)}
-                      class="text-ctp-blue focus:ring-ctp-blue focus:ring-1 w-3 h-3"
-                    />
-                    <span class="text-ctp-text">{metric}</span>
-                  </label>
-                {/each}
-
-                {#if filteredMetrics.length === 0}
-                  <div class="p-2 text-sm text-ctp-subtext0 text-center">
-                    no metrics found
-                  </div>
-                {/if}
-              </div>
-            </div>
-          </details>
+          <SearchDropdown
+            items={commonMetrics}
+            bind:selectedItems={selectedMetrics}
+            bind:searchQuery={searchFilter}
+            getItemText={(metric) => metric}
+            itemTypeName="metrics"
+            placeholder="filter metrics..."
+          />
         </div>
 
         <div class="p-4">

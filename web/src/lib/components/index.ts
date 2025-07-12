@@ -7,3 +7,6 @@ export { default as SimpleLandingPage } from "./simple-landing-page.svelte";
 
 // List components
 export * from "./lists";
+
+// Search components
+export * from "./search";

@@ -4,10 +4,9 @@
     getCreateWorkspaceModal,
   } from "$lib/state/app.svelte.js";
   import { CreateWorkspaceModal } from "$lib/components/modals";
-  import { PageHeader } from "$lib/components";
+  import { PageHeader, SearchInput } from "$lib/components";
   import { WorkspaceList } from "$lib/components/lists";
   import RecentActivity from "$lib/components/recent-activity.svelte";
-  import { onMount } from "svelte";
 
   let { data } = $props();
   let { workspaces } = $derived(data);
@@ -17,24 +16,6 @@
   let searchQuery = $state("");
 
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
-
-  const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === "/") {
-      event.preventDefault();
-      const searchElement = document.querySelector<HTMLInputElement>(
-        'input[type="search"]',
-      );
-      searchElement?.focus();
-    }
-  };
-
-  onMount(() => {
-    window.addEventListener("keydown", handleKeydown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeydown);
-    };
-  });
 </script>
 
 {#if createWorkspaceModal}
@@ -73,22 +54,11 @@
   </PageHeader>
 
   <!-- Search and filter bar -->
-  <div class="px-4 md:px-6 py-4">
-    <div class="max-w-lg">
-      <div
-        class="flex items-center bg-ctp-surface0/20 focus-within:ring-1 focus-within:ring-ctp-text/20 transition-all"
-      >
-        <span class="text-ctp-subtext0 font-mono text-sm px-4 py-3">/</span>
-        <input
-          id="workspace-search"
-          type="search"
-          placeholder="search workspaces..."
-          bind:value={searchQuery}
-          class="flex-1 bg-transparent border-0 py-3 pr-4 text-ctp-text placeholder-ctp-subtext0 focus:outline-none font-mono text-base"
-        />
-      </div>
-    </div>
-  </div>
+  <SearchInput
+    bind:value={searchQuery}
+    placeholder="search workspaces..."
+    id="workspace-search"
+  />
 
   <!-- Terminal-style workspace display -->
   <div class="px-4 md:px-6 font-mono">
