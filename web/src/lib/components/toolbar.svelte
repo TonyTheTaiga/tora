@@ -206,7 +206,7 @@
 
       {#if !isComparisonMode}
         <button
-          class="p-3 hover:bg-ctp-surface0/50 transition-all duration-400 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+          class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-400 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
           title="Enter Comparison Mode"
           onclick={() => {
             toggleMode();
