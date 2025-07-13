@@ -25,7 +25,7 @@
     additionalInfoTitle="click to copy experiment id"
   />
 
-  <div class="p-4 md:p-6 space-y-4 md:space-y-6">
+  <div class="p-2 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-6">
     <ExperimentMetrics
       {experiment}
       {scalarMetrics}

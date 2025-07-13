@@ -436,18 +436,36 @@
 
   /* Layered spacing utilities */
   .layer-spacing-sm {
-    padding: 0.75rem;
+    padding: 0.5rem;
     margin: 0.5rem 0;
   }
 
+  @media (min-width: 640px) {
+    .layer-spacing-sm {
+      padding: 0.75rem;
+    }
+  }
+
   .layer-spacing-md {
-    padding: 1.25rem;
+    padding: 0.75rem;
     margin: 1rem 0;
   }
 
+  @media (min-width: 640px) {
+    .layer-spacing-md {
+      padding: 1.25rem;
+    }
+  }
+
   .layer-spacing-lg {
-    padding: 2rem;
+    padding: 1rem;
     margin: 1.5rem 0;
+  }
+
+  @media (min-width: 640px) {
+    .layer-spacing-lg {
+      padding: 2rem;
+    }
   }
 
   /* Stacked content effect */
@@ -541,6 +559,61 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  /* Mobile-specific optimizations */
+  @media (max-width: 640px) {
+    /* Reduce section divider margins on mobile */
+    .section-divider {
+      margin: 1.5rem 0;
+    }
+
+    /* Tighter spacing for mobile content */
+    .mobile-tight {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    /* Smaller text on mobile for better space utilization */
+    .mobile-text-sm {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+
+    /* Reduce gap between elements on mobile */
+    .mobile-gap-sm {
+      gap: 0.5rem;
+    }
+  }
+
+  /* Responsive container with minimal mobile padding */
+  .container-responsive {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-responsive {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container-responsive {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-responsive {
+      padding-left: 2rem;
+      padding-right: 2rem;
     }
   }
 }
