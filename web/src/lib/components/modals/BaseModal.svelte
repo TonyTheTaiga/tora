@@ -32,6 +32,7 @@
       class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/20"
     >
       <div class="flex items-center gap-3">
+        <div class="w-1 h-5 bg-ctp-blue"></div>
         <h3 id="modal-title" class="text-lg font-bold text-ctp-text">
           {title}
         </h3>

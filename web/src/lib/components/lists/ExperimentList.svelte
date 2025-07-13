@@ -83,9 +83,9 @@
 
   function getTimelineItemClass(experiment: Experiment): string {
     const baseClass =
-      "group transition-colors cursor-pointer hover:bg-ctp-surface0/10 relative";
+      "group transition-colors cursor-pointer hover:bg-ctp-surface0/5 relative mb-1 border border-transparent hover:border-ctp-surface0/8 border-l-2 hover:border-l-ctp-blue/30";
     const selectedClass = isSelected(experiment.id)
-      ? "bg-ctp-blue/10 border-l-2 border-ctp-blue"
+      ? "!bg-ctp-blue/5 !border-l-ctp-blue"
       : "";
 
     return `${baseClass} ${selectedClass}`.trim();

@@ -85,7 +85,7 @@
   <SearchInput bind:value={searchQuery} placeholder="search experiments..." />
 
   <!-- Terminal-style experiments display -->
-  <div class="px-4 md:px-6 font-mono">
+  <div class="font-mono">
     {#if experiments.length === 0}
       <div class="space-y-3 text-base">
         <div class="text-ctp-subtext0 text-sm">

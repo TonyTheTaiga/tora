@@ -212,4 +212,36 @@
     -webkit-line-clamp: 2;
     overflow: hidden;
   }
+
+  /* Subtle Layering - Very Minimal */
+  .subtle-surface {
+    background: color-mix(in srgb, var(--color-ctp-surface0) 2%, transparent);
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 6%, transparent);
+  }
+
+  .subtle-elevated {
+    background: color-mix(in srgb, var(--color-ctp-surface0) 4%, transparent);
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 10%, transparent);
+  }
+
+  /* Minimal Section Dividers */
+  .section-divider {
+    border-top: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
+    margin: 1.5rem 0;
+  }
+
+  .section-divider::before {
+    content: attr(data-label);
+    position: relative;
+    top: -0.5rem;
+    background: var(--color-ctp-base);
+    padding: 0 0.75rem;
+    font-size: 0.75rem;
+    color: var(--color-ctp-subtext0);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
 }

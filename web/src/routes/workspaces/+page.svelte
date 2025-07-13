@@ -69,7 +69,7 @@
       <div class="flex items-center gap-2 mb-3">
         <div class="text-base text-ctp-text font-mono">recent activity</div>
       </div>
-      <div class="bg-ctp-surface0/10 p-4 text-sm">
+      <div class="subtle-surface p-4 text-sm">
         <RecentActivity
           experiments={recentExperiments}
           workspaces={recentWorkspaces}

@@ -7,7 +7,7 @@
   import { drawBarChart } from "./bar-chart.svelte";
   import { drawScatterChart } from "./scatter-chart.svelte";
   import { drawRadarChart } from "./radar-chart.svelte";
-  import { SearchDropdown } from "$lib/components";
+  import { SearchDropdown, PageHeader } from "$lib/components";
   reset();
 
   let { data }: { data: PageData } = $props();
@@ -211,27 +211,10 @@
 
 <div class="font-mono">
   <!-- Header -->
-  <div
-    class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/10"
-  >
-    <div
-      class="flex items-stretch gap-3 md:gap-4 min-w-0 flex-1 pr-4 min-h-fit"
-    >
-      <div
-        class="w-2 bg-ctp-blue rounded-full flex-shrink-0 self-stretch"
-      ></div>
-      <div class="min-w-0 flex-1 py-1">
-        <h1 class="text-lg md:text-xl text-ctp-text truncate font-mono">
-          Experiment Comparison
-        </h1>
-        <div class="text-sm text-ctp-subtext0 space-y-1">
-          <div>
-            {data.experiments?.length || 0} experiments selected
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <PageHeader
+    title="Experiment Comparison"
+    subtitle="{data.experiments?.length || 0} experiments selected"
+  />
 
   <div class="px-4 md:px-6 py-6 space-y-6">
     <!-- Legend -->

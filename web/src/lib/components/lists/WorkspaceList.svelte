@@ -57,7 +57,7 @@
     {#each filteredWorkspaces as workspace}
       <!-- Workspace item with relative positioning for actions -->
       <div
-        class="group relative hover:bg-ctp-surface0/10 transition-colors border-l-2 border-transparent hover:border-ctp-blue/30"
+        class="group relative transition-colors hover:bg-ctp-surface0/5 border border-transparent hover:border-ctp-surface0/8 border-l-2 hover:border-l-ctp-blue/30 mb-1"
       >
         <!-- Main clickable area -->
         <a href={`/workspaces/${workspace.id}`} class="block p-3 md:p-4">
