@@ -1,10 +1,11 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
   import Chart from "chart.js/auto";
-  import { ChartLine, ChevronDown } from "@lucide/svelte";
+  import { ChartLine } from "@lucide/svelte";
   import { onMount, onDestroy } from "svelte";
   import { startTimer } from "$lib/utils/timing";
   import { browser } from "$app/environment";
+  import { SearchDropdown } from "$lib/components";
 
   const MAX_DATA_POINTS_TO_RENDER = 100;
   const CHART_COLOR_KEYS = [
@@ -32,7 +33,6 @@
 
   let chartInstance: Chart | null = null;
   let chartCanvas: HTMLCanvasElement | null = $state(null);
-  let detailsElement: HTMLDetailsElement | null = $state(null);
 
   interface ExperimentWithMetricData extends Experiment {
     metricData?: Record<string, number[]>;
@@ -46,29 +46,8 @@
   let chartTheme = $state(getTheme());
 
   const availableMetrics = $derived.by(() => experiment.availableMetrics || []);
-  const filteredMetrics = $derived.by(() =>
-    availableMetrics.filter((metric) =>
-      metric.toLowerCase().includes(searchFilter.toLowerCase()),
-    ),
-  );
 
   const chartOptions = $derived.by(() => getChartOptions(chartTheme));
-
-  function selectAllMetrics() {
-    selectedMetrics = [...availableMetrics];
-  }
-
-  function clearAllMetrics() {
-    selectedMetrics = [];
-  }
-
-  function toggleMetricCheckbox(metric: string) {
-    if (selectedMetrics.includes(metric)) {
-      selectedMetrics = selectedMetrics.filter((m) => m !== metric);
-    } else {
-      selectedMetrics = [...selectedMetrics, metric];
-    }
-  }
 
   function getTheme() {
     if (!browser) {
@@ -246,41 +225,6 @@
     }
   }
 
-  function handleKeydown(event: KeyboardEvent) {
-    if (
-      event.target instanceof HTMLInputElement ||
-      event.target instanceof HTMLTextAreaElement
-    ) {
-      return;
-    }
-
-    switch (event.key) {
-      case "m":
-        if (detailsElement) {
-          event.preventDefault();
-          detailsElement.open = !detailsElement.open;
-        }
-        break;
-
-      case "/":
-        if (detailsElement?.open) {
-          event.preventDefault();
-          const searchInput = detailsElement.querySelector<HTMLInputElement>(
-            'input[type="search"]',
-          );
-          searchInput?.focus();
-        }
-        break;
-
-      case "Escape":
-        if (detailsElement?.open) {
-          event.preventDefault();
-          detailsElement.open = false;
-        }
-        break;
-    }
-  }
-
   onMount(() => {
     const handleThemeChange = () => {
       chartTheme = getTheme();
@@ -308,28 +252,11 @@
       attributeFilter: ["class"],
     });
 
-    window.addEventListener("keydown", handleKeydown);
-
     return () => {
       mediaQuery.removeEventListener("change", handleThemeChange);
-      window.removeEventListener("keydown", handleKeydown);
       observer.disconnect();
       destroyChart();
     };
-  });
-
-  $effect(() => {
-    const el = detailsElement;
-    if (!el) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (el && !el.contains(event.target as Node)) {
-        el.open = false;
-      }
-    };
-
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
   });
 
   $effect(() => {
@@ -354,76 +281,14 @@
   <!-- Metric Selector -->
   {#if availableMetrics.length > 0}
     <div class="mb-4">
-      <details class="relative" bind:this={detailsElement}>
-        <summary
-          class="flex items-center justify-between cursor-pointer p-2 md:p-3 bg-ctp-surface0/20 border border-ctp-surface0/30 hover:bg-ctp-surface0/30 transition-colors text-sm md:text-sm"
-        >
-          <span class="text-ctp-text">
-            select metrics ({selectedMetrics.length}/{availableMetrics.length})
-          </span>
-          <ChevronDown size={12} class="text-ctp-subtext0 md:w-4 md:h-4" />
-        </summary>
-
-        <div
-          class="absolute top-full left-0 right-0 mt-1 bg-ctp-mantle border border-ctp-surface0/30 shadow-lg z-10 max-h-60 overflow-y-auto"
-        >
-          <!-- Search filter -->
-          <div class="p-2 border-b border-ctp-surface0/20">
-            <div
-              class="flex items-center bg-ctp-surface0/20 border border-ctp-surface0/30 focus-within:ring-1 focus-within:ring-ctp-blue focus-within:border-ctp-blue transition-all"
-            >
-              <span class="text-ctp-subtext0 font-mono text-xs px-2 py-1"
-                >/</span
-              >
-              <input
-                type="search"
-                placeholder=""
-                bind:value={searchFilter}
-                class="flex-1 bg-transparent border-0 py-1 pr-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none font-mono text-base"
-              />
-            </div>
-          </div>
-
-          <!-- Control buttons -->
-          <div class="flex gap-2 p-2 border-b border-ctp-surface0/20">
-            <button
-              onclick={selectAllMetrics}
-              class="px-2 py-1 text-xs bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-green hover:bg-ctp-green/10 hover:border-ctp-green/30 transition-all"
-            >
-              all
-            </button>
-            <button
-              onclick={clearAllMetrics}
-              class="px-2 py-1 text-xs bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 transition-all"
-            >
-              clear
-            </button>
-          </div>
-
-          <!-- Metric checkboxes -->
-          <div class="p-1">
-            {#each filteredMetrics as metric}
-              <label
-                class="flex items-center gap-2 p-1 hover:bg-ctp-surface0/20 cursor-pointer text-sm"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedMetrics.includes(metric)}
-                  onchange={() => toggleMetricCheckbox(metric)}
-                  class="text-ctp-blue focus:ring-ctp-blue focus:ring-1 w-3 h-3"
-                />
-                <span class="text-ctp-text">{metric}</span>
-              </label>
-            {/each}
-
-            {#if filteredMetrics.length === 0}
-              <div class="p-2 text-xs text-ctp-subtext0 text-center">
-                no metrics found
-              </div>
-            {/if}
-          </div>
-        </div>
-      </details>
+      <SearchDropdown
+        items={availableMetrics}
+        bind:selectedItems={selectedMetrics}
+        bind:searchQuery={searchFilter}
+        getItemText={(metric) => metric}
+        itemTypeName="metrics"
+        placeholder=""
+      />
     </div>
   {/if}
 

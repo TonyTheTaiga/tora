@@ -4,10 +4,9 @@
     getCreateWorkspaceModal,
   } from "$lib/state/app.svelte.js";
   import { CreateWorkspaceModal } from "$lib/components/modals";
-  import { PageHeader } from "$lib/components";
-  import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
+  import { PageHeader, SearchInput } from "$lib/components";
+  import { WorkspaceList } from "$lib/components/lists";
   import RecentActivity from "$lib/components/recent-activity.svelte";
-  import { onMount } from "svelte";
 
   let { data } = $props();
   let { workspaces } = $derived(data);
@@ -16,35 +15,7 @@
   let recentWorkspaces = $derived(data.recentWorkspaces);
   let searchQuery = $state("");
 
-  let filteredWorkspaces = $derived(
-    workspaces.filter((workspace) => {
-      const query = searchQuery.toLowerCase();
-      const searchableText =
-        `${workspace.name} ${workspace.description || ""}`.toLowerCase();
-
-      return query.split(" ").every((term) => searchableText.includes(term));
-    }),
-  );
-
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
-
-  const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === "/") {
-      event.preventDefault();
-      const searchElement = document.querySelector<HTMLInputElement>(
-        'input[type="search"]',
-      );
-      searchElement?.focus();
-    }
-  };
-
-  onMount(() => {
-    window.addEventListener("keydown", handleKeydown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeydown);
-    };
-  });
 </script>
 
 {#if createWorkspaceModal}
@@ -60,7 +31,7 @@
     {#snippet actionButton()}
       <button
         onclick={() => openCreateWorkspaceModal()}
-        class="group relative bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-text hover:bg-ctp-surface0/30 hover:border-ctp-surface0/50 px-3 py-2 md:px-4 text-sm font-mono transition-all flex-shrink-0"
+        class="floating-element text-ctp-text px-3 py-2 md:px-4 text-sm font-mono flex-shrink-0"
       >
         <div class="flex items-center gap-2">
           <svg
@@ -83,107 +54,23 @@
   </PageHeader>
 
   <!-- Search and filter bar -->
-  <div class="px-4 md:px-6 py-4">
-    <div class="max-w-lg">
-      <div
-        class="flex items-center bg-ctp-surface0/20 focus-within:ring-1 focus-within:ring-ctp-text/20 transition-all"
-      >
-        <span class="text-ctp-subtext0 font-mono text-sm px-4 py-3">/</span>
-        <input
-          id="workspace-search"
-          type="search"
-          placeholder="search workspaces..."
-          bind:value={searchQuery}
-          class="flex-1 bg-transparent border-0 py-3 pr-4 text-ctp-text placeholder-ctp-subtext0 focus:outline-none font-mono text-base"
-        />
-      </div>
-    </div>
-  </div>
+  <SearchInput
+    bind:value={searchQuery}
+    placeholder="search workspaces..."
+    id="workspace-search"
+  />
 
   <!-- Terminal-style workspace display -->
-  <div class="px-4 md:px-6 font-mono">
-    {#if filteredWorkspaces.length === 0 && searchQuery}
-      <div class="text-ctp-subtext0 text-base">
-        <div>search "{searchQuery}"</div>
-        <div class="text-ctp-subtext1 ml-2">no results found</div>
-      </div>
-    {:else}
-      <!-- File listing style layout -->
-      <div>
-        <table class="w-full table-fixed">
-          <thead>
-            <tr
-              class="text-sm text-ctp-subtext0 border-b border-ctp-surface0/20"
-            >
-              <th class="text-left py-2 w-4"></th>
-              <th class="text-left py-2">name</th>
-              <th class="text-right py-2 w-24">role</th>
-              <th class="text-right py-2 w-24">modified</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each filteredWorkspaces as workspace}
-              <tr
-                class="group text-base hover:bg-ctp-surface0/20 transition-colors"
-              >
-                <td class="py-2 px-1 w-4">
-                  <div class="text-ctp-green text-sm"></div>
-                </td>
-                <td class="py-2 px-1 min-w-0">
-                  <a href={`/workspaces/${workspace.id}`} class="block min-w-0">
-                    <div class="truncate text-ctp-text">
-                      <span
-                        class="group-hover:text-ctp-blue transition-colors font-medium"
-                      >
-                        {workspace.name}
-                      </span>
-                      {#if workspace.description}
-                        <span class="text-ctp-subtext1 text-sm">
-                          - {workspace.description}
-                        </span>
-                      {/if}
-                    </div>
-                  </a>
-                </td>
-                <td class="py-2 px-1 text-right text-sm text-ctp-subtext0 w-24">
-                  <WorkspaceRoleBadge role={workspace.role || "VIEWER"} />
-                </td>
-                <td class="py-2 px-1 text-right text-sm text-ctp-subtext0 w-24">
-                  {new Date(workspace.createdAt).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
+  <div class="font-mono">
+    <WorkspaceList {workspaces} {searchQuery} />
 
-        <!-- Summary line -->
-        <div
-          class="flex items-center text-sm text-ctp-subtext0 pt-2 border-t border-ctp-surface0/20"
-        >
-          <div class="flex-1">
-            {filteredWorkspaces.length} workspace{filteredWorkspaces.length !==
-            1
-              ? "s"
-              : ""} total
-          </div>
-        </div>
-      </div>
-
-      <!-- Recent activity section -->
-      <div class="mt-8 border-t border-ctp-surface0/20 pt-6">
-        <div class="flex items-center gap-2 mb-3">
-          <div class="text-base text-ctp-text font-mono">recent activity</div>
-        </div>
-        <div class="bg-ctp-surface0/10 p-4 text-sm">
-          <RecentActivity
-            experiments={recentExperiments}
-            workspaces={recentWorkspaces}
-          />
-        </div>
-      </div>
-    {/if}
+    <!-- Recent activity section -->
+    <div class="section-divider" data-label="recent activity"></div>
+    <div class="surface-elevated layer-spacing-md stack-layer">
+      <RecentActivity
+        experiments={recentExperiments}
+        workspaces={recentWorkspaces}
+      />
+    </div>
   </div>
 </div>

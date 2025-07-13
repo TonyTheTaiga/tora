@@ -42,49 +42,93 @@
 
   let visible = $state(true);
   let lastScrollY = $state(0);
+  let isScrolling = $state(false);
+  let scrollTimeout: number | undefined;
+
   const scrollThreshold = 10;
+  const hideDelay = 150; // ms to wait before hiding after scroll stops
+
+  const updateVisibility = (
+    currentScrollY: number,
+    documentHeight: number,
+    windowHeight: number,
+  ) => {
+    const hasScroll = documentHeight > windowHeight;
+    const scrollDelta = currentScrollY - lastScrollY;
+    const scrollDistance = Math.abs(scrollDelta);
+
+    // Always show if no scroll is possible
+    if (!hasScroll) {
+      return true;
+    }
+
+    // Always show at the very top (with small buffer for rubber banding)
+    if (currentScrollY <= 5) {
+      return true;
+    }
+
+    // Hide when at bottom (with small buffer)
+    const atBottom = windowHeight + currentScrollY >= documentHeight - 5;
+    if (atBottom) {
+      return false;
+    }
+
+    // Only change visibility if scroll distance exceeds threshold
+    if (scrollDistance > scrollThreshold) {
+      // Show when scrolling up, hide when scrolling down
+      return scrollDelta < 0;
+    }
+
+    // Keep current state if scroll distance is below threshold
+    return visible;
+  };
 
   const handleScroll = () => {
-    if (typeof window !== "undefined" && typeof document !== "undefined") {
-      const currentScrollY = window.scrollY;
-      const documentHeight = document.documentElement.scrollHeight;
-      const windowHeight = window.innerHeight;
-      const hasScroll = documentHeight > windowHeight;
-
-      if (!hasScroll) {
-        visible = true;
-        lastScrollY = Math.max(0, currentScrollY); // Clamp to 0 to ignore rubber banding
-        return;
-      }
-
-      const atBottom = windowHeight + currentScrollY >= documentHeight - 1;
-
-      if (atBottom) {
-        visible = false;
-        lastScrollY = currentScrollY;
-        return;
-      }
-
-      // At top or during rubber band effect (negative scroll)
-      if (currentScrollY <= 0) {
-        visible = true;
-        lastScrollY = Math.max(0, currentScrollY); // Clamp to 0 to ignore rubber banding
-        return;
-      }
-
-      if (Math.abs(currentScrollY - lastScrollY) > scrollThreshold) {
-        visible = currentScrollY < lastScrollY;
-      }
-
-      lastScrollY = currentScrollY;
+    if (typeof window === "undefined" || typeof document === "undefined") {
+      return;
     }
+
+    const currentScrollY = Math.max(0, window.scrollY); // Clamp to prevent negative values
+    const documentHeight = document.documentElement.scrollHeight;
+    const windowHeight = window.innerHeight;
+
+    // Update visibility based on scroll behavior
+    const newVisibility = updateVisibility(
+      currentScrollY,
+      documentHeight,
+      windowHeight,
+    );
+
+    // Only update if visibility actually changed
+    if (newVisibility !== visible) {
+      visible = newVisibility;
+    }
+
+    lastScrollY = currentScrollY;
+    isScrolling = true;
+
+    // Clear existing timeout
+    if (scrollTimeout) {
+      clearTimeout(scrollTimeout);
+    }
+
+    // Set timeout to detect when scrolling stops
+    scrollTimeout = setTimeout(() => {
+      isScrolling = false;
+      // Show toolbar briefly when scrolling stops (unless at bottom)
+      const atBottom = windowHeight + currentScrollY >= documentHeight - 5;
+      if (!atBottom && currentScrollY > 5) {
+        visible = true;
+      }
+    }, hideDelay);
   };
 
   onMount(() => {
     if (typeof window !== "undefined") {
-      lastScrollY = window.scrollY;
+      lastScrollY = Math.max(0, window.scrollY);
       window.addEventListener("scroll", handleScroll, { passive: true });
       window.addEventListener("resize", handleScroll);
+      // Initial call to set correct state
       handleScroll();
     }
   });
@@ -94,16 +138,19 @@
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     }
+    if (scrollTimeout) {
+      clearTimeout(scrollTimeout);
+    }
   });
 </script>
 
 <div
-  class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 transition-all duration-300 {visible
-    ? 'opacity-100'
-    : 'opacity-0 translate-y-full pointer-events-none'}"
+  class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 transition-all {visible
+    ? 'opacity-100 translate-y-0 duration-200 ease-out'
+    : 'opacity-0 translate-y-full pointer-events-none duration-300 ease-in'}"
 >
   <div
-    class="flex items-center bg-ctp-surface1/30 backdrop-blur-xl border border-ctp-surface0/20 rounded-full p-1 shadow-2xl hover:bg-ctp-surface1/40 hover:scale-105 transition-all duration-200"
+    class="flex items-center surface-glass-elevated rounded-full p-1 hover:scale-105 transition-all duration-200"
   >
     <style>
       @keyframes slideInRight {
@@ -148,7 +195,7 @@
 
     {#if isWorkspacePage}
       <button
-        class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+        class="p-3 hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
         title="Create a new experiment"
         onclick={() => {
           openCreateExperimentModal();
@@ -159,7 +206,7 @@
 
       {#if !isComparisonMode}
         <button
-          class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+          class="p-3 hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
           title="Enter Comparison Mode"
           onclick={() => {
             toggleMode();

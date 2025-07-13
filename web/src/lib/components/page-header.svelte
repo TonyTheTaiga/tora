@@ -26,7 +26,7 @@
   class="flex items-center justify-between p-4 md:p-6 border-b border-ctp-surface0/10"
 >
   <div class="flex items-stretch gap-3 md:gap-4 min-w-0 flex-1 pr-4 min-h-fit">
-    <div class="w-2 bg-ctp-blue rounded-full flex-shrink-0 self-stretch"></div>
+    <div class="w-1 bg-ctp-blue flex-shrink-0 self-stretch"></div>
     <div class="min-w-0 flex-1 py-1">
       <h1 class="text-lg md:text-xl text-ctp-text truncate font-mono">
         {title}
