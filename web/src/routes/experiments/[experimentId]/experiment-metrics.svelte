@@ -86,7 +86,7 @@
         <div
           class="flex text-sm text-ctp-subtext0 p-3 border-b border-ctp-surface0/20 sticky top-0"
         >
-          <div class="w-4">•</div>
+          <div class="w-4"></div>
           <div class="flex-1">metric</div>
           <div class="w-20 text-right">value</div>
         </div>

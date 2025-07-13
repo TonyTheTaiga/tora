@@ -16,7 +16,7 @@
   <button
     onclick={onCancel}
     type="button"
-    class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-lavender hover:bg-ctp-lavender/10 hover:border-ctp-lavender/30 hover:text-ctp-lavender px-3 py-2 text-sm transition-all"
+    class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text px-3 py-2 text-sm transition-all"
   >
     {cancelText}
   </button>

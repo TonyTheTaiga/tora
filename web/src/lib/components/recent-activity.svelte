@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Experiment, Workspace } from "$lib/types";
+  import { Activity, FolderOpen } from "@lucide/svelte";
 
   interface Props {
     experiments: Experiment[];
@@ -8,7 +9,38 @@
 
   let { experiments, workspaces }: Props = $props();
 
-  let activeTab = $state<"experiments" | "workspaces">("experiments");
+  let timelineItems = $derived.by(() => {
+    const items: Array<{
+      id: string;
+      name: string;
+      createdAt: Date;
+      type: "experiment" | "workspace";
+      workspaceId?: string;
+    }> = [];
+
+    experiments.forEach((exp) => {
+      items.push({
+        id: exp.id,
+        name: exp.name,
+        createdAt: exp.createdAt,
+        type: "experiment",
+        workspaceId: exp.workspaceId,
+      });
+    });
+
+    workspaces.forEach((ws) => {
+      items.push({
+        id: ws.id,
+        name: ws.name,
+        createdAt: ws.createdAt,
+        type: "workspace",
+      });
+    });
+
+    return items
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, 8);
+  });
 
   function formatDate(date: Date): string {
     return date.toLocaleDateString("en-US", {
@@ -29,92 +61,80 @@
 </script>
 
 <div class="space-y-1 font-mono text-sm">
-  <div class="flex gap-4 text-ctp-subtext0 mb-2">
-    <button
-      onclick={() => (activeTab = "experiments")}
-      class="transition-colors {activeTab === 'experiments'
-        ? 'text-ctp-blue'
-        : 'hover:text-ctp-text'}"
-    >
-      [experiments]
-    </button>
-    <button
-      onclick={() => (activeTab = "workspaces")}
-      class="transition-colors {activeTab === 'workspaces'
-        ? 'text-ctp-blue'
-        : 'hover:text-ctp-text'}"
-    >
-      [workspaces]
-    </button>
-  </div>
+  {#if timelineItems.length === 0}
+    <div class="px-1 py-2 text-ctp-subtext0">no recent activity</div>
+  {:else}
+    {#each timelineItems as item}
+      {@const href =
+        item.type === "experiment"
+          ? `/experiments/${item.id}`
+          : `/workspaces/${item.id}`}
+      {@const canNavigate =
+        item.type === "workspace" ||
+        (item.type === "experiment" && item.workspaceId)}
 
-  <div class="space-y-0">
-    {#if activeTab === "experiments"}
-      {#each experiments.slice(0, 5) as experiment}
-        {#if experiment.workspaceId}
-          <a
-            href="/experiments/{experiment.id}"
-            class="block hover:bg-ctp-surface0/20 px-1 py-1 transition-colors"
-          >
-            <div class="flex items-center gap-2">
-              <span class="text-ctp-text truncate flex-1"
-                >{experiment.name}</span
-              >
-              <div
-                class="flex items-center gap-2 text-xs text-ctp-lavender flex-shrink-0"
-              >
-                <span>{formatDate(experiment.createdAt)}</span>
-                <span class="hidden sm:inline text-ctp-lavender/80"
-                  >{formatTime(experiment.createdAt)}</span
-                >
-              </div>
-            </div>
-          </a>
-        {:else}
-          <div class="hover:bg-ctp-surface0/20 px-1 py-1 transition-colors">
-            <div class="flex items-center gap-2">
-              <span class="text-ctp-text truncate flex-1"
-                >{experiment.name}</span
-              >
-              <div
-                class="flex items-center gap-2 text-xs text-ctp-lavender flex-shrink-0"
-              >
-                <span>{formatDate(experiment.createdAt)}</span>
-                <span class="hidden sm:inline text-ctp-lavender/80"
-                  >{formatTime(experiment.createdAt)}</span
-                >
-              </div>
-            </div>
-          </div>
-        {/if}
-      {/each}
-
-      {#if experiments.length === 0}
-        <div class="px-1 py-2 text-ctp-subtext0">no recent experiments</div>
-      {/if}
-    {:else}
-      {#each workspaces.slice(0, 5) as workspace}
+      {#if canNavigate}
         <a
-          href="/workspaces/{workspace.id}"
-          class="block hover:bg-ctp-surface0/20 px-1 py-1 transition-colors"
+          {href}
+          class="block hover:bg-ctp-surface0/20 px-1 py-1 transition-colors group"
         >
-          <div class="flex items-center gap-2">
-            <span class="text-ctp-text truncate flex-1">{workspace.name}</span>
-            <div
-              class="flex items-center gap-2 text-xs text-ctp-lavender flex-shrink-0"
-            >
-              <span>{formatDate(workspace.createdAt)}</span>
-              <span class="hidden sm:inline text-ctp-lavender/80"
-                >{formatTime(workspace.createdAt)}</span
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 min-w-0 flex-1">
+              <div
+                class="inline-flex items-center gap-1.5 px-2 py-1 {item.type ===
+                'experiment'
+                  ? 'bg-ctp-blue/10 text-ctp-blue border border-ctp-blue/20'
+                  : 'bg-ctp-mauve/10 text-ctp-mauve border border-ctp-mauve/20'}"
               >
+                {#if item.type === "experiment"}
+                  <Activity size={12} />
+                {:else}
+                  <FolderOpen size={12} />
+                {/if}
+                <span
+                  class="text-ctp-text group-hover:text-ctp-blue transition-colors truncate"
+                >
+                  {item.name}
+                </span>
+              </div>
+            </div>
+
+            <!-- Timestamp -->
+            <div
+              class="flex items-center gap-1 text-xs text-ctp-lavender flex-shrink-0 ml-2"
+            >
+              <span>{formatDate(item.createdAt)}</span>
+              <span class="hidden sm:inline text-ctp-lavender/80">
+                {formatTime(item.createdAt)}
+              </span>
             </div>
           </div>
         </a>
-      {/each}
+      {:else}
+        <div class="px-1 py-1">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 min-w-0 flex-1">
+              <div
+                class="inline-flex items-center gap-1.5 px-2 py-1 bg-ctp-blue/10 text-ctp-blue border border-ctp-blue/20"
+              >
+                <Activity size={12} />
+                <span class="text-ctp-text truncate">
+                  {item.name}
+                </span>
+              </div>
+            </div>
 
-      {#if workspaces.length === 0}
-        <div class="px-1 py-2 text-ctp-subtext0">no workspaces found</div>
+            <div
+              class="flex items-center gap-1 text-xs text-ctp-lavender flex-shrink-0 ml-2"
+            >
+              <span>{formatDate(item.createdAt)}</span>
+              <span class="hidden sm:inline text-ctp-lavender/80">
+                {formatTime(item.createdAt)}
+              </span>
+            </div>
+          </div>
+        </div>
       {/if}
-    {/if}
-  </div>
+    {/each}
+  {/if}
 </div>
