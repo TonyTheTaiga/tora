@@ -110,7 +110,7 @@
         {/if}
 
         <!-- Role and metadata - Stack on mobile -->
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2 text-xs">
+        <div class="sm:items-center gap-2 text-xs">
           <!-- Role badge as a tag-like element -->
           <div class="flex items-center gap-1 flex-wrap">
             <span
@@ -118,11 +118,6 @@
             >
               {workspace.role?.toLowerCase() || "viewer"}
             </span>
-          </div>
-
-          <!-- Metadata -->
-          <div class="flex items-center gap-2 text-ctp-subtext1">
-            <span>workspace</span>
           </div>
         </div>
       </div>
