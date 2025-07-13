@@ -78,21 +78,26 @@
           {href}
           class="block hover:bg-ctp-surface0/20 px-1 py-1 transition-colors group"
         >
-          <div class="flex items-center justify-between">
+          <div
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2"
+          >
             <div class="flex items-center gap-2 min-w-0 flex-1">
               <div
-                class="inline-flex items-center gap-1.5 px-2 py-1 {item.type ===
+                class="inline-flex items-center gap-1.5 px-2 py-1 min-w-0 max-w-full {item.type ===
                 'experiment'
                   ? 'bg-ctp-blue/10 text-ctp-blue border border-ctp-blue/20'
                   : 'bg-ctp-mauve/10 text-ctp-mauve border border-ctp-mauve/20'}"
               >
-                {#if item.type === "experiment"}
-                  <Activity size={12} />
-                {:else}
-                  <FolderOpen size={12} />
-                {/if}
+                <div class="flex-shrink-0">
+                  {#if item.type === "experiment"}
+                    <Activity size={12} />
+                  {:else}
+                    <FolderOpen size={12} />
+                  {/if}
+                </div>
                 <span
-                  class="text-ctp-text group-hover:text-ctp-blue transition-colors truncate"
+                  class="text-ctp-text group-hover:text-ctp-blue transition-colors truncate min-w-0"
+                  title={item.name}
                 >
                   {item.name}
                 </span>
@@ -101,7 +106,7 @@
 
             <!-- Timestamp -->
             <div
-              class="flex items-center gap-1 text-xs text-ctp-lavender flex-shrink-0 ml-2"
+              class="flex items-center gap-1 text-xs text-ctp-lavender flex-shrink-0 sm:ml-2"
             >
               <span>{formatDate(item.createdAt)}</span>
               <span class="hidden sm:inline text-ctp-lavender/80">
@@ -112,20 +117,24 @@
         </a>
       {:else}
         <div class="px-1 py-1">
-          <div class="flex items-center justify-between">
+          <div
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2"
+          >
             <div class="flex items-center gap-2 min-w-0 flex-1">
               <div
-                class="inline-flex items-center gap-1.5 px-2 py-1 bg-ctp-blue/10 text-ctp-blue border border-ctp-blue/20"
+                class="inline-flex items-center gap-1.5 px-2 py-1 min-w-0 max-w-full bg-ctp-blue/10 text-ctp-blue border border-ctp-blue/20"
               >
-                <Activity size={12} />
-                <span class="text-ctp-text truncate">
+                <div class="flex-shrink-0">
+                  <Activity size={12} />
+                </div>
+                <span class="text-ctp-text truncate min-w-0" title={item.name}>
                   {item.name}
                 </span>
               </div>
             </div>
 
             <div
-              class="flex items-center gap-1 text-xs text-ctp-lavender flex-shrink-0 ml-2"
+              class="flex items-center gap-1 text-xs text-ctp-lavender flex-shrink-0 sm:ml-2"
             >
               <span>{formatDate(item.createdAt)}</span>
               <span class="hidden sm:inline text-ctp-lavender/80">
