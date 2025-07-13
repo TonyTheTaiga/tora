@@ -11,19 +11,20 @@
   let activeTab = $state<"experiments" | "workspaces">("experiments");
 
   function formatDate(date: Date): string {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year:
+        date.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
+    });
+  }
 
-    if (diffDays === 0) {
-      return "Today";
-    } else if (diffDays === 1) {
-      return "Yesterday";
-    } else if (diffDays < 7) {
-      return `${diffDays} days ago`;
-    } else {
-      return date.toLocaleDateString();
-    }
+  function formatTime(date: Date): string {
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
   }
 </script>
 
@@ -59,9 +60,14 @@
               <span class="text-ctp-text truncate flex-1"
                 >{experiment.name}</span
               >
-              <span class="text-ctp-lavender text-sm">
-                {formatDate(experiment.createdAt)}
-              </span>
+              <div
+                class="flex items-center gap-2 text-xs text-ctp-lavender flex-shrink-0"
+              >
+                <span>{formatDate(experiment.createdAt)}</span>
+                <span class="hidden sm:inline text-ctp-lavender/80"
+                  >{formatTime(experiment.createdAt)}</span
+                >
+              </div>
             </div>
           </a>
         {:else}
@@ -70,9 +76,14 @@
               <span class="text-ctp-text truncate flex-1"
                 >{experiment.name}</span
               >
-              <span class="text-ctp-lavender text-sm">
-                {formatDate(experiment.createdAt)}
-              </span>
+              <div
+                class="flex items-center gap-2 text-xs text-ctp-lavender flex-shrink-0"
+              >
+                <span>{formatDate(experiment.createdAt)}</span>
+                <span class="hidden sm:inline text-ctp-lavender/80"
+                  >{formatTime(experiment.createdAt)}</span
+                >
+              </div>
             </div>
           </div>
         {/if}
@@ -89,9 +100,14 @@
         >
           <div class="flex items-center gap-2">
             <span class="text-ctp-text truncate flex-1">{workspace.name}</span>
-            <span class="text-ctp-lavender text-sm">
-              {formatDate(workspace.createdAt)}
-            </span>
+            <div
+              class="flex items-center gap-2 text-xs text-ctp-lavender flex-shrink-0"
+            >
+              <span>{formatDate(workspace.createdAt)}</span>
+              <span class="hidden sm:inline text-ctp-lavender/80"
+                >{formatTime(workspace.createdAt)}</span
+              >
+            </div>
           </div>
         </a>
       {/each}
