@@ -146,11 +146,11 @@
 
 <div
   class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 transition-all {visible
-    ? 'opacity-100 translate-y-0 duration-200 ease-out'
-    : 'opacity-0 translate-y-full pointer-events-none duration-300 ease-in'}"
+    ? 'opacity-100 translate-y-0 duration-500 ease-out'
+    : 'opacity-0 translate-y-full pointer-events-none duration-500 ease-in'}"
 >
   <div
-    class="flex items-center surface-glass-elevated rounded-full p-1 transition-all duration-200"
+    class="flex items-center surface-glass-elevated rounded-full p-1 transition-all duration-400"
   >
     <style>
       @keyframes slideInRight {
@@ -175,7 +175,7 @@
     </style>
     {#if showBackButton}
       <button
-        class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+        class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-400 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
         title="Go back"
         onclick={() => history.back()}
       >
@@ -195,7 +195,7 @@
 
     {#if isWorkspacePage}
       <button
-        class="p-3 hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+        class="p-3 hover:bg-ctp-surface0/50 transition-all duration-400 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
         title="Create a new experiment"
         onclick={() => {
           openCreateExperimentModal();
@@ -206,7 +206,7 @@
 
       {#if !isComparisonMode}
         <button
-          class="p-3 hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+          class="p-3 hover:bg-ctp-surface0/50 transition-all duration-400 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
           title="Enter Comparison Mode"
           onclick={() => {
             toggleMode();
@@ -217,17 +217,17 @@
       {:else}
         <div
           class="flex items-center"
-          style="animation: slideInRight 0.3s ease-out;"
+          style="animation: slideInRight 0.5s ease-out;"
         >
           <span
             class="text-base text-ctp-subtext0 px-2 whitespace-nowrap"
-            style="animation: fadeIn 0.5s ease-out 0.1s both;"
+            style="animation: fadeIn 0.6s ease-out 0.1s both;"
           >
             {selectedExperiments.length} selected
           </span>
           <button
-            class="p-2 rounded-full hover:bg-ctp-red/20 transition-all duration-200 text-ctp-red hover:text-ctp-red hover:scale-110 active:scale-95"
-            style="animation: slideInRight 0.3s ease-out 0.15s both;"
+            class="p-2 rounded-full hover:bg-ctp-red/20 transition-all duration-400 text-ctp-red hover:text-ctp-red hover:scale-110 active:scale-95"
+            style="animation: slideInRight 0.5s ease-out 0.15s both;"
             title="Cancel Comparison"
             onclick={() => {
               toggleMode();
@@ -236,11 +236,11 @@
             <X size={18} />
           </button>
           <button
-            class="p-2 rounded-full hover:bg-ctp-blue/20 transition-all duration-200 text-ctp-blue hover:text-ctp-blue hover:scale-110 active:scale-95 {selectedExperiments.length <
+            class="p-2 rounded-full hover:bg-ctp-blue/20 transition-all duration-400 text-ctp-blue hover:text-ctp-blue hover:scale-110 active:scale-95 {selectedExperiments.length <
             2
               ? 'opacity-50 cursor-not-allowed'
               : ''}"
-            style="animation: slideInRight 0.3s ease-out 0.2s both;"
+            style="animation: slideInRight 0.5s ease-out 0.2s both;"
             title="Compare Selected"
             disabled={selectedExperiments.length < 2}
             onclick={() => {
@@ -260,7 +260,7 @@
       onclick={() => {
         toggleAppTheme();
       }}
-      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-400 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
       aria-label={theme === "dark"
         ? "Switch to light theme"
         : "Switch to dark theme"}
@@ -276,7 +276,7 @@
     </button>
 
     <button
-      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
+      class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-400 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
       aria-label="go to settings page"
       title="go to settings page"
       onclick={() => {

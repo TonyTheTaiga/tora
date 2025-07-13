@@ -45,9 +45,15 @@ export const load: LayoutServerLoad = async ({ locals }) => {
   const timer = startTimer("workspaces.load", { requestId });
 
   try {
-    const dashboardResponse = await locals.apiClient.get<
-      ApiResponse<DashboardOverview>
-    >("/api/dashboard/overview");
+    const [dashboardResponse, workspaceRoles, invitations] = await Promise.all([
+      locals.apiClient.get<ApiResponse<DashboardOverview>>(
+        "/api/dashboard/overview",
+      ),
+      locals.apiClient
+        .get<Array<{ id: string; name: string }>>("/api/workspace-roles")
+        .catch(() => []),
+      locals.apiClient.get<any[]>("/api/workspace-invitations").catch(() => []),
+    ]);
 
     if (dashboardResponse.status !== 200) {
       error(500, "Failed to fetch dashboard overview");
@@ -92,6 +98,8 @@ export const load: LayoutServerLoad = async ({ locals }) => {
       workspaces,
       recentExperiments,
       recentWorkspaces: workspaces.slice(0, 5),
+      workspaceRoles,
+      invitations,
     };
   } catch (err) {
     timer.end({
