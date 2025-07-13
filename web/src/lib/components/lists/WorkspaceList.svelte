@@ -191,8 +191,21 @@
     {/snippet}
 
     {#snippet actions(workspace)}
-      {#if canDeleteWorkspace(workspace)}
-        <div class="flex items-center justify-end gap-2">
+      <div class="flex items-center justify-end gap-2">
+        {#if canInviteToWorkspace(workspace)}
+          <button
+            onclick={(e) => {
+              e.stopPropagation();
+              openInviteModal(workspace);
+            }}
+            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-blue/30 sm:p-1"
+            title="invite users"
+          >
+            <Users class="w-3 h-3" />
+            <span>Invite</span>
+          </button>
+        {/if}
+        {#if canDeleteWorkspace(workspace)}
           <button
             onclick={(e) => {
               e.stopPropagation();
@@ -204,8 +217,21 @@
             <Trash2 class="w-3 h-3" />
             <span>Delete</span>
           </button>
-        </div>
-      {/if}
+        {/if}
+        {#if canLeaveWorkspace(workspace)}
+          <button
+            onclick={(e) => {
+              e.stopPropagation();
+              leaveWorkspace(workspace.id);
+            }}
+            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-red/30 sm:p-1"
+            title="leave workspace"
+          >
+            <LogOut class="w-3 h-3" />
+            <span>Leave</span>
+          </button>
+        {/if}
+      </div>
     {/snippet}
   </ListCard>
 {/if}
@@ -215,4 +241,12 @@
   bind:isOpen={deleteModalOpen}
   workspace={workspaceToDelete}
   onDeleted={onWorkspaceDeleted}
+/>
+
+<!-- Workspace Invite Modal -->
+<WorkspaceInviteModal
+  bind:isOpen={inviteModalOpen}
+  workspace={workspaceToInvite}
+  {workspaceRoles}
+  onInvite={sendInvitation}
 />

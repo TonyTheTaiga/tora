@@ -84,6 +84,23 @@ export const actions: Actions = {
     }
   },
 
+  deleteWorkspace: async ({ request, locals }) => {
+    const data = await request.formData();
+    const workspaceId = data.get("workspaceId") as string;
+
+    if (!locals.apiClient.hasElevatedPermissions()) {
+      return fail(401, { error: "Authentication required" });
+    }
+
+    try {
+      await locals.apiClient.delete(`/api/workspaces/${workspaceId}`);
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to delete workspace:", error);
+      return fail(500, { error: "Failed to delete workspace" });
+    }
+  },
+
   sendInvitation: async ({ request, locals }) => {
     const data = await request.formData();
     const workspaceId = data.get("workspaceId") as string;
@@ -141,6 +158,26 @@ export const actions: Actions = {
     } catch (error) {
       console.error("Failed to leave workspace:", error);
       return fail(500, { error: "Failed to leave workspace" });
+    }
+  },
+
+  respondToInvitation: async ({ request, locals }) => {
+    const data = await request.formData();
+    const invitationId = data.get("invitationId") as string;
+    const action = data.get("action") as string;
+
+    if (!locals.apiClient.hasElevatedPermissions()) {
+      return fail(401, { error: "Authentication required" });
+    }
+
+    try {
+      await locals.apiClient.put(
+        `/api/workspaces/any/invitations?invitationId=${invitationId}&action=${action}`,
+      );
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to respond to invitation:", error);
+      return fail(500, { error: "Failed to respond to invitation" });
     }
   },
 };
