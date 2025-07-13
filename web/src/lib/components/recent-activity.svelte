@@ -56,11 +56,10 @@
             class="block hover:bg-ctp-surface0/20 px-1 py-1 transition-colors"
           >
             <div class="flex items-center gap-2">
-              <span class="text-ctp-green w-1">•</span>
               <span class="text-ctp-text truncate flex-1"
                 >{experiment.name}</span
               >
-              <span class="text-ctp-subtext1 text-sm">
+              <span class="text-ctp-lavender text-sm">
                 {formatDate(experiment.createdAt)}
               </span>
             </div>
@@ -68,11 +67,10 @@
         {:else}
           <div class="hover:bg-ctp-surface0/20 px-1 py-1 transition-colors">
             <div class="flex items-center gap-2">
-              <span class="text-ctp-green w-1">•</span>
               <span class="text-ctp-text truncate flex-1"
                 >{experiment.name}</span
               >
-              <span class="text-ctp-subtext1 text-sm">
+              <span class="text-ctp-lavender text-sm">
                 {formatDate(experiment.createdAt)}
               </span>
             </div>
@@ -90,9 +88,8 @@
           class="block hover:bg-ctp-surface0/20 px-1 py-1 transition-colors"
         >
           <div class="flex items-center gap-2">
-            <span class="text-ctp-blue w-1">•</span>
             <span class="text-ctp-text truncate flex-1">{workspace.name}</span>
-            <span class="text-ctp-subtext1 text-sm">
+            <span class="text-ctp-lavender text-sm">
               {formatDate(workspace.createdAt)}
             </span>
           </div>

@@ -92,10 +92,10 @@
             {workspace.name}
           </h3>
           <div
-            class="flex items-center gap-2 text-xs text-ctp-subtext0 flex-shrink-0"
+            class="flex items-center gap-2 text-xs text-ctp-lavender flex-shrink-0"
           >
             <span>{formatDate(workspace.createdAt)}</span>
-            <span class="hidden sm:inline text-ctp-subtext1"
+            <span class="hidden sm:inline text-ctp-lavender/80"
               >{formatTime(workspace.createdAt)}</span
             >
           </div>

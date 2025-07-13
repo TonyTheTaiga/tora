@@ -44,7 +44,7 @@
           {#if onAdditionalInfoClick}
             <button
               onclick={onAdditionalInfoClick}
-              class="text-ctp-blue hover:text-ctp-blue/80 transition-colors flex text-start"
+              class="text-ctp-lavender hover:text-ctp-lavender/80 transition-colors flex text-start"
               title={additionalInfoTitle}
             >
               <span>{additionalInfo}</span>

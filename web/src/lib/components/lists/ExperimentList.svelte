@@ -113,10 +113,10 @@
             {experiment.name}
           </h3>
           <div
-            class="flex items-center gap-2 text-xs text-ctp-subtext0 flex-shrink-0"
+            class="flex items-center gap-2 text-xs text-ctp-lavender flex-shrink-0"
           >
             <span>{formatDate(experiment.createdAt)}</span>
-            <span class="hidden sm:inline text-ctp-subtext1"
+            <span class="hidden sm:inline text-ctp-lavender/80"
               >{formatTime(experiment.createdAt)}</span
             >
           </div>
@@ -152,7 +152,7 @@
           {/if}
 
           <!-- Metadata -->
-          <div class="flex items-center gap-2 text-ctp-subtext1">
+          <div class="flex items-center gap-2 text-ctp-lavender">
             {#if experiment.hyperparams && experiment.hyperparams.length > 0}
               <span>
                 {experiment.hyperparams.length} param{experiment.hyperparams

@@ -347,6 +347,26 @@
     border: 1px solid color-mix(in srgb, var(--color-ctp-red) 20%, transparent);
   }
 
+  .surface-accent-lavender {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-lavender) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-lavender) 20%, transparent);
+  }
+
+  .surface-accent-mauve {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-mauve) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-mauve) 20%, transparent);
+  }
+
   /* Depth indicators */
   .depth-inset {
     background: color-mix(

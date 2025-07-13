@@ -23,7 +23,7 @@
     <main
       class="flex-1 w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 layer-fade-in"
     >
-      <div class="surface-layer-1 layer-spacing-md">
+      <div class="content-layer layer-spacing-md">
         {@render children()}
       </div>
     </main>

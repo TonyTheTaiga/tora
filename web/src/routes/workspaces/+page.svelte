@@ -66,7 +66,7 @@
 
     <!-- Recent activity section -->
     <div class="section-divider" data-label="recent activity"></div>
-    <div class="surface-elevated layer-spacing-md stack-layer">
+    <div class="surface-accent-lavender layer-spacing-md stack-layer">
       <RecentActivity
         experiments={recentExperiments}
         workspaces={recentWorkspaces}

@@ -8,8 +8,8 @@
   } = $props();
 </script>
 
-<div class="subtle-surface p-3">
-  <div class="text-base text-ctp-text font-medium mb-3">
+<div class="surface-layer-1 p-3">
+  <div class="text-base text-ctp-mauve font-medium mb-3">
     {title}
   </div>
   <div class="space-y-3">
