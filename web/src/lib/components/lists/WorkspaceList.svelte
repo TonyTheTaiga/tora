@@ -2,6 +2,7 @@
   import { DeleteWorkspaceModal } from "$lib/components/modals";
   import EmptyState from "./EmptyState.svelte";
   import ListCard from "./ListCard.svelte";
+  import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
   import { Trash2 } from "@lucide/svelte";
   import type { Workspace } from "$lib/types";
 
@@ -110,14 +111,10 @@
         {/if}
 
         <!-- Role and metadata - Stack on mobile -->
-        <div class="sm:items-center gap-2 text-xs">
-          <!-- Role badge as a tag-like element -->
+        <div class="flex items-center gap-2 text-xs">
+          <!-- Role badge using the dedicated component -->
           <div class="flex items-center gap-1 flex-wrap">
-            <span
-              class="bg-ctp-surface0/30 text-ctp-subtext0 px-2 py-1 text-[10px]"
-            >
-              {workspace.role?.toLowerCase() || "viewer"}
-            </span>
+            <WorkspaceRoleBadge role={workspace.role || "VIEWER"} />
           </div>
         </div>
       </div>
