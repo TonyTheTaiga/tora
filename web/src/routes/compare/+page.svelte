@@ -255,7 +255,7 @@
 
     <!-- Hyperparameters -->
     <div>
-      <div class="text-sm text-ctp-text mb-3">Hyperparameters</div>
+      <div class="text-sm text-ctp-mauve font-medium mb-3">Hyperparameters</div>
       <div
         class="bg-ctp-surface0/10 border border-ctp-surface0/20 overflow-hidden"
       >
@@ -306,7 +306,9 @@
 
     <!-- Metrics Comparison -->
     <div>
-      <div class="text-sm text-ctp-text mb-3">Metrics Comparison</div>
+      <div class="text-sm text-ctp-mauve font-medium mb-3">
+        Metrics Comparison
+      </div>
       <div class="bg-ctp-surface0/10 border border-ctp-surface0/20">
         <!-- Metric Selector -->
         <div class="p-3 border-b border-ctp-surface0/20">

@@ -1,17 +1,21 @@
 <script lang="ts">
-  import { DeleteWorkspaceModal } from "$lib/components/modals";
+  import {
+    DeleteWorkspaceModal,
+    WorkspaceInviteModal,
+  } from "$lib/components/modals";
   import EmptyState from "./EmptyState.svelte";
   import ListCard from "./ListCard.svelte";
   import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
-  import { Trash2 } from "@lucide/svelte";
+  import { Trash2, Users, LogOut } from "@lucide/svelte";
   import type { Workspace } from "$lib/types";
 
   interface Props {
     workspaces: Workspace[];
     searchQuery?: string;
+    workspaceRoles?: Array<{ id: string; name: string }>;
   }
 
-  let { workspaces, searchQuery = "" }: Props = $props();
+  let { workspaces, searchQuery = "", workspaceRoles = [] }: Props = $props();
 
   let filteredWorkspaces = $derived(
     workspaces.filter((workspace) => {
@@ -45,9 +49,18 @@
   let deleteModalOpen = $state(false);
   let workspaceToDelete: Workspace | null = $state(null);
 
+  // Workspace invitation state
+  let inviteModalOpen = $state(false);
+  let workspaceToInvite: Workspace | null = $state(null);
+
   function openDeleteModal(workspace: Workspace) {
     workspaceToDelete = workspace;
     deleteModalOpen = true;
+  }
+
+  function openInviteModal(workspace: Workspace) {
+    workspaceToInvite = workspace;
+    inviteModalOpen = true;
   }
 
   function onWorkspaceDeleted() {
@@ -57,6 +70,63 @@
 
   function canDeleteWorkspace(workspace: Workspace): boolean {
     return workspace.role === "OWNER";
+  }
+
+  function canInviteToWorkspace(workspace: Workspace): boolean {
+    return workspace.role === "OWNER";
+  }
+
+  function canLeaveWorkspace(workspace: Workspace): boolean {
+    return workspace.role !== "OWNER";
+  }
+
+  function sendInvitation(email: string, roleId: string) {
+    if (!workspaceToInvite) return;
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "?/sendInvitation";
+
+    const workspaceIdInput = document.createElement("input");
+    workspaceIdInput.type = "hidden";
+    workspaceIdInput.name = "workspaceId";
+    workspaceIdInput.value = workspaceToInvite.id;
+    form.appendChild(workspaceIdInput);
+
+    const emailInput = document.createElement("input");
+    emailInput.type = "hidden";
+    emailInput.name = "email";
+    emailInput.value = email;
+    form.appendChild(emailInput);
+
+    const roleIdInput = document.createElement("input");
+    roleIdInput.type = "hidden";
+    roleIdInput.name = "roleId";
+    roleIdInput.value = roleId;
+    form.appendChild(roleIdInput);
+
+    document.body.appendChild(form);
+    form.submit();
+
+    inviteModalOpen = false;
+    workspaceToInvite = null;
+  }
+
+  function leaveWorkspace(workspaceId: string) {
+    if (!confirm("Are you sure you want to leave this workspace?")) return;
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "?/leaveWorkspace";
+
+    const workspaceIdInput = document.createElement("input");
+    workspaceIdInput.type = "hidden";
+    workspaceIdInput.name = "workspaceId";
+    workspaceIdInput.value = workspaceId;
+    form.appendChild(workspaceIdInput);
+
+    document.body.appendChild(form);
+    form.submit();
   }
 
   function getWorkspaceItemClass(workspace: Workspace): string {
@@ -92,10 +162,10 @@
             {workspace.name}
           </h3>
           <div
-            class="flex items-center gap-2 text-xs text-ctp-subtext0 flex-shrink-0"
+            class="flex items-center gap-2 text-xs text-ctp-lavender flex-shrink-0"
           >
             <span>{formatDate(workspace.createdAt)}</span>
-            <span class="hidden sm:inline text-ctp-subtext1"
+            <span class="hidden sm:inline text-ctp-lavender/80"
               >{formatTime(workspace.createdAt)}</span
             >
           </div>
@@ -121,8 +191,21 @@
     {/snippet}
 
     {#snippet actions(workspace)}
-      {#if canDeleteWorkspace(workspace)}
-        <div class="flex items-center justify-end gap-2">
+      <div class="flex items-center justify-end gap-2">
+        {#if canInviteToWorkspace(workspace)}
+          <button
+            onclick={(e) => {
+              e.stopPropagation();
+              openInviteModal(workspace);
+            }}
+            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-blue/30 sm:p-1"
+            title="invite users"
+          >
+            <Users class="w-3 h-3" />
+            <span>Invite</span>
+          </button>
+        {/if}
+        {#if canDeleteWorkspace(workspace)}
           <button
             onclick={(e) => {
               e.stopPropagation();
@@ -134,8 +217,21 @@
             <Trash2 class="w-3 h-3" />
             <span>Delete</span>
           </button>
-        </div>
-      {/if}
+        {/if}
+        {#if canLeaveWorkspace(workspace)}
+          <button
+            onclick={(e) => {
+              e.stopPropagation();
+              leaveWorkspace(workspace.id);
+            }}
+            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-red/30 sm:p-1"
+            title="leave workspace"
+          >
+            <LogOut class="w-3 h-3" />
+            <span>Leave</span>
+          </button>
+        {/if}
+      </div>
     {/snippet}
   </ListCard>
 {/if}
@@ -145,4 +241,12 @@
   bind:isOpen={deleteModalOpen}
   workspace={workspaceToDelete}
   onDeleted={onWorkspaceDeleted}
+/>
+
+<!-- Workspace Invite Modal -->
+<WorkspaceInviteModal
+  bind:isOpen={inviteModalOpen}
+  workspace={workspaceToInvite}
+  {workspaceRoles}
+  onInvite={sendInvitation}
 />

@@ -75,7 +75,7 @@
       >
         <div class="flex items-center gap-2">
           <Plus class="w-4 h-4" />
-          <span class="hidden sm:inline">new</span>
+          <span class="hidden sm:inline">New</span>
         </div>
       </button>
     {/snippet}
@@ -94,7 +94,7 @@
         <div class="mt-4">
           <button
             onclick={() => openCreateExperimentModal()}
-            class="text-ctp-blue hover:text-ctp-blue/80 transition-colors text-sm"
+            class="text-ctp-mauve hover:text-ctp-mauve/80 transition-colors text-sm"
           >
             [create experiment]
           </button>

@@ -137,7 +137,7 @@
     <!-- Search filter -->
     <div class="p-2 border-b border-ctp-surface0/20">
       <div
-        class="flex items-center bg-ctp-surface0/20 border border-ctp-surface0/30 focus-within:ring-1 focus-within:ring-ctp-blue focus-within:border-ctp-blue transition-all"
+        class="flex items-center bg-ctp-surface0/20 border border-ctp-surface0/30 focus-within:ring-1 focus-within:ring-ctp-lavender focus-within:border-ctp-lavender transition-all"
       >
         <span class="text-ctp-subtext0 font-mono text-xs px-2 py-1">/</span>
         <input
@@ -179,7 +179,7 @@
             type="checkbox"
             checked={isItemSelected(selectedItems, item)}
             onchange={() => toggleItem(item)}
-            class="text-ctp-blue focus:ring-ctp-blue focus:ring-1 w-3 h-3"
+            class="text-ctp-lavender focus:ring-ctp-lavender focus:ring-1 w-3 h-3"
           />
           <span class="text-ctp-text">{getItemText(item)}</span>
         </label>

@@ -7,12 +7,15 @@
   import { PageHeader, SearchInput } from "$lib/components";
   import { WorkspaceList } from "$lib/components/lists";
   import RecentActivity from "$lib/components/recent-activity.svelte";
+  import PendingInvitations from "$lib/components/pending-invitations.svelte";
 
   let { data } = $props();
   let { workspaces } = $derived(data);
 
   let recentExperiments = $derived(data.recentExperiments || []);
   let recentWorkspaces = $derived(data.recentWorkspaces);
+  let invitations = $derived(data.invitations || []);
+  let workspaceRoles = $derived(data.workspaceRoles || []);
   let searchQuery = $state("");
 
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
@@ -62,11 +65,14 @@
 
   <!-- Terminal-style workspace display -->
   <div class="font-mono">
-    <WorkspaceList {workspaces} {searchQuery} />
+    <WorkspaceList {workspaces} {searchQuery} {workspaceRoles} />
+
+    <!-- Pending invitations section -->
+    <PendingInvitations {invitations} />
 
     <!-- Recent activity section -->
     <div class="section-divider" data-label="recent activity"></div>
-    <div class="surface-elevated layer-spacing-md stack-layer">
+    <div class="surface-accent-lavender layer-spacing-md stack-layer">
       <RecentActivity
         experiments={recentExperiments}
         workspaces={recentWorkspaces}

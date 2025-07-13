@@ -36,7 +36,7 @@
             <div>
               <ModalInput
                 name="name"
-                placeholder="workspace_name"
+                placeholder="name"
                 bind:value={name}
                 required
               />

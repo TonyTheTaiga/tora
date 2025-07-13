@@ -11,11 +11,11 @@
     >ADMIN</span
   >
 {:else if role === "EDITOR"}
-  <span class="text-ctp-blue font-medium flex-shrink-0 text-xs font-mono"
+  <span class="text-ctp-mauve font-medium flex-shrink-0 text-xs font-mono"
     >EDITOR</span
   >
 {:else if role === "VIEWER"}
-  <span class="text-ctp-green font-medium flex-shrink-0 text-xs font-mono"
+  <span class="text-ctp-lavender font-medium flex-shrink-0 text-xs font-mono"
     >VIEWER</span
   >
 {/if}

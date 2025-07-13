@@ -122,7 +122,7 @@
                   <input
                     type="text"
                     bind:value={tag}
-                    class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 text-ctp-text focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
+                    class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
                     placeholder="tag_name"
                     onkeydown={(event) => {
                       if (event.key === "Enter") {
@@ -137,7 +137,7 @@
                       event.preventDefault();
                       addTag();
                     }}
-                    class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-2 py-1 text-sm transition-all"
+                    class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all"
                   >
                     <Plus size={14} />
                   </button>
@@ -149,9 +149,9 @@
                     event.preventDefault();
                     addingNewTag = true;
                   }}
-                  class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-2 py-1 text-sm transition-all"
+                  class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all"
                 >
-                  <Plus size={12} />
+                  <Plus size={14} />
                 </button>
               {/if}
             </div>

@@ -181,9 +181,9 @@
     button,
     a {
       transition:
-        background-color 0.1s,
-        color 0.1s,
-        transform 0.05s;
+        background-color 0.3s,
+        color 0.3s,
+        transform 0.2s;
     }
 
     button:active,
@@ -259,7 +259,10 @@
     );
     border: 1px solid
       color-mix(in srgb, var(--color-ctp-surface0) 20%, transparent);
-    transition: all 0.2s ease;
+    transition:
+      background-color 0.4s ease,
+      border-color 0.4s ease,
+      transform 0.4s ease;
   }
 
   .surface-interactive:hover {
@@ -274,11 +277,9 @@
       transparent
     );
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px
-      color-mix(in srgb, var(--color-ctp-crust) 40%, transparent);
   }
 
-  /* Elevated surfaces with subtle shadows */
+  /* Elevated surfaces */
   .surface-elevated {
     background: color-mix(
       in srgb,
@@ -287,27 +288,21 @@
     );
     border: 1px solid
       color-mix(in srgb, var(--color-ctp-surface0) 28%, transparent);
-    box-shadow:
-      0 2px 8px color-mix(in srgb, var(--color-ctp-crust) 30%, transparent),
-      0 1px 3px color-mix(in srgb, var(--color-ctp-crust) 20%, transparent);
   }
 
   /* Glass-like surfaces */
   .surface-glass {
-    background: color-mix(in srgb, var(--color-ctp-surface0) 10%, transparent);
-    backdrop-filter: blur(12px);
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 25%, transparent);
-  }
-
-  .surface-glass-elevated {
-    background: color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
+    background: color-mix(in srgb, var(--color-ctp-surface0) 12%, transparent);
     backdrop-filter: blur(16px);
     border: 1px solid
       color-mix(in srgb, var(--color-ctp-surface0) 30%, transparent);
-    box-shadow:
-      0 4px 16px color-mix(in srgb, var(--color-ctp-crust) 25%, transparent),
-      0 2px 6px color-mix(in srgb, var(--color-ctp-crust) 15%, transparent);
+  }
+
+  .surface-glass-elevated {
+    background: color-mix(in srgb, var(--color-ctp-surface0) 18%, transparent);
+    backdrop-filter: blur(20px);
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 35%, transparent);
   }
 
   /* Accent surfaces */
@@ -349,19 +344,45 @@
     border: 1px solid color-mix(in srgb, var(--color-ctp-red) 20%, transparent);
   }
 
+  .surface-accent-lavender {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-lavender) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-lavender) 20%, transparent);
+  }
+
+  .surface-accent-mauve {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-mauve) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-mauve) 20%, transparent);
+  }
+
   /* Depth indicators */
   .depth-inset {
-    box-shadow:
-      inset 0 2px 4px
-        color-mix(in srgb, var(--color-ctp-crust) 20%, transparent),
-      inset 0 1px 2px
-        color-mix(in srgb, var(--color-ctp-crust) 10%, transparent);
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 5%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 10%, transparent);
   }
 
   .depth-raised {
-    box-shadow:
-      0 1px 3px color-mix(in srgb, var(--color-ctp-crust) 15%, transparent),
-      0 1px 2px color-mix(in srgb, var(--color-ctp-crust) 10%, transparent);
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
   }
 
   /* Terminal-style borders and dividers */
@@ -419,21 +440,6 @@
     position: relative;
   }
 
-  .content-layer::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      color-mix(in srgb, var(--color-ctp-surface0) 40%, transparent) 50%,
-      transparent
-    );
-  }
-
   /* Layered spacing utilities */
   .layer-spacing-sm {
     padding: 0.5rem;
@@ -470,6 +476,13 @@
 
   /* Stacked content effect */
   .stack-layer {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
     position: relative;
   }
 
@@ -480,9 +493,9 @@
     left: 4px;
     right: -4px;
     bottom: -4px;
-    background: color-mix(in srgb, var(--color-ctp-surface0) 5%, transparent);
+    background: color-mix(in srgb, var(--color-ctp-surface0) 8%, transparent);
     border: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 10%, transparent);
+      color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
     z-index: -1;
   }
 
@@ -495,17 +508,24 @@
     );
     border: 1px solid
       color-mix(in srgb, var(--color-ctp-surface0) 30%, transparent);
-    box-shadow:
-      0 6px 20px color-mix(in srgb, var(--color-ctp-crust) 30%, transparent),
-      0 3px 8px color-mix(in srgb, var(--color-ctp-crust) 20%, transparent);
-    transition: all 0.3s ease;
+    transition:
+      background-color 0.4s ease,
+      border-color 0.4s ease,
+      transform 0.4s ease;
   }
 
   .floating-element:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 25%,
+      var(--color-ctp-base)
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 40%,
+      transparent
+    );
     transform: translateY(-2px);
-    box-shadow:
-      0 8px 25px color-mix(in srgb, var(--color-ctp-crust) 35%, transparent),
-      0 4px 12px color-mix(in srgb, var(--color-ctp-crust) 25%, transparent);
   }
 
   /* Terminal window chrome */
@@ -533,13 +553,13 @@
 
   /* Subtle animations for layering */
   .layer-fade-in {
-    animation: layerFadeIn 0.4s ease-out;
+    animation: layerFadeIn 0.5s ease-out;
   }
 
   @keyframes layerFadeIn {
     from {
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(4px);
     }
     to {
       opacity: 1;
@@ -548,13 +568,13 @@
   }
 
   .layer-slide-up {
-    animation: layerSlideUp 0.3s ease-out;
+    animation: layerSlideUp 0.5s ease-out;
   }
 
   @keyframes layerSlideUp {
     from {
       opacity: 0;
-      transform: translateY(12px);
+      transform: translateY(6px);
     }
     to {
       opacity: 1;

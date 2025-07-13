@@ -12,9 +12,7 @@
   class="flex items-center justify-center min-h-[calc(100vh-2rem)] font-mono"
 >
   <div class="w-full max-w-md">
-    <div
-      class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 overflow-hidden"
-    >
+    <div class="surface-layer-1 overflow-hidden">
       <div
         class="px-6 py-4 border-b border-ctp-surface0 flex items-center gap-2"
       >
