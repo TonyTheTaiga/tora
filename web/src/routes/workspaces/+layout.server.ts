@@ -7,19 +7,7 @@ interface ApiResponse<T> {
   data: T;
 }
 
-interface ExperimentData {
-  id: string;
-  name: string;
-  description: string;
-  created_at: string;
-  updated_at: string;
-  tags: string[];
-  hyperparams: any[];
-  workspace_id: string;
-  available_metrics: string[];
-}
-
-interface DashboardOverview {
+interface WorkspaceOverview {
   workspaces: {
     id: string;
     name: string;
@@ -29,7 +17,6 @@ interface DashboardOverview {
     experiment_count: number;
     recent_experiment_count: number;
   }[];
-  recent_experiments: ExperimentData[];
 }
 
 export const load: LayoutServerLoad = async ({ locals }) => {
@@ -42,29 +29,23 @@ export const load: LayoutServerLoad = async ({ locals }) => {
   }
 
   const requestId = generateRequestId();
-  const timer = startTimer("workspaces.load", { requestId });
+  const timer = startTimer("workspaces.layout.load", { requestId });
 
   try {
-    const [dashboardResponse, workspaceRoles, invitations] = await Promise.all([
-      locals.apiClient.get<ApiResponse<DashboardOverview>>(
-        "/api/dashboard/overview",
-      ),
-      locals.apiClient
-        .get<Array<{ id: string; name: string }>>("/api/workspace-roles")
-        .catch(() => []),
-      locals.apiClient.get<any[]>("/api/workspace-invitations").catch(() => []),
-    ]);
+    const workspacesResponse = await locals.apiClient.get<
+      ApiResponse<WorkspaceOverview>
+    >("/api/dashboard/overview");
 
-    if (dashboardResponse.status !== 200) {
-      error(500, "Failed to fetch dashboard overview");
+    if (workspacesResponse.status !== 200) {
+      error(500, "Failed to fetch workspaces");
     }
 
-    const dashboardData = dashboardResponse.data;
-    if (!dashboardData) {
-      error(500, "No dashboard data received");
+    const workspacesData = workspacesResponse.data;
+    if (!workspacesData) {
+      error(500, "No workspaces data received");
     }
 
-    const workspaces = dashboardData.workspaces.map((workspace) => ({
+    const workspaces = workspacesData.workspaces.map((workspace: any) => ({
       id: workspace.id,
       name: workspace.name,
       description: workspace.description,
@@ -74,44 +55,25 @@ export const load: LayoutServerLoad = async ({ locals }) => {
       recentExperimentCount: workspace.recent_experiment_count,
     }));
 
-    const recentExperiments = dashboardData.recent_experiments
-      .map((exp) => ({
-        id: exp.id,
-        name: exp.name,
-        description: exp.description || "",
-        hyperparams: exp.hyperparams || [],
-        tags: exp.tags || [],
-        createdAt: new Date(exp.created_at),
-        updatedAt: new Date(exp.updated_at),
-        availableMetrics: exp.available_metrics || [],
-        workspaceId: exp.workspace_id,
-      }))
-      .slice(0, 5);
-
     timer.end({
       workspaces_count: workspaces.length,
-      recent_experiments_count: recentExperiments.length,
       user_id: locals.session.user.id,
     });
 
     return {
       workspaces,
-      recentExperiments,
-      recentWorkspaces: workspaces.slice(0, 5),
-      workspaceRoles,
-      invitations,
     };
   } catch (err) {
     timer.end({
       error: err instanceof Error ? err.message : "Unknown error",
     });
 
-    console.error("Error loading dashboard overview:", err);
+    console.error("Error loading workspaces:", err);
 
     if (err instanceof Error && err.message.includes("401")) {
       error(401, "Authentication required");
     }
 
-    error(500, "Failed to load dashboard overview");
+    error(500, "Failed to load workspaces");
   }
 };
