@@ -213,35 +213,334 @@
     overflow: hidden;
   }
 
-  /* Subtle Layering - Very Minimal */
-  .subtle-surface {
-    background: color-mix(in srgb, var(--color-ctp-surface0) 2%, transparent);
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 6%, transparent);
+  /* Enhanced Visual Layering System */
+
+  /* Base surface layers */
+  .surface-base {
+    background: var(--color-ctp-base);
   }
 
-  .subtle-elevated {
-    background: color-mix(in srgb, var(--color-ctp-surface0) 4%, transparent);
+  .surface-layer-1 {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 8%,
+      var(--color-ctp-base)
+    );
     border: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 10%, transparent);
-  }
-
-  /* Minimal Section Dividers */
-  .section-divider {
-    border-top: 1px solid
       color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
-    margin: 1.5rem 0;
+  }
+
+  .surface-layer-2 {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 15%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 25%, transparent);
+  }
+
+  .surface-layer-3 {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 25%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 35%, transparent);
+  }
+
+  /* Interactive surface states */
+  .surface-interactive {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 12%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 20%, transparent);
+    transition: all 0.2s ease;
+  }
+
+  .surface-interactive:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 20%,
+      var(--color-ctp-base)
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 30%,
+      transparent
+    );
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px
+      color-mix(in srgb, var(--color-ctp-crust) 40%, transparent);
+  }
+
+  /* Elevated surfaces with subtle shadows */
+  .surface-elevated {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 18%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 28%, transparent);
+    box-shadow:
+      0 2px 8px color-mix(in srgb, var(--color-ctp-crust) 30%, transparent),
+      0 1px 3px color-mix(in srgb, var(--color-ctp-crust) 20%, transparent);
+  }
+
+  /* Glass-like surfaces */
+  .surface-glass {
+    background: color-mix(in srgb, var(--color-ctp-surface0) 10%, transparent);
+    backdrop-filter: blur(12px);
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 25%, transparent);
+  }
+
+  .surface-glass-elevated {
+    background: color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
+    backdrop-filter: blur(16px);
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 30%, transparent);
+    box-shadow:
+      0 4px 16px color-mix(in srgb, var(--color-ctp-crust) 25%, transparent),
+      0 2px 6px color-mix(in srgb, var(--color-ctp-crust) 15%, transparent);
+  }
+
+  /* Accent surfaces */
+  .surface-accent-blue {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-blue) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid color-mix(in srgb, var(--color-ctp-blue) 20%, transparent);
+  }
+
+  .surface-accent-green {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-green) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-green) 20%, transparent);
+  }
+
+  .surface-accent-yellow {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-yellow) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-yellow) 20%, transparent);
+  }
+
+  .surface-accent-red {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-red) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid color-mix(in srgb, var(--color-ctp-red) 20%, transparent);
+  }
+
+  /* Depth indicators */
+  .depth-inset {
+    box-shadow:
+      inset 0 2px 4px
+        color-mix(in srgb, var(--color-ctp-crust) 20%, transparent),
+      inset 0 1px 2px
+        color-mix(in srgb, var(--color-ctp-crust) 10%, transparent);
+  }
+
+  .depth-raised {
+    box-shadow:
+      0 1px 3px color-mix(in srgb, var(--color-ctp-crust) 15%, transparent),
+      0 1px 2px color-mix(in srgb, var(--color-ctp-crust) 10%, transparent);
+  }
+
+  /* Terminal-style borders and dividers */
+  .terminal-border {
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 30%, transparent);
+  }
+
+  .terminal-border-accent {
+    border-left: 2px solid var(--color-ctp-blue);
+    border-top: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 20%, transparent);
+    border-right: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 20%, transparent);
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 20%, transparent);
+  }
+
+  /* Enhanced section dividers */
+  .section-divider {
+    position: relative;
+    border-top: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 25%, transparent);
+    margin: 2rem 0;
   }
 
   .section-divider::before {
     content: attr(data-label);
-    position: relative;
-    top: -0.5rem;
+    position: absolute;
+    top: -0.6rem;
+    left: 0;
     background: var(--color-ctp-base);
-    padding: 0 0.75rem;
+    padding: 0 1rem;
     font-size: 0.75rem;
     color: var(--color-ctp-subtext0);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    font-family: inherit;
+  }
+
+  .section-divider-center::before {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Layered content containers */
+  .content-layer {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 6%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
+    position: relative;
+  }
+
+  .content-layer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-ctp-surface0) 40%, transparent) 50%,
+      transparent
+    );
+  }
+
+  /* Layered spacing utilities */
+  .layer-spacing-sm {
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+  }
+
+  .layer-spacing-md {
+    padding: 1.25rem;
+    margin: 1rem 0;
+  }
+
+  .layer-spacing-lg {
+    padding: 2rem;
+    margin: 1.5rem 0;
+  }
+
+  /* Stacked content effect */
+  .stack-layer {
+    position: relative;
+  }
+
+  .stack-layer::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: -4px;
+    bottom: -4px;
+    background: color-mix(in srgb, var(--color-ctp-surface0) 5%, transparent);
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 10%, transparent);
+    z-index: -1;
+  }
+
+  /* Floating action elements */
+  .floating-element {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 20%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 30%, transparent);
+    box-shadow:
+      0 6px 20px color-mix(in srgb, var(--color-ctp-crust) 30%, transparent),
+      0 3px 8px color-mix(in srgb, var(--color-ctp-crust) 20%, transparent);
+    transition: all 0.3s ease;
+  }
+
+  .floating-element:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 25px color-mix(in srgb, var(--color-ctp-crust) 35%, transparent),
+      0 4px 12px color-mix(in srgb, var(--color-ctp-crust) 25%, transparent);
+  }
+
+  /* Terminal window chrome */
+  .terminal-chrome {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 15%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 25%, transparent);
+    border-radius: 0;
+  }
+
+  .terminal-chrome-header {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 25%,
+      var(--color-ctp-base)
+    );
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 35%, transparent);
+    padding: 0.75rem 1rem;
+  }
+
+  /* Subtle animations for layering */
+  .layer-fade-in {
+    animation: layerFadeIn 0.4s ease-out;
+  }
+
+  @keyframes layerFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .layer-slide-up {
+    animation: layerSlideUp 0.3s ease-out;
+  }
+
+  @keyframes layerSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }

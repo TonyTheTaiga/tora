@@ -150,7 +150,7 @@
     : 'opacity-0 translate-y-full pointer-events-none duration-300 ease-in'}"
 >
   <div
-    class="flex items-center bg-ctp-surface1/30 backdrop-blur-xl border border-ctp-surface0/20 rounded-full p-1 shadow-2xl hover:bg-ctp-surface1/40 hover:scale-105 transition-all duration-200"
+    class="flex items-center surface-glass-elevated rounded-full p-1 hover:scale-105 transition-all duration-200"
   >
     <style>
       @keyframes slideInRight {

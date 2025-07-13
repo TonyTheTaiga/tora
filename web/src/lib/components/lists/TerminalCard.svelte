@@ -20,16 +20,12 @@
   }
 </script>
 
-<div class="space-y-2 font-mono">
-  {#each items as item}
-    <div class={getItemClass(item)}>
-      <div
-        class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 hover:bg-ctp-surface0/20 transition-colors"
-      >
+<div class="space-y-3 font-mono">
+  {#each items as item, index}
+    <div class={getItemClass(item)} style="animation-delay: {index * 50}ms">
+      <div class="surface-interactive layer-slide-up">
         <!-- Header row with icon, name, metadata, and date -->
-        <div
-          class="flex items-center justify-between p-3 border-b border-ctp-surface0/20"
-        >
+        <div class="terminal-chrome-header">
           <div class="flex items-center gap-2 min-w-0 flex-1">
             {@render children(item)}
           </div>
@@ -37,14 +33,14 @@
 
         <!-- Description row (if any) -->
         {#if item.description}
-          <div class="px-3 py-2 text-ctp-subtext1 text-sm">
+          <div class="px-4 py-3 text-ctp-subtext1 text-sm surface-layer-1">
             {item.description}
           </div>
         {/if}
 
         <!-- Actions row (if any) -->
         {#if actions}
-          <div class="px-3 py-2 border-t border-ctp-surface0/20">
+          <div class="px-4 py-3 surface-layer-2 terminal-border-accent">
             {@render actions(item)}
           </div>
         {/if}

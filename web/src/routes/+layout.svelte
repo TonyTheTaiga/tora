@@ -16,14 +16,16 @@
   );
 </script>
 
-<div class="min-h-screen text-ctp-text bg-ctp-base" data-theme={theme}>
+<div class="min-h-screen text-ctp-text surface-base" data-theme={theme}>
   {#if showNavigation}
     <Header />
     <Toolbar />
-    <main class="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6">
-      {@render children()}
+    <main class="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6 layer-fade-in">
+      <div class="content-layer layer-spacing-md">
+        {@render children()}
+      </div>
     </main>
   {:else}
-    <main class="flex-1 w-full">{@render children()}</main>
+    <main class="flex-1 w-full surface-base">{@render children()}</main>
   {/if}
 </div>

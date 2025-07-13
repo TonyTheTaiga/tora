@@ -31,7 +31,7 @@
     {#snippet actionButton()}
       <button
         onclick={() => openCreateWorkspaceModal()}
-        class="group relative bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 text-ctp-text hover:bg-ctp-surface0/30 hover:border-ctp-surface0/50 px-3 py-2 md:px-4 text-sm font-mono transition-all flex-shrink-0"
+        class="floating-element text-ctp-text px-3 py-2 md:px-4 text-sm font-mono flex-shrink-0"
       >
         <div class="flex items-center gap-2">
           <svg
@@ -61,20 +61,16 @@
   />
 
   <!-- Terminal-style workspace display -->
-  <div class="px-4 md:px-6 font-mono">
+  <div class="font-mono">
     <WorkspaceList {workspaces} {searchQuery} />
 
     <!-- Recent activity section -->
-    <div class="mt-8 border-t border-ctp-surface0/20 pt-6">
-      <div class="flex items-center gap-2 mb-3">
-        <div class="text-base text-ctp-text font-mono">recent activity</div>
-      </div>
-      <div class="subtle-surface p-4 text-sm">
-        <RecentActivity
-          experiments={recentExperiments}
-          workspaces={recentWorkspaces}
-        />
-      </div>
+    <div class="section-divider" data-label="recent activity"></div>
+    <div class="surface-elevated layer-spacing-md stack-layer">
+      <RecentActivity
+        experiments={recentExperiments}
+        workspaces={recentWorkspaces}
+      />
     </div>
   </div>
 </div>

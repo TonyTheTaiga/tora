@@ -137,12 +137,12 @@
           <div class="w-16 sm:w-24 h-0.5 bg-ctp-blue mx-auto"></div>
         </div>
 
-        <article class="w-full max-w-3xl mx-auto">
+        <article class="w-full max-w-3xl mx-auto layer-fade-in">
           <div
-            class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 overflow-hidden"
+            class="terminal-chrome surface-glass-elevated overflow-hidden stack-layer"
           >
             <header
-              class="grid grid-cols-3 items-center px-4 py-2 border-b border-ctp-surface0"
+              class="terminal-chrome-header grid grid-cols-3 items-center"
             >
               <div class="flex space-x-2">
                 <div class="w-3 h-3 rounded-full bg-ctp-blue"></div>
@@ -156,11 +156,11 @@
               </div>
               <div></div>
             </header>
-            <div class="flex border-b border-ctp-surface0">
+            <div class="flex surface-layer-1 terminal-border">
               <button
                 type="button"
                 class="flex-1 px-4 py-2 text-xs font-mono"
-                class:bg-ctp-surface0={activeTab === "start"}
+                class:surface-layer-2={activeTab === "start"}
                 class:opacity-50={activeTab !== "start"}
                 onclick={() => (activeTab = "start")}
               >
@@ -169,7 +169,7 @@
               <button
                 type="button"
                 class="flex-1 px-4 py-2 text-xs font-mono"
-                class:bg-ctp-surface0={activeTab === "guide"}
+                class:surface-layer-2={activeTab === "guide"}
                 class:opacity-50={activeTab !== "guide"}
                 onclick={() => (activeTab = "guide")}
               >
@@ -201,7 +201,7 @@
             </div>
 
             <footer
-              class="flex flex-col sm:flex-row justify-between items-center p-4 border-t border-ctp-surface0 gap-4"
+              class="surface-layer-1 terminal-border flex flex-col sm:flex-row justify-between items-center p-4 gap-4"
             >
               <span class="text-xs text-ctp-subtext0 font-mono"
                 >start anonymous • sign up to store experiments</span
@@ -209,7 +209,7 @@
               <button
                 type="button"
                 onclick={() => goto("/signup")}
-                class="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2 bg-ctp-blue/20 border border-ctp-blue/40 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all font-mono text-sm"
+                class="w-full sm:w-auto floating-element surface-accent-blue text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust font-mono text-sm flex items-center justify-center gap-2 px-6 py-2"
               >
                 sign up
               </button>

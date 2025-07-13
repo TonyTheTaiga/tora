@@ -1,7 +1,7 @@
 <script lang="ts">
-  import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
   import { DeleteWorkspaceModal } from "$lib/components/modals";
   import EmptyState from "./EmptyState.svelte";
+  import ListCard from "./ListCard.svelte";
   import { Trash2 } from "@lucide/svelte";
   import type { Workspace } from "$lib/types";
 
@@ -27,6 +27,16 @@
     return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
+      year:
+        date.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
+    });
+  }
+
+  function formatTime(date: Date): string {
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   }
 
@@ -47,71 +57,95 @@
   function canDeleteWorkspace(workspace: Workspace): boolean {
     return workspace.role === "OWNER";
   }
+
+  function getWorkspaceItemClass(workspace: Workspace): string {
+    const baseClass = "group layer-slide-up";
+    const surfaceClass = "surface-interactive";
+
+    return `${baseClass} ${surfaceClass}`.trim();
+  }
+
+  function handleWorkspaceClick(workspace: Workspace) {
+    window.location.href = `/workspaces/${workspace.id}`;
+  }
 </script>
 
 {#if filteredWorkspaces.length === 0 && searchQuery}
   <EmptyState type="search" {searchQuery} />
 {:else}
-  <!-- Minimal List Layout -->
-  <div class="space-y-1 font-mono">
-    {#each filteredWorkspaces as workspace}
-      <!-- Workspace item with relative positioning for actions -->
-      <div
-        class="group relative transition-colors hover:bg-ctp-surface0/5 border border-transparent hover:border-ctp-surface0/8 border-l-2 hover:border-l-ctp-blue/30 mb-1"
-      >
-        <!-- Main clickable area -->
-        <a href={`/workspaces/${workspace.id}`} class="block p-3 md:p-4">
-          <div
-            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+  <ListCard
+    items={filteredWorkspaces}
+    getItemClass={getWorkspaceItemClass}
+    onItemClick={handleWorkspaceClick}
+  >
+    {#snippet children(workspace)}
+      <!-- Content - Mobile-first responsive layout -->
+      <div class="flex-1 min-w-0">
+        <!-- Header: Name and date -->
+        <div
+          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 mb-2"
+        >
+          <h3
+            class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate"
           >
-            <!-- Workspace info -->
-            <div class="flex items-center gap-3 min-w-0 flex-1">
-              <!-- Name and description -->
-              <div class="min-w-0 flex-1">
-                <h3
-                  class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate"
-                >
-                  {workspace.name}
-                </h3>
-                {#if workspace.description}
-                  <p class="text-ctp-subtext1 text-sm mt-1 line-clamp-1">
-                    {workspace.description}
-                  </p>
-                {/if}
-              </div>
-            </div>
-
-            <!-- Role and date -->
-            <div class="flex items-center gap-3 text-xs flex-shrink-0 sm:ml-4">
-              <WorkspaceRoleBadge role={workspace.role || "VIEWER"} />
-              <span class="text-ctp-subtext0">
-                {formatDate(workspace.createdAt)}
-              </span>
-            </div>
+            {workspace.name}
+          </h3>
+          <div
+            class="flex items-center gap-2 text-xs text-ctp-subtext0 flex-shrink-0"
+          >
+            <span>{formatDate(workspace.createdAt)}</span>
+            <span class="hidden sm:inline text-ctp-subtext1"
+              >{formatTime(workspace.createdAt)}</span
+            >
           </div>
-        </a>
+        </div>
 
-        <!-- Delete button for owned workspaces -->
-        {#if canDeleteWorkspace(workspace)}
-          <div class="border-t border-ctp-surface0/20 px-3 py-2">
-            <div class="flex items-center justify-end">
-              <button
-                onclick={(e) => {
-                  e.stopPropagation();
-                  openDeleteModal(workspace);
-                }}
-                class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-red/30 sm:p-1"
-                title="delete workspace"
-              >
-                <Trash2 class="w-3 h-3" />
-                <span>Delete</span>
-              </button>
-            </div>
-          </div>
+        <!-- Description -->
+        {#if workspace.description}
+          <p
+            class="text-ctp-subtext1 text-sm mb-2 line-clamp-2 sm:line-clamp-none"
+          >
+            {workspace.description}
+          </p>
         {/if}
+
+        <!-- Role and metadata - Stack on mobile -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 text-xs">
+          <!-- Role badge as a tag-like element -->
+          <div class="flex items-center gap-1 flex-wrap">
+            <span
+              class="bg-ctp-surface0/30 text-ctp-subtext0 px-2 py-1 text-[10px]"
+            >
+              {workspace.role?.toLowerCase() || "viewer"}
+            </span>
+          </div>
+
+          <!-- Metadata -->
+          <div class="flex items-center gap-2 text-ctp-subtext1">
+            <span>workspace</span>
+          </div>
+        </div>
       </div>
-    {/each}
-  </div>
+    {/snippet}
+
+    {#snippet actions(workspace)}
+      {#if canDeleteWorkspace(workspace)}
+        <div class="flex items-center justify-end gap-2">
+          <button
+            onclick={(e) => {
+              e.stopPropagation();
+              openDeleteModal(workspace);
+            }}
+            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-red/30 sm:p-1"
+            title="delete workspace"
+          >
+            <Trash2 class="w-3 h-3" />
+            <span>Delete</span>
+          </button>
+        </div>
+      {/if}
+    {/snippet}
+  </ListCard>
 {/if}
 
 <!-- Delete Workspace Modal -->
