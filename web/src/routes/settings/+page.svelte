@@ -128,7 +128,10 @@
 
 <div class="font-mono">
   <!-- Header -->
-  <PageHeader title="Settings" subtitle="system configuration">
+  <PageHeader
+    title="Settings"
+    subtitle={data?.user?.email || "system configuration"}
+  >
     {#snippet actionButton()}
       <form action="/logout" method="POST">
         <button
@@ -147,38 +150,6 @@
 
   <!-- Main content -->
   <div class="px-4 md:px-6 py-6 space-y-8">
-    <!-- User Profile Section -->
-    <div>
-      <div class="text-base text-ctp-text font-medium mb-4">user profile</div>
-
-      <!-- Primary info - email as filename -->
-      <div class="flex items-center gap-2 mb-3">
-        <div class="text-ctp-green text-sm"></div>
-        <div
-          class="text-sm text-ctp-text font-mono font-semibold break-words min-w-0"
-        >
-          {data?.user?.email}
-        </div>
-        <div class="text-sm text-ctp-subtext0 font-mono ml-auto">
-          {data?.user?.created_at
-            ? new Date(data.user.created_at).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "2-digit",
-              })
-            : ""}
-        </div>
-      </div>
-
-      <!-- Secondary metadata -->
-      <div class="pl-6 space-y-1 text-sm font-mono mb-4">
-        <div class="flex items-center gap-2">
-          <span class="text-ctp-subtext0 w-8">id:</span>
-          <span class="text-ctp-blue truncate min-w-0">{data?.user?.id}</span>
-        </div>
-      </div>
-    </div>
-
     <!-- Workspaces Section -->
     <div>
       <div class="text-base text-ctp-text font-medium mb-4">workspaces</div>
