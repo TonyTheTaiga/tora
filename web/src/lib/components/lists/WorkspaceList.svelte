@@ -104,7 +104,7 @@
                 title="delete workspace"
               >
                 <Trash2 class="w-3 h-3" />
-                <span class="sm:hidden">Delete</span>
+                <span>Delete</span>
               </button>
             </div>
           </div>
