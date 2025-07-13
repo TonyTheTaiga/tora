@@ -17,14 +17,12 @@
   interface Props {
     experiments: Experiment[];
     searchQuery?: string;
-    showSummary?: boolean;
     formatDate?: (date: Date) => string;
   }
 
   let {
     experiments,
     searchQuery = "",
-    showSummary = true,
     formatDate = (date: Date) =>
       date.toLocaleDateString("en-US", {
         month: "short",
@@ -97,32 +95,17 @@
 {#if filteredExperiments.length === 0 && searchQuery}
   <EmptyState type="search" {searchQuery} />
 {:else}
-  <!-- Timeline/Activity Feed Layout -->
+  <!-- Clean List Layout -->
   <div class="space-y-1 font-mono">
-    {#each filteredExperiments as experiment, index}
-      <!-- Timeline item with relative positioning for actions -->
+    {#each filteredExperiments as experiment}
+      <!-- Clean item with relative positioning for actions -->
       <div class={getTimelineItemClass(experiment)}>
         <!-- Main clickable area -->
         <button
           onclick={() => handleExperimentClick(experiment)}
           class="w-full text-left"
         >
-          <div class="flex gap-3 md:gap-4 p-3 md:p-4">
-            <!-- Timeline indicator -->
-            <div class="flex flex-col items-center flex-shrink-0">
-              <!-- Square dot instead of round -->
-              <div
-                class="w-2 h-2 transition-colors {isSelected(experiment.id)
-                  ? 'bg-ctp-blue'
-                  : 'bg-ctp-green'}"
-              ></div>
-              {#if index < filteredExperiments.length - 1}
-                <div
-                  class="w-px bg-ctp-surface0/30 flex-1 mt-2 min-h-[1rem]"
-                ></div>
-              {/if}
-            </div>
-
+          <div class="p-3 md:p-4">
             <!-- Content - Mobile-first responsive layout -->
             <div class="flex-1 min-w-0">
               <!-- Header: Name and date -->
@@ -236,17 +219,4 @@
       </div>
     {/each}
   </div>
-
-  <!-- Summary line -->
-  {#if showSummary}
-    <div
-      class="flex items-center text-sm text-ctp-subtext0 pt-4 border-t border-ctp-surface0/20 mt-6"
-    >
-      <div class="flex-1">
-        {filteredExperiments.length} experiment{filteredExperiments.length !== 1
-          ? "s"
-          : ""} total
-      </div>
-    </div>
-  {/if}
 {/if}
