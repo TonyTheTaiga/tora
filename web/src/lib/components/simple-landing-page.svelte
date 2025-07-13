@@ -137,8 +137,10 @@
           <div class="w-16 sm:w-24 h-0.5 bg-ctp-blue mx-auto"></div>
         </div>
 
-        <article class="w-full max-w-3xl mx-auto">
-          <div class="terminal-chrome overflow-hidden">
+        <article class="w-full max-w-3xl mx-auto layer-fade-in">
+          <div
+            class="terminal-chrome surface-glass-elevated overflow-hidden stack-layer"
+          >
             <header
               class="terminal-chrome-header grid grid-cols-3 items-center"
             >
