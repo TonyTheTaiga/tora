@@ -3,38 +3,6 @@
  */
 
 /**
- * Filter items based on search query
- */
-export function filterItems<T>(
-  items: T[],
-  searchQuery: string,
-  getSearchableText: (item: T) => string,
-): T[] {
-  if (!searchQuery.trim()) return items;
-
-  const query = searchQuery.toLowerCase().trim();
-  return items.filter((item) =>
-    getSearchableText(item).toLowerCase().includes(query),
-  );
-}
-
-/**
- * Focus search input by selector
- */
-export function focusSearchInput(selector = 'input[type="search"]'): void {
-  const searchElement = document.querySelector<HTMLInputElement>(selector);
-  searchElement?.focus();
-}
-
-/**
- * Blur search input by selector
- */
-export function blurSearchInput(selector = 'input[type="search"]'): void {
-  const searchElement = document.querySelector<HTMLInputElement>(selector);
-  searchElement?.blur();
-}
-
-/**
  * Create keyboard event handler for search shortcuts
  */
 export function createSearchKeyboardHandler(options: {
@@ -73,7 +41,10 @@ export function createSearchKeyboardHandler(options: {
         if (onFocusKey) {
           onFocusKey();
         } else {
-          focusSearchInput(searchInputSelector);
+          // Default focus behavior
+          const searchElement =
+            document.querySelector<HTMLInputElement>(searchInputSelector);
+          searchElement?.focus();
         }
         return;
       }
@@ -98,21 +69,6 @@ export function createSearchKeyboardHandler(options: {
         onEscapeKey();
       }
     }
-  };
-}
-
-/**
- * Debounce function for search input
- */
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number,
-): (...args: Parameters<T>) => void {
-  let timeout: ReturnType<typeof setTimeout>;
-
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
   };
 }
 
