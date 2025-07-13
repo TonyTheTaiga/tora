@@ -137,10 +137,8 @@
           <div class="w-16 sm:w-24 h-0.5 bg-ctp-blue mx-auto"></div>
         </div>
 
-        <article class="w-full max-w-3xl mx-auto layer-fade-in">
-          <div
-            class="terminal-chrome surface-glass-elevated overflow-hidden stack-layer"
-          >
+        <article class="w-full max-w-3xl mx-auto">
+          <div class="terminal-chrome overflow-hidden">
             <header
               class="terminal-chrome-header grid grid-cols-3 items-center"
             >
@@ -156,21 +154,29 @@
               </div>
               <div></div>
             </header>
-            <div class="flex surface-layer-1 terminal-border">
+            <div class="flex surface-layer-1">
               <button
                 type="button"
-                class="flex-1 px-4 py-2 text-xs font-mono"
-                class:surface-layer-2={activeTab === "start"}
-                class:opacity-50={activeTab !== "start"}
+                class="flex-1 px-4 py-2 text-xs font-mono border-b-2 transition-colors"
+                class:bg-ctp-surface0={activeTab === "start"}
+                class:text-ctp-text={activeTab === "start"}
+                class:border-ctp-blue={activeTab === "start"}
+                class:text-ctp-subtext0={activeTab !== "start"}
+                class:border-transparent={activeTab !== "start"}
+                class:hover:text-ctp-text={activeTab !== "start"}
                 onclick={() => (activeTab = "start")}
               >
                 quick_start.py
               </button>
               <button
                 type="button"
-                class="flex-1 px-4 py-2 text-xs font-mono"
-                class:surface-layer-2={activeTab === "guide"}
-                class:opacity-50={activeTab !== "guide"}
+                class="flex-1 px-4 py-2 text-xs font-mono border-b-2 transition-colors"
+                class:bg-ctp-surface0={activeTab === "guide"}
+                class:text-ctp-text={activeTab === "guide"}
+                class:border-ctp-blue={activeTab === "guide"}
+                class:text-ctp-subtext0={activeTab !== "guide"}
+                class:border-transparent={activeTab !== "guide"}
+                class:hover:text-ctp-text={activeTab !== "guide"}
                 onclick={() => (activeTab = "guide")}
               >
                 README.md
@@ -209,7 +215,7 @@
               <button
                 type="button"
                 onclick={() => goto("/signup")}
-                class="w-full sm:w-auto floating-element surface-accent-blue text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust font-mono text-sm flex items-center justify-center gap-2 px-6 py-2"
+                class="w-full sm:w-auto text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust font-mono text-sm flex items-center justify-center gap-2 px-6 py-2 border border-ctp-blue"
               >
                 sign up
               </button>
