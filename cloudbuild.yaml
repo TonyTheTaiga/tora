@@ -72,7 +72,7 @@ steps:
           --memory 512Mi \
           --min-instances 0 \
           --max-instances 5 \
-          --set-secrets DATABASE_URL=DATABASE_URL:latest,SUPABASE_URL=SUPABASE_URL:latest,SUPABASE_API_KEY=SUPABASE_KEY:latest,PRIVATE_ANTHROPIC_KEY=ANTHROPIC_KEY:latest,SUPABASE_JWT_SECRET=SUPABASE_JWT_SECRET:latest \
+          --set-secrets DATABASE_URL=DATABASE_URL:latest,SUPABASE_URL=SUPABASE_URL:latest,SUPABASE_API_KEY=SUPABASE_KEY:latest,SUPABASE_JWT_SECRET=SUPABASE_JWT_SECRET:latest \
           --set-env-vars FRONTEND_URL=https://tora-web-1030250455947.us-central1.run.app
 
   # Deploy Web (no longer needs separate push step)
