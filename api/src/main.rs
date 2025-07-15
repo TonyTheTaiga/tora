@@ -12,18 +12,13 @@ mod types;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let settings = settings::Settings::from_env();
-    let pool = PgPoolOptions::new()
+    let db_pool = PgPoolOptions::new()
         .max_connections(20) // Increase based on load
         .min_connections(5)
         .acquire_timeout(Duration::from_secs(30))
         .connect(&settings.database_url)
         .await?;
-
-    let app_state = state::AppState {
-        db_pool: pool,
-        settings,
-    };
-
+    let app_state = state::AppState { db_pool, settings };
     let api_routes = handlers::api_routes(&app_state);
     let app = Router::new().nest("/api", api_routes).with_state(app_state);
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
