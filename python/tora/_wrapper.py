@@ -16,14 +16,14 @@ __all__ = [
 ]
 
 logger = logging.getLogger("tora")
-_CLIENT: Tora | None = None
+_INSTANCE: Tora | None = None
 
 
 def _get_client() -> Tora:
     """Get the global client instance."""
-    if _CLIENT is None:
+    if _INSTANCE is None:
         raise ToraError("Tora client not initialized. Call tora.setup() first.")
-    return _CLIENT
+    return _INSTANCE
 
 
 def setup(
@@ -65,12 +65,12 @@ def setup(
         ToraNetworkError: If there's a network error
 
     """
-    global _CLIENT
-    if _CLIENT is not None:
+    global _INSTANCE
+    if _INSTANCE is not None:
         raise ToraError("Tora client already initialized. Call shutdown() first to reinitialize.")
 
     try:
-        _CLIENT = Tora.create_experiment(
+        _INSTANCE = Tora.create_experiment(
             name=name,
             workspace_id=workspace_id,
             description=description,
@@ -81,13 +81,12 @@ def setup(
             max_buffer_len=max_buffer_len,
         )
         atexit.register(shutdown)
-        experiment_url = f"https://tora-web-1030250455947.us-central1.run.app/experiments/{_CLIENT.experiment_id}"
-        logger.info(f"Tora experiment created: {experiment_url}")
-        print(f"Tora experiment: {experiment_url}")
-        return _CLIENT.experiment_id
+        logger.info(f"Tora experiment created: {_INSTANCE.url}")
+        print(f"Tora experiment: {_INSTANCE.url}")
+        return _INSTANCE.experiment_id
 
     except Exception:
-        _CLIENT = None
+        _INSTANCE = None
         raise
 
 
@@ -122,8 +121,8 @@ def flush() -> None:
         ToraError: If the global client is not initialized
 
     """
-    if _CLIENT is not None:
-        _CLIENT.flush()
+    if _INSTANCE is not None:
+        _INSTANCE.flush()
 
 
 def shutdown() -> None:
@@ -132,14 +131,14 @@ def shutdown() -> None:
     After calling this function, you need to call setup() again
     to reinitialize the client.
     """
-    global _CLIENT
-    if _CLIENT is not None:
+    global _INSTANCE
+    if _INSTANCE is not None:
         try:
-            _CLIENT.shutdown()
+            _INSTANCE.shutdown()
         except Exception as e:
             logger.error(f"Error during shutdown: {e}")
         finally:
-            _CLIENT = None
+            _INSTANCE = None
 
 
 def is_initialized() -> bool:
@@ -149,7 +148,7 @@ def is_initialized() -> bool:
         True if the client is initialized, False otherwise
 
     """
-    return _CLIENT is not None and not _CLIENT.is_closed
+    return _INSTANCE is not None and not _INSTANCE.is_closed
 
 
 def get_experiment_id() -> str | None:
@@ -159,8 +158,8 @@ def get_experiment_id() -> str | None:
         The experiment ID if initialized, None otherwise
 
     """
-    if _CLIENT is not None and not _CLIENT.is_closed:
-        return _CLIENT.experiment_id
+    if _INSTANCE is not None and not _INSTANCE.is_closed:
+        return _INSTANCE.experiment_id
     return None
 
 

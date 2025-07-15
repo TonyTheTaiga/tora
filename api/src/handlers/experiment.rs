@@ -163,7 +163,7 @@ pub async fn create_experiment(
         updated_at,
         available_metrics: vec![],
         workspace_id: Some(request.workspace_id),
-        url: format!("{frontend_url}/experiments/{experiment_id:?}"),
+        url: format!("{frontend_url}/experiments/{experiment_id}"),
     };
 
     (
@@ -274,7 +274,7 @@ pub async fn list_experiments(
                             updated_at,
                             available_metrics: available_metrics.unwrap_or_default(),
                             workspace_id: Some(workspace_id),
-                            url: format!("{frontend_url:?}/experiments/{id:?}"),
+                            url: format!("{frontend_url}/experiments/{id}"),
                         }
                     },
                 )
@@ -374,7 +374,7 @@ pub async fn get_experiment(
                 updated_at,
                 available_metrics: available_metrics.unwrap_or_default(),
                 workspace_id: Some(workspace_id),
-                url: format!("{frontend_url}/experiments/{id:?}"),
+                url: format!("{frontend_url}/experiments/{id}"),
             };
 
             Json(Response {
@@ -501,7 +501,7 @@ pub async fn update_experiment(
                 updated_at,
                 available_metrics: vec![], // TODO: Fetch from metrics table
                 workspace_id: None,        // We don't have workspace_id in the update
-                url: format!("{frontend_url:?}/experiments/{id:?}"),
+                url: format!("{frontend_url}/experiments/{id}"),
             };
 
             Json(Response {
@@ -765,7 +765,7 @@ pub async fn list_workspace_experiments(
                             updated_at,
                             available_metrics: available_metrics.unwrap_or_default(),
                             workspace_id: Some(workspace_id.clone()),
-                            url: format!("{frontend_url}/experiments/{id:?}"),
+                            url: format!("{frontend_url}/experiments/{id}"),
                         }
                     },
                 )
