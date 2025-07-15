@@ -183,20 +183,9 @@ Create new workspace.
 **TORA_API_KEY**
 API key for authentication
 
-**TORA_BASE_URL**
-Custom server URL
-Default: https://tora-1030250455947.us-central1.run.app/api
-
 **AUTHENTICATION**
 Tora operates in anonymous mode by default. For workspace features and
 collaboration, provide an API key via environment variable or function parameter.
-
-**BUFFERING**
-Global API Default buffer size is 1 (immediate sending)
-Client API Default buffer size is 25 (batched sending)
-
-       Metrics are automatically flushed when buffer is full or during shutdown.
-       Call flush() to force immediate sending.
 
 ---
 
