@@ -1,9 +1,45 @@
 # Install Tora SDK
 $ pip install tora
 
-from tora import setup, tlog
-setup("hello, world!")
+# Simple Global API
+import tora
 
-# Log metrics
-tlog("precision", 0.92)
-tlog("recall", 0.76)
+tora.setup(
+    name="my-experiment",
+    hyperparams={"lr": 0.001, "batch_size": 32}
+)
+
+tora.tlog("accuracy", 0.95, step=100)
+tora.tlog("loss", 0.05, step=100)
+
+# Advanced Client API
+client = tora.Tora.create_experiment(
+    name="my-ml-experiment",
+    workspace_id="your-workspace-id",
+    hyperparams={"learning_rate": 0.001, "batch_size": 32},
+    tags=["pytorch", "cnn"]
+)
+
+for epoch in range(100):
+    client.log("train_loss", train_loss, step=epoch)
+    client.log("val_accuracy", val_acc, step=epoch)
+
+client.shutdown()
+
+# Context Manager
+with tora.Tora.create_experiment("my-experiment") as client:
+    client.log("metric", 1.0)
+
+# Load Existing Experiment
+client = tora.Tora.load_experiment("exp-abc123")
+client.log("new_metric", 42.0)
+
+# Create Workspace
+workspace = tora.create_workspace(
+    name="My ML Project",
+    description="Experiments for the new model"
+)
+
+# Environment Variables
+export TORA_API_KEY="your-api-key"
+export TORA_BASE_URL="https://custom-server.com/api"
