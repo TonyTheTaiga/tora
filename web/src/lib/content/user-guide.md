@@ -181,11 +181,32 @@ Create new workspace.
 **ENVIRONMENT VARIABLES**
 
 **TORA_API_KEY**
-API key for authentication
+API key for authentication. When set, this environment variable will be automatically used by all functions that accept an `api_key` parameter, eliminating the need to pass the key explicitly in your code.
 
 **AUTHENTICATION**
-Tora operates in anonymous mode by default. For workspace features and
-collaboration, provide an API key via environment variable or function parameter.
+Tora operates in anonymous mode by default, allowing you to track experiments without any authentication. Authentication is only required if you want to:
+
+- Associate experiments with your user account
+- Create and manage workspaces
+- Access workspace-specific features and collaboration tools
+
+For functions that accept an `api_key` parameter, you can either:
+
+- Set the `TORA_API_KEY` environment variable (recommended)
+- Pass the API key directly as a function parameter
+
+When using the environment variable, simply set it in your shell:
+
+```bash
+export TORA_API_KEY=your_api_key_here
+```
+
+Or in Python:
+
+```python
+import os
+os.environ['TORA_API_KEY'] = 'your_api_key_here'
+```
 
 ---
 
