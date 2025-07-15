@@ -216,7 +216,7 @@
                     ></pre>
                 {/if}
               {:else if activeTab === "guide"}
-                <div class="markdown-content">
+                <div class="markdown-content break-words">
                   {@html marked(userGuide)}
                 </div>
               {/if}
@@ -249,6 +249,8 @@
   .markdown-content {
     @apply text-xs sm:text-sm md:text-base leading-relaxed text-left;
     color: var(--color-ctp-text);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   .markdown-content :global(h1) {
@@ -299,6 +301,23 @@
     @apply px-1 py-0.5 rounded font-mono text-xs;
     background-color: rgba(var(--color-ctp-surface0), 0.3);
     color: var(--color-ctp-green);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .markdown-content :global(pre) {
+    @apply font-mono text-xs p-3 rounded mb-3;
+    background-color: rgba(var(--color-ctp-surface0), 0.3);
+    color: var(--color-ctp-text);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .markdown-content :global(pre code) {
+    @apply p-0;
+    background-color: transparent;
+    white-space: pre-wrap;
   }
 
   .markdown-content :global(hr) {
