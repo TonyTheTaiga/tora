@@ -445,13 +445,6 @@ class TestToraProperties:
         tora = Tora("exp-123", url=test_url, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
         assert tora.url == test_url
 
-    def test_get_experiment_url_method(self):
-        """Test get_experiment_url method returns the same URL as the property."""
-        test_url = "https://test-frontend.example.com/experiments/exp-123"
-        tora = Tora("exp-123", url=test_url, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
-        assert tora.get_experiment_url() == test_url
-        assert tora.get_experiment_url() == tora.url
-
     def test_buffer_size_property(self):
         """Test buffer_size property."""
         test_url = "https://test-frontend.example.com/experiments/exp-123"

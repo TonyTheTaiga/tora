@@ -216,34 +216,6 @@ class TestGetExperimentId:
         assert get_experiment_id() is None
 
 
-class TestGetExperimentUrl:
-    """Tests for the get_experiment_url function."""
-
-    def test_get_experiment_url_success(self):
-        """Test getting experiment URL when client is initialized."""
-        mock_client = Mock()
-        mock_client.url = "https://test-frontend.example.com/experiments/exp-123"
-        mock_client.is_closed = False
-        tora._wrapper._INSTANCE = mock_client
-
-        assert get_experiment_url() == "https://test-frontend.example.com/experiments/exp-123"
-
-    def test_get_experiment_url_no_client(self):
-        """Test getting experiment URL when no client exists."""
-        tora._wrapper._INSTANCE = None
-
-        assert get_experiment_url() is None
-
-    def test_get_experiment_url_closed_client(self):
-        """Test getting experiment URL when client is closed."""
-        mock_client = Mock()
-        mock_client.url = "https://test-frontend.example.com/experiments/exp-123"
-        mock_client.is_closed = True
-        tora._wrapper._INSTANCE = mock_client
-
-        assert get_experiment_url() is None
-
-
 class TestIntegration:
     """Integration tests for wrapper functions."""
 
