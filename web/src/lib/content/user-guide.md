@@ -180,9 +180,6 @@ Create new workspace.
 
 **ENVIRONMENT VARIABLES**
 
-**TORA_API_KEY**
-API key for authentication. When set, this environment variable will be automatically used by all functions that accept an `api_key` parameter, eliminating the need to pass the key explicitly in your code.
-
 **AUTHENTICATION**
 Tora operates in anonymous mode by default, allowing you to track experiments without any authentication. Authentication is only required if you want to:
 
