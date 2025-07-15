@@ -205,13 +205,13 @@
               {#if activeTab === "start"}
                 {#if highlightedGettingStarted}
                   <div
-                    class="text-xs sm:text-sm md:text-base leading-relaxed overflow-x-auto text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent"
+                    class="text-xs sm:text-sm md:text-base leading-relaxed text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent [&_pre]:whitespace-pre-wrap [&_pre]:break-words"
                   >
                     {@html highlightedGettingStarted}
                   </div>
                 {:else}
                   <pre
-                    class="text-xs sm:text-sm md:text-base text-ctp-text font-mono leading-relaxed overflow-x-auto text-left"><code
+                    class="text-xs sm:text-sm md:text-base text-ctp-text font-mono leading-relaxed text-left whitespace-pre-wrap break-words"><code
                       >{@html formattedGettingStarted}</code
                     ></pre>
                 {/if}
