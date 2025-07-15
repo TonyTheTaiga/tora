@@ -5,7 +5,6 @@ use axum::{Extension, Json, extract::State, http::StatusCode, response::IntoResp
 
 use uuid::Uuid;
 
-// Get dashboard overview with workspaces and recent experiments in a single call
 pub async fn get_dashboard_overview(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
@@ -24,7 +23,6 @@ pub async fn get_dashboard_overview(
         }
     };
 
-    // Fetch workspaces with experiment counts - optimized query
     let workspaces_result = sqlx::query_as::<_, (String, String, Option<String>, chrono::DateTime<chrono::Utc>, String, i64, i64)>(
         r#"
         SELECT w.id::text, w.name, w.description, w.created_at, wr.name as role,
@@ -90,6 +88,7 @@ pub async fn get_dashboard_overview(
                 )
                 .collect();
 
+            let frontend_url = app_state.settings.frontend_url;
             let recent_experiments: Vec<Experiment> = experiment_rows
                 .into_iter()
                 .map(
@@ -105,7 +104,7 @@ pub async fn get_dashboard_overview(
                         available_metrics,
                     )| {
                         Experiment {
-                            id,
+                            id: id.to_string(),
                             name,
                             description,
                             hyperparams: hyperparams.unwrap_or_default(),
@@ -114,6 +113,7 @@ pub async fn get_dashboard_overview(
                             updated_at,
                             available_metrics: available_metrics.unwrap_or_default(),
                             workspace_id: Some(workspace_id),
+                            url: format!("{frontend_url:?}/experiments/{id:?}"),
                         }
                     },
                 )

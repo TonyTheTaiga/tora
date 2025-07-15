@@ -152,8 +152,9 @@ pub async fn create_experiment(
             .into_response();
     }
 
+    let frontend_url = app_state.settings.frontend_url;
     let experiment = Experiment {
-        id: experiment_id,
+        id: experiment_id.to_string(),
         name,
         description,
         hyperparams: hyperparams.unwrap_or_default(),
@@ -162,6 +163,7 @@ pub async fn create_experiment(
         updated_at,
         available_metrics: vec![],
         workspace_id: Some(request.workspace_id),
+        url: format!("{frontend_url}/experiments/{experiment_id:?}"),
     };
 
     (
@@ -245,6 +247,7 @@ pub async fn list_experiments(
         .await
     };
 
+    let frontend_url = app_state.settings.frontend_url;
     match result {
         Ok(rows) => {
             let experiments: Vec<Experiment> = rows
@@ -262,7 +265,7 @@ pub async fn list_experiments(
                         available_metrics,
                     )| {
                         Experiment {
-                            id,
+                            id: id.to_string(),
                             name,
                             description,
                             hyperparams: hyperparams.unwrap_or_default(),
@@ -271,6 +274,7 @@ pub async fn list_experiments(
                             updated_at,
                             available_metrics: available_metrics.unwrap_or_default(),
                             workspace_id: Some(workspace_id),
+                            url: format!("{frontend_url:?}/experiments/{id:?}"),
                         }
                     },
                 )
@@ -347,6 +351,7 @@ pub async fn get_experiment(
     .fetch_one(&app_state.db_pool)
     .await;
 
+    let frontend_url = app_state.settings.frontend_url;
     match result {
         Ok((
             id,
@@ -360,7 +365,7 @@ pub async fn get_experiment(
             available_metrics,
         )) => {
             let experiment = Experiment {
-                id,
+                id: id.to_string(),
                 name,
                 description,
                 hyperparams: hyperparams.unwrap_or_default(),
@@ -369,6 +374,7 @@ pub async fn get_experiment(
                 updated_at,
                 available_metrics: available_metrics.unwrap_or_default(),
                 workspace_id: Some(workspace_id),
+                url: format!("{frontend_url}/experiments/{id:?}"),
             };
 
             Json(Response {
@@ -472,7 +478,6 @@ pub async fn update_experiment(
         _ => {}
     }
 
-    // Update the experiment
     let result = sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>)>(
         "UPDATE experiment SET name = $1, description = $2, tags = $3, updated_at = NOW() WHERE id = $4 RETURNING id::text, name, description, hyperparams, tags, created_at, updated_at",
     )
@@ -483,10 +488,11 @@ pub async fn update_experiment(
     .fetch_one(&app_state.db_pool)
     .await;
 
+    let frontend_url = app_state.settings.frontend_url;
     match result {
         Ok((id, name, description, hyperparams, tags, created_at, updated_at)) => {
             let experiment = Experiment {
-                id,
+                id: id.to_string(),
                 name,
                 description,
                 hyperparams: hyperparams.unwrap_or_default(),
@@ -495,6 +501,7 @@ pub async fn update_experiment(
                 updated_at,
                 available_metrics: vec![], // TODO: Fetch from metrics table
                 workspace_id: None,        // We don't have workspace_id in the update
+                url: format!("{frontend_url:?}/experiments/{id:?}"),
             };
 
             Json(Response {
@@ -732,6 +739,7 @@ pub async fn list_workspace_experiments(
     .fetch_all(&app_state.db_pool)
     .await;
 
+    let frontend_url = app_state.settings.frontend_url;
     match result {
         Ok(rows) => {
             let experiments: Vec<Experiment> = rows
@@ -748,7 +756,7 @@ pub async fn list_workspace_experiments(
                         available_metrics,
                     )| {
                         Experiment {
-                            id,
+                            id: id.to_string(),
                             name,
                             description,
                             hyperparams: hyperparams.unwrap_or_default(),
@@ -757,6 +765,7 @@ pub async fn list_workspace_experiments(
                             updated_at,
                             available_metrics: available_metrics.unwrap_or_default(),
                             workspace_id: Some(workspace_id.clone()),
+                            url: format!("{frontend_url}/experiments/{id:?}"),
                         }
                     },
                 )
