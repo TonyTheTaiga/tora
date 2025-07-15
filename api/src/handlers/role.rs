@@ -1,8 +1,8 @@
+use crate::state::AppState;
 use crate::types::{Response, WorkspaceRole};
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
-use sqlx::PgPool;
 
-pub async fn list_workspace_roles(State(pool): State<PgPool>) -> impl IntoResponse {
+pub async fn list_workspace_roles(State(app_state): State<AppState>) -> impl IntoResponse {
     let result = sqlx::query_as::<_, WorkspaceRole>(
         r#"
         SELECT id::text, name
@@ -10,7 +10,7 @@ pub async fn list_workspace_roles(State(pool): State<PgPool>) -> impl IntoRespon
         ORDER BY name
         "#,
     )
-    .fetch_all(&pool)
+    .fetch_all(&app_state.db_pool)
     .await;
 
     match result {

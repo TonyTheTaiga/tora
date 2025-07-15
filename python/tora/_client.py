@@ -72,11 +72,8 @@ def create_workspace(
     if len(name) > 255:
         raise ToraValidationError("Workspace name cannot exceed 255 characters")
 
-    if description is not None:
-        if not isinstance(description, str):
-            raise ToraValidationError("Workspace description must be a string")
-        if len(description) > 1000:
-            raise ToraValidationError("Workspace description cannot exceed 1000 characters")
+    if description is not None and len(description) > 1000:
+        raise ToraValidationError("Workspace description cannot exceed 1000 characters")
 
     server_url = server_url or TORA_BASE_URL
     resolved_api_key = Tora._get_api_key(api_key)
@@ -129,6 +126,7 @@ class Tora:
     def __init__(
         self,
         experiment_id: str,
+        url: str,
         description: str | None = None,
         hyperparams: Mapping[str, HPValue] | None = None,
         tags: list[str] | None = None,
@@ -140,6 +138,7 @@ class Tora:
 
         Args:
             experiment_id: The ID of the experiment
+            url: link to the experiment
             description: Optional description of the experiment
             hyperparams: Optional hyperparameters for the experiment
             tags: Optional list of tags for the experiment
@@ -159,6 +158,7 @@ class Tora:
             raise ToraValidationError("Experiment ID must be a non-empty string")
 
         self._experiment_id = experiment_id.strip()
+        self._url = url
         self._description = description
         self._hyperparams = hyperparams
         self._tags = tags
@@ -265,7 +265,8 @@ class Tora:
                     raise ToraAPIError("Invalid response format from experiment creation API")
 
                 experiment_data = json_data["data"]
-                experiment_id = experiment_data.get("id")
+                experiment_id = experiment_data["id"]
+                experiment_url = experiment_data["url"]
 
                 if not experiment_id:
                     raise ToraAPIError("No experiment ID in response")
@@ -286,6 +287,7 @@ class Tora:
 
         return cls(
             experiment_id=experiment_id,
+            url=experiment_url,
             description=description,
             hyperparams=hyperparams,
             tags=tags,
@@ -405,6 +407,7 @@ class Tora:
 
         return cls(
             experiment_id=data["id"],
+            url=data["url"],
             description=data.get("description"),
             hyperparams=hyperparams,
             tags=data.get("tags"),
@@ -444,9 +447,6 @@ class Tora:
         step = validate_step(step)
 
         if metadata is not None:
-            if not isinstance(metadata, dict):
-                raise ToraValidationError("Metadata must be a dictionary")
-
             try:
                 import json
 
@@ -563,6 +563,11 @@ class Tora:
         return self._experiment_id
 
     @property
+    def url(self) -> str:
+        """Returns the experiment url"""
+        return self._url
+
+    @property
     def buffer_size(self) -> int:
         """Get the current number of buffered metrics."""
         return len(self._buffer)
@@ -594,15 +599,6 @@ class Tora:
         """
         for name, value in metrics.items():
             self.log(name, value, step=step)
-
-    def get_experiment_url(self) -> str:
-        """Return the web URL for this experiment.
-
-        Returns:
-            The experiment URL for viewing in the web dashboard
-
-        """
-        return f"https://tora-web-1030250455947.us-central1.run.app/experiments/{self.experiment_id}"
 
     def __repr__(self) -> str:
         """Return string representation of the Tora client."""

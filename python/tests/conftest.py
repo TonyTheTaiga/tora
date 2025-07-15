@@ -1,7 +1,3 @@
-"""
-Pytest configuration and fixtures for Tora SDK tests.
-"""
-
 import contextlib
 from unittest.mock import Mock
 
@@ -12,14 +8,12 @@ from tora._http import HttpClient, HttpResponse
 
 @pytest.fixture
 def mock_http_client():
-    """Mock HTTP client for testing."""
     client = Mock(spec=HttpClient)
     return client
 
 
 @pytest.fixture
 def mock_response():
-    """Mock HTTP response for testing."""
     response = Mock(spec=HttpResponse)
     response.status_code = 200
     response.text = '{"status": 200, "data": {}}'
@@ -30,7 +24,6 @@ def mock_response():
 
 @pytest.fixture
 def sample_experiment_data():
-    """Sample experiment data for testing."""
     return {
         "id": "exp-123",
         "name": "test-experiment",
@@ -44,12 +37,12 @@ def sample_experiment_data():
         "updated_at": "2023-01-01T00:00:00Z",
         "available_metrics": ["accuracy", "loss"],
         "workspace_id": "ws-123",
+        "url": "https://test-frontend.example.com/experiments/exp-123",
     }
 
 
 @pytest.fixture
 def sample_workspace_data():
-    """Sample workspace data for testing."""
     return {
         "id": "ws-123",
         "name": "test-workspace",
@@ -61,7 +54,6 @@ def sample_workspace_data():
 
 @pytest.fixture
 def sample_hyperparams():
-    """Sample hyperparameters for testing."""
     return {
         "learning_rate": 0.01,
         "batch_size": 32,
@@ -72,13 +64,11 @@ def sample_hyperparams():
 
 @pytest.fixture
 def sample_tags():
-    """Sample tags for testing."""
     return ["test", "ml", "experiment"]
 
 
 @pytest.fixture
 def mock_successful_response(sample_experiment_data):
-    """Mock successful API response."""
     response = Mock(spec=HttpResponse)
     response.status_code = 200
     response.json.return_value = {"status": 200, "data": sample_experiment_data}
@@ -88,7 +78,6 @@ def mock_successful_response(sample_experiment_data):
 
 @pytest.fixture
 def mock_error_response():
-    """Mock error API response."""
     response = Mock(spec=HttpResponse)
     response.status_code = 400
     response.text = "Bad Request"
@@ -105,33 +94,27 @@ def mock_error_response():
 
 @pytest.fixture(autouse=True)
 def reset_global_client():
-    """Reset global client state before each test."""
     import tora._wrapper
 
-    tora._wrapper._CLIENT = None
+    tora._wrapper._INSTANCE = None
     yield
-    # Cleanup after test
-    if tora._wrapper._CLIENT:
+    if tora._wrapper._INSTANCE:
         with contextlib.suppress(Exception):
-            tora._wrapper._CLIENT.shutdown()
-        tora._wrapper._CLIENT = None
+            tora._wrapper._INSTANCE.shutdown()
+        tora._wrapper._INSTANCE = None
 
 
 @pytest.fixture(autouse=True)
 def isolate_environment(monkeypatch):
-    """Isolate environment variables to prevent production access."""
-    # Clear any existing production environment variables
     monkeypatch.delenv("TORA_API_KEY", raising=False)
     monkeypatch.delenv("TORA_BASE_URL", raising=False)
 
-    # Set safe test defaults
     monkeypatch.setenv("TORA_API_KEY", "test-api-key-isolated")
     monkeypatch.setenv("TORA_BASE_URL", "https://test-isolated.example.com/api")
 
 
 @pytest.fixture
 def env_vars(monkeypatch):
-    """Set up environment variables for testing."""
     monkeypatch.setenv("TORA_API_KEY", "test-api-key")
     monkeypatch.setenv("TORA_BASE_URL", "https://test.tora.dev/api")
     return {

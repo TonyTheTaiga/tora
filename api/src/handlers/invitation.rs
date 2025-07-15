@@ -1,4 +1,5 @@
 use crate::middleware::auth::AuthenticatedUser;
+use crate::state::AppState;
 use crate::types::{CreateInvitationRequest, InvitationActionQuery, Response, WorkspaceInvitation};
 use axum::{
     Extension, Json,
@@ -7,12 +8,11 @@ use axum::{
     response::IntoResponse,
 };
 
-use sqlx::PgPool;
 use uuid::Uuid;
 
 pub async fn create_invitation(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
     Json(request): Json<CreateInvitationRequest>,
 ) -> impl IntoResponse {
     let from_user_uuid = match Uuid::parse_str(&user.id) {
@@ -31,7 +31,7 @@ pub async fn create_invitation(
 
     let to_user_result = sqlx::query_as::<_, (Uuid,)>("SELECT id FROM auth.users WHERE email = $1")
         .bind(&request.email)
-        .fetch_optional(&pool)
+        .fetch_optional(&app_state.db_pool)
         .await;
 
     let to_user_uuid = match to_user_result {
@@ -99,7 +99,7 @@ pub async fn create_invitation(
     .bind(workspace_uuid)
     .bind(role_uuid)
     .bind("PENDING") // Initial status
-    .fetch_one(&pool)
+    .fetch_one(&app_state.db_pool)
     .await;
 
     match result {
@@ -127,7 +127,7 @@ pub async fn create_invitation(
 
 pub async fn list_invitations(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
 ) -> impl IntoResponse {
     let user_uuid = match Uuid::parse_str(&user.id) {
         Ok(uuid) => uuid,
@@ -162,7 +162,7 @@ pub async fn list_invitations(
         "#,
     )
     .bind(user_uuid)
-    .fetch_all(&pool)
+    .fetch_all(&app_state.db_pool)
     .await;
 
     match result {
@@ -187,7 +187,7 @@ pub async fn list_invitations(
 
 pub async fn respond_to_invitation(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
     Query(query): Query<InvitationActionQuery>,
 ) -> impl IntoResponse {
     let invitation_uuid = match Uuid::parse_str(&query.invitation_id) {
@@ -218,7 +218,7 @@ pub async fn respond_to_invitation(
         }
     };
 
-    let mut tx = match pool.begin().await {
+    let mut tx = match app_state.db_pool.begin().await {
         Ok(tx) => tx,
         Err(e) => {
             eprintln!("Failed to begin transaction: {e}");

@@ -1,31 +1,26 @@
 use axum::Router;
 use sqlx::postgres::PgPoolOptions;
-use std::env;
 use std::time::Duration;
 use tokio::signal;
 
 mod handlers;
 mod middleware;
+mod settings;
+mod state;
 mod types;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let pool = match env::var("DATABASE_URL") {
-        Ok(database_url) => {
-            PgPoolOptions::new()
-                .max_connections(20) // Increase based on load
-                .min_connections(5)
-                .acquire_timeout(Duration::from_secs(30))
-                .connect(&database_url)
-                .await?
-        }
-        Err(_) => {
-            eprintln!("Error: DATABASE_URL environment variable not set");
-            return Err("DATABASE_URL not set".into());
-        }
-    };
-    let api_routes = handlers::api_routes(&pool);
-    let app = Router::new().nest("/api", api_routes).with_state(pool);
+    let settings = settings::Settings::from_env();
+    let db_pool = PgPoolOptions::new()
+        .max_connections(20) // Increase based on load
+        .min_connections(5)
+        .acquire_timeout(Duration::from_secs(30))
+        .connect(&settings.database_url)
+        .await?;
+    let app_state = state::AppState { db_pool, settings };
+    let api_routes = handlers::api_routes(&app_state);
+    let app = Router::new().nest("/api", api_routes).with_state(app_state);
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())

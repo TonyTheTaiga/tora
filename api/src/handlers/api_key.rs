@@ -1,4 +1,5 @@
 use crate::middleware::auth::AuthenticatedUser;
+use crate::state::AppState;
 use crate::types::{ApiKey, CreateApiKeyRequest, Response};
 use axum::{
     Extension, Json,
@@ -9,12 +10,11 @@ use axum::{
 use rand::distributions::Alphanumeric;
 use rand::{Rng, thread_rng};
 use sha2::{Digest, Sha256};
-use sqlx::PgPool;
 use uuid::Uuid;
 
 pub async fn create_api_key(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
     Json(request): Json<CreateApiKeyRequest>,
 ) -> impl IntoResponse {
     let key_value: String = thread_rng()
@@ -48,7 +48,7 @@ pub async fn create_api_key(
     .bind(user_uuid)
     .bind(&request.name)
     .bind(&key_hash)
-    .fetch_one(&pool)
+    .fetch_one(&app_state.db_pool)
     .await;
 
     match result {
@@ -79,7 +79,7 @@ pub async fn create_api_key(
 
 pub async fn list_api_keys(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
 ) -> impl IntoResponse {
     let user_uuid = match Uuid::parse_str(&user.id) {
         Ok(uuid) => uuid,
@@ -104,7 +104,7 @@ pub async fn list_api_keys(
         "#,
     )
     .bind(user_uuid)
-    .fetch_all(&pool)
+    .fetch_all(&app_state.db_pool)
     .await;
 
     match result {
@@ -129,7 +129,7 @@ pub async fn list_api_keys(
 
 pub async fn revoke_api_key(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
     Path(key_id): Path<String>,
 ) -> impl IntoResponse {
     let user_uuid = match Uuid::parse_str(&user.id) {
@@ -169,7 +169,7 @@ pub async fn revoke_api_key(
     )
     .bind(key_uuid)
     .bind(user_uuid)
-    .execute(&pool)
+    .execute(&app_state.db_pool)
     .await;
 
     match result {

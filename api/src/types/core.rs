@@ -65,6 +65,7 @@ pub struct Experiment {
     pub updated_at: chrono::DateTime<chrono::Utc>,
     pub available_metrics: Vec<String>,
     pub workspace_id: Option<String>,
+    pub url: String,
 }
 
 #[derive(Deserialize, Serialize, Debug)]

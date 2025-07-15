@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tora"
-version = "0.0.6"
+version = "0.0.7"
 description = "Python SDK for Tora ML experiment tracking platform"
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -133,3 +133,8 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+]

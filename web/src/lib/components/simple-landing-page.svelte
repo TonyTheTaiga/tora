@@ -8,6 +8,7 @@
   import { gettingStartedContent, userGuide } from "$lib/content";
 
   let activeTab: "start" | "guide" = "guide";
+  let isMaximized = false;
 
   const headline = "Pure Speed. Pure Insight. A New Experiment Tracker.";
 
@@ -137,17 +138,29 @@
           <div class="w-16 sm:w-24 h-0.5 bg-ctp-blue mx-auto"></div>
         </div>
 
-        <article class="w-full max-w-3xl mx-auto layer-fade-in">
+        <article
+          class="w-full max-w-3xl mx-auto layer-fade-in"
+          class:maximized={isMaximized}
+        >
           <div
             class="terminal-chrome surface-glass-elevated overflow-hidden stack-layer"
+            class:maximized-terminal={isMaximized}
           >
             <header
               class="terminal-chrome-header grid grid-cols-3 items-center"
             >
               <div class="flex space-x-2">
-                <div class="w-3 h-3 rounded-full bg-ctp-blue"></div>
-                <div class="w-3 h-3 rounded-full bg-ctp-blue"></div>
-                <div class="w-3 h-3 rounded-full bg-ctp-blue"></div>
+                <div class="w-3 h-3 rounded-full bg-ctp-overlay0"></div>
+                <div class="w-3 h-3 rounded-full bg-ctp-overlay0"></div>
+                <button
+                  type="button"
+                  onclick={() => (isMaximized = !isMaximized)}
+                  class="w-3 h-3 rounded-full bg-ctp-blue cursor-pointer"
+                  title={isMaximized ? "Restore" : "Maximize"}
+                  aria-label={isMaximized
+                    ? "Restore terminal window"
+                    : "Maximize terminal window"}
+                ></button>
               </div>
               <div
                 class="text-center text-xs text-ctp-subtext0 font-mono hidden sm:inline"
@@ -187,22 +200,23 @@
 
             <div
               class="p-4 sm:p-6 max-h-[220px] sm:min-h-[320px] overflow-y-auto"
+              class:maximized-content={isMaximized}
             >
               {#if activeTab === "start"}
                 {#if highlightedGettingStarted}
                   <div
-                    class="text-xs sm:text-sm md:text-base leading-relaxed overflow-x-auto text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent"
+                    class="text-xs sm:text-sm md:text-base leading-relaxed text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent [&_pre]:whitespace-pre-wrap [&_pre]:break-words"
                   >
                     {@html highlightedGettingStarted}
                   </div>
                 {:else}
                   <pre
-                    class="text-xs sm:text-sm md:text-base text-ctp-text font-mono leading-relaxed overflow-x-auto text-left"><code
+                    class="text-xs sm:text-sm md:text-base text-ctp-text font-mono leading-relaxed text-left whitespace-pre-wrap break-words"><code
                       >{@html formattedGettingStarted}</code
                     ></pre>
                 {/if}
               {:else if activeTab === "guide"}
-                <div class="markdown-content">
+                <div class="markdown-content break-words">
                   {@html marked(userGuide)}
                 </div>
               {/if}
@@ -235,6 +249,8 @@
   .markdown-content {
     @apply text-xs sm:text-sm md:text-base leading-relaxed text-left;
     color: var(--color-ctp-text);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   .markdown-content :global(h1) {
@@ -285,6 +301,23 @@
     @apply px-1 py-0.5 rounded font-mono text-xs;
     background-color: rgba(var(--color-ctp-surface0), 0.3);
     color: var(--color-ctp-green);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .markdown-content :global(pre) {
+    @apply font-mono text-xs p-3 rounded mb-3;
+    background-color: rgba(var(--color-ctp-surface0), 0.3);
+    color: var(--color-ctp-text);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .markdown-content :global(pre code) {
+    @apply p-0;
+    background-color: transparent;
+    white-space: pre-wrap;
   }
 
   .markdown-content :global(hr) {
@@ -296,5 +329,19 @@
     @apply border-l-2 pl-4 italic;
     border-color: var(--color-ctp-blue);
     color: var(--color-ctp-subtext1);
+  }
+
+  /* Maximized terminal styles */
+  .maximized {
+    @apply fixed inset-0 z-50 max-w-none w-full h-full m-0;
+  }
+
+  .maximized-terminal {
+    @apply h-full;
+  }
+
+  .maximized-content {
+    @apply max-h-none min-h-0;
+    height: calc(100vh - 200px);
   }
 </style>

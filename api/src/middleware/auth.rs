@@ -1,3 +1,4 @@
+use crate::state;
 use crate::types;
 use axum::{
     Json,
@@ -9,7 +10,6 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use sqlx::PgPool;
 use supabase_auth::models::AuthClient;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -37,19 +37,22 @@ impl IntoResponse for AuthError {
     }
 }
 
-pub fn protected_route<T>(method_router: MethodRouter<T>, pool: &sqlx::PgPool) -> MethodRouter<T>
+pub fn protected_route<T>(
+    method_router: MethodRouter<T>,
+    app_state: &state::AppState,
+) -> MethodRouter<T>
 where
     T: Clone + Send + Sync + 'static,
 {
     method_router.layer(middleware::from_fn_with_state(
-        pool.clone(),
+        app_state.clone(),
         auth_middleware,
     ))
 }
 
 pub async fn auth_middleware(
     headers: HeaderMap,
-    State(pool): State<PgPool>,
+    State(app_state): State<state::AppState>,
     mut req: Request,
     next: Next,
 ) -> Result<Response, AuthError> {
@@ -57,7 +60,7 @@ pub async fn auth_middleware(
     First check for API key
     */
     if let Some(api_key) = extract_api_key(&headers) {
-        match validate_api_key(pool, &api_key).await {
+        match validate_api_key(app_state.db_pool, &api_key).await {
             Ok(authenticated_user) => {
                 req.extensions_mut().insert(authenticated_user);
                 return Ok(next.run(req).await);

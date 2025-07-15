@@ -1,4 +1,5 @@
 use crate::middleware::auth::AuthenticatedUser;
+use crate::state::AppState;
 use crate::types::{BatchCreateMetricsRequest, CreateMetricRequest, Metric, Response};
 use axum::{
     Extension, Json,
@@ -7,12 +8,11 @@ use axum::{
     response::IntoResponse,
 };
 
-use sqlx::PgPool;
 use uuid::Uuid;
 
 pub async fn get_metrics(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
 ) -> impl IntoResponse {
     let user_uuid = match Uuid::parse_str(&user.id) {
@@ -54,7 +54,7 @@ pub async fn get_metrics(
     )
     .bind(experiment_uuid)
     .bind(user_uuid)
-    .fetch_one(&pool)
+    .fetch_one(&app_state.db_pool)
     .await;
 
     match access_check {
@@ -86,7 +86,7 @@ pub async fn get_metrics(
         "SELECT id, experiment_id::text, name, value::float8, step::float8, metadata, created_at FROM metric WHERE experiment_id = $1 ORDER BY created_at DESC",
     )
     .bind(experiment_uuid)
-    .fetch_all(&pool)
+    .fetch_all(&app_state.db_pool)
     .await;
 
     match result {
@@ -129,7 +129,7 @@ pub async fn get_metrics(
 // Create single metric
 pub async fn create_metric(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
     Json(request): Json<CreateMetricRequest>,
 ) -> impl IntoResponse {
@@ -172,7 +172,7 @@ pub async fn create_metric(
     )
     .bind(experiment_uuid)
     .bind(user_uuid)
-    .fetch_one(&pool)
+    .fetch_one(&app_state.db_pool)
     .await;
 
     match access_check {
@@ -208,7 +208,7 @@ pub async fn create_metric(
     .bind(request.value)
     .bind(request.step.map(|s| s as f64))
     .bind(&request.metadata)
-    .fetch_one(&pool)
+    .fetch_one(&app_state.db_pool)
     .await;
 
     match result {
@@ -248,7 +248,7 @@ pub async fn create_metric(
 
 pub async fn batch_create_metrics(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
     Json(request): Json<BatchCreateMetricsRequest>,
 ) -> impl IntoResponse {
@@ -301,7 +301,7 @@ pub async fn batch_create_metrics(
     )
     .bind(experiment_uuid)
     .bind(user_uuid)
-    .fetch_one(&pool)
+    .fetch_one(&app_state.db_pool)
     .await;
 
     match access_check {
@@ -329,7 +329,7 @@ pub async fn batch_create_metrics(
         _ => {}
     }
 
-    let mut tx = match pool.begin().await {
+    let mut tx = match app_state.db_pool.begin().await {
         Ok(tx) => tx,
         Err(e) => {
             eprintln!("Failed to begin transaction: {e}");
@@ -407,7 +407,7 @@ pub async fn batch_create_metrics(
 
 pub async fn export_metrics_csv(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
 ) -> impl IntoResponse {
     use axum::http::HeaderMap;
@@ -450,7 +450,7 @@ pub async fn export_metrics_csv(
     )
     .bind(experiment_uuid)
     .bind(user_uuid)
-    .fetch_one(&pool)
+    .fetch_one(&app_state.db_pool)
     .await;
 
     match access_check {
@@ -482,7 +482,7 @@ pub async fn export_metrics_csv(
         "SELECT id, experiment_id::text, name, value::float8, step::float8, metadata, created_at FROM metric WHERE experiment_id = $1 ORDER BY created_at ASC",
     )
     .bind(experiment_uuid)
-    .fetch_all(&pool)
+    .fetch_all(&app_state.db_pool)
     .await;
 
     match result {
