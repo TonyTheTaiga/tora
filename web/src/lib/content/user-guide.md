@@ -10,157 +10,232 @@ Track metrics, hyperparameters, and experiment metadata with just 2 lines of cod
 
 ### Global API Functions
 
-#### **`setup()`** - Initialize Global Experiment
+**NAME**
+Global API - Simple experiment tracking functions
 
-Creates a global experiment session for simple logging workflows.
+**SYNOPSIS**
+`python
+       import tora
+       tora.setup(name, workspace_id=None, ...)
+       tora.tlog(name, value, step=None, metadata=None)
+       `
 
-**Parameters:**
+**DESCRIPTION**
+Global API functions provide a simple interface for single experiment workflows.
+Uses a global client instance for immediate logging with minimal setup.
 
-- **`name`** _(string)_ - Experiment name
-- **`workspace_id`** _(string, optional)_ - Target workspace ID
-- **`description`** _(string, optional)_ - Experiment description
-- **`hyperparams`** _(dict, optional)_ - Hyperparameter dictionary
-- **`tags`** _(list, optional)_ - Experiment tags
-- **`api_key`** _(string, optional)_ - Authentication key
-- **`server_url`** _(string, optional)_ - Custom server URL
-- **`max_buffer_len`** _(int, optional)_ - Buffer size (default: 1)
+**FUNCTIONS**
 
-**Returns:** Experiment ID string
+**setup**(name, workspace_id=None, description=None, hyperparams=None, tags=None, api_key=None, server_url=None, max_buffer_len=1)
+Initialize global experiment session.
 
-Creates an experiment with immediate logging and prints the experiment URL to console.
+       name            Experiment name (required)
+       workspace_id    Target workspace ID
+       description     Experiment description
+       hyperparams     Hyperparameter dictionary
+       tags            List of experiment tags
+       api_key         Authentication key
+       server_url      Custom server URL
+       max_buffer_len  Buffer size (default: 1)
 
-#### **`tlog()`** - Log Metrics
+       Returns experiment ID string. Prints experiment URL to console.
 
-Simple logging function that uses the global experiment created by `setup()`.
+**tlog**(name, value, step=None, metadata=None)
+Log metrics using global experiment.
 
-**Parameters:**
+       name      Metric name (required)
+       value     Metric value - int or float (required)
+       step      Step number
+       metadata  Additional metadata dict (max 10KB)
 
-- **`name`** _(string)_ - Metric name
-- **`value`** _(int|float)_ - Metric value
-- **`step`** _(int, optional)_ - Step number
-- **`metadata`** _(dict, optional)_ - Additional metadata (max 10KB)
+       Note: Must call setup() first.
 
-**Note:** Must call `setup()` before using `tlog()`.
+**flush**()
+Force immediate sending of all buffered metrics.
 
-#### **`flush()`** - Flush Buffered Metrics
+**shutdown**()
+Cleanup global client and flush remaining metrics.
 
-Forces immediate sending of all buffered metrics.
+**is_initialized**()
+Check if global client is initialized.
+Returns bool.
 
-#### **`shutdown()`** - Cleanup Global Client
+**get_experiment_id**()
+Get current experiment ID.
+Returns experiment ID string or None.
 
-Shuts down the global client and flushes all remaining metrics.
+### Tora Client Class
 
-#### **`is_initialized()`** - Check Initialization Status
+**NAME**
+Tora - Main client for experiment tracking
 
-**Returns:** `True` if global client is initialized, `False` otherwise
+**SYNOPSIS**
+`python
+       client = Tora.create_experiment(name, workspace_id=None, ...)
+       client = Tora.load_experiment(experiment_id, ...)
+       `
 
-#### **`get_experiment_id()`** - Get Current Experiment ID
+**DESCRIPTION**
+The Tora class provides methods for logging metrics, managing experiments,
+and supports both buffered and immediate metric logging.
 
-**Returns:** Experiment ID string or `None` if not initialized
+**CLASS METHODS**
 
-#### **`get_experiment_url()`** - Get Experiment Web URL
+**Tora.create_experiment**(name, workspace_id=None, description=None, hyperparams=None, tags=None, max_buffer_len=25, api_key=None, server_url=None)
+Create new experiment and return Tora client instance.
 
-**Returns:** Web URL string or `None` if not initialized
+       name            Experiment name (required)
+       workspace_id    Target workspace ID
+       description     Experiment description
+       hyperparams     Hyperparameter dictionary
+       tags            List of experiment tags
+       max_buffer_len  Buffer size (default: 25)
+       api_key         Authentication key
+       server_url      Custom server URL
 
-### Client Class API
+**Tora.load_experiment**(experiment_id, max_buffer_len=25, api_key=None, server_url=None)
+Load existing experiment and return Tora client instance.
 
-#### **`Tora.create_experiment()`** - Create New Experiment
+       experiment_id   ID of existing experiment (required)
+       max_buffer_len  Buffer size (default: 25)
+       api_key         Authentication key
+       server_url      Custom server URL
 
-Creates a new experiment and returns a client instance.
+**INSTANCE METHODS**
 
-**Parameters:**
+**log**(name, value, step=None, metadata=None)
+Log single metric with automatic buffering.
 
-- **`name`** _(string)_ - Experiment name
-- **`workspace_id`** _(string, optional)_ - Target workspace ID
-- **`description`** _(string, optional)_ - Experiment description
-- **`hyperparams`** _(dict, optional)_ - Hyperparameter dictionary
-- **`tags`** _(list, optional)_ - Experiment tags
-- **`max_buffer_len`** _(int, optional)_ - Buffer size (default: 25)
-- **`api_key`** _(string, optional)_ - Authentication key
-- **`server_url`** _(string, optional)_ - Custom server URL
+       name      Metric name (required)
+       value     Metric value - int or float (required)
+       step      Step number
+       metadata  Additional metadata dict (max 10KB)
 
-**Returns:** `Tora` client instance
+**log_metrics**(metrics, step=None)
+Log multiple metrics at once.
 
-#### **`Tora.load_experiment()`** - Load Existing Experiment
+       metrics   Dictionary of metric names to values (required)
+       step      Step number for all metrics
 
-Loads an existing experiment and returns a client instance.
+**flush**()
+Force immediate sending of all buffered metrics.
 
-**Parameters:**
+**shutdown**()
+Flush all metrics and close client. Required for cleanup.
 
-- **`experiment_id`** _(string)_ - ID of existing experiment
-- **`max_buffer_len`** _(int, optional)_ - Buffer size (default: 25)
-- **`api_key`** _(string, optional)_ - Authentication key
-- **`server_url`** _(string, optional)_ - Custom server URL
+**PROPERTIES**
 
-**Returns:** `Tora` client instance
+**experiment_id**
+Get experiment ID string (read-only)
 
-#### **`client.log()`** - Log Metrics
+**url**
+Get experiment URL string (read-only)
 
-Log a metric value with automatic buffering.
+**max_buffer_len**
+Get/set maximum buffer length (read-write)
 
-**Parameters:**
+**buffer_size**
+Get current number of buffered metrics (read-only)
 
-- **`name`** _(string)_ - Metric name
-- **`value`** _(int|float)_ - Metric value
-- **`step`** _(int, optional)_ - Step number
-- **`metadata`** _(dict, optional)_ - Additional metadata (max 10KB)
+**is_closed**
+Check if client is closed - returns bool (read-only)
 
-Metrics are buffered and sent in batches when buffer reaches `max_buffer_len`.
+**CONTEXT MANAGER**
+Supports 'with' statement for automatic cleanup:
 
-#### **`client.flush()`** - Flush Client Buffer
-
-Forces immediate sending of all buffered metrics for this client.
-
-#### **`client.shutdown()`** - Shutdown Client
-
-Flushes remaining metrics and closes the client connection.
+       ```python
+       with Tora.create_experiment("name") as client:
+           client.log("metric", 1.0)
+       ```
 
 ### Workspace Management
 
-#### **`create_workspace()`** - Create New Workspace
+**NAME**
+create_workspace - Create new workspace for organizing experiments
 
-Creates a new workspace for organizing experiments.
+**SYNOPSIS**
+`python
+       import tora
+       workspace = tora.create_workspace(name, description=None, api_key=None, server_url=None)
+       `
 
-**Parameters:**
+**DESCRIPTION**
+Creates a new workspace for organizing experiments. Requires authentication.
 
-- **`name`** _(string)_ - Workspace name (max 255 chars)
-- **`description`** _(string, optional)_ - Workspace description (max 1000 chars)
-- **`api_key`** _(string, optional)_ - Authentication key (required)
-- **`server_url`** _(string, optional)_ - Custom server URL
+**FUNCTION**
 
-**Returns:** Workspace data dictionary with `id`, `name`, `description`, etc.
+**create_workspace**(name, description=None, api_key=None, server_url=None)
+Create new workspace.
+
+       name         Workspace name - max 255 chars (required)
+       description  Workspace description - max 1000 chars
+       api_key      Authentication key (required)
+       server_url   Custom server URL
+
+       Returns workspace data dictionary with id, name, description, etc.
 
 ---
 
 ## Configuration
 
-### Environment Variables
+**ENVIRONMENT VARIABLES**
 
-- **`TORA_API_KEY`** - API key for authentication
-- **`TORA_BASE_URL`** - Custom server URL (default: https://tora-1030250455947.us-central1.run.app/api)
+**TORA_API_KEY**
+API key for authentication
 
-### Authentication
+**TORA_BASE_URL**
+Custom server URL
+Default: https://tora-1030250455947.us-central1.run.app/api
 
-Tora operates in anonymous mode by default. For workspace features and collaboration, provide an API key via environment variable or function parameter.
+**AUTHENTICATION**
+Tora operates in anonymous mode by default. For workspace features and
+collaboration, provide an API key via environment variable or function parameter.
 
-### Buffering
+**BUFFERING**
+Global API Default buffer size is 1 (immediate sending)
+Client API Default buffer size is 25 (batched sending)
 
-- **Global API**: Default buffer size is 1 (immediate sending)
-- **Client API**: Default buffer size is 25 (batched sending)
-- Metrics are automatically flushed when buffer is full or during shutdown
-- Call `flush()` to force immediate sending
+       Metrics are automatically flushed when buffer is full or during shutdown.
+       Call flush() to force immediate sending.
 
 ---
 
 ## Exception Classes
 
-- **`ToraError`** - Base exception class
-- **`ToraValidationError`** - Input validation errors
-- **`ToraNetworkError`** - Network-related errors
-- **`ToraAPIError`** - API response errors
-- **`ToraAuthenticationError`** - Authentication errors
-- **`ToraConfigurationError`** - Configuration errors
-- **`ToraExperimentError`** - Experiment-related errors
-- **`ToraMetricError`** - Metric logging errors
-- **`ToraWorkspaceError`** - Workspace-related errors
-- **`ToraTimeoutError`** - Request timeout errors
+**NAME**
+Tora Exceptions - Error handling classes
+
+**DESCRIPTION**
+Exception hierarchy for error handling and debugging.
+
+**EXCEPTIONS**
+
+**ToraError**
+Base exception class for all Tora errors
+
+**ToraValidationError**
+Input validation errors
+
+**ToraNetworkError**
+Network-related errors
+
+**ToraAPIError**
+API response errors
+
+**ToraAuthenticationError**
+Authentication errors
+
+**ToraConfigurationError**
+Configuration errors
+
+**ToraExperimentError**
+Experiment-related errors
+
+**ToraMetricError**
+Metric logging errors
+
+**ToraWorkspaceError**
+Workspace-related errors
+
+**ToraTimeoutError**
+Request timeout errors

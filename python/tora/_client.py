@@ -600,15 +600,6 @@ class Tora:
         for name, value in metrics.items():
             self.log(name, value, step=step)
 
-    def get_experiment_url(self) -> str:
-        """Return the web URL for this experiment.
-
-        Returns:
-            The experiment URL for viewing in the web dashboard
-
-        """
-        return self._url
-
     def __repr__(self) -> str:
         """Return string representation of the Tora client."""
         status = "closed" if self.is_closed else "open"

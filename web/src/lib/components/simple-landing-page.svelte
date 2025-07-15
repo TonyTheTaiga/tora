@@ -8,6 +8,7 @@
   import { gettingStartedContent, userGuide } from "$lib/content";
 
   let activeTab: "start" | "guide" = "guide";
+  let isMaximized = false;
 
   const headline = "Pure Speed. Pure Insight. A New Experiment Tracker.";
 
@@ -137,17 +138,29 @@
           <div class="w-16 sm:w-24 h-0.5 bg-ctp-blue mx-auto"></div>
         </div>
 
-        <article class="w-full max-w-3xl mx-auto layer-fade-in">
+        <article
+          class="w-full max-w-3xl mx-auto layer-fade-in"
+          class:maximized={isMaximized}
+        >
           <div
             class="terminal-chrome surface-glass-elevated overflow-hidden stack-layer"
+            class:maximized-terminal={isMaximized}
           >
             <header
               class="terminal-chrome-header grid grid-cols-3 items-center"
             >
               <div class="flex space-x-2">
-                <div class="w-3 h-3 rounded-full bg-ctp-blue"></div>
-                <div class="w-3 h-3 rounded-full bg-ctp-blue"></div>
-                <div class="w-3 h-3 rounded-full bg-ctp-blue"></div>
+                <div class="w-3 h-3 rounded-full bg-ctp-overlay0"></div>
+                <div class="w-3 h-3 rounded-full bg-ctp-overlay0"></div>
+                <button
+                  type="button"
+                  onclick={() => (isMaximized = !isMaximized)}
+                  class="w-3 h-3 rounded-full bg-ctp-blue cursor-pointer"
+                  title={isMaximized ? "Restore" : "Maximize"}
+                  aria-label={isMaximized
+                    ? "Restore terminal window"
+                    : "Maximize terminal window"}
+                ></button>
               </div>
               <div
                 class="text-center text-xs text-ctp-subtext0 font-mono hidden sm:inline"
@@ -187,6 +200,7 @@
 
             <div
               class="p-4 sm:p-6 max-h-[220px] sm:min-h-[320px] overflow-y-auto"
+              class:maximized-content={isMaximized}
             >
               {#if activeTab === "start"}
                 {#if highlightedGettingStarted}
@@ -296,5 +310,19 @@
     @apply border-l-2 pl-4 italic;
     border-color: var(--color-ctp-blue);
     color: var(--color-ctp-subtext1);
+  }
+
+  /* Maximized terminal styles */
+  .maximized {
+    @apply fixed inset-0 z-50 max-w-none w-full h-full m-0;
+  }
+
+  .maximized-terminal {
+    @apply h-full;
+  }
+
+  .maximized-content {
+    @apply max-h-none min-h-0;
+    height: calc(100vh - 200px);
   }
 </style>
