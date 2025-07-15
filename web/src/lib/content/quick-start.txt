@@ -42,4 +42,3 @@ workspace = tora.create_workspace(
 
 # Environment Variables
 export TORA_API_KEY="your-api-key"
-export TORA_BASE_URL="https://custom-server.com/api"
