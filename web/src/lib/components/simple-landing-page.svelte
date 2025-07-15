@@ -252,7 +252,7 @@
             </div>
 
             <footer
-              class="surface-layer-1 border-t border-ctp-surface0/30 flex flex-col sm:flex-row justify-between items-center p-4 gap-4"
+              class="border-t border-ctp-surface0/30 flex flex-col sm:flex-row justify-between items-center p-4 gap-4"
             >
               <span class="text-xs text-ctp-subtext0 font-mono"
                 >start anonymous • sign up to store experiments</span
