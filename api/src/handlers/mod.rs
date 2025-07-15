@@ -1,11 +1,11 @@
 use crate::middleware::auth::protected_route;
+use crate::state::AppState;
 use axum::{
     Router,
     http::{HeaderValue, Method},
     routing::{delete, get, post, put},
 };
 use http::header::{AUTHORIZATION, CONTENT_TYPE};
-use std::env;
 use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
@@ -19,107 +19,110 @@ mod role;
 mod user;
 mod workspace;
 
-pub fn api_routes(pool: &sqlx::PgPool) -> Router<sqlx::PgPool> {
+pub fn api_routes(app_state: &AppState) -> Router<AppState> {
     let protected_routes = Router::new()
         // Workspaces
         .route(
             "/workspaces",
-            protected_route(get(workspace::list_workspaces), pool),
+            protected_route(get(workspace::list_workspaces), app_state),
         )
         .route(
             "/workspaces",
-            protected_route(post(workspace::create_workspace), pool),
+            protected_route(post(workspace::create_workspace), app_state),
         )
         .route(
             "/workspaces/{id}",
-            protected_route(get(workspace::get_workspace), pool),
+            protected_route(get(workspace::get_workspace), app_state),
         )
         .route(
             "/workspaces/{id}",
-            protected_route(delete(workspace::delete_workspace), pool),
+            protected_route(delete(workspace::delete_workspace), app_state),
         )
         .route(
             "/workspaces/{id}/leave",
-            protected_route(post(workspace::leave_workspace), pool),
+            protected_route(post(workspace::leave_workspace), app_state),
         )
         .route(
             "/workspaces/{id}/members",
-            protected_route(get(workspace::get_workspace_members), pool),
+            protected_route(get(workspace::get_workspace_members), app_state),
         )
         .route(
             "/workspaces/{id}/experiments",
-            protected_route(get(experiment::list_workspace_experiments), pool),
+            protected_route(get(experiment::list_workspace_experiments), app_state),
         )
         // Experiments
         .route(
             "/experiments",
-            protected_route(get(experiment::list_experiments), pool),
+            protected_route(get(experiment::list_experiments), app_state),
         )
         .route(
             "/experiments",
-            protected_route(post(experiment::create_experiment), pool),
+            protected_route(post(experiment::create_experiment), app_state),
         )
         .route(
             "/experiments/{id}",
-            protected_route(get(experiment::get_experiment), pool),
+            protected_route(get(experiment::get_experiment), app_state),
         )
         .route(
             "/experiments/{id}",
-            protected_route(put(experiment::update_experiment), pool),
+            protected_route(put(experiment::update_experiment), app_state),
         )
         .route(
             "/experiments/{id}",
-            protected_route(delete(experiment::delete_experiment), pool),
+            protected_route(delete(experiment::delete_experiment), app_state),
         )
         // Metrics
         .route(
             "/experiments/{id}/metrics",
-            protected_route(get(metric::get_metrics), pool),
+            protected_route(get(metric::get_metrics), app_state),
         )
         .route(
             "/experiments/{id}/metrics",
-            protected_route(post(metric::create_metric), pool),
+            protected_route(post(metric::create_metric), app_state),
         )
         .route(
             "/experiments/{experiment_id}/metrics/batch",
-            protected_route(post(metric::batch_create_metrics), pool),
+            protected_route(post(metric::batch_create_metrics), app_state),
         )
         .route(
             "/experiments/{id}/metrics/csv",
-            protected_route(get(metric::export_metrics_csv), pool),
+            protected_route(get(metric::export_metrics_csv), app_state),
         )
         // Dashboard
         .route(
             "/dashboard/overview",
-            protected_route(get(dashboard::get_dashboard_overview), pool),
+            protected_route(get(dashboard::get_dashboard_overview), app_state),
         )
         // Settings and user management
-        .route("/settings", protected_route(get(user::get_settings), pool))
+        .route(
+            "/settings",
+            protected_route(get(user::get_settings), app_state),
+        )
         .route("/workspace-roles", get(role::list_workspace_roles))
         // API Keys
         .route(
             "/api-keys",
-            protected_route(get(api_key::list_api_keys), pool),
+            protected_route(get(api_key::list_api_keys), app_state),
         )
         .route(
             "/api-keys",
-            protected_route(post(api_key::create_api_key), pool),
+            protected_route(post(api_key::create_api_key), app_state),
         )
         .route(
             "/api-keys/{id}",
-            protected_route(delete(api_key::revoke_api_key), pool),
+            protected_route(delete(api_key::revoke_api_key), app_state),
         )
         .route(
             "/workspace-invitations",
-            protected_route(post(invitation::create_invitation), pool),
+            protected_route(post(invitation::create_invitation), app_state),
         )
         .route(
             "/workspace-invitations",
-            protected_route(get(invitation::list_invitations), pool),
+            protected_route(get(invitation::list_invitations), app_state),
         )
         .route(
             "/workspaces/any/invitations",
-            protected_route(put(invitation::respond_to_invitation), pool),
+            protected_route(put(invitation::respond_to_invitation), app_state),
         );
 
     let public_routes = Router::new()
@@ -137,8 +140,9 @@ pub fn api_routes(pool: &sqlx::PgPool) -> Router<sqlx::PgPool> {
                 .layer(
                     CorsLayer::new()
                         .allow_origin(
-                            env::var("FRONTEND_URL")
-                                .expect("FRONTEND_URL not set!")
+                            app_state
+                                .settings
+                                .frontend_url
                                 .parse::<HeaderValue>()
                                 .unwrap(),
                         )

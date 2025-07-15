@@ -1,14 +1,14 @@
 use crate::middleware::auth::AuthenticatedUser;
+use crate::state::AppState;
 use crate::types::{DashboardOverview, Experiment, Response, WorkspaceSummary};
 use axum::{Extension, Json, extract::State, http::StatusCode, response::IntoResponse};
 
-use sqlx::PgPool;
 use uuid::Uuid;
 
 // Get dashboard overview with workspaces and recent experiments in a single call
 pub async fn get_dashboard_overview(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
 ) -> impl IntoResponse {
     let user_uuid = match Uuid::parse_str(&user.id) {
         Ok(uuid) => uuid,
@@ -41,7 +41,7 @@ pub async fn get_dashboard_overview(
         "#,
     )
     .bind(user_uuid)
-    .fetch_all(&pool)
+    .fetch_all(&app_state.db_pool)
     .await;
 
     // Fetch recent experiments with metrics - optimized query
@@ -60,7 +60,7 @@ pub async fn get_dashboard_overview(
         "#,
     )
     .bind(user_uuid)
-    .fetch_all(&pool)
+    .fetch_all(&app_state.db_pool)
     .await;
 
     match (workspaces_result, experiments_result) {

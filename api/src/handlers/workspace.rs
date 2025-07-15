@@ -1,4 +1,5 @@
 use crate::middleware::auth::AuthenticatedUser;
+use crate::state::AppState;
 use crate::types::{CreateWorkspaceRequest, Response, Workspace, WorkspaceMember};
 use axum::{
     Extension, Json,
@@ -7,12 +8,11 @@ use axum::{
     response::IntoResponse,
 };
 
-use sqlx::PgPool;
 use uuid::Uuid;
 
 pub async fn list_workspaces(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
 ) -> impl IntoResponse {
     let user_uuid = match Uuid::parse_str(&user.id) {
         Ok(uuid) => uuid,
@@ -48,7 +48,7 @@ pub async fn list_workspaces(
         "#,
     )
     .bind(user_uuid)
-    .fetch_all(&pool)
+    .fetch_all(&app_state.db_pool)
     .await;
 
     match result {
@@ -86,10 +86,10 @@ pub async fn list_workspaces(
 
 pub async fn create_workspace(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
     Json(request): Json<CreateWorkspaceRequest>,
 ) -> impl IntoResponse {
-    let mut tx = match pool.begin().await {
+    let mut tx = match app_state.db_pool.begin().await {
         Ok(tx) => tx,
         Err(e) => {
             eprintln!("Failed to begin transaction: {e}");
@@ -214,7 +214,7 @@ pub async fn create_workspace(
 
 pub async fn get_workspace(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
     Path(workspace_id): Path<String>,
 ) -> impl IntoResponse {
     let workspace_uuid = match Uuid::parse_str(&workspace_id) {
@@ -251,7 +251,7 @@ pub async fn get_workspace(
     )
     .bind(workspace_uuid)
     .bind(Uuid::parse_str(&user.id).unwrap())
-    .fetch_one(&pool)
+    .fetch_one(&app_state.db_pool)
     .await;
 
     match result {
@@ -294,7 +294,7 @@ pub async fn get_workspace(
 
 pub async fn get_workspace_members(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
     Path(workspace_id): Path<String>,
 ) -> impl IntoResponse {
     let workspace_uuid = match Uuid::parse_str(&workspace_id) {
@@ -316,7 +316,7 @@ pub async fn get_workspace_members(
     )
     .bind(workspace_uuid)
     .bind(Uuid::parse_str(&user.id).unwrap())
-    .fetch_one(&pool)
+    .fetch_one(&app_state.db_pool)
     .await;
 
     match access_check {
@@ -355,7 +355,7 @@ pub async fn get_workspace_members(
         "#,
     )
     .bind(workspace_uuid)
-    .fetch_all(&pool)
+    .fetch_all(&app_state.db_pool)
     .await;
 
     match result {
@@ -392,7 +392,7 @@ pub async fn get_workspace_members(
 
 pub async fn delete_workspace(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
     Path(workspace_id): Path<String>,
 ) -> impl IntoResponse {
     let workspace_uuid = match Uuid::parse_str(&workspace_id) {
@@ -418,7 +418,7 @@ pub async fn delete_workspace(
     )
     .bind(workspace_uuid)
     .bind(Uuid::parse_str(&user.id).unwrap())
-    .fetch_one(&pool)
+    .fetch_one(&app_state.db_pool)
     .await;
 
     match owner_check {
@@ -449,7 +449,7 @@ pub async fn delete_workspace(
     // Delete the workspace (CASCADE will handle related records)
     let delete_result = sqlx::query("DELETE FROM workspace WHERE id = $1")
         .bind(workspace_uuid)
-        .execute(&pool)
+        .execute(&app_state.db_pool)
         .await;
 
     match delete_result {
@@ -474,7 +474,7 @@ pub async fn delete_workspace(
 
 pub async fn leave_workspace(
     Extension(user): Extension<AuthenticatedUser>,
-    State(pool): State<PgPool>,
+    State(app_state): State<AppState>,
     Path(workspace_id): Path<String>,
 ) -> impl IntoResponse {
     let workspace_uuid = match Uuid::parse_str(&workspace_id) {
@@ -500,7 +500,7 @@ pub async fn leave_workspace(
         "#,
     )
     .bind(workspace_uuid)
-    .fetch_one(&pool)
+    .fetch_one(&app_state.db_pool)
     .await;
 
     let is_owner = sqlx::query_as::<_, (i64,)>(
@@ -512,7 +512,7 @@ pub async fn leave_workspace(
     )
     .bind(workspace_uuid)
     .bind(Uuid::parse_str(&user.id).unwrap())
-    .fetch_one(&pool)
+    .fetch_one(&app_state.db_pool)
     .await;
 
     match (owner_count, is_owner) {
@@ -541,7 +541,7 @@ pub async fn leave_workspace(
         sqlx::query("DELETE FROM user_workspaces WHERE workspace_id = $1 AND user_id = $2")
             .bind(workspace_uuid)
             .bind(Uuid::parse_str(&user.id).unwrap())
-            .execute(&pool)
+            .execute(&app_state.db_pool)
             .await;
 
     match delete_result {
