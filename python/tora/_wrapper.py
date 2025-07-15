@@ -170,7 +170,6 @@ def get_experiment_url() -> str | None:
         The experiment URL if initialized, None otherwise
 
     """
-    experiment_id = get_experiment_id()
-    if experiment_id:
-        return f"https://tora-web-1030250455947.us-central1.run.app/experiments/{experiment_id}"
+    if _INSTANCE is not None and not _INSTANCE.is_closed:
+        return _INSTANCE.url
     return None

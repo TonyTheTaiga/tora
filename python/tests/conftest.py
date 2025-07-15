@@ -44,6 +44,7 @@ def sample_experiment_data():
         "updated_at": "2023-01-01T00:00:00Z",
         "available_metrics": ["accuracy", "loss"],
         "workspace_id": "ws-123",
+        "url": "https://test-frontend.example.com/experiments/exp-123",
     }
 
 
@@ -108,13 +109,13 @@ def reset_global_client():
     """Reset global client state before each test."""
     import tora._wrapper
 
-    tora._wrapper._CLIENT = None
+    tora._wrapper._INSTANCE = None
     yield
     # Cleanup after test
-    if tora._wrapper._CLIENT:
+    if tora._wrapper._INSTANCE:
         with contextlib.suppress(Exception):
-            tora._wrapper._CLIENT.shutdown()
-        tora._wrapper._CLIENT = None
+            tora._wrapper._INSTANCE.shutdown()
+        tora._wrapper._INSTANCE = None
 
 
 @pytest.fixture(autouse=True)

@@ -1066,7 +1066,7 @@ wheels = [
 
 [[package]]
 name = "tora"
-version = "0.0.6"
+version = "0.0.7"
 source = { editable = "." }
 
 [package.optional-dependencies]
@@ -1086,6 +1086,11 @@ docs = [
     { name = "mkdocstrings", extra = ["python"] },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "build", marker = "extra == 'dev'", specifier = ">=0.10.0" },
@@ -1101,6 +1106,9 @@ requires-dist = [
     { name = "twine", marker = "extra == 'dev'", specifier = ">=4.0.0" },
 ]
 provides-extras = ["dev", "docs"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=8.4.1" }]
 
 [[package]]
 name = "twine"
