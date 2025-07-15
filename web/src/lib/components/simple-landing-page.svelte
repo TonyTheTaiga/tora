@@ -163,7 +163,7 @@
           class:maximized={isMaximized}
         >
           <div
-            class="terminal-chrome surface-glass-elevated overflow-hidden stack-layer"
+            class="terminal-chrome overflow-hidden stack-layer"
             class:maximized-terminal={isMaximized}
           >
             <header
@@ -189,33 +189,42 @@
               </div>
               <div></div>
             </header>
-            <div class="flex surface-layer-1">
+            <div class="flex relative">
               <button
                 type="button"
-                class="flex-1 px-4 py-2 text-xs font-mono border-b-2 transition-colors"
+                class="flex-1 px-4 py-2 text-xs font-mono relative transition-colors"
                 class:bg-ctp-surface0={activeTab === "start"}
                 class:text-ctp-text={activeTab === "start"}
-                class:border-ctp-blue={activeTab === "start"}
                 class:text-ctp-subtext0={activeTab !== "start"}
-                class:border-transparent={activeTab !== "start"}
                 class:hover:text-ctp-text={activeTab !== "start"}
                 onclick={() => (activeTab = "start")}
               >
                 quick_start.py
+                {#if activeTab === "start"}
+                  <div
+                    class="absolute bottom-0 left-0 right-0 h-0.5 bg-ctp-blue"
+                  ></div>
+                {/if}
               </button>
               <button
                 type="button"
-                class="flex-1 px-4 py-2 text-xs font-mono border-b-2 transition-colors"
+                class="flex-1 px-4 py-2 text-xs font-mono relative transition-colors"
                 class:bg-ctp-surface0={activeTab === "guide"}
                 class:text-ctp-text={activeTab === "guide"}
-                class:border-ctp-blue={activeTab === "guide"}
                 class:text-ctp-subtext0={activeTab !== "guide"}
-                class:border-transparent={activeTab !== "guide"}
                 class:hover:text-ctp-text={activeTab !== "guide"}
                 onclick={() => (activeTab = "guide")}
               >
                 README.md
+                {#if activeTab === "guide"}
+                  <div
+                    class="absolute bottom-0 left-0 right-0 h-0.5 bg-ctp-blue"
+                  ></div>
+                {/if}
               </button>
+              <div
+                class="absolute bottom-0 left-0 right-0 h-px bg-ctp-surface0/30"
+              ></div>
             </div>
 
             <div
@@ -243,7 +252,7 @@
             </div>
 
             <footer
-              class="surface-layer-1 terminal-border flex flex-col sm:flex-row justify-between items-center p-4 gap-4"
+              class="surface-layer-1 border-t border-ctp-surface0/30 flex flex-col sm:flex-row justify-between items-center p-4 gap-4"
             >
               <span class="text-xs text-ctp-subtext0 font-mono"
                 >start anonymous • sign up to store experiments</span
