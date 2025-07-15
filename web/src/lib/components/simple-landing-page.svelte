@@ -1,20 +1,34 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import Logo from "$lib/logo_assets/logo.svelte";
-  import { onMount } from "svelte";
   import { createHighlighter } from "shiki";
   import { browser } from "$app/environment";
   import { marked } from "marked";
   import { gettingStartedContent, userGuide } from "$lib/content";
 
-  let activeTab: "start" | "guide" = "guide";
-  let isMaximized = false;
+  let activeTab: "start" | "guide" = $state<"start" | "guide">("guide");
+  let isMaximized = $state(false);
+  let highlightedGettingStarted = $state("");
+  let isHighlighting = $state(false);
+
+  $effect(() => {
+    if (browser && document.body) {
+      if (isMaximized) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+      }
+    }
+
+    return () => {
+      if (browser && document.body) {
+        document.body.style.overflow = "";
+      }
+    };
+  });
 
   const headline = "Pure Speed. Pure Insight.";
   const subtitle = "A Modern Experiment Tracker.";
-
-  let highlightedGettingStarted = "";
-  let isHighlighting = false;
 
   function addLineNumbers(code: string): string {
     return code
@@ -95,7 +109,7 @@
     }
   }
 
-  onMount(() => {
+  $effect(() => {
     highlightCode();
 
     if (browser && window.matchMedia) {
