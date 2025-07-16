@@ -8,12 +8,12 @@ struct ContentView: View {
       ScrollView {
         VStack(spacing: 32) {
           ToraLogo()
-            .frame(width: 200)
+            .frame(width: geometry.size.width * 0.75)
 
           VStack(spacing: 16) {
             Text("A Modern Experiment Tracker")
               .font(.system(size: 28, weight: .bold, design: .monospaced))
-              .foregroundColor(.primary)
+              .foregroundColor(Color.ctpText)
               .multilineTextAlignment(.center)
 
             Rectangle()
