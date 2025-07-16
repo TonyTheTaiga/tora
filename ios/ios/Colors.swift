@@ -59,30 +59,30 @@ extension Color {
     static let rosewater = Color(red: 0xdc / 255, green: 0x8a / 255, blue: 0x78 / 255)
   }
 
-  static var ctpBase: Color { CatppuccinMocha.base }
-  static var ctpMantle: Color { CatppuccinMocha.mantle }
-  static var ctpCrust: Color { CatppuccinMocha.crust }
-  static var ctpSurface0: Color { CatppuccinMocha.surface0 }
-  static var ctpSurface1: Color { CatppuccinMocha.surface1 }
-  static var ctpSurface2: Color { CatppuccinMocha.surface2 }
-  static var ctpOverlay0: Color { CatppuccinMocha.overlay0 }
-  static var ctpOverlay1: Color { CatppuccinMocha.overlay1 }
-  static var ctpOverlay2: Color { CatppuccinMocha.overlay2 }
-  static var ctpText: Color { CatppuccinMocha.text }
-  static var ctpSubtext0: Color { CatppuccinMocha.subtext0 }
-  static var ctpSubtext1: Color { CatppuccinMocha.subtext1 }
-  static var ctpLavender: Color { CatppuccinMocha.lavender }
-  static var ctpBlue: Color { CatppuccinMocha.blue }
-  static var ctpSapphire: Color { CatppuccinMocha.sapphire }
-  static var ctpSky: Color { CatppuccinMocha.sky }
-  static var ctpTeal: Color { CatppuccinMocha.teal }
-  static var ctpGreen: Color { CatppuccinMocha.green }
-  static var ctpYellow: Color { CatppuccinMocha.yellow }
-  static var ctpPeach: Color { CatppuccinMocha.peach }
-  static var ctpMaroon: Color { CatppuccinMocha.maroon }
-  static var ctpRed: Color { CatppuccinMocha.red }
-  static var ctpMauve: Color { CatppuccinMocha.mauve }
-  static var ctpPink: Color { CatppuccinMocha.pink }
-  static var ctpFlamingo: Color { CatppuccinMocha.flamingo }
-  static var ctpRosewater: Color { CatppuccinMocha.rosewater }
+  static var ctpBase: Color { CatppuccinLatte.base }
+  static var ctpMantle: Color { CatppuccinLatte.mantle }
+  static var ctpCrust: Color { CatppuccinLatte.crust }
+  static var ctpSurface0: Color { CatppuccinLatte.surface0 }
+  static var ctpSurface1: Color { CatppuccinLatte.surface1 }
+  static var ctpSurface2: Color { CatppuccinLatte.surface2 }
+  static var ctpOverlay0: Color { CatppuccinLatte.overlay0 }
+  static var ctpOverlay1: Color { CatppuccinLatte.overlay1 }
+  static var ctpOverlay2: Color { CatppuccinLatte.overlay2 }
+  static var ctpText: Color { CatppuccinLatte.text }
+  static var ctpSubtext0: Color { CatppuccinLatte.subtext0 }
+  static var ctpSubtext1: Color { CatppuccinLatte.subtext1 }
+  static var ctpLavender: Color { CatppuccinLatte.lavender }
+  static var ctpBlue: Color { CatppuccinLatte.blue }
+  static var ctpSapphire: Color { CatppuccinLatte.sapphire }
+  static var ctpSky: Color { CatppuccinLatte.sky }
+  static var ctpTeal: Color { CatppuccinLatte.teal }
+  static var ctpGreen: Color { CatppuccinLatte.green }
+  static var ctpYellow: Color { CatppuccinLatte.yellow }
+  static var ctpPeach: Color { CatppuccinLatte.peach }
+  static var ctpMaroon: Color { CatppuccinLatte.maroon }
+  static var ctpRed: Color { CatppuccinLatte.red }
+  static var ctpMauve: Color { CatppuccinLatte.mauve }
+  static var ctpPink: Color { CatppuccinLatte.pink }
+  static var ctpFlamingo: Color { CatppuccinLatte.flamingo }
+  static var ctpRosewater: Color { CatppuccinLatte.rosewater }
 }
