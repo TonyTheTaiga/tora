@@ -24,7 +24,6 @@ struct ContentView: View {
         Spacer()
           .frame(height: geometry.size.height * 0.05)
 
-        // Scrolling subtitle
         ScrollingSubtitle()
           .frame(height: 30)
           .opacity(subtitleOpacity)
@@ -35,11 +34,18 @@ struct ContentView: View {
 
         Button {
         } label: {
+          let buttonFontSize = min(max(geometry.size.width * 0.04, 14), 20)
+          let horizontalPadding = min(max(geometry.size.width * 0.08, 24), 48)
+          let verticalPadding = min(max(geometry.size.height * 0.015, 10), 16)
+
           Text("login")
-            .font(.dynamicInter(16, weight: .medium, relativeTo: .body))
+            .font(
+              Font.dynamicInter(
+                buttonFontSize, weight: Font.Weight.medium, relativeTo: Font.TextStyle.body)
+            )
             .foregroundColor(buttonPressed ? Color.ctpBase : Color.ctpBlue)
-            .padding(.horizontal, 32)
-            .padding(.vertical, 12)
+            .padding(.horizontal, horizontalPadding)
+            .padding(.vertical, verticalPadding)
             .background(
               RoundedRectangle(cornerRadius: 0)
                 .fill(buttonPressed ? Color.ctpBlue : Color.clear)
@@ -72,7 +78,6 @@ struct ContentView: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .padding(.horizontal, 20)
       .onAppear {
-        // Trigger animations on appear
         withAnimation {
           logoScale = 1.0
           logoOpacity = 1.0
@@ -104,10 +109,15 @@ struct ScrollingSubtitle: View {
 
   var body: some View {
     GeometryReader { geometry in
+      let dynamicFontSize = min(max(geometry.size.width * 0.045, 16), 28)
+
       HStack(spacing: spacing) {
         ForEach(0..<10, id: \.self) { _ in
           Text(text)
-            .font(.dynamicInter(18, weight: .medium, relativeTo: .title2))
+            .font(
+              .dynamicInter(
+                dynamicFontSize, weight: Font.Weight.bold, relativeTo: Font.TextStyle.title2)
+            )
             .foregroundColor(Color.ctpSubtext1)
             .fixedSize()
         }
@@ -115,7 +125,7 @@ struct ScrollingSubtitle: View {
       .offset(x: offset)
       .clipped()
       .onAppear {
-        let textWidth = estimateTextWidth()
+        let textWidth = estimateTextWidth(fontSize: dynamicFontSize)
 
         withAnimation(.linear(duration: textWidth / 40).repeatForever(autoreverses: false)) {
           offset = -textWidth
@@ -124,8 +134,9 @@ struct ScrollingSubtitle: View {
     }
   }
 
-  private func estimateTextWidth() -> CGFloat {
-    return CGFloat(text.count) * 11  // Approximate character width for one instance
+  private func estimateTextWidth(fontSize: CGFloat) -> CGFloat {
+    let characterWidth = fontSize * 0.6  // Inter font has roughly 0.6 character width ratio
+    return CGFloat(text.count) * characterWidth
   }
 }
 
