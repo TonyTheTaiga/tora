@@ -28,7 +28,7 @@
   });
 
   const headline = "Pure Speed. Pure Insight.";
-  const subtitle = "A Modern Experiment Tracker.";
+  const subtitle = "A Modern Experiment Tracker";
 
   function addLineNumbers(code: string): string {
     return code
@@ -148,13 +148,13 @@
           <h1
             class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-2 sm:mb-3 text-ctp-text font-mono"
           >
-            {subtitle}
+            {headline}
           </h1>
-          <!-- <h2
+          <h2
             class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-4 sm:mb-6 text-ctp-text font-mono"
           >
             {subtitle}
-          </h2> -->
+          </h2>
           <div class="w-16 sm:w-24 h-0.5 bg-ctp-blue mx-auto"></div>
         </div>
 
