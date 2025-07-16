@@ -8,7 +8,7 @@ struct ContentView: View {
       ScrollView {
         VStack(spacing: 32) {
           ToraLogo()
-            .frame(width: 200, height: 60)
+            .frame(width: 200)
 
           VStack(spacing: 16) {
             Text("A Modern Experiment Tracker")
@@ -30,10 +30,12 @@ struct ContentView: View {
 }
 
 struct ToraLogo: View {
+  private let logoAspectRatio: CGFloat = 357.41 / 109.34
+
   var body: some View {
     ToraIcon()
       .fill(Color.ctpBlue)
-      .aspectRatio(357.41 / 109.34, contentMode: ContentMode.fit)
+      .aspectRatio(logoAspectRatio, contentMode: ContentMode.fit)
   }
 }
 
