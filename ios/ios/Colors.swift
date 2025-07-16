@@ -1,7 +1,6 @@
 import SwiftUI
 
 extension Color {
-    // MARK: - Catppuccin Mocha (Dark Theme)
     struct CatppuccinMocha {
         static let base = Color(red: 0x1e/255, green: 0x1e/255, blue: 0x2e/255)
         static let mantle = Color(red: 0x18/255, green: 0x18/255, blue: 0x25/255)
@@ -31,7 +30,6 @@ extension Color {
         static let rosewater = Color(red: 0xf5/255, green: 0xe0/255, blue: 0xdc/255)
     }
 
-    // MARK: - Catppuccin Latte (Light Theme)
     struct CatppuccinLatte {
         static let base = Color(red: 0xef/255, green: 0xf1/255, blue: 0xf5/255)
         static let mantle = Color(red: 0xe6/255, green: 0xe9/255, blue: 0xef/255)
@@ -61,7 +59,6 @@ extension Color {
         static let rosewater = Color(red: 0xdc/255, green: 0x8a/255, blue: 0x78/255)
     }
 
-    // MARK: - Theme-aware colors (defaults to dark theme)
     static var ctpBase: Color { CatppuccinMocha.base }
     static var ctpMantle: Color { CatppuccinMocha.mantle }
     static var ctpCrust: Color { CatppuccinMocha.crust }
