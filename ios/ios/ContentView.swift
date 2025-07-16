@@ -1,24 +1,39 @@
 import SwiftUI
 
 struct ContentView: View {
-  @State private var isMaximized = false
-
   var body: some View {
     GeometryReader { geometry in
       ScrollView {
-        VStack(spacing: 32) {
+        VStack(spacing: geometry.size.height * 0.04) {
           ToraLogo()
             .frame(width: geometry.size.width * 0.75)
 
-          VStack(spacing: 16) {
-            Text("A Modern Experiment Tracker")
-              .font(.system(size: 28, weight: .bold, design: .monospaced))
+          VStack(spacing: geometry.size.height * 0.02) {
+            Text("Pure Speed. Pure Insight.")
+              .font(
+                .system(
+                  size: min(geometry.size.width * 0.08, geometry.size.height * 0.045),
+                  weight: .bold, design: .monospaced)
+              )
               .foregroundColor(Color.ctpText)
               .multilineTextAlignment(.center)
+              .lineLimit(1)
+              .minimumScaleFactor(0.6)
+
+            Text("A Modern Experiment Tracker")
+              .font(
+                .system(
+                  size: min(geometry.size.width * 0.06, geometry.size.height * 0.035),
+                  weight: .bold, design: .monospaced)
+              )
+              .foregroundColor(Color.ctpText)
+              .multilineTextAlignment(.center)
+              .lineLimit(2)
+              .minimumScaleFactor(0.7)
 
             Rectangle()
               .fill(Color.ctpBlue)
-              .frame(width: 60, height: 2)
+              .frame(width: geometry.size.width * 0.15, height: 2)
           }
         }
         .frame(maxWidth: .infinity, minHeight: geometry.size.height)
