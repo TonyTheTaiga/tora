@@ -34,6 +34,7 @@ struct ContentView: View {
                     .frame(height: geometry.size.height * 0.05)
 
                 Button {
+                    loginSheetShown = true
                 } label: {
                     let buttonFontSize = min(max(geometry.size.width * 0.04, 14), 20)
                     let horizontalPadding = min(max(geometry.size.width * 0.08, 24), 48)
@@ -56,6 +57,9 @@ struct ContentView: View {
                             RoundedRectangle(cornerRadius: 0)
                                 .stroke(Color.ctpBlue, lineWidth: 1)
                         )
+                }
+                .sheet(isPresented: $loginSheetShown) {
+                    LoginView()
                 }
                 .scaleEffect(buttonPressed ? 0.95 : 1.0)
                 .offset(y: buttonOffset)
