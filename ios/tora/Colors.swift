@@ -86,3 +86,16 @@ extension Color {
     static var ctpFlamingo: Color { CatppuccinLatte.flamingo }
     static var ctpRosewater: Color { CatppuccinLatte.rosewater }
 }
+
+struct ModalBackground: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .background(Color.ctpBase)
+    }
+}
+
+extension View {
+    func modalBackground() -> some View {
+        modifier(ModalBackground())
+    }
+}

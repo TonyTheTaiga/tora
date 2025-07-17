@@ -59,7 +59,7 @@ struct ContentView: View {
                         )
                 }
                 .sheet(isPresented: $loginSheetShown) {
-                    LoginView()
+                    SignInSheet()
                 }
                 .scaleEffect(buttonPressed ? 0.95 : 1.0)
                 .offset(y: buttonOffset)
@@ -103,7 +103,6 @@ struct ContentView: View {
                 }
             }
         }
-        .background(Color.ctpBase)
     }
 }
 
@@ -158,5 +157,6 @@ struct ToraLogo: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            .background(Color.ctpBase)
     }
 }
