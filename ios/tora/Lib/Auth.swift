@@ -10,9 +10,39 @@ import Foundation
 import SwiftData
 import SwiftUI
 
-enum AuthErrors: Error {
+enum AuthErrors: Error, LocalizedError {
     case invalidURL
-    case authFailure
+    case authFailure(String)
+    case dataError(String)
+    case responseError(String)
+    case requestError(Int, String)
+    case networkError(Error)
+    case jsonParsingError(Error)
+    case invalidResponse
+    case missingRequiredFields([String])
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "Invalid URL configuration"
+        case .authFailure(let message):
+            return "Authentication failed: \(message)"
+        case .dataError(let message):
+            return "Data processing error: \(message)"
+        case .responseError(let message):
+            return "Response error: \(message)"
+        case .requestError(let statusCode, let message):
+            return "Request failed with status \(statusCode): \(message)"
+        case .networkError(let error):
+            return "Network error: \(error.localizedDescription)"
+        case .jsonParsingError(let error):
+            return "JSON parsing error: \(error.localizedDescription)"
+        case .invalidResponse:
+            return "Invalid response format"
+        case .missingRequiredFields(let fields):
+            return "Missing required fields: \(fields.joined(separator: ", "))"
+        }
+    }
 }
 
 @Model
@@ -45,31 +75,74 @@ class AuthService: ObservableObject {
     private let backendUrl: String = "http://localhost:8080"
 
     func login(email: String, password: String) async throws -> UserSession {
+        do {
+            let session = try await doLogin(email: email, password: password)
+            await MainActor.run {
+                self.isAuthenticated = true
+            }
+            return session
+        } catch let authError as AuthErrors {
+            // Re-throw AuthErrors as-is to preserve specific error information
+            throw authError
+        } catch {
+            // Wrap unexpected errors
+            throw AuthErrors.authFailure("Unexpected error: \(error.localizedDescription)")
+        }
+    }
+
+    private func doLogin(email: String, password: String) async throws -> UserSession {
         guard let url = URL(string: "\(backendUrl)/api/login") else {
             throw AuthErrors.invalidURL
         }
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONSerialization.data(withJSONObject: ["email": email, "password": password])
-        let (data, response) = try await Foundation.URLSession.shared.data(for: request)
-        let httpResponse = response as! HTTPURLResponse
+
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: ["email": email, "password": password])
+        } catch {
+            throw AuthErrors.dataError("Failed to serialize login credentials: \(error.localizedDescription)")
+        }
+
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await URLSession.shared.data(for: request)
+        } catch {
+            throw AuthErrors.networkError(error)
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AuthErrors.invalidResponse
+        }
 
         guard httpResponse.statusCode == 200 else {
-            throw AuthErrors.authFailure
+            let errorMessage = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
+            throw AuthErrors.requestError(httpResponse.statusCode, errorMessage)
         }
 
-        let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+        let json: [String: Any]
+        do {
+            json = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+        } catch {
+            throw AuthErrors.jsonParsingError(error)
+        }
 
         guard let responseData = json["data"] as? [String: Any] else {
-            throw AuthErrors.authFailure
+            throw AuthErrors.responseError("Missing 'data' field in response")
         }
 
-        guard let userData = responseData["user"] as? [String: Any],
-            let userId = userData["id"] as? String,
+        guard let userData = responseData["user"] as? [String: Any] else {
+            throw AuthErrors.responseError("Missing 'user' field in response data")
+        }
+
+        guard let userId = userData["id"] as? String,
             let userEmail = userData["email"] as? String
         else {
-            throw AuthErrors.authFailure
+            var missingFields: [String] = []
+            if userData["id"] == nil { missingFields.append("user.id") }
+            if userData["email"] == nil { missingFields.append("user.email") }
+            throw AuthErrors.missingRequiredFields(missingFields)
         }
 
         guard let accessToken = responseData["access_token"] as? String,
@@ -78,7 +151,13 @@ class AuthService: ObservableObject {
             let expiresIn = responseData["expires_in"] as? Int,
             let expiresAt = responseData["expires_at"] as? Int
         else {
-            throw AuthErrors.authFailure
+            var missingFields: [String] = []
+            if responseData["access_token"] == nil { missingFields.append("access_token") }
+            if responseData["refresh_token"] == nil { missingFields.append("refresh_token") }
+            if responseData["token_type"] == nil { missingFields.append("token_type") }
+            if responseData["expires_in"] == nil { missingFields.append("expires_in") }
+            if responseData["expires_at"] == nil { missingFields.append("expires_at") }
+            throw AuthErrors.missingRequiredFields(missingFields)
         }
 
         let expiresInDate = Date(timeIntervalSince1970: TimeInterval(expiresIn))
@@ -94,7 +173,6 @@ class AuthService: ObservableObject {
             tokenType: tokenType
         )
 
-        isAuthenticated = true
         return session
     }
 }
