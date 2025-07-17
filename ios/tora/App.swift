@@ -23,7 +23,6 @@ struct Tora: App {
         WindowGroup {
             ContentView()
                 .modalBackground()
-                .preferredColorScheme(.light)
                 .modelContainer(for: UserSession.self)
                 .environmentObject(authService)
         }
