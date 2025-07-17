@@ -5,6 +5,7 @@
 //  Created by taiga on 7/16/25.
 //
 
+import Combine
 import Foundation
 import SwiftData
 import SwiftUI
@@ -38,7 +39,9 @@ class UserSession {
     }
 }
 
-class AuthService {
+class AuthService: ObservableObject {
+    @Published var isAuthenticated = false
+
     private let backendUrl: String = "http://localhost:8080"
 
     func login(email: String, password: String) async throws -> UserSession {
@@ -91,6 +94,7 @@ class AuthService {
             tokenType: tokenType
         )
 
+        isAuthenticated = true
         return session
     }
 }

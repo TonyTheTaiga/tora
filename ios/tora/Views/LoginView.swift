@@ -1,10 +1,11 @@
+import Combine
 import SwiftData
 import SwiftUI
 
 struct SignInSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
-    @State private var authService = AuthService()
+    @StateObject private var authService = AuthService()
     @State private var email = ""
     @State private var password = ""
     @FocusState private var isFocused: Field?
@@ -26,6 +27,7 @@ struct SignInSheet: View {
                         isFocused = .password
                     }
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .keyboardType(.emailAddress)
 
                 SecureField("Password", text: $password)
                     .focused($isFocused, equals: .password)
@@ -36,7 +38,12 @@ struct SignInSheet: View {
 
                 Button("Sign In") {
                     Task {
-                        try await signIn()
+                        do {
+                            try await signIn()
+                        } catch {
+                            print("failed to login")
+                        }
+
                     }
                 }
                 .buttonStyle(.borderedProminent)
@@ -56,9 +63,14 @@ struct SignInSheet: View {
         .modalBackground()
     }
 
-    func signIn() async throws {
-        let userSession = try await authService.login(email: email, password: password)
-        context.insert(userSession)
-        dismiss()
+    private func signIn() async throws {
+        do {
+            let userSession = try await authService.login(email: email, password: password)
+            print(userSession.auth_token)
+            context.insert(userSession)
+            dismiss()
+        } catch {
+            throw AuthErrors.authFailure
+        }
     }
 }
