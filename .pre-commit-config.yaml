@@ -64,7 +64,7 @@ repos:
     hooks:
       - id: swift-format-ios
         name: swift-format (ios)
-        entry: bash -c 'cd ios && swift-format format --in-place --recursive .'
+        entry: bash -c 'cd ios && swift-format format --in-place --recursive --configuration .swift-format.json .'
         language: system
         files: ^ios/.*\.swift$
         pass_filenames: false
