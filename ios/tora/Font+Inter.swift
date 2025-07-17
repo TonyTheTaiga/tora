@@ -25,9 +25,7 @@ extension Font {
             return .custom("InterVariable", size: size)
         }
     }
-}
 
-extension Font {
     static func dynamicInter(
         _ size: CGFloat, weight: Font.Weight = .regular, relativeTo textStyle: Font.TextStyle = .body
     ) -> Font {

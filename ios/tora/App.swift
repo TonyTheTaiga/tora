@@ -1,10 +1,4 @@
-//
-//  iosApp.swift
-//  ios
-//
-//  Created by taiga on 7/16/25.
-//
-
+import SwiftData
 import SwiftUI
 
 @main
@@ -14,6 +8,7 @@ struct iosApp: App {
             ContentView()
                 .modalBackground()
                 .preferredColorScheme(.light)
+                .modelContainer(for: UserSession.self)
         }
     }
 }
