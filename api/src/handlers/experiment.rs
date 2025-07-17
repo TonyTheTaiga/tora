@@ -9,7 +9,7 @@ use axum::{
     http::StatusCode,
     response::IntoResponse,
 };
-
+use tracing::{debug, error, info};
 use uuid::Uuid;
 
 pub async fn create_experiment(
@@ -17,9 +17,19 @@ pub async fn create_experiment(
     State(app_state): State<AppState>,
     Json(request): Json<CreateExperimentRequest>,
 ) -> impl IntoResponse {
+    info!(
+        "Creating experiment '{}' for user: {} in workspace: {}",
+        request.name, user.email, request.workspace_id
+    );
+    debug!("Experiment request: {:?}", request);
+
     let user_uuid = match Uuid::parse_str(&user.id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
+        Ok(uuid) => {
+            debug!("Parsed user UUID: {}", uuid);
+            uuid
+        }
+        Err(e) => {
+            error!("Failed to parse user ID '{}': {}", user.id, e);
             return (
                 StatusCode::BAD_REQUEST,
                 Json(Response {

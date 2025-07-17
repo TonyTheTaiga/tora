@@ -83,7 +83,7 @@ pub struct ListExperimentsQuery {
     pub workspace: Option<String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct CreateMetricRequest {
     pub name: String,
     pub value: f64,
@@ -91,7 +91,7 @@ pub struct CreateMetricRequest {
     pub metadata: Option<serde_json::Value>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct BatchCreateMetricsRequest {
     pub metrics: Vec<CreateMetricRequest>,
 }

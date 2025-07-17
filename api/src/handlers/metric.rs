@@ -7,7 +7,7 @@ use axum::{
     http::StatusCode,
     response::IntoResponse,
 };
-
+use tracing::{debug, error, info};
 use uuid::Uuid;
 
 pub async fn get_metrics(
@@ -233,7 +233,10 @@ pub async fn create_metric(
                 .into_response()
         }
         Err(e) => {
-            eprintln!("Database error: {e}");
+            error!(
+                "Database error creating metric for experiment {}: {}",
+                experiment_id, e
+            );
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
@@ -252,6 +255,13 @@ pub async fn batch_create_metrics(
     Path(experiment_id): Path<String>,
     Json(request): Json<BatchCreateMetricsRequest>,
 ) -> impl IntoResponse {
+    info!(
+        "Batch creating {} metrics for experiment {} by user: {}",
+        request.metrics.len(),
+        experiment_id,
+        user.email
+    );
+    debug!("Batch metrics request: {:?}", request);
     if request.metrics.is_empty() {
         return (
             StatusCode::CREATED,
@@ -368,9 +378,13 @@ pub async fn batch_create_metrics(
     .await;
 
     match result {
-        Ok(_) => {
+        Ok(query_result) => {
+            debug!(
+                "Successfully inserted {} metrics",
+                query_result.rows_affected()
+            );
             if let Err(e) = tx.commit().await {
-                eprintln!("Failed to commit transaction: {e}");
+                error!("Failed to commit transaction for batch metrics: {}", e);
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Json(Response {
@@ -380,9 +394,17 @@ pub async fn batch_create_metrics(
                 )
                     .into_response();
             }
+            info!(
+                "Successfully committed {} metrics for experiment {}",
+                request.metrics.len(),
+                experiment_id
+            );
         }
         Err(e) => {
-            eprintln!("Failed to create metrics: {e}");
+            error!(
+                "Failed to create metrics for experiment {}: {}",
+                experiment_id, e
+            );
             let _ = tx.rollback().await;
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
