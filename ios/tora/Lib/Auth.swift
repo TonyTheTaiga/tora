@@ -69,23 +69,41 @@ class UserSession {
     }
 }
 
+@MainActor
 class AuthService: ObservableObject {
     @Published var isAuthenticated = false
+    @Published var currentUser: UserSession?
 
+    static let shared = AuthService()
     private let backendUrl: String = "http://localhost:8080"
+
+    private init() {
+        checkAuthenticationStatus()
+    }
+
+    func checkAuthenticationStatus() {
+        // Check if user session exists in SwiftData
+        // This would typically check for stored session and validate token expiry
+        // For now, we'll implement basic logic
+        isAuthenticated = false
+        currentUser = nil
+    }
+
+    func logout() {
+        isAuthenticated = false
+        currentUser = nil
+        // Clear stored session data
+    }
 
     func login(email: String, password: String) async throws -> UserSession {
         do {
             let session = try await doLogin(email: email, password: password)
-            await MainActor.run {
-                self.isAuthenticated = true
-            }
+            self.isAuthenticated = true
+            self.currentUser = session
             return session
         } catch let authError as AuthErrors {
-            // Re-throw AuthErrors as-is to preserve specific error information
             throw authError
         } catch {
-            // Wrap unexpected errors
             throw AuthErrors.authFailure("Unexpected error: \(error.localizedDescription)")
         }
     }
