@@ -18,6 +18,7 @@ struct ContentView: View {
 @main
 struct Tora: App {
     @StateObject private var authService = AuthService.shared
+    @StateObject private var workspaceService = WorkspaceService(authService: AuthService.shared)
 
     var body: some Scene {
         WindowGroup {
@@ -25,6 +26,7 @@ struct Tora: App {
                 .modalBackground()
                 .modelContainer(for: UserSession.self)
                 .environmentObject(authService)
+                .environmentObject(workspaceService)
         }
     }
 }

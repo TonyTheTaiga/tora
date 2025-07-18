@@ -1,26 +1,49 @@
+import SwiftData
 import SwiftUI
 
 struct MainAppView: View {
-    @EnvironmentObject var authService: AuthService
+    @State private var selectedTab: Tabs = .workspaces
+
+    enum Tabs: Equatable, Hashable {
+        case workspaces
+        case experiments
+        case settings
+    }
 
     var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                if let user = authService.currentUser {
-                    Text("Hello, \(user.email)")
-                        .font(.title2)
-                        .foregroundColor(.secondary)
-                }
-
-                Spacer()
+        TabView(selection: $selectedTab) {
+            Tab("Workspaces", systemImage: "macwindow.stack", value: .workspaces) {
+                WorkspacesView()
             }
-            .padding()
-            .navigationTitle("Tora")
-        }
+
+            Tab("Experiments", systemImage: "sparkle.text.clipboard", value: .experiments) {
+                ExperimentsView()
+            }
+
+            Tab("Settings", systemImage: "gearshape.2", value: .settings) {
+                ExperimentsView()
+            }
+        }.accentColor(Color.ctpBlue)
     }
 }
 
 #Preview {
     MainAppView()
         .environmentObject(AuthService.shared)
+        .environmentObject(WorkspaceService(authService: AuthService.shared))
+        .modelContainer(for: UserSession.self, inMemory: true)
+        .onAppear {
+            let service = AuthService.shared
+            service.isAuthenticated = true
+            service.currentUser = UserSession(
+                id: "preview-user",
+                email: "preview@tora.com",
+                auth_token: "token",
+                refresh_token: "refresh",
+                expiresIn: Date(),
+                expiresAt: Date().addingTimeInterval(3600),
+                tokenType: "Bearer"
+            )
+        }
+        .modalBackground()
 }
