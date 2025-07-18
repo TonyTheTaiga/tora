@@ -9,6 +9,11 @@ import Foundation
 import SwiftData
 import SwiftUI
 
+struct ApiResponse<T: Decodable>: Decodable {
+    let status: Int
+    let data: T?
+}
+
 enum WorkspaceErrors: Error, LocalizedError {
     case invalidURL
     case authFailure(String)
@@ -51,9 +56,9 @@ enum WorkspaceErrors: Error, LocalizedError {
 }
 
 struct Workspace: Decodable, Identifiable {
-    var id: UUID
+    var id: String
     var name: String
-    var description: String
+    var description: String?
     var createdAt: Date
     var role: String
 
@@ -61,16 +66,17 @@ struct Workspace: Decodable, Identifiable {
         case id
         case name
         case description
-        case createdAt
+        case createdAt = "created_at"
         case role
     }
 }
 
+@MainActor
 class WorkspaceService: ObservableObject {
     private var baseUrl = "http://localhost:8080/api"
-    @ObservedObject private var authService: AuthService
+    private let authService: AuthService
 
-    public init(authService: AuthService) {
+    init(authService: AuthService) {
         self.authService = authService
     }
 
@@ -106,8 +112,9 @@ class WorkspaceService: ObservableObject {
 
         do {
             let decoder = JSONDecoder()
-            let workspaces = try decoder.decode([Workspace].self, from: data)
-            return workspaces
+            decoder.dateDecodingStrategy = .iso8601
+            let apiResponse = try decoder.decode(ApiResponse<[Workspace]>.self, from: data)
+            return apiResponse.data ?? []
         } catch {
             throw WorkspaceErrors.jsonParsingError(error)
         }

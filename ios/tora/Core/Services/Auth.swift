@@ -10,6 +10,24 @@ import Foundation
 import SwiftData
 import SwiftUI
 
+private struct UserData: Decodable {
+    let id: String
+    let email: String
+}
+
+private struct TokenData: Decodable {
+    let user: UserData
+    let accessToken: String
+    let refreshToken: String
+    let tokenType: String
+    let expiresIn: Int
+    let expiresAt: Int
+}
+
+private struct LoginResponse: Decodable {
+    let data: TokenData
+}
+
 enum AuthErrors: Error, LocalizedError {
     case invalidURL
     case authFailure(String)
@@ -84,9 +102,6 @@ class AuthService: ObservableObject {
     }
 
     func checkAuthenticationStatus() {
-        // Check if user session exists in SwiftData
-        // This would typically check for stored session and validate token expiry
-        // For now, we'll implement basic logic
         isAuthenticated = false
         currentUser = nil
     }
@@ -94,7 +109,6 @@ class AuthService: ObservableObject {
     func logout() {
         isAuthenticated = false
         currentUser = nil
-        // Clear stored session data
     }
 
     func login(email: String, password: String) async throws -> UserSession {
@@ -141,58 +155,29 @@ class AuthService: ObservableObject {
             throw AuthErrors.requestError(httpResponse.statusCode, errorMessage)
         }
 
-        let json: [String: Any]
         do {
-            json = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            decoder.dateDecodingStrategy = .iso8601
+            let loginResponse = try decoder.decode(LoginResponse.self, from: data)
+            let tokenData = loginResponse.data
+
+            let expiresInDate = Date(timeIntervalSince1970: TimeInterval(tokenData.expiresIn))
+            let expiresAtDate = Date(timeIntervalSince1970: TimeInterval(tokenData.expiresAt))
+
+            let session = UserSession(
+                id: tokenData.user.id,
+                email: tokenData.user.email,
+                auth_token: tokenData.accessToken,
+                refresh_token: tokenData.refreshToken,
+                expiresIn: expiresInDate,
+                expiresAt: expiresAtDate,
+                tokenType: tokenData.tokenType
+            )
+
+            return session
         } catch {
             throw AuthErrors.jsonParsingError(error)
         }
-
-        guard let responseData = json["data"] as? [String: Any] else {
-            throw AuthErrors.responseError("Missing 'data' field in response")
-        }
-
-        guard let userData = responseData["user"] as? [String: Any] else {
-            throw AuthErrors.responseError("Missing 'user' field in response data")
-        }
-
-        guard let userId = userData["id"] as? String,
-            let userEmail = userData["email"] as? String
-        else {
-            var missingFields: [String] = []
-            if userData["id"] == nil { missingFields.append("user.id") }
-            if userData["email"] == nil { missingFields.append("user.email") }
-            throw AuthErrors.missingRequiredFields(missingFields)
-        }
-
-        guard let accessToken = responseData["access_token"] as? String,
-            let refreshToken = responseData["refresh_token"] as? String,
-            let tokenType = responseData["token_type"] as? String,
-            let expiresIn = responseData["expires_in"] as? Int,
-            let expiresAt = responseData["expires_at"] as? Int
-        else {
-            var missingFields: [String] = []
-            if responseData["access_token"] == nil { missingFields.append("access_token") }
-            if responseData["refresh_token"] == nil { missingFields.append("refresh_token") }
-            if responseData["token_type"] == nil { missingFields.append("token_type") }
-            if responseData["expires_in"] == nil { missingFields.append("expires_in") }
-            if responseData["expires_at"] == nil { missingFields.append("expires_at") }
-            throw AuthErrors.missingRequiredFields(missingFields)
-        }
-
-        let expiresInDate = Date(timeIntervalSince1970: TimeInterval(expiresIn))
-        let expiresAtDate = Date(timeIntervalSince1970: TimeInterval(expiresAt))
-
-        let session = UserSession(
-            id: userId,
-            email: userEmail,
-            auth_token: accessToken,
-            refresh_token: refreshToken,
-            expiresIn: expiresInDate,
-            expiresAt: expiresAtDate,
-            tokenType: tokenType
-        )
-
-        return session
     }
 }

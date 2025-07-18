@@ -26,9 +26,9 @@ struct WorkspacesView: View {
                         VStack(alignment: .leading) {
                             Text(workspace.name)
                                 .font(.headline)
-                            Text(workspace.description)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+
+                            Text(workspace.description ?? "(No Description)")
+                                .font(.caption)
                         }
                     }
                 }

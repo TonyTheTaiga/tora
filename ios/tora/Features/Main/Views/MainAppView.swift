@@ -16,14 +16,14 @@ struct MainAppView: View {
                 WorkspacesView()
             }
 
-            Tab("Experiments", systemImage: "sparkle.text.clipboard", value: .experiments) {
-                ExperimentsView()
-            }
+            //            Tab("Experiments", systemImage: "sparkle.text.clipboard", value: .experiments) {
+            //                ExperimentsView()
+            //            }
 
             Tab("Settings", systemImage: "gearshape.2", value: .settings) {
                 ExperimentsView()
             }
-        }.accentColor(Color.ctpBlue)
+        }.accentColor(Color.ctpOverlay2)
     }
 }
 
