@@ -1,9 +1,3 @@
-//
-//  Workspaces.swift
-//  tora
-//
-//  Created by taiga on 7/18/25.
-//
 import Combine
 import Foundation
 import SwiftData

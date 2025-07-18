@@ -1,10 +1,3 @@
-//
-//  Auth.swift
-//  tora
-//
-//  Created by taiga on 7/16/25.
-//
-
 import Combine
 import Foundation
 import SwiftData
