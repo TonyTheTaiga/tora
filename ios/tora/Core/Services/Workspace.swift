@@ -55,7 +55,7 @@ enum WorkspaceErrors: Error, LocalizedError {
     }
 }
 
-struct Workspace: Decodable, Identifiable {
+struct Workspace: Decodable, Identifiable, Equatable {
     var id: String
     var name: String
     var description: String?
