@@ -90,7 +90,10 @@ struct HyperParam: Codable, Equatable {
                 throw DecodingError.typeMismatch(
                     HyperParamValue.self,
                     DecodingError.Context(
-                        codingPath: decoder.codingPath, debugDescription: "Unsupported hyperparam value type"))
+                        codingPath: decoder.codingPath,
+                        debugDescription: "Unsupported hyperparam value type"
+                    )
+                )
             }
         }
 
