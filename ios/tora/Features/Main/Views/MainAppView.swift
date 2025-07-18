@@ -23,7 +23,7 @@ struct MainAppView: View {
             Tab("Settings", systemImage: "gearshape.2", value: .settings) {
                 ExperimentsView()
             }
-        }.accentColor(Color.ctpOverlay2)
+        }.accentColor(Color.ctpBlue)
     }
 }
 
