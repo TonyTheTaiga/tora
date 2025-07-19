@@ -1,9 +1,6 @@
 import SwiftUI
 
 // MARK: - Design System Foundation
-// Inspired by the web terminal-style, information-first approach
-// Optimized for iOS with mobile-specific patterns
-
 public struct DesignSystem {
 
     // MARK: - Color System
@@ -166,63 +163,40 @@ public struct DesignSystem {
 
 // MARK: - Component Style Extensions
 extension View {
-    // Surface styling inspired by web's layering system
-    func terminalCard() -> some View {
+    func toraCard() -> some View {
         self
-            .background(DesignSystem.Colors.surface)
-            .overlay(
-                Rectangle()
-                    .stroke(DesignSystem.Colors.border, lineWidth: 1)
-            )
+            .padding(16)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
     }
 
-    func terminalCardElevated() -> some View {
+    func toraCardElevated() -> some View {
         self
-            .background(DesignSystem.Colors.surfaceElevated)
-            .overlay(
-                Rectangle()
-                    .stroke(DesignSystem.Colors.border, lineWidth: 1)
-            )
+            .padding(16)
+            .background(.thickMaterial, in: RoundedRectangle(cornerRadius: 12))
     }
 
-    // Glass effect for overlays (inspired by web's glass surfaces)
     func glassBackground() -> some View {
         self
-            .background(
-                DesignSystem.Colors.surface
-                    .opacity(0.8)
-                    .background(.ultraThinMaterial)
-            )
+            .background(.ultraThinMaterial)
     }
 
-    // Terminal-style button
-    func terminalButton(style: TerminalButtonStyle = .primary) -> some View {
+    func toraButton(style: ToraButtonStyle = .primary) -> some View {
         self
-            .padding(.horizontal, DesignSystem.Spacing.md)
-            .padding(.vertical, DesignSystem.Spacing.sm)
-            .background(style.backgroundColor)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(style.backgroundColor, in: RoundedRectangle(cornerRadius: 8))
             .foregroundColor(style.foregroundColor)
-            .overlay(
-                Rectangle()
-                    .stroke(style.borderColor, lineWidth: 1)
-            )
-            .cornerRadius(DesignSystem.CornerRadius.button)
     }
 
-    // List item styling
-    func terminalListItem() -> some View {
+    func toraListItem() -> some View {
         self
-            .padding(DesignSystem.Spacing.listItemPadding)
-            .background(DesignSystem.Colors.background)
-            .overlay(
-                Rectangle()
-                    .stroke(DesignSystem.Colors.borderSubtle, lineWidth: 1)
-            )
+            .padding(12)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
     }
 }
 
 // MARK: - Button Styles
-public enum TerminalButtonStyle {
+public enum ToraButtonStyle {
     case primary
     case secondary
     case accent
@@ -231,39 +205,26 @@ public enum TerminalButtonStyle {
     public var backgroundColor: Color {
         switch self {
         case .primary:
-            return DesignSystem.Colors.accent.opacity(0.1)
+            return Color(.systemBlue)
         case .secondary:
-            return DesignSystem.Colors.surface
+            return Color(.secondarySystemFill)
         case .accent:
-            return DesignSystem.Colors.accentSecondary.opacity(0.1)
+            return Color(.systemPurple)
         case .destructive:
-            return DesignSystem.Colors.error.opacity(0.1)
+            return Color(.systemRed)
         }
     }
 
     public var foregroundColor: Color {
         switch self {
         case .primary:
-            return DesignSystem.Colors.accent
+            return Color(.white)
         case .secondary:
-            return DesignSystem.Colors.textPrimary
+            return Color(.label)
         case .accent:
-            return DesignSystem.Colors.accentSecondary
+            return Color(.white)
         case .destructive:
-            return DesignSystem.Colors.error
-        }
-    }
-
-    public var borderColor: Color {
-        switch self {
-        case .primary:
-            return DesignSystem.Colors.accent.opacity(0.3)
-        case .secondary:
-            return DesignSystem.Colors.border
-        case .accent:
-            return DesignSystem.Colors.accentSecondary.opacity(0.3)
-        case .destructive:
-            return DesignSystem.Colors.error.opacity(0.3)
+            return Color(.white)
         }
     }
 }

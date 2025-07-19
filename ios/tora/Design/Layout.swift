@@ -81,7 +81,7 @@ extension DesignSystem.Typography {
 }
 
 // MARK: - Container Views
-public struct TerminalContainer<Content: View>: View {
+public struct ToraContainer<Content: View>: View {
     let content: Content
     let maxWidth: CGFloat?
     let horizontalPadding: CGFloat
@@ -104,7 +104,7 @@ public struct TerminalContainer<Content: View>: View {
 }
 
 // MARK: - Screen Container
-public struct TerminalScreen<Content: View>: View {
+public struct ToraScreen<Content: View>: View {
     let content: Content
     let backgroundColor: Color
     let showsScrollIndicators: Bool
@@ -130,7 +130,7 @@ public struct TerminalScreen<Content: View>: View {
 }
 
 // MARK: - List Container
-public struct TerminalList<Data: RandomAccessCollection, Content: View>: View where Data.Element: Identifiable {
+public struct ToraList<Data: RandomAccessCollection, Content: View>: View where Data.Element: Identifiable {
     let data: Data
     let content: (Data.Element, Int) -> Content
     let spacing: CGFloat
@@ -158,7 +158,7 @@ public struct TerminalList<Data: RandomAccessCollection, Content: View>: View wh
 }
 
 // MARK: - Grid Container
-public struct TerminalGrid<Data: RandomAccessCollection, Content: View>: View where Data.Element: Identifiable {
+public struct ToraGrid<Data: RandomAccessCollection, Content: View>: View where Data.Element: Identifiable {
     let data: Data
     let columns: [GridItem]
     let content: (Data.Element) -> Content

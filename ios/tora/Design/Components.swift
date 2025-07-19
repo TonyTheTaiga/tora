@@ -1,10 +1,10 @@
 import SwiftUI
 
 // MARK: - Reusable UI Components
-// Terminal-style components optimized for iOS
+// iOS-native components with Tora design language
 
-// MARK: - Terminal Card Component
-public struct TerminalCard<Content: View>: View {
+// MARK: - Tora Card Component
+public struct ToraCard<Content: View>: View {
     let content: Content
     let style: CardStyle
 
@@ -17,22 +17,22 @@ public struct TerminalCard<Content: View>: View {
         var backgroundColor: Color {
             switch self {
             case .standard:
-                return DesignSystem.Colors.surface
+                return .clear
             case .elevated:
-                return DesignSystem.Colors.surfaceElevated
+                return Color.secondary.opacity(0.1)
             case .accent:
-                return DesignSystem.Colors.accent.opacity(0.05)
+                return Color.blue.opacity(0.1)
             case .alternating(let isEven):
-                return isEven ? DesignSystem.Colors.surface.opacity(0.3) : DesignSystem.Colors.surface.opacity(0.6)
+                return isEven ? Color.secondary.opacity(0.05) : Color.secondary.opacity(0.1)
             }
         }
 
         var borderColor: Color {
             switch self {
             case .standard, .elevated, .alternating:
-                return DesignSystem.Colors.border
+                return Color.secondary.opacity(0.3)
             case .accent:
-                return DesignSystem.Colors.accent.opacity(0.2)
+                return Color.blue.opacity(0.3)
             }
         }
     }
@@ -44,25 +44,24 @@ public struct TerminalCard<Content: View>: View {
 
     public var body: some View {
         content
-            .padding(DesignSystem.Spacing.cardPadding)
-            .background(style.backgroundColor)
+            .padding(16)
+            .background(style.backgroundColor, in: RoundedRectangle(cornerRadius: 12))
             .overlay(
-                Rectangle()
-                    .stroke(style.borderColor, lineWidth: 1)
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(style.borderColor, lineWidth: 0.5)
             )
-            .cornerRadius(DesignSystem.CornerRadius.card)
     }
 }
 
-// MARK: - Terminal Button Component
-public struct TerminalButton: View {
+// MARK: - Tora Button Component
+public struct ToraButton: View {
     let title: String
-    let style: TerminalButtonStyle
+    let style: ToraButtonStyle
     let action: () -> Void
 
     @State private var isPressed = false
 
-    public init(_ title: String, style: TerminalButtonStyle = .primary, action: @escaping () -> Void) {
+    public init(_ title: String, style: ToraButtonStyle = .primary, action: @escaping () -> Void) {
         self.title = title
         self.style = style
         self.action = action
@@ -71,31 +70,57 @@ public struct TerminalButton: View {
     public var body: some View {
         Button(action: action) {
             Text(title)
-                .font(DesignSystem.Typography.callout())
+                .font(.callout)
+                .fontWeight(.medium)
                 .foregroundColor(style.foregroundColor)
-                .padding(.horizontal, DesignSystem.Spacing.md)
-                .padding(.vertical, DesignSystem.Spacing.sm)
-                .background(style.backgroundColor)
-                .overlay(
-                    Rectangle()
-                        .stroke(style.borderColor, lineWidth: 1)
-                )
-                .cornerRadius(DesignSystem.CornerRadius.button)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(style.backgroundColor, in: RoundedRectangle(cornerRadius: 8))
                 .scaleEffect(isPressed ? 0.97 : 1.0)
         }
         .buttonStyle(PlainButtonStyle())
         .onLongPressGesture(
             minimumDuration: 0, maximumDistance: .infinity,
             pressing: { pressing in
-                withAnimation(DesignSystem.Animation.buttonPress) {
+                withAnimation(.easeInOut(duration: 0.1)) {
                     isPressed = pressing
                 }
             }, perform: {})
     }
 }
 
-// MARK: - Terminal List Item Component
-public struct TerminalListItem<Content: View, Actions: View>: View {
+// MARK: - Tora Toolbar Button Component
+public struct ToraToolbarButton: View {
+    let systemImage: String
+    let action: () -> Void
+
+    @State private var isPressed = false
+
+    public init(systemImage: String, action: @escaping () -> Void) {
+        self.systemImage = systemImage
+        self.action = action
+    }
+
+    public var body: some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
+                .font(.body)
+                .foregroundColor(.accentColor)
+                .scaleEffect(isPressed ? 0.95 : 1.0)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .onLongPressGesture(
+            minimumDuration: 0, maximumDistance: .infinity,
+            pressing: { pressing in
+                withAnimation(.easeInOut(duration: 0.1)) {
+                    isPressed = pressing
+                }
+            }, perform: {})
+    }
+}
+
+// MARK: - Tora List Item Component
+public struct ToraListItem<Content: View, Actions: View>: View {
     let content: Content
     let actions: Actions?
     let isAlternating: Bool
@@ -128,77 +153,61 @@ public struct TerminalListItem<Content: View, Actions: View>: View {
         VStack(spacing: 0) {
             // Main content
             content
-                .padding(DesignSystem.Spacing.listItemPadding)
+                .padding(12)
 
             // Actions section if provided
             if let actions = actions {
                 Divider()
-                    .background(DesignSystem.Colors.divider)
 
                 HStack {
                     actions
                 }
-                .padding(.horizontal, DesignSystem.Spacing.listItemPadding)
-                .padding(.vertical, DesignSystem.Spacing.sm)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
             }
         }
         .background(
             isAlternating
-                ? (index % 2 == 0 ? DesignSystem.Colors.surface.opacity(0.3) : DesignSystem.Colors.surface.opacity(0.6))
-                : DesignSystem.Colors.surface
-        )
-        .overlay(
-            Rectangle()
-                .stroke(DesignSystem.Colors.borderSubtle, lineWidth: 1)
+                ? (index % 2 == 0 ? Color.secondary.opacity(0.05) : Color.secondary.opacity(0.1))
+                : Color.clear,
+            in: RoundedRectangle(cornerRadius: 8)
         )
     }
 }
 
-// MARK: - Terminal Search Input
-public struct TerminalSearchInput: View {
+// MARK: - Tora Search Input
+public struct ToraSearchInput: View {
     @Binding var text: String
     let placeholder: String
-    let showSlashPrefix: Bool
 
     @FocusState private var isFocused: Bool
 
-    public init(text: Binding<String>, placeholder: String = "search...", showSlashPrefix: Bool = true) {
+    public init(text: Binding<String>, placeholder: String = "Search...") {
         self._text = text
         self.placeholder = placeholder
-        self.showSlashPrefix = showSlashPrefix
     }
 
     public var body: some View {
-        HStack(spacing: 0) {
-            if showSlashPrefix {
-                Text("/")
-                    .font(DesignSystem.Typography.mono())
-                    .foregroundColor(DesignSystem.Colors.textTertiary)
-                    .padding(.leading, DesignSystem.Spacing.md)
-            }
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.secondary)
 
             TextField(placeholder, text: $text)
-                .font(DesignSystem.Typography.mono())
-                .foregroundColor(DesignSystem.Colors.textPrimary)
-                .padding(.horizontal, showSlashPrefix ? DesignSystem.Spacing.sm : DesignSystem.Spacing.md)
-                .padding(.vertical, DesignSystem.Spacing.sm)
                 .focused($isFocused)
         }
-        .background(DesignSystem.Colors.surface)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
         .overlay(
-            Rectangle()
-                .stroke(
-                    isFocused ? DesignSystem.Colors.accent.opacity(0.5) : DesignSystem.Colors.border,
-                    lineWidth: 1
-                )
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(isFocused ? Color(.systemBlue) : Color.clear, lineWidth: 2)
         )
-        .cornerRadius(DesignSystem.CornerRadius.input)
-        .animation(DesignSystem.Animation.quick, value: isFocused)
+        .animation(.easeInOut(duration: 0.2), value: isFocused)
     }
 }
 
-// MARK: - Terminal Modal Background
-public struct TerminalModalBackground<Content: View>: View {
+// MARK: - Tora Modal Background
+public struct ToraModalBackground<Content: View>: View {
     let content: Content
 
     public init(@ViewBuilder content: () -> Content) {
@@ -207,21 +216,17 @@ public struct TerminalModalBackground<Content: View>: View {
 
     public var body: some View {
         ZStack {
-            // Backdrop
-            DesignSystem.Colors.backgroundSecondary
-                .opacity(0.9)
+            Color.black.opacity(0.3)
                 .ignoresSafeArea()
-                .background(.ultraThinMaterial)
 
-            // Content
             content
-                .padding(DesignSystem.Spacing.screenHorizontal)
+                .padding(20)
         }
     }
 }
 
-// MARK: - Terminal Header Component
-public struct TerminalHeader: View {
+// MARK: - Tora Header Component
+public struct ToraHeader: View {
     let title: String
     let subtitle: String?
     let showBackButton: Bool
@@ -245,40 +250,33 @@ public struct TerminalHeader: View {
                 Button(action: backAction ?? {}) {
                     Image(systemName: "chevron.left")
                         .font(.title2)
-                        .foregroundColor(DesignSystem.Colors.accent)
+                        .foregroundColor(.accentColor)
                 }
-                .padding(.trailing, DesignSystem.Spacing.sm)
+                .padding(.trailing, 8)
             }
 
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: DesignSystem.Spacing.sm) {
-                    Rectangle()
-                        .fill(DesignSystem.Colors.accent)
-                        .frame(width: 3, height: 20)
-
-                    Text(title)
-                        .font(DesignSystem.Typography.title2())
-                        .foregroundColor(DesignSystem.Colors.textPrimary)
-                }
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
 
                 if let subtitle = subtitle {
                     Text(subtitle)
-                        .font(DesignSystem.Typography.caption())
-                        .foregroundColor(DesignSystem.Colors.textTertiary)
-                        .padding(.leading, DesignSystem.Spacing.md + 3)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
             }
 
             Spacer()
         }
-        .padding(.horizontal, DesignSystem.Spacing.screenHorizontal)
-        .padding(.vertical, DesignSystem.Spacing.md)
-        .background(DesignSystem.Colors.backgroundSecondary)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
     }
 }
 
-// MARK: - Terminal Empty State
-public struct TerminalEmptyState: View {
+// MARK: - Tora Empty State
+public struct ToraEmptyState: View {
     let title: String
     let message: String
     let systemImage: String
@@ -300,32 +298,32 @@ public struct TerminalEmptyState: View {
     }
 
     public var body: some View {
-        VStack(spacing: DesignSystem.Spacing.lg) {
+        VStack(spacing: 24) {
             Image(systemName: systemImage)
                 .font(.system(size: 48))
-                .foregroundColor(DesignSystem.Colors.textTertiary)
+                .foregroundColor(.secondary)
 
-            VStack(spacing: DesignSystem.Spacing.sm) {
+            VStack(spacing: 8) {
                 Text(title)
-                    .font(DesignSystem.Typography.headline())
-                    .foregroundColor(DesignSystem.Colors.textPrimary)
+                    .font(.headline)
+                    .foregroundColor(.primary)
 
                 Text(message)
-                    .font(DesignSystem.Typography.body())
-                    .foregroundColor(DesignSystem.Colors.textSecondary)
+                    .font(.body)
+                    .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
             }
 
             if let actionTitle = actionTitle, let action = action {
-                TerminalButton(actionTitle, style: .primary, action: action)
+                ToraButton(actionTitle, style: .primary, action: action)
             }
         }
-        .padding(DesignSystem.Spacing.xl)
+        .padding(32)
     }
 }
 
-// MARK: - Terminal Loading State
-public struct TerminalLoadingState: View {
+// MARK: - Tora Loading State
+public struct ToraLoadingState: View {
     let message: String
 
     public init(message: String = "loading...") {
@@ -333,15 +331,14 @@ public struct TerminalLoadingState: View {
     }
 
     public var body: some View {
-        VStack(spacing: DesignSystem.Spacing.md) {
+        VStack(spacing: 16) {
             ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: DesignSystem.Colors.accent))
                 .scaleEffect(1.2)
 
             Text(message)
-                .font(DesignSystem.Typography.mono())
-                .foregroundColor(DesignSystem.Colors.textSecondary)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
         }
-        .padding(DesignSystem.Spacing.xl)
+        .padding(32)
     }
 }

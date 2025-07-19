@@ -9,22 +9,49 @@ struct WorkspaceRow: View {
         Button(action: {
             showingExperiments = true
         }) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(workspace.name)
-                    .font(.headline)
-                    .foregroundColor(.primary)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(workspace.name)
+                        .font(.headline)
+                        .foregroundColor(.primary)
 
-                Text(workspace.description ?? "No description")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    Spacer()
 
-                Text("Role: \(workspace.role)")
-                    .font(.caption)
-                    .foregroundColor(.accentColor)
+                    Text(workspace.role)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(.secondary.opacity(0.1))
+                        .clipShape(Capsule())
+                }
+
+                if let description = workspace.description, !description.isEmpty {
+                    Text(description)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                }
+
+                HStack {
+                    Image(systemName: "folder")
+                        .foregroundColor(.secondary)
+                        .font(.caption)
+
+                    Text("Tap to view experiments")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondary)
+                        .font(.caption2)
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 6)
-            .padding(.horizontal, 16)
+            .padding()
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
             .contentShape(Rectangle())
         }
         .buttonStyle(PlainButtonStyle())
@@ -44,58 +71,43 @@ struct WorkspaceExperimentsView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
+            Group {
                 if isLoading {
                     VStack(spacing: 16) {
                         ProgressView()
+                            .scaleEffect(1.2)
                         Text("Loading experiments...")
                             .foregroundColor(.secondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if let errorMessage = errorMessage {
-                    VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.largeTitle)
-                            .foregroundColor(.orange)
-                        Text("Error loading experiments")
-                            .font(.headline)
+                    ContentUnavailableView {
+                        Label("Error Loading Experiments", systemImage: "exclamationmark.triangle")
+                    } description: {
                         Text(errorMessage)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                        Button("Try Again") {
+                    } actions: {
+                        ToraButton("Try Again", style: .primary) {
                             fetchExperiments()
                         }
-                        .buttonStyle(.borderedProminent)
                     }
-                    .padding()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if experiments.isEmpty {
-                    VStack(spacing: 16) {
-                        Image(systemName: "flask")
-                            .font(.largeTitle)
-                            .foregroundColor(.secondary)
-                        Text("No experiments found")
-                            .font(.headline)
+                    ContentUnavailableView {
+                        Label("No Experiments", systemImage: "flask")
+                    } description: {
                         Text("This workspace doesn't have any experiments yet.")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
                     }
-                    .padding()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     List(experiments) { experiment in
                         ExperimentRow(experiment: experiment)
                     }
-                    .listStyle(.plain)
+                    .listStyle(.insetGrouped)
                 }
             }
             .navigationTitle(workspace.name)
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    ToraToolbarButton(systemImage: "xmark") {
                         dismiss()
                     }
                 }
@@ -131,37 +143,37 @@ struct ExperimentRow: View {
     let experiment: Experiment
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(experiment.name)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                    .font(.headline)
+                    .foregroundColor(.primary)
 
                 Spacer()
 
                 Text(formatDate(experiment.updatedAt))
-                    .font(.caption2)
+                    .font(.caption)
                     .foregroundColor(.secondary)
             }
 
             if let description = experiment.description, !description.isEmpty {
                 Text(description)
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundColor(.secondary)
                     .lineLimit(2)
             }
 
             if !experiment.tags.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 6) {
                         ForEach(experiment.tags, id: \.self) { tag in
                             Text(tag)
-                                .font(.caption2)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Color.accentColor.opacity(0.1))
-                                .foregroundColor(.accentColor)
-                                .cornerRadius(4)
+                                .font(.caption)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(.blue.opacity(0.1))
+                                .foregroundColor(.blue)
+                                .clipShape(Capsule())
                         }
                     }
                     .padding(.horizontal, 1)
@@ -170,15 +182,15 @@ struct ExperimentRow: View {
 
             if !experiment.hyperparams.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 6) {
                         ForEach(experiment.hyperparams, id: \.key) { hyperparam in
                             Text("\(hyperparam.key): \(hyperparam.value.displayValue)")
-                                .font(.caption2)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Color.gray.opacity(0.1))
+                                .font(.caption)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(.secondary.opacity(0.1))
                                 .foregroundColor(.secondary)
-                                .cornerRadius(4)
+                                .clipShape(Capsule())
                         }
                     }
                     .padding(.horizontal, 1)
@@ -187,15 +199,13 @@ struct ExperimentRow: View {
 
             if !experiment.availableMetrics.isEmpty {
                 Text("Metrics: \(experiment.availableMetrics.joined(separator: ", "))")
-                    .font(.caption2)
+                    .font(.caption)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
             }
         }
-        .padding(.vertical, 4)
-        .padding(.horizontal, 8)
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(8)
+        .padding()
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
     }
 
     private func formatDate(_ date: Date) -> String {
@@ -213,29 +223,44 @@ struct WorkspacesView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
+            Group {
                 if isLoading {
-                    ProgressView("Loading Workspaces...")
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .scaleEffect(1.2)
+                        Text("Loading workspaces...")
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if let errorMessage = errorMessage {
-                    Text("Error: \(errorMessage)")
-                        .foregroundColor(.red)
-                        .padding()
+                    ContentUnavailableView {
+                        Label("Error Loading Workspaces", systemImage: "exclamationmark.triangle")
+                    } description: {
+                        Text(errorMessage)
+                    } actions: {
+                        ToraButton("Try Again", style: .primary) {
+                            fetchWorkspaces()
+                        }
+                    }
                 } else if workspaces.isEmpty {
-                    Text("No Workspaces Found")
-                        .foregroundColor(.secondary)
+                    ContentUnavailableView {
+                        Label("No Workspaces", systemImage: "folder")
+                    } description: {
+                        Text("No workspaces are available for your account.")
+                    }
                 } else {
                     List(workspaces) { workspace in
                         WorkspaceRow(workspace: workspace)
                     }
-                    .listStyle(.plain)
+                    .listStyle(.insetGrouped)
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
             .navigationTitle("Workspaces")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: fetchWorkspaces) {
-                        Image(systemName: "arrow.clockwise")
+                    ToraToolbarButton(systemImage: "arrow.clockwise") {
+                        fetchWorkspaces()
                     }
                     .disabled(isLoading)
                 }

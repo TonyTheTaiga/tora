@@ -1,34 +1,32 @@
 # Tora iOS Design System
 
-A comprehensive design system inspired by the web terminal-style approach, optimized for iOS with mobile-specific patterns and responsive design.
+A native iOS design system that provides consistent, accessible, and beautiful UI components for the Tora experiment tracking app.
 
 ## Overview
 
-The Tora iOS Design System provides a unified visual language that maintains consistency with the web application while being optimized for mobile interactions and iOS design patterns.
+The Tora iOS Design System embraces iOS design principles while maintaining the information-first philosophy of the Tora brand. It provides native-feeling components that work seamlessly across iPhone and iPad.
 
 ### Key Features
 
-- **Catppuccin Color Palette**: Full light/dark theme support with semantic color mapping
-- **Inter Typography**: Dynamic scaling with accessibility support
-- **Terminal Aesthetic**: Sharp edges, information-first design, technical feel
-- **Responsive Design**: Seamless adaptation from iPhone to iPad
+- **iOS Native**: Uses system colors, materials, and design patterns
+- **Dynamic Typography**: Supports Dynamic Type and accessibility scaling
+- **Information-First**: Clean, data-focused design approach
+- **Responsive Design**: Adapts beautifully from iPhone to iPad
 - **Component Library**: Pre-built, reusable UI components
-- **Design Tokens**: Comprehensive token system for consistency
-- **Accessibility First**: WCAG compliant with proper contrast ratios
+- **Accessibility First**: Full VoiceOver and accessibility support
 
 ## Architecture
 
 ```
 Design/
-├── Colors.swift              # Catppuccin color definitions (existing)
-├── Typography.swift          # Inter font system (existing)
-├── Icons.swift              # Icon components (existing)
-├── DesignSystem.swift       # Core design system foundation
-├── DesignTokens.swift       # Comprehensive design tokens
-├── Components.swift         # Reusable UI components
-├── Layout.swift            # Layout system and responsive helpers
-├── DesignSystemIndex.swift # Central export interface
-└── README.md              # This documentation
+├── Colors.swift         # Catppuccin color definitions (existing)
+├── Typography.swift     # Inter font system (existing)
+├── Icons.swift         # Icon components (existing)
+├── DesignSystem.swift  # Core design system foundation
+├── DesignTokens.swift  # Design tokens for consistency
+├── Components.swift    # Reusable UI components
+├── Layout.swift       # Layout system and responsive helpers
+└── README.md          # This documentation
 ```
 
 ## Quick Start
@@ -40,133 +38,135 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack(spacing: ToraSpacing.md) {
+        VStack(spacing: 16) {
             // Using design system components
             ToraHeader(title: "Experiments", subtitle: "12 total")
 
             ToraCard(style: .standard) {
-                Text("Terminal-style card")
-                    .font(ToraTypography.body())
-                    .foregroundColor(ToraColors.textPrimary)
+                Text("Clean, native iOS card")
+                    .font(.body)
+                    .foregroundColor(.primary)
             }
 
             ToraButton("Create Experiment", style: .primary) {
                 // Action
             }
         }
-        .toraContainer()
-        .background(ToraColors.background)
+        .padding()
+        .background(Color(.systemBackground))
     }
 }
 ```
 
-### Using Design Tokens
+### Using System Colors
 
 ```swift
-// Colors
-.foregroundColor(ToraDesignTokens.SemanticColors.textPrimary)
-.background(ToraDesignTokens.ComponentColors.Card.background)
+// Native iOS colors that adapt to light/dark mode
+.foregroundColor(.primary)
+.background(.regularMaterial)
+.accentColor(.blue)
 
-// Typography
-.font(ToraDesignTokens.TypographyTokens.fontSizeLG)
-
-// Spacing
-.padding(ToraDesignTokens.SpacingTokens.spacingMD)
-
-// Animations
-.animation(ToraDesignTokens.AnimationTokens.animationSmooth)
+// Custom semantic colors
+.foregroundColor(Color(.label))
+.background(Color(.systemBackground))
 ```
 
 ## Design Principles
 
 ### 1. Information-First
-Data and content take priority over decorative elements. The design emphasizes clarity and readability.
+Data and content take priority over decorative elements. The design emphasizes clarity and readability while feeling native to iOS.
 
-### 2. Terminal Aesthetic
-- Sharp edges (no rounded corners on cards/containers)
-- Monospace fonts for data display
-- Technical, developer-focused visual language
-- Subtle borders and dividers
+### 2. iOS Native
+- Uses system colors and materials for automatic light/dark mode
+- Follows iOS design patterns and conventions
+- Leverages platform capabilities like Dynamic Type
+- Feels familiar to iOS users
 
 ### 3. Responsive Design
-- Mobile-first approach
-- Dynamic typography scaling
-- Adaptive layouts for different screen sizes
-- Touch-optimized interactions
+- Mobile-first approach optimized for touch
+- Dynamic typography that scales with accessibility settings
+- Adaptive layouts for iPhone and iPad
+- Proper touch target sizes (44pt minimum)
 
 ### 4. Accessibility
-- WCAG 2.1 AA compliance
-- Minimum 4.5:1 contrast ratios
-- Dynamic type support
-- Proper touch target sizes (44pt minimum)
+- Full VoiceOver support
+- Dynamic Type support
+- High contrast mode support
+- Proper semantic labeling
 
 ## Color System
 
-### Semantic Colors
+### System Colors
 ```swift
-// Background hierarchy
-ToraColors.background          // Primary background
-ToraColors.backgroundSecondary // Secondary background
-ToraColors.backgroundTertiary  // Tertiary background
+// iOS system colors that automatically adapt to light/dark mode
+Color(.systemBackground)      // Primary background
+Color(.secondarySystemBackground) // Secondary background
+Color(.tertiarySystemBackground)  // Tertiary background
 
-// Text hierarchy
-ToraColors.textPrimary    // Primary text
-ToraColors.textSecondary  // Secondary text
-ToraColors.textTertiary   // Tertiary text
+// Text colors
+Color(.label)           // Primary text
+Color(.secondaryLabel)  // Secondary text
+Color(.tertiaryLabel)   // Tertiary text
 
 // Interactive elements
-ToraColors.accent         // Primary brand color (blue)
-ToraColors.accentSecondary // Secondary brand color (lavender)
-ToraColors.accentTertiary  // Tertiary brand color (mauve)
+Color(.systemBlue)      // Primary actions
+Color(.systemPurple)    // Secondary actions
+Color(.systemRed)       // Destructive actions
 ```
 
-### Component Colors
+### Materials
 ```swift
-// Button colors
-ToraComponentColors.Button.primaryBackground
-ToraComponentColors.Button.primaryForeground
-ToraComponentColors.Button.primaryBorder
-
-// Card colors
-ToraComponentColors.Card.background
-ToraComponentColors.Card.backgroundElevated
-ToraComponentColors.Card.border
+// iOS materials for depth and layering
+.regularMaterial        // Standard material
+.thinMaterial          // Subtle material
+.ultraThinMaterial     // Very subtle material
+.thickMaterial         // Strong material
 ```
 
 ## Typography System
 
-### Responsive Typography
+### Dynamic Typography
 ```swift
-// Automatically scales with device size and accessibility settings
-.font(ToraTypography.responsiveTitle1())  // 28pt on iPhone, 32pt on iPad
-.font(ToraTypography.responsiveBody())    // 16pt on compact, 17pt on regular
-.font(ToraTypography.responsiveCaption()) // 11pt on compact, 12pt on regular
+// iOS system fonts that automatically scale with accessibility settings
+.font(.largeTitle)     // Largest title
+.font(.title)          // Section titles
+.font(.title2)         // Subsection titles
+.font(.headline)       // Important content
+.font(.body)           // Regular content
+.font(.callout)        // Emphasized content
+.font(.subheadline)    // Secondary content
+.font(.footnote)       // Small content
+.font(.caption)        // Smallest content
 ```
 
-### Standard Typography
+### Font Weights
 ```swift
-.font(ToraTypography.title1())     // 28pt, bold
-.font(ToraTypography.headline())   // 17pt, semibold
-.font(ToraTypography.body())       // 17pt, regular
-.font(ToraTypography.caption())    // 12pt, regular
-.font(ToraTypography.mono())       // Monospace for data
+.fontWeight(.ultraLight)
+.fontWeight(.thin)
+.fontWeight(.light)
+.fontWeight(.regular)
+.fontWeight(.medium)
+.fontWeight(.semibold)
+.fontWeight(.bold)
+.fontWeight(.heavy)
+.fontWeight(.black)
 ```
 
 ## Component Library
 
 ### Cards
 ```swift
-// Standard card
+// Standard card with native iOS styling
 ToraCard(style: .standard) {
     Text("Content")
 }
 
-// Elevated card
+// Elevated card with secondary background
 ToraCard(style: .elevated) {
     Text("Content")
 }
 
-// Alternating list cards
+// Alternating cards for lists
 ToraCard(style: .alternating(isEven: index % 2 == 0)) {
     Text("Content")
 }
@@ -174,36 +174,52 @@ ToraCard(style: .alternating(isEven: index % 2 == 0)) {
 
 ### Buttons
 ```swift
-// Primary button
+// Primary button (system blue)
 ToraButton("Submit", style: .primary) { }
 
-// Secondary button
+// Secondary button (system fill)
 ToraButton("Cancel", style: .secondary) { }
 
-// Destructive button
+// Destructive button (system red)
 ToraButton("Delete", style: .destructive) { }
 ```
 
-### Lists
+### Toolbar Buttons
 ```swift
-ToraList(experiments) { experiment, index in
-    ToraListItem(index: index, isAlternating: true) {
-        // Content
-        Text(experiment.name)
-    } actions: {
-        // Action buttons
-        ToraButton("Edit", style: .secondary) { }
-    }
+// Icon-based toolbar buttons for navigation
+ToraToolbarButton(systemImage: "xmark") {
+    // Close/cancel action
+}
+
+ToraToolbarButton(systemImage: "arrow.clockwise") {
+    // Refresh action
+}
+
+ToraToolbarButton(systemImage: "plus") {
+    // Add action
 }
 ```
 
 ### Search Input
 ```swift
-ToraSearchInput(
-    text: $searchQuery,
-    placeholder: "search experiments...",
-    showSlashPrefix: true
-)
+ToraSearchInput(text: $searchQuery, placeholder: "Search...")
+```
+
+### Empty States
+```swift
+ToraEmptyState(
+    title: "No Data",
+    message: "There's nothing here yet.",
+    systemImage: "tray",
+    actionTitle: "Add Item"
+) {
+    // Action
+}
+```
+
+### Loading States
+```swift
+ToraLoadingState(message: "Loading...")
 ```
 
 ## Layout System

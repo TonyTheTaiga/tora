@@ -46,18 +46,9 @@ struct LoginFormSheet: View {
                         .multilineTextAlignment(.center)
                 }
 
-                Button(action: {
+                ToraButton(isLoading ? "Signing In..." : "Sign In", style: .primary) {
                     Task { await signIn() }
-                }) {
-                    HStack {
-                        if isLoading {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                        }
-                        Text(isLoading ? "Signing In..." : "Sign In")
-                    }
                 }
-                .buttonStyle(.borderedProminent)
                 .disabled(isLoading || email.isEmpty || password.isEmpty)
 
                 Spacer()
@@ -66,7 +57,7 @@ struct LoginFormSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    ToraToolbarButton(systemImage: "xmark") {
                         dismiss()
                     }
                 }
@@ -106,7 +97,7 @@ struct LoginView: View {
     @State private var subtitleOpacity: Double = 0.0
     @State private var buttonOffset: CGFloat = 30
     @State private var buttonOpacity: Double = 0.0
-    @State private var buttonPressed = false
+
     @State private var loginSheetShown: Bool = false
 
     var body: some View {
@@ -132,49 +123,15 @@ struct LoginView: View {
                 Spacer()
                     .frame(height: geometry.size.height * 0.05)
 
-                Button {
+                ToraButton("Login", style: .primary) {
                     loginSheetShown = true
-                } label: {
-                    let buttonFontSize = min(max(geometry.size.width * 0.04, 14), 20)
-                    let horizontalPadding = min(max(geometry.size.width * 0.08, 24), 48)
-                    let verticalPadding = min(max(geometry.size.height * 0.015, 10), 16)
-
-                    Text("login")
-                        .font(
-                            Font.dynamicInter(
-                                buttonFontSize, weight: Font.Weight.medium, relativeTo: Font.TextStyle.body)
-                        )
-                        .foregroundColor(buttonPressed ? Color.ctpBase : Color.ctpBlue)
-                        .padding(.horizontal, horizontalPadding)
-                        .padding(.vertical, verticalPadding)
-                        .background(
-                            RoundedRectangle(cornerRadius: 0)
-                                .fill(buttonPressed ? Color.ctpBlue : Color.clear)
-                                .animation(.easeInOut(duration: 0.15), value: buttonPressed)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 0)
-                                .stroke(Color.ctpBlue, lineWidth: 1)
-                        )
                 }
-                .sheet(isPresented: $loginSheetShown) {
-                    LoginFormSheet()
-                }
-                .scaleEffect(buttonPressed ? 0.95 : 1.0)
                 .offset(y: buttonOffset)
                 .opacity(buttonOpacity)
                 .animation(.easeOut(duration: 0.8).delay(0.6), value: buttonOffset)
                 .animation(.easeOut(duration: 0.8).delay(0.6), value: buttonOpacity)
-                .animation(.easeInOut(duration: 0.1), value: buttonPressed)
-                .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.1)) {
-                        buttonPressed = true
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        withAnimation(.easeInOut(duration: 0.1)) {
-                            buttonPressed = false
-                        }
-                    }
+                .sheet(isPresented: $loginSheetShown) {
+                    LoginFormSheet()
                 }
 
                 Spacer()
