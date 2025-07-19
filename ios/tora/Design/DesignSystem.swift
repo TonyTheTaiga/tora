@@ -25,6 +25,9 @@ public struct DesignSystem {
         public static var accentSecondary: Color { Color.ctpLavender }
         public static var accentTertiary: Color { Color.ctpMauve }
 
+        // Brand elements
+        public static var logoColor: Color { Color.ctpBlue }
+
         // Status colors
         public static var success: Color { Color.ctpGreen }
         public static var warning: Color { Color.ctpYellow }

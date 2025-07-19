@@ -205,14 +205,15 @@ struct ToraLogo: View {
 
     var body: some View {
         Image("ToraLogo")
+            .renderingMode(.template)
             .resizable()
             .aspectRatio(logoAspectRatio, contentMode: .fit)
+            .foregroundColor(DesignSystem.Colors.logoColor)
     }
 }
 
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {
         LoginView()
-            .background(Color.ctpBase)
     }
 }

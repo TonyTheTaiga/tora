@@ -66,6 +66,7 @@ struct Workspace: Decodable, Identifiable, Equatable {
     }
 }
 
+// MARK: - Hyperparam
 struct HyperParam: Codable, Equatable {
     let key: String
     let value: HyperParamValue
