@@ -49,6 +49,7 @@ enum WorkspaceErrors: Error, LocalizedError {
     }
 }
 
+// Mark: Workspace
 struct Workspace: Decodable, Identifiable, Equatable {
     var id: String
     var name: String
@@ -126,6 +127,7 @@ struct HyperParam: Codable, Equatable {
     }
 }
 
+// Mark: Experiment
 struct Experiment: Decodable, Identifiable, Equatable {
     var id: String
     var name: String
@@ -236,6 +238,99 @@ class WorkspaceService: ObservableObject {
             decoder.dateDecodingStrategy = .iso8601
             let apiResponse = try decoder.decode(ApiResponse<[Experiment]>.self, from: data)
             return apiResponse.data ?? []
+        } catch {
+            throw WorkspaceErrors.jsonParsingError(error)
+        }
+    }
+}
+
+@MainActor
+class ExperimentService: ObservableObject {
+    private var baseUrl = "http://localhost:8080/api"
+    private let authService: AuthService
+
+    init(authService: AuthService) {
+        self.authService = authService
+    }
+
+    public func listAll() async throws -> [Experiment] {
+        guard let url = URL(string: "\(baseUrl)/experiments") else {
+            throw WorkspaceErrors.invalidURL
+        }
+
+        guard let token = authService.currentUser?.auth_token else {
+            throw WorkspaceErrors.unauthenticated
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await URLSession.shared.data(for: request)
+        } catch {
+            throw WorkspaceErrors.networkError(error)
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw WorkspaceErrors.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            let errorMessage = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
+            throw WorkspaceErrors.requestError(httpResponse.statusCode, errorMessage)
+        }
+
+        do {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let apiResponse = try decoder.decode(ApiResponse<[Experiment]>.self, from: data)
+            return apiResponse.data ?? []
+        } catch {
+            throw WorkspaceErrors.jsonParsingError(error)
+        }
+    }
+
+    public func get(experimentId: String) async throws -> Experiment {
+        guard let url = URL(string: "\(baseUrl)/experiments/\(experimentId)") else {
+            throw WorkspaceErrors.invalidURL
+        }
+
+        guard let token = authService.currentUser?.auth_token else {
+            throw WorkspaceErrors.unauthenticated
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await URLSession.shared.data(for: request)
+        } catch {
+            throw WorkspaceErrors.networkError(error)
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw WorkspaceErrors.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            let errorMessage = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
+            throw WorkspaceErrors.requestError(httpResponse.statusCode, errorMessage)
+        }
+
+        do {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let apiResponse = try decoder.decode(ApiResponse<Experiment>.self, from: data)
+            guard let experiment = apiResponse.data else {
+                throw WorkspaceErrors.dataError("No experiment data received")
+            }
+            return experiment
         } catch {
             throw WorkspaceErrors.jsonParsingError(error)
         }

@@ -3,12 +3,12 @@ import SwiftUI
 
 struct WorkspaceRow: View {
     let workspace: Workspace
-    @State private var showingExperiments = false
+    let onExperimentSelected: ((String) -> Void)?
 
     var body: some View {
-        Button(action: {
-            showingExperiments = true
-        }) {
+        NavigationLink {
+            WorkspaceExperimentsView(workspace: workspace, onExperimentSelected: onExperimentSelected)
+        } label: {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text(workspace.name)
@@ -54,15 +54,12 @@ struct WorkspaceRow: View {
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
             .contentShape(Rectangle())
         }
-        .buttonStyle(PlainButtonStyle())
-        .sheet(isPresented: $showingExperiments) {
-            WorkspaceExperimentsView(workspace: workspace)
-        }
     }
 }
 
 struct WorkspaceExperimentsView: View {
     let workspace: Workspace
+    let onExperimentSelected: ((String) -> Void)?
     @EnvironmentObject private var workspaceService: WorkspaceService
     @State private var experiments: [Experiment] = []
     @State private var isLoading = true
@@ -70,46 +67,44 @@ struct WorkspaceExperimentsView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationView {
-            Group {
-                if isLoading {
-                    VStack(spacing: 16) {
-                        ProgressView()
-                            .scaleEffect(1.2)
-                        Text("Loading experiments...")
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if let errorMessage = errorMessage {
-                    ContentUnavailableView {
-                        Label("Error Loading Experiments", systemImage: "exclamationmark.triangle")
-                    } description: {
-                        Text(errorMessage)
-                    } actions: {
-                        ToraButton("Try Again", style: .primary) {
-                            fetchExperiments()
-                        }
-                    }
-                } else if experiments.isEmpty {
-                    ContentUnavailableView {
-                        Label("No Experiments", systemImage: "flask")
-                    } description: {
-                        Text("This workspace doesn't have any experiments yet.")
-                    }
-                } else {
-                    List(experiments) { experiment in
-                        ExperimentRow(experiment: experiment)
-                    }
-                    .listStyle(.insetGrouped)
+        Group {
+            if isLoading {
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .scaleEffect(1.2)
+                    Text("Loading experiments...")
+                        .foregroundColor(.secondary)
                 }
-            }
-            .navigationTitle(workspace.name)
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    ToraToolbarButton(systemImage: "xmark") {
-                        dismiss()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let errorMessage = errorMessage {
+                ContentUnavailableView {
+                    Label("Error Loading Experiments", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(errorMessage)
+                } actions: {
+                    ToraButton("Try Again", style: .primary) {
+                        fetchExperiments()
                     }
+                }
+            } else if experiments.isEmpty {
+                ContentUnavailableView {
+                    Label("No Experiments", systemImage: "flask")
+                } description: {
+                    Text("This workspace doesn't have any experiments yet.")
+                }
+            } else {
+                List(experiments) { experiment in
+                    ExperimentRow(experiment: experiment, onExperimentSelected: onExperimentSelected)
+                }
+                .listStyle(.insetGrouped)
+            }
+        }
+        .navigationTitle(workspace.name)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                ToraToolbarButton(systemImage: "xmark") {
+                    dismiss()
                 }
             }
         }
@@ -141,71 +136,94 @@ struct WorkspaceExperimentsView: View {
 
 struct ExperimentRow: View {
     let experiment: Experiment
+    let onExperimentSelected: ((String) -> Void)?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(experiment.name)
-                    .font(.headline)
-                    .foregroundColor(.primary)
+        Button(action: {
+            onExperimentSelected?(experiment.id)
+        }) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(experiment.name)
+                        .font(.headline)
+                        .foregroundColor(.primary)
 
-                Spacer()
+                    Spacer()
 
-                Text(formatDate(experiment.updatedAt))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+                    Text(formatDate(experiment.updatedAt))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
 
-            if let description = experiment.description, !description.isEmpty {
-                Text(description)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
-            }
+                if let description = experiment.description, !description.isEmpty {
+                    Text(description)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                }
 
-            if !experiment.tags.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        ForEach(experiment.tags, id: \.self) { tag in
-                            Text(tag)
-                                .font(.caption)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(.blue.opacity(0.1))
-                                .foregroundColor(.blue)
-                                .clipShape(Capsule())
+                if !experiment.tags.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(experiment.tags, id: \.self) { tag in
+                                Text(tag)
+                                    .font(.caption)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(.blue.opacity(0.1))
+                                    .foregroundColor(.blue)
+                                    .clipShape(Capsule())
+                            }
                         }
+                        .padding(.horizontal, 1)
                     }
-                    .padding(.horizontal, 1)
+                }
+
+                if !experiment.hyperparams.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(experiment.hyperparams, id: \.key) { hyperparam in
+                                Text("\(hyperparam.key): \(hyperparam.value.displayValue)")
+                                    .font(.caption)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(.secondary.opacity(0.1))
+                                    .foregroundColor(.secondary)
+                                    .clipShape(Capsule())
+                            }
+                        }
+                        .padding(.horizontal, 1)
+                    }
+                }
+
+                if !experiment.availableMetrics.isEmpty {
+                    Text("Metrics: \(experiment.availableMetrics.joined(separator: ", "))")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+
+                HStack {
+                    Image(systemName: "flask")
+                        .foregroundColor(.secondary)
+                        .font(.caption)
+
+                    Text("Tap to view details")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondary)
+                        .font(.caption2)
                 }
             }
-
-            if !experiment.hyperparams.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        ForEach(experiment.hyperparams, id: \.key) { hyperparam in
-                            Text("\(hyperparam.key): \(hyperparam.value.displayValue)")
-                                .font(.caption)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(.secondary.opacity(0.1))
-                                .foregroundColor(.secondary)
-                                .clipShape(Capsule())
-                        }
-                    }
-                    .padding(.horizontal, 1)
-                }
-            }
-
-            if !experiment.availableMetrics.isEmpty {
-                Text("Metrics: \(experiment.availableMetrics.joined(separator: ", "))")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-            }
+            .padding()
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+            .contentShape(Rectangle())
         }
-        .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .buttonStyle(PlainButtonStyle())
     }
 
     private func formatDate(_ date: Date) -> String {
@@ -216,58 +234,60 @@ struct ExperimentRow: View {
 }
 
 struct WorkspacesView: View {
+    let onExperimentSelected: ((String) -> Void)?
     @EnvironmentObject private var workspaceService: WorkspaceService
     @State private var workspaces: [Workspace] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
 
+    init(onExperimentSelected: ((String) -> Void)? = nil) {
+        self.onExperimentSelected = onExperimentSelected
+    }
+
     var body: some View {
-        NavigationView {
-            Group {
-                if isLoading {
-                    VStack(spacing: 16) {
-                        ProgressView()
-                            .scaleEffect(1.2)
-                        Text("Loading workspaces...")
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if let errorMessage = errorMessage {
-                    ContentUnavailableView {
-                        Label("Error Loading Workspaces", systemImage: "exclamationmark.triangle")
-                    } description: {
-                        Text(errorMessage)
-                    } actions: {
-                        ToraButton("Try Again", style: .primary) {
-                            fetchWorkspaces()
-                        }
-                    }
-                } else if workspaces.isEmpty {
-                    ContentUnavailableView {
-                        Label("No Workspaces", systemImage: "folder")
-                    } description: {
-                        Text("No workspaces are available for your account.")
-                    }
-                } else {
-                    List(workspaces) { workspace in
-                        WorkspaceRow(workspace: workspace)
-                    }
-                    .listStyle(.insetGrouped)
+        Group {
+            if isLoading {
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .scaleEffect(1.2)
+                    Text("Loading workspaces...")
+                        .foregroundColor(.secondary)
                 }
-            }
-            .navigationTitle("Workspaces")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    ToraToolbarButton(systemImage: "arrow.clockwise") {
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let errorMessage = errorMessage {
+                ContentUnavailableView {
+                    Label("Error Loading Workspaces", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(errorMessage)
+                } actions: {
+                    ToraButton("Try Again", style: .primary) {
                         fetchWorkspaces()
                     }
-                    .disabled(isLoading)
                 }
+            } else if workspaces.isEmpty {
+                ContentUnavailableView {
+                    Label("No Workspaces", systemImage: "folder")
+                } description: {
+                    Text("No workspaces are available for your account.")
+                }
+            } else {
+                List(workspaces) { workspace in
+                    WorkspaceRow(workspace: workspace, onExperimentSelected: onExperimentSelected)
+                }
+                .listStyle(.insetGrouped)
             }
-            .onAppear(perform: fetchWorkspaces)
         }
-        .navigationViewStyle(.stack)
+        .navigationTitle("Workspaces")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                ToraToolbarButton(systemImage: "arrow.clockwise") {
+                    fetchWorkspaces()
+                }
+                .disabled(isLoading)
+            }
+        }
+        .onAppear(perform: fetchWorkspaces)
     }
 
     private func fetchWorkspaces() {
@@ -286,4 +306,5 @@ struct WorkspacesView: View {
 
 #Preview {
     WorkspacesView()
+        .environmentObject(WorkspaceService(authService: AuthService.shared))
 }

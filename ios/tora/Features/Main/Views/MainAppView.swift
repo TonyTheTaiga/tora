@@ -3,6 +3,7 @@ import SwiftUI
 
 struct MainAppView: View {
     @State private var selectedTab: Tabs = .workspaces
+    @State private var selectedExperimentId: String?
 
     enum Tabs: Equatable, Hashable {
         case workspaces
@@ -13,15 +14,22 @@ struct MainAppView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab("Workspaces", systemImage: "macwindow.stack", value: .workspaces) {
-                WorkspacesView()
+                NavigationStack {
+                    WorkspacesView(onExperimentSelected: { experimentId in
+                        selectedExperimentId = experimentId
+                        selectedTab = .experiments
+                    })
+                }
             }
 
-            //            Tab("Experiments", systemImage: "sparkle.text.clipboard", value: .experiments) {
-            //                ExperimentsView()
-            //            }
+            Tab("Experiments", systemImage: "flask", value: .experiments) {
+                NavigationStack {
+                    ExperimentsView(experimentId: selectedExperimentId)
+                }
+            }
 
             Tab("Settings", systemImage: "gearshape.2", value: .settings) {
-                ExperimentsView()
+                SettingsView()
             }
         }.accentColor(Color.ctpBlue)
     }
@@ -31,6 +39,7 @@ struct MainAppView: View {
     MainAppView()
         .environmentObject(AuthService.shared)
         .environmentObject(WorkspaceService(authService: AuthService.shared))
+        .environmentObject(ExperimentService(authService: AuthService.shared))
         .modelContainer(for: UserSession.self, inMemory: true)
         .onAppear {
             let service = AuthService.shared

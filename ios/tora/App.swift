@@ -19,6 +19,7 @@ struct ContentView: View {
 struct Tora: App {
     @StateObject private var authService = AuthService.shared
     @StateObject private var workspaceService = WorkspaceService(authService: AuthService.shared)
+    @StateObject private var experimentService = ExperimentService(authService: AuthService.shared)
 
     var body: some Scene {
         WindowGroup {
@@ -27,6 +28,7 @@ struct Tora: App {
                 .modelContainer(for: UserSession.self)
                 .environmentObject(authService)
                 .environmentObject(workspaceService)
+                .environmentObject(experimentService)
         }
     }
 }
@@ -34,4 +36,6 @@ struct Tora: App {
 #Preview {
     ContentView()
         .environmentObject(AuthService.shared)
+        .environmentObject(WorkspaceService(authService: AuthService.shared))
+        .environmentObject(ExperimentService(authService: AuthService.shared))
 }
