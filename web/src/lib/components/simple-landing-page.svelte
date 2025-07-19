@@ -139,7 +139,9 @@
 >
   <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex flex-col items-center text-center text-ctp-text">
-      <div class="fill-ctp-blue w-full max-w-xs sm:max-w-sm mb-8 sm:mb-12">
+      <div
+        class="fill-ctp-blue w-full max-w-xs sm:max-w-sm mb-8 sm:mb-12 -translate-x-[-5.5%]"
+      >
         <Logo />
       </div>
 
