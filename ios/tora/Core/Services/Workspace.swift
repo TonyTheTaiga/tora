@@ -157,7 +157,7 @@ struct Experiment: Decodable, Identifiable, Equatable {
 
 @MainActor
 class WorkspaceService: ObservableObject {
-    private var baseUrl = "http://localhost:8080/api"
+    private var baseUrl = Config.baseURL + "/api"
     private let authService: AuthService
 
     init(authService: AuthService) {
@@ -235,6 +235,9 @@ class WorkspaceService: ObservableObject {
         }
 
         do {
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("Received JSON for experiments: \(jsonString)")
+            }
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             let apiResponse = try decoder.decode(ApiResponse<[Experiment]>.self, from: data)
@@ -247,7 +250,7 @@ class WorkspaceService: ObservableObject {
 
 @MainActor
 class ExperimentService: ObservableObject {
-    private var baseUrl = "http://localhost:8080/api"
+    private var baseUrl = Config.baseURL + "/api"
     private let authService: AuthService
 
     init(authService: AuthService) {
@@ -323,6 +326,8 @@ class ExperimentService: ObservableObject {
             let errorMessage = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
             throw WorkspaceErrors.requestError(httpResponse.statusCode, errorMessage)
         }
+
+        print(data)
 
         do {
             let decoder = JSONDecoder()

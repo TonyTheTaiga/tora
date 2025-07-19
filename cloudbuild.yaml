@@ -34,25 +34,25 @@ steps:
       - "DOCKER_BUILDKIT=1"
 
   # Web pipeline with cache
-  - name: "gcr.io/cloud-builders/docker"
-    id: "build-web"
-    waitFor: ["setup-buildx"]
-    dir: "web"
-    args:
-      - "buildx"
-      - "build"
-      - "--builder"
-      - "builder"
-      - "--cache-from=type=registry,ref=us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:cache"
-      - "--cache-to=type=registry,ref=us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:cache,mode=max"
-      - "--push"
-      - "-t"
-      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA"
-      - "-t"
-      - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:latest"
-      - "."
-    env:
-      - "DOCKER_BUILDKIT=1"
+  # - name: "gcr.io/cloud-builders/docker"
+  #   id: "build-web"
+  #   waitFor: ["setup-buildx"]
+  #   dir: "web"
+  #   args:
+  #     - "buildx"
+  #     - "build"
+  #     - "--builder"
+  #     - "builder"
+  #     - "--cache-from=type=registry,ref=us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:cache"
+  #     - "--cache-to=type=registry,ref=us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:cache,mode=max"
+  #     - "--push"
+  #     - "-t"
+  #     - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA"
+  #     - "-t"
+  #     - "us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:latest"
+  #     - "."
+  #   env:
+  #     - "DOCKER_BUILDKIT=1"
 
   # Deploy API (no longer needs separate push step)
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
@@ -76,25 +76,25 @@ steps:
           --set-env-vars FRONTEND_URL=https://tora-web.vercel.app
 
   # Deploy Web (no longer needs separate push step)
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-    id: "deploy-web"
-    waitFor: ["build-web"]
-    dir: "web"
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - |
-        gcloud run deploy tora-web \
-          --image us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA \
-          --region us-central1 \
-          --platform managed \
-          --allow-unauthenticated \
-          --cpu 1.0 \
-          --memory 512Mi \
-          --min-instances 0 \
-          --max-instances 5 \
-          --set-env-vars PUBLIC_API_BASE_URL=https://tora-api-1030250455947.us-central1.run.app \
-          --port 3000
+  # - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+  #   id: "deploy-web"
+  #   waitFor: ["build-web"]
+  #   dir: "web"
+  #   entrypoint: "bash"
+  #   args:
+  #     - "-c"
+  #     - |
+  #       gcloud run deploy tora-web \
+  #         --image us-central1-docker.pkg.dev/$PROJECT_ID/tora/web:$COMMIT_SHA \
+  #         --region us-central1 \
+  #         --platform managed \
+  #         --allow-unauthenticated \
+  #         --cpu 1.0 \
+  #         --memory 512Mi \
+  #         --min-instances 0 \
+  #         --max-instances 5 \
+  #         --set-env-vars PUBLIC_API_BASE_URL=https://tora-api-1030250455947.us-central1.run.app \
+  #         --port 3000
 
 timeout: "1600s"
 logsBucket: "gs://artifacts.taigaishida-217622.appspot.com/logs"

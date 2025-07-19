@@ -88,7 +88,7 @@ class AuthService: ObservableObject {
     // Magical singleton, gets instantited on first reference
     static let shared = AuthService()
 
-    private let backendUrl: String = "http://localhost:8080"
+    private let backendUrl: String = Config.baseURL
 
     private init() {
         checkAuthenticationStatus()

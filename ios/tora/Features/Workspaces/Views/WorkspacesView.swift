@@ -126,6 +126,10 @@ struct WorkspaceExperimentsView: View {
                 }
             } catch {
                 await MainActor.run {
+                    if let workspaceError = error as? WorkspaceErrors {
+                        print("Caught workspace error: \(workspaceError)")
+                    }
+                    print("Error fetching experiments: \(error)")
                     self.errorMessage = error.localizedDescription
                     self.isLoading = false
                 }
