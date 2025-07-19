@@ -47,8 +47,8 @@ struct MainAppView: View {
             service.currentUser = UserSession(
                 id: "preview-user",
                 email: "preview@tora.com",
-                auth_token: "token",
-                refresh_token: "refresh",
+                authToken: "token",
+                refreshToken: "refresh",
                 expiresIn: Date(),
                 expiresAt: Date().addingTimeInterval(3600),
                 tokenType: "Bearer"

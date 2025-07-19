@@ -49,7 +49,7 @@ enum WorkspaceErrors: Error, LocalizedError {
     }
 }
 
-// Mark: Workspace
+// MARK: - Workspace
 struct Workspace: Decodable, Identifiable, Equatable {
     var id: String
     var name: String
@@ -127,7 +127,7 @@ struct HyperParam: Codable, Equatable {
     }
 }
 
-// Mark: Experiment
+// MARK: - Experiment
 struct Experiment: Decodable, Identifiable, Equatable {
     var id: String
     var name: String
@@ -168,7 +168,7 @@ class WorkspaceService: ObservableObject {
             throw WorkspaceErrors.invalidURL
         }
 
-        guard let token = authService.currentUser?.auth_token else {
+        guard let token = authService.currentUser?.authToken else {
             throw WorkspaceErrors.unauthenticated
         }
 
@@ -208,7 +208,7 @@ class WorkspaceService: ObservableObject {
             throw WorkspaceErrors.invalidURL
         }
 
-        guard let token = authService.currentUser?.auth_token else {
+        guard let token = authService.currentUser?.authToken else {
             throw WorkspaceErrors.unauthenticated
         }
 
@@ -258,7 +258,7 @@ class ExperimentService: ObservableObject {
             throw WorkspaceErrors.invalidURL
         }
 
-        guard let token = authService.currentUser?.auth_token else {
+        guard let token = authService.currentUser?.authToken else {
             throw WorkspaceErrors.unauthenticated
         }
 
@@ -298,7 +298,7 @@ class ExperimentService: ObservableObject {
             throw WorkspaceErrors.invalidURL
         }
 
-        guard let token = authService.currentUser?.auth_token else {
+        guard let token = authService.currentUser?.authToken else {
             throw WorkspaceErrors.unauthenticated
         }
 

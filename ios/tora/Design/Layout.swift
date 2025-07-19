@@ -33,23 +33,23 @@ public struct DeviceInfo {
 // MARK: - Responsive Spacing
 public struct ResponsiveSpacing {
     public static func horizontal() -> CGFloat {
-        DeviceInfo.isPhone ? DesignSystem.Spacing.md : DesignSystem.Spacing.lg
+        DeviceInfo.isPhone ? DesignSystem.Spacing.medium : DesignSystem.Spacing.large
     }
 
     public static func vertical() -> CGFloat {
-        DeviceInfo.isPhone ? DesignSystem.Spacing.md : DesignSystem.Spacing.xl
+        DeviceInfo.isPhone ? DesignSystem.Spacing.medium : DesignSystem.Spacing.extraLarge
     }
 
     public static func cardPadding() -> CGFloat {
-        DeviceInfo.isCompact ? DesignSystem.Spacing.sm : DesignSystem.Spacing.md
+        DeviceInfo.isCompact ? DesignSystem.Spacing.small : DesignSystem.Spacing.medium
     }
 
     public static func listItemPadding() -> CGFloat {
-        DeviceInfo.isCompact ? DesignSystem.Spacing.sm : DesignSystem.Spacing.md
+        DeviceInfo.isCompact ? DesignSystem.Spacing.small : DesignSystem.Spacing.medium
     }
 
     public static func sectionSpacing() -> CGFloat {
-        DeviceInfo.isPhone ? DesignSystem.Spacing.lg : DesignSystem.Spacing.xl
+        DeviceInfo.isPhone ? DesignSystem.Spacing.large : DesignSystem.Spacing.extraLarge
     }
 }
 
@@ -167,7 +167,7 @@ public struct ToraGrid<Data: RandomAccessCollection, Content: View>: View where 
     public init(
         _ data: Data,
         columns: Int = 2,
-        spacing: CGFloat = DesignSystem.Spacing.md,
+        spacing: CGFloat = DesignSystem.Spacing.medium,
         @ViewBuilder content: @escaping (Data.Element) -> Content
     ) {
         self.data = data
@@ -343,8 +343,9 @@ struct KeyboardResponsive: ViewModifier {
     func body(content: Content) -> some View {
         content
             .padding(.bottom, keyboardHeight)
-            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) {
-                notification in
+            .onReceive(
+                NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+            ) { notification in
                 if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
                     withAnimation(DesignSystem.Animation.smooth) {
                         keyboardHeight = keyboardFrame.cgRectValue.height

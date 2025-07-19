@@ -139,90 +139,93 @@ struct ExperimentRow: View {
     let onExperimentSelected: ((String) -> Void)?
 
     var body: some View {
-        Button(action: {
-            onExperimentSelected?(experiment.id)
-        }) {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text(experiment.name)
-                        .font(.headline)
-                        .foregroundColor(.primary)
+        Button(
+            action: {
+                onExperimentSelected?(experiment.id)
+            },
+            label: {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text(experiment.name)
+                            .font(.headline)
+                            .foregroundColor(.primary)
 
-                    Spacer()
+                        Spacer()
 
-                    Text(formatDate(experiment.updatedAt))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+                        Text(formatDate(experiment.updatedAt))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
 
-                if let description = experiment.description, !description.isEmpty {
-                    Text(description)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .lineLimit(2)
-                }
+                    if let description = experiment.description, !description.isEmpty {
+                        Text(description)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                    }
 
-                if !experiment.tags.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(experiment.tags, id: \.self) { tag in
-                                Text(tag)
-                                    .font(.caption)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(.blue.opacity(0.1))
-                                    .foregroundColor(.blue)
-                                    .clipShape(Capsule())
+                    if !experiment.tags.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 6) {
+                                ForEach(experiment.tags, id: \.self) { tag in
+                                    Text(tag)
+                                        .font(.caption)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(.blue.opacity(0.1))
+                                        .foregroundColor(.blue)
+                                        .clipShape(Capsule())
+                                }
                             }
+                            .padding(.horizontal, 1)
                         }
-                        .padding(.horizontal, 1)
+                    }
+
+                    if !experiment.hyperparams.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 6) {
+                                ForEach(experiment.hyperparams, id: \.key) { hyperparam in
+                                    Text("\(hyperparam.key): \(hyperparam.value.displayValue)")
+                                        .font(.caption)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(.secondary.opacity(0.1))
+                                        .foregroundColor(.secondary)
+                                        .clipShape(Capsule())
+                                }
+                            }
+                            .padding(.horizontal, 1)
+                        }
+                    }
+
+                    if !experiment.availableMetrics.isEmpty {
+                        Text("Metrics: \(experiment.availableMetrics.joined(separator: ", "))")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+
+                    HStack {
+                        Image(systemName: "flask")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
+
+                        Text("Tap to view details")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.secondary)
+                            .font(.caption2)
                     }
                 }
-
-                if !experiment.hyperparams.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(experiment.hyperparams, id: \.key) { hyperparam in
-                                Text("\(hyperparam.key): \(hyperparam.value.displayValue)")
-                                    .font(.caption)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(.secondary.opacity(0.1))
-                                    .foregroundColor(.secondary)
-                                    .clipShape(Capsule())
-                            }
-                        }
-                        .padding(.horizontal, 1)
-                    }
-                }
-
-                if !experiment.availableMetrics.isEmpty {
-                    Text("Metrics: \(experiment.availableMetrics.joined(separator: ", "))")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                }
-
-                HStack {
-                    Image(systemName: "flask")
-                        .foregroundColor(.secondary)
-                        .font(.caption)
-
-                    Text("Tap to view details")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-
-                    Spacer()
-
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
-                        .font(.caption2)
-                }
+                .padding()
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                .contentShape(Rectangle())
             }
-            .padding()
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-            .contentShape(Rectangle())
-        }
+        )
         .buttonStyle(PlainButtonStyle())
     }
 

@@ -9,30 +9,33 @@ struct ExperimentSelectorView: View {
     var body: some View {
         NavigationView {
             List(experiments) { experiment in
-                Button(action: {
-                    onExperimentSelected(experiment)
-                    dismiss()
-                }) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(experiment.name)
-                            .font(.headline)
-                            .foregroundColor(.primary)
+                Button(
+                    action: {
+                        onExperimentSelected(experiment)
+                        dismiss()
+                    },
+                    label: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(experiment.name)
+                                .font(.headline)
+                                .foregroundColor(.primary)
 
-                        if let description = experiment.description, !description.isEmpty {
-                            Text(description)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .lineLimit(2)
-                        }
+                            if let description = experiment.description, !description.isEmpty {
+                                Text(description)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(2)
+                            }
 
-                        if let workspaceId = experiment.workspaceId {
-                            Text("Workspace: \(workspaceId)")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
+                            if let workspaceId = experiment.workspaceId {
+                                Text("Workspace: \(workspaceId)")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
                         }
+                        .padding(.vertical, 4)
                     }
-                    .padding(.vertical, 4)
-                }
+                )
                 .buttonStyle(PlainButtonStyle())
                 .listRowBackground(
                     selectedExperiment?.id == experiment.id ? Color.blue.opacity(0.1) : Color.clear
@@ -108,17 +111,19 @@ struct ExperimentsView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 if !allExperiments.isEmpty {
-                    Button(action: {
-                        showingExperimentSelector = true
-                    }) {
-                        HStack(spacing: 4) {
-                            Text(selectedExperiment?.name.truncated(to: 20) ?? "Choose")
-                                .font(.headline)
-                            Image(systemName: "chevron.down")
-                                .font(.caption)
-                        }
-                        .foregroundColor(.primary)
-                    }
+                    Button(
+                        action: {
+                            showingExperimentSelector = true
+                        },
+                        label: {
+                            HStack(spacing: 4) {
+                                Text(selectedExperiment?.name.truncated(to: 20) ?? "Choose")
+                                    .font(.headline)
+                                Image(systemName: "chevron.down")
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.primary)
+                        })
                 }
             }
 

@@ -204,9 +204,9 @@ struct ToraLogo: View {
     private let logoAspectRatio: CGFloat = 357.41 / 109.34
 
     var body: some View {
-        ToraIcon()
-            .fill(Color.ctpBlue)
-            .aspectRatio(logoAspectRatio, contentMode: ContentMode.fit)
+        Image("ToraLogo")
+            .resizable()
+            .aspectRatio(logoAspectRatio, contentMode: .fit)
     }
 }
 

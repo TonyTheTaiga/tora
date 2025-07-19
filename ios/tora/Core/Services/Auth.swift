@@ -60,20 +60,20 @@ enum AuthErrors: Error, LocalizedError {
 class UserSession {
     var id: String
     var email: String
-    var auth_token: String
-    var refresh_token: String
+    var authToken: String
+    var refreshToken: String
     var expiresIn: Date
     var expiresAt: Date
     var tokenType: String
 
     init(
-        id: String, email: String, auth_token: String, refresh_token: String, expiresIn: Date, expiresAt: Date,
+        id: String, email: String, authToken: String, refreshToken: String, expiresIn: Date, expiresAt: Date,
         tokenType: String
     ) {
         self.id = id
         self.email = email
-        self.auth_token = auth_token
-        self.refresh_token = refresh_token
+        self.authToken = authToken
+        self.refreshToken = refreshToken
         self.expiresAt = expiresAt
         self.expiresIn = expiresIn
         self.tokenType = tokenType
@@ -161,8 +161,8 @@ class AuthService: ObservableObject {
             let session = UserSession(
                 id: tokenData.user.id,
                 email: tokenData.user.email,
-                auth_token: tokenData.accessToken,
-                refresh_token: tokenData.refreshToken,
+                authToken: tokenData.accessToken,
+                refreshToken: tokenData.refreshToken,
                 expiresIn: expiresInDate,
                 expiresAt: expiresAtDate,
                 tokenType: tokenData.tokenType

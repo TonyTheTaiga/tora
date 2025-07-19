@@ -8,9 +8,9 @@ public struct DesignTokens {
 
     // MARK: - Theme Management
     public enum Theme: String, CaseIterable {
-        case light = "light"
-        case dark = "dark"
-        case system = "system"
+        case light
+        case dark
+        case system
 
         public var displayName: String {
             switch self {
@@ -67,56 +67,53 @@ public struct DesignTokens {
         public static var overlayHeavy: Color { Color.ctpBase.opacity(0.95) }
     }
 
-    // MARK: - Component-Specific Color Tokens
-    public struct ComponentColors {
-        // Button colors
-        public struct Button {
-            public static var primaryBackground: Color { SemanticColors.brandPrimary.opacity(0.1) }
-            public static var primaryForeground: Color { SemanticColors.brandPrimary }
-            public static var primaryBorder: Color { SemanticColors.brandPrimary.opacity(0.3) }
+    // MARK: - Button Color Tokens
+    public struct ButtonColors {
+        public static var primaryBackground: Color { SemanticColors.brandPrimary.opacity(0.1) }
+        public static var primaryForeground: Color { SemanticColors.brandPrimary }
+        public static var primaryBorder: Color { SemanticColors.brandPrimary.opacity(0.3) }
 
-            public static var secondaryBackground: Color { SemanticColors.surfaceBase }
-            public static var secondaryForeground: Color { SemanticColors.textPrimary }
-            public static var secondaryBorder: Color { SemanticColors.borderPrimary }
+        public static var secondaryBackground: Color { SemanticColors.surfaceBase }
+        public static var secondaryForeground: Color { SemanticColors.textPrimary }
+        public static var secondaryBorder: Color { SemanticColors.borderPrimary }
 
-            public static var destructiveBackground: Color { SemanticColors.statusError.opacity(0.1) }
-            public static var destructiveForeground: Color { SemanticColors.statusError }
-            public static var destructiveBorder: Color { SemanticColors.statusError.opacity(0.3) }
-        }
+        public static var destructiveBackground: Color { SemanticColors.statusError.opacity(0.1) }
+        public static var destructiveForeground: Color { SemanticColors.statusError }
+        public static var destructiveBorder: Color { SemanticColors.statusError.opacity(0.3) }
+    }
 
-        // Input colors
-        public struct Input {
-            public static var background: Color { SemanticColors.surfaceBase }
-            public static var foreground: Color { SemanticColors.textPrimary }
-            public static var placeholder: Color { SemanticColors.textTertiary }
-            public static var border: Color { SemanticColors.borderPrimary }
-            public static var borderFocused: Color { SemanticColors.borderFocus }
-        }
+    // MARK: - Input Color Tokens
+    public struct InputColors {
+        public static var background: Color { SemanticColors.surfaceBase }
+        public static var foreground: Color { SemanticColors.textPrimary }
+        public static var placeholder: Color { SemanticColors.textTertiary }
+        public static var border: Color { SemanticColors.borderPrimary }
+        public static var borderFocused: Color { SemanticColors.borderFocus }
+    }
 
-        // Card colors
-        public struct Card {
-            public static var background: Color { SemanticColors.surfaceBase }
-            public static var backgroundElevated: Color { SemanticColors.surfaceElevated }
-            public static var backgroundAccent: Color { SemanticColors.brandPrimary.opacity(0.05) }
-            public static var border: Color { SemanticColors.borderPrimary }
-            public static var borderAccent: Color { SemanticColors.borderAccent }
-        }
+    // MARK: - Card Color Tokens
+    public struct CardColors {
+        public static var background: Color { SemanticColors.surfaceBase }
+        public static var backgroundElevated: Color { SemanticColors.surfaceElevated }
+        public static var backgroundAccent: Color { SemanticColors.brandPrimary.opacity(0.05) }
+        public static var border: Color { SemanticColors.borderPrimary }
+        public static var borderAccent: Color { SemanticColors.borderAccent }
+    }
 
-        // List colors (inspired by web's alternating backgrounds)
-        public struct List {
-            public static var backgroundEven: Color { SemanticColors.surfaceBase.opacity(0.3) }
-            public static var backgroundOdd: Color { SemanticColors.surfaceBase.opacity(0.6) }
-            public static var backgroundHover: Color { SemanticColors.surfaceHover }
-            public static var border: Color { SemanticColors.borderSecondary }
-        }
+    // MARK: - List Color Tokens
+    public struct ListColors {
+        public static var backgroundEven: Color { SemanticColors.surfaceBase.opacity(0.3) }
+        public static var backgroundOdd: Color { SemanticColors.surfaceBase.opacity(0.6) }
+        public static var backgroundHover: Color { SemanticColors.surfaceHover }
+        public static var border: Color { SemanticColors.borderSecondary }
+    }
 
-        // Navigation colors
-        public struct Navigation {
-            public static var background: Color { SemanticColors.backgroundSecondary }
-            public static var backgroundGlass: Color { SemanticColors.surfaceBase.opacity(0.8) }
-            public static var foreground: Color { SemanticColors.textPrimary }
-            public static var accent: Color { SemanticColors.brandPrimary }
-        }
+    // MARK: - Navigation Color Tokens
+    public struct NavigationColors {
+        public static var background: Color { SemanticColors.backgroundSecondary }
+        public static var backgroundGlass: Color { SemanticColors.surfaceBase.opacity(0.8) }
+        public static var foreground: Color { SemanticColors.textPrimary }
+        public static var accent: Color { SemanticColors.brandPrimary }
     }
 
     // MARK: - Typography Tokens
@@ -209,30 +206,31 @@ public struct DesignTokens {
         public static let shadowLG = Color.black.opacity(0.15)
         public static let shadowXL = Color.black.opacity(0.2)
 
-        // Shadow configurations
-        public struct ShadowConfig {
-            public let color: Color
-            public let radius: CGFloat
-            public let offset: CGSize
+    }
 
-            public static let subtle = ShadowConfig(
-                color: shadowSM,
-                radius: 4,
-                offset: CGSize(width: 0, height: 2)
-            )
+    // MARK: - Shadow Configuration Tokens
+    public struct ShadowConfig {
+        public let color: Color
+        public let radius: CGFloat
+        public let offset: CGSize
 
-            public static let medium = ShadowConfig(
-                color: shadowMD,
-                radius: 8,
-                offset: CGSize(width: 0, height: 4)
-            )
+        public static let subtle = ShadowConfig(
+            color: ShadowTokens.shadowSM,
+            radius: 4,
+            offset: CGSize(width: 0, height: 2)
+        )
 
-            public static let large = ShadowConfig(
-                color: shadowLG,
-                radius: 16,
-                offset: CGSize(width: 0, height: 8)
-            )
-        }
+        public static let medium = ShadowConfig(
+            color: ShadowTokens.shadowMD,
+            radius: 8,
+            offset: CGSize(width: 0, height: 4)
+        )
+
+        public static let large = ShadowConfig(
+            color: ShadowTokens.shadowLG,
+            radius: 16,
+            offset: CGSize(width: 0, height: 8)
+        )
     }
 
     // MARK: - Animation Tokens
@@ -266,11 +264,11 @@ public struct DesignTokens {
 
     // MARK: - Breakpoint Tokens
     public struct BreakpointTokens {
-        public static let xs: CGFloat = 320  // Small phones
-        public static let sm: CGFloat = 375  // Regular phones
-        public static let md: CGFloat = 414  // Large phones
-        public static let lg: CGFloat = 768  // Small tablets
-        public static let xl: CGFloat = 1024  // Large tablets
+        public static let extraSmall: CGFloat = 320  // Small phones
+        public static let small: CGFloat = 375  // Regular phones
+        public static let medium: CGFloat = 414  // Large phones
+        public static let large: CGFloat = 768  // Small tablets
+        public static let extraLarge: CGFloat = 1024  // Large tablets
         public static let xxl: CGFloat = 1200  // Desktop
     }
 }
