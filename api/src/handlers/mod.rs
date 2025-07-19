@@ -136,7 +136,28 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
         .merge(public_routes)
         .layer(
             ServiceBuilder::new()
-                .layer(TraceLayer::new_for_http())
+                .layer(
+                    TraceLayer::new_for_http()
+                        .make_span_with(|request: &axum::extract::Request| {
+                            tracing::info_span!(
+                                "http",
+                                method = %request.method(),
+                                uri = %request.uri(),
+                            )
+                        })
+                        .on_response(
+                            |response: &axum::response::Response,
+                             latency: std::time::Duration,
+                             span: &tracing::Span| {
+                                span.in_scope(|| {
+                                    tracing::info!(
+                                        status = %response.status(),
+                                        latency_ms = latency.as_millis(),
+                                    );
+                                });
+                            },
+                        ),
+                )
                 .layer(
                     CorsLayer::new()
                         .allow_origin(

@@ -1,0 +1,41 @@
+import SwiftData
+import SwiftUI
+
+struct ContentView: View {
+    @EnvironmentObject var authService: AuthService
+
+    var body: some View {
+        Group {
+            if authService.isAuthenticated {
+                MainAppView()
+            } else {
+                LoginView()
+            }
+        }
+    }
+}
+
+@main
+struct Tora: App {
+    @StateObject private var authService = AuthService.shared
+    @StateObject private var workspaceService = WorkspaceService(authService: AuthService.shared)
+    @StateObject private var experimentService = ExperimentService(authService: AuthService.shared)
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .modalBackground()
+                .modelContainer(for: UserSession.self)
+                .environmentObject(authService)
+                .environmentObject(workspaceService)
+                .environmentObject(experimentService)
+        }
+    }
+}
+
+#Preview {
+    ContentView()
+        .environmentObject(AuthService.shared)
+        .environmentObject(WorkspaceService(authService: AuthService.shared))
+        .environmentObject(ExperimentService(authService: AuthService.shared))
+}

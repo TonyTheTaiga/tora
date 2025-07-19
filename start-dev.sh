@@ -112,6 +112,7 @@ if [ -z "$SUPABASE_PASSWORD" ] || [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_API_
 fi
 
 # Export environment variables for the API
+# export RUST_LOG=api::handlers::metric=debug
 export RUST_LOG=debug
 export RUST_BACKTRACE=1
 export RUST_ENV=dev

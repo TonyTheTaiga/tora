@@ -7,16 +7,22 @@ use axum::{
     http::StatusCode,
     response::IntoResponse,
 };
-
+use tracing::{debug, error, info};
 use uuid::Uuid;
 
 pub async fn list_workspaces(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
 ) -> impl IntoResponse {
+    info!("Listing workspaces for user: {}", user.email);
+
     let user_uuid = match Uuid::parse_str(&user.id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
+        Ok(uuid) => {
+            debug!("Parsed user UUID: {}", uuid);
+            uuid
+        }
+        Err(e) => {
+            error!("Failed to parse user ID '{}': {}", user.id, e);
             return (
                 StatusCode::BAD_REQUEST,
                 Json(Response {
@@ -28,6 +34,10 @@ pub async fn list_workspaces(
         }
     };
 
+    debug!(
+        "Executing query to fetch workspaces for user: {}",
+        user_uuid
+    );
     let result = sqlx::query_as::<
         _,
         (
@@ -53,14 +63,22 @@ pub async fn list_workspaces(
 
     match result {
         Ok(rows) => {
+            info!(
+                "Successfully fetched {} workspaces for user: {}",
+                rows.len(),
+                user.email
+            );
             let workspaces: Vec<Workspace> = rows
                 .into_iter()
-                .map(|(id, name, description, created_at, role)| Workspace {
-                    id,
-                    name,
-                    description,
-                    created_at,
-                    role,
+                .map(|(id, name, description, created_at, role)| {
+                    debug!("Workspace: {} ({}), role: {}", name, id, role);
+                    Workspace {
+                        id,
+                        name,
+                        description,
+                        created_at,
+                        role,
+                    }
                 })
                 .collect();
 
@@ -71,7 +89,10 @@ pub async fn list_workspaces(
             .into_response()
         }
         Err(e) => {
-            eprintln!("Database error: {e}");
+            error!(
+                "Database error while fetching workspaces for user {}: {}",
+                user.email, e
+            );
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {

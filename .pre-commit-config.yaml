@@ -8,7 +8,6 @@ repos:
         exclude: ^(web/|api/)
       - id: check-yaml
         exclude: ^(web/|api/)
-      - id: check-added-large-files
       - id: check-merge-conflict
       - id: check-toml
         files: \.(toml)$
@@ -35,7 +34,12 @@ repos:
     hooks:
       - id: mypy
         files: ^python/tora/
-        args: ["--ignore-missing-imports", "--no-strict-optional", "--allow-any-generics"]
+        args:
+          [
+            "--ignore-missing-imports",
+            "--no-strict-optional",
+            "--allow-any-generics",
+          ]
         additional_dependencies: [types-requests]
 
   - repo: local
@@ -54,4 +58,13 @@ repos:
         entry: bash -c 'cd api && cargo fmt --all'
         language: system
         files: ^api/
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: swift-format-ios
+        name: swift-format (ios)
+        entry: bash -c 'cd ios && swift-format format --in-place --recursive --configuration .swift-format.json .'
+        language: system
+        files: ^ios/.*\.swift$
         pass_filenames: false

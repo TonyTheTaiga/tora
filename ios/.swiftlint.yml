@@ -1,0 +1,23 @@
+disabled_rules:
+  - opening_brace
+
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - overridden_super_call
+  - redundant_nil_coalescing
+  - sorted_imports
+  - unneeded_parentheses_in_closure_argument
+
+line_length:
+  warning: 120
+  error: 150
+
+identifier_name:
+  min_length: 1
+
+excluded:
+  - build/
+  - .build/
