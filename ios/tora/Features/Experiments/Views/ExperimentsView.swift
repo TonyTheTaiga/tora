@@ -18,7 +18,6 @@ struct ExperimentSelectorView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(experiment.name)
                                 .font(.headline)
-                                .foregroundColor(.primary)
 
                             if let description = experiment.description, !description.isEmpty {
                                 Text(description)
@@ -26,17 +25,9 @@ struct ExperimentSelectorView: View {
                                     .foregroundColor(.secondary)
                                     .lineLimit(2)
                             }
-
-                            if let workspaceId = experiment.workspaceId {
-                                Text("Workspace: \(workspaceId)")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                            }
                         }
-                        .padding(.vertical, 4)
                     }
                 )
-                .buttonStyle(PlainButtonStyle())
                 .listRowBackground(
                     selectedExperiment?.id == experiment.id ? Color.blue.opacity(0.1) : Color.clear
                 )
@@ -45,8 +36,8 @@ struct ExperimentSelectorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    ToraToolbarButton(systemImage: "xmark") {
-                        dismiss()
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
                     }
                 }
             }
@@ -71,38 +62,26 @@ struct ExperimentsView: View {
     var body: some View {
         Group {
             if isLoadingExperiments {
-                VStack(spacing: 16) {
-                    ProgressView()
-                        .scaleEffect(1.2)
-                    Text("Loading experiments...")
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                ProgressView("Loading experiments...")
             } else if let errorMessage = errorMessage {
-                ContentUnavailableView {
-                    Label("Error Loading Experiments", systemImage: "exclamationmark.triangle")
-                } description: {
+                VStack {
+                    Text("Error Loading Experiments")
+                        .font(.headline)
                     Text(errorMessage)
-                } actions: {
-                    ToraButton("Try Again", style: .primary) {
+                        .font(.caption)
+                    Button("Try Again") {
                         fetchAllExperiments()
                     }
                 }
             } else if allExperiments.isEmpty {
-                ContentUnavailableView {
-                    Label("No Experiments", systemImage: "flask")
-                } description: {
-                    Text("No experiments are available across your workspaces.")
-                }
+                Text("No Experiments")
             } else if let selectedExperiment = selectedExperiment {
                 ExperimentContentView(experiment: selectedExperiment, isLoading: isLoadingExperiment)
             } else {
-                ContentUnavailableView {
-                    Label("Choose an Experiment", systemImage: "flask")
-                } description: {
-                    Text("Select an experiment from the header to view its details.")
-                } actions: {
-                    ToraButton("Choose Experiment", style: .primary) {
+                VStack {
+                    Text("Choose an Experiment")
+                        .font(.headline)
+                    Button("Choose Experiment") {
                         showingExperimentSelector = true
                     }
                 }
@@ -122,18 +101,19 @@ struct ExperimentsView: View {
                                 Image(systemName: "chevron.down")
                                     .font(.caption)
                             }
-                            .foregroundColor(.primary)
                         })
                 }
             }
 
             ToolbarItem(placement: .navigationBarTrailing) {
-                ToraToolbarButton(systemImage: "arrow.clockwise") {
+                Button(action: {
                     if let selectedExperiment = selectedExperiment {
                         fetchExperimentDetails(selectedExperiment.id)
                     } else {
                         fetchAllExperiments()
                     }
+                }) {
+                    Image(systemName: "arrow.clockwise")
                 }
                 .disabled(isLoadingExperiments || isLoadingExperiment)
             }
@@ -194,7 +174,6 @@ struct ExperimentsView: View {
             } catch {
                 await MainActor.run {
                     self.isLoadingExperiment = false
-                    // Keep the basic experiment info even if detailed fetch fails
                 }
             }
         }
@@ -209,159 +188,39 @@ struct ExperimentContentView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 if isLoading {
-                    VStack(spacing: 16) {
-                        ProgressView()
-                            .scaleEffect(1.2)
-                        Text("Loading experiment details...")
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding(.top, 100)
+                    ProgressView("Loading experiment details...")
                 } else {
-                    // Description Section
                     if let description = experiment.description, !description.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Description")
                                 .font(.headline)
-                                .foregroundColor(.primary)
 
                             Text(description)
                                 .font(.body)
-                                .foregroundColor(.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
                         }
-                        .padding()
-                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
                     }
 
-                    // Metadata Section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Metadata")
                             .font(.headline)
-                            .foregroundColor(.primary)
 
                         VStack(spacing: 8) {
                             HStack {
                                 Text("Created")
                                     .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.primary)
                                 Spacer()
                                 Text(formatDate(experiment.createdAt))
                                     .font(.subheadline)
-                                    .foregroundColor(.secondary)
                             }
 
                             HStack {
                                 Text("Updated")
                                     .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.primary)
                                 Spacer()
                                 Text(formatDate(experiment.updatedAt))
                                     .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-
-                            if let workspaceId = experiment.workspaceId {
-                                HStack {
-                                    Text("Workspace")
-                                        .font(.subheadline)
-                                        .fontWeight(.medium)
-                                        .foregroundColor(.primary)
-                                    Spacer()
-                                    Text(workspaceId)
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-                                }
                             }
                         }
-                    }
-                    .padding()
-                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-
-                    // Tags Section
-                    if !experiment.tags.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Tags")
-                                .font(.headline)
-                                .foregroundColor(.primary)
-
-                            LazyVGrid(
-                                columns: [
-                                    GridItem(.adaptive(minimum: 80), spacing: 8)
-                                ], spacing: 8
-                            ) {
-                                ForEach(experiment.tags, id: \.self) { tag in
-                                    Text(tag)
-                                        .font(.subheadline)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(.blue.opacity(0.1))
-                                        .foregroundColor(.blue)
-                                        .clipShape(Capsule())
-                                }
-                            }
-                        }
-                        .padding()
-                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-                    }
-
-                    // Hyperparameters Section
-                    if !experiment.hyperparams.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Hyperparameters")
-                                .font(.headline)
-                                .foregroundColor(.primary)
-
-                            VStack(spacing: 8) {
-                                ForEach(experiment.hyperparams, id: \.key) { hyperparam in
-                                    HStack {
-                                        Text(hyperparam.key)
-                                            .font(.subheadline)
-                                            .fontWeight(.medium)
-                                            .foregroundColor(.primary)
-                                        Spacer()
-                                        Text(hyperparam.value.displayValue)
-                                            .font(.subheadline)
-                                            .foregroundColor(.secondary)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 4)
-                                            .background(.secondary.opacity(0.1))
-                                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                                    }
-                                }
-                            }
-                        }
-                        .padding()
-                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-                    }
-
-                    // Metrics Section
-                    if !experiment.availableMetrics.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Available Metrics")
-                                .font(.headline)
-                                .foregroundColor(.primary)
-
-                            LazyVGrid(
-                                columns: [
-                                    GridItem(.adaptive(minimum: 100), spacing: 8)
-                                ], spacing: 8
-                            ) {
-                                ForEach(experiment.availableMetrics, id: \.self) { metric in
-                                    Text(metric)
-                                        .font(.subheadline)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(.green.opacity(0.1))
-                                        .foregroundColor(.green)
-                                        .clipShape(Capsule())
-                                }
-                            }
-                        }
-                        .padding()
-                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
                     }
                 }
             }
@@ -390,5 +249,4 @@ extension String {
 #Preview {
     ExperimentsView()
         .environmentObject(ExperimentService(authService: AuthService.shared))
-        .preferredColorScheme(.light)
 }

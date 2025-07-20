@@ -46,7 +46,7 @@ struct LoginFormSheet: View {
                         .multilineTextAlignment(.center)
                 }
 
-                ToraButton(isLoading ? "Signing In..." : "Sign In", style: .primary) {
+                Button(isLoading ? "Signing In..." : "Sign In") {
                     Task { await signIn() }
                 }
                 .disabled(isLoading || email.isEmpty || password.isEmpty)
@@ -57,8 +57,8 @@ struct LoginFormSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    ToraToolbarButton(systemImage: "xmark") {
-                        dismiss()
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
                     }
                 }
             }
@@ -105,8 +105,12 @@ struct LoginView: View {
             VStack(spacing: 0) {
                 Spacer()
 
-                ToraLogo()
+                Image("ToraLogo")
+                    .renderingMode(.template)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .frame(width: geometry.size.width * 0.6)
+                    .foregroundColor(Color.accent)
                     .scaleEffect(logoScale)
                     .opacity(logoOpacity)
                     .animation(.spring(response: 0.8, dampingFraction: 0.6), value: logoScale)
@@ -123,7 +127,7 @@ struct LoginView: View {
                 Spacer()
                     .frame(height: geometry.size.height * 0.05)
 
-                ToraButton("Login", style: .primary) {
+                Button("Login") {
                     loginSheetShown = true
                 }
                 .offset(y: buttonOffset)
@@ -174,11 +178,8 @@ struct ScrollingSubtitle: View {
             HStack(spacing: spacing) {
                 ForEach(0..<10, id: \.self) { _ in
                     Text(text)
-                        .font(
-                            .dynamicInter(
-                                dynamicFontSize, weight: Font.Weight.bold, relativeTo: Font.TextStyle.title2)
-                        )
-                        .foregroundColor(Color.ctpSubtext1)
+                        .font(.system(size: dynamicFontSize, weight: .bold, design: .default))
+                        .foregroundColor(Color.secondary)
                         .fixedSize()
                 }
             }
@@ -195,7 +196,7 @@ struct ScrollingSubtitle: View {
     }
 
     private func estimateTextWidth(fontSize: CGFloat) -> CGFloat {
-        let characterWidth = fontSize * 0.6  // Inter font has roughly 0.6 character width ratio
+        let characterWidth = fontSize * 0.6
         return CGFloat(text.count) * characterWidth
     }
 }
@@ -208,7 +209,7 @@ struct ToraLogo: View {
             .renderingMode(.template)
             .resizable()
             .aspectRatio(logoAspectRatio, contentMode: .fit)
-            .foregroundColor(DesignSystem.Colors.logoColor)
+            .foregroundColor(Color.accent)
     }
 }
 

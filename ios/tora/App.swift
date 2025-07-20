@@ -24,7 +24,7 @@ struct Tora: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modalBackground()
+                .background(Color.white)
                 .modelContainer(for: UserSession.self)
                 .environmentObject(authService)
                 .environmentObject(workspaceService)

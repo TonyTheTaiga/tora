@@ -31,7 +31,7 @@ struct MainAppView: View {
             Tab("Settings", systemImage: "gearshape.2", value: .settings) {
                 SettingsView()
             }
-        }.accentColor(Color.ctpBlue)
+        }.accentColor(.blue)
     }
 }
 
@@ -54,5 +54,5 @@ struct MainAppView: View {
                 tokenType: "Bearer"
             )
         }
-        .modalBackground()
+        .background(Color.white)
 }

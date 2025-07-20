@@ -67,7 +67,8 @@ class UserSession {
     var tokenType: String
 
     init(
-        id: String, email: String, authToken: String, refreshToken: String, expiresIn: Date, expiresAt: Date,
+        id: String, email: String, authToken: String, refreshToken: String, expiresIn: Date,
+        expiresAt: Date,
         tokenType: String
     ) {
         self.id = id
@@ -127,9 +128,12 @@ class AuthService: ObservableObject {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: ["email": email, "password": password])
+            request.httpBody = try JSONSerialization.data(withJSONObject: [
+                "email": email, "password": password,
+            ])
         } catch {
-            throw AuthErrors.dataError("Failed to serialize login credentials: \(error.localizedDescription)")
+            throw AuthErrors.dataError(
+                "Failed to serialize login credentials: \(error.localizedDescription)")
         }
 
         let (data, response): (Data, URLResponse)
