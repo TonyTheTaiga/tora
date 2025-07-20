@@ -79,8 +79,6 @@ struct ExperimentsView: View {
                 ExperimentContentView(experiment: selectedExperiment, isLoading: isLoadingExperiment)
             } else {
                 VStack {
-                    Text("Choose an Experiment")
-                        .font(.headline)
                     Button("Choose Experiment") {
                         showingExperimentSelector = true
                     }
