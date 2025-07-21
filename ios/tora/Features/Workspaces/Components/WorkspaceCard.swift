@@ -23,44 +23,48 @@ struct WorkspaceCard: View {
     @State private var isExpanded: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading) {
-            Button(action: { isExpanded.toggle() }) {
-                HStack {
-                    Text(workspace.name)
-                        .font(.headline)
-                    Text("(\(experiments.count))")
-                        .font(.headline)
-                    Spacer()
-                    Image(
-                        systemName: isExpanded ? "chevron.up" : "chevron.down"
-                    )
-                }
-            }
-            .foregroundColor(Color.custom.ctpText)
-
-            if isExpanded {
-                Text("\(workspace.role)")
-                    .font(.footnote)
-                    .foregroundColor(getRoleColor(workspace.role))
-
-                if !experiments.isEmpty {
-                    Text("Experiments")
-                        .font(.subheadline)
-
-                    ForEach(experiments) { experiment in
-                        Button(action: { onExperimentSelected(experiment.id) }) {
-                            ExperimentRow(experiment: experiment)
-                                .padding(.vertical, 2)
-                        }
-                        .foregroundColor(Color.custom.ctpBlue)
+        Group {
+            VStack(alignment: .leading) {
+                Button(action: { isExpanded.toggle() }) {
+                    HStack {
+                        Text(workspace.name)
+                            .font(.headline)
+                        Text("(\(experiments.count))")
+                            .font(.headline)
+                        Spacer()
+                        Image(
+                            systemName: isExpanded
+                                ? "chevron.up" : "chevron.down"
+                        )
                     }
-                } else {
-                    Text("No experiments in this workspace.")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
+                }
+                .foregroundColor(Color.custom.ctpText)
+
+                if isExpanded {
+                    Text("\(workspace.role)")
+                        .font(.footnote)
+                        .foregroundColor(getRoleColor(workspace.role))
+
+                    if !experiments.isEmpty {
+                        ForEach(experiments) { experiment in
+                            Button(action: {
+                                onExperimentSelected(experiment.id)
+                            }) {
+                                ExperimentRow(experiment: experiment)
+                                    .padding(.vertical, 2)
+                            }
+                            .foregroundColor(Color.custom.ctpBlue)
+                        }
+                    } else {
+                        Text("No experiments in this workspace.")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
                 }
             }
         }
+        .padding(.all, 4)
+        .border(Color.custom.ctpOverlay2, width: 1)
     }
 
     private func getRoleColor(_ role: String) -> Color {

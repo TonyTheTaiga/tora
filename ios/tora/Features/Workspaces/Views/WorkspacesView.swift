@@ -35,13 +35,8 @@ struct WorkspacesView: View {
                                 experiments: experiments[workspace.id] ?? [],
                                 onExperimentSelected: onExperimentSelected
                             )
-                            .padding(.horizontal)
-                            .border(Color.custom.ctpOverlay0, width: 1)
-
                         }
-
                     }
-
                 }
             }
         }
