@@ -327,8 +327,6 @@ class ExperimentService: ObservableObject {
             throw WorkspaceErrors.requestError(httpResponse.statusCode, errorMessage)
         }
 
-        print(data)
-
         do {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
