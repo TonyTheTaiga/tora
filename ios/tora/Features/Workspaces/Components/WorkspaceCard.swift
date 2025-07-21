@@ -19,7 +19,7 @@ struct ExperimentRow: View {
 struct WorkspaceCard: View {
     var workspace: Workspace
     var experiments: [Experiment]
-    let onExperimentSelected: ((String) -> Void)?
+    let onExperimentSelected: ((String) -> Void)
     @State private var isExpanded: Bool = false
 
     var body: some View {
@@ -41,7 +41,7 @@ struct WorkspaceCard: View {
             if isExpanded {
                 if !experiments.isEmpty {
                     ForEach(experiments) { experiment in
-                        Button(action: { onExperimentSelected?(experiment.id) }) {
+                        Button(action: { onExperimentSelected(experiment.id) }) {
                             ExperimentRow(experiment: experiment)
                                 .padding(.vertical, 2)
                         }

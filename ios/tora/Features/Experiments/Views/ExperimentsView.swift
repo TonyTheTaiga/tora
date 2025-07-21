@@ -48,7 +48,6 @@ struct ExperimentSelectorView: View {
 struct ExperimentsView: View {
     let initialExperimentId: String?
     @EnvironmentObject private var experimentService: ExperimentService
-    @State private var allExperiments: [Experiment] = []
     @State private var selectedExperiment: Experiment?
     @State private var isLoadingExperiments = true
     @State private var isLoadingExperiment = false
@@ -73,7 +72,7 @@ struct ExperimentsView: View {
                         fetchAllExperiments()
                     }
                 }
-            } else if allExperiments.isEmpty {
+            } else if experimentService.experiments.isEmpty {
                 Text("No Experiments")
             } else if let selectedExperiment = selectedExperiment {
                 ExperimentContentView(experiment: selectedExperiment, isLoading: isLoadingExperiment)
@@ -87,7 +86,7 @@ struct ExperimentsView: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                if !allExperiments.isEmpty {
+                if !experimentService.experiments.isEmpty {
                     Button(
                         action: {
                             showingExperimentSelector = true
@@ -121,7 +120,7 @@ struct ExperimentsView: View {
         }
         .sheet(isPresented: $showingExperimentSelector) {
             ExperimentSelectorView(
-                experiments: allExperiments,
+                experiments: experimentService.experiments,
                 selectedExperiment: selectedExperiment,
                 onExperimentSelected: { experiment in
                     selectExperiment(experiment)

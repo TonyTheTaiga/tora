@@ -97,7 +97,6 @@ struct LoginView: View {
     @State private var subtitleOpacity: Double = 0.0
     @State private var buttonOffset: CGFloat = 30
     @State private var buttonOpacity: Double = 0.0
-
     @State private var loginSheetShown: Bool = false
 
     var body: some View {
