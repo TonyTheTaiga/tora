@@ -85,12 +85,10 @@ class UserSession {
 class AuthService: ObservableObject {
     @Published var isAuthenticated = false
     @Published var currentUser: UserSession?
-
-    // Magical singleton, gets instantited on first reference
-    static let shared = AuthService()
-
     private let backendUrl: String = Config.baseURL
 
+    // Magical singleton, gets instantited on first reference
+    static let shared: AuthService = .init()
     private init() {
         checkAuthenticationStatus()
     }

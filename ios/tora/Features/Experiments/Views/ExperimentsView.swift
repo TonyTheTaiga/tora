@@ -135,13 +135,12 @@ struct ExperimentsView: View {
         errorMessage = nil
         Task {
             do {
-                let experiments = try await experimentService.listAll()
+                try await experimentService.listAll()
                 await MainActor.run {
-                    self.allExperiments = experiments
                     self.isLoadingExperiments = false
 
                     if let initialId = initialExperimentId,
-                        let experiment = experiments.first(where: { $0.id == initialId })
+                        let experiment = experimentService.experiments.first(where: { $0.id == initialId })
                     {
                         selectExperiment(experiment)
                     }

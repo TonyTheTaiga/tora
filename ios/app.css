@@ -1,0 +1,639 @@
+@import "tailwindcss";
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  @root {
+    font-family: Inter, sans-serif;
+    font-feature-settings:
+      "liga" 1,
+      "calt" 1; /* fix for Chrome */
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  @supports (font-variation-settings: normal) {
+    :root {
+      font-family: InterVariable, sans-serif;
+    }
+  }
+
+  @theme {
+    --color-gray-200: #e5e7eb;
+
+    /* Catppuccin Mocha palette (Dark theme) */
+    --color-dark-ctp-base: #1e1e2e;
+    --color-dark-ctp-mantle: #181825;
+    --color-dark-ctp-crust: #11111b;
+    --color-dark-ctp-surface0: #313244;
+    --color-dark-ctp-surface1: #45475a;
+    --color-dark-ctp-surface2: #585b70;
+    --color-dark-ctp-overlay0: #6c7086;
+    --color-dark-ctp-overlay1: #7f849c;
+    --color-dark-ctp-overlay2: #9399b2;
+    --color-dark-ctp-text: #e0e7ff;
+    --color-dark-ctp-subtext0: #a6adc8;
+    --color-dark-ctp-subtext1: #bac2de;
+    --color-dark-ctp-lavender: #b4befe;
+    --color-dark-ctp-blue: #89b4fa;
+    --color-dark-ctp-sapphire: #74c7ec;
+    --color-dark-ctp-sky: #89dceb;
+    --color-dark-ctp-teal: #94e2d5;
+    --color-dark-ctp-green: #a6e3a1;
+    --color-dark-ctp-yellow: #f9e2af;
+    --color-dark-ctp-peach: #fab387;
+    --color-dark-ctp-maroon: #eba0ac;
+    --color-dark-ctp-red: #f38ba8;
+    --color-dark-ctp-mauve: #cba6f7;
+    --color-dark-ctp-pink: #f5c2e7;
+    --color-dark-ctp-flamingo: #f2cdcd;
+    --color-dark-ctp-rosewater: #f5e0dc;
+
+    /* Catppuccin Latte palette (Light theme) */
+    --color-light-ctp-base: #eff1f5;
+    --color-light-ctp-mantle: #e6e9ef;
+    --color-light-ctp-crust: #dce0e8;
+    --color-light-ctp-surface0: #ccd0da;
+    --color-light-ctp-surface1: #bcc0cc;
+    --color-light-ctp-surface2: #acb0be;
+    --color-light-ctp-overlay0: #9ca0b0;
+    --color-light-ctp-overlay1: #8c8fa1;
+    --color-light-ctp-overlay2: #7c7f93;
+    --color-light-ctp-text: #4c4f69;
+    --color-light-ctp-subtext0: #6c6f85;
+    --color-light-ctp-subtext1: #5c5f77;
+    --color-light-ctp-lavender: #7287fd;
+    --color-light-ctp-blue: #1e66f5;
+    --color-light-ctp-sapphire: #209fb5;
+    --color-light-ctp-sky: #04a5e5;
+    --color-light-ctp-teal: #179299;
+    --color-light-ctp-green: #40a02b;
+    --color-light-ctp-yellow: #df8e1d;
+    --color-light-ctp-peach: #fe640b;
+    --color-light-ctp-maroon: #e64553;
+    --color-light-ctp-red: #d20f39;
+    --color-light-ctp-mauve: #8839ef;
+    --color-light-ctp-pink: #ea76cb;
+    --color-light-ctp-flamingo: #dd7878;
+    --color-light-ctp-rosewater: #dc8a78;
+
+    /* Default theme variables (will be overridden by .light or .dark classes) */
+    --color-ctp-base: var(--color-dark-ctp-base);
+    --color-ctp-mantle: var(--color-dark-ctp-mantle);
+    --color-ctp-crust: var(--color-dark-ctp-crust);
+    --color-ctp-surface0: var(--color-dark-ctp-surface0);
+    --color-ctp-surface1: var(--color-dark-ctp-surface1);
+    --color-ctp-surface2: var(--color-dark-ctp-surface2);
+    --color-ctp-overlay0: var(--color-dark-ctp-overlay0);
+    --color-ctp-overlay1: var(--color-dark-ctp-overlay1);
+    --color-ctp-overlay2: var(--color-dark-ctp-overlay2);
+    --color-ctp-text: var(--color-dark-ctp-text);
+    --color-ctp-subtext0: var(--color-dark-ctp-subtext0);
+    --color-ctp-subtext1: var(--color-dark-ctp-subtext1);
+    --color-ctp-lavender: var(--color-dark-ctp-lavender);
+    --color-ctp-blue: var(--color-dark-ctp-blue);
+    --color-ctp-sapphire: var(--color-dark-ctp-sapphire);
+    --color-ctp-sky: var(--color-dark-ctp-sky);
+    --color-ctp-teal: var(--color-dark-ctp-teal);
+    --color-ctp-green: var(--color-dark-ctp-green);
+    --color-ctp-yellow: var(--color-dark-ctp-yellow);
+    --color-ctp-peach: var(--color-dark-ctp-peach);
+    --color-ctp-maroon: var(--color-dark-ctp-maroon);
+    --color-ctp-red: var(--color-dark-ctp-red);
+    --color-ctp-mauve: var(--color-dark-ctp-mauve);
+    --color-ctp-pink: var(--color-dark-ctp-pink);
+    --color-ctp-flamingo: var(--color-dark-ctp-flamingo);
+    --color-ctp-rosewater: var(--color-dark-ctp-rosewater);
+  }
+
+  .dark {
+    --color-gray-200: #374151;
+    --color-ctp-base: var(--color-dark-ctp-base);
+    --color-ctp-mantle: var(--color-dark-ctp-mantle);
+    --color-ctp-crust: var(--color-dark-ctp-crust);
+    --color-ctp-surface0: var(--color-dark-ctp-surface0);
+    --color-ctp-surface1: var(--color-dark-ctp-surface1);
+    --color-ctp-surface2: var(--color-dark-ctp-surface2);
+    --color-ctp-overlay0: var(--color-dark-ctp-overlay0);
+    --color-ctp-overlay1: var(--color-dark-ctp-overlay1);
+    --color-ctp-overlay2: var(--color-dark-ctp-overlay2);
+    --color-ctp-text: var(--color-dark-ctp-text);
+    --color-ctp-subtext0: var(--color-dark-ctp-subtext0);
+    --color-ctp-subtext1: var(--color-dark-ctp-subtext1);
+    --color-ctp-lavender: var(--color-dark-ctp-lavender);
+    --color-ctp-blue: var(--color-dark-ctp-blue);
+    --color-ctp-sapphire: var(--color-dark-ctp-sapphire);
+    --color-ctp-sky: var(--color-dark-ctp-sky);
+    --color-ctp-teal: var(--color-dark-ctp-teal);
+    --color-ctp-green: var(--color-dark-ctp-green);
+    --color-ctp-yellow: var(--color-dark-ctp-yellow);
+    --color-ctp-peach: var(--color-dark-ctp-peach);
+    --color-ctp-maroon: var(--color-dark-ctp-maroon);
+    --color-ctp-red: var(--color-dark-ctp-red);
+    --color-ctp-mauve: var(--color-dark-ctp-mauve);
+    --color-ctp-pink: var(--color-dark-ctp-pink);
+    --color-ctp-flamingo: var(--color-dark-ctp-flamingo);
+    --color-ctp-rosewater: var(--color-dark-ctp-rosewater);
+  }
+
+  .light {
+    --color-gray-200: #e5e7eb;
+    --color-ctp-base: var(--color-light-ctp-base);
+    --color-ctp-mantle: var(--color-light-ctp-mantle);
+    --color-ctp-crust: var(--color-light-ctp-crust);
+    --color-ctp-surface0: var(--color-light-ctp-surface0);
+    --color-ctp-surface1: var(--color-light-ctp-surface1);
+    --color-ctp-surface2: var(--color-light-ctp-surface2);
+    --color-ctp-overlay0: var(--color-light-ctp-overlay0);
+    --color-ctp-overlay1: var(--color-light-ctp-overlay1);
+    --color-ctp-overlay2: var(--color-light-ctp-overlay2);
+    --color-ctp-text: var(--color-light-ctp-text);
+    --color-ctp-subtext0: var(--color-light-ctp-subtext0);
+    --color-ctp-subtext1: var(--color-light-ctp-subtext1);
+    --color-ctp-lavender: var(--color-light-ctp-lavender);
+    --color-ctp-blue: var(--color-light-ctp-blue);
+    --color-ctp-sapphire: var(--color-light-ctp-sapphire);
+    --color-ctp-sky: var(--color-light-ctp-sky);
+    --color-ctp-teal: var(--color-light-ctp-teal);
+    --color-ctp-green: var(--color-light-ctp-green);
+    --color-ctp-yellow: var(--color-light-ctp-yellow);
+    --color-ctp-peach: var(--color-light-ctp-peach);
+    --color-ctp-maroon: var(--color-light-ctp-maroon);
+    --color-ctp-red: var(--color-light-ctp-red);
+    --color-ctp-mauve: var(--color-light-ctp-mauve);
+    --color-ctp-pink: var(--color-light-ctp-pink);
+    --color-ctp-flamingo: var(--color-light-ctp-flamingo);
+    --color-ctp-rosewater: var(--color-light-ctp-rosewater);
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  @media (hover: none) {
+    button,
+    a {
+      transition:
+        background-color 0.3s,
+        color 0.3s,
+        transform 0.2s;
+    }
+
+    button:active,
+    a:active {
+      transform: scale(0.97);
+    }
+
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--color-ctp-blue);
+      outline-offset: 2px;
+    }
+  }
+
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  /* Enhanced Visual Layering System */
+
+  /* Base surface layers */
+  .surface-base {
+    background: var(--color-ctp-base);
+  }
+
+  .surface-layer-1 {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
+  }
+
+  .surface-layer-2 {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 15%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 25%, transparent);
+  }
+
+  .surface-layer-3 {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 25%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 35%, transparent);
+  }
+
+  /* Interactive surface states */
+  .surface-interactive {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 12%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 20%, transparent);
+    transition:
+      background-color 0.4s ease,
+      border-color 0.4s ease,
+      transform 0.4s ease;
+  }
+
+  .surface-interactive:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 20%,
+      var(--color-ctp-base)
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 30%,
+      transparent
+    );
+    transform: translateY(-1px);
+  }
+
+  /* Elevated surfaces */
+  .surface-elevated {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 18%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 28%, transparent);
+  }
+
+  /* Glass-like surfaces */
+  .surface-glass {
+    background: color-mix(in srgb, var(--color-ctp-surface0) 12%, transparent);
+    backdrop-filter: blur(16px);
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 30%, transparent);
+  }
+
+  .surface-glass-elevated {
+    background: color-mix(in srgb, var(--color-ctp-surface0) 18%, transparent);
+    backdrop-filter: blur(20px);
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 35%, transparent);
+  }
+
+  /* Accent surfaces */
+  .surface-accent-blue {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-blue) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid color-mix(in srgb, var(--color-ctp-blue) 20%, transparent);
+  }
+
+  .surface-accent-green {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-green) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-green) 20%, transparent);
+  }
+
+  .surface-accent-yellow {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-yellow) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-yellow) 20%, transparent);
+  }
+
+  .surface-accent-red {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-red) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid color-mix(in srgb, var(--color-ctp-red) 20%, transparent);
+  }
+
+  .surface-accent-lavender {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-lavender) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-lavender) 20%, transparent);
+  }
+
+  .surface-accent-mauve {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-mauve) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-mauve) 20%, transparent);
+  }
+
+  /* Depth indicators */
+  .depth-inset {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 5%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 10%, transparent);
+  }
+
+  .depth-raised {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
+  }
+
+  /* Terminal-style borders and dividers */
+  .terminal-border {
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 30%, transparent);
+  }
+
+  .terminal-border-accent {
+    border-left: 2px solid var(--color-ctp-blue);
+    border-top: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 20%, transparent);
+    border-right: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 20%, transparent);
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 20%, transparent);
+  }
+
+  /* Enhanced section dividers */
+  .section-divider {
+    position: relative;
+    border-top: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 25%, transparent);
+    margin: 2rem 0;
+  }
+
+  .section-divider::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -0.6rem;
+    left: 0;
+    background: var(--color-ctp-base);
+    padding: 0 1rem;
+    font-size: 0.75rem;
+    color: var(--color-ctp-subtext0);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: inherit;
+  }
+
+  .section-divider-center::before {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Layered content containers */
+  .content-layer {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 6%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
+    position: relative;
+  }
+
+  /* Layered spacing utilities */
+  .layer-spacing-sm {
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+  }
+
+  @media (min-width: 640px) {
+    .layer-spacing-sm {
+      padding: 0.75rem;
+    }
+  }
+
+  .layer-spacing-md {
+    padding: 0.75rem;
+    margin: 1rem 0;
+  }
+
+  @media (min-width: 640px) {
+    .layer-spacing-md {
+      padding: 1.25rem;
+    }
+  }
+
+  .layer-spacing-lg {
+    padding: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  @media (min-width: 640px) {
+    .layer-spacing-lg {
+      padding: 2rem;
+    }
+  }
+
+  /* Stacked content effect */
+  .stack-layer {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 8%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
+    position: relative;
+  }
+
+  .stack-layer::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: -4px;
+    bottom: -4px;
+    background: color-mix(in srgb, var(--color-ctp-surface0) 8%, transparent);
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
+    z-index: -1;
+  }
+
+  /* Floating action elements */
+  .floating-element {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 20%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 30%, transparent);
+    transition:
+      background-color 0.4s ease,
+      border-color 0.4s ease,
+      transform 0.4s ease;
+  }
+
+  .floating-element:hover {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 25%,
+      var(--color-ctp-base)
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 40%,
+      transparent
+    );
+    transform: translateY(-2px);
+  }
+
+  /* Terminal window chrome */
+  .terminal-chrome {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 15%,
+      var(--color-ctp-base)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 25%, transparent);
+    border-radius: 0;
+  }
+
+  .terminal-chrome-header {
+    background: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 25%,
+      var(--color-ctp-base)
+    );
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--color-ctp-surface0) 35%, transparent);
+    padding: 0.75rem 1rem;
+  }
+
+  /* Subtle animations for layering */
+  .layer-fade-in {
+    animation: layerFadeIn 0.5s ease-out;
+  }
+
+  @keyframes layerFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .layer-slide-up {
+    animation: layerSlideUp 0.5s ease-out;
+  }
+
+  @keyframes layerSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Mobile-specific optimizations */
+  @media (max-width: 640px) {
+    /* Reduce section divider margins on mobile */
+    .section-divider {
+      margin: 1.5rem 0;
+    }
+
+    /* Tighter spacing for mobile content */
+    .mobile-tight {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    /* Smaller text on mobile for better space utilization */
+    .mobile-text-sm {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+
+    /* Reduce gap between elements on mobile */
+    .mobile-gap-sm {
+      gap: 0.5rem;
+    }
+  }
+
+  /* Responsive container with minimal mobile padding */
+  .container-responsive {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-responsive {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container-responsive {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-responsive {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+}

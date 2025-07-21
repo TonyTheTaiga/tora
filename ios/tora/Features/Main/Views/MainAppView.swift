@@ -54,5 +54,4 @@ struct MainAppView: View {
                 tokenType: "Bearer"
             )
         }
-        .background(Color.white)
 }

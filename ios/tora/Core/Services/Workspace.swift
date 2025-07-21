@@ -157,14 +157,16 @@ struct Experiment: Decodable, Identifiable, Equatable {
 
 @MainActor
 class WorkspaceService: ObservableObject {
+    @Published var workspaces: [Workspace] = []
     private var baseUrl = Config.baseURL + "/api"
     private let authService: AuthService
 
+    static let shared: WorkspaceService = .init(authService: AuthService.shared)
     init(authService: AuthService) {
         self.authService = authService
     }
 
-    public func list() async throws -> [Workspace] {
+    public func list() async throws {
         guard let url = URL(string: "\(baseUrl)/workspaces") else {
             throw WorkspaceErrors.invalidURL
         }
@@ -198,7 +200,7 @@ class WorkspaceService: ObservableObject {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             let apiResponse = try decoder.decode(ApiResponse<[Workspace]>.self, from: data)
-            return apiResponse.data ?? []
+            self.workspaces = apiResponse.data ?? []
         } catch {
             throw WorkspaceErrors.jsonParsingError(error)
         }
@@ -235,9 +237,6 @@ class WorkspaceService: ObservableObject {
         }
 
         do {
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("Received JSON for experiments: \(jsonString)")
-            }
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             let apiResponse = try decoder.decode(ApiResponse<[Experiment]>.self, from: data)
@@ -250,14 +249,16 @@ class WorkspaceService: ObservableObject {
 
 @MainActor
 class ExperimentService: ObservableObject {
+    @Published var experiments: [Experiment] = []
     private var baseUrl = Config.baseURL + "/api"
     private let authService: AuthService
 
+    static let shared: ExperimentService = .init(authService: AuthService.shared)
     init(authService: AuthService) {
         self.authService = authService
     }
 
-    public func listAll() async throws -> [Experiment] {
+    public func listAll() async throws {
         guard let url = URL(string: "\(baseUrl)/experiments") else {
             throw WorkspaceErrors.invalidURL
         }
@@ -291,7 +292,7 @@ class ExperimentService: ObservableObject {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             let apiResponse = try decoder.decode(ApiResponse<[Experiment]>.self, from: data)
-            return apiResponse.data ?? []
+            self.experiments = apiResponse.data ?? []
         } catch {
             throw WorkspaceErrors.jsonParsingError(error)
         }

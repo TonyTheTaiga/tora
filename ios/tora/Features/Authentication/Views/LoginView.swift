@@ -110,7 +110,7 @@ struct LoginView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: geometry.size.width * 0.6)
-                    .foregroundColor(Color.accent)
+                    .foregroundColor(Color.custom.ctpBlue)
                     .scaleEffect(logoScale)
                     .opacity(logoOpacity)
                     .animation(.spring(response: 0.8, dampingFraction: 0.6), value: logoScale)
@@ -209,7 +209,7 @@ struct ToraLogo: View {
             .renderingMode(.template)
             .resizable()
             .aspectRatio(logoAspectRatio, contentMode: .fit)
-            .foregroundColor(Color.accent)
+            .foregroundColor(Color.custom.ctpBlue)
     }
 }
 
