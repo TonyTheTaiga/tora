@@ -27,13 +27,19 @@ struct WorkspacesView: View {
                 Text("No Workspaces")
             } else {
                 ScrollView {
-                    ForEach(workspaceService.workspaces, id: \.id) {
-                        workspace in
-                        WorkspaceCard(
-                            workspace: workspace,
-                            experiments: experiments[workspace.id] ?? [],
-                            onExperimentSelected: onExperimentSelected
-                        ).padding(.horizontal)
+                    VStack {
+                        ForEach(workspaceService.workspaces, id: \.id) {
+                            workspace in
+                            WorkspaceCard(
+                                workspace: workspace,
+                                experiments: experiments[workspace.id] ?? [],
+                                onExperimentSelected: onExperimentSelected
+                            )
+                            .padding(.horizontal)
+                            .border(Color.custom.ctpOverlay0, width: 1)
+
+                        }
+
                     }
 
                 }
