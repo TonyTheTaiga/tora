@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct WorkspacesView: View {
-    let onExperimentSelected: ((String) -> Void)?
+    let onExperimentSelected: ((String) -> Void)
     @EnvironmentObject private var workspaceService: WorkspaceService
     @EnvironmentObject private var experimentService: ExperimentService
     @State private var isLoading = true
