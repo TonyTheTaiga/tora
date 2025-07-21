@@ -39,7 +39,14 @@ struct WorkspaceCard: View {
             .foregroundColor(Color.custom.ctpText)
 
             if isExpanded {
+                Text("\(workspace.role)")
+                    .font(.footnote)
+                    .foregroundColor(getRoleColor(workspace.role))
+
                 if !experiments.isEmpty {
+                    Text("Experiments")
+                        .font(.subheadline)
+
                     ForEach(experiments) { experiment in
                         Button(action: { onExperimentSelected(experiment.id) }) {
                             ExperimentRow(experiment: experiment)
@@ -53,6 +60,19 @@ struct WorkspaceCard: View {
                         .foregroundColor(.gray)
                 }
             }
+        }
+    }
+
+    private func getRoleColor(_ role: String) -> Color {
+        switch role {
+        case "OWNER":
+            return .custom.ctpYellow
+        case "ADMIN":
+            return .custom.ctpRed
+        case "VIEWER":
+            return .custom.ctpGreen
+        default:
+            return .gray
         }
     }
 }
