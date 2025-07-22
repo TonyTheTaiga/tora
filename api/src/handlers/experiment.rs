@@ -96,7 +96,6 @@ pub async fn list_experiments(
     let result = if let Some(workspace_id) = &query.workspace {
         let workspace_uuid = parse_uuid(workspace_id, "workspace_id")?;
 
-        // List experiments for a specific workspace with metrics summary
         sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String, Option<Vec<String>>)>(
             r#"
             SELECT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text,
@@ -176,7 +175,6 @@ pub async fn list_experiments(
     }
 }
 
-// Get single experiment
 pub async fn get_experiment(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
@@ -353,7 +351,6 @@ pub async fn update_experiment(
     let user_uuid = parse_uuid(&user.id, "user_id")?;
     let experiment_uuid = parse_uuid(&id, "experiment_id")?;
 
-    // Check if user has access to this experiment
     let access_check = sqlx::query_as::<_, (i64,)>(
         r#"
         SELECT COUNT(*) FROM experiment e

@@ -22,7 +22,6 @@ pub use result::{AppError, AppResult, parse_uuid};
 
 pub fn api_routes(app_state: &AppState) -> Router<AppState> {
     let protected_routes = Router::new()
-        // Workspaces
         .route(
             "/workspaces",
             protected_route(get(workspace::list_workspaces), app_state),
@@ -51,7 +50,6 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
             "/workspaces/{id}/experiments",
             protected_route(get(experiment::list_workspace_experiments), app_state),
         )
-        // Experiments
         .route(
             "/experiments",
             protected_route(get(experiment::list_experiments), app_state),
@@ -76,7 +74,6 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
             "/experiments/batch",
             protected_route(post(experiment::get_experiments_batch), app_state),
         )
-        // Metrics
         .route(
             "/experiments/{id}/metrics",
             protected_route(get(metric::get_metrics), app_state),
@@ -99,7 +96,6 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
             protected_route(get(user::get_settings), app_state),
         )
         .route("/workspace-roles", get(role::list_workspace_roles))
-        // API Keys
         .route(
             "/api-keys",
             protected_route(get(api_key::list_api_keys), app_state),

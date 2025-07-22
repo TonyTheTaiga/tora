@@ -2,19 +2,11 @@ use chrono;
 use serde::{Deserialize, Serialize};
 use sqlx;
 
-// ============================================================================
-// User-related types
-// ============================================================================
-
 #[derive(Serialize)]
 pub struct UserInfo {
     pub id: String,
     pub email: String,
 }
-
-// ============================================================================
-// Workspace-related types
-// ============================================================================
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Workspace {
@@ -51,10 +43,6 @@ pub struct WorkspaceSummary {
     pub recent_experiment_count: i64,
 }
 
-// ============================================================================
-// Experiment-related types
-// ============================================================================
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Experiment {
     pub id: String,
@@ -82,10 +70,6 @@ pub struct Hyperparam {
     pub value: HyperparamValue,
 }
 
-// ============================================================================
-// Metric-related types
-// ============================================================================
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Metric {
     pub id: i64,
@@ -96,10 +80,6 @@ pub struct Metric {
     pub metadata: Option<serde_json::Value>,
     pub created_at: chrono::DateTime<chrono::Utc>,
 }
-
-// ============================================================================
-// API Key-related types
-// ============================================================================
 
 #[derive(sqlx::FromRow, Debug)]
 #[allow(dead_code)]
@@ -125,10 +105,6 @@ pub struct ApiKey {
     pub key: Option<String>,
 }
 
-// ============================================================================
-// Invitation-related types
-// ============================================================================
-
 #[derive(Serialize, Deserialize, sqlx::FromRow)]
 pub struct WorkspaceInvitation {
     pub id: String,
@@ -141,10 +117,6 @@ pub struct WorkspaceInvitation {
     pub from: String,
     pub created_at: chrono::DateTime<chrono::Utc>,
 }
-
-// ============================================================================
-// Dashboard-related types
-// ============================================================================
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DashboardOverview {

@@ -255,7 +255,6 @@ pub async fn delete_workspace(
         ));
     }
 
-    // Delete the workspace (CASCADE will handle related records)
     let delete_result = sqlx::query("DELETE FROM workspace WHERE id = $1")
         .bind(workspace_uuid)
         .execute(&app_state.db_pool)
@@ -278,7 +277,6 @@ pub async fn leave_workspace(
 ) -> AppResult<impl IntoResponse> {
     let workspace_uuid = parse_uuid(&workspace_id, "workspace_id")?;
 
-    // Check if user is the only owner - prevent leaving if so
     let owner_count = sqlx::query_as::<_, (i64,)>(
         r#"
         SELECT COUNT(*) FROM user_workspaces uw

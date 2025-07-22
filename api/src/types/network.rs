@@ -12,10 +12,6 @@ pub struct Response<T> {
     pub data: Option<T>,
 }
 
-// ============================================================================
-// Authentication-related Request/Response Types
-// ============================================================================
-
 #[derive(Deserialize, Serialize)]
 pub struct CreateUser {
     pub email: String,
@@ -50,10 +46,6 @@ pub struct AuthenticatedUser {
     pub id: String,
     pub email: String,
 }
-
-// ============================================================================
-// Request Types for Various Endpoints
-// ============================================================================
 
 #[derive(Deserialize)]
 pub struct CreateWorkspaceRequest {
@@ -114,17 +106,13 @@ pub struct CreateInvitationRequest {
 pub struct InvitationActionQuery {
     #[serde(rename = "invitationId")]
     pub invitation_id: String,
-    pub action: String, // "accept" or "deny"
+    pub action: String,
 }
 
 #[derive(Deserialize)]
 pub struct BatchGetExperimentsRequest {
     pub ids: Vec<String>,
 }
-
-// ============================================================================
-// Error Types
-// ============================================================================
 
 #[derive(Debug, Clone, Serialize)]
 pub struct ErrorResponse {
