@@ -167,10 +167,10 @@ class WorkspaceService: ObservableObject {
     @Published var workspaces: [Workspace] = []
     private var baseUrl = Config.baseURL + "/api"
     private let authService: AuthService
-
-    // MARK: - Singleton and Initializer
-
     static let shared: WorkspaceService = .init(authService: AuthService.shared)
+
+    // MARK: - Constructor
+
     init(authService: AuthService) {
         self.authService = authService
     }
@@ -267,10 +267,10 @@ class ExperimentService: ObservableObject {
     @Published var experiments: [Experiment] = []
     private var baseUrl = Config.baseURL + "/api"
     private let authService: AuthService
-
-    // MARK: - Singleton and Initializer
-
     static let shared: ExperimentService = .init(authService: AuthService.shared)
+
+    // MARK: - Constructor
+
     init(authService: AuthService) {
         self.authService = authService
     }
