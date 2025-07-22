@@ -117,6 +117,11 @@ pub struct InvitationActionQuery {
     pub action: String, // "accept" or "deny"
 }
 
+#[derive(Deserialize)]
+pub struct BatchGetExperimentsRequest {
+    pub ids: Vec<String>,
+}
+
 // ============================================================================
 // Error Types
 // ============================================================================

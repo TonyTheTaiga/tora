@@ -72,6 +72,10 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
             "/experiments/{id}",
             protected_route(delete(experiment::delete_experiment), app_state),
         )
+        .route(
+            "/experiments/batch",
+            protected_route(post(experiment::get_experiments_batch), app_state),
+        )
         // Metrics
         .route(
             "/experiments/{id}/metrics",
