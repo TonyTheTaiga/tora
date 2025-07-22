@@ -341,16 +341,7 @@ pub async fn get_experiments_batch(
             )
                 .into_response()
         }
-    };
-
-    (
-        StatusCode::OK,
-        Json(Response {
-            status: 200,
-            data: None::<String>,
-        }),
-    )
-        .into_response()
+    }
 }
 
 pub async fn update_experiment(
