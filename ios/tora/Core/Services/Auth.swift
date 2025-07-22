@@ -3,6 +3,8 @@ import Foundation
 import SwiftData
 import SwiftUI
 
+// MARK: - Private Data Structures
+
 private struct UserData: Decodable {
     let id: String
     let email: String
@@ -20,6 +22,8 @@ private struct TokenData: Decodable {
 private struct LoginResponse: Decodable {
     let data: TokenData
 }
+
+// MARK: - Authentication Errors
 
 enum AuthErrors: Error, LocalizedError {
     case invalidURL
@@ -56,6 +60,8 @@ enum AuthErrors: Error, LocalizedError {
     }
 }
 
+// MARK: - User Session Model
+
 @Model
 class UserSession {
     var id: String
@@ -81,17 +87,25 @@ class UserSession {
     }
 }
 
+// MARK: - Authentication Service
+
 @MainActor
 class AuthService: ObservableObject {
+    // MARK: - Properties
+
     @Published var isAuthenticated = false
     @Published var currentUser: UserSession?
     private let backendUrl: String = Config.baseURL
+
+    // MARK: - Singleton
 
     // Magical singleton, gets instantited on first reference
     static let shared: AuthService = .init()
     private init() {
         checkAuthenticationStatus()
     }
+
+    // MARK: - Public Methods
 
     func checkAuthenticationStatus() {
         isAuthenticated = false
@@ -115,6 +129,8 @@ class AuthService: ObservableObject {
             throw AuthErrors.authFailure("Unexpected error: \(error.localizedDescription)")
         }
     }
+
+    // MARK: - Private Methods
 
     private func _login_with_email_and_password(email: String, password: String) async throws -> UserSession {
         guard let url = URL(string: "\(backendUrl)/api/login") else {

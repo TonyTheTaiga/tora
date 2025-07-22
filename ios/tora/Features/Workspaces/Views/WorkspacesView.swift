@@ -2,12 +2,16 @@ import SwiftData
 import SwiftUI
 
 struct WorkspacesView: View {
+    // MARK: - Properties
+
     let onExperimentSelected: ((String) -> Void)
     @EnvironmentObject private var workspaceService: WorkspaceService
     @EnvironmentObject private var experimentService: ExperimentService
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var experiments: [String: [Experiment]] = [:]
+
+    // MARK: - Body
 
     var body: some View {
         Group {
@@ -54,6 +58,8 @@ struct WorkspacesView: View {
             fetchWorkspaces()
         })
     }
+
+    // MARK: - Private Methods
 
     private func fetchWorkspaces() {
         isLoading = true

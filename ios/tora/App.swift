@@ -1,8 +1,14 @@
 import SwiftData
 import SwiftUI
 
+// MARK: - Content View
+
 struct ContentView: View {
+    // MARK: - Properties
+
     @EnvironmentObject var authService: AuthService
+
+    // MARK: - Body
 
     var body: some View {
         Group {
@@ -15,11 +21,17 @@ struct ContentView: View {
     }
 }
 
+// MARK: - Tora App
+
 @main
 struct Tora: App {
+    // MARK: - Properties
+
     @StateObject private var authService = AuthService.shared
     @StateObject private var workspaceService = WorkspaceService(authService: AuthService.shared)
     @StateObject private var experimentService = ExperimentService(authService: AuthService.shared)
+
+    // MARK: - Body
 
     var body: some Scene {
         WindowGroup {
@@ -32,6 +44,8 @@ struct Tora: App {
         }
     }
 }
+
+// MARK: - Preview
 
 #Preview {
     ContentView()

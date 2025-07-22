@@ -1,7 +1,11 @@
 import SwiftData
 import SwiftUI
 
+// MARK: - Login Form Sheet
+
 struct LoginFormSheet: View {
+    // MARK: - Properties
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @EnvironmentObject var authService: AuthService
@@ -15,6 +19,8 @@ struct LoginFormSheet: View {
     enum Field {
         case email, password
     }
+
+    // MARK: - Body
 
     var body: some View {
         NavigationView {
@@ -65,6 +71,8 @@ struct LoginFormSheet: View {
         }
     }
 
+    // MARK: - Private Methods
+
     private func signIn() async {
         isLoading = true
         showError = false
@@ -90,7 +98,11 @@ struct LoginFormSheet: View {
     }
 }
 
+// MARK: - Login View
+
 struct LoginView: View {
+    // MARK: - Properties
+
     @State private var logoScale: CGFloat = 0.8
     @State private var logoOpacity: Double = 0.0
     @State private var subtitleOffset: CGFloat = 20
@@ -98,6 +110,8 @@ struct LoginView: View {
     @State private var buttonOffset: CGFloat = 30
     @State private var buttonOpacity: Double = 0.0
     @State private var loginSheetShown: Bool = false
+
+    // MARK: - Body
 
     var body: some View {
         GeometryReader { geometry in
@@ -165,10 +179,16 @@ struct LoginView: View {
     }
 }
 
+// MARK: - Scrolling Subtitle
+
 struct ScrollingSubtitle: View {
+    // MARK: - Properties
+
     @State private var offset: CGFloat = 0
     private let text = "A Modern Experiment Tracker • "
     private let spacing: CGFloat = 0
+
+    // MARK: - Body
 
     var body: some View {
         GeometryReader { geometry in
@@ -194,14 +214,22 @@ struct ScrollingSubtitle: View {
         }
     }
 
+    // MARK: - Private Methods
+
     private func estimateTextWidth(fontSize: CGFloat) -> CGFloat {
         let characterWidth = fontSize * 0.6
         return CGFloat(text.count) * characterWidth
     }
 }
 
+// MARK: - Tora Logo
+
 struct ToraLogo: View {
+    // MARK: - Properties
+
     private let logoAspectRatio: CGFloat = 357.41 / 109.34
+
+    // MARK: - Body
 
     var body: some View {
         Image("ToraLogo")
@@ -211,6 +239,8 @@ struct ToraLogo: View {
             .foregroundColor(Color.custom.ctpBlue)
     }
 }
+
+// MARK: - Preview
 
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {

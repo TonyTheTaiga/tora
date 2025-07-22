@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - Color Palette
+
 struct ColorPalette {
     let ctpBase = Color(light: "#eff1f5", dark: "#1e1e2e")
     let ctpMantle = Color(light: "#e6e9ef", dark: "#181825")
@@ -28,6 +30,8 @@ struct ColorPalette {
     let ctpFlamingo = Color(light: "#dd7878", dark: "#f2cdcd")
     let ctpRosewater = Color(light: "#dc8a78", dark: "#f5e0dc")
 }
+
+// MARK: - Color Extension
 
 extension Color {
     static let custom = ColorPalette()
@@ -66,6 +70,8 @@ extension Color {
         self.init(uiColor: UIColor(light: light, dark: dark))
     }
 }
+
+// MARK: - UIColor Extension
 
 extension UIColor {
     convenience init(light: String, dark: String) {

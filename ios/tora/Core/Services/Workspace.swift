@@ -3,10 +3,14 @@ import Foundation
 import SwiftData
 import SwiftUI
 
+// MARK: - API Response
+
 struct ApiResponse<T: Decodable>: Decodable {
     let status: Int
     let data: T?
 }
+
+// MARK: - Workspace Errors
 
 enum WorkspaceErrors: Error, LocalizedError {
     case invalidURL
@@ -49,7 +53,8 @@ enum WorkspaceErrors: Error, LocalizedError {
     }
 }
 
-// MARK: - Workspace
+// MARK: - Data Models
+
 struct Workspace: Decodable, Identifiable, Equatable {
     var id: String
     var name: String
@@ -66,7 +71,6 @@ struct Workspace: Decodable, Identifiable, Equatable {
     }
 }
 
-// MARK: - Hyperparam
 struct HyperParam: Codable, Equatable {
     let key: String
     let value: HyperParamValue
@@ -128,7 +132,6 @@ struct HyperParam: Codable, Equatable {
     }
 }
 
-// MARK: - Experiment
 struct Experiment: Decodable, Identifiable, Equatable {
     var id: String
     var name: String
@@ -155,16 +158,24 @@ struct Experiment: Decodable, Identifiable, Equatable {
     }
 }
 
+// MARK: - Workspace Service
+
 @MainActor
 class WorkspaceService: ObservableObject {
+    // MARK: - Properties
+
     @Published var workspaces: [Workspace] = []
     private var baseUrl = Config.baseURL + "/api"
     private let authService: AuthService
+
+    // MARK: - Singleton and Initializer
 
     static let shared: WorkspaceService = .init(authService: AuthService.shared)
     init(authService: AuthService) {
         self.authService = authService
     }
+
+    // MARK: - Public Methods
 
     public func list() async throws {
         guard let url = URL(string: "\(baseUrl)/workspaces") else {
@@ -247,16 +258,24 @@ class WorkspaceService: ObservableObject {
     }
 }
 
+// MARK: - Experiment Service
+
 @MainActor
 class ExperimentService: ObservableObject {
+    // MARK: - Properties
+
     @Published var experiments: [Experiment] = []
     private var baseUrl = Config.baseURL + "/api"
     private let authService: AuthService
+
+    // MARK: - Singleton and Initializer
 
     static let shared: ExperimentService = .init(authService: AuthService.shared)
     init(authService: AuthService) {
         self.authService = authService
     }
+
+    // MARK: - Public Methods
 
     public func listAll() async throws {
         guard let url = URL(string: "\(baseUrl)/experiments") else {

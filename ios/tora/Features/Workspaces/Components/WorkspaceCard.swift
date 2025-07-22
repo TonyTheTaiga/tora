@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+// MARK: - Experiment Row
+
 struct ExperimentRow: View {
     var experiment: Experiment
 
@@ -16,11 +18,17 @@ struct ExperimentRow: View {
     }
 }
 
+// MARK: - Workspace Card
+
 struct WorkspaceCard: View {
+    // MARK: - Properties
+
     var workspace: Workspace
     var experiments: [Experiment]
     let onExperimentSelected: ((String) -> Void)
     @State private var isExpanded: Bool = false
+
+    // MARK: - Body
 
     var body: some View {
         Group {
@@ -67,6 +75,8 @@ struct WorkspaceCard: View {
         .border(Color.custom.ctpOverlay2, width: 1)
     }
 
+    // MARK: - Private Methods
+
     private func getRoleColor(_ role: String) -> Color {
         switch role {
         case "OWNER":
@@ -80,6 +90,8 @@ struct WorkspaceCard: View {
         }
     }
 }
+
+// MARK: - Preview
 
 #Preview(traits: .sizeThatFitsLayout) {
     WorkspaceCard(
