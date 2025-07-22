@@ -297,7 +297,7 @@ pub async fn get_experiments_batch(
     let frontend_url = app_state.settings.frontend_url;
     match results {
         Ok(experiments) => {
-            let experiment_results = experiments
+            let experiment_results: Vec<Experiment> = experiments
                 .into_iter()
                 .map(|e| Experiment {
                     id: e.0.clone(),
@@ -311,7 +311,7 @@ pub async fn get_experiments_batch(
                     available_metrics: e.8.unwrap_or_default(),
                     url: format!("{}/experiments/{}", frontend_url, e.0.clone()),
                 })
-                .collect::<Vec<Experiment>>();
+                .collect();
 
             (
                 StatusCode::OK,
