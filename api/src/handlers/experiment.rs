@@ -403,7 +403,6 @@ pub async fn update_experiment(
     .into_response())
 }
 
-// Delete experiment
 pub async fn delete_experiment(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
@@ -412,7 +411,6 @@ pub async fn delete_experiment(
     let user_uuid = parse_uuid(&user.id, "user_id")?;
     let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
 
-    // Check if user has owner/admin access to this experiment
     let access_check = sqlx::query_as::<_, (i64,)>(
         r#"
         SELECT COUNT(*) FROM experiment e
@@ -450,7 +448,6 @@ pub async fn delete_experiment(
         .into_response())
 }
 
-// List experiments for a specific workspace
 pub async fn list_workspace_experiments(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
@@ -459,7 +456,6 @@ pub async fn list_workspace_experiments(
     let user_uuid = parse_uuid(&user.id, "user_id")?;
     let workspace_uuid = parse_uuid(&workspace_id, "workspace_id")?;
 
-    // Check if user has access to the workspace
     let access_check = sqlx::query_as::<_, (i64,)>(
         "SELECT COUNT(*) FROM user_workspaces WHERE workspace_id = $1 AND user_id = $2",
     )
@@ -473,7 +469,6 @@ pub async fn list_workspace_experiments(
         ));
     }
 
-    // List experiments for the workspace with metrics summary
     let result = sqlx::query_as::<
         _,
         (
