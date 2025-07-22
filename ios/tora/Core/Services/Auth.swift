@@ -105,7 +105,7 @@ class AuthService: ObservableObject {
 
     func login(email: String, password: String) async throws -> UserSession {
         do {
-            let session = try await doLogin(email: email, password: password)
+            let session = try await _login_with_email_and_password(email: email, password: password)
             self.isAuthenticated = true
             self.currentUser = session
             return session
@@ -116,7 +116,7 @@ class AuthService: ObservableObject {
         }
     }
 
-    private func doLogin(email: String, password: String) async throws -> UserSession {
+    private func _login_with_email_and_password(email: String, password: String) async throws -> UserSession {
         guard let url = URL(string: "\(backendUrl)/api/login") else {
             throw AuthErrors.invalidURL
         }
@@ -156,10 +156,8 @@ class AuthService: ObservableObject {
             decoder.dateDecodingStrategy = .iso8601
             let loginResponse = try decoder.decode(LoginResponse.self, from: data)
             let tokenData = loginResponse.data
-
             let expiresInDate = Date(timeIntervalSince1970: TimeInterval(tokenData.expiresIn))
             let expiresAtDate = Date(timeIntervalSince1970: TimeInterval(tokenData.expiresAt))
-
             let session = UserSession(
                 id: tokenData.user.id,
                 email: tokenData.user.email,
