@@ -83,13 +83,17 @@ struct LoginFormSheet: View {
         }
 
         do {
-            let userSession = try await authService.login(email: email, password: password)
+            let userSession = try await authService.login(
+                email: email,
+                password: password
+            )
             context.insert(userSession)
             try context.save()
             dismiss()
         } catch {
             if let authError = error as? LocalizedError {
-                errorMessage = authError.errorDescription ?? "Authentication failed"
+                errorMessage =
+                    authError.errorDescription ?? "Authentication failed"
             } else {
                 errorMessage = "An unexpected error occurred. Please try again."
             }
@@ -126,7 +130,10 @@ struct LoginView: View {
                     .foregroundColor(Color.custom.ctpBlue)
                     .scaleEffect(logoScale)
                     .opacity(logoOpacity)
-                    .animation(.spring(response: 0.8, dampingFraction: 0.6), value: logoScale)
+                    .animation(
+                        .spring(response: 0.8, dampingFraction: 0.6),
+                        value: logoScale
+                    )
                     .animation(.easeOut(duration: 0.6), value: logoOpacity)
 
                 Spacer()
@@ -135,7 +142,10 @@ struct LoginView: View {
                 ScrollingSubtitle()
                     .frame(height: 30)
                     .opacity(subtitleOpacity)
-                    .animation(.easeOut(duration: 0.8).delay(0.3), value: subtitleOpacity)
+                    .animation(
+                        .easeOut(duration: 0.8).delay(0.3),
+                        value: subtitleOpacity
+                    )
 
                 Spacer()
                     .frame(height: geometry.size.height * 0.05)
@@ -145,8 +155,14 @@ struct LoginView: View {
                 }
                 .offset(y: buttonOffset)
                 .opacity(buttonOpacity)
-                .animation(.easeOut(duration: 0.8).delay(0.6), value: buttonOffset)
-                .animation(.easeOut(duration: 0.8).delay(0.6), value: buttonOpacity)
+                .animation(
+                    .easeOut(duration: 0.8).delay(0.6),
+                    value: buttonOffset
+                )
+                .animation(
+                    .easeOut(duration: 0.8).delay(0.6),
+                    value: buttonOpacity
+                )
                 .sheet(isPresented: $loginSheetShown) {
                     LoginFormSheet()
                 }
@@ -185,8 +201,11 @@ struct ScrollingSubtitle: View {
     // MARK: - Properties
 
     @State private var offset: CGFloat = 0
+    @State private var textWidth: CGFloat = 0
+
     private let text = "A Modern Experiment Tracker • "
     private let spacing: CGFloat = 0
+    private let scrollSpeed: CGFloat = 40  // pixels per second
 
     // MARK: - Body
 
@@ -195,30 +214,64 @@ struct ScrollingSubtitle: View {
             let dynamicFontSize = min(max(geometry.size.width * 0.045, 16), 28)
 
             HStack(spacing: spacing) {
-                ForEach(0..<10, id: \.self) { _ in
+                ForEach(
+                    0..<max(
+                        2,
+                        textWidth > 0
+                            ? Int(ceil(geometry.size.width / textWidth)) + 1 : 3
+                    ),
+                    id: \.self
+                ) { _ in
                     Text(text)
-                        .font(.system(size: dynamicFontSize, weight: .bold, design: .default))
-                        .foregroundColor(Color.secondary)
+                        .font(
+                            .system(
+                                size: dynamicFontSize,
+                                weight: .bold,
+                                design: .default
+                            )
+                        )
+                        .foregroundColor(.secondary)
                         .fixedSize()
+                        .background(
+                            GeometryReader { textGeometry in
+                                Color.clear.onAppear {
+                                    if textWidth == 0 {
+                                        textWidth = textGeometry.size.width
+                                    }
+                                }
+                            }
+                        )
                 }
             }
             .offset(x: offset)
             .clipped()
             .onAppear {
-                let textWidth = estimateTextWidth(fontSize: dynamicFontSize)
-
-                withAnimation(.linear(duration: textWidth / 40).repeatForever(autoreverses: false)) {
-                    offset = -textWidth
-                }
+                startScrolling()
+            }
+            .onChange(of: dynamicFontSize) {
+                textWidth = 0
+                offset = 0
             }
         }
     }
 
     // MARK: - Private Methods
 
-    private func estimateTextWidth(fontSize: CGFloat) -> CGFloat {
-        let characterWidth = fontSize * 0.6
-        return CGFloat(text.count) * characterWidth
+    private func startScrolling() {
+        guard textWidth > 0 else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                startScrolling()
+            }
+            return
+        }
+
+        withAnimation(
+            .linear(duration: textWidth / scrollSpeed).repeatForever(
+                autoreverses: false
+            )
+        ) {
+            offset = -textWidth
+        }
     }
 }
 

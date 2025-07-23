@@ -19,7 +19,11 @@ struct MainAppView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            Tab("Workspaces", systemImage: "macwindow.stack", value: .workspaces) {
+            Tab(
+                "Workspaces",
+                systemImage: "macwindow.stack",
+                value: .workspaces
+            ) {
                 NavigationStack {
                     WorkspacesView(onExperimentSelected: { experimentId in
                         selectedExperimentId = experimentId
@@ -37,7 +41,7 @@ struct MainAppView: View {
             Tab("Settings", systemImage: "gearshape.2", value: .settings) {
                 SettingsView()
             }
-        }.accentColor(.blue)
+        }.accentColor(.blue).onAppear(perform: { print("initializing...") })
     }
 }
 

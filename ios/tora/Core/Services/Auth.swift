@@ -2,6 +2,7 @@ import Combine
 import Foundation
 import SwiftData
 import SwiftUI
+import os
 
 // MARK: - Private Data Structures
 
@@ -132,60 +133,62 @@ class AuthService: ObservableObject {
     // MARK: - Private Methods
 
     private func _login_with_email_and_password(email: String, password: String) async throws -> UserSession {
-        guard let url = URL(string: "\(backendUrl)/api/login") else {
-            throw AuthErrors.invalidURL
-        }
+        try await measure(OSLog.auth, name: "_login_with_email_and_password") {
+            guard let url = URL(string: "\(backendUrl)/api/login") else {
+                throw AuthErrors.invalidURL
+            }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: [
-                "email": email, "password": password,
-            ])
-        } catch {
-            throw AuthErrors.dataError(
-                "Failed to serialize login credentials: \(error.localizedDescription)")
-        }
+            do {
+                request.httpBody = try JSONSerialization.data(withJSONObject: [
+                    "email": email, "password": password,
+                ])
+            } catch {
+                throw AuthErrors.dataError(
+                    "Failed to serialize login credentials: \(error.localizedDescription)")
+            }
 
-        let (data, response): (Data, URLResponse)
-        do {
-            (data, response) = try await URLSession.shared.data(for: request)
-        } catch {
-            throw AuthErrors.networkError(error)
-        }
+            let (data, response): (Data, URLResponse)
+            do {
+                (data, response) = try await URLSession.shared.data(for: request)
+            } catch {
+                throw AuthErrors.networkError(error)
+            }
 
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw AuthErrors.invalidResponse
-        }
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw AuthErrors.invalidResponse
+            }
 
-        guard httpResponse.statusCode == 200 else {
-            let errorMessage = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
-            throw AuthErrors.requestError(httpResponse.statusCode, errorMessage)
-        }
+            guard httpResponse.statusCode == 200 else {
+                let errorMessage = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
+                throw AuthErrors.requestError(httpResponse.statusCode, errorMessage)
+            }
 
-        do {
-            let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            decoder.dateDecodingStrategy = .iso8601
-            let loginResponse = try decoder.decode(LoginResponse.self, from: data)
-            let tokenData = loginResponse.data
-            let expiresInDate = Date(timeIntervalSince1970: TimeInterval(tokenData.expiresIn))
-            let expiresAtDate = Date(timeIntervalSince1970: TimeInterval(tokenData.expiresAt))
-            let session = UserSession(
-                id: tokenData.user.id,
-                email: tokenData.user.email,
-                authToken: tokenData.accessToken,
-                refreshToken: tokenData.refreshToken,
-                expiresIn: expiresInDate,
-                expiresAt: expiresAtDate,
-                tokenType: tokenData.tokenType
-            )
+            do {
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                decoder.dateDecodingStrategy = .iso8601
+                let loginResponse = try decoder.decode(LoginResponse.self, from: data)
+                let tokenData = loginResponse.data
+                let expiresInDate = Date(timeIntervalSince1970: TimeInterval(tokenData.expiresIn))
+                let expiresAtDate = Date(timeIntervalSince1970: TimeInterval(tokenData.expiresAt))
+                let session = UserSession(
+                    id: tokenData.user.id,
+                    email: tokenData.user.email,
+                    authToken: tokenData.accessToken,
+                    refreshToken: tokenData.refreshToken,
+                    expiresIn: expiresInDate,
+                    expiresAt: expiresAtDate,
+                    tokenType: tokenData.tokenType
+                )
 
-            return session
-        } catch {
-            throw AuthErrors.jsonParsingError(error)
+                return session
+            } catch {
+                throw AuthErrors.jsonParsingError(error)
+            }
         }
     }
 }

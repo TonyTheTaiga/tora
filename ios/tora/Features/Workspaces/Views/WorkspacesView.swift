@@ -9,7 +9,7 @@ struct WorkspacesView: View {
     @EnvironmentObject private var experimentService: ExperimentService
     @State private var isLoading = true
     @State private var errorMessage: String?
-    @State private var experiments: [String: [Experiment]] = [:]
+    @State private var workspaceExperiments: [String: [Experiment]] = [:]
 
     // MARK: - Body
 
@@ -36,7 +36,7 @@ struct WorkspacesView: View {
                             workspace in
                             WorkspaceCard(
                                 workspace: workspace,
-                                experiments: experiments[workspace.id] ?? [],
+                                experiments: workspaceExperiments[workspace.id] ?? [],
                                 onExperimentSelected: onExperimentSelected
                             )
                         }
@@ -65,15 +65,22 @@ struct WorkspacesView: View {
         isLoading = true
         errorMessage = nil
         Task {
+            defer { isLoading = false }
+
             do {
                 try await workspaceService.list()
-                for workspace in workspaceService.workspaces {
-                    experiments[workspace.id] =
-                        try await workspaceService.listExperiments(
-                            for: workspace.id
-                        )
+                try await withThrowingTaskGroup(of: (String, [Experiment]).self) { group in
+                    for workspace in workspaceService.workspaces {
+                        group.addTask {
+                            let experiments = try await workspaceService.listExperiments(for: workspace.id)
+                            return (workspace.id, experiments)
+                        }
+                    }
+                    for try await (workspaceId, experiments) in group {
+                        workspaceExperiments[workspaceId] = experiments
+                    }
+
                 }
-                self.isLoading = false
             } catch {
                 self.errorMessage = error.localizedDescription
             }
