@@ -40,7 +40,7 @@ struct LoginFormSheet: View {
                     .focused($isFocused, equals: .password)
                     .onSubmit {
                         if !isLoading {
-                            Task { await signIn() }
+                            signIn()
                         }
                     }
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -53,7 +53,7 @@ struct LoginFormSheet: View {
                 }
 
                 Button(isLoading ? "Signing In..." : "Sign In") {
-                    Task { await signIn() }
+                    signIn()
                 }
                 .disabled(isLoading || email.isEmpty || password.isEmpty)
 
@@ -73,30 +73,35 @@ struct LoginFormSheet: View {
 
     // MARK: - Private Methods
 
-    private func signIn() async {
+    private func signIn() {
         isLoading = true
         showError = false
         errorMessage = ""
 
-        defer {
-            isLoading = false
+        Task {
+            defer {
+                isLoading = false
+            }
+
+            do {
+                try await authService.login(
+                    email: email,
+                    password: password
+                )
+                dismiss()
+            } catch {
+                if let authError = error as? LocalizedError {
+                    errorMessage =
+                        authError.errorDescription ?? "Authentication failed"
+                } else {
+                    errorMessage =
+                        "An unexpected error occurred. Please try again."
+                }
+                showError = true
+            }
+
         }
 
-        do {
-            let _ = try await authService.login(
-                email: email,
-                password: password
-            )
-            dismiss()
-        } catch {
-            if let authError = error as? LocalizedError {
-                errorMessage =
-                    authError.errorDescription ?? "Authentication failed"
-            } else {
-                errorMessage = "An unexpected error occurred. Please try again."
-            }
-            showError = true
-        }
     }
 }
 

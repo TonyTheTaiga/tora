@@ -156,8 +156,10 @@ class AuthService: ObservableObject {
     }
 
     // MARK: - Private Methods
+
     private func updateKeychain(email: String, password: String) throws {
-        let query: [String: Any] = [
+        // add -> catch -> update
+        let addQuery: [String: Any] = [
             kSecClass as String: kSecClassInternetPassword,
             kSecAttrAccount as String: email,
             kSecAttrServer as String: "tora-tracker",
@@ -165,8 +167,29 @@ class AuthService: ObservableObject {
                 using: String.Encoding.utf8
             )!,
         ]
-        let status = SecItemAdd(query as CFDictionary, nil)
-        guard status == errSecSuccess else {
+        var status = SecItemAdd(addQuery as CFDictionary, nil)
+        if status == errSecDuplicateItem {
+            let updateQuery: [String: Any] = [
+                kSecClass as String: kSecClassInternetPassword,
+                kSecAttrAccount as String: email,
+                kSecAttrServer as String: "tora-tracker",
+            ]
+            let attrs: [String: Any] = [
+                kSecValueData as String: password.data(
+                    using: String.Encoding.utf8
+                )!
+            ]
+            status = SecItemUpdate(
+                updateQuery as CFDictionary,
+                attrs as CFDictionary
+            )
+        }
+
+        if status != errSecSuccess {
+            let errorMessage =
+                SecCopyErrorMessageString(status, nil) as String?
+                ?? "Unknown error"
+            print("updating keychain failed: \(errorMessage) (\(status))")
             throw KeychainError.unhandledError(status: status)
         }
     }
