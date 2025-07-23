@@ -83,12 +83,10 @@ struct LoginFormSheet: View {
         }
 
         do {
-            let userSession = try await authService.login(
+            let _ = try await authService.login(
                 email: email,
                 password: password
             )
-            context.insert(userSession)
-            try context.save()
             dismiss()
         } catch {
             if let authError = error as? LocalizedError {

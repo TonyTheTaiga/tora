@@ -6,6 +6,11 @@ import os
 
 // MARK: - Private Data Structures
 
+struct Credentials {
+    var email: String
+    var password: String
+}
+
 private struct UserData: Decodable {
     let id: String
     let email: String
@@ -61,6 +66,12 @@ enum AuthErrors: Error, LocalizedError {
     }
 }
 
+enum KeychainError: Error {
+    case noPassword
+    case unexpectedPasswordData
+    case unhandledError(status: OSStatus)
+}
+
 // MARK: - User Session Model
 
 @Model
@@ -74,7 +85,11 @@ class UserSession {
     var tokenType: String
 
     init(
-        id: String, email: String, authToken: String, refreshToken: String, expiresIn: Date,
+        id: String,
+        email: String,
+        authToken: String,
+        refreshToken: String,
+        expiresIn: Date,
         expiresAt: Date,
         tokenType: String
     ) {
@@ -96,6 +111,8 @@ class AuthService: ObservableObject {
 
     @Published var isAuthenticated = false
     @Published var currentUser: UserSession?
+    @Environment(\.modelContext) private var modelContext
+
     private let backendUrl: String = Config.baseURL
     static let shared: AuthService = .init()
 
@@ -108,6 +125,7 @@ class AuthService: ObservableObject {
     // MARK: - Public Methods
 
     func checkAuthenticationStatus() {
+        // update this to fetch from keychain then do the auth? or is it better to store the tokens in the keychain?
         isAuthenticated = false
         currentUser = nil
     }
@@ -117,22 +135,45 @@ class AuthService: ObservableObject {
         currentUser = nil
     }
 
-    func login(email: String, password: String) async throws -> UserSession {
+    func login(email: String, password: String) async throws {
         do {
-            let session = try await _login_with_email_and_password(email: email, password: password)
+            let userSession = try await _login_with_email_and_password(
+                email: email,
+                password: password
+            )
+            try updateKeychain(email: email, password: password)
             self.isAuthenticated = true
-            self.currentUser = session
-            return session
+            self.currentUser = userSession
         } catch let authError as AuthErrors {
             throw authError
+        } catch let keychainError as KeychainError {
+            throw keychainError
         } catch {
-            throw AuthErrors.authFailure("Unexpected error: \(error.localizedDescription)")
+            throw AuthErrors.authFailure(
+                "Unexpected error: \(error.localizedDescription)"
+            )
         }
     }
 
     // MARK: - Private Methods
+    private func updateKeychain(email: String, password: String) throws {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassInternetPassword,
+            kSecAttrAccount as String: email,
+            kSecAttrServer as String: "tora-tracker",
+            kSecValueData as String: password.data(
+                using: String.Encoding.utf8
+            )!,
+        ]
+        let status = SecItemAdd(query as CFDictionary, nil)
+        guard status == errSecSuccess else {
+            throw KeychainError.unhandledError(status: status)
+        }
+    }
 
-    private func _login_with_email_and_password(email: String, password: String) async throws -> UserSession {
+    private func _login_with_email_and_password(email: String, password: String)
+        async throws -> UserSession
+    {
         try await measure(OSLog.auth, name: "_login_with_email_and_password") {
             guard let url = URL(string: "\(backendUrl)/api/login") else {
                 throw AuthErrors.invalidURL
@@ -140,7 +181,10 @@ class AuthService: ObservableObject {
 
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue(
+                "application/json",
+                forHTTPHeaderField: "Content-Type"
+            )
 
             do {
                 request.httpBody = try JSONSerialization.data(withJSONObject: [
@@ -148,12 +192,15 @@ class AuthService: ObservableObject {
                 ])
             } catch {
                 throw AuthErrors.dataError(
-                    "Failed to serialize login credentials: \(error.localizedDescription)")
+                    "Failed to serialize login credentials: \(error.localizedDescription)"
+                )
             }
 
             let (data, response): (Data, URLResponse)
             do {
-                (data, response) = try await URLSession.shared.data(for: request)
+                (data, response) = try await URLSession.shared.data(
+                    for: request
+                )
             } catch {
                 throw AuthErrors.networkError(error)
             }
@@ -163,18 +210,30 @@ class AuthService: ObservableObject {
             }
 
             guard httpResponse.statusCode == 200 else {
-                let errorMessage = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
-                throw AuthErrors.requestError(httpResponse.statusCode, errorMessage)
+                let errorMessage = HTTPURLResponse.localizedString(
+                    forStatusCode: httpResponse.statusCode
+                )
+                throw AuthErrors.requestError(
+                    httpResponse.statusCode,
+                    errorMessage
+                )
             }
 
             do {
                 let decoder = JSONDecoder()
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
                 decoder.dateDecodingStrategy = .iso8601
-                let loginResponse = try decoder.decode(LoginResponse.self, from: data)
+                let loginResponse = try decoder.decode(
+                    LoginResponse.self,
+                    from: data
+                )
                 let tokenData = loginResponse.data
-                let expiresInDate = Date(timeIntervalSince1970: TimeInterval(tokenData.expiresIn))
-                let expiresAtDate = Date(timeIntervalSince1970: TimeInterval(tokenData.expiresAt))
+                let expiresInDate = Date(
+                    timeIntervalSince1970: TimeInterval(tokenData.expiresIn)
+                )
+                let expiresAtDate = Date(
+                    timeIntervalSince1970: TimeInterval(tokenData.expiresAt)
+                )
                 let session = UserSession(
                     id: tokenData.user.id,
                     email: tokenData.user.email,
