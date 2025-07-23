@@ -159,7 +159,7 @@ class AuthService: ObservableObject {
 
     private func updateKeychain(email: String, password: String) throws {
         // add -> catch -> update
-        let addQuery: [String: Any] = [
+        var query: [String: Any] = [
             kSecClass as String: kSecClassInternetPassword,
             kSecAttrAccount as String: email,
             kSecAttrServer as String: "tora-tracker",
@@ -167,20 +167,18 @@ class AuthService: ObservableObject {
                 using: String.Encoding.utf8
             )!,
         ]
-        var status = SecItemAdd(addQuery as CFDictionary, nil)
+        var status = SecItemAdd(query as CFDictionary, nil)
+
+        // If duplicate just update the key
         if status == errSecDuplicateItem {
-            let updateQuery: [String: Any] = [
-                kSecClass as String: kSecClassInternetPassword,
-                kSecAttrAccount as String: email,
-                kSecAttrServer as String: "tora-tracker",
-            ]
+            query.removeValue(forKey: kSecValueData as String)
             let attrs: [String: Any] = [
                 kSecValueData as String: password.data(
                     using: String.Encoding.utf8
                 )!
             ]
             status = SecItemUpdate(
-                updateQuery as CFDictionary,
+                query as CFDictionary,
                 attrs as CFDictionary
             )
         }
