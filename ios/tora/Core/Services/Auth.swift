@@ -29,6 +29,36 @@ private struct LoginResponse: Decodable {
     let data: TokenData
 }
 
+// MARK: - User Session Model
+
+class UserSession: Encodable, Decodable {
+    var id: String
+    var email: String
+    var authToken: String
+    var refreshToken: String
+    var expiresIn: Date
+    var expiresAt: Date
+    var tokenType: String
+
+    init(
+        id: String,
+        email: String,
+        authToken: String,
+        refreshToken: String,
+        expiresIn: Date,
+        expiresAt: Date,
+        tokenType: String
+    ) {
+        self.id = id
+        self.email = email
+        self.authToken = authToken
+        self.refreshToken = refreshToken
+        self.expiresAt = expiresAt
+        self.expiresIn = expiresIn
+        self.tokenType = tokenType
+    }
+}
+
 // MARK: - Authentication Errors
 
 enum AuthErrors: Error, LocalizedError {
@@ -70,36 +100,7 @@ enum KeychainError: Error {
     case noPassword
     case unexpectedPasswordData
     case unhandledError(status: OSStatus)
-}
-
-// MARK: - User Session Model
-
-class UserSession: Encodable {
-    var id: String
-    var email: String
-    var authToken: String
-    var refreshToken: String
-    var expiresIn: Date
-    var expiresAt: Date
-    var tokenType: String
-
-    init(
-        id: String,
-        email: String,
-        authToken: String,
-        refreshToken: String,
-        expiresIn: Date,
-        expiresAt: Date,
-        tokenType: String
-    ) {
-        self.id = id
-        self.email = email
-        self.authToken = authToken
-        self.refreshToken = refreshToken
-        self.expiresAt = expiresAt
-        self.expiresIn = expiresIn
-        self.tokenType = tokenType
-    }
+    case invalidData
 }
 
 // MARK: - Authentication Service
@@ -127,6 +128,11 @@ class AuthService: ObservableObject {
         // update this to fetch from keychain then do the auth? or is it better to store the tokens in the keychain?
         isAuthenticated = false
         currentUser = nil
+
+        if checkSessionInKeychain() {
+            currentUser = try? retrieveSessionFromKeychain()
+            isAuthenticated = true
+        }
     }
 
     func logout() {
@@ -160,19 +166,18 @@ class AuthService: ObservableObject {
         return try JSONEncoder().encode(userSession)
     }
 
-    private func b64EncodeToData(_ input: Data) -> Data {
-        return input.base64EncodedData()
+    private func jsonDeserialize(_ input: Data) throws -> UserSession {
+        return try JSONDecoder().decode(UserSession.self, from: input)
     }
 
     private func updateKeychain(_ userSession: UserSession) throws {
         let serialized = try jsonSerialize(userSession)
-        let b64 = b64EncodeToData(serialized)
 
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: userSession.email,
             kSecAttrService as String: "tora-tracker",
-            kSecValueData as String: b64,
+            kSecValueData as String: serialized,
         ]
         var status = SecItemAdd(query as CFDictionary, nil)
 
@@ -180,7 +185,7 @@ class AuthService: ObservableObject {
         if status == errSecDuplicateItem {
             query.removeValue(forKey: kSecValueData as String)
             let attrs: [String: Any] = [
-                kSecValueData as String: b64
+                kSecValueData as String: serialized
             ]
             status = SecItemUpdate(
                 query as CFDictionary,
@@ -232,16 +237,32 @@ class AuthService: ObservableObject {
     //        }
     //    }
 
-    private func checkKeychain() -> Bool {
+    private func checkSessionInKeychain() -> Bool {
         let query: [String: Any] = [
-            kSecAttrServer as String: "tora-tracker"
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: "tora-tracker",
         ]
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
-        if status == errSecSuccess {
-            return true
+        return status == errSecSuccess
+    }
+
+    private func retrieveSessionFromKeychain() throws -> UserSession {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: "tora-tracker",
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+        ]
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        guard status == errSecSuccess else {
+            throw KeychainError.unhandledError(status: status)
         }
-        return false
+        guard let userSessionData = result as? Data else {
+            throw KeychainError.invalidData
+        }
+        return try jsonDeserialize(userSessionData)
     }
 
     private func _LoginWithEmailAndPassword(email: String, password: String)
