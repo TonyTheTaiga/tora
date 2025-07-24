@@ -147,7 +147,7 @@ class AuthService: ObservableObject {
                 email: email,
                 password: password
             )
-            try updateKeychain(userSession)
+            try storeSessionInKeychain(userSession)
             self.isAuthenticated = true
             self.currentUser = userSession
         } catch let authError as AuthErrors {
@@ -171,7 +171,7 @@ class AuthService: ObservableObject {
         return try JSONDecoder().decode(UserSession.self, from: input)
     }
 
-    private func updateKeychain(_ userSession: UserSession) throws {
+    private func storeSessionInKeychain(_ userSession: UserSession) throws {
         let serialized = try jsonSerialize(userSession)
 
         var query: [String: Any] = [
