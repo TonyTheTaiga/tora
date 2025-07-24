@@ -119,6 +119,7 @@ class AuthService: ObservableObject {
     // MARK: - Constructor
 
     private init() {
+        print("initializing auth service")
         checkAuthenticationStatus()
     }
 

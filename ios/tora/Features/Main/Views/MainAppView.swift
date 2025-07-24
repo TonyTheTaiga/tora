@@ -41,7 +41,8 @@ struct MainAppView: View {
             Tab("Settings", systemImage: "gearshape.2", value: .settings) {
                 SettingsView()
             }
-        }.accentColor(.blue).onAppear(perform: { print("initializing...") })
+        }
+        .accentColor(.blue)
     }
 }
 
