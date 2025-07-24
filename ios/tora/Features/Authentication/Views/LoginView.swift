@@ -6,14 +6,12 @@ import SwiftUI
 struct LoginFormSheet: View {
     // MARK: - Properties
 
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var context
     @EnvironmentObject var authService: AuthService
+    @Environment(\.dismiss) private var dismiss
     @State private var email = ""
     @State private var password = ""
     @State private var errorMessage = ""
     @State private var isLoading = false
-    @State private var showError = false
     @FocusState private var isFocused: Field?
 
     enum Field {
@@ -47,7 +45,7 @@ struct LoginFormSheet: View {
                     }
                     .textFieldStyle(RoundedBorderTextFieldStyle())
 
-                if showError {
+                if errorMessage != "" {
                     Text(errorMessage)
                         .foregroundColor(.red)
                         .font(.caption)
@@ -77,7 +75,6 @@ struct LoginFormSheet: View {
 
     private func signIn() {
         isLoading = true
-        showError = false
         errorMessage = ""
 
         Task {
@@ -99,7 +96,6 @@ struct LoginFormSheet: View {
                     errorMessage =
                         "An unexpected error occurred. Please try again."
                 }
-                showError = true
             }
 
         }
@@ -112,12 +108,6 @@ struct LoginFormSheet: View {
 struct LoginView: View {
     // MARK: - Properties
 
-    @State private var logoScale: CGFloat = 0.8
-    @State private var logoOpacity: Double = 0.0
-    @State private var subtitleOffset: CGFloat = 20
-    @State private var subtitleOpacity: Double = 0.0
-    @State private var buttonOffset: CGFloat = 30
-    @State private var buttonOpacity: Double = 0.0
     @State private var loginSheetShown: Bool = false
 
     // MARK: - Body
@@ -133,24 +123,12 @@ struct LoginView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(width: geometry.size.width * 0.6)
                     .foregroundColor(Color.custom.ctpBlue)
-                    .scaleEffect(logoScale)
-                    .opacity(logoOpacity)
-                    .animation(
-                        .spring(response: 0.8, dampingFraction: 0.6),
-                        value: logoScale
-                    )
-                    .animation(.easeOut(duration: 0.6), value: logoOpacity)
 
                 Spacer()
                     .frame(height: geometry.size.height * 0.05)
 
                 ScrollingSubtitle()
                     .frame(height: 30)
-                    .opacity(subtitleOpacity)
-                    .animation(
-                        .easeOut(duration: 0.8).delay(0.3),
-                        value: subtitleOpacity
-                    )
 
                 Spacer()
                     .frame(height: geometry.size.height * 0.05)
@@ -158,16 +136,6 @@ struct LoginView: View {
                 Button("Login") {
                     loginSheetShown = true
                 }
-                .offset(y: buttonOffset)
-                .opacity(buttonOpacity)
-                .animation(
-                    .easeOut(duration: 0.8).delay(0.6),
-                    value: buttonOffset
-                )
-                .animation(
-                    .easeOut(duration: 0.8).delay(0.6),
-                    value: buttonOpacity
-                )
                 .sheet(isPresented: $loginSheetShown) {
                     LoginFormSheet()
                 }
@@ -176,26 +144,6 @@ struct LoginView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.horizontal, 20)
-            .onAppear {
-                withAnimation {
-                    logoScale = 1.0
-                    logoOpacity = 1.0
-                }
-
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    withAnimation {
-                        subtitleOffset = 0
-                        subtitleOpacity = 1.0
-                    }
-                }
-
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                    withAnimation {
-                        buttonOffset = 0
-                        buttonOpacity = 1.0
-                    }
-                }
-            }
         }
     }
 }

@@ -21,7 +21,7 @@ struct MainAppView: View {
         TabView(selection: $selectedTab) {
             Tab(
                 "Workspaces",
-                systemImage: "macwindow.stack",
+                systemImage: "folder",
                 value: .workspaces
             ) {
                 NavigationStack {
@@ -32,7 +32,7 @@ struct MainAppView: View {
                 }
             }
 
-            Tab("Experiments", systemImage: "flask", value: .experiments) {
+            Tab("Experiments", systemImage: "receipt", value: .experiments) {
                 NavigationStack {
                     ExperimentsView(experimentId: selectedExperimentId)
                 }
@@ -44,27 +44,4 @@ struct MainAppView: View {
         }
         .accentColor(.blue)
     }
-}
-
-// MARK: - Preview
-
-#Preview {
-    MainAppView()
-        .environmentObject(AuthService.shared)
-        .environmentObject(WorkspaceService(authService: AuthService.shared))
-        .environmentObject(ExperimentService(authService: AuthService.shared))
-        .modelContainer(for: UserSession.self, inMemory: true)
-        .onAppear {
-            let service = AuthService.shared
-            service.isAuthenticated = true
-            service.currentUser = UserSession(
-                id: "preview-user",
-                email: "preview@tora.com",
-                authToken: "token",
-                refreshToken: "refresh",
-                expiresIn: Date(),
-                expiresAt: Date().addingTimeInterval(3600),
-                tokenType: "Bearer"
-            )
-        }
 }
