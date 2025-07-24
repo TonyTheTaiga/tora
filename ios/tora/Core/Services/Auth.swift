@@ -127,17 +127,6 @@ class AuthService: ObservableObject {
 
     // MARK: - Public Methods
 
-    func checkAuthenticationStatus() {
-        // update this to fetch from keychain then do the auth? or is it better to store the tokens in the keychain?
-        isAuthenticated = false
-        currentUser = nil
-
-        if checkSessionInKeychain() {
-            currentUser = try? retrieveSessionFromKeychain()
-            isAuthenticated = true
-        }
-    }
-
     func logout() {
         isAuthenticated = false
         currentUser = nil
@@ -164,6 +153,16 @@ class AuthService: ObservableObject {
     }
 
     // MARK: - Private Methods
+
+    private func checkAuthenticationStatus() {
+        isAuthenticated = false
+        currentUser = nil
+
+        if checkSessionInKeychain() {
+            currentUser = try? retrieveSessionFromKeychain()
+            isAuthenticated = true
+        }
+    }
 
     private func jsonSerialize(_ userSession: UserSession) throws -> Data {
         return try JSONEncoder().encode(userSession)
