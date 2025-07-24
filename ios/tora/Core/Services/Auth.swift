@@ -145,7 +145,7 @@ class AuthService: ObservableObject {
 
     func login(email: String, password: String) async throws {
         do {
-            let userSession = try await _LoginWithEmailAndPassword(
+            let userSession = try await loginWithEmailAndPassword(
                 email: email,
                 password: password
             )
@@ -233,7 +233,7 @@ class AuthService: ObservableObject {
         return try jsonDeserialize(userSessionData)
     }
 
-    private func _LoginWithEmailAndPassword(email: String, password: String)
+    private func loginWithEmailAndPassword(email: String, password: String)
         async throws -> UserSession
     {
         try await measure(OSLog.auth, name: "_login_with_email_and_password") {
