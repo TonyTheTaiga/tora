@@ -126,7 +126,8 @@ class AuthService: ObservableObject {
 
     // MARK: - Public Methods
 
-    func logout() {
+    func logout() throws {
+        try deleteUserSessionFromKeychain()
         isAuthenticated = false
         currentUser = nil
     }
@@ -201,6 +202,19 @@ class AuthService: ObservableObject {
                 ?? "Unknown error"
             print("updating keychain failed: \(errorMessage) (\(status))")
             throw KeychainError.unhandledError(status: status)
+        }
+    }
+
+    private func deleteUserSessionFromKeychain() throws {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: serviceName,
+        ]
+        let status = SecItemDelete(query as CFDictionary)
+        if status != errSecSuccess {
+            let errorMessage =
+                SecCopyErrorMessageString(status, nil) as String? ?? "Unknown error"
+            print("updating keychain failed: \(errorMessage) (\(status))")
         }
     }
 

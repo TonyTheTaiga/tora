@@ -18,7 +18,7 @@ struct SettingsView: View {
     // MARK: - Private Methods
 
     private func logout() {
-        authService.logout()
+        try? authService.logout()
     }
 }
 
