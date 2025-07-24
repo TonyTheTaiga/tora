@@ -96,6 +96,8 @@ enum AuthErrors: Error, LocalizedError {
     }
 }
 
+// MARK: - Keychain Errors
+
 enum KeychainError: Error {
     case noPassword
     case unexpectedPasswordData
