@@ -158,10 +158,14 @@ class AuthService: ObservableObject {
         isAuthenticated = false
         currentUser = nil
 
-        if checkSessionInKeychain() {
-            // still need to verify it the auth token is valid here.
-            currentUser = try? retrieveSessionFromKeychain()
-            isAuthenticated = true
+        do {
+            if try checkSessionInKeychain() {
+                currentUser = try retrieveSessionFromKeychain()
+                isAuthenticated = true
+            }
+        } catch {
+            print("Keychain error: \(error)")
+            isAuthenticated = false
         }
     }
 
@@ -219,13 +223,19 @@ class AuthService: ObservableObject {
         }
     }
 
-    private func checkSessionInKeychain() -> Bool {
+    private func checkSessionInKeychain() throws -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: serviceName,
         ]
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
+        if status != errSecSuccess {
+            let errorMessage =
+                SecCopyErrorMessageString(status, nil) as String? ?? "Unknown error"
+            print("updating keychain failed: \(errorMessage) (\(status))")
+            throw KeychainError.unhandledError(status: status)
+        }
         return status == errSecSuccess
     }
 
