@@ -113,7 +113,6 @@ class AuthService: ObservableObject {
 
     @Published var isAuthenticated = false
     @Published var currentUser: UserSession?
-    @Environment(\.modelContext) private var modelContext
 
     private let serviceName = "tora-tracker"
     private let backendUrl: String = Config.baseURL
@@ -159,6 +158,7 @@ class AuthService: ObservableObject {
         currentUser = nil
 
         if checkSessionInKeychain() {
+            // still need to verify it the auth token is valid here.
             currentUser = try? retrieveSessionFromKeychain()
             isAuthenticated = true
         }

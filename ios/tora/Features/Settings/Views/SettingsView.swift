@@ -3,7 +3,6 @@ import SwiftUI
 struct SettingsView: View {
     // MARK: - Properties
 
-    @Environment(\.modelContext) private var context
     @EnvironmentObject private var authService: AuthService
 
     // MARK: - Body
@@ -11,14 +10,14 @@ struct SettingsView: View {
     var body: some View {
         Button("Logout") {
             Task {
-                logOut()
+                logout()
             }
         }
     }
 
-    // MARK: - Public Methods
+    // MARK: - Private Methods
 
-    func logOut() {
+    private func logout() {
         authService.logout()
     }
 }
