@@ -37,7 +37,6 @@ struct Tora: App {
         WindowGroup {
             ContentView()
                 .background(Color.white)
-                .modelContainer(for: UserSession.self)
                 .environmentObject(authService)
                 .environmentObject(workspaceService)
                 .environmentObject(experimentService)

@@ -74,8 +74,7 @@ enum KeychainError: Error {
 
 // MARK: - User Session Model
 
-@Model
-class UserSession {
+class UserSession: Encodable {
     var id: String
     var email: String
     var authToken: String
@@ -119,7 +118,6 @@ class AuthService: ObservableObject {
     // MARK: - Constructor
 
     private init() {
-        print("initializing auth service")
         checkAuthenticationStatus()
     }
 
@@ -138,11 +136,11 @@ class AuthService: ObservableObject {
 
     func login(email: String, password: String) async throws {
         do {
-            let userSession = try await _login_with_email_and_password(
+            let userSession = try await _LoginWithEmailAndPassword(
                 email: email,
                 password: password
             )
-            try updateKeychain(email: email, password: password)
+            try updateKeychain(userSession)
             self.isAuthenticated = true
             self.currentUser = userSession
         } catch let authError as AuthErrors {
@@ -158,15 +156,23 @@ class AuthService: ObservableObject {
 
     // MARK: - Private Methods
 
-    private func updateKeychain(email: String, password: String) throws {
-        // add -> catch -> update
+    private func jsonSerialize(_ userSession: UserSession) throws -> Data {
+        return try JSONEncoder().encode(userSession)
+    }
+
+    private func b64EncodeToData(_ input: Data) -> Data {
+        return input.base64EncodedData()
+    }
+
+    private func updateKeychain(_ userSession: UserSession) throws {
+        let serialized = try jsonSerialize(userSession)
+        let b64 = b64EncodeToData(serialized)
+
         var query: [String: Any] = [
-            kSecClass as String: kSecClassInternetPassword,
-            kSecAttrAccount as String: email,
-            kSecAttrServer as String: "tora-tracker",
-            kSecValueData as String: password.data(
-                using: String.Encoding.utf8
-            )!,
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: userSession.email,
+            kSecAttrService as String: "tora-tracker",
+            kSecValueData as String: b64,
         ]
         var status = SecItemAdd(query as CFDictionary, nil)
 
@@ -174,9 +180,7 @@ class AuthService: ObservableObject {
         if status == errSecDuplicateItem {
             query.removeValue(forKey: kSecValueData as String)
             let attrs: [String: Any] = [
-                kSecValueData as String: password.data(
-                    using: String.Encoding.utf8
-                )!
+                kSecValueData as String: b64
             ]
             status = SecItemUpdate(
                 query as CFDictionary,
@@ -193,7 +197,54 @@ class AuthService: ObservableObject {
         }
     }
 
-    private func _login_with_email_and_password(email: String, password: String)
+    //    private func updateKeychain(email: String, password: String) throws {
+    //        // add -> catch -> update
+    //        var query: [String: Any] = [
+    //            kSecClass as String: kSecClassInternetPassword,
+    //            kSecAttrAccount as String: email,
+    //            kSecAttrServer as String: "tora-tracker",
+    //            kSecValueData as String: password.data(
+    //                using: String.Encoding.utf8
+    //            )!,
+    //        ]
+    //        var status = SecItemAdd(query as CFDictionary, nil)
+    //
+    //        // If duplicate just update the key
+    //        if status == errSecDuplicateItem {
+    //            query.removeValue(forKey: kSecValueData as String)
+    //            let attrs: [String: Any] = [
+    //                kSecValueData as String: password.data(
+    //                    using: String.Encoding.utf8
+    //                )!
+    //            ]
+    //            status = SecItemUpdate(
+    //                query as CFDictionary,
+    //                attrs as CFDictionary
+    //            )
+    //        }
+    //
+    //        if status != errSecSuccess {
+    //            let errorMessage =
+    //                SecCopyErrorMessageString(status, nil) as String?
+    //                ?? "Unknown error"
+    //            print("updating keychain failed: \(errorMessage) (\(status))")
+    //            throw KeychainError.unhandledError(status: status)
+    //        }
+    //    }
+
+    private func checkKeychain() -> Bool {
+        let query: [String: Any] = [
+            kSecAttrServer as String: "tora-tracker"
+        ]
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        if status == errSecSuccess {
+            return true
+        }
+        return false
+    }
+
+    private func _LoginWithEmailAndPassword(email: String, password: String)
         async throws -> UserSession
     {
         try await measure(OSLog.auth, name: "_login_with_email_and_password") {
