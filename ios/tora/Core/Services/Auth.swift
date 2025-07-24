@@ -203,41 +203,6 @@ class AuthService: ObservableObject {
         }
     }
 
-    //    private func updateKeychain(email: String, password: String) throws {
-    //        // add -> catch -> update
-    //        var query: [String: Any] = [
-    //            kSecClass as String: kSecClassInternetPassword,
-    //            kSecAttrAccount as String: email,
-    //            kSecAttrServer as String: "tora-tracker",
-    //            kSecValueData as String: password.data(
-    //                using: String.Encoding.utf8
-    //            )!,
-    //        ]
-    //        var status = SecItemAdd(query as CFDictionary, nil)
-    //
-    //        // If duplicate just update the key
-    //        if status == errSecDuplicateItem {
-    //            query.removeValue(forKey: kSecValueData as String)
-    //            let attrs: [String: Any] = [
-    //                kSecValueData as String: password.data(
-    //                    using: String.Encoding.utf8
-    //                )!
-    //            ]
-    //            status = SecItemUpdate(
-    //                query as CFDictionary,
-    //                attrs as CFDictionary
-    //            )
-    //        }
-    //
-    //        if status != errSecSuccess {
-    //            let errorMessage =
-    //                SecCopyErrorMessageString(status, nil) as String?
-    //                ?? "Unknown error"
-    //            print("updating keychain failed: \(errorMessage) (\(status))")
-    //            throw KeychainError.unhandledError(status: status)
-    //        }
-    //    }
-
     private func checkSessionInKeychain() -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
