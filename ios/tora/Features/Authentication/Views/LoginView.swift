@@ -30,6 +30,7 @@ struct LoginFormSheet: View {
                     .fontWeight(.bold)
 
                 TextField("Email", text: $email)
+                    .textContentType(.emailAddress)
                     .focused($isFocused, equals: .email)
                     .onSubmit {
                         isFocused = .password
@@ -37,6 +38,7 @@ struct LoginFormSheet: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
 
                 SecureField("Password", text: $password)
+                    .textContentType(.password)
                     .focused($isFocused, equals: .password)
                     .onSubmit {
                         if !isLoading {
