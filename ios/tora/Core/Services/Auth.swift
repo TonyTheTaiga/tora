@@ -113,6 +113,7 @@ class AuthService: ObservableObject {
     @Published var currentUser: UserSession?
     @Environment(\.modelContext) private var modelContext
 
+    private let serviceName = "tora-tracker"
     private let backendUrl: String = Config.baseURL
     static let shared: AuthService = .init()
 
@@ -176,7 +177,7 @@ class AuthService: ObservableObject {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: userSession.email,
-            kSecAttrService as String: "tora-tracker",
+            kSecAttrService as String: serviceName,
             kSecValueData as String: serialized,
         ]
         var status = SecItemAdd(query as CFDictionary, nil)
@@ -240,7 +241,7 @@ class AuthService: ObservableObject {
     private func checkSessionInKeychain() -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: "tora-tracker",
+            kSecAttrService as String: serviceName,
         ]
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
@@ -250,7 +251,7 @@ class AuthService: ObservableObject {
     private func retrieveSessionFromKeychain() throws -> UserSession {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: "tora-tracker",
+            kSecAttrService as String: serviceName,
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne,
         ]
