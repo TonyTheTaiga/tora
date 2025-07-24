@@ -215,6 +215,7 @@ class AuthService: ObservableObject {
             let errorMessage =
                 SecCopyErrorMessageString(status, nil) as String? ?? "Unknown error"
             print("updating keychain failed: \(errorMessage) (\(status))")
+            throw KeychainError.unhandledError(status: status)
         }
     }
 
