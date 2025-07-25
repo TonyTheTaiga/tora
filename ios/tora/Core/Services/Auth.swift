@@ -217,7 +217,8 @@ class AuthService: ObservableObject {
         let status = SecItemDelete(query as CFDictionary)
         if status != errSecSuccess {
             let errorMessage =
-                SecCopyErrorMessageString(status, nil) as String? ?? "Unknown error"
+                SecCopyErrorMessageString(status, nil) as String?
+                ?? "Unknown error"
             print("updating keychain failed: \(errorMessage) (\(status))")
             throw KeychainError.unhandledError(status: status)
         }
@@ -232,7 +233,8 @@ class AuthService: ObservableObject {
         let status = SecItemCopyMatching(query as CFDictionary, &result)
         if status != errSecSuccess {
             let errorMessage =
-                SecCopyErrorMessageString(status, nil) as String? ?? "Unknown error"
+                SecCopyErrorMessageString(status, nil) as String?
+                ?? "Unknown error"
             print("updating keychain failed: \(errorMessage) (\(status))")
             throw KeychainError.unhandledError(status: status)
         }

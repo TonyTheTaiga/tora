@@ -205,7 +205,8 @@ class WorkspaceService: ObservableObject {
             }
 
             guard (200...299).contains(httpResponse.statusCode) else {
-                let errorMessage = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
+                let errorMessage = HTTPURLResponse.localizedString(
+                    forStatusCode: httpResponse.statusCode)
                 throw WorkspaceErrors.requestError(httpResponse.statusCode, errorMessage)
             }
 
@@ -247,7 +248,8 @@ class WorkspaceService: ObservableObject {
             }
 
             guard (200...299).contains(httpResponse.statusCode) else {
-                let errorMessage = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
+                let errorMessage = HTTPURLResponse.localizedString(
+                    forStatusCode: httpResponse.statusCode)
                 throw WorkspaceErrors.requestError(httpResponse.statusCode, errorMessage)
             }
 
@@ -309,7 +311,8 @@ class ExperimentService: ObservableObject {
             }
 
             guard (200...299).contains(httpResponse.statusCode) else {
-                let errorMessage = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
+                let errorMessage = HTTPURLResponse.localizedString(
+                    forStatusCode: httpResponse.statusCode)
                 throw WorkspaceErrors.requestError(httpResponse.statusCode, errorMessage)
             }
 
@@ -351,7 +354,8 @@ class ExperimentService: ObservableObject {
             }
 
             guard (200...299).contains(httpResponse.statusCode) else {
-                let errorMessage = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
+                let errorMessage = HTTPURLResponse.localizedString(
+                    forStatusCode: httpResponse.statusCode)
                 throw WorkspaceErrors.requestError(httpResponse.statusCode, errorMessage)
             }
 
