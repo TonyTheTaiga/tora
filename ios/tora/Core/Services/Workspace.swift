@@ -190,12 +190,20 @@ class WorkspaceService: ObservableObject {
 
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            request.setValue(
+                "application/json",
+                forHTTPHeaderField: "Content-Type"
+            )
+            request.setValue(
+                "Bearer \(token)",
+                forHTTPHeaderField: "Authorization"
+            )
 
             let (data, response): (Data, URLResponse)
             do {
-                (data, response) = try await URLSession.shared.data(for: request)
+                (data, response) = try await URLSession.shared.data(
+                    for: request
+                )
             } catch {
                 throw WorkspaceErrors.networkError(error)
             }
@@ -206,14 +214,21 @@ class WorkspaceService: ObservableObject {
 
             guard (200...299).contains(httpResponse.statusCode) else {
                 let errorMessage = HTTPURLResponse.localizedString(
-                    forStatusCode: httpResponse.statusCode)
-                throw WorkspaceErrors.requestError(httpResponse.statusCode, errorMessage)
+                    forStatusCode: httpResponse.statusCode
+                )
+                throw WorkspaceErrors.requestError(
+                    httpResponse.statusCode,
+                    errorMessage
+                )
             }
 
             do {
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601
-                let apiResponse = try decoder.decode(ApiResponse<[Workspace]>.self, from: data)
+                let apiResponse = try decoder.decode(
+                    ApiResponse<[Workspace]>.self,
+                    from: data
+                )
                 self.workspaces = apiResponse.data ?? []
             } catch {
                 throw WorkspaceErrors.jsonParsingError(error)
@@ -221,9 +236,15 @@ class WorkspaceService: ObservableObject {
         }
     }
 
-    public func listExperiments(for workspaceId: String) async throws -> [Experiment] {
+    public func listExperiments(for workspaceId: String) async throws
+        -> [Experiment]
+    {
         try await measure(OSLog.workspace, name: "listExperiments") {
-            guard let url = URL(string: "\(baseUrl)/workspaces/\(workspaceId)/experiments") else {
+            guard
+                let url = URL(
+                    string: "\(baseUrl)/workspaces/\(workspaceId)/experiments"
+                )
+            else {
                 throw WorkspaceErrors.invalidURL
             }
 
@@ -233,12 +254,20 @@ class WorkspaceService: ObservableObject {
 
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            request.setValue(
+                "application/json",
+                forHTTPHeaderField: "Content-Type"
+            )
+            request.setValue(
+                "Bearer \(token)",
+                forHTTPHeaderField: "Authorization"
+            )
 
             let (data, response): (Data, URLResponse)
             do {
-                (data, response) = try await URLSession.shared.data(for: request)
+                (data, response) = try await URLSession.shared.data(
+                    for: request
+                )
             } catch {
                 throw WorkspaceErrors.networkError(error)
             }
@@ -249,14 +278,21 @@ class WorkspaceService: ObservableObject {
 
             guard (200...299).contains(httpResponse.statusCode) else {
                 let errorMessage = HTTPURLResponse.localizedString(
-                    forStatusCode: httpResponse.statusCode)
-                throw WorkspaceErrors.requestError(httpResponse.statusCode, errorMessage)
+                    forStatusCode: httpResponse.statusCode
+                )
+                throw WorkspaceErrors.requestError(
+                    httpResponse.statusCode,
+                    errorMessage
+                )
             }
 
             do {
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601
-                let apiResponse = try decoder.decode(ApiResponse<[Experiment]>.self, from: data)
+                let apiResponse = try decoder.decode(
+                    ApiResponse<[Experiment]>.self,
+                    from: data
+                )
                 return apiResponse.data ?? []
             } catch {
                 throw WorkspaceErrors.jsonParsingError(error)
@@ -274,7 +310,9 @@ class ExperimentService: ObservableObject {
     @Published var experiments: [Experiment] = []
     private var baseUrl = Config.baseURL + "/api"
     private let authService: AuthService
-    static let shared: ExperimentService = .init(authService: AuthService.shared)
+    static let shared: ExperimentService = .init(
+        authService: AuthService.shared
+    )
 
     // MARK: - Constructor
 
@@ -296,12 +334,20 @@ class ExperimentService: ObservableObject {
 
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            request.setValue(
+                "application/json",
+                forHTTPHeaderField: "Content-Type"
+            )
+            request.setValue(
+                "Bearer \(token)",
+                forHTTPHeaderField: "Authorization"
+            )
 
             let (data, response): (Data, URLResponse)
             do {
-                (data, response) = try await URLSession.shared.data(for: request)
+                (data, response) = try await URLSession.shared.data(
+                    for: request
+                )
             } catch {
                 throw WorkspaceErrors.networkError(error)
             }
@@ -312,14 +358,21 @@ class ExperimentService: ObservableObject {
 
             guard (200...299).contains(httpResponse.statusCode) else {
                 let errorMessage = HTTPURLResponse.localizedString(
-                    forStatusCode: httpResponse.statusCode)
-                throw WorkspaceErrors.requestError(httpResponse.statusCode, errorMessage)
+                    forStatusCode: httpResponse.statusCode
+                )
+                throw WorkspaceErrors.requestError(
+                    httpResponse.statusCode,
+                    errorMessage
+                )
             }
 
             do {
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601
-                let apiResponse = try decoder.decode(ApiResponse<[Experiment]>.self, from: data)
+                let apiResponse = try decoder.decode(
+                    ApiResponse<[Experiment]>.self,
+                    from: data
+                )
                 self.experiments = apiResponse.data ?? []
             } catch {
                 throw WorkspaceErrors.jsonParsingError(error)
@@ -329,7 +382,9 @@ class ExperimentService: ObservableObject {
 
     public func get(experimentId: String) async throws -> Experiment {
         try await measure(OSLog.workspace, name: "getExperiment") {
-            guard let url = URL(string: "\(baseUrl)/experiments/\(experimentId)") else {
+            guard
+                let url = URL(string: "\(baseUrl)/experiments/\(experimentId)")
+            else {
                 throw WorkspaceErrors.invalidURL
             }
 
@@ -339,12 +394,20 @@ class ExperimentService: ObservableObject {
 
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            request.setValue(
+                "application/json",
+                forHTTPHeaderField: "Content-Type"
+            )
+            request.setValue(
+                "Bearer \(token)",
+                forHTTPHeaderField: "Authorization"
+            )
 
             let (data, response): (Data, URLResponse)
             do {
-                (data, response) = try await URLSession.shared.data(for: request)
+                (data, response) = try await URLSession.shared.data(
+                    for: request
+                )
             } catch {
                 throw WorkspaceErrors.networkError(error)
             }
@@ -355,16 +418,25 @@ class ExperimentService: ObservableObject {
 
             guard (200...299).contains(httpResponse.statusCode) else {
                 let errorMessage = HTTPURLResponse.localizedString(
-                    forStatusCode: httpResponse.statusCode)
-                throw WorkspaceErrors.requestError(httpResponse.statusCode, errorMessage)
+                    forStatusCode: httpResponse.statusCode
+                )
+                throw WorkspaceErrors.requestError(
+                    httpResponse.statusCode,
+                    errorMessage
+                )
             }
 
             do {
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601
-                let apiResponse = try decoder.decode(ApiResponse<Experiment>.self, from: data)
+                let apiResponse = try decoder.decode(
+                    ApiResponse<Experiment>.self,
+                    from: data
+                )
                 guard let experiment = apiResponse.data else {
-                    throw WorkspaceErrors.dataError("No experiment data received")
+                    throw WorkspaceErrors.dataError(
+                        "No experiment data received"
+                    )
                 }
                 return experiment
             } catch {
