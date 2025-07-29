@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Experiment, Workspace } from "$lib/types";
+  import { onMount } from "svelte";
 
   let workspaces = $state<Workspace[]>([]);
   let loading = $state({
@@ -108,24 +109,6 @@
     }
   }
 
-  $effect(() => {
-    loadWorkspaces();
-  });
-
-  $effect(() => {
-    if (selectedWorkspace) {
-      loadExperiments(selectedWorkspace.id);
-      selectedExperiment = null;
-      scalarMetrics = [];
-    }
-  });
-
-  $effect(() => {
-    if (selectedExperiment) {
-      loadExperimentDetails(selectedExperiment.id);
-    }
-  });
-
   function onWorkspaceSelect(workspace: Workspace) {
     selectedWorkspace = workspace;
   }
@@ -143,6 +126,24 @@
         date.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
     });
   }
+
+  onMount(() => {
+    loadWorkspaces();
+  });
+
+  $effect(() => {
+    if (selectedWorkspace) {
+      loadExperiments(selectedWorkspace.id);
+      selectedExperiment = null;
+      scalarMetrics = [];
+    }
+  });
+
+  $effect(() => {
+    if (selectedExperiment) {
+      loadExperimentDetails(selectedExperiment.id);
+    }
+  });
 </script>
 
 <div class="bg-ctp-base text-ctp-text flex font-mono">
