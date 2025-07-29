@@ -149,11 +149,7 @@
 </script>
 
 <div class="bg-ctp-base text-ctp-text flex font-mono">
-  <!-- =================================================================== -->
-  <!-- Workspaces Panel (Column 1) - 25%                                   -->
-  <!-- =================================================================== -->
   <div class="w-1/4 border-r border-ctp-surface0/30 flex flex-col">
-    <!-- Header -->
     <div class="terminal-chrome-header">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-ctp-text font-medium text-base font-mono">
@@ -177,7 +173,6 @@
       </div>
     </div>
 
-    <!-- Scrollable Content -->
     <div class="flex-1 overflow-y-auto min-h-0">
       {#if loading.workspaces}
         <div class="text-center py-8 text-ctp-subtext0 text-sm font-mono">
@@ -242,11 +237,7 @@
     </div>
   </div>
 
-  <!-- =================================================================== -->
-  <!-- Experiments Panel (Column 2) - 25%                                  -->
-  <!-- =================================================================== -->
   <div class="w-1/4 border-r border-ctp-surface0/30 flex flex-col">
-    <!-- Header -->
     <div class="terminal-chrome-header">
       {#if selectedWorkspace}
         <div class="flex items-center justify-between mb-3">
@@ -276,7 +267,6 @@
       {/if}
     </div>
 
-    <!-- Scrollable Content -->
     <div class="flex-1 overflow-y-auto min-h-0">
       {#if selectedWorkspace}
         {#if loading.experiments}
@@ -352,11 +342,7 @@
     </div>
   </div>
 
-  <!-- =================================================================== -->
-  <!-- Details Panel (Column 3) - 50%                                      -->
-  <!-- =================================================================== -->
   <div class="w-1/2 flex flex-col">
-    <!-- Header -->
     <div class="terminal-chrome-header">
       {#if selectedExperiment}
         <div class="mb-3">
@@ -384,7 +370,6 @@
       {/if}
     </div>
 
-    <!-- Scrollable Content -->
     <div class="flex-1 overflow-y-auto p-4 min-h-0">
       {#if selectedExperiment}
         {#if loading.experimentDetails}
@@ -410,7 +395,6 @@
           </div>
         {:else}
           <div class="space-y-6 font-mono">
-            <!-- Metrics Section -->
             {#if scalarMetrics.length > 0}
               <div class="space-y-2">
                 <div class="flex items-center gap-2">
@@ -448,7 +432,6 @@
               </div>
             {/if}
 
-            <!-- Tags Section -->
             {#if selectedExperiment.tags?.length}
               <div class="space-y-2">
                 <div class="flex items-center gap-2">
@@ -468,7 +451,6 @@
               </div>
             {/if}
 
-            <!-- Hyperparameters Section -->
             {#if selectedExperiment.hyperparams?.length}
               <div class="space-y-2">
                 <div class="flex items-center gap-2">
