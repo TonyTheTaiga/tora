@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Experiment, Workspace } from "$lib/types";
   import { onMount } from "svelte";
+  import InteractiveChart from "../experiments/[experimentId]/interactive-chart.svelte";
 
   let workspaces = $state<Workspace[]>([]);
   let loading = $state({
@@ -14,13 +15,30 @@
     experimentDetails: null as string | null,
   });
 
+  interface ExperimentWithMetricData extends Experiment {
+    metricData?: Record<string, number[]>;
+  }
+
   let selectedWorkspace = $state<Workspace | null>(null);
   let selectedExperiment = $state<Experiment | null>(null);
   let experiments = $state<Experiment[]>([]);
   let scalarMetrics = $state<any[]>([]);
+  let timeSeriesMetrics = $state<string[]>([]);
+  let selectedMetrics = $state<string[]>([]);
+  let experimentMetricData = $state<Record<string, number[]>>({});
 
   let workspaceSearchQuery = $state("");
   let experimentSearchQuery = $state("");
+
+  // Create experiment with metric data for the chart
+  const experimentForChart = $derived.by(() => {
+    if (!selectedExperiment) return null;
+    return {
+      ...selectedExperiment,
+      metricData: experimentMetricData,
+      availableMetrics: timeSeriesMetrics,
+    } as ExperimentWithMetricData;
+  });
 
   async function loadWorkspaces() {
     try {
@@ -97,7 +115,35 @@
       if (!metrics || !Array.isArray(metrics))
         throw new Error("Invalid response structure from metrics API");
 
-      scalarMetrics = metrics;
+      // Process metrics data similar to experiment page
+      const metricsByName = new Map<string, any[]>();
+      metrics.forEach((metric: any) => {
+        if (!metricsByName.has(metric.name)) {
+          metricsByName.set(metric.name, []);
+        }
+        metricsByName.get(metric.name)!.push(metric);
+      });
+
+      const scalarMetricsList: any[] = [];
+      const timeSeriesNames: string[] = [];
+      const metricData: Record<string, number[]> = {};
+
+      metricsByName.forEach((metricList, name) => {
+        if (metricList.length === 1) {
+          scalarMetricsList.push(metricList[0]);
+        } else {
+          timeSeriesNames.push(name);
+        }
+
+        // Create metric data for chart
+        metricData[name] = metricList
+          .sort((a, b) => (a.step || 0) - (b.step || 0))
+          .map((m) => m.value);
+      });
+
+      scalarMetrics = scalarMetricsList;
+      timeSeriesMetrics = timeSeriesNames;
+      experimentMetricData = metricData;
     } catch (error) {
       console.error("Failed to load experiment details:", error);
       errors.experimentDetails =
@@ -136,12 +182,28 @@
       loadExperiments(selectedWorkspace.id);
       selectedExperiment = null;
       scalarMetrics = [];
+      timeSeriesMetrics = [];
+      selectedMetrics = [];
+      experimentMetricData = {};
     }
   });
 
   $effect(() => {
     if (selectedExperiment) {
-      loadExperimentDetails(selectedExperiment.id);
+      let cancelled = false;
+      const experimentId = selectedExperiment.id;
+
+      const loadDetails = async () => {
+        if (cancelled) return;
+        await loadExperimentDetails(experimentId);
+      };
+
+      selectedMetrics = []; // Reset selected metrics when changing experiments
+      loadDetails();
+
+      return () => {
+        cancelled = true;
+      };
     }
   });
 </script>
@@ -393,10 +455,29 @@
           </div>
         {:else}
           <div class="space-y-6 font-mono">
+            {#if timeSeriesMetrics.length > 0 && experimentForChart}
+              <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                  <div class="text-sm text-ctp-text">interactive chart</div>
+                  <div class="text-sm text-ctp-subtext0 font-mono">
+                    [{timeSeriesMetrics.length} time series]
+                  </div>
+                </div>
+                <div
+                  class="bg-ctp-surface0/10 border border-ctp-surface0/20 p-2 md:p-4"
+                >
+                  <InteractiveChart
+                    experiment={experimentForChart}
+                    bind:selectedMetrics
+                  />
+                </div>
+              </div>
+            {/if}
+
             {#if scalarMetrics.length > 0}
               <div class="space-y-2">
                 <div class="flex items-center gap-2">
-                  <div class="text-sm text-ctp-text">metrics</div>
+                  <div class="text-sm text-ctp-text">scalar metrics</div>
                   <div class="text-sm text-ctp-subtext0 font-mono">
                     [{scalarMetrics.length}]
                   </div>
