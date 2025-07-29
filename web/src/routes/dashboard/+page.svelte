@@ -206,7 +206,9 @@
   });
 </script>
 
-<div class="bg-ctp-base text-ctp-text flex font-mono">
+<div
+  class="bg-ctp-base text-ctp-text flex font-mono border-b border-ctp-surface0/30"
+>
   <div class="w-1/4 border-r border-ctp-surface0/30 flex flex-col">
     <div class="terminal-chrome-header">
       <div class="flex items-center justify-between mb-3">
