@@ -2,6 +2,7 @@
   import type { Experiment, Workspace } from "$lib/types";
   import { onMount } from "svelte";
   import InteractiveChart from "../experiments/[experimentId]/interactive-chart.svelte";
+  import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
 
   let workspaces = $state<Workspace[]>([]);
   let loading = $state({
@@ -270,9 +271,9 @@
                 <div class="flex items-center justify-between mb-2">
                   <span class="font-medium text-ctp-text">{workspace.name}</span
                   >
-                  <span class="text-xs text-ctp-subtext0">
-                    {workspace.role?.toLowerCase()}
-                  </span>
+                  {#if workspace.role}
+                    <WorkspaceRoleBadge role={workspace.role} />
+                  {/if}
                 </div>
                 {#if workspace.description}
                   <div class="text-xs text-ctp-subtext0 line-clamp-2 mb-2">

@@ -279,7 +279,6 @@
     transform: translateY(-1px);
   }
 
-  /* Elevated surfaces */
   .surface-elevated {
     background: color-mix(
       in srgb,
@@ -290,7 +289,6 @@
       color-mix(in srgb, var(--color-ctp-surface0) 28%, transparent);
   }
 
-  /* Glass-like surfaces */
   .surface-glass {
     background: color-mix(in srgb, var(--color-ctp-surface0) 12%, transparent);
     backdrop-filter: blur(16px);
@@ -305,7 +303,6 @@
       color-mix(in srgb, var(--color-ctp-surface0) 35%, transparent);
   }
 
-  /* Accent surfaces */
   .surface-accent-blue {
     background: color-mix(
       in srgb,
@@ -364,7 +361,6 @@
       color-mix(in srgb, var(--color-ctp-mauve) 20%, transparent);
   }
 
-  /* Depth indicators */
   .depth-inset {
     background: color-mix(
       in srgb,
@@ -385,7 +381,6 @@
       color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
   }
 
-  /* Terminal-style borders and dividers */
   .terminal-border {
     border: 1px solid
       color-mix(in srgb, var(--color-ctp-surface0) 30%, transparent);
@@ -401,7 +396,6 @@
       color-mix(in srgb, var(--color-ctp-surface0) 20%, transparent);
   }
 
-  /* Enhanced section dividers */
   .section-divider {
     position: relative;
     border-top: 1px solid
@@ -428,7 +422,6 @@
     transform: translateX(-50%);
   }
 
-  /* Layered content containers */
   .content-layer {
     background: color-mix(
       in srgb,
@@ -440,7 +433,6 @@
     position: relative;
   }
 
-  /* Layered spacing utilities */
   .layer-spacing-sm {
     padding: 0.5rem;
     margin: 0.5rem 0;
@@ -474,7 +466,6 @@
     }
   }
 
-  /* Stacked content effect */
   .stack-layer {
     background: color-mix(
       in srgb,
@@ -499,7 +490,6 @@
     z-index: -1;
   }
 
-  /* Floating action elements */
   .floating-element {
     background: color-mix(
       in srgb,
@@ -528,7 +518,6 @@
     transform: translateY(-2px);
   }
 
-  /* Terminal window chrome */
   .terminal-chrome {
     background: color-mix(
       in srgb,
@@ -551,7 +540,6 @@
     padding: 0.75rem 1rem;
   }
 
-  /* Subtle animations for layering */
   .layer-fade-in {
     animation: layerFadeIn 0.5s ease-out;
   }
