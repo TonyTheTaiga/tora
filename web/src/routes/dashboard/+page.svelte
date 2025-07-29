@@ -41,9 +41,6 @@
         role: ws.role,
         experimentCount: ws.experiment_count,
       }));
-      if (workspaces.length > 0 && !selectedWorkspace) {
-        selectedWorkspace = workspaces[0];
-      }
     } catch (error) {
       console.error("Failed to load workspaces:", error);
       errors.workspaces =
