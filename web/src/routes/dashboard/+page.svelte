@@ -30,7 +30,6 @@
   let workspaceSearchQuery = $state("");
   let experimentSearchQuery = $state("");
 
-  // Create experiment with metric data for the chart
   const experimentForChart = $derived.by(() => {
     if (!selectedExperiment) return null;
     return {
@@ -115,7 +114,6 @@
       if (!metrics || !Array.isArray(metrics))
         throw new Error("Invalid response structure from metrics API");
 
-      // Process metrics data similar to experiment page
       const metricsByName = new Map<string, any[]>();
       metrics.forEach((metric: any) => {
         if (!metricsByName.has(metric.name)) {
@@ -135,7 +133,6 @@
           timeSeriesNames.push(name);
         }
 
-        // Create metric data for chart
         metricData[name] = metricList
           .sort((a, b) => (a.step || 0) - (b.step || 0))
           .map((m) => m.value);
@@ -198,7 +195,7 @@
         await loadExperimentDetails(experimentId);
       };
 
-      selectedMetrics = []; // Reset selected metrics when changing experiments
+      selectedMetrics = [];
       loadDetails();
 
       return () => {
@@ -208,7 +205,7 @@
   });
 </script>
 
-<div class="bg-ctp-base text-ctp-text flex font-mono">
+<div class="bg-ctp-base text-ctp-text flex font-mono border-b">
   <div class="w-1/4 border-r border-ctp-surface0/30 flex flex-col">
     <div class="terminal-chrome-header">
       <div class="flex items-center justify-between mb-3">
@@ -457,12 +454,6 @@
           <div class="space-y-6 font-mono">
             {#if timeSeriesMetrics.length > 0 && experimentForChart}
               <div class="space-y-2">
-                <div class="flex items-center gap-2">
-                  <div class="text-sm text-ctp-text">interactive chart</div>
-                  <div class="text-sm text-ctp-subtext0 font-mono">
-                    [{timeSeriesMetrics.length} time series]
-                  </div>
-                </div>
                 <div
                   class="bg-ctp-surface0/10 border border-ctp-surface0/20 p-2 md:p-4"
                 >
@@ -562,12 +553,6 @@
             {/if}
           </div>
         {/if}
-      {:else}
-        <div class="flex items-center justify-center h-full">
-          <div class="text-center text-ctp-subtext0 text-sm font-mono">
-            select an experiment to view details
-          </div>
-        </div>
       {/if}
     </div>
   </div>
