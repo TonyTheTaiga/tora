@@ -271,9 +271,7 @@
                 <div class="flex items-center justify-between mb-2">
                   <span class="font-medium text-ctp-text">{workspace.name}</span
                   >
-                  {#if workspace.role}
-                    <WorkspaceRoleBadge role={workspace.role} />
-                  {/if}
+                  <WorkspaceRoleBadge role={workspace.role} />
                 </div>
                 {#if workspace.description}
                   <div class="text-xs text-ctp-subtext0 line-clamp-2 mb-2">
