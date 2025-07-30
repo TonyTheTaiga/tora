@@ -221,7 +221,6 @@
       <div
         class="flex items-center bg-ctp-surface0/20 focus-within:ring-1 focus-within:ring-ctp-text/20 transition-all"
       >
-        <span class="text-ctp-subtext0 text-sm px-3 py-2">/</span>
         <input
           type="search"
           bind:value={workspaceSearchQuery}
@@ -270,11 +269,12 @@
               onclick={() => onWorkspaceSelect(workspace)}
             >
               <div class="p-3">
-                <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center justify-between mb-2 gap-2">
                   <span class="font-medium text-ctp-text">{workspace.name}</span
                   >
                   <WorkspaceRoleBadge role={workspace.role} />
                 </div>
+
                 {#if workspace.description}
                   <div class="text-xs text-ctp-subtext0 line-clamp-2 mb-2">
                     {workspace.description}
@@ -301,10 +301,30 @@
             >[{experiments.length}]</span
           >
         </div>
+        <div class="mb-3">
+          <span
+            class="text-xs text-ctp-overlay0 hover:text-ctp-blue cursor-pointer"
+            role="button"
+            tabindex="0"
+            onclick={(e) => {
+              e.stopPropagation();
+              selectedWorkspace && copyToClipboard(selectedWorkspace.id);
+            }}
+            onkeydown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                selectedWorkspace && copyToClipboard(selectedWorkspace.id);
+              }
+            }}
+            title="click to copy workspace id"
+          >
+            workspace id: {selectedWorkspace.id}
+          </span>
+        </div>
         <div
           class="flex items-center bg-ctp-surface0/20 focus-within:ring-1 focus-within:ring-ctp-text/20"
         >
-          <span class="text-ctp-subtext0 text-sm px-3 py-2">/</span>
           <input
             type="search"
             bind:value={experimentSearchQuery}
@@ -411,7 +431,7 @@
               selectedExperiment && copyToClipboard(selectedExperiment.id)}
             title="click to copy experiment id"
           >
-            id: {selectedExperiment.id}
+            experiment id: {selectedExperiment.id}
           </button>
         </div>
       {:else}

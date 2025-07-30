@@ -29,9 +29,8 @@
           submitting = true;
           return async ({ update, result }) => {
             submitting = false;
-            if (result.type === "redirect") {
-              goto(result.location);
-            }
+            await update();
+            goto("/dashboard");
           };
         }}
       >
@@ -117,9 +116,6 @@
         <button
           type="button"
           class="inline-flex items-center justify-center px-5 py-2.5 bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors font-mono"
-          onclick={() => {
-            goto("/signup");
-          }}
         >
           sign up
         </button>
