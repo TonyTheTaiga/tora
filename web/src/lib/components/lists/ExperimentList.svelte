@@ -19,6 +19,7 @@
     experiments: Experiment[];
     searchQuery?: string;
     formatDate?: (date: Date) => string;
+    onItemClick?: (experiment: Experiment) => void;
   }
 
   let {
@@ -33,6 +34,13 @@
             ? "numeric"
             : undefined,
       }),
+    onItemClick = (experiment: Experiment) => {
+      if (getMode()) {
+        addExperiment(experiment.id);
+      } else {
+        goto(`/experiments/${experiment.id}`);
+      }
+    },
   }: Props = $props();
 
   let currentWorkspace = $derived(page.data.currentWorkspace);
@@ -55,14 +63,6 @@
       })
       .map((e) => e.exp),
   );
-
-  function handleExperimentClick(experiment: Experiment) {
-    if (getMode()) {
-      addExperiment(experiment.id);
-    } else {
-      goto(`/experiments/${experiment.id}`);
-    }
-  }
 
   let selectedExperimentIds = $derived(
     filteredExperiments
@@ -98,7 +98,7 @@
   <ListCard
     items={filteredExperiments}
     getItemClass={getTimelineItemClass}
-    onItemClick={handleExperimentClick}
+    {onItemClick}
   >
     {#snippet children(experiment)}
       <!-- Content - Mobile-first responsive layout -->

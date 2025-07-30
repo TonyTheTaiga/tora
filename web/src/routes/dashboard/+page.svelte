@@ -2,8 +2,8 @@
   import type { Experiment, Workspace } from "$lib/types";
   import { onMount } from "svelte";
   import InteractiveChart from "../experiments/[experimentId]/interactive-chart.svelte";
-  import WorkspaceRoleBadge from "$lib/components/workspace-role-badge.svelte";
-  import { Trash2, Users, LogOut, Edit } from "@lucide/svelte";
+  import WorkspaceList from "$lib/components/lists/WorkspaceList.svelte";
+  import ExperimentList from "$lib/components/lists/ExperimentList.svelte";
 
   let workspaces = $state<Workspace[]>([]);
   let loading = $state({
@@ -157,133 +157,13 @@
   function onWorkspaceSelect(workspace: Workspace) {
     selectedWorkspace = workspace;
   }
+
   function onExperimentSelect(experiment: Experiment) {
     selectedExperiment = experiment;
   }
+
   function copyToClipboard(text: string) {
     navigator.clipboard.writeText(text);
-  }
-  function formatDate(date: Date): string {
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year:
-        date.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
-    });
-  }
-
-  // Workspace action functions
-  function canInviteToWorkspace(workspace: Workspace): boolean {
-    return ["OWNER", "ADMIN"].includes(workspace.role || "VIEWER");
-  }
-
-  function canDeleteWorkspace(workspace: Workspace): boolean {
-    return workspace.role === "OWNER";
-  }
-
-  function canLeaveWorkspace(workspace: Workspace): boolean {
-    return workspace.role !== "OWNER";
-  }
-
-  async function leaveWorkspace(workspaceId: string) {
-    if (!confirm("Are you sure you want to leave this workspace?")) return;
-
-    try {
-      const response = await fetch(`/api/workspaces/${workspaceId}/leave`, {
-        method: "POST",
-      });
-      if (!response.ok) throw new Error("Failed to leave workspace");
-
-      // Refresh workspaces list
-      await loadWorkspaces();
-      if (selectedWorkspace?.id === workspaceId) {
-        selectedWorkspace = null;
-      }
-    } catch (error) {
-      console.error("Failed to leave workspace:", error);
-      alert("Failed to leave workspace. Please try again.");
-    }
-  }
-
-  function openInviteModal(workspace: Workspace) {
-    // This would open an invite modal - for now just show an alert
-    alert(
-      `Invite functionality for workspace "${workspace.name}" would open here`,
-    );
-  }
-
-  function openDeleteWorkspaceModal(workspace: Workspace) {
-    // This would open a delete confirmation modal - for now just show a confirm
-    if (
-      confirm(
-        `Are you sure you want to delete workspace "${workspace.name}"? This action cannot be undone.`,
-      )
-    ) {
-      deleteWorkspace(workspace.id);
-    }
-  }
-
-  async function deleteWorkspace(workspaceId: string) {
-    try {
-      const response = await fetch(`/api/workspaces/${workspaceId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete workspace");
-
-      // Refresh workspaces list
-      await loadWorkspaces();
-      if (selectedWorkspace?.id === workspaceId) {
-        selectedWorkspace = null;
-      }
-    } catch (error) {
-      console.error("Failed to delete workspace:", error);
-      alert("Failed to delete workspace. Please try again.");
-    }
-  }
-
-  // Experiment action functions
-  function canDeleteExperiment(workspace: Workspace | null): boolean {
-    return workspace
-      ? ["OWNER", "ADMIN"].includes(workspace.role || "VIEWER")
-      : false;
-  }
-
-  function openEditExperimentModal(experiment: Experiment) {
-    // This would open an edit experiment modal - for now just show an alert
-    alert(
-      `Edit functionality for experiment "${experiment.name}" would open here`,
-    );
-  }
-
-  function openDeleteExperimentModal(experiment: Experiment) {
-    // This would open a delete confirmation modal - for now just show a confirm
-    if (
-      confirm(
-        `Are you sure you want to delete experiment "${experiment.name}"? This action cannot be undone.`,
-      )
-    ) {
-      deleteExperiment(experiment.id);
-    }
-  }
-
-  async function deleteExperiment(experimentId: string) {
-    if (!selectedWorkspace) return;
-
-    try {
-      const response = await fetch(`/api/experiments/${experimentId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete experiment");
-
-      // Refresh experiments list
-      await loadExperiments(selectedWorkspace.id);
-      if (selectedExperiment?.id === experimentId) {
-        selectedExperiment = null;
-      }
-    } catch (error) {
-      console.error("Failed to delete experiment:", error);
-      alert("Failed to delete experiment. Please try again.");
-    }
   }
 
   onMount(() => {
@@ -368,89 +248,11 @@
           no workspaces found
         </div>
       {:else}
-        <div class="space-y-0">
-          {#each workspaces.filter((w) => w.name
-              .toLowerCase()
-              .includes(workspaceSearchQuery.toLowerCase())) as workspace, index (workspace.id)}
-            <div
-              class="text-sm {selectedWorkspace?.id === workspace.id
-                ? 'bg-ctp-surface0/20 text-ctp-mauve border-l-2 border-l-ctp-mauve'
-                : 'hover:bg-ctp-surface0/10 border-l-2 border-l-transparent hover:border-l-ctp-blue/30'} {index %
-                2 ===
-              0
-                ? 'bg-ctp-surface0/5'
-                : ''}"
-            >
-              <button
-                class="w-full text-left"
-                onclick={() => onWorkspaceSelect(workspace)}
-              >
-                <div class="p-3">
-                  <div class="flex items-center justify-between mb-2 gap-2">
-                    <span class="font-medium text-ctp-text"
-                      >{workspace.name}</span
-                    >
-                    <WorkspaceRoleBadge role={workspace.role} />
-                  </div>
-
-                  {#if workspace.description}
-                    <div class="text-xs text-ctp-subtext0 line-clamp-2 mb-2">
-                      {workspace.description}
-                    </div>
-                  {/if}
-                  <div class="text-xs text-ctp-overlay0">
-                    {formatDate(workspace.createdAt)}
-                  </div>
-                </div>
-              </button>
-
-              <!-- Action buttons -->
-              <div class="border-t border-ctp-surface0/20 px-3 py-2">
-                <div class="flex items-center justify-end gap-2">
-                  {#if canInviteToWorkspace(workspace)}
-                    <button
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        openInviteModal(workspace);
-                      }}
-                      class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 hover:border-ctp-blue/30 p-1"
-                      title="invite users"
-                    >
-                      <Users class="w-3 h-3" />
-                      <span>Invite</span>
-                    </button>
-                  {/if}
-                  {#if canDeleteWorkspace(workspace)}
-                    <button
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        openDeleteWorkspaceModal(workspace);
-                      }}
-                      class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 hover:border-ctp-red/30 p-1"
-                      title="delete workspace"
-                    >
-                      <Trash2 class="w-3 h-3" />
-                      <span>Delete</span>
-                    </button>
-                  {/if}
-                  {#if canLeaveWorkspace(workspace)}
-                    <button
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        leaveWorkspace(workspace.id);
-                      }}
-                      class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 hover:border-ctp-red/30 p-1"
-                      title="leave workspace"
-                    >
-                      <LogOut class="w-3 h-3" />
-                      <span>Leave</span>
-                    </button>
-                  {/if}
-                </div>
-              </div>
-            </div>
-          {/each}
-        </div>
+        <WorkspaceList
+          {workspaces}
+          searchQuery={workspaceSearchQuery}
+          onItemClick={onWorkspaceSelect}
+        />
       {/if}
     </div>
   </div>
@@ -529,83 +331,11 @@
             no experiments found
           </div>
         {:else}
-          <div class="space-y-0">
-            {#each experiments.filter((e) => e.name
-                .toLowerCase()
-                .includes(experimentSearchQuery.toLowerCase())) as experiment, index (experiment.id)}
-              <div
-                class="text-sm {selectedExperiment?.id === experiment.id
-                  ? 'bg-ctp-surface0/20 text-ctp-mauve border-l-2 border-l-ctp-mauve'
-                  : 'hover:bg-ctp-surface0/10 border-l-2 border-l-transparent hover:border-l-ctp-blue/30'} {index %
-                  2 ===
-                0
-                  ? 'bg-ctp-surface0/5'
-                  : ''}"
-              >
-                <button
-                  class="w-full text-left"
-                  onclick={() => onExperimentSelect(experiment)}
-                >
-                  <div class="p-3">
-                    <div class="flex items-center justify-between mb-2">
-                      <span class="font-medium text-ctp-text"
-                        >{experiment.name}</span
-                      >
-                      <span class="text-xs text-ctp-lavender"
-                        >{formatDate(experiment.createdAt)}</span
-                      >
-                    </div>
-                    {#if experiment.description}
-                      <div class="text-xs text-ctp-subtext0 line-clamp-2 mb-2">
-                        {experiment.description}
-                      </div>
-                    {/if}
-                    <div
-                      class="flex items-center space-x-3 text-xs text-ctp-overlay0"
-                    >
-                      {#if experiment.tags?.length}<span
-                          >{experiment.tags.length} tags</span
-                        >{/if}
-                      {#if experiment.availableMetrics?.length}<span
-                          >{experiment.availableMetrics.length} metrics</span
-                        >{/if}
-                    </div>
-                  </div>
-                </button>
-
-                <!-- Action buttons -->
-                <div class="border-t border-ctp-surface0/20 px-3 py-2">
-                  <div class="flex items-center justify-end gap-2">
-                    <button
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        openEditExperimentModal(experiment);
-                      }}
-                      class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 hover:border-ctp-blue/30 p-1"
-                      title="edit experiment"
-                    >
-                      <Edit class="w-3 h-3" />
-                      <span>Edit</span>
-                    </button>
-
-                    {#if canDeleteExperiment(selectedWorkspace)}
-                      <button
-                        onclick={(e) => {
-                          e.stopPropagation();
-                          openDeleteExperimentModal(experiment);
-                        }}
-                        class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 hover:border-ctp-red/30 p-1"
-                        title="delete experiment"
-                      >
-                        <Trash2 class="w-3 h-3" />
-                        <span>Delete</span>
-                      </button>
-                    {/if}
-                  </div>
-                </div>
-              </div>
-            {/each}
-          </div>
+          <ExperimentList
+            {experiments}
+            searchQuery={experimentSearchQuery}
+            onItemClick={onExperimentSelect}
+          />
         {/if}
       {/if}
     </div>

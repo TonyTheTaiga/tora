@@ -13,9 +13,17 @@
     workspaces: Workspace[];
     searchQuery?: string;
     workspaceRoles?: Array<{ id: string; name: string }>;
+    onItemClick?: (workspace: Workspace) => void;
   }
 
-  let { workspaces, searchQuery = "", workspaceRoles = [] }: Props = $props();
+  let {
+    workspaces,
+    searchQuery = "",
+    workspaceRoles = [],
+    onItemClick = (workspace: Workspace) => {
+      window.location.href = `/workspaces/${workspace.id}`;
+    },
+  }: Props = $props();
 
   let filteredWorkspaces = $derived(
     workspaces.filter((workspace) => {
@@ -135,10 +143,6 @@
 
     return `${baseClass} ${surfaceClass}`.trim();
   }
-
-  function handleWorkspaceClick(workspace: Workspace) {
-    window.location.href = `/workspaces/${workspace.id}`;
-  }
 </script>
 
 {#if filteredWorkspaces.length === 0 && searchQuery}
@@ -147,7 +151,7 @@
   <ListCard
     items={filteredWorkspaces}
     getItemClass={getWorkspaceItemClass}
-    onItemClick={handleWorkspaceClick}
+    {onItemClick}
   >
     {#snippet children(workspace)}
       <!-- Content - Mobile-first responsive layout -->
