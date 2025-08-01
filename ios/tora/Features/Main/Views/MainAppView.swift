@@ -24,18 +24,14 @@ struct MainAppView: View {
                 systemImage: "folder",
                 value: .workspaces
             ) {
-                NavigationStack {
-                    WorkspacesView(onExperimentSelected: { experimentId in
-                        selectedExperimentId = experimentId
-                        selectedTab = .experiments
-                    })
-                }
+                WorkspacesView(onExperimentSelected: { experimentId in
+                    selectedExperimentId = experimentId
+                    selectedTab = .experiments
+                })
             }
 
             Tab("Experiments", systemImage: "receipt", value: .experiments) {
-                NavigationStack {
-                    ExperimentsView(experimentId: selectedExperimentId)
-                }
+                ExperimentsView(experimentId: selectedExperimentId)
             }
 
             Tab("Settings", systemImage: "gearshape.2", value: .settings) {
