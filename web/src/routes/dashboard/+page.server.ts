@@ -1,0 +1,112 @@
+import type { Actions } from "@sveltejs/kit";
+import type { ApiResponse, Workspace } from "$lib/types";
+import { fail, error } from "@sveltejs/kit";
+import { generateRequestId, startTimer } from "$lib/utils/timing";
+import type { PageServerLoad } from "./$types";
+
+export const load: PageServerLoad = async ({ locals, fetch }) => {
+  if (!locals.session) {
+    error(401, "Authentication required");
+  }
+
+  if (!locals.apiClient) {
+    error(500, "API client not available");
+  }
+
+  try {
+    const requestId = generateRequestId();
+    const timer = startTimer("dashboard.page.load", { requestId });
+
+    const response = await fetch("/api/workspaces");
+    const apiResponse: ApiResponse<Workspace[]> = await response.json();
+    const workspaces = apiResponse.data.map((workspace: any) => ({
+      id: workspace.id,
+      name: workspace.name,
+      description: workspace.description,
+      createdAt: new Date(workspace.createdAt),
+      role: workspace.role,
+    }));
+
+    timer.end({
+      workspaces_count: workspaces.length,
+      user_id: locals.session.user.id,
+    });
+
+    return { workspaces };
+  } catch (err) {
+    if (err instanceof Error && "status" in err) {
+      throw err;
+    }
+    throw error(500, "Failed to load workspaces");
+  }
+};
+
+export const actions: Actions = {
+  createWorkspace: async ({ request, locals }) => {
+    if (!locals.session) {
+      return fail(401, { error: "Authentication required" });
+    }
+
+    if (!locals.apiClient) {
+      return fail(500, { error: "API client not available" });
+    }
+
+    const requestId = generateRequestId();
+    const timer = startTimer("workspace.create", {
+      requestId,
+      userId: locals.session.user.id,
+    });
+
+    try {
+      const formData = await request.formData();
+      const name = formData.get("name") as string;
+      const description = formData.get("description") as string;
+
+      if (!name || name.trim().length === 0) {
+        timer.end({ error: "Invalid name" });
+        return fail(400, { error: "Workspace name is required" });
+      }
+
+      const response = await locals.apiClient.post<ApiResponse<Workspace>>(
+        "/api/workspaces",
+        {
+          name: name.trim(),
+          description: description?.trim() || null,
+        },
+      );
+
+      if (response.status !== 201) {
+        return fail(500, { error: "Failed to create workspace" });
+      }
+
+      const workspace = response.data;
+
+      timer.end({
+        workspaceId: workspace.id,
+        workspaceName: workspace.name,
+      });
+
+      return {
+        id: workspace.id,
+        name: workspace.name,
+        description: workspace.description,
+        createdAt: new Date(workspace.createdAt),
+        role: workspace.role,
+      };
+    } catch (err) {
+      timer.end({
+        error: err instanceof Error ? err.message : "Unknown error",
+      });
+
+      console.error("Error creating workspace:", err);
+
+      if (err instanceof Error && err.message.includes("401")) {
+        return fail(401, { error: "Authentication required" });
+      }
+
+      return fail(500, {
+        error: "Failed to create workspace. Please try again.",
+      });
+    }
+  },
+};
