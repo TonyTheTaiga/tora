@@ -16,7 +16,8 @@
   import WorkspaceList from "$lib/components/lists/WorkspaceList.svelte";
   import ExperimentList from "$lib/components/lists/ExperimentList.svelte";
 
-  let workspaces = $state<Workspace[]>([]);
+  let { data } = $props();
+  let workspaces = $derived(data.workspaces);
   let workspaceRoles = $state<WorkspaceRole[]>([]);
   let workspaceInvitations = $state<PendingInvitation[]>([]);
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
@@ -55,35 +56,6 @@
       availableMetrics: timeSeriesMetrics,
     } as ExperimentWithMetricData;
   });
-
-  async function loadWorkspaces() {
-    try {
-      loading.workspaces = true;
-      errors.workspaces = null;
-      const response = await fetch("/api/dashboard/overview");
-      if (!response.ok)
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      const apiResponse = await response.json();
-      const data = apiResponse.data;
-      if (!data || !data.workspaces)
-        throw new Error("Invalid response structure from dashboard API");
-
-      workspaces = data.workspaces.map((ws: any) => ({
-        id: ws.id,
-        name: ws.name,
-        description: ws.description,
-        createdAt: new Date(ws.created_at),
-        role: ws.role,
-        experimentCount: ws.experiment_count,
-      }));
-    } catch (error) {
-      console.error("Failed to load workspaces:", error);
-      errors.workspaces =
-        error instanceof Error ? error.message : "Failed to load workspaces";
-    } finally {
-      loading.workspaces = false;
-    }
-  }
 
   async function loadWorkspaceRoles() {
     try {
@@ -207,10 +179,9 @@
     navigator.clipboard.writeText(text);
   }
 
-  onMount(() => {
-    loadWorkspaceRoles();
-    loadPendingInvitations();
-    loadWorkspaces();
+  onMount(async () => {
+    await loadWorkspaceRoles();
+    await loadPendingInvitations();
   });
 
   $effect(() => {
@@ -292,24 +263,7 @@
     </div>
 
     <div class="flex-1 overflow-y-auto min-h-0">
-      {#if loading.workspaces}
-        <div class="text-center py-8 text-ctp-subtext0 text-sm">
-          loading workspaces...
-        </div>
-      {:else if errors.workspaces}
-        <div class="surface-layer-2 p-4 m-2">
-          <div class="text-ctp-red font-medium mb-2 text-sm">
-            error loading workspaces
-          </div>
-          <div class="text-ctp-subtext0 text-xs mb-3">
-            {errors.workspaces}
-          </div>
-          <button
-            class="text-ctp-blue hover:text-ctp-blue/80 text-xs"
-            onclick={() => loadWorkspaces()}>[retry]</button
-          >
-        </div>
-      {:else if workspaces.length === 0}
+      {#if workspaces.length === 0}
         <div class="text-center py-8 text-ctp-subtext0 text-sm">
           no workspaces found
         </div>
