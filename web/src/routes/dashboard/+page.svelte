@@ -6,6 +6,7 @@
   import ExperimentList from "$lib/components/lists/ExperimentList.svelte";
 
   let workspaces = $state<Workspace[]>([]);
+  let workspaceRoles = $state<Array<{ id: string; name: string }>>([]);
   let loading = $state({
     workspaces: true,
     experiments: false,
@@ -67,6 +68,21 @@
         error instanceof Error ? error.message : "Failed to load workspaces";
     } finally {
       loading.workspaces = false;
+    }
+  }
+
+  async function loadWorkspaceRoles() {
+    try {
+      const response = await fetch("/api/workspace-roles");
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      workspaceRoles = await response.json();
+      workspaceRoles = workspaceRoles.filter((item) => {
+        return item.name !== "OWNER";
+      });
+    } catch (error) {
+      console.error(`Failed to load workspace roles:`, error);
     }
   }
 
@@ -167,6 +183,7 @@
   }
 
   onMount(() => {
+    loadWorkspaceRoles();
     loadWorkspaces();
   });
 
@@ -252,6 +269,7 @@
           {workspaces}
           searchQuery={workspaceSearchQuery}
           onItemClick={onWorkspaceSelect}
+          {workspaceRoles}
         />
       {/if}
     </div>
