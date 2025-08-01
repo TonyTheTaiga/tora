@@ -27,7 +27,7 @@
         class="p-6 space-y-5"
         use:enhance={() => {
           submitting = true;
-          return async ({ update, result }) => {
+          return async ({ update }) => {
             submitting = false;
             await update();
             goto("/dashboard");

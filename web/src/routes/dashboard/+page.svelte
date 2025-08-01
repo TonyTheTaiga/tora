@@ -1,4 +1,9 @@
 <script lang="ts">
+  import {
+    openCreateWorkspaceModal,
+    getCreateWorkspaceModal,
+  } from "$lib/state/app.svelte";
+  import CreateWorkspaceModal from "$lib/components/modals/create-workspace-modal.svelte";
   import type {
     Experiment,
     Workspace,
@@ -14,6 +19,7 @@
   let workspaces = $state<Workspace[]>([]);
   let workspaceRoles = $state<WorkspaceRole[]>([]);
   let workspaceInvitations = $state<PendingInvitation[]>([]);
+  let createWorkspaceModal = $derived(getCreateWorkspaceModal());
 
   let loading = $state({
     workspaces: true,
@@ -238,6 +244,10 @@
   });
 </script>
 
+{#if createWorkspaceModal}
+  <CreateWorkspaceModal />
+{/if}
+
 <div
   class="bg-ctp-base text-ctp-text flex space-x-2 font-mono border-b border-ctp-surface0/30"
 >
@@ -245,11 +255,30 @@
     <div class="terminal-chrome-header">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-ctp-text font-medium text-base">workspaces</h2>
-        <span
-          class="bg-ctp-surface0/20 text-ctp-subtext0 px-2 py-1 text-xs border border-ctp-surface0/30"
-          >[{workspaces.length}]</span
+
+        <button
+          aria-label="create-workspace"
+          onclick={() => openCreateWorkspaceModal()}
+          class="floating-element text-ctp-text px-3 py-2 md:px-4 text-sm font-mono flex-shrink-0"
         >
+          <div class="flex items-center gap-2">
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              ></path>
+            </svg>
+          </div>
+        </button>
       </div>
+
       <div
         class="flex items-center bg-ctp-surface0/20 focus-within:ring-1 focus-within:ring-ctp-text/20 transition-all"
       >

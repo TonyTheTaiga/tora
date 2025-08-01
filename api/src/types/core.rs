@@ -21,6 +21,7 @@ pub struct Workspace {
     pub id: String,
     pub name: String,
     pub description: Option<String>,
+    #[serde(rename = "createdAt")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub role: String,
 }
