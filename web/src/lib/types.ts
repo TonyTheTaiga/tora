@@ -37,7 +37,10 @@ export interface ExperimentAnalysis {
   hyperparameter_recommendations: Record<string, HPRecommendation>;
 }
 
-export type WorkspaceRole = "VIEWER" | "EDITOR" | "ADMIN" | "OWNER";
+export interface WorkspaceRole {
+  id: string;
+  name: "VIEWER" | "EDITOR" | "ADMIN" | "OWNER";
+}
 
 export interface Workspace {
   id: string;
@@ -74,4 +77,9 @@ export interface SessionData {
     id: string;
     email: string;
   };
+}
+
+export interface ApiResponse<T> {
+  status: number;
+  data: T;
 }

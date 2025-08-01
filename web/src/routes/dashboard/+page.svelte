@@ -1,12 +1,20 @@
 <script lang="ts">
-  import type { Experiment, Workspace } from "$lib/types";
+  import type {
+    Experiment,
+    Workspace,
+    PendingInvitation,
+    ApiResponse,
+    WorkspaceRole,
+  } from "$lib/types";
   import { onMount } from "svelte";
   import InteractiveChart from "../experiments/[experimentId]/interactive-chart.svelte";
   import WorkspaceList from "$lib/components/lists/WorkspaceList.svelte";
   import ExperimentList from "$lib/components/lists/ExperimentList.svelte";
 
   let workspaces = $state<Workspace[]>([]);
-  let workspaceRoles = $state<Array<{ id: string; name: string }>>([]);
+  let workspaceRoles = $state<WorkspaceRole[]>([]);
+  let workspaceInvitations = $state<PendingInvitation[]>([]);
+
   let loading = $state({
     workspaces: true,
     experiments: false,
@@ -77,12 +85,23 @@
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      workspaceRoles = await response.json();
-      workspaceRoles = workspaceRoles.filter((item) => {
+      const apiReponse: ApiResponse<WorkspaceRole[]> = await response.json();
+      workspaceRoles = apiReponse.data.filter((item) => {
         return item.name !== "OWNER";
       });
     } catch (error) {
       console.error(`Failed to load workspace roles:`, error);
+    }
+  }
+
+  async function loadPendingInvitations() {
+    try {
+      const response = await fetch("/api/workspace-invitations");
+      const responseJson: ApiResponse<PendingInvitation[]> =
+        await response.json();
+      workspaceInvitations = responseJson.data;
+    } catch (error) {
+      console.error("Failed to load pending invitaitons");
     }
   }
 
@@ -184,6 +203,7 @@
 
   onMount(() => {
     loadWorkspaceRoles();
+    loadPendingInvitations();
     loadWorkspaces();
   });
 
@@ -219,7 +239,7 @@
 </script>
 
 <div
-  class="bg-ctp-base text-ctp-text flex font-mono border-b border-ctp-surface0/30"
+  class="bg-ctp-base text-ctp-text flex space-x-2 font-mono border-b border-ctp-surface0/30"
 >
   <div class="w-1/4 border-r border-ctp-surface0/30 flex flex-col">
     <div class="terminal-chrome-header">
@@ -275,7 +295,7 @@
     </div>
   </div>
 
-  <div class="w-1/4 border-r border-ctp-surface0/30 flex flex-col">
+  <div class="w-1/4 border-r border-l border-ctp-surface0/30 flex flex-col">
     <div class="terminal-chrome-header">
       {#if selectedWorkspace}
         <div class="flex items-center justify-between mb-3">
@@ -359,7 +379,7 @@
     </div>
   </div>
 
-  <div class="w-1/2 flex flex-col">
+  <div class="w-1/2 border-l border-ctp-surface0/30 flex flex-col">
     <div class="terminal-chrome-header">
       {#if selectedExperiment}
         <div class="mb-3">

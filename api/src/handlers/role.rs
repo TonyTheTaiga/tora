@@ -14,7 +14,11 @@ pub async fn list_workspace_roles(State(app_state): State<AppState>) -> impl Int
     .await;
 
     match result {
-        Ok(roles) => Json(Some(roles)).into_response(),
+        Ok(roles) => Json(Response {
+            status: 200,
+            data: Some(roles),
+        })
+        .into_response(),
         Err(e) => {
             eprintln!("Database error: {e}");
             (
