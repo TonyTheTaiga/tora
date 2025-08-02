@@ -109,4 +109,35 @@ export const actions: Actions = {
       });
     }
   },
+
+  deleteWorkspace: async ({ request, locals, fetch }) => {
+    if (!locals.session) {
+      return fail(401, { error: "Authentication required" });
+    }
+
+    if (!locals.apiClient) {
+      return fail(500, { error: "API client not available" });
+    }
+
+    const requestId = generateRequestId();
+    const timer = startTimer("workspace.create", {
+      requestId,
+      userId: locals.session.user.id,
+    });
+
+    try {
+      const data = await request.formData();
+      const workspaceId = data.get("workspaceId") as string;
+      const response = await fetch(`/api/workspaces/${workspaceId}`, {
+        method: "DELETE",
+      });
+      console.log(response);
+      return { success: true };
+    } catch (err) {
+      console.error("failed to delete workspace", err);
+      fail(500, { error: `failed to delete workspace ${err}` });
+    }
+
+    timer.end({});
+  },
 };
