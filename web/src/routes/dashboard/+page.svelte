@@ -220,13 +220,12 @@
 {/if}
 
 <div
-  class="bg-ctp-base text-ctp-text flex space-x-2 font-mono border-b border-ctp-surface0/30"
+  class="bg-ctp-base text-ctp-text flex space-x-2 font-mono border-ctp-surface0/30"
 >
-  <div class="w-1/4 border-r border-ctp-surface0/30 flex flex-col">
+  <div class="w-1/4 border-r border-b border-ctp-surface0/30 flex flex-col">
     <div class="terminal-chrome-header">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-ctp-text font-medium text-base">workspaces</h2>
-
         <button
           aria-label="create-workspace"
           onclick={() => openCreateWorkspaceModal()}
@@ -234,18 +233,20 @@
         >
           <div class="flex items-center gap-2">
             <svg
-              class="w-4 h-4"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-folder-plus-icon lucide-folder-plus"
+              ><path d="M12 10v6" /><path d="M9 13h6" /><path
+                d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
+              /></svg
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 4v16m8-8H4"
-              ></path>
-            </svg>
           </div>
         </button>
       </div>
@@ -278,7 +279,9 @@
     </div>
   </div>
 
-  <div class="w-1/4 border-r border-l border-ctp-surface0/30 flex flex-col">
+  <div
+    class="w-1/4 border-r border-l border-b border-ctp-surface0/30 flex flex-col"
+  >
     <div class="terminal-chrome-header">
       {#if selectedWorkspace}
         <div class="flex items-center justify-between mb-3">
@@ -362,7 +365,7 @@
     </div>
   </div>
 
-  <div class="w-1/2 border-l border-ctp-surface0/30 flex flex-col">
+  <div class="w-1/2 border-l border-b border-ctp-surface0/30 flex flex-col">
     <div class="terminal-chrome-header">
       {#if selectedExperiment}
         <div class="mb-3">

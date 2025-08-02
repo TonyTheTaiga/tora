@@ -113,7 +113,7 @@ fi
 
 # Export environment variables for the API
 # export RUST_LOG=api::handlers::metric=debug
-export RUST_LOG=debug
+export RUST_LOG=error
 export RUST_BACKTRACE=1
 export RUST_ENV=dev
 export PUBLIC_API_BASE_URL=http://localhost:8080
