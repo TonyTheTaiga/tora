@@ -54,40 +54,6 @@
     }
   }
 
-  async function loadExperiments(workspaceId: string) {
-    try {
-      loading.experiments = true;
-      errors.experiments = null;
-      const response = await fetch(
-        `/api/workspaces/${workspaceId}/experiments`,
-      );
-      if (!response.ok)
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      const apiResponse = await response.json();
-      const data = apiResponse.data;
-      if (!data || !Array.isArray(data))
-        throw new Error("Invalid response structure from experiments API");
-
-      experiments = data.map((exp: any) => ({
-        id: exp.id,
-        name: exp.name,
-        description: exp.description || "",
-        hyperparams: exp.hyperparams || [],
-        tags: exp.tags || [],
-        createdAt: new Date(exp.created_at),
-        updatedAt: new Date(exp.updated_at),
-        availableMetrics: exp.available_metrics || [],
-        workspaceId: workspaceId,
-      }));
-    } catch (error) {
-      console.error("Failed to load experiments:", error);
-      errors.experiments =
-        error instanceof Error ? error.message : "Failed to load experiments";
-    } finally {
-      loading.experiments = false;
-    }
-  }
-
   onMount(async () => {
     await loadWorkspaceRoles();
     await loadPendingInvitations();
@@ -96,7 +62,6 @@
   $effect(() => {
     if (selectedWorkspace) {
       setSelectedExperiment(null);
-      loadExperiments(selectedWorkspace.id);
     }
   });
 </script>
@@ -116,7 +81,7 @@
     class="w-1/4 border-r border-l border-b border-ctp-surface0/30 flex flex-col"
   >
     {#if selectedWorkspace}
-      <ExperimentListColumn {experiments} />
+      <ExperimentListColumn />
     {:else}
       <div class="text-ctp-subtext0 text-sm terminal-chrome-header">
         select a workspace to view experiments
@@ -126,7 +91,7 @@
 
   <div class="w-1/2 border-l border-b border-ctp-surface0/30 flex flex-col">
     {#if selectedExperiment}
-      <ExperimentDetails {selectedExperiment} />
+      <ExperimentDetails />
     {:else}
       <div class="text-ctp-subtext0 text-sm terminal-chrome-header">
         select a experiemnt to view details
