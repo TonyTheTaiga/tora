@@ -67,7 +67,7 @@ export const actions: Actions = {
         return fail(400, { error: "Workspace name is required" });
       }
 
-      const response = await locals.apiClient.post<ApiResponse<WorkspaceData>>(
+      const response = await locals.apiClient.post<ApiResponse<Workspace>>(
         "/api/workspaces",
         {
           name: name.trim(),
