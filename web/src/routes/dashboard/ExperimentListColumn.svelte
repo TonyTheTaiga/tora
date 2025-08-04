@@ -16,16 +16,6 @@
   let experiments: Experiment[] = $state([]);
   let experimentToEdit = $derived(getExperimentToEdit());
 
-  $effect(() => {
-    if (selectedWorkspace) {
-      loadExperiments(selectedWorkspace).then((results) => {
-        if (results) {
-          experiments = results;
-        }
-      });
-    }
-  });
-
   async function loadExperiments(
     workspace: Workspace,
   ): Promise<Experiment[] | undefined> {
@@ -61,6 +51,16 @@
       loading.experiments = false;
     }
   }
+
+  $effect(() => {
+    if (selectedWorkspace) {
+      loadExperiments(selectedWorkspace).then((results) => {
+        if (results) {
+          experiments = results;
+        }
+      });
+    }
+  });
 </script>
 
 {#if experimentToEdit}

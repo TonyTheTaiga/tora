@@ -10,10 +10,6 @@ interface ModalState {
 
 interface AppState {
   modals: ModalState;
-  ui: {
-    isLoading: boolean;
-    error: string | null;
-  };
 }
 
 const state = $state<AppState>({
@@ -23,10 +19,6 @@ const state = $state<AppState>({
     deleteExperiment: null,
     selectedExperiment: null,
     createWorkspace: false,
-  },
-  ui: {
-    isLoading: false,
-    error: null,
   },
 });
 
@@ -58,10 +50,6 @@ export function setSelectedExperiment(experiment: Experiment | null) {
   state.modals.selectedExperiment = experiment;
 }
 
-export function getModalState() {
-  return state.modals;
-}
-
 export function getCreateExperimentModal() {
   return state.modals.createExperiment;
 }
@@ -78,18 +66,6 @@ export function getSelectedExperiment() {
   return state.modals.selectedExperiment;
 }
 
-export function setLoading(loading: boolean) {
-  state.ui.isLoading = loading;
-}
-
-export function setError(error: string | null) {
-  state.ui.error = error;
-}
-
-export function getUIState() {
-  return state.ui;
-}
-
 export function openCreateWorkspaceModal() {
   state.modals.createWorkspace = true;
 }
@@ -100,12 +76,4 @@ export function closeCreateWorkspaceModal() {
 
 export function getCreateWorkspaceModal() {
   return state.modals.createWorkspace;
-}
-
-export function clearAllModals() {
-  state.modals.createExperiment = false;
-  state.modals.editExperiment = null;
-  state.modals.deleteExperiment = null;
-  state.modals.selectedExperiment = null;
-  state.modals.createWorkspace = false;
 }
