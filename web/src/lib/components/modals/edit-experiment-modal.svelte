@@ -52,7 +52,6 @@
       class="space-y-4"
       use:enhance={() => {
         return async ({ result, update }) => {
-          await update();
           if (result.type === "success" || result.type === "redirect") {
             console.log(
               `Experiment updated successfully ${experimentCopy.name} ${experimentCopy.description}`,
@@ -62,6 +61,8 @@
             experiment.tags = [...experiment.tags];
             resetExperimentToEdit();
           }
+
+          await update();
         };
       }}
     >
