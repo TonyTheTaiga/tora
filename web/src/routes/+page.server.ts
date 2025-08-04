@@ -102,4 +102,27 @@ export const actions: Actions = {
 
     timer.end({});
   },
+
+  sendInvitation: async ({ request, locals }) => {
+    const data = await request.formData();
+    const workspaceId = data.get("workspaceId") as string;
+    const email = data.get("email") as string;
+    const roleId = data.get("roleId") as string;
+
+    if (!locals.apiClient.hasElevatedPermissions()) {
+      return fail(401, { error: "Authentication required" });
+    }
+
+    try {
+      await locals.apiClient.post("/api/workspace-invitations", {
+        workspaceId,
+        email,
+        roleId,
+      });
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to send invitation:", error);
+      return fail(500, { error: "Failed to send invitation" });
+    }
+  },
 };

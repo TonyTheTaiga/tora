@@ -31,12 +31,10 @@
     {#snippet children()}
       <form
         method="POST"
-        action="?/sendInvitation"
+        action="/?/sendInvitation"
         class="space-y-4"
         use:enhance={({ formElement, formData, action, cancel, submitter }) => {
           return async ({ result, update }) => {
-            // `result` is an `ActionResult` object
-            // `update` is a function which triggers the default logic that would be triggered if this callback wasn't set
             await update();
             email = "";
             roleId = "";
