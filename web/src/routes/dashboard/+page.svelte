@@ -5,7 +5,6 @@
     getSelectedExperiment,
     setSelectedExperiment,
   } from "./state.svelte";
-  import CreateWorkspaceModal from "$lib/components/modals/create-workspace-modal.svelte";
   import type {
     PendingInvitation,
     ApiResponse,
@@ -20,7 +19,6 @@
   let workspaces = $derived(data.workspaces);
   let workspaceRoles = $state<WorkspaceRole[]>([]);
   let workspaceInvitations = $state<PendingInvitation[]>([]);
-  let createWorkspaceModal = $derived(getCreateWorkspaceModal());
   let selectedWorkspace = $derived(getSelectedWorkspace());
   let selectedExperiment = $derived(getSelectedExperiment());
 
@@ -46,7 +44,7 @@
         await response.json();
       workspaceInvitations = responseJson.data;
     } catch (error) {
-      console.error("Failed to load pending invitaitons");
+      console.error("Failed to load pending invitations:", error);
     }
   }
 
@@ -61,10 +59,6 @@
     }
   });
 </script>
-
-{#if createWorkspaceModal}
-  <CreateWorkspaceModal />
-{/if}
 
 <div
   class="bg-ctp-base text-ctp-text flex space-x-2 font-mono border-ctp-surface0/30"

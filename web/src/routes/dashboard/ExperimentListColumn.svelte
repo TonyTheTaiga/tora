@@ -68,25 +68,17 @@
     >
   </div>
   <div class="mb-3">
-    <span
+    <button
       class="text-xs text-ctp-overlay0 hover:text-ctp-blue cursor-pointer"
-      role="button"
       tabindex="0"
       onclick={(e) => {
         e.stopPropagation();
         selectedWorkspace && copyToClipboard(selectedWorkspace.id);
       }}
-      onkeydown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          e.stopPropagation();
-          selectedWorkspace && copyToClipboard(selectedWorkspace.id);
-        }
-      }}
       title="click to copy workspace id"
     >
       workspace id: {selectedWorkspace && selectedWorkspace.id}
-    </span>
+    </button>
   </div>
   <div
     class="flex items-center bg-ctp-surface0/20 focus-within:ring-1 focus-within:ring-ctp-text/20"

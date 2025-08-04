@@ -1,11 +1,20 @@
 <script lang="ts">
-  import { openCreateWorkspaceModal } from "$lib/state/app.svelte";
+  import {
+    openCreateWorkspaceModal,
+    getCreateWorkspaceModal,
+  } from "$lib/state/app.svelte";
   import { setSelectedWorkspace } from "./state.svelte";
   import WorkspaceList from "$lib/components/lists/WorkspaceList.svelte";
+  import CreateWorkspaceModal from "$lib/components/modals/create-workspace-modal.svelte";
 
   let { workspaces, workspaceRoles } = $props();
   let workspaceSearchQuery = $state("");
+  let createWorkspaceModal = $derived(getCreateWorkspaceModal());
 </script>
+
+{#if createWorkspaceModal}
+  <CreateWorkspaceModal />
+{/if}
 
 <div class="terminal-chrome-header">
   <div class="flex items-center justify-between mb-3">

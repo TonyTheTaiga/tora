@@ -16,7 +16,7 @@ interface AppState {
   };
 }
 
-let state = $state<AppState>({
+const state = $state<AppState>({
   modals: {
     createExperiment: false,
     editExperiment: null,
