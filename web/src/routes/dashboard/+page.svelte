@@ -4,12 +4,9 @@
     getSelectedWorkspace,
     getSelectedExperiment,
     setSelectedExperiment,
-    loading,
-    errors,
   } from "./state.svelte";
   import CreateWorkspaceModal from "$lib/components/modals/create-workspace-modal.svelte";
   import type {
-    Experiment,
     PendingInvitation,
     ApiResponse,
     WorkspaceRole,
@@ -26,7 +23,6 @@
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
   let selectedWorkspace = $derived(getSelectedWorkspace());
   let selectedExperiment = $derived(getSelectedExperiment());
-  let experiments = $state<Experiment[]>([]);
 
   async function loadWorkspaceRoles() {
     try {
