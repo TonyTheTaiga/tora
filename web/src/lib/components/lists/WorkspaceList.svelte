@@ -137,7 +137,7 @@
     form.submit();
   }
 
-  function getWorkspaceItemClass(workspace: Workspace): string {
+  function getWorkspaceItemClass(): string {
     const baseClass = "group layer-slide-up";
     const surfaceClass = "surface-interactive";
 

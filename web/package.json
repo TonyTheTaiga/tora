@@ -41,5 +41,8 @@
       "esbuild",
       "tailwindcss"
     ]
+  },
+  "dependencies": {
+    "bits-ui": "^2.9.1"
   }
 }
