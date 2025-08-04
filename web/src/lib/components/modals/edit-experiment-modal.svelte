@@ -54,6 +54,9 @@
         return async ({ result, update }) => {
           await update();
           if (result.type === "success" || result.type === "redirect") {
+            console.log(
+              `Experiment updated successfully ${experimentCopy.name} ${experimentCopy.description}`,
+            );
             experiment.name = experimentCopy.name;
             experiment.description = experimentCopy.description;
             experiment.tags = [...experiment.tags];

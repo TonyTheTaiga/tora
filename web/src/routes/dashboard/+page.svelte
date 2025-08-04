@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { getCreateWorkspaceModal } from "$lib/state/app.svelte";
   import {
     getSelectedWorkspace,
     getSelectedExperiment,

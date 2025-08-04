@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { getExperimentToEdit } from "$lib/state/app.svelte";
   import ExperimentList from "$lib/components/lists/ExperimentList.svelte";
+  import EditExperimentModal from "$lib/components/modals/edit-experiment-modal.svelte";
   import type { Workspace, Experiment } from "$lib/types";
   import { copyToClipboard } from "$lib/utils/common";
   import {
@@ -8,9 +10,11 @@
     loading,
     errors,
   } from "./state.svelte";
+
   let selectedWorkspace = $derived(getSelectedWorkspace());
   let experimentSearchQuery = $state("");
   let experiments: Experiment[] = $state([]);
+  let experimentToEdit = $derived(getExperimentToEdit());
 
   $effect(() => {
     if (selectedWorkspace) {
@@ -59,6 +63,10 @@
   }
 </script>
 
+{#if experimentToEdit}
+  <EditExperimentModal bind:experiment={experimentToEdit} />
+{/if}
+
 <div class="terminal-chrome-header">
   <div class="flex items-center justify-between mb-3">
     <h2 class="text-ctp-text font-medium text-base">experiments</h2>
@@ -73,7 +81,9 @@
       tabindex="0"
       onclick={(e) => {
         e.stopPropagation();
-        selectedWorkspace && copyToClipboard(selectedWorkspace.id);
+        if (selectedWorkspace) {
+          copyToClipboard(selectedWorkspace.id);
+        }
       }}
       title="click to copy workspace id"
     >
