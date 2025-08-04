@@ -32,7 +32,7 @@
 
   <div class="w-1/2 border-l border-b border-ctp-surface0/30 flex flex-col">
     {#if selectedExperiment}
-      <ExperimentDetails />
+      <ExperimentDetails experiment={selectedExperiment} />
     {:else}
       <EmptyState message="select a experiment to view details" />
     {/if}
