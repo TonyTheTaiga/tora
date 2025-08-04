@@ -4,14 +4,10 @@
   import EditExperimentModal from "$lib/components/modals/edit-experiment-modal.svelte";
   import type { Workspace, Experiment } from "$lib/types";
   import { copyToClipboard } from "$lib/utils/common";
-  import {
-    getSelectedWorkspace,
-    setSelectedExperiment,
-    loading,
-    errors,
-  } from "./state.svelte";
+  import { setSelectedExperiment, loading, errors } from "./state.svelte";
 
-  let selectedWorkspace = $derived(getSelectedWorkspace());
+  let { workspace }: { workspace: Workspace } = $props();
+
   let experimentSearchQuery = $state("");
   let experiments: Experiment[] = $state([]);
   let experimentToEdit = $derived(getExperimentToEdit());
@@ -53,13 +49,11 @@
   }
 
   $effect(() => {
-    if (selectedWorkspace) {
-      loadExperiments(selectedWorkspace).then((results) => {
-        if (results) {
-          experiments = results;
-        }
-      });
-    }
+    loadExperiments(workspace).then((results) => {
+      if (results) {
+        experiments = results;
+      }
+    });
   });
 </script>
 
@@ -81,13 +75,11 @@
       tabindex="0"
       onclick={(e) => {
         e.stopPropagation();
-        if (selectedWorkspace) {
-          copyToClipboard(selectedWorkspace.id);
-        }
+        copyToClipboard(workspace.id);
       }}
       title="click to copy workspace id"
     >
-      workspace id: {selectedWorkspace && selectedWorkspace.id}
+      workspace id: {workspace.id}
     </button>
   </div>
   <div
@@ -103,30 +95,28 @@
 </div>
 
 <div class="flex-1 overflow-y-auto min-h-0">
-  {#if selectedWorkspace}
-    {#if loading.experiments}
-      <div class="text-center py-8 text-ctp-subtext0 text-sm">
-        loading experiments...
+  {#if loading.experiments}
+    <div class="text-center py-8 text-ctp-subtext0 text-sm">
+      loading experiments...
+    </div>
+  {:else if errors.experiments}
+    <div class="surface-layer-2 p-4 m-2">
+      <div class="text-ctp-red font-medium mb-2 text-sm">
+        error loading experiments
       </div>
-    {:else if errors.experiments}
-      <div class="surface-layer-2 p-4 m-2">
-        <div class="text-ctp-red font-medium mb-2 text-sm">
-          error loading experiments
-        </div>
-        <div class="text-ctp-subtext0 text-xs mb-3">
-          {errors.experiments}
-        </div>
+      <div class="text-ctp-subtext0 text-xs mb-3">
+        {errors.experiments}
       </div>
-    {:else if experiments && experiments.length === 0}
-      <div class="text-center py-8 text-ctp-subtext0 text-sm">
-        no experiments found
-      </div>
-    {:else}
-      <ExperimentList
-        {experiments}
-        searchQuery={experimentSearchQuery}
-        onItemClick={setSelectedExperiment}
-      />
-    {/if}
+    </div>
+  {:else if experiments && experiments.length === 0}
+    <div class="text-center py-8 text-ctp-subtext0 text-sm">
+      no experiments found
+    </div>
+  {:else}
+    <ExperimentList
+      {experiments}
+      searchQuery={experimentSearchQuery}
+      onItemClick={setSelectedExperiment}
+    />
   {/if}
 </div>

@@ -1,9 +1,5 @@
 <script lang="ts">
-  import {
-    getSelectedWorkspace,
-    getSelectedExperiment,
-    setSelectedExperiment,
-  } from "./state.svelte";
+  import { getSelectedWorkspace, getSelectedExperiment } from "./state.svelte";
   import type {
     PendingInvitation,
     ApiResponse,
@@ -51,12 +47,6 @@
     await loadWorkspaceRoles();
     await loadPendingInvitations();
   });
-
-  $effect(() => {
-    if (selectedWorkspace) {
-      setSelectedExperiment(null);
-    }
-  });
 </script>
 
 <div
@@ -70,7 +60,7 @@
     class="w-1/4 border-r border-l border-b border-ctp-surface0/30 flex flex-col"
   >
     {#if selectedWorkspace}
-      <ExperimentListColumn />
+      <ExperimentListColumn workspace={selectedWorkspace} />
     {:else}
       <div class="text-ctp-subtext0 text-sm terminal-chrome-header">
         select a workspace to view experiments
