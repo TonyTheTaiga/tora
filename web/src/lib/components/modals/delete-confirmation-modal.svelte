@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
   import { AlertTriangle, Loader2 } from "@lucide/svelte";
-  import { resetExperimentToDelete } from "$lib/state/app.svelte.js";
+  import { resetExperimentToDelete } from "$lib/state/modal.svelte.js";
   import { enhance } from "$app/forms";
   import { BaseModal } from "$lib/components/modals";
 

@@ -2,12 +2,12 @@
   import {
     openCreateWorkspaceModal,
     getCreateWorkspaceModal,
-  } from "$lib/state/app.svelte";
+  } from "$lib/state/modal.svelte";
   import { setSelectedWorkspace } from "./state.svelte";
   import WorkspaceList from "$lib/components/lists/WorkspaceList.svelte";
   import CreateWorkspaceModal from "$lib/components/modals/create-workspace-modal.svelte";
 
-  let { workspaces, workspaceRoles } = $props();
+  let { workspaces, workspaceRoles, workspaceInvitations } = $props();
   let workspaceSearchQuery = $state("");
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
 </script>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getExperimentToEdit } from "$lib/state/app.svelte";
+  import { getExperimentToEdit } from "$lib/state/modal.svelte";
   import ExperimentList from "$lib/components/lists/ExperimentList.svelte";
   import EditExperimentModal from "$lib/components/modals/edit-experiment-modal.svelte";
   import type { Workspace, Experiment } from "$lib/types";

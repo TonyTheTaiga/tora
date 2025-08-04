@@ -2,7 +2,7 @@
   import {
     openCreateWorkspaceModal,
     getCreateWorkspaceModal,
-  } from "$lib/state/app.svelte.js";
+  } from "$lib/state/modal.svelte.js";
   import { CreateWorkspaceModal } from "$lib/components/modals";
   import { PageHeader, SearchInput } from "$lib/components";
   import { WorkspaceList } from "$lib/components/lists";

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Plus, X } from "@lucide/svelte";
-  import { closeCreateExperimentModal } from "$lib/state/app.svelte.js";
+  import { closeCreateExperimentModal } from "$lib/state/modal.svelte.js";
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
   import {

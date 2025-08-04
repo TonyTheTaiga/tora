@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { closeCreateWorkspaceModal } from "$lib/state/app.svelte.js";
+  import { closeCreateWorkspaceModal } from "$lib/state/modal.svelte.js";
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
   import {

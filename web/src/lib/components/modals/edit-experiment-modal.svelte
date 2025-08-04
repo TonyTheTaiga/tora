@@ -2,7 +2,7 @@
   import { X, Plus } from "@lucide/svelte";
   import { enhance } from "$app/forms";
   import type { Experiment } from "$lib/types";
-  import { resetExperimentToEdit } from "$lib/state/app.svelte.js";
+  import { resetExperimentToEdit } from "$lib/state/modal.svelte.js";
   import {
     BaseModal,
     ModalFormSection,

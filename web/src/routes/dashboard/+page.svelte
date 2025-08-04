@@ -4,20 +4,20 @@
   import ExperimentListColumn from "./ExperimentListColumn.svelte";
   import ExperimentDetails from "./ExperimentDetails.svelte";
   import EmptyState from "./EmptyState.svelte";
-  import { createWorkspaceData } from "./workspaceData.svelte";
+  import { loadData } from "./loader.svelte";
 
   let { data } = $props();
   let workspaces = $derived(data.workspaces);
   let selectedWorkspace = $derived(getSelectedWorkspace());
   let selectedExperiment = $derived(getSelectedExperiment());
-  const { workspaceRoles, workspaceInvitations } = createWorkspaceData();
+  const { workspaceRoles, workspaceInvitations } = loadData();
 </script>
 
 <div
   class="bg-ctp-base text-ctp-text flex space-x-2 font-mono border-ctp-surface0/30"
 >
   <div class="w-1/4 border-r border-b border-ctp-surface0/30 flex flex-col">
-    <WorkspaceColumn {workspaces} {workspaceRoles} />
+    <WorkspaceColumn {workspaces} {workspaceRoles} {workspaceInvitations} />
   </div>
 
   <div

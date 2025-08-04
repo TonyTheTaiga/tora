@@ -8,7 +8,7 @@
   import {
     setExperimentToEdit,
     setExperimentToDelete,
-  } from "$lib/state/app.svelte.js";
+  } from "$lib/state/modal.svelte.js";
   import { Trash2, Edit } from "@lucide/svelte";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";

@@ -1,7 +1,7 @@
 import { onMount } from "svelte";
 import type { ApiResponse, WorkspaceRole, PendingInvitation } from "$lib/types";
 
-export function createWorkspaceData() {
+export function loadData() {
   let workspaceRoles = $state<WorkspaceRole[]>([]);
   let workspaceInvitations = $state<PendingInvitation[]>([]);
 

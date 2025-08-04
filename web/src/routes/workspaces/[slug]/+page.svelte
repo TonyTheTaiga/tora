@@ -4,7 +4,7 @@
     getExperimentToEdit,
     getExperimentToDelete,
     openCreateExperimentModal,
-  } from "$lib/state/app.svelte.js";
+  } from "$lib/state/modal.svelte.js";
   import {
     CreateExperimentModal,
     DeleteConfirmationModal,
