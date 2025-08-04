@@ -2,7 +2,7 @@
   import { X, Plus } from "@lucide/svelte";
   import { enhance } from "$app/forms";
   import type { Experiment } from "$lib/types";
-  import { closeEditExperimentModal } from "$lib/state/app.svelte.js";
+  import { resetExperimentToEdit } from "$lib/state/modal.svelte.js";
   import {
     BaseModal,
     ModalFormSection,
@@ -52,13 +52,17 @@
       class="space-y-4"
       use:enhance={() => {
         return async ({ result, update }) => {
-          await update();
           if (result.type === "success" || result.type === "redirect") {
+            console.log(
+              `Experiment updated successfully ${experimentCopy.name} ${experimentCopy.description}`,
+            );
             experiment.name = experimentCopy.name;
             experiment.description = experimentCopy.description;
-            experiment.tags = [...experiment.tags];
-            closeEditExperimentModal();
+            experiment.tags = [...experimentCopy.tags];
+            resetExperimentToEdit();
           }
+
+          await update();
         };
       }}
     >
@@ -159,7 +163,7 @@
         </ModalFormSection>
       </div>
 
-      <ModalButtons onCancel={closeEditExperimentModal} submitText="update" />
+      <ModalButtons onCancel={resetExperimentToEdit} submitText="update" />
     </form>
   {/snippet}
 </BaseModal>

@@ -15,6 +15,6 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
       url.pathname.startsWith("/signup") ||
       url.pathname === "/")
   ) {
-    return redirect(302, "/workspaces");
+    return redirect(302, "/dashboard");
   }
 };

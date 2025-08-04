@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Users } from "@lucide/svelte";
+  import { enhance } from "$app/forms";
   import {
     BaseModal,
     ModalFormSection,
@@ -10,7 +10,6 @@
   let {
     isOpen = $bindable(false),
     workspace,
-    onInvite,
     workspaceRoles = [],
   }: {
     isOpen: boolean;
@@ -25,22 +24,30 @@
   function closeModal() {
     isOpen = false;
   }
-
-  function handleSubmit(e: Event) {
-    e.preventDefault();
-    if (email && roleId) {
-      onInvite(email, roleId);
-      closeModal();
-      email = "";
-      roleId = "";
-    }
-  }
 </script>
 
 {#if isOpen && workspace}
   <BaseModal title="Invite User">
     {#snippet children()}
-      <form onsubmit={handleSubmit} class="space-y-4">
+      <form
+        method="POST"
+        action="/?/sendInvitation"
+        class="space-y-4"
+        use:enhance={({ formElement, formData, action, cancel, submitter }) => {
+          return async ({ result, update }) => {
+            await update();
+            email = "";
+            roleId = "";
+            closeModal();
+          };
+        }}
+      >
+        <input
+          type="hidden"
+          id="workspaceId"
+          name="workspaceId"
+          value={workspace.id}
+        />
         <ModalFormSection title="details">
           {#snippet children()}
             <div class="flex items-center gap-2 mb-3">
@@ -52,7 +59,7 @@
 
             <div>
               <ModalInput
-                id="invite-email"
+                id="email"
                 name="email"
                 type="email"
                 placeholder="colleague@example.com"
@@ -63,7 +70,7 @@
 
             <div>
               <select
-                id="invite-role"
+                id="roleId"
                 name="roleId"
                 bind:value={roleId}
                 required

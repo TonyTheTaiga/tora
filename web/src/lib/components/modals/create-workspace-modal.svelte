@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { closeCreateWorkspaceModal } from "$lib/state/app.svelte.js";
+  import { closeCreateWorkspaceModal } from "$lib/state/modal.svelte.js";
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
   import {
@@ -17,7 +17,7 @@
   {#snippet children()}
     <form
       method="POST"
-      action="?/createWorkspace"
+      action="/?/createWorkspace"
       class="space-y-4"
       use:enhance={() => {
         return async ({ result, update }) => {

@@ -58,26 +58,43 @@ async function proxyRequest(
 ) {
   const url = new URL(request.url);
   const rustBackendUrl = `${RUST_API_BASE_URL}/api/${path}${url.search}`;
+
   const headers = new Headers(request.headers);
   headers.delete("host");
   headers.delete("cookie");
+
   const auth_token = cookies.get("tora_auth_token");
   if (auth_token) {
     const sessionJson = atob(auth_token);
     const sessionData: SessionData = JSON.parse(sessionJson);
     headers.set("Authorization", `Bearer ${sessionData.access_token}`);
   }
+
+  let body: BodyInit | null = null;
+
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    const contentType = request.headers.get("content-type");
+
+    if (contentType?.includes("multipart/form-data")) {
+      body = await request.formData();
+      headers.delete("content-type");
+    } else if (contentType?.includes("application/x-www-form-urlencoded")) {
+      body = await request.text();
+    } else if (contentType?.includes("application/json")) {
+      body = await request.text();
+    } else {
+      body = await request.arrayBuffer();
+    }
+  }
+
   const options: RequestInit = {
     method: request.method,
     headers: headers,
-    body:
-      request.method === "GET" || request.method === "HEAD"
-        ? null
-        : await request.arrayBuffer(),
+    body: body,
   };
+
   try {
     const response = await fetch(rustBackendUrl, options);
-
     const proxyResponse = new Response(response.body, {
       status: response.status,
       statusText: response.statusText,

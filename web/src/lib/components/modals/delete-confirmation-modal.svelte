@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
   import { AlertTriangle, Loader2 } from "@lucide/svelte";
-  import { closeDeleteExperimentModal } from "$lib/state/app.svelte.js";
+  import { resetExperimentToDelete } from "$lib/state/modal.svelte.js";
   import { enhance } from "$app/forms";
   import { BaseModal } from "$lib/components/modals";
 
@@ -17,7 +17,7 @@
 
   function closeModal() {
     if (isDeleting) return;
-    closeDeleteExperimentModal();
+    resetExperimentToDelete();
   }
 </script>
 
@@ -59,7 +59,7 @@
               experiments = experiments.filter(
                 (exp) => exp.id !== experimentId,
               );
-              closeDeleteExperimentModal();
+              resetExperimentToDelete();
             } else {
               console.error("Error deleting experiment:", result);
               await update();

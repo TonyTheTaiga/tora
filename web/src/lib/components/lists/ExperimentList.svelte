@@ -6,9 +6,9 @@
     selectedForComparison,
   } from "$lib/state/comparison.svelte.js";
   import {
-    openEditExperimentModal,
-    openDeleteExperimentModal,
-  } from "$lib/state/app.svelte.js";
+    setExperimentToEdit,
+    setExperimentToDelete,
+  } from "$lib/state/modal.svelte.js";
   import { Trash2, Edit } from "@lucide/svelte";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
@@ -19,6 +19,7 @@
     experiments: Experiment[];
     searchQuery?: string;
     formatDate?: (date: Date) => string;
+    onItemClick?: (experiment: Experiment) => void;
   }
 
   let {
@@ -33,6 +34,13 @@
             ? "numeric"
             : undefined,
       }),
+    onItemClick = (experiment: Experiment) => {
+      if (getMode()) {
+        addExperiment(experiment.id);
+      } else {
+        goto(`/experiments/${experiment.id}`);
+      }
+    },
   }: Props = $props();
 
   let currentWorkspace = $derived(page.data.currentWorkspace);
@@ -55,14 +63,6 @@
       })
       .map((e) => e.exp),
   );
-
-  function handleExperimentClick(experiment: Experiment) {
-    if (getMode()) {
-      addExperiment(experiment.id);
-    } else {
-      goto(`/experiments/${experiment.id}`);
-    }
-  }
 
   let selectedExperimentIds = $derived(
     filteredExperiments
@@ -98,7 +98,7 @@
   <ListCard
     items={filteredExperiments}
     getItemClass={getTimelineItemClass}
-    onItemClick={handleExperimentClick}
+    {onItemClick}
   >
     {#snippet children(experiment)}
       <!-- Content - Mobile-first responsive layout -->
@@ -183,7 +183,7 @@
         <button
           onclick={(e) => {
             e.stopPropagation();
-            openEditExperimentModal(experiment);
+            setExperimentToEdit(experiment);
           }}
           class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-blue/30 sm:p-1"
           title="edit experiment"
@@ -196,7 +196,7 @@
           <button
             onclick={(e) => {
               e.stopPropagation();
-              openDeleteExperimentModal(experiment);
+              setExperimentToDelete(experiment);
             }}
             class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-red/30 sm:p-1"
             title="delete experiment"

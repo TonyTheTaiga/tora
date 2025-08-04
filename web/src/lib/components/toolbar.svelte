@@ -21,7 +21,7 @@
     getTheme,
     toggleTheme as toggleAppTheme,
   } from "$lib/state/theme.svelte.js";
-  import { openCreateExperimentModal } from "$lib/state/app.svelte.js";
+  import { openCreateExperimentModal } from "$lib/state/modal.svelte.js";
   import { page } from "$app/state";
 
   let theme = $derived.by(() => getTheme());

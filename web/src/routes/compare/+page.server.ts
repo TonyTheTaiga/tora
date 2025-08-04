@@ -1,12 +1,7 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import type { HyperParam } from "$lib/types";
+import type { HyperParam, ApiResponse } from "$lib/types";
 import { generateRequestId, startTimer } from "$lib/utils/timing";
-
-interface ApiResponse<T> {
-  status: number;
-  data: T;
-}
 
 interface ExperimentData {
   id: string;
