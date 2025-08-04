@@ -6,8 +6,8 @@
     selectedForComparison,
   } from "$lib/state/comparison.svelte.js";
   import {
-    openEditExperimentModal,
-    openDeleteExperimentModal,
+    setExperimentToEdit,
+    setExperimentToDelete,
   } from "$lib/state/app.svelte.js";
   import { Trash2, Edit } from "@lucide/svelte";
   import { page } from "$app/state";
@@ -183,7 +183,7 @@
         <button
           onclick={(e) => {
             e.stopPropagation();
-            openEditExperimentModal(experiment);
+            setExperimentToEdit(experiment);
           }}
           class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-blue/30 sm:p-1"
           title="edit experiment"
@@ -196,7 +196,7 @@
           <button
             onclick={(e) => {
               e.stopPropagation();
-              openDeleteExperimentModal(experiment);
+              setExperimentToDelete(experiment);
             }}
             class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-red/30 sm:p-1"
             title="delete experiment"

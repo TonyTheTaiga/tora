@@ -2,7 +2,7 @@
   import { X, Plus } from "@lucide/svelte";
   import { enhance } from "$app/forms";
   import type { Experiment } from "$lib/types";
-  import { closeEditExperimentModal } from "$lib/state/app.svelte.js";
+  import { resetExperimentToEdit } from "$lib/state/app.svelte.js";
   import {
     BaseModal,
     ModalFormSection,
@@ -57,7 +57,7 @@
             experiment.name = experimentCopy.name;
             experiment.description = experimentCopy.description;
             experiment.tags = [...experiment.tags];
-            closeEditExperimentModal();
+            resetExperimentToEdit();
           }
         };
       }}
@@ -159,7 +159,7 @@
         </ModalFormSection>
       </div>
 
-      <ModalButtons onCancel={closeEditExperimentModal} submitText="update" />
+      <ModalButtons onCancel={resetExperimentToEdit} submitText="update" />
     </form>
   {/snippet}
 </BaseModal>

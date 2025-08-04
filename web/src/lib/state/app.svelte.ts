@@ -1,5 +1,4 @@
 import type { Experiment } from "$lib/types";
-import { startTimer } from "$lib/utils/timing";
 
 interface ModalState {
   createExperiment: boolean;
@@ -39,36 +38,24 @@ export function closeCreateExperimentModal() {
   state.modals.createExperiment = false;
 }
 
-export function openEditExperimentModal(experiment: Experiment) {
-  const timer = startTimer("ui.openEditModal", { experimentId: experiment.id });
+export function setExperimentToEdit(experiment: Experiment) {
   state.modals.editExperiment = experiment;
-  timer.end();
 }
 
-export function closeEditExperimentModal() {
+export function resetExperimentToEdit() {
   state.modals.editExperiment = null;
 }
 
-export function openDeleteExperimentModal(experiment: Experiment) {
-  const timer = startTimer("ui.openDeleteModal", {
-    experimentId: experiment.id,
-  });
+export function setExperimentToDelete(experiment: Experiment) {
   state.modals.deleteExperiment = experiment;
-  timer.end();
 }
 
-export function closeDeleteExperimentModal() {
+export function resetExperimentToDelete() {
   state.modals.deleteExperiment = null;
 }
 
 export function setSelectedExperiment(experiment: Experiment | null) {
-  const timer = startTimer("ui.setSelectedExperiment", {
-    experimentId: experiment?.id,
-    action: experiment ? "select" : "deselect",
-  });
-
   state.modals.selectedExperiment = experiment;
-  timer.end();
 }
 
 export function getModalState() {
@@ -79,11 +66,11 @@ export function getCreateExperimentModal() {
   return state.modals.createExperiment;
 }
 
-export function getEditExperimentModal() {
+export function getExperimentToEdit() {
   return state.modals.editExperiment;
 }
 
-export function getDeleteExperimentModal() {
+export function getExperimentToDelete() {
   return state.modals.deleteExperiment;
 }
 

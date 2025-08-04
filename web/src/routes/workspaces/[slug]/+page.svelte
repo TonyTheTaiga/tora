@@ -1,8 +1,8 @@
 <script lang="ts">
   import {
     getCreateExperimentModal,
-    getEditExperimentModal,
-    getDeleteExperimentModal,
+    getExperimentToEdit,
+    getExperimentToDelete,
     openCreateExperimentModal,
   } from "$lib/state/app.svelte.js";
   import {
@@ -22,8 +22,8 @@
   let experiments: Experiment[] = $derived(data.experiments || []);
   let searchQuery = $state("");
   let createExperimentModal = $derived(getCreateExperimentModal());
-  let editExperimentModal = $derived(getEditExperimentModal());
-  let deleteExperimentModal = $derived(getDeleteExperimentModal());
+  let editExperimentModal = $derived(getExperimentToEdit());
+  let deleteExperimentModal = $derived(getExperimentToDelete());
 
   function formatDate(date: Date): string {
     return date.toLocaleDateString("en-US", {
