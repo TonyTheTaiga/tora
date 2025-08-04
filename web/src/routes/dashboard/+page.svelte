@@ -9,6 +9,7 @@
   import WorkspaceColumn from "./WorkspaceColumn.svelte";
   import ExperimentListColumn from "./ExperimentListColumn.svelte";
   import ExperimentDetails from "./ExperimentDetails.svelte";
+  import EmptyState from "./EmptyState.svelte";
 
   let { data } = $props();
   let workspaces = $derived(data.workspaces);
@@ -62,9 +63,7 @@
     {#if selectedWorkspace}
       <ExperimentListColumn workspace={selectedWorkspace} />
     {:else}
-      <div class="text-ctp-subtext0 text-sm terminal-chrome-header">
-        select a workspace to view experiments
-      </div>
+      <EmptyState message="select a workspace to view experiments" />
     {/if}
   </div>
 
@@ -72,9 +71,7 @@
     {#if selectedExperiment}
       <ExperimentDetails />
     {:else}
-      <div class="text-ctp-subtext0 text-sm terminal-chrome-header">
-        select a experiemnt to view details
-      </div>
+      <EmptyState message="select a experiment to view details" />
     {/if}
   </div>
 </div>
