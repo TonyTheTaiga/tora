@@ -1,6 +1,12 @@
 <script lang="ts">
   import { getCreateWorkspaceModal } from "$lib/state/app.svelte";
-  import { getSelectedWorkspace } from "./state.svelte";
+  import {
+    getSelectedWorkspace,
+    getSelectedExperiment,
+    setSelectedExperiment,
+    loading,
+    errors,
+  } from "./state.svelte";
   import CreateWorkspaceModal from "$lib/components/modals/create-workspace-modal.svelte";
   import type {
     Experiment,
@@ -9,9 +15,9 @@
     WorkspaceRole,
   } from "$lib/types";
   import { onMount } from "svelte";
-  import InteractiveChart from "../experiments/[experimentId]/interactive-chart.svelte";
-  import ExperimentList from "$lib/components/lists/ExperimentList.svelte";
   import WorkspaceColumn from "./WorkspaceColumn.svelte";
+  import ExperimentListColumn from "./ExperimentListColumn.svelte";
+  import ExperimentDetails from "./ExperimentDetails.svelte";
 
   let { data } = $props();
   let workspaces = $derived(data.workspaces);
@@ -19,39 +25,8 @@
   let workspaceInvitations = $state<PendingInvitation[]>([]);
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
   let selectedWorkspace = $derived(getSelectedWorkspace());
-
-  let loading = $state({
-    workspaces: true,
-    experiments: false,
-    experimentDetails: false,
-  });
-  let errors = $state({
-    workspaces: null as string | null,
-    experiments: null as string | null,
-    experimentDetails: null as string | null,
-  });
-
-  interface ExperimentWithMetricData extends Experiment {
-    metricData?: Record<string, number[]>;
-  }
-
-  let selectedExperiment = $state<Experiment | null>(null);
+  let selectedExperiment = $derived(getSelectedExperiment());
   let experiments = $state<Experiment[]>([]);
-  let scalarMetrics = $state<any[]>([]);
-  let timeSeriesMetrics = $state<string[]>([]);
-  let selectedMetrics = $state<string[]>([]);
-  let experimentMetricData = $state<Record<string, number[]>>({});
-
-  let experimentSearchQuery = $state("");
-
-  const experimentForChart = $derived.by(() => {
-    if (!selectedExperiment) return null;
-    return {
-      ...selectedExperiment,
-      metricData: experimentMetricData,
-      availableMetrics: timeSeriesMetrics,
-    } as ExperimentWithMetricData;
-  });
 
   async function loadWorkspaceRoles() {
     try {
@@ -113,64 +88,6 @@
     }
   }
 
-  async function loadExperimentDetails(experimentId: string) {
-    try {
-      loading.experimentDetails = true;
-      errors.experimentDetails = null;
-      const response = await fetch(`/api/experiments/${experimentId}/metrics`);
-      if (!response.ok)
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      const apiResponse = await response.json();
-      const metrics = apiResponse.data;
-      if (!metrics || !Array.isArray(metrics))
-        throw new Error("Invalid response structure from metrics API");
-
-      const metricsByName = new Map<string, any[]>();
-      metrics.forEach((metric: any) => {
-        if (!metricsByName.has(metric.name)) {
-          metricsByName.set(metric.name, []);
-        }
-        metricsByName.get(metric.name)!.push(metric);
-      });
-
-      const scalarMetricsList: any[] = [];
-      const timeSeriesNames: string[] = [];
-      const metricData: Record<string, number[]> = {};
-
-      metricsByName.forEach((metricList, name) => {
-        if (metricList.length === 1) {
-          scalarMetricsList.push(metricList[0]);
-        } else {
-          timeSeriesNames.push(name);
-        }
-
-        metricData[name] = metricList
-          .sort((a, b) => (a.step || 0) - (b.step || 0))
-          .map((m) => m.value);
-      });
-
-      scalarMetrics = scalarMetricsList;
-      timeSeriesMetrics = timeSeriesNames;
-      experimentMetricData = metricData;
-    } catch (error) {
-      console.error("Failed to load experiment details:", error);
-      errors.experimentDetails =
-        error instanceof Error
-          ? error.message
-          : "Failed to load experiment details";
-    } finally {
-      loading.experimentDetails = false;
-    }
-  }
-
-  function onExperimentSelect(experiment: Experiment) {
-    selectedExperiment = experiment;
-  }
-
-  function copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text);
-  }
-
   onMount(async () => {
     await loadWorkspaceRoles();
     await loadPendingInvitations();
@@ -178,31 +95,8 @@
 
   $effect(() => {
     if (selectedWorkspace) {
+      setSelectedExperiment(null);
       loadExperiments(selectedWorkspace.id);
-      selectedExperiment = null;
-      scalarMetrics = [];
-      timeSeriesMetrics = [];
-      selectedMetrics = [];
-      experimentMetricData = {};
-    }
-  });
-
-  $effect(() => {
-    if (selectedExperiment) {
-      let cancelled = false;
-      const experimentId = selectedExperiment.id;
-
-      const loadDetails = async () => {
-        if (cancelled) return;
-        await loadExperimentDetails(experimentId);
-      };
-
-      selectedMetrics = [];
-      loadDetails();
-
-      return () => {
-        cancelled = true;
-      };
     }
   });
 </script>
@@ -214,249 +108,29 @@
 <div
   class="bg-ctp-base text-ctp-text flex space-x-2 font-mono border-ctp-surface0/30"
 >
-  <WorkspaceColumn {workspaces} {workspaceRoles} />
+  <div class="w-1/4 border-r border-b border-ctp-surface0/30 flex flex-col">
+    <WorkspaceColumn {workspaces} {workspaceRoles} />
+  </div>
 
   <div
     class="w-1/4 border-r border-l border-b border-ctp-surface0/30 flex flex-col"
   >
-    <div class="terminal-chrome-header">
-      {#if selectedWorkspace}
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-ctp-text font-medium text-base">experiments</h2>
-          <span
-            class="bg-ctp-surface0/20 text-ctp-subtext0 px-2 py-1 text-xs border border-ctp-surface0/30"
-            >[{experiments.length}]</span
-          >
-        </div>
-        <div class="mb-3">
-          <span
-            class="text-xs text-ctp-overlay0 hover:text-ctp-blue cursor-pointer"
-            role="button"
-            tabindex="0"
-            onclick={(e) => {
-              e.stopPropagation();
-              selectedWorkspace && copyToClipboard(selectedWorkspace.id);
-            }}
-            onkeydown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                e.stopPropagation();
-                selectedWorkspace && copyToClipboard(selectedWorkspace.id);
-              }
-            }}
-            title="click to copy workspace id"
-          >
-            workspace id: {selectedWorkspace && selectedWorkspace.id}
-          </span>
-        </div>
-        <div
-          class="flex items-center bg-ctp-surface0/20 focus-within:ring-1 focus-within:ring-ctp-text/20"
-        >
-          <input
-            type="search"
-            bind:value={experimentSearchQuery}
-            placeholder="search experiments..."
-            class="flex-1 bg-transparent border-0 py-2 pr-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none text-sm"
-          />
-        </div>
-      {:else}
-        <div class="text-ctp-subtext0 text-sm">
-          select a workspace to view experiments
-        </div>
-      {/if}
-    </div>
-
-    <div class="flex-1 overflow-y-auto min-h-0">
-      {#if selectedWorkspace}
-        {#if loading.experiments}
-          <div class="text-center py-8 text-ctp-subtext0 text-sm">
-            loading experiments...
-          </div>
-        {:else if errors.experiments}
-          <div class="surface-layer-2 p-4 m-2">
-            <div class="text-ctp-red font-medium mb-2 text-sm">
-              error loading experiments
-            </div>
-            <div class="text-ctp-subtext0 text-xs mb-3">
-              {errors.experiments}
-            </div>
-            <button
-              class="text-ctp-blue hover:text-ctp-blue/80 text-xs"
-              onclick={() =>
-                selectedWorkspace && loadExperiments(selectedWorkspace.id)}
-              >[retry]</button
-            >
-          </div>
-        {:else if experiments.length === 0}
-          <div class="text-center py-8 text-ctp-subtext0 text-sm">
-            no experiments found
-          </div>
-        {:else}
-          <ExperimentList
-            {experiments}
-            searchQuery={experimentSearchQuery}
-            onItemClick={onExperimentSelect}
-          />
-        {/if}
-      {/if}
-    </div>
+    {#if selectedWorkspace}
+      <ExperimentListColumn {experiments} />
+    {:else}
+      <div class="text-ctp-subtext0 text-sm terminal-chrome-header">
+        select a workspace to view experiments
+      </div>
+    {/if}
   </div>
 
   <div class="w-1/2 border-l border-b border-ctp-surface0/30 flex flex-col">
-    <div class="terminal-chrome-header">
-      {#if selectedExperiment}
-        <div class="mb-3">
-          <h2 class="text-ctp-text font-medium text-lg mb-2">
-            {selectedExperiment.name}
-          </h2>
-          {#if selectedExperiment.description}
-            <p class="text-ctp-subtext0 line-clamp-2 mb-3 text-sm">
-              {selectedExperiment.description}
-            </p>
-          {/if}
-          <button
-            class="text-xs text-ctp-overlay0 hover:text-ctp-blue"
-            onclick={() =>
-              selectedExperiment && copyToClipboard(selectedExperiment.id)}
-            title="click to copy experiment id"
-          >
-            experiment id: {selectedExperiment.id}
-          </button>
-        </div>
-      {:else}
-        <div class="text-ctp-subtext0 text-sm">
-          select an experiment to view details
-        </div>
-      {/if}
-    </div>
-
-    <div class="flex-1 overflow-y-auto p-4 min-h-0">
-      {#if selectedExperiment}
-        {#if loading.experimentDetails}
-          <div class="text-center py-12">
-            <div class="text-ctp-subtext0 text-sm">
-              loading experiment details...
-            </div>
-          </div>
-        {:else if errors.experimentDetails}
-          <div class="surface-layer-2 p-4">
-            <div class="text-ctp-red font-medium text-sm mb-3">
-              error loading experiment details
-            </div>
-            <div class="text-ctp-subtext0 mb-4 text-xs">
-              {errors.experimentDetails}
-            </div>
-            <button
-              class="text-ctp-blue hover:text-ctp-blue/80 text-xs"
-              onclick={() =>
-                selectedExperiment &&
-                loadExperimentDetails(selectedExperiment.id)}>[retry]</button
-            >
-          </div>
-        {:else}
-          <div class="space-y-6">
-            {#if timeSeriesMetrics.length > 0 && experimentForChart}
-              <div class="space-y-2">
-                <div
-                  class="bg-ctp-surface0/10 border border-ctp-surface0/20 p-2 md:p-4"
-                >
-                  <InteractiveChart
-                    experiment={experimentForChart}
-                    bind:selectedMetrics
-                  />
-                </div>
-              </div>
-            {/if}
-
-            {#if scalarMetrics.length > 0}
-              <div class="space-y-2">
-                <div class="flex items-center gap-2">
-                  <div class="text-sm text-ctp-text">scalar metrics</div>
-                  <div class="text-sm text-ctp-subtext0">
-                    [{scalarMetrics.length}]
-                  </div>
-                </div>
-                <div class="terminal-chrome">
-                  {#each scalarMetrics as metric, index}
-                    <div
-                      class="flex text-sm hover:bg-ctp-surface0/20 p-3 {index !==
-                      scalarMetrics.length - 1
-                        ? 'border-b border-ctp-surface0/20'
-                        : ''} {index % 2 === 0 ? 'bg-ctp-surface0/5' : ''}"
-                    >
-                      <div class="w-4 text-ctp-green">•</div>
-                      <div
-                        class="flex-1 text-ctp-text truncate"
-                        title={metric.name}
-                      >
-                        {metric.name}
-                      </div>
-                      <div
-                        class="w-24 text-right text-ctp-blue"
-                        title={String(metric.value)}
-                      >
-                        {typeof metric.value === "number"
-                          ? metric.value.toFixed(4)
-                          : metric.value}
-                      </div>
-                    </div>
-                  {/each}
-                </div>
-              </div>
-            {/if}
-
-            {#if selectedExperiment.tags?.length}
-              <div class="space-y-2">
-                <div class="flex items-center gap-2">
-                  <div class="text-sm text-ctp-text">tags</div>
-                  <div class="text-sm text-ctp-subtext0">
-                    [{selectedExperiment.tags.length}]
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-1">
-                  {#each selectedExperiment.tags as tag}
-                    <span
-                      class="text-xs bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-2 py-1"
-                      >{tag}</span
-                    >
-                  {/each}
-                </div>
-              </div>
-            {/if}
-
-            {#if selectedExperiment.hyperparams?.length}
-              <div class="space-y-2">
-                <div class="flex items-center gap-2">
-                  <div class="text-sm text-ctp-text">hyperparameters</div>
-                  <div class="text-sm text-ctp-subtext0">
-                    [{selectedExperiment.hyperparams.length}]
-                  </div>
-                </div>
-                <div class="terminal-chrome">
-                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
-                    {#each selectedExperiment.hyperparams as param, index}
-                      <div
-                        class="flex flex-col sm:flex-row sm:items-center sm:justify-between hover:bg-ctp-surface0/20 px-3 py-2 text-sm gap-1 sm:gap-2 {index !==
-                        selectedExperiment.hyperparams.length - 1
-                          ? 'border-b border-ctp-surface0/20'
-                          : ''} {index % 2 === 0 ? 'bg-ctp-surface0/5' : ''}"
-                      >
-                        <span class="text-ctp-subtext0 truncate"
-                          >{param.key}</span
-                        >
-                        <span
-                          class="text-ctp-blue bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 max-w-32 truncate text-xs"
-                          title={String(param.value)}>{param.value}</span
-                        >
-                      </div>
-                    {/each}
-                  </div>
-                </div>
-              </div>
-            {/if}
-          </div>
-        {/if}
-      {/if}
-    </div>
+    {#if selectedExperiment}
+      <ExperimentDetails {selectedExperiment} />
+    {:else}
+      <div class="text-ctp-subtext0 text-sm terminal-chrome-header">
+        select a experiemnt to view details
+      </div>
+    {/if}
   </div>
 </div>

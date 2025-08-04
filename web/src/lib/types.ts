@@ -8,6 +8,7 @@ export interface Experiment {
   updatedAt: Date;
   availableMetrics: string[];
   workspaceId?: string;
+  metricData?: Record<string, number[]>;
 }
 
 export interface Metric {
