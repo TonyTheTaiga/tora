@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { getSelectedWorkspace, getSelectedExperiment } from "./state.svelte";
   import WorkspaceColumn from "./WorkspaceColumn.svelte";
   import ExperimentListColumn from "./ExperimentListColumn.svelte";
   import ExperimentDetails from "./ExperimentDetails.svelte";
   import EmptyState from "./EmptyState.svelte";
   import { loadData } from "./loader.svelte";
+  import { getSelectedWorkspace, getSelectedExperiment } from "./state.svelte";
 
   let { data } = $props();
   let workspaces = $derived(data.workspaces);
