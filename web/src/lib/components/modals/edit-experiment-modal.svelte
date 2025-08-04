@@ -58,7 +58,7 @@
             );
             experiment.name = experimentCopy.name;
             experiment.description = experimentCopy.description;
-            experiment.tags = [...experiment.tags];
+            experiment.tags = [...experimentCopy.tags];
             resetExperimentToEdit();
           }
 
