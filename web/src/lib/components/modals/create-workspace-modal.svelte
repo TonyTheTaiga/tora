@@ -17,7 +17,7 @@
   {#snippet children()}
     <form
       method="POST"
-      action="?/createWorkspace"
+      action="/?/createWorkspace"
       class="space-y-4"
       use:enhance={() => {
         return async ({ result, update }) => {

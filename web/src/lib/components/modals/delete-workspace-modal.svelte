@@ -52,7 +52,7 @@
         <!-- Form -->
         <form
           method="POST"
-          action="?/deleteWorkspace"
+          action="/?/deleteWorkspace"
           class="flex justify-end gap-2 pt-3 mt-3 border-t border-ctp-surface0/20"
           use:enhance={() => {
             isDeleting = true;

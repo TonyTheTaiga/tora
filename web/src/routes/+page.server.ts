@@ -4,7 +4,7 @@ import { generateRequestId, startTimer } from "$lib/utils/timing";
 import type { ApiResponse, Workspace } from "$lib/types";
 
 export const actions: Actions = {
-  dashboardCreateWorkspace: async ({ request, locals }) => {
+  createWorkspace: async ({ request, locals }) => {
     if (!locals.session) {
       return fail(401, { error: "Authentication required" });
     }
@@ -72,7 +72,7 @@ export const actions: Actions = {
     }
   },
 
-  dashboardDeleteWorkspace: async ({ request, locals, fetch }) => {
+  deleteWorkspace: async ({ request, locals, fetch }) => {
     if (!locals.session) {
       return fail(401, { error: "Authentication required" });
     }
