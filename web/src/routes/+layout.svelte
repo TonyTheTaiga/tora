@@ -22,9 +22,7 @@
     <Header />
     <!-- <Toolbar /> -->
     <main class="layer-fade-in">
-      <div class="content-layer">
-        {@render children()}
-      </div>
+      {@render children()}
     </main>
   {:else}
     <main class="surface-base"><SimpleLandingPage /></main>
