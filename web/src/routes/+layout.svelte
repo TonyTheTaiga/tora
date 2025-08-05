@@ -16,16 +16,17 @@
   );
 </script>
 
-<div class="min-h-screen text-ctp-text surface-base" data-theme={theme}>
+<div class="text-ctp-text surface-base flex-1" data-theme={theme}>
   {#if showNavigation}
     <Header />
-    <Toolbar />
-    <main class="flex-1 w-full layer-fade-in">
+    <!-- <Toolbar /> -->
+    <main class="w-full layer-fade-in">
       <div class="content-layer">
         {@render children()}
       </div>
     </main>
   {:else}
-    <main class="flex-1 w-full surface-base">{@render children()}</main>
+    <!-- just renders the landing page -->
+    <main class="w-full surface-base">{@render children()}</main>
   {/if}
 </div>
