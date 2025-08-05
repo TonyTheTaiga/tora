@@ -41,6 +41,6 @@ export const actions: Actions = {
       sameSite: "strict",
       maxAge: response.data.expires_in,
     });
-    redirect(303, "/workspaces");
+    redirect(303, "/dashboard");
   },
 };

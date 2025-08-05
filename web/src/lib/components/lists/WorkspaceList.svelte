@@ -16,14 +16,8 @@
     onItemClick?: (workspace: Workspace) => void;
   }
 
-  let {
-    workspaces,
-    searchQuery = "",
-    workspaceRoles = [],
-    onItemClick = (workspace: Workspace) => {
-      window.location.href = `/workspaces/${workspace.id}`;
-    },
-  }: Props = $props();
+  let { workspaces, searchQuery, workspaceRoles, onItemClick }: Props =
+    $props();
 
   let filteredWorkspaces = $derived(
     workspaces.filter((workspace) => {

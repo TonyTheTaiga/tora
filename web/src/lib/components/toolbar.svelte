@@ -29,12 +29,12 @@
   let selectedExperiments = $derived.by(() =>
     getExperimentsSelectedForComparision(),
   );
-  let isWorkspacePage = $derived(page.url.pathname.startsWith("/workspaces/"));
+  let isWorkspacePage = $derived(page.url.pathname.startsWith("/dashboard/"));
   let showBackButton = $derived.by(() => {
     const path = page.url.pathname;
     return (
       path !== "/" &&
-      path !== "/workspaces" &&
+      path !== "/dashboard" &&
       !path.startsWith("/login") &&
       !path.startsWith("/signup")
     );
@@ -185,9 +185,9 @@
 
     <button
       class="p-3 rounded-full hover:bg-ctp-surface0/50 transition-all duration-200 text-ctp-subtext0 hover:text-ctp-text hover:scale-110 active:scale-95"
-      title="Go to workspaces"
+      title="Go to dashboard"
       onclick={() => {
-        goto("/workspaces");
+        goto("/dashboard");
       }}
     >
       <Command size={20} />

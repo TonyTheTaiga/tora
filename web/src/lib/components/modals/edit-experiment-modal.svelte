@@ -48,7 +48,7 @@
   {#snippet children()}
     <form
       method="POST"
-      action="/experiments?/update"
+      action="/?/updateExperiment"
       class="space-y-4"
       use:enhance={() => {
         return async ({ result, update }) => {
