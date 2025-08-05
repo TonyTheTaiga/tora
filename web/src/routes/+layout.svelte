@@ -3,7 +3,6 @@
   import { getTheme } from "$lib/state/theme.svelte.js";
   import Header from "$lib/components/header.svelte";
   import Toolbar from "$lib/components/toolbar.svelte";
-  import SimpleLandingPage from "$lib/components/simple-landing-page.svelte";
   import { page } from "$app/state";
 
   let { children } = $props();
@@ -25,6 +24,6 @@
       {@render children()}
     </main>
   {:else}
-    <main class="surface-base"><SimpleLandingPage /></main>
+    <main class="surface-base">{@render children()}</main>
   {/if}
 </div>
