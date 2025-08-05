@@ -17,10 +17,10 @@
   );
 </script>
 
-<div class="text-ctp-text surface-base flex-1" data-theme={theme}>
+<div class="text-ctp-text surface-base flex-1">
   {#if showNavigation}
     <Header />
-    <!-- <Toolbar /> -->
+    <Toolbar />
     <main class="layer-fade-in">
       {@render children()}
     </main>
