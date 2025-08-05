@@ -17,8 +17,9 @@
       <Logo />
     </button>
 
-    <div class="flex flex-row space-x-4">
+    <div class="flex space-x-4">
       <button
+        class="floating-element p-2"
         onclick={() => {
           toggleTheme();
         }}
@@ -36,7 +37,7 @@
         {/if}
       </button>
 
-      <button onclick={() => goto("/settings")}>
+      <button class="floating-element p-2" onclick={() => goto("/settings")}>
         <Cog />
       </button>
     </div>

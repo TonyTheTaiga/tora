@@ -19,20 +19,17 @@
 
 <div class="terminal-chrome-header">
   <div class="flex items-center justify-between mb-3">
-    <h2 class="text-ctp-text font-medium text-base">workspaces</h2>
+    <h2 class="text-ctp-text font-medium text-base">Workspaces</h2>
     <div>
       <button
         aria-label="create-workspace"
         onclick={() => openCreateWorkspaceModal()}
-        class="floating-element px-3 py-2 md:px-4 flex-shrink-0"
+        class="floating-element p-2"
       >
         <FolderPlus />
       </button>
 
-      <button
-        aria-label="pending-invitations"
-        class="floating-element px-3 py-2 md:px-4 flex-shrink-0"
-      >
+      <button aria-label="pending-invitations" class="floating-element p-2">
         <Mail />
       </button>
     </div>
