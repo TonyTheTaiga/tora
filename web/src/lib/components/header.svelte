@@ -1,6 +1,9 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import Logo from "$lib/logo_assets/logo.svelte";
+  import { getTheme, toggleTheme } from "$lib/state/theme.svelte";
+  import { Cog, Moon, Sun } from "@lucide/svelte";
+  let theme = $derived(getTheme());
 </script>
 
 <header class="sticky top-0 z-30 surface-glass-elevated">
@@ -13,5 +16,29 @@
     >
       <Logo />
     </button>
+
+    <div class="flex flex-row space-x-4">
+      <button
+        onclick={() => {
+          toggleTheme();
+        }}
+        aria-label={theme === "dark"
+          ? "Switch to light theme"
+          : "Switch to dark theme"}
+        title={theme === "dark"
+          ? "Switch to light theme"
+          : "Switch to dark theme"}
+      >
+        {#if theme === "dark"}
+          <Sun size={20} />
+        {:else}
+          <Moon size={20} />
+        {/if}
+      </button>
+
+      <button onclick={() => goto("/settings")}>
+        <Cog />
+      </button>
+    </div>
   </nav>
 </header>
