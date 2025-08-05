@@ -3,6 +3,7 @@
   import { getTheme } from "$lib/state/theme.svelte.js";
   import Header from "$lib/components/header.svelte";
   import Toolbar from "$lib/components/toolbar.svelte";
+  import SimpleLandingPage from "$lib/components/simple-landing-page.svelte";
   import { page } from "$app/state";
 
   let { children } = $props();
@@ -20,13 +21,12 @@
   {#if showNavigation}
     <Header />
     <!-- <Toolbar /> -->
-    <main class="w-full layer-fade-in">
+    <main class="layer-fade-in">
       <div class="content-layer">
         {@render children()}
       </div>
     </main>
   {:else}
-    <!-- just renders the landing page -->
-    <main class="w-full surface-base">{@render children()}</main>
+    <main class="surface-base"><SimpleLandingPage /></main>
   {/if}
 </div>
