@@ -14,16 +14,16 @@
 </script>
 
 <div
-  class="h-full bg-ctp-base text-ctp-text flex space-x-2 font-mono border-ctp-surface0/30 px-4 py-2"
+  class="bg-ctp-base text-ctp-text flex space-x-2 font-mono border-ctp-surface0/30 px-4 py-2"
 >
   <div
-    class="w-1/4 border-l border-r border-b border-ctp-surface0/30 flex flex-col h-full"
+    class="w-1/4 border-l border-r border-b border-ctp-surface0/30 flex flex-col"
   >
     <WorkspaceColumn {workspaces} {workspaceRoles} {workspaceInvitations} />
   </div>
 
   <div
-    class="w-1/4 border-r border-l border-b border-ctp-surface0/30 flex flex-col h-full"
+    class="w-1/4 border-r border-l border-b border-ctp-surface0/30 flex flex-col"
   >
     {#if selectedWorkspace}
       <ExperimentListColumn workspace={selectedWorkspace} />
@@ -33,7 +33,7 @@
   </div>
 
   <div
-    class="w-1/2 border-l border-r border-b border-ctp-surface0/30 flex flex-col h-full"
+    class="w-1/2 border-l border-r border-b border-ctp-surface0/30 flex flex-col"
   >
     {#if selectedExperiment}
       <ExperimentDetails experiment={selectedExperiment} />
