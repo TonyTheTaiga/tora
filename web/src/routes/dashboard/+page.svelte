@@ -14,7 +14,7 @@
 </script>
 
 <div
-  class="bg-ctp-base text-ctp-text flex space-x-2 font-mono border-ctp-surface0/30 px-4 py-2 h-[calc(100vh-4rem)] overflow-hidden"
+  class="text-ctp-text flex space-x-2 font-mono border-ctp-surface0/30 p-4 h-[calc(100vh-4.5rem)] overflow-hidden"
 >
   <div
     class="w-1/4 border-l border-r border-b border-ctp-surface0/30 flex flex-col overflow-y-auto"
