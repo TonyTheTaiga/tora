@@ -117,6 +117,7 @@ pyrightconfig.json
 api/target
 
 web.old
+web.old.2
 supabase
 
 # Created by https://www.toptal.com/developers/gitignore/api/swift,swiftpackagemanager,xcode
