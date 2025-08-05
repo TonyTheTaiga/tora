@@ -1,12 +1,15 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
+  import { X } from "@lucide/svelte";
 
   let {
     title,
     children,
+    onClose,
   }: {
     title: string;
     children: any;
+    onClose?: () => void;
   } = $props();
 
   onMount(() => {
@@ -40,6 +43,16 @@
           {title}
         </h3>
       </div>
+      {#if onClose}
+        <button
+          onclick={onClose}
+          type="button"
+          class="text-ctp-subtext0 hover:text-ctp-text p-1 transition-colors"
+          aria-label="Close modal"
+        >
+          <X size={20} />
+        </button>
+      {/if}
     </div>
 
     <div class="px-3 sm:px-4 md:px-6 py-3 sm:py-4">

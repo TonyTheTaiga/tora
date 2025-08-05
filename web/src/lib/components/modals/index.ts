@@ -2,6 +2,7 @@ export { default as BaseModal } from "./BaseModal.svelte";
 export { default as ModalFormSection } from "./ModalFormSection.svelte";
 export { default as ModalInput } from "./ModalInput.svelte";
 export { default as ModalButtons } from "./ModalButtons.svelte";
+export { default as ModalClose } from "./ModalClose.svelte";
 export { default as CreateExperimentModal } from "./create-experiment-modal.svelte";
 export { default as EditExperimentModal } from "./edit-experiment-modal.svelte";
 export { default as DeleteConfirmationModal } from "./delete-confirmation-modal.svelte";

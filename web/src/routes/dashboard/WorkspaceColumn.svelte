@@ -7,14 +7,26 @@
   import WorkspaceList from "$lib/components/lists/WorkspaceList.svelte";
   import CreateWorkspaceModal from "$lib/components/modals/create-workspace-modal.svelte";
   import { Mail, FolderPlus } from "@lucide/svelte";
+  import InvitationsModal from "./invitations-modal.svelte";
 
   let { workspaces, workspaceRoles, workspaceInvitations } = $props();
   let workspaceSearchQuery = $state("");
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
+
+  let openInvitationModal = $state<boolean>(false);
 </script>
 
 {#if createWorkspaceModal}
   <CreateWorkspaceModal />
+{/if}
+
+{#if openInvitationModal}
+  <InvitationsModal
+    invitations={workspaceInvitations}
+    close={() => {
+      openInvitationModal = false;
+    }}
+  />
 {/if}
 
 <div class="terminal-chrome-header">
@@ -29,8 +41,17 @@
         <FolderPlus />
       </button>
 
-      <button aria-label="pending-invitations" class="floating-element p-2">
+      <button
+        aria-label="pending-invitations"
+        class="floating-element p-2 relative"
+        onclick={() => (openInvitationModal = true)}
+      >
         <Mail />
+        {#if workspaceInvitations.length > 0}
+          <div
+            class="absolute -top-1 -right-1 w-3 h-3 bg-ctp-red rounded-full animate-pulse"
+          ></div>
+        {/if}
       </button>
     </div>
   </div>
