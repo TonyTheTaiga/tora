@@ -37,13 +37,11 @@ export function loadData() {
   });
 
   return {
-    // get workspaceRoles() {
-    //   return workspaceRoles;
-    // },
-    // get workspaceInvitations() {
-    //   return workspaceInvitations;
-    // },
-    workspaceRoles,
-    workspaceInvitations,
+    get workspaceRoles() {
+      return workspaceRoles;
+    },
+    get workspaceInvitations() {
+      return workspaceInvitations;
+    },
   };
 }
