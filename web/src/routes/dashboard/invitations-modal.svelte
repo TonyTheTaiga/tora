@@ -1,15 +1,10 @@
 <script lang="ts">
-  import {
-    BaseModal,
-    ModalFormSection,
-    ModalInput,
-    ModalButtons,
-    ModalClose,
-  } from "$lib/components/modals";
+  import { BaseModal } from "$lib/components/modals";
+  import PendingInvitations from "$lib/components/pending-invitations.svelte";
 
   let { invitations, close } = $props();
 </script>
 
 <BaseModal title="Workspace Invitations" onClose={close}>
-  {#each invitations as invitation}{/each}
+  <PendingInvitations {invitations} />
 </BaseModal>

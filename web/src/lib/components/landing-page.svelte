@@ -28,7 +28,7 @@
   });
 
   const headline = "Pure Speed. Pure Insight.";
-  const subtitle = "A New Experiment Tracker";
+  const subtitle = "A Modern Experiment Tracker";
 
   function addLineNumbers(code: string): string {
     return code
@@ -137,25 +137,27 @@
 <div
   class="flex items-center justify-center min-h-[calc(100vh-2rem)] font-mono"
 >
-  <div class="w-full max-w-6xl mx-auto px-8">
+  <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex flex-col items-center text-center text-ctp-text">
-      <div class="fill-ctp-blue w-full max-w-sm mb-12 -translate-x-[-5.5%]">
+      <div
+        class="fill-ctp-blue w-full max-w-xs sm:max-w-sm mb-8 sm:mb-12 -translate-x-[-5.5%]"
+      >
         <Logo />
       </div>
 
-      <div class="w-full max-w-4xl space-y-12">
+      <div class="w-full max-w-4xl space-y-8 sm:space-y-12">
         <div>
           <h1
-            class="text-5xl font-bold leading-tight mb-3 text-ctp-text font-mono"
+            class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-2 sm:mb-3 text-ctp-text font-mono"
           >
             {headline}
           </h1>
           <h2
-            class="text-4xl font-bold leading-tight mb-6 text-ctp-text font-mono"
+            class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-4 sm:mb-6 text-ctp-text font-mono"
           >
             {subtitle}
           </h2>
-          <div class="w-24 h-0.5 bg-ctp-blue mx-auto"></div>
+          <div class="w-16 sm:w-24 h-0.5 bg-ctp-blue mx-auto"></div>
         </div>
 
         <article
@@ -183,7 +185,7 @@
                 ></button>
               </div>
               <div
-                class="text-center text-xs text-ctp-subtext0 font-mono inline"
+                class="text-center text-xs text-ctp-subtext0 font-mono hidden sm:inline"
               >
                 ~/tora
               </div>
@@ -228,19 +230,19 @@
             </div>
 
             <div
-              class="p-6 min-h-[320px] overflow-y-auto"
+              class="p-4 sm:p-6 max-h-[220px] sm:min-h-[320px] overflow-y-auto"
               class:maximized-content={isMaximized}
             >
               {#if activeTab === "start"}
                 {#if highlightedGettingStarted}
                   <div
-                    class="text-base leading-relaxed text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent [&_pre]:whitespace-pre-wrap [&_pre]:break-words"
+                    class="text-xs sm:text-sm md:text-base leading-relaxed text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent [&_pre]:whitespace-pre-wrap [&_pre]:break-words"
                   >
                     {@html highlightedGettingStarted}
                   </div>
                 {:else}
                   <pre
-                    class="text-base text-ctp-text font-mono leading-relaxed text-left whitespace-pre-wrap break-words"><code
+                    class="text-xs sm:text-sm md:text-base text-ctp-text font-mono leading-relaxed text-left whitespace-pre-wrap break-words"><code
                       >{@html formattedGettingStarted}</code
                     ></pre>
                 {/if}
@@ -252,7 +254,7 @@
             </div>
 
             <footer
-              class="border-t border-ctp-surface0/30 flex flex-row justify-between items-center p-4 gap-4"
+              class="border-t border-ctp-surface0/30 flex flex-col sm:flex-row justify-between items-center p-4 gap-4"
             >
               <span class="text-xs text-ctp-subtext0 font-mono"
                 >start anonymous • sign up to store experiments</span
@@ -260,7 +262,7 @@
               <button
                 type="button"
                 onclick={() => goto("/signup")}
-                class="w-auto text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust font-mono text-sm flex items-center justify-center gap-2 px-6 py-2 border border-ctp-blue"
+                class="w-full sm:w-auto text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust font-mono text-sm flex items-center justify-center gap-2 px-6 py-2 border border-ctp-blue"
               >
                 sign up
               </button>
@@ -276,7 +278,7 @@
   @reference "tailwindcss";
 
   .markdown-content {
-    @apply text-base leading-relaxed text-left;
+    @apply text-xs sm:text-sm md:text-base leading-relaxed text-left;
     color: var(--color-ctp-text);
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -335,7 +337,7 @@
   }
 
   .markdown-content :global(pre) {
-    @apply font-mono text-base p-3 rounded mb-3;
+    @apply font-mono text-xs p-3 rounded mb-3;
     background-color: rgba(var(--color-ctp-surface0), 0.3);
     color: var(--color-ctp-text);
     white-space: pre-wrap;
