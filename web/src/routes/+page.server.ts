@@ -140,29 +140,6 @@ export const actions: Actions = {
     timer.end({});
   },
 
-  sendInvitation: async ({ request, locals }) => {
-    const data = await request.formData();
-    const workspaceId = data.get("workspaceId") as string;
-    const email = data.get("email") as string;
-    const roleId = data.get("roleId") as string;
-
-    if (!locals.apiClient.hasElevatedPermissions()) {
-      return fail(401, { error: "Authentication required" });
-    }
-
-    try {
-      await locals.apiClient.post("/api/workspace-invitations", {
-        workspaceId,
-        email,
-        roleId,
-      });
-      return { success: true };
-    } catch (error) {
-      console.error("Failed to send invitation:", error);
-      return fail(500, { error: "Failed to send invitation" });
-    }
-  },
-
   createExperiment: async ({ request, locals }) => {
     const {
       "experiment-name": name,
@@ -184,6 +161,7 @@ export const actions: Actions = {
     await locals.apiClient.post("/api/experiments", payload);
     return { success: true };
   },
+
   updateExperiment: async ({ request, locals }) => {
     const {
       "experiment-id": id,
@@ -199,7 +177,8 @@ export const actions: Actions = {
 
     return { success: true };
   },
-  delete: async ({ request, locals }) => {
+
+  deleteExperiment: async ({ request, locals }) => {
     const data = await request.formData();
     const id = data.get("id");
 
@@ -210,5 +189,65 @@ export const actions: Actions = {
     }
     await locals.apiClient.delete<null>(`/api/experiments/${id}`);
     return { success: true };
+  },
+
+  respondToInvitation: async ({ request, locals }) => {
+    const data = await request.formData();
+    const invitationId = data.get("invitationId") as string;
+    const action = data.get("action") as string;
+
+    if (!locals.apiClient.hasElevatedPermissions()) {
+      return fail(401, { error: "Authentication required" });
+    }
+
+    try {
+      await locals.apiClient.put(
+        `/api/workspaces/any/invitations?invitationId=${invitationId}&action=${action}`,
+      );
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to respond to invitation:", error);
+      return fail(500, { error: "Failed to respond to invitation" });
+    }
+  },
+
+  leaveWorkspace: async ({ request, locals }) => {
+    const data = await request.formData();
+    const workspaceId = data.get("workspaceId") as string;
+
+    if (!locals.apiClient.hasElevatedPermissions()) {
+      return fail(401, { error: "Authentication required" });
+    }
+
+    try {
+      await locals.apiClient.post(`/api/workspaces/${workspaceId}/leave`);
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to leave workspace:", error);
+      return fail(500, { error: "Failed to leave workspace" });
+    }
+  },
+
+  sendInvitation: async ({ request, locals }) => {
+    const data = await request.formData();
+    const workspaceId = data.get("workspaceId") as string;
+    const email = data.get("email") as string;
+    const roleId = data.get("roleId") as string;
+
+    if (!locals.apiClient.hasElevatedPermissions()) {
+      return fail(401, { error: "Authentication required" });
+    }
+
+    try {
+      await locals.apiClient.post("/api/workspace-invitations", {
+        workspaceId,
+        email,
+        roleId,
+      });
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to send invitation:", error);
+      return fail(500, { error: "Failed to send invitation" });
+    }
   },
 };

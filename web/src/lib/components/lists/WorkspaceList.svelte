@@ -116,7 +116,7 @@
 
     const form = document.createElement("form");
     form.method = "POST";
-    form.action = "?/leaveWorkspace";
+    form.action = "/?/leaveWorkspace";
 
     const workspaceIdInput = document.createElement("input");
     workspaceIdInput.type = "hidden";
