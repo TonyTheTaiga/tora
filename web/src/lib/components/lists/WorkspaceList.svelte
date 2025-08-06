@@ -47,11 +47,8 @@
     });
   }
 
-  // Workspace deletion state
   let deleteModalOpen = $state(false);
   let workspaceToDelete: Workspace | null = $state(null);
-
-  // Workspace invitation state
   let inviteModalOpen = $state(false);
   let workspaceToInvite: Workspace | null = $state(null);
 
@@ -148,9 +145,7 @@
     {onItemClick}
   >
     {#snippet children(workspace)}
-      <!-- Content - Mobile-first responsive layout -->
       <div class="flex-1 min-w-0">
-        <!-- Header: Name and date -->
         <div
           class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 mb-2"
         >
@@ -169,7 +164,6 @@
           </div>
         </div>
 
-        <!-- Description -->
         {#if workspace.description}
           <p
             class="text-ctp-subtext1 text-sm mb-2 line-clamp-2 sm:line-clamp-none"
@@ -178,9 +172,7 @@
           </p>
         {/if}
 
-        <!-- Role and metadata - Stack on mobile -->
         <div class="flex items-center gap-2 text-xs">
-          <!-- Role badge using the dedicated component -->
           <div class="flex items-center gap-1 flex-wrap">
             <WorkspaceRoleBadge role={workspace.role || "VIEWER"} />
           </div>
