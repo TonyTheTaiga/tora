@@ -33,11 +33,18 @@
         desc: exp.description?.toLowerCase() ?? "",
         tags: exp.tags?.map((t: string) => t.toLowerCase()) ?? [],
       }))
-      .filter((entry: any) => {
-        if (!searchQuery) return true;
-        const q = searchQuery.toLowerCase();
-        return entry.name.includes(q);
-      })
+      .filter(
+        (entry: {
+          exp: Experiment;
+          name: string;
+          desc: string;
+          tags: string[];
+        }) => {
+          if (!searchQuery) return true;
+          const q = searchQuery.toLowerCase();
+          return entry.name.includes(q);
+        },
+      )
       .map((e: any) => e.exp),
   );
 
