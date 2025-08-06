@@ -100,9 +100,7 @@
     <div class="space-y-6">
       {#if experiment.availableMetrics.length > 0}
         <div class="space-y-2">
-          <div
-            class="bg-ctp-surface0/10 border border-ctp-surface0/20 p-2 md:p-4"
-          >
+          <div class="bg-ctp-surface0/10 border border-ctp-surface0/20 p-4">
             <ExperimentChart
               metricData={experiment.metricData}
               availableMetrics={experiment.availableMetrics}
@@ -176,7 +174,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
               {#each experiment.hyperparams as param, index}
                 <div
-                  class="flex flex-col sm:flex-row sm:items-center sm:justify-between hover:bg-ctp-surface0/20 px-3 py-2 text-sm gap-1 sm:gap-2 {index !==
+                  class="flex flex-row items-center justify-between hover:bg-ctp-surface0/20 px-3 py-2 text-sm gap-2 {index !==
                   experiment.hyperparams.length - 1
                     ? 'border-b border-ctp-surface0/20'
                     : ''} {index % 2 === 0 ? 'bg-ctp-surface0/5' : ''}"

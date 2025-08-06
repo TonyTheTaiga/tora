@@ -26,7 +26,7 @@
 <div class="font-mono">
   <!-- Header -->
   <div
-    class="flex items-center justify-between border-b border-ctp-surface0/20 px-4 md:px-6 py-4"
+    class="flex items-center justify-between border-b border-ctp-surface0/20 px-6 py-4"
   >
     <div>
       <h1 class="text-lg font-medium text-ctp-text">Settings</h1>
@@ -49,7 +49,7 @@
   </div>
 
   <!-- Main content -->
-  <div class="px-4 md:px-6 py-6 space-y-8">
+  <div class="px-6 py-6 space-y-8">
     <!-- API Keys Section -->
     <div>
       <div class="text-base text-ctp-text font-medium mb-4">api keys</div>

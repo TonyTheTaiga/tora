@@ -1,6 +1,6 @@
 # What is Tora?
 
-**Tora** is an experiment tracker built for speed and simplicity. Designed specifically for ML engineers and data scientists who want to track experiments without the complexity.
+**Tora** is an experiment tracker built for speed and simplicity.
 
 Track metrics, hyperparameters, and experiment metadata with just 2 lines of code.
 

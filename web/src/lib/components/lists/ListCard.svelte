@@ -29,13 +29,13 @@
   {#each items as item}
     <div class={getItemClass(item)}>
       <button onclick={() => handleItemClick(item)} class="w-full text-left">
-        <div class="p-2 sm:p-3 md:p-4">
+        <div class="p-4">
           {@render children(item)}
         </div>
       </button>
 
       {#if actions}
-        <div class="border-t border-ctp-surface0/20 px-2 sm:px-3 py-2">
+        <div class="border-t border-ctp-surface0/20 px-3 py-2">
           {@render actions(item)}
         </div>
       {/if}

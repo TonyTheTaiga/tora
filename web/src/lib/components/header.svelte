@@ -7,9 +7,7 @@
 </script>
 
 <header class="sticky top-0 z-30 surface-glass-elevated">
-  <nav
-    class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 flex flex-row justify-between items-center"
-  >
+  <nav class="px-6 py-4 flex flex-row justify-between items-center">
     <button
       class="w-32 text-ctp-blue fill-current hover:text-ctp-blue/80 transition-colors"
       onclick={() => goto("/")}
