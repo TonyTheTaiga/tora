@@ -12,7 +12,7 @@
   let {
     items,
     getItemClass = () =>
-      "group transition-colors cursor-pointer hover:bg-ctp-surface0/5 relative mb-1 border border-transparent hover:border-ctp-surface0/8 border-l-2 hover:border-l-ctp-blue/30",
+      "group layer-slide-up floating-element cursor-pointer relative mb-3 border-l-2 hover:border-l-ctp-blue/30",
     onItemClick,
     children,
     actions,

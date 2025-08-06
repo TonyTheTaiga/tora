@@ -127,20 +127,12 @@
     document.body.appendChild(form);
     form.submit();
   }
-
-  function getWorkspaceItemClass(): string {
-    return "group layer-slide-up floating-element cursor-pointer relative mb-3 border-l-2 hover:border-l-ctp-blue/30";
-  }
 </script>
 
 {#if filteredWorkspaces.length === 0 && searchQuery}
   <EmptyState type="search" {searchQuery} />
 {:else}
-  <ListCard
-    items={filteredWorkspaces}
-    getItemClass={getWorkspaceItemClass}
-    {onItemClick}
-  >
+  <ListCard items={filteredWorkspaces} {onItemClick}>
     {#snippet children(workspace)}
       <div class="flex-1 min-w-0">
         <div class="flex items-center justify-between gap-3 mb-2">
