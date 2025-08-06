@@ -22,6 +22,10 @@
       {@render children()}
     </main>
   {:else}
-    <main class="surface-base">{@render children()}</main>
+    <main
+      class="surface-base min-h-screen flex flex-col justify-center items-center"
+    >
+      {@render children()}
+    </main>
   {/if}
 </div>
