@@ -22,7 +22,7 @@ pub struct CreateUser {
     pub password: String,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct ConfirmQueryParams {
     pub token_hash: String,
     pub confirm_type: String,
