@@ -1,7 +1,6 @@
 <script lang="ts">
   import "../app.css";
   import Header from "$lib/components/header.svelte";
-  // import Toolbar from "$lib/components/toolbar.svelte";
   import { page } from "$app/state";
 
   let { children } = $props();
