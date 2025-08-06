@@ -16,7 +16,7 @@
       href="/"
       class="text-ctp-blue hover:text-ctp-blue/80 transition-colors text-sm"
     >
-      [back to workspace]
+      [back to homepage]
     </a>
   </div>
 </div>
