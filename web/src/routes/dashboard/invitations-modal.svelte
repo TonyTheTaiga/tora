@@ -6,5 +6,9 @@
 </script>
 
 <BaseModal title="Workspace Invitations" onClose={close}>
-  <PendingInvitations {invitations} />
+  {#if invitations.length > 0}
+    <PendingInvitations {invitations} />
+  {:else}
+    <div class="text-center text-ctp-gray-400">No pending invitations.</div>
+  {/if}
 </BaseModal>
