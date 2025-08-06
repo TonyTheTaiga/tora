@@ -4,7 +4,14 @@
   import EditExperimentModal from "$lib/components/modals/edit-experiment-modal.svelte";
   import type { Workspace, Experiment } from "$lib/types";
   import { copyToClipboard } from "$lib/utils/common";
-  import { setSelectedExperiment, loading, errors } from "./state.svelte";
+  import {
+    setSelectedExperiment,
+    loading,
+    errors,
+    getCachedExperiments,
+    setCachedExperiments,
+    isWorkspaceLoaded,
+  } from "./state.svelte";
 
   let { workspace }: { workspace: Workspace } = $props();
 
@@ -49,11 +56,20 @@
   }
 
   $effect(() => {
-    loadExperiments(workspace).then((results) => {
-      if (results) {
-        experiments = results;
-      }
-    });
+    const cached = getCachedExperiments(workspace.id);
+    if (cached) {
+      experiments = cached;
+      return;
+    }
+
+    if (!isWorkspaceLoaded(workspace.id)) {
+      loadExperiments(workspace).then((results) => {
+        if (results) {
+          experiments = results;
+          setCachedExperiments(workspace.id, results);
+        }
+      });
+    }
   });
 </script>
 

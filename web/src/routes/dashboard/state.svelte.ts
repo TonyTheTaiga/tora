@@ -3,6 +3,9 @@ import type { Workspace, Experiment } from "$lib/types";
 let selectedWorkspace = $state<Workspace | null>(null);
 let selectedExperiment = $state<Experiment | null>(null);
 
+let experimentsCache = $state(new Map<string, Experiment[]>());
+let loadedWorkspaces = $state(new Set<string>());
+
 export let loading = $state({
   workspaces: true,
   experiments: false,
@@ -29,4 +32,30 @@ export function getSelectedExperiment(): Experiment | null {
 
 export function setSelectedExperiment(experiment: Experiment | null) {
   selectedExperiment = experiment;
+}
+
+export function getCachedExperiments(workspaceId: string): Experiment[] | null {
+  return experimentsCache.get(workspaceId) || null;
+}
+
+export function setCachedExperiments(
+  workspaceId: string,
+  experiments: Experiment[],
+): void {
+  experimentsCache.set(workspaceId, experiments);
+  loadedWorkspaces.add(workspaceId);
+}
+
+export function isWorkspaceLoaded(workspaceId: string): boolean {
+  return loadedWorkspaces.has(workspaceId);
+}
+
+export function clearExperimentsCache(): void {
+  experimentsCache.clear();
+  loadedWorkspaces.clear();
+}
+
+export function clearWorkspaceCache(workspaceId: string): void {
+  experimentsCache.delete(workspaceId);
+  loadedWorkspaces.delete(workspaceId);
 }
