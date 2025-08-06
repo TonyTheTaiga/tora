@@ -25,9 +25,35 @@ jobs:
         with:
           components: rustfmt
       - name: Set up Swift
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "5.10"
+        run: |
+          # Install dependencies
+          sudo apt-get update
+          sudo apt-get install -y \
+            binutils \
+            git \
+            gnupg2 \
+            libc6-dev \
+            libcurl4-openssl-dev \
+            libedit2 \
+            libgcc-9-dev \
+            libpython3-dev \
+            libsqlite3-0 \
+            libstdc++-9-dev \
+            libxml2-dev \
+            libz3-dev \
+            pkg-config \
+            tzdata \
+            unzip \
+            zlib1g-dev
+
+          # Download and install Swift
+          SWIFT_VERSION="5.10.1"
+          SWIFT_URL="https://download.swift.org/swift-${SWIFT_VERSION}-release/ubuntu2204/swift-${SWIFT_VERSION}-RELEASE/swift-${SWIFT_VERSION}-RELEASE-ubuntu22.04.tar.gz"
+
+          wget -q $SWIFT_URL
+          tar xzf swift-${SWIFT_VERSION}-RELEASE-ubuntu22.04.tar.gz
+          sudo mv swift-${SWIFT_VERSION}-RELEASE-ubuntu22.04 /usr/share/swift
+          echo "/usr/share/swift/usr/bin" >> $GITHUB_PATH
       - name: Install swift-format
         run: |
           git clone https://github.com/apple/swift-format.git
