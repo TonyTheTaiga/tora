@@ -123,7 +123,7 @@ pub async fn refresh_token(
             StatusCode::UNAUTHORIZED,
             Json(types::Response::<&str> {
                 status: 401,
-                data: None,
+                data: Some("Failed to refresh token"),
             }),
         )
             .into_response(),

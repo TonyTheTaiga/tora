@@ -123,12 +123,12 @@
 
 <details class="relative" bind:this={detailsElement}>
   <summary
-    class="flex items-center justify-between cursor-pointer p-2 md:p-3 bg-ctp-surface0/20 border border-ctp-surface0/30 hover:bg-ctp-surface0/30 transition-colors text-sm md:text-sm"
+    class="flex items-center justify-between cursor-pointer p-3 bg-ctp-surface0/20 border border-ctp-surface0/30 hover:bg-ctp-surface0/30 transition-colors text-sm"
   >
     <span class="text-ctp-text">
       {summaryDisplayText()}
     </span>
-    <ChevronDown size={12} class="text-ctp-subtext0 md:w-4 md:h-4" />
+    <ChevronDown size={16} class="text-ctp-subtext0" />
   </summary>
 
   <div

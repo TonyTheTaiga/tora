@@ -16,7 +16,7 @@
   function respondToInvitation(invitationId: string, accept: boolean) {
     const form = document.createElement("form");
     form.method = "POST";
-    form.action = "?/respondToInvitation";
+    form.action = "/?/respondToInvitation";
 
     const invitationIdInput = document.createElement("input");
     invitationIdInput.type = "hidden";

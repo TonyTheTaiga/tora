@@ -1,6 +1,7 @@
 import type { Handle } from "@sveltejs/kit";
 import type { SessionData } from "$lib/types";
 import { ApiClient } from "$lib/api";
+import { dev } from "$app/environment";
 
 type RefreshResponse = {
   status: number;
@@ -33,9 +34,19 @@ export const handle: Handle = async ({ event, resolve }) => {
             email: response.data.user.email,
           },
         };
+        const sessionJson = JSON.stringify(newSessionData);
+        const sessionBase64 = btoa(sessionJson);
+        event.cookies.set("tora_auth_token", sessionBase64, {
+          path: "/",
+          httpOnly: true,
+          secure: !dev,
+          sameSite: "strict",
+          maxAge: newSessionData.expires_in,
+        });
         event.locals.session = newSessionData;
         apiClient = new ApiClient(undefined, newSessionData.access_token);
       } else if (response.status === 401) {
+        console.error(`failed to refresh:`, response.data);
         event.cookies.delete("tora_auth_token", { path: "/" });
       }
     }

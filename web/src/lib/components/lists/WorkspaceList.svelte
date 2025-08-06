@@ -11,19 +11,13 @@
 
   interface Props {
     workspaces: Workspace[];
-    searchQuery?: string;
-    workspaceRoles?: Array<{ id: string; name: string }>;
-    onItemClick?: (workspace: Workspace) => void;
+    searchQuery: string;
+    workspaceRoles: Array<{ id: string; name: string }>;
+    onItemClick: (workspace: Workspace) => void;
   }
 
-  let {
-    workspaces,
-    searchQuery = "",
-    workspaceRoles = [],
-    onItemClick = (workspace: Workspace) => {
-      window.location.href = `/workspaces/${workspace.id}`;
-    },
-  }: Props = $props();
+  let { workspaces, searchQuery, workspaceRoles, onItemClick }: Props =
+    $props();
 
   let filteredWorkspaces = $derived(
     workspaces.filter((workspace) => {
@@ -53,11 +47,8 @@
     });
   }
 
-  // Workspace deletion state
   let deleteModalOpen = $state(false);
   let workspaceToDelete: Workspace | null = $state(null);
-
-  // Workspace invitation state
   let inviteModalOpen = $state(false);
   let workspaceToInvite: Workspace | null = $state(null);
 
@@ -125,7 +116,7 @@
 
     const form = document.createElement("form");
     form.method = "POST";
-    form.action = "?/leaveWorkspace";
+    form.action = "/?/leaveWorkspace";
 
     const workspaceIdInput = document.createElement("input");
     workspaceIdInput.type = "hidden";
@@ -154,12 +145,8 @@
     {onItemClick}
   >
     {#snippet children(workspace)}
-      <!-- Content - Mobile-first responsive layout -->
       <div class="flex-1 min-w-0">
-        <!-- Header: Name and date -->
-        <div
-          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 mb-2"
-        >
+        <div class="flex items-center justify-between gap-3 mb-2">
           <h3
             class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate"
           >
@@ -169,24 +156,19 @@
             class="flex items-center gap-2 text-xs text-ctp-lavender flex-shrink-0"
           >
             <span>{formatDate(workspace.createdAt)}</span>
-            <span class="hidden sm:inline text-ctp-lavender/80"
+            <span class="text-ctp-lavender/80"
               >{formatTime(workspace.createdAt)}</span
             >
           </div>
         </div>
 
-        <!-- Description -->
         {#if workspace.description}
-          <p
-            class="text-ctp-subtext1 text-sm mb-2 line-clamp-2 sm:line-clamp-none"
-          >
+          <p class="text-ctp-subtext1 text-sm mb-2">
             {workspace.description}
           </p>
         {/if}
 
-        <!-- Role and metadata - Stack on mobile -->
         <div class="flex items-center gap-2 text-xs">
-          <!-- Role badge using the dedicated component -->
           <div class="flex items-center gap-1 flex-wrap">
             <WorkspaceRoleBadge role={workspace.role || "VIEWER"} />
           </div>
@@ -202,7 +184,7 @@
               e.stopPropagation();
               openInviteModal(workspace);
             }}
-            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-blue/30 sm:p-1"
+            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 hover:border-ctp-blue/30 p-1"
             title="invite users"
           >
             <Users class="w-3 h-3" />
@@ -215,7 +197,7 @@
               e.stopPropagation();
               openDeleteModal(workspace);
             }}
-            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-red/30 sm:p-1"
+            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 hover:border-ctp-red/30 p-1"
             title="delete workspace"
           >
             <Trash2 class="w-3 h-3" />
@@ -228,7 +210,7 @@
               e.stopPropagation();
               leaveWorkspace(workspace.id);
             }}
-            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-red/30 sm:p-1"
+            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 hover:border-ctp-red/30 p-1"
             title="leave workspace"
           >
             <LogOut class="w-3 h-3" />

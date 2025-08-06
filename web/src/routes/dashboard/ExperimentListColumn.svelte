@@ -63,11 +63,7 @@
 
 <div class="terminal-chrome-header">
   <div class="flex items-center justify-between mb-3">
-    <h2 class="text-ctp-text font-medium text-base">experiments</h2>
-    <span
-      class="bg-ctp-surface0/20 text-ctp-subtext0 px-2 py-1 text-xs border border-ctp-surface0/30"
-      >[{experiments ? experiments.length : 0}]</span
-    >
+    <h2 class="text-ctp-text font-medium text-base">Experiments</h2>
   </div>
   <div class="mb-3">
     <button

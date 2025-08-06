@@ -1,7 +1,45 @@
 import type { Actions } from "@sveltejs/kit";
 import { fail } from "@sveltejs/kit";
 import { generateRequestId, startTimer } from "$lib/utils/timing";
-import type { ApiResponse, Workspace } from "$lib/types";
+import type { ApiResponse, Workspace, HyperParam } from "$lib/types";
+
+interface FormDataResult {
+  hyperparams: HyperParam[];
+  tags: string[];
+  [key: string]: any;
+}
+
+function parseFormData(formData: FormData): FormDataResult {
+  const data = Object.fromEntries(formData);
+  const result: FormDataResult = {
+    hyperparams: [],
+    tags: [],
+  };
+  const hyperparamMap = new Map<number, Partial<HyperParam>>();
+
+  for (const [key, value] of Object.entries(data)) {
+    if (typeof value !== "string") continue;
+
+    if (key.startsWith("hyperparams.")) {
+      const [, indexStr, field] = key.split(".");
+      const index = Number(indexStr);
+      const existing = hyperparamMap.get(index) ?? {};
+      hyperparamMap.set(index, { ...existing, [field]: value });
+    } else if (key.startsWith("tags.")) {
+      const [, indexStr] = key.split(".");
+      result.tags[Number(indexStr)] = value;
+    } else {
+      result[key] = value;
+    }
+  }
+
+  result.hyperparams = [...hyperparamMap.values()].filter(
+    (hp): hp is HyperParam => hp.key != null && hp.value != null,
+  );
+  result.tags = result.tags.filter(Boolean);
+
+  return result;
+}
 
 export const actions: Actions = {
   createWorkspace: async ({ request, locals }) => {
@@ -93,7 +131,6 @@ export const actions: Actions = {
       const response = await fetch(`/api/workspaces/${workspaceId}`, {
         method: "DELETE",
       });
-      console.log(response);
       return { success: true };
     } catch (err) {
       console.error("failed to delete workspace", err);
@@ -101,6 +138,94 @@ export const actions: Actions = {
     }
 
     timer.end({});
+  },
+
+  createExperiment: async ({ request, locals }) => {
+    const {
+      "experiment-name": name,
+      "experiment-description": description,
+      "workspace-id": workspaceId,
+      tags,
+    } = parseFormData(await request.formData());
+
+    const payload: any = {
+      name: name,
+      description: description || "",
+      tags,
+    };
+
+    if (workspaceId) {
+      payload["workspaceId"] = workspaceId;
+    }
+
+    await locals.apiClient.post("/api/experiments", payload);
+    return { success: true };
+  },
+
+  updateExperiment: async ({ request, locals }) => {
+    const {
+      "experiment-id": id,
+      "experiment-name": name,
+      "experiment-description": description,
+      tags,
+    } = parseFormData(await request.formData());
+    await locals.apiClient.put(`/api/experiments/${id}`, {
+      name: name,
+      description: description || "",
+      tags,
+    });
+
+    return { success: true };
+  },
+
+  deleteExperiment: async ({ request, locals }) => {
+    const data = await request.formData();
+    const id = data.get("id");
+
+    if (!id || typeof id !== "string") {
+      return fail(400, {
+        message: "A valid ID is required",
+      });
+    }
+    await locals.apiClient.delete<null>(`/api/experiments/${id}`);
+    return { success: true };
+  },
+
+  respondToInvitation: async ({ request, locals }) => {
+    const data = await request.formData();
+    const invitationId = data.get("invitationId") as string;
+    const action = data.get("action") as string;
+
+    if (!locals.apiClient.hasElevatedPermissions()) {
+      return fail(401, { error: "Authentication required" });
+    }
+
+    try {
+      await locals.apiClient.put(
+        `/api/workspaces/any/invitations?invitationId=${invitationId}&action=${action}`,
+      );
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to respond to invitation:", error);
+      return fail(500, { error: "Failed to respond to invitation" });
+    }
+  },
+
+  leaveWorkspace: async ({ request, locals }) => {
+    const data = await request.formData();
+    const workspaceId = data.get("workspaceId") as string;
+
+    if (!locals.apiClient.hasElevatedPermissions()) {
+      return fail(401, { error: "Authentication required" });
+    }
+
+    try {
+      await locals.apiClient.post(`/api/workspaces/${workspaceId}/leave`);
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to leave workspace:", error);
+      return fail(500, { error: "Failed to leave workspace" });
+    }
   },
 
   sendInvitation: async ({ request, locals }) => {

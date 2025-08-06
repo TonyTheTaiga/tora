@@ -1,13 +1,10 @@
 <script lang="ts">
   import "../app.css";
-  import { getTheme } from "$lib/state/theme.svelte.js";
   import Header from "$lib/components/header.svelte";
-  import Toolbar from "$lib/components/toolbar.svelte";
   import { page } from "$app/state";
 
   let { children } = $props();
 
-  let theme = $derived.by(() => getTheme());
   let showNavigation = $derived(
     page.url.pathname !== "/" &&
       page.url.pathname !== "/login" &&
@@ -16,16 +13,18 @@
   );
 </script>
 
-<div class="min-h-screen text-ctp-text surface-base" data-theme={theme}>
+<div class="text-ctp-text surface-base flex-1">
   {#if showNavigation}
     <Header />
-    <Toolbar />
-    <main class="flex-1 w-full layer-fade-in">
-      <div class="content-layer">
-        {@render children()}
-      </div>
+    <!-- <Toolbar /> -->
+    <main class="layer-fade-in">
+      {@render children()}
     </main>
   {:else}
-    <main class="flex-1 w-full surface-base">{@render children()}</main>
+    <main
+      class="surface-base min-h-screen flex flex-col justify-center items-center"
+    >
+      {@render children()}
+    </main>
   {/if}
 </div>

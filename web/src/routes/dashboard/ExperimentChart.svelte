@@ -269,7 +269,7 @@
   <!-- Chart Display Section -->
   {#if selectedMetrics.length > 0}
     <div
-      class="relative h-60 sm:h-80 w-full border border-ctp-surface0/20 bg-transparent overflow-hidden"
+      class="relative h-80 w-full border border-ctp-surface0/20 bg-transparent overflow-hidden"
     >
       <div class="absolute inset-0">
         <canvas bind:this={chartCanvas} class="chart-canvas"></canvas>
@@ -284,12 +284,9 @@
     <!-- Empty State -->
   {:else if availableMetrics && availableMetrics.length > 0}
     <div
-      class="flex flex-col items-center justify-center h-60 sm:h-80 w-full border border-ctp-surface0/20"
+      class="flex flex-col items-center justify-center h-80 w-full border border-ctp-surface0/20"
     >
-      <ChartLine
-        size={20}
-        class="text-ctp-subtext0 mb-2 sm:mb-3 sm:w-6 sm:h-6"
-      />
+      <ChartLine size={24} class="text-ctp-subtext0 mb-3" />
       <p class="text-ctp-subtext0 text-xs text-center max-w-md">
         select metrics to view chart data
       </p>

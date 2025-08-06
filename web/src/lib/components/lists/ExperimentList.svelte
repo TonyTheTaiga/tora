@@ -1,47 +1,24 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
   import {
-    getMode,
-    addExperiment,
-    selectedForComparison,
-  } from "$lib/state/comparison.svelte.js";
-  import {
     setExperimentToEdit,
     setExperimentToDelete,
   } from "$lib/state/modal.svelte.js";
   import { Trash2, Edit } from "@lucide/svelte";
   import { page } from "$app/state";
-  import { goto } from "$app/navigation";
   import EmptyState from "./EmptyState.svelte";
   import ListCard from "./ListCard.svelte";
 
-  interface Props {
-    experiments: Experiment[];
-    searchQuery?: string;
-    formatDate?: (date: Date) => string;
-    onItemClick?: (experiment: Experiment) => void;
-  }
+  let { experiments, searchQuery, onItemClick } = $props();
 
-  let {
-    experiments,
-    searchQuery = "",
-    formatDate = (date: Date) =>
-      date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year:
-          date.getFullYear() !== new Date().getFullYear()
-            ? "numeric"
-            : undefined,
-      }),
-    onItemClick = (experiment: Experiment) => {
-      if (getMode()) {
-        addExperiment(experiment.id);
-      } else {
-        goto(`/experiments/${experiment.id}`);
-      }
-    },
-  }: Props = $props();
+  function formatDate(date: Date) {
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year:
+        date.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
+    });
+  }
 
   let currentWorkspace = $derived(page.data.currentWorkspace);
   let canDeleteExperiment = $derived(
@@ -50,29 +27,26 @@
 
   let filteredExperiments = $derived(
     experiments
-      .map((exp) => ({
+      .map((exp: Experiment) => ({
         exp,
         name: exp.name.toLowerCase(),
         desc: exp.description?.toLowerCase() ?? "",
         tags: exp.tags?.map((t: string) => t.toLowerCase()) ?? [],
       }))
-      .filter((entry) => {
-        if (!searchQuery) return true;
-        const q = searchQuery.toLowerCase();
-        return entry.name.includes(q);
-      })
-      .map((e) => e.exp),
+      .filter(
+        (entry: {
+          exp: Experiment;
+          name: string;
+          desc: string;
+          tags: string[];
+        }) => {
+          if (!searchQuery) return true;
+          const q = searchQuery.toLowerCase();
+          return entry.name.includes(q);
+        },
+      )
+      .map((e: any) => e.exp),
   );
-
-  let selectedExperimentIds = $derived(
-    filteredExperiments
-      .filter((exp) => selectedForComparison(exp.id))
-      .map((exp) => exp.id),
-  );
-
-  function isSelected(experimentId: string): boolean {
-    return selectedExperimentIds.includes(experimentId);
-  }
 
   function formatTime(date: Date): string {
     return date.toLocaleTimeString("en-US", {
@@ -81,32 +55,17 @@
       hour12: true,
     });
   }
-
-  function getTimelineItemClass(experiment: Experiment): string {
-    const baseClass = "group layer-slide-up";
-    const selectedClass = isSelected(experiment.id)
-      ? "surface-accent-blue"
-      : "surface-interactive";
-
-    return `${baseClass} ${selectedClass}`.trim();
-  }
 </script>
 
 {#if filteredExperiments.length === 0 && searchQuery}
   <EmptyState type="search" {searchQuery} />
 {:else}
-  <ListCard
-    items={filteredExperiments}
-    getItemClass={getTimelineItemClass}
-    {onItemClick}
-  >
+  <ListCard items={filteredExperiments} {onItemClick}>
     {#snippet children(experiment)}
-      <!-- Content - Mobile-first responsive layout -->
+      <!-- Content -->
       <div class="flex-1 min-w-0">
         <!-- Header: Name and date -->
-        <div
-          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 mb-2"
-        >
+        <div class="flex items-center justify-between gap-3 mb-2">
           <h3
             class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate"
           >
@@ -116,7 +75,7 @@
             class="flex items-center gap-2 text-xs text-ctp-lavender flex-shrink-0"
           >
             <span>{formatDate(experiment.createdAt)}</span>
-            <span class="hidden sm:inline text-ctp-lavender/80"
+            <span class="text-ctp-lavender/80"
               >{formatTime(experiment.createdAt)}</span
             >
           </div>
@@ -124,15 +83,13 @@
 
         <!-- Description -->
         {#if experiment.description}
-          <p
-            class="text-ctp-subtext1 text-sm mb-2 line-clamp-2 sm:line-clamp-none"
-          >
+          <p class="text-ctp-subtext1 text-sm mb-2">
             {experiment.description}
           </p>
         {/if}
 
-        <!-- Tags and metadata - Stack on mobile -->
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2 text-xs">
+        <!-- Tags and metadata -->
+        <div class="flex items-center gap-2 text-xs">
           <!-- Tags -->
           {#if experiment.tags && experiment.tags.length > 0}
             <div class="flex items-center gap-1 flex-wrap">
@@ -185,7 +142,7 @@
             e.stopPropagation();
             setExperimentToEdit(experiment);
           }}
-          class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-blue/30 sm:p-1"
+          class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-blue transition-colors bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 hover:border-ctp-blue/30 p-1"
           title="edit experiment"
         >
           <Edit class="w-3 h-3" />
@@ -198,7 +155,7 @@
               e.stopPropagation();
               setExperimentToDelete(experiment);
             }}
-            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors sm:bg-ctp-surface0/20 sm:backdrop-blur-md sm:border sm:border-ctp-surface0/30 sm:hover:border-ctp-red/30 sm:p-1"
+            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 hover:border-ctp-red/30 p-1"
             title="delete experiment"
           >
             <Trash2 class="w-3 h-3" />
