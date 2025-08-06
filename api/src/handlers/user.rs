@@ -50,7 +50,6 @@ pub async fn confirm_create(
     State(app_state): State<AppState>,
     Query(payload): Query<types::ConfirmQueryParams>,
 ) -> Redirect {
-    println!("{payload:?}");
     let auth_client = create_client(&app_state.settings);
     let params = VerifyTokenHashParams {
         token_hash: payload.token_hash.clone(),
