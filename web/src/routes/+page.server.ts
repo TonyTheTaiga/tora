@@ -131,7 +131,6 @@ export const actions: Actions = {
       const response = await fetch(`/api/workspaces/${workspaceId}`, {
         method: "DELETE",
       });
-      console.log(response);
       return { success: true };
     } catch (err) {
       console.error("failed to delete workspace", err);

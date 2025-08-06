@@ -11,9 +11,9 @@
 
   interface Props {
     workspaces: Workspace[];
-    searchQuery?: string;
-    workspaceRoles?: Array<{ id: string; name: string }>;
-    onItemClick?: (workspace: Workspace) => void;
+    searchQuery: string;
+    workspaceRoles: Array<{ id: string; name: string }>;
+    onItemClick: (workspace: Workspace) => void;
   }
 
   let { workspaces, searchQuery, workspaceRoles, onItemClick }: Props =

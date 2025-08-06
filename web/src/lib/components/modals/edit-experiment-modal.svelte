@@ -45,125 +45,116 @@
 </script>
 
 <BaseModal title="Edit Experiment">
-  {#snippet children()}
-    <form
-      method="POST"
-      action="/?/updateExperiment"
-      class="space-y-4"
-      use:enhance={() => {
-        return async ({ result, update }) => {
-          if (result.type === "success" || result.type === "redirect") {
-            console.log(
-              `Experiment updated successfully ${experimentCopy.name} ${experimentCopy.description}`,
-            );
-            experiment.name = experimentCopy.name;
-            experiment.description = experimentCopy.description;
-            experiment.tags = [...experimentCopy.tags];
-            resetExperimentToEdit();
-          }
+  <form
+    method="POST"
+    action="/?/updateExperiment"
+    class="space-y-4"
+    use:enhance={() => {
+      return async ({ result, update }) => {
+        if (result.type === "success" || result.type === "redirect") {
+          experiment.name = experimentCopy.name;
+          experiment.description = experimentCopy.description;
+          experiment.tags = [...experimentCopy.tags];
+          resetExperimentToEdit();
+        }
 
-          await update();
-        };
-      }}
-    >
-      <input
-        class="hidden"
-        id="experiment-id"
-        name="experiment-id"
-        value={experimentCopy.id}
-      />
+        await update();
+      };
+    }}
+  >
+    <input
+      class="hidden"
+      id="experiment-id"
+      name="experiment-id"
+      value={experimentCopy.id}
+    />
 
-      <div class="space-y-4">
-        <ModalFormSection title="experiment config">
-          {#snippet children()}
-            <div>
-              <ModalInput
-                id="experiment-name"
-                name="experiment-name"
-                placeholder="experiment_name"
-                bind:value={experimentCopy.name}
-                required
-              />
-            </div>
-            <div>
-              <ModalInput
-                id="experiment-description"
-                name="experiment-description"
-                type="textarea"
-                rows={2}
-                placeholder="description"
-                bind:value={experimentCopy.description}
-                required
-              />
-            </div>
-          {/snippet}
-        </ModalFormSection>
+    <div class="space-y-4">
+      <ModalFormSection title="experiment config">
+        <div>
+          <ModalInput
+            id="experiment-name"
+            name="experiment-name"
+            placeholder="experiment_name"
+            bind:value={experimentCopy.name}
+            required
+          />
+        </div>
+        <div>
+          <ModalInput
+            id="experiment-description"
+            name="experiment-description"
+            type="textarea"
+            rows={2}
+            placeholder="description"
+            bind:value={experimentCopy.description}
+            required
+          />
+        </div>
+      </ModalFormSection>
 
-        <ModalFormSection title="tags">
-          {#snippet children()}
-            <div class="flex flex-wrap items-center gap-2">
-              {#if experimentCopy.tags && experimentCopy.tags.length > 0}
-                {#each experimentCopy.tags as tag, i}
-                  <input type="hidden" value={tag} name="tags.{i}" />
-                  <span
-                    class="inline-flex items-center px-2 py-1 text-sm bg-ctp-blue/10 text-ctp-blue border border-ctp-blue/30"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      class="text-ctp-blue/70 hover:text-ctp-red transition-colors ml-1.5"
-                      onclick={() => experimentCopy.tags?.splice(i, 1)}
-                      aria-label="Remove tag"
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                {/each}
-              {/if}
-
-              {#if addingNewTag}
-                <div class="flex items-center gap-2">
-                  <input
-                    type="text"
-                    bind:value={tag}
-                    class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
-                    placeholder="tag_name"
-                    onkeydown={(event) => {
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                        addTag();
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onclick={(event) => {
-                      event.preventDefault();
-                      addTag();
-                    }}
-                    class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all"
-                  >
-                    <Plus size={14} />
-                  </button>
-                </div>
-              {:else}
+      <ModalFormSection title="tags">
+        <div class="flex flex-wrap items-center gap-2">
+          {#if experimentCopy.tags && experimentCopy.tags.length > 0}
+            {#each experimentCopy.tags as tag, i}
+              <input type="hidden" value={tag} name="tags.{i}" />
+              <span
+                class="inline-flex items-center px-2 py-1 text-sm bg-ctp-blue/10 text-ctp-blue border border-ctp-blue/30"
+              >
+                {tag}
                 <button
                   type="button"
-                  onclick={(event) => {
-                    event.preventDefault();
-                    addingNewTag = true;
-                  }}
-                  class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all"
+                  class="text-ctp-blue/70 hover:text-ctp-red transition-colors ml-1.5"
+                  onclick={() => experimentCopy.tags?.splice(i, 1)}
+                  aria-label="Remove tag"
                 >
-                  <Plus size={14} />
+                  <X size={12} />
                 </button>
-              {/if}
-            </div>
-          {/snippet}
-        </ModalFormSection>
-      </div>
+              </span>
+            {/each}
+          {/if}
 
-      <ModalButtons onCancel={resetExperimentToEdit} submitText="update" />
-    </form>
-  {/snippet}
+          {#if addingNewTag}
+            <div class="flex items-center gap-2">
+              <input
+                type="text"
+                bind:value={tag}
+                class="bg-ctp-surface0/20 border border-ctp-surface0/30 px-3 py-2 text-ctp-text placeholder-ctp-subtext0 focus:outline-none focus:ring-1 focus:ring-ctp-blue focus:border-ctp-blue transition-all text-sm"
+                placeholder="tag_name"
+                onkeydown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    addTag();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onclick={(event) => {
+                  event.preventDefault();
+                  addTag();
+                }}
+                class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all"
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+          {:else}
+            <button
+              type="button"
+              onclick={(event) => {
+                event.preventDefault();
+                addingNewTag = true;
+              }}
+              class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all"
+            >
+              <Plus size={14} />
+            </button>
+          {/if}
+        </div>
+      </ModalFormSection>
+    </div>
+
+    <ModalButtons onCancel={resetExperimentToEdit} submitText="update" />
+  </form>
 </BaseModal>

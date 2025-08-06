@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Plus, LogOut, Trash2 } from "@lucide/svelte";
-  import { PageHeader } from "$lib/components";
   import { enhance } from "$app/forms";
 
   let { data } = $props();
@@ -26,25 +25,28 @@
 
 <div class="font-mono">
   <!-- Header -->
-  <PageHeader
-    title="Settings"
-    subtitle={data?.user?.email || "system configuration"}
+  <div
+    class="flex items-center justify-between border-b border-ctp-surface0/20 px-4 md:px-6 py-4"
   >
-    {#snippet actionButton()}
-      <form action="/logout" method="POST">
-        <button
-          type="submit"
-          class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 px-3 py-2 text-sm transition-all"
-          aria-label="Sign out"
-        >
-          <div class="flex items-center gap-2">
-            <LogOut size={12} />
-            <span>logout</span>
-          </div>
-        </button>
-      </form>
-    {/snippet}
-  </PageHeader>
+    <div>
+      <h1 class="text-lg font-medium text-ctp-text">Settings</h1>
+      <p class="text-sm text-ctp-subtext1">
+        {data?.user?.email || "system configuration"}
+      </p>
+    </div>
+    <form action="/logout" method="POST">
+      <button
+        type="submit"
+        class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 px-3 py-2 text-sm transition-all"
+        aria-label="Sign out"
+      >
+        <div class="flex items-center gap-2">
+          <LogOut size={12} />
+          <span>logout</span>
+        </div>
+      </button>
+    </form>
+  </div>
 
   <!-- Main content -->
   <div class="px-4 md:px-6 py-6 space-y-8">

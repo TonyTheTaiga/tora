@@ -16,9 +16,7 @@ The base modal wrapper that provides consistent styling, backdrop, and structure
 
 ```svelte
 <BaseModal title="My Modal">
-  {#snippet children()}
-    <!-- Modal content goes here -->
-  {/snippet}
+  <!-- Modal content goes here -->
 </BaseModal>
 ```
 
@@ -34,9 +32,7 @@ A bordered section container for grouping form elements with a title.
 
 ```svelte
 <ModalFormSection title="Basic Config">
-  {#snippet children()}
-    <!-- Form inputs go here -->
-  {/snippet}
+  <!-- Form inputs go here -->
 </ModalFormSection>
 ```
 
@@ -142,33 +138,29 @@ Or import specific modals:
 </script>
 
 <BaseModal title="Create Item">
-  {#snippet children()}
-    <form class="space-y-4">
-      <ModalFormSection title="item config">
-        {#snippet children()}
-          <div>
-            <ModalInput
-              name="name"
-              placeholder="item_name"
-              bind:value={name}
-              required
-            />
-          </div>
-          <div>
-            <ModalInput
-              name="description"
-              type="textarea"
-              rows={2}
-              placeholder="description"
-              bind:value={description}
-            />
-          </div>
-        {/snippet}
-      </ModalFormSection>
+  <form class="space-y-4">
+    <ModalFormSection title="item config">
+      <div>
+        <ModalInput
+          name="name"
+          placeholder="item_name"
+          bind:value={name}
+          required
+        />
+      </div>
+      <div>
+        <ModalInput
+          name="description"
+          type="textarea"
+          rows={2}
+          placeholder="description"
+          bind:value={description}
+        />
+      </div>
+    </ModalFormSection>
 
-      <ModalButtons onCancel={handleCancel} submitText="create" />
-    </form>
-  {/snippet}
+    <ModalButtons onCancel={handleCancel} submitText="create" />
+  </form>
 </BaseModal>
 ```
 
