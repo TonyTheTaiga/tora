@@ -55,12 +55,20 @@
       hour12: true,
     });
   }
+
+  function getExperimentItemClass(): string {
+    return "group layer-slide-up floating-element cursor-pointer relative mb-3 border-l-2 hover:border-l-ctp-blue/30";
+  }
 </script>
 
 {#if filteredExperiments.length === 0 && searchQuery}
   <EmptyState type="search" {searchQuery} />
 {:else}
-  <ListCard items={filteredExperiments} {onItemClick}>
+  <ListCard
+    items={filteredExperiments}
+    getItemClass={getExperimentItemClass}
+    {onItemClick}
+  >
     {#snippet children(experiment)}
       <!-- Content -->
       <div class="flex-1 min-w-0">

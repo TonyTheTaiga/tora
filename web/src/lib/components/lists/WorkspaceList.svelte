@@ -129,10 +129,7 @@
   }
 
   function getWorkspaceItemClass(): string {
-    const baseClass = "group layer-slide-up";
-    const surfaceClass = "surface-interactive";
-
-    return `${baseClass} ${surfaceClass}`.trim();
+    return "group layer-slide-up floating-element cursor-pointer relative mb-3 border-l-2 hover:border-l-ctp-blue/30";
   }
 </script>
 
