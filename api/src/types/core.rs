@@ -132,7 +132,10 @@ pub struct ApiKey {
 #[derive(Serialize, Deserialize, sqlx::FromRow)]
 pub struct WorkspaceInvitation {
     pub id: String,
+    #[serde(rename = "workspaceId")]
     pub workspace_id: String,
+    #[serde(rename = "workspaceName")]
+    pub workspace_name: String,
     pub email: String,
     pub role: String,
     pub from: String,

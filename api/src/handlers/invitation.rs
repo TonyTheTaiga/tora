@@ -148,6 +148,7 @@ pub async fn list_invitations(
         SELECT
             wi.id::text,
             w.id::text as workspace_id,
+            w.name as workspace_name,
             u_to.email as email,
             wr.name as role,
             u_from.email as from,

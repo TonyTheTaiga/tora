@@ -56,6 +56,7 @@ export interface PendingInvitation {
   from: string;
   to: string;
   workspaceId: string;
+  workspaceName: string;
   roleId: string;
   createdAt: Date;
 }
