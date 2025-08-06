@@ -25,6 +25,7 @@
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       const apiResponse = await response.json();
       const data = apiResponse.data;
+      console.log(data);
       if (!data || !Array.isArray(data))
         throw new Error("Invalid response structure from experiments API");
 

@@ -1,47 +1,24 @@
 <script lang="ts">
   import type { Experiment } from "$lib/types";
   import {
-    getMode,
-    addExperiment,
-    selectedForComparison,
-  } from "$lib/state/comparison.svelte.js";
-  import {
     setExperimentToEdit,
     setExperimentToDelete,
   } from "$lib/state/modal.svelte.js";
   import { Trash2, Edit } from "@lucide/svelte";
   import { page } from "$app/state";
-  import { goto } from "$app/navigation";
   import EmptyState from "./EmptyState.svelte";
   import ListCard from "./ListCard.svelte";
 
-  interface Props {
-    experiments: Experiment[];
-    searchQuery?: string;
-    formatDate?: (date: Date) => string;
-    onItemClick?: (experiment: Experiment) => void;
-  }
+  let { experiments, searchQuery, onItemClick } = $props();
 
-  let {
-    experiments,
-    searchQuery = "",
-    formatDate = (date: Date) =>
-      date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year:
-          date.getFullYear() !== new Date().getFullYear()
-            ? "numeric"
-            : undefined,
-      }),
-    onItemClick = (experiment: Experiment) => {
-      if (getMode()) {
-        addExperiment(experiment.id);
-      } else {
-        goto(`/experiments/${experiment.id}`);
-      }
-    },
-  }: Props = $props();
+  function formatDate(date: Date) {
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year:
+        date.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
+    });
+  }
 
   let currentWorkspace = $derived(page.data.currentWorkspace);
   let canDeleteExperiment = $derived(
@@ -50,29 +27,19 @@
 
   let filteredExperiments = $derived(
     experiments
-      .map((exp) => ({
+      .map((exp: Experiment) => ({
         exp,
         name: exp.name.toLowerCase(),
         desc: exp.description?.toLowerCase() ?? "",
         tags: exp.tags?.map((t: string) => t.toLowerCase()) ?? [],
       }))
-      .filter((entry) => {
+      .filter((entry: any) => {
         if (!searchQuery) return true;
         const q = searchQuery.toLowerCase();
         return entry.name.includes(q);
       })
-      .map((e) => e.exp),
+      .map((e: any) => e.exp),
   );
-
-  let selectedExperimentIds = $derived(
-    filteredExperiments
-      .filter((exp) => selectedForComparison(exp.id))
-      .map((exp) => exp.id),
-  );
-
-  function isSelected(experimentId: string): boolean {
-    return selectedExperimentIds.includes(experimentId);
-  }
 
   function formatTime(date: Date): string {
     return date.toLocaleTimeString("en-US", {
@@ -81,25 +48,12 @@
       hour12: true,
     });
   }
-
-  function getTimelineItemClass(experiment: Experiment): string {
-    const baseClass = "group layer-slide-up";
-    const selectedClass = isSelected(experiment.id)
-      ? "surface-accent-blue"
-      : "surface-interactive";
-
-    return `${baseClass} ${selectedClass}`.trim();
-  }
 </script>
 
 {#if filteredExperiments.length === 0 && searchQuery}
   <EmptyState type="search" {searchQuery} />
 {:else}
-  <ListCard
-    items={filteredExperiments}
-    getItemClass={getTimelineItemClass}
-    {onItemClick}
-  >
+  <ListCard items={filteredExperiments} {onItemClick}>
     {#snippet children(experiment)}
       <!-- Content - Mobile-first responsive layout -->
       <div class="flex-1 min-w-0">
