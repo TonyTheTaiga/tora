@@ -2,7 +2,6 @@ import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
 export const load: PageServerLoad = async ({ url, fetch }) => {
-  // Extract all possible parameters that Supabase might need
   const tokenHash = url.searchParams.get("token_hash");
   const confirmType =
     url.searchParams.get("confirm_type") || url.searchParams.get("type");

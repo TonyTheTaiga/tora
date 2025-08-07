@@ -8,7 +8,7 @@ use axum::{
     body::to_bytes,
     extract::{Query, State},
     http::StatusCode,
-    response::{IntoResponse, Redirect},
+    response::IntoResponse,
 };
 use supabase_auth::models::{AuthClient, VerifyOtpParams, VerifyTokenHashParams};
 
