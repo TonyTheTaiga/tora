@@ -81,7 +81,7 @@
   </div>
 </div>
 
-<div class="flex-1 overflow-y-auto p-4 min-h-0">
+<div class="overflow-y-auto">
   {#if loading.experimentDetails}
     <div class="text-center py-12">
       <div class="text-ctp-subtext0 text-sm">loading experiment details...</div>
