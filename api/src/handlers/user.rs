@@ -49,21 +49,28 @@ pub async fn create_user(
 pub async fn confirm_create(
     State(app_state): State<AppState>,
     Query(payload): Query<types::ConfirmQueryParams>,
-) -> Redirect {
+) -> impl IntoResponse {
     let auth_client = create_client(&app_state.settings);
     let params = VerifyTokenHashParams {
         token_hash: payload.token_hash.clone(),
         otp_type: supabase_auth::models::OtpType::Email,
     };
-
-    auth_client
+    match auth_client
         .verify_otp(VerifyOtpParams::TokenHash(params))
         .await
-        .expect("Failed to verify_otp!");
-
-    Redirect::permanent(
-        &std::env::var("REDIRECT_URL_CONFIRM").expect("REDIRECT_URL_CONFIRM not set!"),
-    )
+    {
+        Ok(_response) => Json(types::Response {
+            status: 200,
+            data: Some("Sucecss".into()),
+        }),
+        Err(err) => Json(types::Response {
+            status: 400,
+            data: Some(serde_json::json!({
+                "error" : "Failed to confirm signup",
+                "message": err.to_string()
+            })),
+        }),
+    }
 }
 
 pub async fn login(
