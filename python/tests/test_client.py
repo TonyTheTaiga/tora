@@ -285,6 +285,29 @@ class TestToraLogging:
             tora.log("loss", 0.5, metadata={"obj": NonSerializable()})
 
 
+class TestToraResult:
+    def test_result_logs_with_result_metadata(self):
+        test_url = "https://test-frontend.example.com/experiments/exp-123"
+        tora = Tora("exp-123", url=test_url, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
+
+        tora.result("best_accuracy", 0.97)
+
+        assert tora.buffer_size == 1
+        entry = tora._buffer[0]
+        assert entry["name"] == "best_accuracy"
+        assert entry["value"] == 0.97
+        assert entry["step"] is None
+        assert entry["metadata"] == {"result": True}
+
+    def test_result_closed_client(self):
+        test_url = "https://test-frontend.example.com/experiments/exp-123"
+        tora = Tora("exp-123", url=test_url, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
+        tora.shutdown()
+
+        with pytest.raises(ToraMetricError, match="closed Tora client"):
+            tora.result("score", 1.0)
+
+
 class TestToraFlushAndShutdown:
     @patch("tora._client.Tora._write_logs")
     def test_flush(self, mock_write_logs):

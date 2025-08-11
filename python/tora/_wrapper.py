@@ -13,6 +13,7 @@ __all__ = [
     "setup",
     "shutdown",
     "tlog",
+    "tresult",
 ]
 
 logger = logging.getLogger("tora")
@@ -112,6 +113,23 @@ def tlog(
     """
     client = _get_client()
     client.log(name, value, step, metadata)
+
+
+def tresult(name: str, value: int | float) -> None:
+    """Log a result using the global Tora client.
+
+    Args:
+        name: Name of the result
+        value: Numeric value of the result
+
+    Raises:
+        ToraError: If the global client is not initialized
+        ToraValidationError: If input validation fails
+        ToraMetricError: If logging fails
+
+    """
+    client = _get_client()
+    client.result(name, value)
 
 
 def flush() -> None:
