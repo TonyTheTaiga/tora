@@ -63,7 +63,6 @@ def create_workspace(
         ToraValidationError: If the workspace name is invalid
         ToraAPIError: If the API request fails
         ToraNetworkError: If there's a network error
-
     """
     if not name or not isinstance(name, str):
         raise ToraValidationError("Workspace name must be a non-empty string")
@@ -425,14 +424,14 @@ class Tora:
     ) -> None:
         """Log a metric value.
 
-        Metrics are buffered and sent in batches when the buffer reaches max_buffer_len.
+        Logs are buffered and sent in batches when the buffer reaches max_buffer_len.
         Call flush() or shutdown() to send remaining buffered metrics immediately.
 
         Args:
-            name: Name of the metric
-            value: Numeric value of the metric
-            step: Optional step number for the metric
-            metadata: Optional metadata dictionary for the metric
+            name: Name of the log
+            value: Numeric value of the log
+            step: Optional step number for the log
+            metadata: Optional metadata dictionary for the log
 
         Raises:
             ToraValidationError: If input validation fails
@@ -468,6 +467,22 @@ class Tora:
 
         if len(self._buffer) >= self._max_buffer_len:
             self._write_logs()
+
+    def result(self, name: str, value: int | float):
+        """Log a experiment result.
+
+        Results are buffered and sent in batches when the buffer reaches max_buffer_len.
+        Call flush() or shutdown() to send remaining buffered metrics immediately.
+
+        Args:
+            name: Name of the result
+            value: Numeric value of the result
+
+        Raises:
+            ToraValidationError: If input validation fails
+            ToraMetricError: If the client is closed
+        """
+        self.log(name=name, value=value, step=None, metadata={"result": True})
 
     def _write_logs(self) -> None:
         """Write buffered metrics to the API.

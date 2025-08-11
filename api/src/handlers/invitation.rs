@@ -1,10 +1,12 @@
 use crate::middleware::auth::AuthenticatedUser;
 use crate::state::AppState;
-use crate::types::{CreateInvitationRequest, InvitationActionQuery, Response, WorkspaceInvitation};
+use crate::types::{
+    AppError, AppResult, CreateInvitationRequest, InvitationActionQuery, Response,
+    WorkspaceInvitation,
+};
 use axum::{
     Extension, Json,
     extract::{Query, State},
-    http::StatusCode,
     response::IntoResponse,
 };
 
@@ -14,80 +16,23 @@ pub async fn create_invitation(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Json(request): Json<CreateInvitationRequest>,
-) -> impl IntoResponse {
-    let from_user_uuid = match Uuid::parse_str(&user.id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid sender user ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
+) -> AppResult<impl IntoResponse> {
+    let from_user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
 
     let to_user_result = sqlx::query_as::<_, (Uuid,)>("SELECT id FROM auth.users WHERE email = $1")
         .bind(&request.email)
         .fetch_optional(&app_state.db_pool)
-        .await;
+        .await?;
 
     let to_user_uuid = match to_user_result {
-        Ok(Some((uuid,))) => uuid,
-        Ok(None) => {
-            return (
-                StatusCode::NOT_FOUND,
-                Json(Response {
-                    status: 404,
-                    data: Some("Recipient user not found".to_string()),
-                }),
-            )
-                .into_response();
-        }
-        Err(e) => {
-            eprintln!("Database error: {e}");
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to look up recipient user".to_string()),
-                }),
-            )
-                .into_response();
-        }
+        Some((uuid,)) => uuid,
+        None => return Err(AppError::NotFound("Recipient user not found".to_string())),
     };
 
-    let workspace_uuid = match Uuid::parse_str(&request.workspace_id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid workspace ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
+    let workspace_uuid = crate::types::error::parse_uuid(&request.workspace_id, "workspace_id")?;
+    let role_uuid = crate::types::error::parse_uuid(&request.role_id, "role_id")?;
 
-    let role_uuid = match Uuid::parse_str(&request.role_id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid role ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
-
-    let result = sqlx::query_as::<_, WorkspaceInvitation>(
+    let invitation = sqlx::query_as::<_, WorkspaceInvitation>(
         r#"
         INSERT INTO workspace_invitations ("to", "from", workspace_id, role_id, status)
         VALUES ($1, $2, $3, $4, $5)
@@ -98,52 +43,27 @@ pub async fn create_invitation(
     .bind(from_user_uuid)
     .bind(workspace_uuid)
     .bind(role_uuid)
-    .bind("PENDING") // Initial status
+    .bind("PENDING")
     .fetch_one(&app_state.db_pool)
-    .await;
+    .await?;
 
-    match result {
-        Ok(invitation) => (
-            StatusCode::CREATED,
-            Json(Response {
-                status: 201,
-                data: Some(invitation),
-            }),
-        )
-            .into_response(),
-        Err(e) => {
-            eprintln!("Database error: {e}");
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to create invitation".to_string()),
-                }),
-            )
-                .into_response()
-        }
-    }
+    Ok((
+        axum::http::StatusCode::CREATED,
+        Json(Response {
+            status: 201,
+            data: Some(invitation),
+        }),
+    )
+        .into_response())
 }
 
 pub async fn list_invitations(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
-) -> impl IntoResponse {
-    let user_uuid = match Uuid::parse_str(&user.id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid user ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
+) -> AppResult<impl IntoResponse> {
+    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
 
-    let result = sqlx::query_as::<_, WorkspaceInvitation>(
+    let invitations = sqlx::query_as::<_, WorkspaceInvitation>(
         r#"
         SELECT
             wi.id::text,
@@ -164,75 +84,24 @@ pub async fn list_invitations(
     )
     .bind(user_uuid)
     .fetch_all(&app_state.db_pool)
-    .await;
+    .await?;
 
-    match result {
-        Ok(invitations) => Json(Response {
-            status: 200,
-            data: Some(invitations),
-        })
-        .into_response(),
-        Err(e) => {
-            eprintln!("Database error: {e}");
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to fetch invitations".to_string()),
-                }),
-            )
-                .into_response()
-        }
-    }
+    Ok(Json(Response {
+        status: 200,
+        data: Some(invitations),
+    })
+    .into_response())
 }
 
 pub async fn respond_to_invitation(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Query(query): Query<InvitationActionQuery>,
-) -> impl IntoResponse {
-    let invitation_uuid = match Uuid::parse_str(&query.invitation_id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid invitation ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
+) -> AppResult<impl IntoResponse> {
+    let invitation_uuid = crate::types::error::parse_uuid(&query.invitation_id, "invitation_id")?;
+    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
 
-    let user_uuid = match Uuid::parse_str(&user.id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid user ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
-
-    let mut tx = match app_state.db_pool.begin().await {
-        Ok(tx) => tx,
-        Err(e) => {
-            eprintln!("Failed to begin transaction: {e}");
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to respond to invitation".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
+    let mut tx = app_state.db_pool.begin().await?;
 
     let invitation_details = sqlx::query_as::<_, (Uuid, Uuid, Uuid, String)>(
         r#"
@@ -245,60 +114,34 @@ pub async fn respond_to_invitation(
     .bind(invitation_uuid)
     .bind(user_uuid)
     .fetch_optional(&mut *tx)
-    .await;
+    .await?;
 
     let (to_user_id, workspace_id, role_id, current_status) = match invitation_details {
-        Ok(Some((to, ws, role, status))) => (to, ws, role, status),
-        Ok(None) => {
-            return (
-                StatusCode::NOT_FOUND,
-                Json(Response {
-                    status: 404,
-                    data: Some("Invitation not found or not for this user".to_string()),
-                }),
-            )
-                .into_response();
-        }
-        Err(e) => {
-            eprintln!("Database error: {e}");
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to fetch invitation details".to_string()),
-                }),
-            )
-                .into_response();
+        Some((to, ws, role, status)) => (to, ws, role, status),
+        None => {
+            return Err(AppError::NotFound(
+                "Invitation not found or not for this user".to_string(),
+            ));
         }
     };
 
     if current_status != "PENDING" {
-        return (
-            StatusCode::BAD_REQUEST,
-            Json(Response {
-                status: 400,
-                data: Some("Invitation is no longer pending".to_string()),
-            }),
-        )
-            .into_response();
+        return Err(AppError::BadRequest(
+            "Invitation is no longer pending".to_string(),
+        ));
     }
 
     let new_status = match query.action.as_str() {
         "accept" => "ACCEPTED",
         "deny" => "DENIED",
         _ => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid action. Use 'accept' or 'deny'".to_string()),
-                }),
-            )
-                .into_response();
+            return Err(AppError::BadRequest(
+                "Invalid action. Use 'accept' or 'deny'".to_string(),
+            ));
         }
     };
 
-    let update_result = sqlx::query(
+    sqlx::query(
         r#"
         UPDATE workspace_invitations
         SET status = $1
@@ -308,60 +151,24 @@ pub async fn respond_to_invitation(
     .bind(new_status)
     .bind(invitation_uuid)
     .execute(&mut *tx)
-    .await;
-
-    if let Err(e) = update_result {
-        eprintln!("Failed to update invitation status: {e}");
-        let _ = tx.rollback().await;
-        return (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(Response {
-                status: 500,
-                data: Some("Failed to update invitation status".to_string()),
-            }),
-        )
-            .into_response();
-    }
+    .await?;
 
     if new_status == "ACCEPTED" {
-        let insert_user_workspace = sqlx::query(
+        sqlx::query(
             "INSERT INTO user_workspaces (user_id, workspace_id, role_id) VALUES ($1, $2, $3)",
         )
         .bind(to_user_id)
         .bind(workspace_id)
         .bind(role_id)
         .execute(&mut *tx)
-        .await;
-
-        if let Err(e) = insert_user_workspace {
-            eprintln!("Failed to add user to workspace: {e}");
-            let _ = tx.rollback().await;
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to add user to workspace".to_string()),
-                }),
-            )
-                .into_response();
-        }
+        .await?;
     }
 
-    if let Err(e) = tx.commit().await {
-        eprintln!("Failed to commit transaction: {e}");
-        return (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(Response {
-                status: 500,
-                data: Some("Failed to commit transaction".to_string()),
-            }),
-        )
-            .into_response();
-    }
+    tx.commit().await?;
 
-    Json(Response {
+    Ok(Json(Response {
         status: 200,
         data: Some(format!("Invitation {}", new_status.to_lowercase())),
     })
-    .into_response()
+    .into_response())
 }

@@ -4,6 +4,7 @@ import pytest
 
 import tora._wrapper
 from tora import flush, get_experiment_id, is_initialized, setup, shutdown, tlog
+from tora._wrapper import tresult
 from tora._exceptions import ToraError, ToraValidationError
 
 
@@ -145,6 +146,22 @@ class TestIsInitialized:
         tora._wrapper._INSTANCE = mock_client
 
         assert is_initialized() is False
+
+
+class TestTresult:
+    def test_tresult_success(self):
+        mock_client = Mock()
+        tora._wrapper._INSTANCE = mock_client
+
+        tresult("best_acc", 0.99)
+
+        mock_client.result.assert_called_once_with("best_acc", 0.99)
+
+    def test_tresult_no_client(self):
+        tora._wrapper._INSTANCE = None
+
+        with pytest.raises(ToraError, match="not initialized"):
+            tresult("score", 1.0)
 
 
 class TestGetExperimentId:

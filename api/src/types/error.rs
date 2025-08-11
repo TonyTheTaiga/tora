@@ -1,7 +1,7 @@
 use axum::{
+    Json,
     http::StatusCode,
     response::{IntoResponse, Response},
-    Json,
 };
 use serde::Serialize;
 use std::fmt;
@@ -33,17 +33,17 @@ pub enum AppError {
 impl fmt::Display for AppError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            AppError::BadRequest(msg) => write!(f, "Bad request: {}", msg),
-            AppError::Unauthorized(msg) => write!(f, "Unauthorized: {}", msg),
-            AppError::Forbidden(msg) => write!(f, "Forbidden: {}", msg),
-            AppError::NotFound(msg) => write!(f, "Not found: {}", msg),
-            AppError::Conflict(msg) => write!(f, "Conflict: {}", msg),
-            AppError::UnprocessableEntity(msg) => write!(f, "Unprocessable entity: {}", msg),
-            AppError::Internal(msg) => write!(f, "Internal server error: {}", msg),
-            AppError::Database(err) => write!(f, "Database error: {}", err),
-            AppError::Validation(msg) => write!(f, "Validation error: {}", msg),
-            AppError::InvalidUuid(msg) => write!(f, "Invalid UUID: {}", msg),
-            AppError::AuthenticationFailed(msg) => write!(f, "Authentication failed: {}", msg),
+            AppError::BadRequest(msg) => write!(f, "Bad request: {msg}"),
+            AppError::Unauthorized(msg) => write!(f, "Unauthorized: {msg}"),
+            AppError::Forbidden(msg) => write!(f, "Forbidden: {msg}"),
+            AppError::NotFound(msg) => write!(f, "Not found: {msg}"),
+            AppError::Conflict(msg) => write!(f, "Conflict: {msg}"),
+            AppError::UnprocessableEntity(msg) => write!(f, "Unprocessable entity: {msg}"),
+            AppError::Internal(msg) => write!(f, "Internal server error: {msg}"),
+            AppError::Database(err) => write!(f, "Database error: {err}"),
+            AppError::Validation(msg) => write!(f, "Validation error: {msg}"),
+            AppError::InvalidUuid(msg) => write!(f, "Invalid UUID: {msg}"),
+            AppError::AuthenticationFailed(msg) => write!(f, "Authentication failed: {msg}"),
         }
     }
 }
@@ -53,36 +53,11 @@ impl std::error::Error for AppError {}
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, error_type, message, details) = match self {
-            AppError::BadRequest(msg) => (
-                StatusCode::BAD_REQUEST,
-                "BAD_REQUEST",
-                msg,
-                None,
-            ),
-            AppError::Unauthorized(msg) => (
-                StatusCode::UNAUTHORIZED,
-                "UNAUTHORIZED",
-                msg,
-                None,
-            ),
-            AppError::Forbidden(msg) => (
-                StatusCode::FORBIDDEN,
-                "FORBIDDEN",
-                msg,
-                None,
-            ),
-            AppError::NotFound(msg) => (
-                StatusCode::NOT_FOUND,
-                "NOT_FOUND",
-                msg,
-                None,
-            ),
-            AppError::Conflict(msg) => (
-                StatusCode::CONFLICT,
-                "CONFLICT",
-                msg,
-                None,
-            ),
+            AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "BAD_REQUEST", msg, None),
+            AppError::Unauthorized(msg) => (StatusCode::UNAUTHORIZED, "UNAUTHORIZED", msg, None),
+            AppError::Forbidden(msg) => (StatusCode::FORBIDDEN, "FORBIDDEN", msg, None),
+            AppError::NotFound(msg) => (StatusCode::NOT_FOUND, "NOT_FOUND", msg, None),
+            AppError::Conflict(msg) => (StatusCode::CONFLICT, "CONFLICT", msg, None),
             AppError::UnprocessableEntity(msg) => (
                 StatusCode::UNPROCESSABLE_ENTITY,
                 "UNPROCESSABLE_ENTITY",
@@ -139,24 +114,16 @@ impl IntoResponse for AppError {
                     ),
                 }
             }
-            AppError::Validation(msg) => (
-                StatusCode::BAD_REQUEST,
-                "VALIDATION_ERROR",
-                msg,
-                None,
-            ),
+            AppError::Validation(msg) => (StatusCode::BAD_REQUEST, "VALIDATION_ERROR", msg, None),
             AppError::InvalidUuid(field) => (
                 StatusCode::BAD_REQUEST,
                 "INVALID_UUID",
-                format!("Invalid UUID format for field: {}", field),
+                format!("Invalid UUID format for field: {field}"),
                 None,
             ),
-            AppError::AuthenticationFailed(msg) => (
-                StatusCode::UNAUTHORIZED,
-                "AUTHENTICATION_FAILED",
-                msg,
-                None,
-            ),
+            AppError::AuthenticationFailed(msg) => {
+                (StatusCode::UNAUTHORIZED, "AUTHENTICATION_FAILED", msg, None)
+            }
         };
 
         let error_response = ErrorResponse {
@@ -185,13 +152,15 @@ impl From<uuid::Error> for AppError {
 pub type AppResult<T> = Result<T, AppError>;
 
 pub fn parse_uuid(uuid_str: &str, field_name: &str) -> AppResult<uuid::Uuid> {
-    uuid::Uuid::parse_str(uuid_str)
-        .map_err(|_| AppError::InvalidUuid(field_name.to_string()))
+    uuid::Uuid::parse_str(uuid_str).map_err(|_| AppError::InvalidUuid(field_name.to_string()))
 }
 
 pub fn validate_not_empty(value: &str, field_name: &str) -> AppResult<()> {
     if value.trim().is_empty() {
-        Err(AppError::Validation(format!("{} cannot be empty", field_name)))
+        Err(AppError::Validation(format!(
+            "{} cannot be empty",
+            field_name
+        )))
     } else {
         Ok(())
     }

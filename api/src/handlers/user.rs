@@ -3,11 +3,11 @@ use crate::middleware::auth::AuthenticatedUser;
 use crate::settings::Settings;
 use crate::state::AppState;
 use crate::types;
+use crate::types::{AppError, AppResult};
 use axum::{
     Extension, Json,
     body::to_bytes,
     extract::{Query, State},
-    http::StatusCode,
     response::IntoResponse,
 };
 use supabase_auth::models::{AuthClient, VerifyOtpParams, VerifyTokenHashParams};
@@ -23,65 +23,51 @@ fn create_client(settings: &Settings) -> AuthClient {
 pub async fn create_user(
     State(app_state): State<AppState>,
     Json(payload): Json<types::CreateUser>,
-) -> impl IntoResponse {
+) -> AppResult<impl IntoResponse> {
     let auth_client = create_client(&app_state.settings);
-    match auth_client
+    auth_client
         .sign_up_with_email_and_password(&payload.email, &payload.password, None)
         .await
-    {
-        Ok(_response) => Json(types::Response {
-            status: 201,
-            data: Some(serde_json::json!({
-                "message": "User created successfully",
-                "email": payload.email
-            })),
-        }),
-        Err(err) => Json(types::Response {
-            status: 400,
-            data: Some(serde_json::json!({
-                "error": "Failed to create user",
-                "message": err.to_string()
-            })),
-        }),
-    }
+        .map_err(|e| AppError::BadRequest(format!("Failed to create user: {e}")))?;
+
+    Ok(Json(types::Response {
+        status: 201,
+        data: Some(serde_json::json!({
+            "message": "User created successfully",
+            "email": payload.email
+        })),
+    }))
 }
 
 pub async fn confirm_create(
     State(app_state): State<AppState>,
     Query(payload): Query<types::ConfirmQueryParams>,
-) -> impl IntoResponse {
+) -> AppResult<impl IntoResponse> {
     let auth_client = create_client(&app_state.settings);
     let params = VerifyTokenHashParams {
         token_hash: payload.token_hash.clone(),
         otp_type: supabase_auth::models::OtpType::Email,
     };
-    match auth_client
+    auth_client
         .verify_otp(VerifyOtpParams::TokenHash(params))
         .await
-    {
-        Ok(_response) => Json(types::Response {
-            status: 200,
-            data: Some("Sucecss".into()),
-        }),
-        Err(err) => Json(types::Response {
-            status: 400,
-            data: Some(serde_json::json!({
-                "error" : "Failed to confirm signup",
-                "message": err.to_string()
-            })),
-        }),
-    }
+        .map_err(|e| AppError::BadRequest(format!("Failed to confirm signup: {e}")))?;
+
+    Ok(Json(types::Response::<String> {
+        status: 200,
+        data: Some("Sucecss".into()),
+    }))
 }
 
 pub async fn login(
     State(app_state): State<AppState>,
     Json(payload): Json<types::LoginParams>,
-) -> impl IntoResponse {
+) -> AppResult<impl IntoResponse> {
     let auth_client = create_client(&app_state.settings);
     let session = auth_client
         .login_with_email(&payload.email, &payload.password)
         .await
-        .expect("Failed to login user! Double check password and email.");
+        .map_err(|_| AppError::AuthenticationFailed("Invalid email or password".to_string()))?;
 
     let session_payload = serde_json::json!({
         "access_token": session.access_token,
@@ -95,46 +81,39 @@ pub async fn login(
         }
     });
 
-    Json(types::Response {
+    Ok(Json(types::Response {
         status: 200,
         data: Some(session_payload),
-    })
+    }))
 }
 
 pub async fn refresh_token(
     State(app_state): State<AppState>,
     Json(payload): Json<types::RefreshTokenRequest>,
-) -> impl IntoResponse {
+) -> AppResult<impl IntoResponse> {
     let auth_client = create_client(&app_state.settings);
-    match auth_client.refresh_session(&payload.refresh_token).await {
-        Ok(session) => {
-            let session_payload = serde_json::json!({
-                "access_token": session.access_token,
-                "token_type": "bearer",
-                "expires_in": session.expires_in,
-                "expires_at": session.expires_at,
-                "refresh_token": session.refresh_token,
-                "user": {
-                    "id": session.user.id,
-                    "email": session.user.email,
-                }
-            });
+    let session = auth_client
+        .refresh_session(&payload.refresh_token)
+        .await
+        .map_err(|_| AppError::AuthenticationFailed("Failed to refresh token".to_string()))?;
 
-            Json(types::Response {
-                status: 200,
-                data: Some(session_payload),
-            })
-            .into_response()
+    let session_payload = serde_json::json!({
+        "access_token": session.access_token,
+        "token_type": "bearer",
+        "expires_in": session.expires_in,
+        "expires_at": session.expires_at,
+        "refresh_token": session.refresh_token,
+        "user": {
+            "id": session.user.id,
+            "email": session.user.email,
         }
-        Err(_) => (
-            StatusCode::UNAUTHORIZED,
-            Json(types::Response::<&str> {
-                status: 401,
-                data: Some("Failed to refresh token"),
-            }),
-        )
-            .into_response(),
-    }
+    });
+
+    Ok(Json(types::Response {
+        status: 200,
+        data: Some(session_payload),
+    })
+    .into_response())
 }
 
 pub async fn get_settings(

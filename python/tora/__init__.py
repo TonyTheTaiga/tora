@@ -19,6 +19,7 @@ from ._wrapper import (
     setup,
     shutdown,
     tlog,
+    tresult,
 )
 
 __version__ = "0.0.7"
@@ -43,4 +44,5 @@ __all__ = [
     "setup",
     "shutdown",
     "tlog",
+    "tresult",
 ]
