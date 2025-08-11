@@ -16,7 +16,6 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
   try {
     const requestId = generateRequestId();
     const timer = startTimer("dashboard.page.load", { requestId });
-
     const response = await fetch("/api/workspaces");
     const apiResponse: ApiResponse<Workspace[]> = await response.json();
     const workspaces = apiResponse.data.map((workspace: any) => ({

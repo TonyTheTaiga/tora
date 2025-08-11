@@ -1,7 +1,8 @@
 use crate::middleware::auth::AuthenticatedUser;
 use crate::state::AppState;
 use crate::types::{
-    CreateExperimentRequest, Experiment, ListExperimentsQuery, Response, UpdateExperimentRequest,
+    AppError, AppResult, CreateExperimentRequest, Experiment, ListExperimentsQuery, Response,
+    UpdateExperimentRequest,
 };
 use axum::{
     Extension, Json,
@@ -9,158 +10,56 @@ use axum::{
     http::StatusCode,
     response::IntoResponse,
 };
-use tracing::{debug, error, info};
+use tracing::{debug, info};
 use uuid::Uuid;
 
 pub async fn create_experiment(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Json(request): Json<CreateExperimentRequest>,
-) -> impl IntoResponse {
+) -> AppResult<impl IntoResponse> {
     info!(
         "Creating experiment '{}' for user: {} in workspace: {}",
         request.name, user.email, request.workspace_id
     );
     debug!("Experiment request: {:?}", request);
-
-    let user_uuid = match Uuid::parse_str(&user.id) {
-        Ok(uuid) => {
-            debug!("Parsed user UUID: {}", uuid);
-            uuid
-        }
-        Err(e) => {
-            error!("Failed to parse user ID '{}': {}", user.id, e);
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid user ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
+    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
 
     // TODO: Handler anonymous experiments.
-    let workspace_uuid = match Uuid::parse_str(&request.workspace_id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid workspace ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
-
-    let mut tx = match app_state.db_pool.begin().await {
-        Ok(tx) => tx,
-        Err(e) => {
-            eprintln!("Failed to begin transaction: {e}");
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to create experiment".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
-
+    let workspace_uuid = crate::types::error::parse_uuid(&request.workspace_id, "workspace_id")?;
+    let mut tx = app_state.db_pool.begin().await?;
     let access_check = sqlx::query_as::<_, (i64,)>(
         "SELECT COUNT(*) FROM user_workspaces WHERE workspace_id = $1 AND user_id = $2",
     )
     .bind(workspace_uuid)
     .bind(user_uuid)
     .fetch_one(&mut *tx)
-    .await;
-
-    match access_check {
-        Ok((0,)) => {
-            return (
-                StatusCode::FORBIDDEN,
-                Json(Response {
-                    status: 403,
-                    data: Some("Access denied to workspace".to_string()),
-                }),
-            )
-                .into_response();
-        }
-        Err(e) => {
-            eprintln!("Database error: {e}");
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to check workspace access".to_string()),
-                }),
-            )
-                .into_response();
-        }
-        _ => {}
+    .await?;
+    if access_check.0 == 0 {
+        return Err(AppError::Forbidden(
+            "Access denied to workspace".to_string(),
+        ));
     }
 
     let experiment_result = sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>)>(
         "INSERT INTO experiment (name, description, tags, hyperparams) VALUES ($1, $2, $3, $4) RETURNING id::text, name, description, hyperparams, tags, created_at, updated_at",
     )
     .bind(&request.name)
-    .bind(if request.description.is_empty() { None } else { Some(&request.description) })
+    .bind(request.description.unwrap_or_default())
     .bind(request.tags.unwrap_or_default())
     .bind(request.hyperparams)
     .fetch_one(&mut *tx)
-    .await;
-
+    .await?;
     let (experiment_id, name, description, hyperparams, tags, created_at, updated_at) =
-        match experiment_result {
-            Ok(row) => row,
-            Err(e) => {
-                eprintln!("Failed to create experiment: {e}");
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(Response {
-                        status: 500,
-                        data: Some("Failed to create experiment".to_string()),
-                    }),
-                )
-                    .into_response();
-            }
-        };
+        experiment_result;
 
-    let workspace_experiment_result = sqlx::query(
-        "INSERT INTO workspace_experiments (workspace_id, experiment_id) VALUES ($1, $2)",
-    )
-    .bind(workspace_uuid)
-    .bind(Uuid::parse_str(&experiment_id).unwrap())
-    .execute(&mut *tx)
-    .await;
+    sqlx::query("INSERT INTO workspace_experiments (workspace_id, experiment_id) VALUES ($1, $2)")
+        .bind(workspace_uuid)
+        .bind(Uuid::parse_str(&experiment_id).unwrap())
+        .execute(&mut *tx)
+        .await?;
 
-    if let Err(e) = workspace_experiment_result {
-        eprintln!("Failed to add experiment to workspace: {e}");
-        return (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(Response {
-                status: 500,
-                data: Some("Failed to create experiment".to_string()),
-            }),
-        )
-            .into_response();
-    }
-
-    if let Err(e) = tx.commit().await {
-        eprintln!("Failed to commit transaction: {e}");
-        return (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(Response {
-                status: 500,
-                data: Some("Failed to create experiment".to_string()),
-            }),
-        )
-            .into_response();
-    }
+    tx.commit().await?;
 
     let frontend_url = app_state.settings.frontend_url;
     let experiment = Experiment {
@@ -176,49 +75,25 @@ pub async fn create_experiment(
         url: format!("{frontend_url}/experiments/{experiment_id}"),
     };
 
-    (
+    Ok((
         StatusCode::CREATED,
         Json(Response {
             status: 201,
             data: Some(experiment),
         }),
     )
-        .into_response()
+        .into_response())
 }
 
 pub async fn list_experiments(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Query(query): Query<ListExperimentsQuery>,
-) -> impl IntoResponse {
-    let user_uuid = match Uuid::parse_str(&user.id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid user ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
+) -> AppResult<impl IntoResponse> {
+    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
 
     let result = if let Some(workspace_id) = &query.workspace {
-        let workspace_uuid = match Uuid::parse_str(workspace_id) {
-            Ok(uuid) => uuid,
-            Err(_) => {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    Json(Response {
-                        status: 400,
-                        data: Some("Invalid workspace ID".to_string()),
-                    }),
-                )
-                    .into_response();
-            }
-        };
+        let workspace_uuid = crate::types::error::parse_uuid(workspace_id, "workspace_id")?;
 
         // List experiments for a specific workspace with metrics summary
         sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String, Option<Vec<String>>)>(
@@ -290,23 +165,13 @@ pub async fn list_experiments(
                 )
                 .collect();
 
-            Json(Response {
+            Ok(Json(Response {
                 status: 200,
                 data: Some(experiments),
             })
-            .into_response()
+            .into_response())
         }
-        Err(e) => {
-            eprintln!("Database error: {e}");
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to fetch experiments".to_string()),
-                }),
-            )
-                .into_response()
-        }
+        Err(e) => Err(e.into()),
     }
 }
 
@@ -315,34 +180,9 @@ pub async fn get_experiment(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
-) -> impl IntoResponse {
-    let user_uuid = match Uuid::parse_str(&user.id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid user ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
-
-    let experiment_uuid = match Uuid::parse_str(&experiment_id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid experiment ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
+) -> AppResult<impl IntoResponse> {
+    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
+    let experiment_uuid = crate::types::error::parse_uuid(&experiment_id, "experiment_id")?;
 
     let result = sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String, Option<Vec<String>>)>(
         r#"
@@ -387,31 +227,16 @@ pub async fn get_experiment(
                 url: format!("{frontend_url}/experiments/{id}"),
             };
 
-            Json(Response {
+            Ok(Json(Response {
                 status: 200,
                 data: Some(experiment),
             })
-            .into_response()
+            .into_response())
         }
-        Err(sqlx::Error::RowNotFound) => (
-            StatusCode::NOT_FOUND,
-            Json(Response {
-                status: 404,
-                data: Some("Experiment not found".to_string()),
-            }),
-        )
-            .into_response(),
-        Err(e) => {
-            eprintln!("Database error: {e}");
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to fetch experiment".to_string()),
-                }),
-            )
-                .into_response()
+        Err(sqlx::Error::RowNotFound) => {
+            Err(AppError::NotFound("Experiment not found".to_string()))
         }
+        Err(e) => Err(e.into()),
     }
 }
 
@@ -420,34 +245,9 @@ pub async fn update_experiment(
     State(app_state): State<AppState>,
     Path(id): Path<String>,
     Json(request): Json<UpdateExperimentRequest>,
-) -> impl IntoResponse {
-    let user_uuid = match Uuid::parse_str(&user.id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid user ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
-
-    let experiment_uuid = match Uuid::parse_str(&id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid experiment ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
+) -> AppResult<impl IntoResponse> {
+    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
+    let experiment_uuid = crate::types::error::parse_uuid(&id, "experiment_id")?;
 
     // Check if user has access to this experiment
     let access_check = sqlx::query_as::<_, (i64,)>(
@@ -461,77 +261,42 @@ pub async fn update_experiment(
     .bind(experiment_uuid)
     .bind(user_uuid)
     .fetch_one(&app_state.db_pool)
-    .await;
-
-    match access_check {
-        Ok((0,)) => {
-            return (
-                StatusCode::FORBIDDEN,
-                Json(Response {
-                    status: 403,
-                    data: Some("Access denied to experiment".to_string()),
-                }),
-            )
-                .into_response();
-        }
-        Err(e) => {
-            eprintln!("Database error: {e}");
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to check experiment access".to_string()),
-                }),
-            )
-                .into_response();
-        }
-        _ => {}
+    .await?;
+    if access_check.0 == 0 {
+        return Err(AppError::Forbidden(
+            "Access denied to experiment".to_string(),
+        ));
     }
 
     let result = sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>)>(
         "UPDATE experiment SET name = $1, description = $2, tags = $3, updated_at = NOW() WHERE id = $4 RETURNING id::text, name, description, hyperparams, tags, created_at, updated_at",
     )
     .bind(&request.name)
-    .bind(if request.description.is_empty() { None } else { Some(&request.description) })
+    .bind(request.description.unwrap_or_default())
     .bind(request.tags.unwrap_or_default())
     .bind(experiment_uuid)
     .fetch_one(&app_state.db_pool)
-    .await;
-
+    .await?;
     let frontend_url = app_state.settings.frontend_url;
-    match result {
-        Ok((id, name, description, hyperparams, tags, created_at, updated_at)) => {
-            let experiment = Experiment {
-                id: id.to_string(),
-                name,
-                description,
-                hyperparams: hyperparams.unwrap_or_default(),
-                tags: tags.unwrap_or_default(),
-                created_at,
-                updated_at,
-                available_metrics: vec![], // TODO: Fetch from metrics table
-                workspace_id: None,        // We don't have workspace_id in the update
-                url: format!("{frontend_url}/experiments/{id}"),
-            };
+    let (id, name, description, hyperparams, tags, created_at, updated_at) = result;
+    let experiment = Experiment {
+        id: id.to_string(),
+        name,
+        description,
+        hyperparams: hyperparams.unwrap_or_default(),
+        tags: tags.unwrap_or_default(),
+        created_at,
+        updated_at,
+        available_metrics: vec![],
+        workspace_id: None,
+        url: format!("{frontend_url}/experiments/{id}"),
+    };
 
-            Json(Response {
-                status: 200,
-                data: Some(experiment),
-            })
-            .into_response()
-        }
-        Err(e) => {
-            eprintln!("Database error: {e}");
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to update experiment".to_string()),
-                }),
-            )
-                .into_response()
-        }
-    }
+    Ok(Json(Response {
+        status: 200,
+        data: Some(experiment),
+    })
+    .into_response())
 }
 
 // Delete experiment
@@ -539,34 +304,9 @@ pub async fn delete_experiment(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
-) -> impl IntoResponse {
-    let user_uuid = match Uuid::parse_str(&user.id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid user ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
-
-    let experiment_uuid = match Uuid::parse_str(&experiment_id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid experiment ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
+) -> AppResult<impl IntoResponse> {
+    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
+    let experiment_uuid = crate::types::error::parse_uuid(&experiment_id, "experiment_id")?;
 
     // Check if user has owner/admin access to this experiment
     let access_check = sqlx::query_as::<_, (i64,)>(
@@ -581,75 +321,29 @@ pub async fn delete_experiment(
     .bind(experiment_uuid)
     .bind(user_uuid)
     .fetch_one(&app_state.db_pool)
-    .await;
-
-    match access_check {
-        Ok((0,)) => {
-            return (
-                StatusCode::FORBIDDEN,
-                Json(Response {
-                    status: 403,
-                    data: Some(
-                        "Access denied - only workspace owners and admins can delete experiments"
-                            .to_string(),
-                    ),
-                }),
-            )
-                .into_response();
-        }
-        Err(e) => {
-            eprintln!("Database error: {e}");
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to check experiment access".to_string()),
-                }),
-            )
-                .into_response();
-        }
-        _ => {}
+    .await?;
+    if access_check.0 == 0 {
+        return Err(AppError::Forbidden(
+            "Access denied - only workspace owners and admins can delete experiments".to_string(),
+        ));
     }
 
     let delete_result = sqlx::query("DELETE FROM experiment WHERE id = $1")
         .bind(experiment_uuid)
         .execute(&app_state.db_pool)
-        .await;
-
-    match delete_result {
-        Ok(result) => {
-            if result.rows_affected() == 0 {
-                (
-                    StatusCode::NOT_FOUND,
-                    Json(Response {
-                        status: 404,
-                        data: Some("Experiment not found".to_string()),
-                    }),
-                )
-                    .into_response()
-            } else {
-                (
-                    StatusCode::NO_CONTENT,
-                    Json(Response::<()> {
-                        status: 204,
-                        data: None,
-                    }),
-                )
-                    .into_response()
-            }
-        }
-        Err(e) => {
-            eprintln!("Database error: {e}");
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to delete experiment".to_string()),
-                }),
-            )
-                .into_response()
-        }
+        .await?;
+    if delete_result.rows_affected() == 0 {
+        return Err(AppError::NotFound("Experiment not found".to_string()));
     }
+
+    Ok((
+        StatusCode::NO_CONTENT,
+        Json(Response::<()> {
+            status: 204,
+            data: None,
+        }),
+    )
+        .into_response())
 }
 
 // List experiments for a specific workspace
@@ -657,34 +351,9 @@ pub async fn list_workspace_experiments(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Path(workspace_id): Path<String>,
-) -> impl IntoResponse {
-    let user_uuid = match Uuid::parse_str(&user.id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid user ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
-
-    let workspace_uuid = match Uuid::parse_str(&workspace_id) {
-        Ok(uuid) => uuid,
-        Err(_) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json(Response {
-                    status: 400,
-                    data: Some("Invalid workspace ID".to_string()),
-                }),
-            )
-                .into_response();
-        }
-    };
+) -> AppResult<impl IntoResponse> {
+    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
+    let workspace_uuid = crate::types::error::parse_uuid(&workspace_id, "workspace_id")?;
 
     // Check if user has access to the workspace
     let access_check = sqlx::query_as::<_, (i64,)>(
@@ -693,31 +362,11 @@ pub async fn list_workspace_experiments(
     .bind(workspace_uuid)
     .bind(user_uuid)
     .fetch_one(&app_state.db_pool)
-    .await;
-
-    match access_check {
-        Ok((0,)) => {
-            return (
-                StatusCode::FORBIDDEN,
-                Json(Response {
-                    status: 403,
-                    data: Some("Access denied to workspace".to_string()),
-                }),
-            )
-                .into_response();
-        }
-        Err(e) => {
-            eprintln!("Database error: {e}");
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to check workspace access".to_string()),
-                }),
-            )
-                .into_response();
-        }
-        _ => {}
+    .await?;
+    if access_check.0 == 0 {
+        return Err(AppError::Forbidden(
+            "Access denied to workspace".to_string(),
+        ));
     }
 
     // List experiments for the workspace with metrics summary
@@ -781,22 +430,12 @@ pub async fn list_workspace_experiments(
                 )
                 .collect();
 
-            Json(Response {
+            Ok(Json(Response {
                 status: 200,
                 data: Some(experiments),
             })
-            .into_response()
+            .into_response())
         }
-        Err(e) => {
-            eprintln!("Database error: {e}");
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to fetch experiments".to_string()),
-                }),
-            )
-                .into_response()
-        }
+        Err(e) => Err(e.into()),
     }
 }

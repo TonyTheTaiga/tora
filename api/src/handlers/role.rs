@@ -1,9 +1,11 @@
 use crate::state::AppState;
-use crate::types::{Response, WorkspaceRole};
-use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
+use crate::types::{AppResult, Response, WorkspaceRole};
+use axum::{Json, extract::State, response::IntoResponse};
 
-pub async fn list_workspace_roles(State(app_state): State<AppState>) -> impl IntoResponse {
-    let result = sqlx::query_as::<_, WorkspaceRole>(
+pub async fn list_workspace_roles(
+    State(app_state): State<AppState>,
+) -> AppResult<impl IntoResponse> {
+    let roles = sqlx::query_as::<_, WorkspaceRole>(
         r#"
         SELECT id::text, name
         FROM workspace_role
@@ -11,24 +13,11 @@ pub async fn list_workspace_roles(State(app_state): State<AppState>) -> impl Int
         "#,
     )
     .fetch_all(&app_state.db_pool)
-    .await;
+    .await?;
 
-    match result {
-        Ok(roles) => Json(Response {
-            status: 200,
-            data: Some(roles),
-        })
-        .into_response(),
-        Err(e) => {
-            eprintln!("Database error: {e}");
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(Response {
-                    status: 500,
-                    data: Some("Failed to fetch workspace roles".to_string()),
-                }),
-            )
-                .into_response()
-        }
-    }
+    Ok(Json(Response {
+        status: 200,
+        data: Some(roles),
+    })
+    .into_response())
 }

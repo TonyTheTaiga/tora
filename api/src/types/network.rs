@@ -64,7 +64,7 @@ pub struct CreateWorkspaceRequest {
 #[derive(Deserialize, Debug)]
 pub struct CreateExperimentRequest {
     pub name: String,
-    pub description: String,
+    pub description: Option<String>,
     #[serde(rename = "workspaceId")]
     pub workspace_id: String,
     pub tags: Option<Vec<String>>,
@@ -74,7 +74,7 @@ pub struct CreateExperimentRequest {
 #[derive(Deserialize)]
 pub struct UpdateExperimentRequest {
     pub name: String,
-    pub description: String,
+    pub description: Option<String>,
     pub tags: Option<Vec<String>>,
 }
 
