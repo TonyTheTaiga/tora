@@ -34,12 +34,14 @@ export const actions: Actions = {
     };
     const sessionJson = JSON.stringify(sessionData);
     const sessionBase64 = btoa(sessionJson);
+    const THIRTY_DAYS = 60 * 60 * 24 * 30;
     cookies.set("tora_auth_token", sessionBase64, {
       path: "/",
       httpOnly: true,
       secure: !dev,
       sameSite: "strict",
-      maxAge: response.data.expires_in,
+      // Keep cookie for refresh window; access token can refresh server-side
+      maxAge: THIRTY_DAYS,
     });
     redirect(303, "/dashboard");
   },

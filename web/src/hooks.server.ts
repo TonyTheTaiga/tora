@@ -20,33 +20,39 @@ export const handle: Handle = async ({ event, resolve }) => {
       apiClient = new ApiClient(undefined, sessionData.access_token);
     } else {
       apiClient = new ApiClient();
-      const response = await apiClient.post<RefreshResponse>("/api/refresh", {
-        refresh_token: sessionData.refresh_token,
-      });
-      if (response.status === 200) {
-        const newSessionData: SessionData = {
-          access_token: response.data.access_token,
-          refresh_token: response.data.refresh_token,
-          expires_in: response.data.expires_in,
-          expires_at: response.data.expires_at,
-          user: {
-            id: response.data.user.id,
-            email: response.data.user.email,
-          },
-        };
-        const sessionJson = JSON.stringify(newSessionData);
-        const sessionBase64 = btoa(sessionJson);
-        event.cookies.set("tora_auth_token", sessionBase64, {
-          path: "/",
-          httpOnly: true,
-          secure: !dev,
-          sameSite: "strict",
-          maxAge: newSessionData.expires_in,
+      try {
+        const response = await apiClient.post<RefreshResponse>("/api/refresh", {
+          refresh_token: sessionData.refresh_token,
         });
-        event.locals.session = newSessionData;
-        apiClient = new ApiClient(undefined, newSessionData.access_token);
-      } else if (response.status === 401) {
-        console.error(`failed to refresh:`, response.data);
+        if (response.status === 200) {
+          const newSessionData: SessionData = {
+            access_token: response.data.access_token,
+            refresh_token: response.data.refresh_token,
+            expires_in: response.data.expires_in,
+            expires_at: response.data.expires_at,
+            user: {
+              id: response.data.user.id,
+              email: response.data.user.email,
+            },
+          };
+          const sessionJson = JSON.stringify(newSessionData);
+          const sessionBase64 = btoa(sessionJson);
+          const THIRTY_DAYS = 60 * 60 * 24 * 30;
+          event.cookies.set("tora_auth_token", sessionBase64, {
+            path: "/",
+            httpOnly: true,
+            secure: !dev,
+            sameSite: "strict",
+            maxAge: THIRTY_DAYS,
+          });
+          event.locals.session = newSessionData;
+          apiClient = new ApiClient(undefined, newSessionData.access_token);
+        } else if (response.status === 401) {
+          console.error(`failed to refresh:`, response.data);
+          event.cookies.delete("tora_auth_token", { path: "/" });
+        }
+      } catch (err) {
+        console.error("refresh request failed:", err);
         event.cookies.delete("tora_auth_token", { path: "/" });
       }
     }
