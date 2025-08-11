@@ -11,7 +11,6 @@ use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 
 mod api_key;
-mod dashboard;
 mod experiment;
 mod invitation;
 mod metric;
@@ -87,11 +86,6 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
         .route(
             "/experiments/{id}/metrics/csv",
             protected_route(get(metric::export_metrics_csv), app_state),
-        )
-        // Dashboard
-        .route(
-            "/dashboard/overview",
-            protected_route(get(dashboard::get_dashboard_overview), app_state),
         )
         // Settings and user management
         .route(
