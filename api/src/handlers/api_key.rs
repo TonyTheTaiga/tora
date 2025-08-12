@@ -1,6 +1,7 @@
+use crate::handlers::{AppError, AppResult, parse_uuid};
 use crate::middleware::auth::AuthenticatedUser;
 use crate::state::AppState;
-use crate::types::{ApiKey, AppError, AppResult, CreateApiKeyRequest, Response};
+use crate::types::{ApiKey, CreateApiKeyRequest, Response};
 use axum::{
     Extension, Json,
     extract::{Path, State},
@@ -24,7 +25,7 @@ pub async fn create_api_key(
     let mut hasher = Sha256::new();
     hasher.update(&full_key);
     let key_hash = format!("{:x}", hasher.finalize());
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
     let result = sqlx::query_as::<_, ApiKey>(
         "INSERT INTO api_keys (user_id, name, key_hash) VALUES ($1, $2, $3) RETURNING id::text, name, created_at, revoked, NULL as key"
     )
@@ -50,7 +51,7 @@ pub async fn list_api_keys(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
 ) -> AppResult<impl IntoResponse> {
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
 
     let result = sqlx::query_as::<_, ApiKey>(
         r#"
@@ -76,8 +77,8 @@ pub async fn revoke_api_key(
     State(app_state): State<AppState>,
     Path(key_id): Path<String>,
 ) -> AppResult<impl IntoResponse> {
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
-    let key_uuid = crate::types::error::parse_uuid(&key_id, "key_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
+    let key_uuid = parse_uuid(&key_id, "key_id")?;
 
     let result = sqlx::query(
         r#"

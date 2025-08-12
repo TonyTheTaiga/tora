@@ -1,8 +1,7 @@
+use crate::handlers::{AppError, AppResult, parse_uuid};
 use crate::middleware::auth::AuthenticatedUser;
 use crate::state::AppState;
-use crate::types::{
-    AppError, AppResult, BatchCreateMetricsRequest, CreateMetricRequest, Metric, Response,
-};
+use crate::types::{BatchCreateMetricsRequest, CreateMetricRequest, Metric, Response};
 use axum::{
     Extension, Json,
     extract::{Path, State},
@@ -16,8 +15,8 @@ pub async fn get_metrics(
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
 ) -> AppResult<impl IntoResponse> {
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
-    let experiment_uuid = crate::types::error::parse_uuid(&experiment_id, "experiment_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
+    let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
 
     // Check if user has access to this experiment
     let access_check = sqlx::query_as::<_, (i64,)>(
@@ -75,8 +74,8 @@ pub async fn create_metric(
     Path(experiment_id): Path<String>,
     Json(request): Json<CreateMetricRequest>,
 ) -> AppResult<impl IntoResponse> {
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
-    let experiment_uuid = crate::types::error::parse_uuid(&experiment_id, "experiment_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
+    let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
 
     // Check if user has access to this experiment
     let access_check = sqlx::query_as::<_, (i64,)>(
@@ -154,8 +153,8 @@ pub async fn batch_create_metrics(
             .into_response());
     }
 
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
-    let experiment_uuid = crate::types::error::parse_uuid(&experiment_id, "experiment_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
+    let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
 
     let access_check = sqlx::query_as::<_, (i64,)>(
         r#"
@@ -226,8 +225,8 @@ pub async fn export_metrics_csv(
 ) -> AppResult<impl IntoResponse> {
     use axum::http::HeaderMap;
 
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
-    let experiment_uuid = crate::types::error::parse_uuid(&experiment_id, "experiment_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
+    let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
 
     let access_check = sqlx::query_as::<_, (i64,)>(
         r#"

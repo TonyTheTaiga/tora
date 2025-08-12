@@ -14,9 +14,11 @@ mod api_key;
 mod experiment;
 mod invitation;
 mod metric;
+pub mod result;
 mod role;
 mod user;
 mod workspace;
+pub use result::{AppError, AppResult, parse_uuid};
 
 pub fn api_routes(app_state: &AppState) -> Router<AppState> {
     let protected_routes = Router::new()

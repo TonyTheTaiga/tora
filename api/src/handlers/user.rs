@@ -1,9 +1,8 @@
-use crate::handlers::{api_key, invitation, workspace};
+use crate::handlers::{AppError, AppResult, api_key, invitation, workspace};
 use crate::middleware::auth::AuthenticatedUser;
 use crate::settings::Settings;
 use crate::state::AppState;
 use crate::types;
-use crate::types::{AppError, AppResult};
 use axum::{
     Extension, Json,
     body::to_bytes,

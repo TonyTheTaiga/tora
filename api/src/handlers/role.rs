@@ -1,5 +1,6 @@
+use crate::handlers::AppResult;
 use crate::state::AppState;
-use crate::types::{AppResult, Response, WorkspaceRole};
+use crate::types::{Response, WorkspaceRole};
 use axum::{Json, extract::State, response::IntoResponse};
 
 pub async fn list_workspace_roles(

@@ -1,8 +1,8 @@
+use crate::handlers::{AppError, AppResult, parse_uuid};
 use crate::middleware::auth::AuthenticatedUser;
 use crate::state::AppState;
 use crate::types::{
-    AppError, AppResult, CreateExperimentRequest, Experiment, ListExperimentsQuery, Response,
-    UpdateExperimentRequest,
+    CreateExperimentRequest, Experiment, ListExperimentsQuery, Response, UpdateExperimentRequest,
 };
 use axum::{
     Extension, Json,
@@ -23,10 +23,10 @@ pub async fn create_experiment(
         request.name, user.email, request.workspace_id
     );
     debug!("Experiment request: {:?}", request);
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
 
     // TODO: Handler anonymous experiments.
-    let workspace_uuid = crate::types::error::parse_uuid(&request.workspace_id, "workspace_id")?;
+    let workspace_uuid = parse_uuid(&request.workspace_id, "workspace_id")?;
     let mut tx = app_state.db_pool.begin().await?;
     let access_check = sqlx::query_as::<_, (i64,)>(
         "SELECT COUNT(*) FROM user_workspaces WHERE workspace_id = $1 AND user_id = $2",
@@ -90,10 +90,10 @@ pub async fn list_experiments(
     State(app_state): State<AppState>,
     Query(query): Query<ListExperimentsQuery>,
 ) -> AppResult<impl IntoResponse> {
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
 
     let result = if let Some(workspace_id) = &query.workspace {
-        let workspace_uuid = crate::types::error::parse_uuid(workspace_id, "workspace_id")?;
+        let workspace_uuid = parse_uuid(workspace_id, "workspace_id")?;
 
         // List experiments for a specific workspace with metrics summary
         sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String, Option<Vec<String>>)>(
@@ -181,8 +181,8 @@ pub async fn get_experiment(
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
 ) -> AppResult<impl IntoResponse> {
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
-    let experiment_uuid = crate::types::error::parse_uuid(&experiment_id, "experiment_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
+    let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
 
     let result = sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String, Option<Vec<String>>)>(
         r#"
@@ -246,8 +246,8 @@ pub async fn update_experiment(
     Path(id): Path<String>,
     Json(request): Json<UpdateExperimentRequest>,
 ) -> AppResult<impl IntoResponse> {
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
-    let experiment_uuid = crate::types::error::parse_uuid(&id, "experiment_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
+    let experiment_uuid = parse_uuid(&id, "experiment_id")?;
 
     // Check if user has access to this experiment
     let access_check = sqlx::query_as::<_, (i64,)>(
@@ -305,8 +305,8 @@ pub async fn delete_experiment(
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
 ) -> AppResult<impl IntoResponse> {
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
-    let experiment_uuid = crate::types::error::parse_uuid(&experiment_id, "experiment_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
+    let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
 
     // Check if user has owner/admin access to this experiment
     let access_check = sqlx::query_as::<_, (i64,)>(
@@ -352,8 +352,8 @@ pub async fn list_workspace_experiments(
     State(app_state): State<AppState>,
     Path(workspace_id): Path<String>,
 ) -> AppResult<impl IntoResponse> {
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
-    let workspace_uuid = crate::types::error::parse_uuid(&workspace_id, "workspace_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
+    let workspace_uuid = parse_uuid(&workspace_id, "workspace_id")?;
 
     // Check if user has access to the workspace
     let access_check = sqlx::query_as::<_, (i64,)>(
