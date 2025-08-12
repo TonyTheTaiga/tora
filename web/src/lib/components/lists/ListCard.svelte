@@ -15,10 +15,10 @@
   }
 </script>
 
-<div role="list" class="font-mono">
+<div role="list" class="font-mono divide-y divide-ctp-surface0/30">
   {#each items as item}
     <div role="listitem" class="group layer-slide-up">
-      <div class="flex items-start justify-between gap-4 px-2 py-2">
+      <div class="flex items-start justify-between gap-4 px-2 py-3">
         <button
           onclick={() => handleItemClick(item)}
           class="text-left flex-1 min-w-0 focus:outline-none"
