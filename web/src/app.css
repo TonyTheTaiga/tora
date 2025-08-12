@@ -217,45 +217,6 @@
       color-mix(in srgb, var(--color-ctp-surface0) 25%, transparent);
   }
 
-  .surface-layer-3 {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-surface0) 25%,
-      var(--color-ctp-base)
-    );
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 35%, transparent);
-  }
-
-  /* Interactive surface states */
-  .surface-interactive {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-surface0) 12%,
-      var(--color-ctp-base)
-    );
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 20%, transparent);
-    transition:
-      background-color 0.4s ease,
-      border-color 0.4s ease,
-      transform 0.4s ease;
-  }
-
-  .surface-interactive:hover {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-surface0) 20%,
-      var(--color-ctp-base)
-    );
-    border-color: color-mix(
-      in srgb,
-      var(--color-ctp-surface0) 30%,
-      transparent
-    );
-    transform: translateY(-1px);
-  }
-
   .surface-elevated {
     background: color-mix(
       in srgb,
@@ -264,13 +225,9 @@
     );
     border: 1px solid
       color-mix(in srgb, var(--color-ctp-surface0) 28%, transparent);
-  }
-
-  .surface-glass {
-    background: color-mix(in srgb, var(--color-ctp-surface0) 12%, transparent);
-    backdrop-filter: blur(16px);
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 30%, transparent);
+    box-shadow:
+      0 4px 6px -1px color-mix(in srgb, var(--color-ctp-crust) 40%, transparent),
+      0 2px 4px -1px color-mix(in srgb, var(--color-ctp-crust) 20%, transparent);
   }
 
   .surface-glass-elevated {
@@ -278,151 +235,6 @@
     backdrop-filter: blur(20px);
     border: 1px solid
       color-mix(in srgb, var(--color-ctp-surface0) 35%, transparent);
-  }
-
-  .surface-accent-blue {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-blue) 8%,
-      var(--color-ctp-base)
-    );
-    border: 1px solid color-mix(in srgb, var(--color-ctp-blue) 20%, transparent);
-  }
-
-  .surface-accent-green {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-green) 8%,
-      var(--color-ctp-base)
-    );
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-green) 20%, transparent);
-  }
-
-  .surface-accent-yellow {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-yellow) 8%,
-      var(--color-ctp-base)
-    );
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-yellow) 20%, transparent);
-  }
-
-  .surface-accent-red {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-red) 8%,
-      var(--color-ctp-base)
-    );
-    border: 1px solid color-mix(in srgb, var(--color-ctp-red) 20%, transparent);
-  }
-
-  .surface-accent-lavender {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-lavender) 8%,
-      var(--color-ctp-base)
-    );
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-lavender) 20%, transparent);
-  }
-
-  .surface-accent-mauve {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-mauve) 8%,
-      var(--color-ctp-base)
-    );
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-mauve) 20%, transparent);
-  }
-
-  .depth-inset {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-surface0) 5%,
-      var(--color-ctp-base)
-    );
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 10%, transparent);
-  }
-
-  .depth-raised {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-surface0) 8%,
-      var(--color-ctp-base)
-    );
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
-  }
-
-  .terminal-border {
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 30%, transparent);
-  }
-
-  .terminal-border-accent {
-    border-left: 2px solid var(--color-ctp-blue);
-    border-top: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 20%, transparent);
-    border-right: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 20%, transparent);
-    border-bottom: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 20%, transparent);
-  }
-
-  .section-divider {
-    position: relative;
-    border-top: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 25%, transparent);
-    margin: 2rem 0;
-  }
-
-  .section-divider::before {
-    content: attr(data-label);
-    position: absolute;
-    top: -0.6rem;
-    left: 0;
-    background: var(--color-ctp-base);
-    padding: 0 1rem;
-    font-size: 0.75rem;
-    color: var(--color-ctp-subtext0);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-family: inherit;
-  }
-
-  .section-divider-center::before {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .content-layer {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-surface0) 6%,
-      var(--color-ctp-base)
-    );
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
-    position: relative;
-  }
-
-  .layer-spacing-sm {
-    padding: 0.75rem;
-    margin: 0.5rem 0;
-  }
-
-  .layer-spacing-md {
-    padding: 1.25rem;
-    margin: 1rem 0;
-  }
-
-  .layer-spacing-lg {
-    padding: 2rem;
-    margin: 1.5rem 0;
   }
 
   .stack-layer {
@@ -477,8 +289,6 @@
     transform: translateY(-2px);
   }
 
-  /* list/menu component-specific styles removed; keep app.css general */
-
   .terminal-chrome {
     background: color-mix(
       in srgb,
@@ -488,17 +298,6 @@
     border: 1px solid
       color-mix(in srgb, var(--color-ctp-surface0) 25%, transparent);
     border-radius: 0;
-  }
-
-  .terminal-chrome-header {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-surface0) 25%,
-      var(--color-ctp-base)
-    );
-    border-bottom: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 35%, transparent);
-    padding: 0.75rem 1rem;
   }
 
   .layer-fade-in {

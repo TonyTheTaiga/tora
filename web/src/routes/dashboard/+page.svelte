@@ -51,25 +51,47 @@
 </script>
 
 <div
-  class="text-ctp-text flex space-x-2 font-mono border-ctp-surface0/30 p-4 h-[calc(100vh-4.5rem)] overflow-hidden"
+  class="text-ctp-text flex space-x-4 font-mono p-6 h-[calc(100vh-4.5rem)] overflow-hidden bg-gradient-to-br from-ctp-base to-ctp-mantle"
 >
-  <div class="w-1/4 flex flex-col overflow-y-auto">
-    <WorkspaceColumn {workspaces} {workspaceRoles} {workspaceInvitations} />
+  <div class="w-1/4 flex flex-col overflow-hidden">
+    <div
+      class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 h-full flex flex-col overflow-hidden backdrop-blur-sm"
+    >
+      <div class="flex-1 overflow-y-auto">
+        <WorkspaceColumn {workspaces} {workspaceRoles} {workspaceInvitations} />
+      </div>
+    </div>
   </div>
 
-  <div class="w-1/4 lex flex-col overflow-y-auto">
-    {#if selectedWorkspace}
-      <ExperimentListColumn workspace={selectedWorkspace} />
-    {:else}
-      <EmptyState message="select a workspace to view experiments" />
-    {/if}
+  <div class="w-1/4 flex flex-col overflow-hidden">
+    <div
+      class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 h-full flex flex-col overflow-hidden backdrop-blur-sm"
+    >
+      <div class="flex-1 overflow-y-auto">
+        {#if selectedWorkspace}
+          <ExperimentListColumn workspace={selectedWorkspace} />
+        {:else}
+          <div class="h-full flex items-center justify-center">
+            <EmptyState message="select a workspace to view experiments" />
+          </div>
+        {/if}
+      </div>
+    </div>
   </div>
 
-  <div class="w-1/2 flex flex-col overflow-y-auto">
-    {#if selectedExperiment}
-      <ExperimentDetails experiment={selectedExperiment} />
-    {:else}
-      <EmptyState message="select a experiment to view details" />
-    {/if}
+  <div class="w-1/2 flex flex-col overflow-hidden">
+    <div
+      class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 h-full flex flex-col overflow-hidden backdrop-blur-sm"
+    >
+      <div class="flex-1 overflow-y-auto">
+        {#if selectedExperiment}
+          <ExperimentDetails experiment={selectedExperiment} />
+        {:else}
+          <div class="h-full flex items-center justify-center">
+            <EmptyState message="select a experiment to view details" />
+          </div>
+        {/if}
+      </div>
+    </div>
   </div>
 </div>

@@ -77,7 +77,9 @@
 {/if}
 
 <div class="h-full flex flex-col">
-  <div class="sticky top-0 z-10 terminal-chrome-header">
+  <div
+    class="sticky top-0 z-10 surface-elevated border-b border-ctp-surface0/30 p-4"
+  >
     <div class="flex items-center justify-between mb-3">
       <h2 class="text-ctp-text font-medium text-base">Experiments</h2>
     </div>
@@ -95,19 +97,19 @@
       </button>
     </div>
     <div
-      class="flex items-center bg-ctp-surface0/20 focus-within:ring-1 focus-within:ring-ctp-text/20 mb-3"
+      class="flex items-center bg-ctp-surface0/30 focus-within:ring-1 focus-within:ring-ctp-blue/30 transition-all mb-3 border border-ctp-surface0/40"
     >
       <input
         type="search"
         bind:value={experimentSearchQuery}
         placeholder="search experiments..."
-        class="flex-1 bg-transparent border-0 py-2 pr-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none text-sm"
+        class="flex-1 bg-transparent border-0 py-2 px-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none text-sm"
       />
     </div>
   </div>
 
   <!-- Scrollable Content Area -->
-  <div class="flex-1 overflow-y-auto min-h-0">
+  <div class="flex-1 overflow-y-auto min-h-0 p-4">
     {#if loading.experiments}
       <div class="text-center py-8 text-ctp-subtext0 text-sm">
         loading experiments...
