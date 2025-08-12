@@ -76,58 +76,61 @@
   <EditExperimentModal bind:experiment={experimentToEdit} />
 {/if}
 
-<div class="terminal-chrome-header">
-  <div class="flex items-center justify-between mb-3">
-    <h2 class="text-ctp-text font-medium text-base">Experiments</h2>
-  </div>
-  <div class="mb-3">
-    <button
-      class="text-xs text-ctp-overlay0 hover:text-ctp-blue cursor-pointer"
-      tabindex="0"
-      onclick={(e) => {
-        e.stopPropagation();
-        copyToClipboard(workspace.id);
-      }}
-      title="click to copy workspace id"
+<div class="h-full flex flex-col">
+  <div class="sticky top-0 z-10 terminal-chrome-header">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-ctp-text font-medium text-base">Experiments</h2>
+    </div>
+    <div class="mb-3">
+      <button
+        class="text-xs text-ctp-overlay0 hover:text-ctp-blue cursor-pointer"
+        tabindex="0"
+        onclick={(e) => {
+          e.stopPropagation();
+          copyToClipboard(workspace.id);
+        }}
+        title="click to copy workspace id"
+      >
+        workspace id: {workspace.id}
+      </button>
+    </div>
+    <div
+      class="flex items-center bg-ctp-surface0/20 focus-within:ring-1 focus-within:ring-ctp-text/20 mb-3"
     >
-      workspace id: {workspace.id}
-    </button>
+      <input
+        type="search"
+        bind:value={experimentSearchQuery}
+        placeholder="search experiments..."
+        class="flex-1 bg-transparent border-0 py-2 pr-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none text-sm"
+      />
+    </div>
   </div>
-  <div
-    class="flex items-center bg-ctp-surface0/20 focus-within:ring-1 focus-within:ring-ctp-text/20"
-  >
-    <input
-      type="search"
-      bind:value={experimentSearchQuery}
-      placeholder="search experiments..."
-      class="flex-1 bg-transparent border-0 py-2 pr-3 text-ctp-text placeholder-ctp-subtext0 focus:outline-none text-sm"
-    />
-  </div>
-</div>
 
-<div class="flex-1 overflow-y-auto min-h-0">
-  {#if loading.experiments}
-    <div class="text-center py-8 text-ctp-subtext0 text-sm">
-      loading experiments...
-    </div>
-  {:else if errors.experiments}
-    <div class="surface-layer-2 p-4 m-2">
-      <div class="text-ctp-red font-medium mb-2 text-sm">
-        error loading experiments
+  <!-- Scrollable Content Area -->
+  <div class="flex-1 overflow-y-auto min-h-0">
+    {#if loading.experiments}
+      <div class="text-center py-8 text-ctp-subtext0 text-sm">
+        loading experiments...
       </div>
-      <div class="text-ctp-subtext0 text-xs mb-3">
-        {errors.experiments}
+    {:else if errors.experiments}
+      <div class="surface-layer-2 p-4 m-2">
+        <div class="text-ctp-red font-medium mb-2 text-sm">
+          error loading experiments
+        </div>
+        <div class="text-ctp-subtext0 text-xs mb-3">
+          {errors.experiments}
+        </div>
       </div>
-    </div>
-  {:else if experiments && experiments.length === 0}
-    <div class="text-center py-8 text-ctp-subtext0 text-sm">
-      no experiments found
-    </div>
-  {:else}
-    <ExperimentList
-      {experiments}
-      searchQuery={experimentSearchQuery}
-      onItemClick={setSelectedExperiment}
-    />
-  {/if}
+    {:else if experiments && experiments.length === 0}
+      <div class="text-center py-8 text-ctp-subtext0 text-sm">
+        no experiments found
+      </div>
+    {:else}
+      <ExperimentList
+        {experiments}
+        searchQuery={experimentSearchQuery}
+        onItemClick={setSelectedExperiment}
+      />
+    {/if}
+  </div>
 </div>
