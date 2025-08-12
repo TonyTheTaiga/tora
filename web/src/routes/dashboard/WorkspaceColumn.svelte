@@ -12,7 +12,6 @@
   let { workspaces, workspaceRoles, workspaceInvitations } = $props();
   let workspaceSearchQuery = $state("");
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
-
   let openInvitationModal = $state<boolean>(false);
 </script>
 

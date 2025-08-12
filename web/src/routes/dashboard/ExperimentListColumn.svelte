@@ -14,7 +14,6 @@
   } from "./state.svelte";
 
   let { workspace }: { workspace: Workspace } = $props();
-
   let experimentSearchQuery = $state("");
   let experiments: Experiment[] = $state([]);
   let experimentToEdit = $derived(getExperimentToEdit());
