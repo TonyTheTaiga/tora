@@ -154,22 +154,3 @@ pub type AppResult<T> = Result<T, AppError>;
 pub fn parse_uuid(uuid_str: &str, field_name: &str) -> AppResult<uuid::Uuid> {
     uuid::Uuid::parse_str(uuid_str).map_err(|_| AppError::InvalidUuid(field_name.to_string()))
 }
-
-pub fn validate_not_empty(value: &str, field_name: &str) -> AppResult<()> {
-    if value.trim().is_empty() {
-        Err(AppError::Validation(format!(
-            "{} cannot be empty",
-            field_name
-        )))
-    } else {
-        Ok(())
-    }
-}
-
-pub fn validate_email(email: &str) -> AppResult<()> {
-    if email.contains('@') && email.contains('.') {
-        Ok(())
-    } else {
-        Err(AppError::Validation("Invalid email format".to_string()))
-    }
-}

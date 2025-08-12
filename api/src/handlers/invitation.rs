@@ -1,9 +1,7 @@
+use crate::handlers::{AppError, AppResult, parse_uuid};
 use crate::middleware::auth::AuthenticatedUser;
 use crate::state::AppState;
-use crate::types::{
-    AppError, AppResult, CreateInvitationRequest, InvitationActionQuery, Response,
-    WorkspaceInvitation,
-};
+use crate::types::{CreateInvitationRequest, InvitationActionQuery, Response, WorkspaceInvitation};
 use axum::{
     Extension, Json,
     extract::{Query, State},
@@ -17,7 +15,7 @@ pub async fn create_invitation(
     State(app_state): State<AppState>,
     Json(request): Json<CreateInvitationRequest>,
 ) -> AppResult<impl IntoResponse> {
-    let from_user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
+    let from_user_uuid = parse_uuid(&user.id, "user_id")?;
 
     let to_user_result = sqlx::query_as::<_, (Uuid,)>("SELECT id FROM auth.users WHERE email = $1")
         .bind(&request.email)
@@ -29,8 +27,8 @@ pub async fn create_invitation(
         None => return Err(AppError::NotFound("Recipient user not found".to_string())),
     };
 
-    let workspace_uuid = crate::types::error::parse_uuid(&request.workspace_id, "workspace_id")?;
-    let role_uuid = crate::types::error::parse_uuid(&request.role_id, "role_id")?;
+    let workspace_uuid = parse_uuid(&request.workspace_id, "workspace_id")?;
+    let role_uuid = parse_uuid(&request.role_id, "role_id")?;
 
     let invitation = sqlx::query_as::<_, WorkspaceInvitation>(
         r#"
@@ -61,7 +59,7 @@ pub async fn list_invitations(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
 ) -> AppResult<impl IntoResponse> {
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
 
     let invitations = sqlx::query_as::<_, WorkspaceInvitation>(
         r#"
@@ -98,8 +96,8 @@ pub async fn respond_to_invitation(
     State(app_state): State<AppState>,
     Query(query): Query<InvitationActionQuery>,
 ) -> AppResult<impl IntoResponse> {
-    let invitation_uuid = crate::types::error::parse_uuid(&query.invitation_id, "invitation_id")?;
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
+    let invitation_uuid = parse_uuid(&query.invitation_id, "invitation_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
 
     let mut tx = app_state.db_pool.begin().await?;
 

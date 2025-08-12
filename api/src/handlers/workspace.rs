@@ -1,8 +1,7 @@
+use crate::handlers::{AppError, AppResult, parse_uuid};
 use crate::middleware::auth::AuthenticatedUser;
 use crate::state::AppState;
-use crate::types::{
-    AppError, AppResult, CreateWorkspaceRequest, Response, Workspace, WorkspaceMember,
-};
+use crate::types::{CreateWorkspaceRequest, Response, Workspace, WorkspaceMember};
 use axum::{
     Extension, Json,
     extract::{Path, State},
@@ -18,7 +17,7 @@ pub async fn list_workspaces(
 ) -> AppResult<impl IntoResponse> {
     info!("Listing workspaces for user: {}", user.email);
 
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
 
     debug!(
         "Executing query to fetch workspaces for user: {}",
@@ -99,7 +98,7 @@ pub async fn create_workspace(
 
     let (owner_role_id,) = owner_role_result;
 
-    let user_uuid = crate::types::error::parse_uuid(&user.id, "user_id")?;
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
 
     sqlx::query("INSERT INTO user_workspaces (user_id, workspace_id, role_id) VALUES ($1, $2, $3)")
         .bind(user_uuid)
@@ -133,7 +132,7 @@ pub async fn get_workspace(
     State(app_state): State<AppState>,
     Path(workspace_id): Path<String>,
 ) -> AppResult<impl IntoResponse> {
-    let workspace_uuid = crate::types::error::parse_uuid(&workspace_id, "workspace_id")?;
+    let workspace_uuid = parse_uuid(&workspace_id, "workspace_id")?;
 
     let result = sqlx::query_as::<
         _,
@@ -184,7 +183,7 @@ pub async fn get_workspace_members(
     State(app_state): State<AppState>,
     Path(workspace_id): Path<String>,
 ) -> AppResult<impl IntoResponse> {
-    let workspace_uuid = crate::types::error::parse_uuid(&workspace_id, "workspace_id")?;
+    let workspace_uuid = parse_uuid(&workspace_id, "workspace_id")?;
 
     let access_check = sqlx::query_as::<_, (i64,)>(
         "SELECT COUNT(*) FROM user_workspaces WHERE workspace_id = $1 AND user_id = $2",
@@ -236,7 +235,7 @@ pub async fn delete_workspace(
     State(app_state): State<AppState>,
     Path(workspace_id): Path<String>,
 ) -> AppResult<impl IntoResponse> {
-    let workspace_uuid = crate::types::error::parse_uuid(&workspace_id, "workspace_id")?;
+    let workspace_uuid = parse_uuid(&workspace_id, "workspace_id")?;
 
     let owner_check = sqlx::query_as::<_, (i64,)>(
         r#"
@@ -277,7 +276,7 @@ pub async fn leave_workspace(
     State(app_state): State<AppState>,
     Path(workspace_id): Path<String>,
 ) -> AppResult<impl IntoResponse> {
-    let workspace_uuid = crate::types::error::parse_uuid(&workspace_id, "workspace_id")?;
+    let workspace_uuid = parse_uuid(&workspace_id, "workspace_id")?;
 
     // Check if user is the only owner - prevent leaving if so
     let owner_count = sqlx::query_as::<_, (i64,)>(

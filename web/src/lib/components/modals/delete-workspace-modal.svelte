@@ -6,11 +6,9 @@
   let {
     workspace,
     isOpen = $bindable(false),
-    onDeleted,
   }: {
     workspace: any;
     isOpen: boolean;
-    onDeleted?: () => void;
   } = $props();
 
   let isDeleting = $state(false);
@@ -24,7 +22,6 @@
 {#if isOpen && workspace}
   <BaseModal title="Delete Workspace?">
     <div class="space-y-4">
-      <!-- Warning content -->
       <div class="border border-ctp-surface0/20 p-3 mb-4">
         <div class="flex items-start gap-3">
           <AlertTriangle size={20} class="text-ctp-red mt-0.5 flex-shrink-0" />
@@ -55,10 +52,11 @@
           return async ({ result, update }) => {
             isDeleting = false;
             if (result.type === "success") {
-              onDeleted?.();
               closeModal();
+              await update();
             } else {
               console.error("Error deleting workspace:", result);
+              closeModal();
               await update();
             }
           };
