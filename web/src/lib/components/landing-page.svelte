@@ -8,7 +8,6 @@
 
   let activeTab: "start" | "guide" = $state<"start" | "guide">("guide");
   let isMaximized = $state(false);
-  let highlightedGettingStarted = $state("");
   let isHighlighting = $state(false);
 
   $effect(() => {
@@ -43,6 +42,9 @@
   }
 
   const formattedGettingStarted = addLineNumbers(gettingStartedContent);
+  let highlightedGettingStarted = $state(
+    `<pre class="text-ctp-text font-mono"><code>${formattedGettingStarted}</code></pre>`,
+  );
 
   function getTheme() {
     if (!browser) return "catppuccin-mocha";
@@ -161,15 +163,15 @@
         </div>
 
         <article
-          class="w-full max-w-3xl mx-auto layer-fade-in"
+          class="w-full self-stretch max-w-[48rem] mx-auto layer-fade-in"
           class:maximized={isMaximized}
         >
           <div
-            class="terminal-chrome overflow-hidden stack-layer"
+            class="terminal-chrome overflow-hidden stack-layer flex flex-col min-w-0 w-full box-border"
             class:maximized-terminal={isMaximized}
           >
             <header
-              class="terminal-chrome-header grid grid-cols-3 items-center"
+              class="terminal-chrome-header grid grid-cols-3 items-center px-4 py-3"
             >
               <div class="flex space-x-2">
                 <div class="w-3 h-3 rounded-full bg-ctp-overlay0"></div>
@@ -194,7 +196,7 @@
             <div class="flex relative">
               <button
                 type="button"
-                class="flex-1 px-4 py-2 text-xs font-mono relative transition-colors"
+                class="flex-1 px-4 py-3 text-xs font-mono relative transition-colors"
                 class:bg-ctp-surface0={activeTab === "start"}
                 class:text-ctp-text={activeTab === "start"}
                 class:text-ctp-subtext0={activeTab !== "start"}
@@ -210,7 +212,7 @@
               </button>
               <button
                 type="button"
-                class="flex-1 px-4 py-2 text-xs font-mono relative transition-colors"
+                class="flex-1 px-4 py-3 text-xs font-mono relative transition-colors"
                 class:bg-ctp-surface0={activeTab === "guide"}
                 class:text-ctp-text={activeTab === "guide"}
                 class:text-ctp-subtext0={activeTab !== "guide"}
@@ -230,24 +232,17 @@
             </div>
 
             <div
-              class="p-4 sm:p-6 max-h-[220px] sm:min-h-[320px] overflow-y-auto"
+              class="p-4 sm:p-6 max-h-[220px] sm:min-h-[320px] overflow-y-scroll terminal-content box-border"
               class:maximized-content={isMaximized}
             >
               {#if activeTab === "start"}
-                {#if highlightedGettingStarted}
-                  <div
-                    class="text-xs sm:text-sm md:text-base leading-relaxed text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent [&_pre]:whitespace-pre-wrap [&_pre]:break-words"
-                  >
-                    {@html highlightedGettingStarted}
-                  </div>
-                {:else}
-                  <pre
-                    class="text-xs sm:text-sm md:text-base text-ctp-text font-mono leading-relaxed text-left whitespace-pre-wrap break-words"><code
-                      >{@html formattedGettingStarted}</code
-                    ></pre>
-                {/if}
+                <div
+                  class="w-full text-xs sm:text-sm md:text-base leading-relaxed text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent [&_pre]:whitespace-pre-wrap [&_pre]:break-words"
+                >
+                  {@html highlightedGettingStarted}
+                </div>
               {:else if activeTab === "guide"}
-                <div class="markdown-content break-words">
+                <div class="markdown-content break-words w-full">
                   {@html marked(userGuide)}
                 </div>
               {/if}
@@ -364,15 +359,21 @@
 
   /* Maximized terminal styles */
   .maximized {
-    @apply fixed inset-0 z-50 max-w-none w-full h-full m-0;
+    @apply fixed inset-0 z-50 max-w-none w-full m-0;
+    height: 100dvh; /* use dynamic viewport height for mobile */
   }
 
   .maximized-terminal {
-    @apply h-full;
+    @apply h-full flex flex-col min-w-0;
   }
 
   .maximized-content {
-    @apply max-h-none min-h-0;
-    height: calc(100vh - 200px);
+    @apply flex-1 max-h-none min-h-0 overflow-y-auto;
+    height: auto; /* let flexbox control height */
+  }
+
+  /* Keep content width stable when vertical scrollbar toggles */
+  .terminal-content {
+    scrollbar-gutter: stable both-edges;
   }
 </style>
