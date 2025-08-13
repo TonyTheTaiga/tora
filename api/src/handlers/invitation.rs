@@ -34,7 +34,7 @@ pub async fn create_invitation(
         r#"
         INSERT INTO workspace_invitations ("to", "from", workspace_id, role_id, status)
         VALUES ($1, $2, $3, $4, $5)
-        RETURNING id::text, workspace_id::text, (SELECT email FROM auth.users WHERE id = "to") as email, (SELECT name FROM workspace_role WHERE id = role_id) as role, (SELECT email FROM auth.users WHERE id = "from") as from, created_at
+        RETURNING id::text, workspace_id::text, (SELECT name FROM workspace WHERE id = workspace_id) as workspace_name, (SELECT email FROM auth.users WHERE id = "to") as email, (SELECT name FROM workspace_role WHERE id = role_id) as role, (SELECT email FROM auth.users WHERE id = "from") as from, created_at
         "#,
     )
     .bind(to_user_uuid)
