@@ -5,7 +5,10 @@
   import { BaseModal } from "$lib/components/modals";
   import { resetExperimentToDelete } from "$lib/state/modal.svelte.js";
 
-  let { experiment = $bindable() }: { experiment: Experiment } = $props();
+  let {
+    experiment,
+    experiments = $bindable(),
+  }: { experiment: Experiment; experiments: Experiment[] } = $props();
 
   let isDeleting = $state(false);
 
@@ -49,6 +52,10 @@
         return async ({ result, update }) => {
           isDeleting = false;
           if (result.type === "success") {
+            const experimentId = experiment.id;
+            experiments = experiments.filter(
+              (experiment) => experiment.id !== experimentId,
+            );
             closeModal();
             await update();
           } else {

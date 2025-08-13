@@ -64,6 +64,7 @@
   }
 
   let experimentToDelete = $derived(getExperimentToDelete());
+
   function openDeleteModal(experiment: Experiment) {
     setExperimentToDelete(experiment);
   }
@@ -164,5 +165,5 @@
 {/if}
 
 {#if experimentToDelete}
-  <DeleteExperimentModal bind:experiment={experimentToDelete} />
+  <DeleteExperimentModal experiment={experimentToDelete} bind:experiments />
 {/if}
