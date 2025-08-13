@@ -8,131 +8,72 @@
 
   let activeTab: "start" | "guide" = $state<"start" | "guide">("guide");
   let isMaximized = $state(false);
-  let isHighlighting = $state(false);
-
-  $effect(() => {
-    if (browser && document.body) {
-      if (isMaximized) {
-        document.body.style.overflow = "hidden";
-      } else {
-        document.body.style.overflow = "";
-      }
-    }
-
-    return () => {
-      if (browser && document.body) {
-        document.body.style.overflow = "";
-      }
-    };
-  });
+  let highlightedCode = $state("");
 
   const headline = "Pure Speed. Pure Insight.";
   const subtitle = "A Modern Experiment Tracker";
 
-  function addLineNumbers(code: string): string {
-    return code
-      .trim()
-      .split("\n")
-      .filter((line) => line.trim() !== "")
-      .map((line, index) => {
-        const lineNum = (index + 1).toString().padStart(2, " ");
-        return `<span class="text-ctp-overlay0 select-none">${lineNum}</span>  ${line}`;
-      })
-      .join("\n");
+  function toggleMaximize() {
+    isMaximized = !isMaximized;
+    document.body.style.overflow = isMaximized ? "hidden" : "";
   }
 
-  const formattedGettingStarted = addLineNumbers(gettingStartedContent);
-  let highlightedGettingStarted = $state(
-    `<pre class="text-ctp-text font-mono"><code>${formattedGettingStarted}</code></pre>`,
-  );
-
-  function getTheme() {
-    if (!browser) return "catppuccin-mocha";
-
-    const htmlElement = document.documentElement;
-    if (htmlElement.classList.contains("light")) {
-      return "catppuccin-latte";
-    }
-    if (htmlElement.classList.contains("dark")) {
-      return "catppuccin-mocha";
-    }
-
-    if (
-      window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: light)").matches
-    ) {
-      return "catppuccin-latte";
-    }
-
-    return "catppuccin-mocha";
-  }
-
-  async function highlightCode() {
-    if (isHighlighting) return;
-    isHighlighting = true;
+  // Simple syntax highlighting
+  async function initHighlighting() {
+    if (!browser) return;
 
     try {
-      const currentTheme = getTheme();
-
       const highlighter = await createHighlighter({
         themes: ["catppuccin-mocha", "catppuccin-latte"],
         langs: ["python"],
       });
 
-      highlightedGettingStarted = highlighter.codeToHtml(
-        gettingStartedContent,
-        {
-          lang: "python",
-          theme: currentTheme,
-          transformers: [
-            {
-              line(node, line) {
-                node.properties["data-line"] = line;
-                node.children.unshift({
-                  type: "element",
-                  tagName: "span",
-                  properties: {
-                    class: "line-number",
-                    style:
-                      "color: var(--color-ctp-overlay0); user-select: none; margin-right: 1em; display: inline-block; width: 2ch; text-align: right;",
-                  },
-                  children: [
-                    { type: "text", value: line.toString().padStart(2, " ") },
-                  ],
-                });
-              },
+      const isDark =
+        document.documentElement.classList.contains("dark") ||
+        (!document.documentElement.classList.contains("light") &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+      const theme = isDark ? "catppuccin-mocha" : "catppuccin-latte";
+
+      highlightedCode = highlighter.codeToHtml(gettingStartedContent, {
+        lang: "python",
+        theme,
+        transformers: [
+          {
+            line(node, line) {
+              node.children.unshift({
+                type: "element",
+                tagName: "span",
+                properties: {
+                  class: "line-number",
+                  style:
+                    "color: var(--color-ctp-overlay0); user-select: none; margin-right: 1em; display: inline-block; width: 2ch; text-align: right;",
+                },
+                children: [
+                  { type: "text", value: line.toString().padStart(2, " ") },
+                ],
+              });
             },
-          ],
-        },
-      );
+          },
+        ],
+      });
     } catch (error) {
-      console.error("Shiki highlighting failed:", error);
-      highlightedGettingStarted = `<pre class="text-ctp-text font-mono"><code>${formattedGettingStarted}</code></pre>`;
+      console.error("Highlighting failed:", error);
+      // Fallback to plain text with line numbers
+      const lines = gettingStartedContent.trim().split("\n");
+      const numbered = lines
+        .map((line, i) => {
+          const num = (i + 1).toString().padStart(2, " ");
+          return `<span class="text-ctp-overlay0 select-none">${num}</span>  ${line}`;
+        })
+        .join("\n");
+      highlightedCode = `<pre class="text-ctp-text font-mono"><code>${numbered}</code></pre>`;
     }
   }
 
+  // Initialize highlighting on mount
   $effect(() => {
-    highlightCode();
-
-    if (browser && window.matchMedia) {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
-      const handleThemeChange = () => {
-        isHighlighting = false;
-        highlightCode();
-      };
-
-      mediaQuery.addEventListener("change", handleThemeChange);
-      const observer = new MutationObserver(handleThemeChange);
-      observer.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ["class"],
-      });
-
-      return () => {
-        mediaQuery.removeEventListener("change", handleThemeChange);
-        observer.disconnect();
-      };
-    }
+    initHighlighting();
   });
 </script>
 
@@ -163,11 +104,11 @@
         </div>
 
         <article
-          class="w-full self-stretch max-w-[48rem] mx-auto layer-fade-in"
+          class="w-full max-w-[48rem] mx-auto layer-fade-in"
           class:maximized={isMaximized}
         >
           <div
-            class="terminal-chrome overflow-hidden stack-layer flex flex-col min-w-0 w-full box-border"
+            class="terminal-chrome overflow-hidden flex flex-col min-w-0 w-full box-border"
             class:maximized-terminal={isMaximized}
           >
             <header
@@ -177,13 +118,11 @@
                 <div class="w-3 h-3 rounded-full bg-ctp-overlay0"></div>
                 <div class="w-3 h-3 rounded-full bg-ctp-overlay0"></div>
                 <button
+                  aria-label={isMaximized ? "Restore" : "Maximize"}
                   type="button"
-                  onclick={() => (isMaximized = !isMaximized)}
+                  onclick={toggleMaximize}
                   class="w-3 h-3 rounded-full bg-ctp-blue cursor-pointer"
                   title={isMaximized ? "Restore" : "Maximize"}
-                  aria-label={isMaximized
-                    ? "Restore terminal window"
-                    : "Maximize terminal window"}
                 ></button>
               </div>
               <div
@@ -193,6 +132,7 @@
               </div>
               <div></div>
             </header>
+
             <div class="flex relative">
               <button
                 type="button"
@@ -239,7 +179,7 @@
                 <div
                   class="w-full text-xs sm:text-sm md:text-base leading-relaxed text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent [&_pre]:whitespace-pre-wrap [&_pre]:break-words"
                 >
-                  {@html highlightedGettingStarted}
+                  {@html highlightedCode}
                 </div>
               {:else if activeTab === "guide"}
                 <div class="markdown-content break-words w-full">
@@ -251,9 +191,9 @@
             <footer
               class="border-t border-ctp-surface0/30 flex flex-col sm:flex-row justify-between items-center p-4 gap-4"
             >
-              <span class="text-xs text-ctp-subtext0 font-mono"
-                >start anonymous • sign up to store experiments</span
-              >
+              <span class="text-xs text-ctp-subtext0 font-mono">
+                start anonymous • sign up to store experiments
+              </span>
               <button
                 type="button"
                 onclick={() => goto("/signup")}
@@ -313,7 +253,6 @@
     color: var(--color-ctp-text);
   }
 
-  /* Special styling for feature list items */
   .markdown-content :global(li strong:first-child) {
     color: var(--color-ctp-mauve);
   }
@@ -357,10 +296,9 @@
     color: var(--color-ctp-subtext1);
   }
 
-  /* Maximized terminal styles */
   .maximized {
     @apply fixed inset-0 z-50 max-w-none w-full m-0;
-    height: 100dvh; /* use dynamic viewport height for mobile */
+    height: 100dvh;
   }
 
   .maximized-terminal {
@@ -369,10 +307,9 @@
 
   .maximized-content {
     @apply flex-1 max-h-none min-h-0 overflow-y-auto;
-    height: auto; /* let flexbox control height */
+    height: auto;
   }
 
-  /* Keep content width stable when vertical scrollbar toggles */
   .terminal-content {
     scrollbar-gutter: stable both-edges;
   }

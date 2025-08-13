@@ -237,30 +237,6 @@
       color-mix(in srgb, var(--color-ctp-surface0) 35%, transparent);
   }
 
-  .stack-layer {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-surface0) 8%,
-      var(--color-ctp-base)
-    );
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
-    position: relative;
-  }
-
-  .stack-layer::after {
-    content: "";
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    right: -4px;
-    bottom: -4px;
-    background: color-mix(in srgb, var(--color-ctp-surface0) 8%, transparent);
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 15%, transparent);
-    z-index: -1;
-  }
-
   .floating-element {
     background: color-mix(
       in srgb,
