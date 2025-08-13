@@ -9,6 +9,12 @@
   import { Trash2, Users, LogOut } from "@lucide/svelte";
   import type { Workspace } from "$lib/types";
   import ListActionsMenu, { type MenuItem } from "./ListActionsMenu.svelte";
+  import {
+    setWorkspaceToDelete,
+    setWorkspaceToInvite,
+    getWorkspaceToDelete,
+    getWorkspaceToInvite,
+  } from "$lib/state/modal.svelte.js";
 
   interface Props {
     workspaces: Workspace[];
@@ -48,19 +54,15 @@
     });
   }
 
-  let deleteModalOpen = $state(false);
-  let workspaceToDelete: Workspace | null = $state(null);
-  let inviteModalOpen = $state(false);
-  let workspaceToInvite: Workspace | null = $state(null);
+  let workspaceToDelete = $derived(getWorkspaceToDelete());
+  let workspaceToInvite = $derived(getWorkspaceToInvite());
 
   function openDeleteModal(workspace: Workspace) {
-    workspaceToDelete = workspace;
-    deleteModalOpen = true;
+    setWorkspaceToDelete(workspace);
   }
 
   function openInviteModal(workspace: Workspace) {
-    workspaceToInvite = workspace;
-    inviteModalOpen = true;
+    setWorkspaceToInvite(workspace);
   }
 
   function canDeleteWorkspace(workspace: Workspace): boolean {
@@ -73,38 +75,6 @@
 
   function canLeaveWorkspace(workspace: Workspace): boolean {
     return workspace.role !== "OWNER";
-  }
-
-  function sendInvitation(email: string, roleId: string) {
-    if (!workspaceToInvite) return;
-
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "?/sendInvitation";
-
-    const workspaceIdInput = document.createElement("input");
-    workspaceIdInput.type = "hidden";
-    workspaceIdInput.name = "workspaceId";
-    workspaceIdInput.value = workspaceToInvite.id;
-    form.appendChild(workspaceIdInput);
-
-    const emailInput = document.createElement("input");
-    emailInput.type = "hidden";
-    emailInput.name = "email";
-    emailInput.value = email;
-    form.appendChild(emailInput);
-
-    const roleIdInput = document.createElement("input");
-    roleIdInput.type = "hidden";
-    roleIdInput.name = "roleId";
-    roleIdInput.value = roleId;
-    form.appendChild(roleIdInput);
-
-    document.body.appendChild(form);
-    form.submit();
-
-    inviteModalOpen = false;
-    workspaceToInvite = null;
   }
 
   function leaveWorkspace(workspaceId: string) {
@@ -195,14 +165,10 @@
   </ListCard>
 {/if}
 
-<DeleteWorkspaceModal
-  bind:isOpen={deleteModalOpen}
-  workspace={workspaceToDelete}
-/>
+{#if workspaceToDelete}
+  <DeleteWorkspaceModal bind:workspace={workspaceToDelete} />
+{/if}
 
-<WorkspaceInviteModal
-  bind:isOpen={inviteModalOpen}
-  workspace={workspaceToInvite}
-  {workspaceRoles}
-  onInvite={sendInvitation}
-/>
+{#if workspaceToInvite}
+  <WorkspaceInviteModal bind:workspace={workspaceToInvite} {workspaceRoles} />
+{/if}

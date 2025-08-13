@@ -1,4 +1,4 @@
-import type { Experiment } from "$lib/types";
+import type { Experiment, Workspace } from "$lib/types";
 
 interface ModalState {
   createExperiment: boolean;
@@ -6,6 +6,9 @@ interface ModalState {
   deleteExperiment: Experiment | null;
   selectedExperiment: Experiment | null;
   createWorkspace: boolean;
+  // workspace-centric modals (coarse-grained)
+  deleteWorkspace?: Workspace | null;
+  inviteWorkspace?: Workspace | null;
 }
 
 interface AppState {
@@ -19,6 +22,8 @@ const state = $state<AppState>({
     deleteExperiment: null,
     selectedExperiment: null,
     createWorkspace: false,
+    deleteWorkspace: null,
+    inviteWorkspace: null,
   },
 });
 
@@ -76,4 +81,29 @@ export function closeCreateWorkspaceModal() {
 
 export function getCreateWorkspaceModal() {
   return state.modals.createWorkspace;
+}
+
+// Workspace modals
+export function setWorkspaceToDelete(workspace: Workspace) {
+  state.modals.deleteWorkspace = workspace;
+}
+
+export function resetWorkspaceToDelete() {
+  state.modals.deleteWorkspace = null;
+}
+
+export function getWorkspaceToDelete() {
+  return state.modals.deleteWorkspace;
+}
+
+export function setWorkspaceToInvite(workspace: Workspace) {
+  state.modals.inviteWorkspace = workspace;
+}
+
+export function resetWorkspaceToInvite() {
+  state.modals.inviteWorkspace = null;
+}
+
+export function getWorkspaceToInvite() {
+  return state.modals.inviteWorkspace;
 }

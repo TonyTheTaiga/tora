@@ -130,6 +130,7 @@
     {:else}
       <ExperimentList
         {experiments}
+        {workspace}
         searchQuery={experimentSearchQuery}
         onItemClick={setSelectedExperiment}
       />

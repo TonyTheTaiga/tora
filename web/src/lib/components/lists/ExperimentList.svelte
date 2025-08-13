@@ -3,14 +3,16 @@
   import {
     setExperimentToEdit,
     setExperimentToDelete,
+    getExperimentToDelete,
   } from "$lib/state/modal.svelte.js";
   import { Trash2, Edit } from "@lucide/svelte";
   import { page } from "$app/state";
   import EmptyState from "./EmptyState.svelte";
   import ListCard from "./ListCard.svelte";
   import ListActionsMenu, { type MenuItem } from "./ListActionsMenu.svelte";
+  import { DeleteExperimentModal } from "$lib/components/modals";
 
-  let { experiments, searchQuery, onItemClick } = $props();
+  let { workspace, experiments, searchQuery, onItemClick } = $props();
 
   function formatDate(date: Date) {
     return date.toLocaleDateString("en-US", {
@@ -21,9 +23,8 @@
     });
   }
 
-  let currentWorkspace = $derived(page.data.currentWorkspace);
   let canDeleteExperiment = $derived(
-    currentWorkspace && ["OWNER", "ADMIN"].includes(currentWorkspace.role),
+    ["OWNER", "ADMIN"].includes(workspace.role),
   );
 
   let filteredExperiments = $derived(
@@ -60,6 +61,11 @@
       minute: "2-digit",
       hour12: true,
     });
+  }
+
+  let experimentToDelete = $derived(getExperimentToDelete());
+  function openDeleteModal(experiment: Experiment) {
+    setExperimentToDelete(experiment);
   }
 </script>
 
@@ -147,7 +153,7 @@
                   label: "Delete",
                   icon: Trash2,
                   destructive: true,
-                  onSelect: () => setExperimentToDelete(experiment),
+                  onSelect: () => openDeleteModal(experiment),
                 },
               ]
             : []),
@@ -155,4 +161,8 @@
       />
     {/snippet}
   </ListCard>
+{/if}
+
+{#if experimentToDelete}
+  <DeleteExperimentModal bind:experiment={experimentToDelete} />
 {/if}

@@ -6,10 +6,12 @@
     title,
     children,
     onClose,
+    size = "lg",
   }: {
     title: string;
     children: any;
     onClose?: () => void;
+    size?: "sm" | "md" | "lg";
   } = $props();
 
   onMount(() => {
@@ -26,7 +28,9 @@
          flex items-center justify-center p-4 z-50 overflow-hidden font-mono"
 >
   <div
-    class="w-full max-w-xl bg-ctp-mantle border border-ctp-surface0/30 overflow-auto max-h-[90vh]"
+    class={`w-full ${
+      size === "sm" ? "max-w-sm" : size === "md" ? "max-w-md" : "max-w-xl"
+    } bg-ctp-mantle border border-ctp-surface0/30 overflow-auto overflow-x-hidden max-h-[90vh]`}
     role="dialog"
     aria-modal="true"
     aria-labelledby="modal-title"
