@@ -18,7 +18,6 @@
     document.body.style.overflow = isMaximized ? "hidden" : "";
   }
 
-  // Simple syntax highlighting
   async function initHighlighting() {
     if (!browser) return;
 
@@ -104,11 +103,11 @@
         </div>
 
         <article
-          class="w-full max-w-[48rem] mx-auto layer-fade-in"
+          class="w-full md:w-[48rem] max-w-full mx-auto layer-fade-in"
           class:maximized={isMaximized}
         >
           <div
-            class="terminal-chrome overflow-hidden flex flex-col min-w-0 w-full box-border"
+            class="terminal-chrome overflow-hidden flex flex-col w-full box-border"
             class:maximized-terminal={isMaximized}
           >
             <header
@@ -172,7 +171,7 @@
             </div>
 
             <div
-              class="p-4 sm:p-6 max-h-[220px] sm:min-h-[320px] overflow-y-scroll terminal-content box-border"
+              class="p-4 sm:p-6 h-[220px] sm:h-[320px] overflow-y-scroll terminal-content box-border"
               class:maximized-content={isMaximized}
             >
               {#if activeTab === "start"}
@@ -211,6 +210,16 @@
 
 <style lang="postcss">
   @reference "tailwindcss";
+
+  /* Keep viewport width stable by reserving scrollbar space */
+  :global(html) {
+    scrollbar-gutter: stable;
+  }
+
+  /* Always show vertical scrollbar to prevent layout shift between tabs */
+  :global(body) {
+    overflow-y: scroll;
+  }
 
   .markdown-content {
     @apply text-xs sm:text-sm md:text-base leading-relaxed text-left;
