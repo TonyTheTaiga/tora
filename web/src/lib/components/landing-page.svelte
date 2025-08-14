@@ -1,10 +1,16 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import Logo from "$lib/logo_assets/logo.svelte";
-  import { createHighlighter } from "shiki";
   import { browser } from "$app/environment";
-  import { marked } from "marked";
-  import { gettingStartedContent, userGuide } from "$lib/content";
+
+  interface Props {
+    highlightedCodeDark: string;
+    highlightedCodeLight: string;
+    processedUserGuide: string;
+  }
+
+  let { highlightedCodeDark, highlightedCodeLight, processedUserGuide }: Props =
+    $props();
 
   let activeTab: "start" | "guide" = $state<"start" | "guide">("guide");
   let isMaximized = $state(false);
@@ -18,59 +24,19 @@
     document.body.style.overflow = isMaximized ? "hidden" : "";
   }
 
-  async function initHighlighting() {
+  function updateHighlightedCode() {
     if (!browser) return;
 
-    try {
-      const highlighter = await createHighlighter({
-        themes: ["catppuccin-mocha", "catppuccin-latte"],
-        langs: ["python"],
-      });
+    const isDark =
+      document.documentElement.classList.contains("dark") ||
+      (!document.documentElement.classList.contains("light") &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
 
-      const isDark =
-        document.documentElement.classList.contains("dark") ||
-        (!document.documentElement.classList.contains("light") &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches);
-
-      const theme = isDark ? "catppuccin-mocha" : "catppuccin-latte";
-
-      highlightedCode = highlighter.codeToHtml(gettingStartedContent, {
-        lang: "python",
-        theme,
-        transformers: [
-          {
-            line(node, line) {
-              node.children.unshift({
-                type: "element",
-                tagName: "span",
-                properties: {
-                  class: "line-number",
-                  style:
-                    "color: var(--color-ctp-overlay0); user-select: none; margin-right: 1em; display: inline-block; width: 2ch; text-align: right;",
-                },
-                children: [
-                  { type: "text", value: line.toString().padStart(2, " ") },
-                ],
-              });
-            },
-          },
-        ],
-      });
-    } catch (error) {
-      console.error("Highlighting failed:", error);
-      const lines = gettingStartedContent.trim().split("\n");
-      const numbered = lines
-        .map((line, i) => {
-          const num = (i + 1).toString().padStart(2, " ");
-          return `<span class="text-ctp-overlay0 select-none">${num}</span>  ${line}`;
-        })
-        .join("\n");
-      highlightedCode = `<pre class="text-ctp-text font-mono"><code>${numbered}</code></pre>`;
-    }
+    highlightedCode = isDark ? highlightedCodeDark : highlightedCodeLight;
   }
 
   $effect(() => {
-    initHighlighting();
+    updateHighlightedCode();
   });
 </script>
 
@@ -178,7 +144,7 @@
             </div>
           {:else if activeTab === "guide"}
             <div class="markdown-content break-words w-full">
-              {@html marked(userGuide)}
+              {@html processedUserGuide}
             </div>
           {/if}
         </div>
