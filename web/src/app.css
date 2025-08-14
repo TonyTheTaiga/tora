@@ -111,6 +111,18 @@
     --color-ctp-pink: var(--color-dark-ctp-pink);
     --color-ctp-flamingo: var(--color-dark-ctp-flamingo);
     --color-ctp-rosewater: var(--color-dark-ctp-rosewater);
+
+    /* Mixed colors for common UI patterns */
+    --color-ctp-terminal-bg: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 15%,
+      var(--color-ctp-base)
+    );
+    --color-ctp-terminal-border: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 25%,
+      transparent
+    );
   }
 
   .dark {
@@ -141,6 +153,18 @@
     --color-ctp-pink: var(--color-dark-ctp-pink);
     --color-ctp-flamingo: var(--color-dark-ctp-flamingo);
     --color-ctp-rosewater: var(--color-dark-ctp-rosewater);
+
+    /* Mixed colors for common UI patterns */
+    --color-ctp-terminal-bg: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 15%,
+      var(--color-ctp-base)
+    );
+    --color-ctp-terminal-border: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 25%,
+      transparent
+    );
   }
 
   .light {
@@ -171,6 +195,18 @@
     --color-ctp-pink: var(--color-light-ctp-pink);
     --color-ctp-flamingo: var(--color-light-ctp-flamingo);
     --color-ctp-rosewater: var(--color-light-ctp-rosewater);
+
+    /* Mixed colors for common UI patterns */
+    --color-ctp-terminal-bg: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 15%,
+      var(--color-ctp-base)
+    );
+    --color-ctp-terminal-border: color-mix(
+      in srgb,
+      var(--color-ctp-surface0) 25%,
+      transparent
+    );
   }
 
   button {
@@ -263,17 +299,6 @@
       transparent
     );
     transform: translateY(-2px);
-  }
-
-  .terminal-chrome {
-    background: color-mix(
-      in srgb,
-      var(--color-ctp-surface0) 15%,
-      var(--color-ctp-base)
-    );
-    border: 1px solid
-      color-mix(in srgb, var(--color-ctp-surface0) 25%, transparent);
-    border-radius: 0;
   }
 
   .layer-fade-in {

@@ -120,7 +120,7 @@
                 [{scalarMetrics.length}]
               </div>
             </div>
-            <div class="terminal-chrome">
+            <div class="bg-ctp-terminal-bg border-ctp-terminal-border">
               {#each scalarMetrics as metric, index}
                 <div
                   class="flex text-sm hover:bg-ctp-surface0/20 p-3 {index !==
@@ -176,7 +176,7 @@
                 [{experiment.hyperparams.length}]
               </div>
             </div>
-            <div class="terminal-chrome">
+            <div class="bg-ctp-terminal-bg border-ctp-terminal-border">
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
                 {#each experiment.hyperparams as param, index}
                   <div

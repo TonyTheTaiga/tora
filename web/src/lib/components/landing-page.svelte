@@ -58,7 +58,6 @@
       });
     } catch (error) {
       console.error("Highlighting failed:", error);
-      // Fallback to plain text with line numbers
       const lines = gettingStartedContent.trim().split("\n");
       const numbered = lines
         .map((line, i) => {
@@ -70,7 +69,6 @@
     }
   }
 
-  // Initialize highlighting on mount
   $effect(() => {
     initHighlighting();
   });
@@ -107,7 +105,7 @@
           class:maximized={isMaximized}
         >
           <div
-            class="terminal-chrome overflow-hidden flex flex-col w-full box-border"
+            class="bg-ctp-terminal-bg border-ctp-terminal-border overflow-hidden flex flex-col w-full box-border"
             class:maximized-terminal={isMaximized}
           >
             <header
@@ -211,12 +209,10 @@
 <style lang="postcss">
   @reference "tailwindcss";
 
-  /* Keep viewport width stable by reserving scrollbar space */
   :global(html) {
     scrollbar-gutter: stable;
   }
 
-  /* Always show vertical scrollbar to prevent layout shift between tabs */
   :global(body) {
     overflow-y: scroll;
   }
