@@ -6,7 +6,6 @@
     getExperimentToDelete,
   } from "$lib/state/modal.svelte.js";
   import { Trash2, Edit } from "@lucide/svelte";
-  import { page } from "$app/state";
   import EmptyState from "./EmptyState.svelte";
   import ListCard from "./ListCard.svelte";
   import ListActionsMenu, { type MenuItem } from "./ListActionsMenu.svelte";

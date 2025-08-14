@@ -6,7 +6,7 @@
   let theme = $derived(getTheme());
 </script>
 
-<header class="shrink-0 sticky top-0 z-30 surface-glass-elevated" role="banner">
+<header class="shrink-0 sticky top-0 z-30 surface-glass-elevated">
   <nav class="px-6 py-4 flex flex-row justify-between items-center">
     <button
       class="w-32 text-ctp-blue fill-current hover:text-ctp-blue/80 transition-colors"
