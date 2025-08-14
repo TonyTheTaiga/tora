@@ -13,18 +13,13 @@
   );
 </script>
 
-<div class="text-ctp-text surface-base flex-1">
-  {#if showNavigation}
+{#if showNavigation}
+  <div class="flex flex-col h-full">
     <Header />
-    <!-- <Toolbar /> -->
-    <main class="layer-fade-in">
-      {@render children()}
-    </main>
-  {:else}
-    <main
-      class="surface-base min-h-screen flex flex-col justify-center items-center"
-    >
-      {@render children()}
-    </main>
-  {/if}
-</div>
+    {@render children()}
+  </div>
+{:else}
+  <main class="h-full w-full">
+    {@render children()}
+  </main>
+{/if}

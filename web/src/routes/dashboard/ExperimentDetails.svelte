@@ -61,7 +61,7 @@
   });
 </script>
 
-<div class="h-full flex flex-col">
+<div class="flex flex-col">
   <div
     class="sticky top-0 z-10 surface-elevated border-b border-ctp-surface0/30 p-4"
   >
@@ -84,7 +84,7 @@
     </div>
   </div>
 
-  <div class="flex-1 overflow-y-auto min-h-0 p-4">
+  <div class="p-4">
     {#if loading.experimentDetails}
       <div class="text-center py-12">
         <div class="text-ctp-subtext0 text-sm">

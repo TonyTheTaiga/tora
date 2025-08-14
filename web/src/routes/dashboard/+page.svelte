@@ -50,48 +50,39 @@
   });
 </script>
 
-<div
-  class="text-ctp-text flex space-x-4 font-mono p-6 h-[calc(100vh-4.5rem)] overflow-hidden bg-gradient-to-br from-ctp-base to-ctp-mantle"
+<main
+  class="min-h-0 grow grid grid-cols-[25%_25%_50%] overflow-hidden p-4 space-x-2"
 >
-  <div class="w-1/4 flex flex-col overflow-hidden">
-    <div
-      class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 h-full flex flex-col overflow-hidden backdrop-blur-sm"
-    >
-      <div class="flex-1 overflow-y-auto">
-        <WorkspaceColumn {workspaces} {workspaceRoles} {workspaceInvitations} />
-      </div>
-    </div>
-  </div>
+  <!-- Workspace Column -->
+  <section
+    class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 overflow-y-auto"
+  >
+    <WorkspaceColumn {workspaces} {workspaceRoles} {workspaceInvitations} />
+  </section>
 
-  <div class="w-1/4 flex flex-col overflow-hidden">
-    <div
-      class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 h-full flex flex-col overflow-hidden backdrop-blur-sm"
-    >
-      <div class="flex-1 overflow-y-auto">
-        {#if selectedWorkspace}
-          <ExperimentListColumn workspace={selectedWorkspace} />
-        {:else}
-          <div class="h-full flex items-center justify-center">
-            <EmptyState message="select a workspace to view experiments" />
-          </div>
-        {/if}
+  <!-- Experiment List Column -->
+  <section
+    class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 overflow-y-auto"
+  >
+    {#if selectedWorkspace}
+      <ExperimentListColumn workspace={selectedWorkspace} />
+    {:else}
+      <div class="h-full flex items-center justify-center">
+        <EmptyState message="select a workspace to view experiments" />
       </div>
-    </div>
-  </div>
+    {/if}
+  </section>
 
-  <div class="w-1/2 flex flex-col overflow-hidden">
-    <div
-      class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 h-full flex flex-col overflow-hidden backdrop-blur-sm"
-    >
-      <div class="flex-1 overflow-y-auto">
-        {#if selectedExperiment}
-          <ExperimentDetails experiment={selectedExperiment} />
-        {:else}
-          <div class="h-full flex items-center justify-center">
-            <EmptyState message="select a experiment to view details" />
-          </div>
-        {/if}
+  <!-- Experiment Details Column -->
+  <section
+    class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 overflow-y-auto"
+  >
+    {#if selectedExperiment}
+      <ExperimentDetails experiment={selectedExperiment} />
+    {:else}
+      <div class="h-full flex items-center justify-center">
+        <EmptyState message="select a experiment to view details" />
       </div>
-    </div>
-  </div>
-</div>
+    {/if}
+  </section>
+</main>

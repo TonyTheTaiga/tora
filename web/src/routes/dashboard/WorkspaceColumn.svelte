@@ -28,7 +28,7 @@
   />
 {/if}
 
-<div class="h-full flex flex-col">
+<div class="flex flex-col">
   <div
     class="sticky top-0 z-10 surface-elevated border-b border-ctp-surface0/30 p-4"
   >
@@ -70,8 +70,8 @@
     </div>
   </div>
 
-  <!-- Scrollable Content Area -->
-  <div class="flex-1 overflow-y-auto min-h-0 p-4">
+  <!-- Content Area -->
+  <div class="p-4">
     {#if workspaces.length === 0}
       <div class="text-center py-8 text-ctp-subtext0 text-sm">
         no workspaces found

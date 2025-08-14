@@ -75,147 +75,135 @@
 </script>
 
 <div
-  class="flex items-center justify-center min-h-[calc(100vh-2rem)] font-mono"
+  class="flex flex-col text-center justify-center items-center text-ctp-text mx-auto p-4 sm:p-6 lg:p-8 max-w-6xl font-mono"
 >
-  <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex flex-col items-center text-center text-ctp-text">
-      <div
-        class="fill-ctp-blue w-full max-w-xs sm:max-w-sm mb-8 sm:mb-12 -translate-x-[-5.5%]"
-      >
-        <Logo />
-      </div>
+  <div
+    class="fill-ctp-blue w-full max-w-xs sm:max-w-sm mb-8 sm:mb-12 -translate-x-[-5.5%]"
+  >
+    <Logo />
+  </div>
 
-      <div class="w-full max-w-4xl space-y-8 sm:space-y-12">
-        <div>
-          <h1
-            class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-2 sm:mb-3 text-ctp-text font-mono"
+  <div class="w-full max-w-4xl space-y-8 sm:space-y-12">
+    <div>
+      <h1
+        class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-2 sm:mb-3 text-ctp-text font-mono"
+      >
+        {headline}
+      </h1>
+      <h2
+        class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-4 sm:mb-6 text-ctp-text font-mono"
+      >
+        {subtitle}
+      </h2>
+      <div class="w-16 sm:w-24 h-0.5 bg-ctp-blue mx-auto"></div>
+    </div>
+
+    <article
+      class="w-full md:w-[48rem] max-w-full mx-auto layer-fade-in"
+      class:maximized={isMaximized}
+    >
+      <div
+        class="bg-ctp-terminal-bg border-ctp-terminal-border overflow-hidden flex flex-col w-full box-border"
+        class:maximized-terminal={isMaximized}
+      >
+        <header
+          class="terminal-chrome-header grid grid-cols-3 items-center px-4 py-3"
+        >
+          <div class="flex space-x-2">
+            <div class="w-3 h-3 rounded-full bg-ctp-overlay0"></div>
+            <div class="w-3 h-3 rounded-full bg-ctp-overlay0"></div>
+            <button
+              aria-label={isMaximized ? "Restore" : "Maximize"}
+              type="button"
+              onclick={toggleMaximize}
+              class="w-3 h-3 rounded-full bg-ctp-blue cursor-pointer"
+              title={isMaximized ? "Restore" : "Maximize"}
+            ></button>
+          </div>
+          <div
+            class="text-center text-xs text-ctp-subtext0 font-mono hidden sm:inline"
           >
-            {headline}
-          </h1>
-          <h2
-            class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-4 sm:mb-6 text-ctp-text font-mono"
+            ~/tora
+          </div>
+          <div></div>
+        </header>
+
+        <div class="flex relative">
+          <button
+            type="button"
+            class="flex-1 px-4 py-3 text-xs font-mono relative transition-colors"
+            class:bg-ctp-surface0={activeTab === "start"}
+            class:text-ctp-text={activeTab === "start"}
+            class:text-ctp-subtext0={activeTab !== "start"}
+            class:hover:text-ctp-text={activeTab !== "start"}
+            onclick={() => (activeTab = "start")}
           >
-            {subtitle}
-          </h2>
-          <div class="w-16 sm:w-24 h-0.5 bg-ctp-blue mx-auto"></div>
+            quick_start.py
+            {#if activeTab === "start"}
+              <div
+                class="absolute bottom-0 left-0 right-0 h-0.5 bg-ctp-blue"
+              ></div>
+            {/if}
+          </button>
+          <button
+            type="button"
+            class="flex-1 px-4 py-3 text-xs font-mono relative transition-colors"
+            class:bg-ctp-surface0={activeTab === "guide"}
+            class:text-ctp-text={activeTab === "guide"}
+            class:text-ctp-subtext0={activeTab !== "guide"}
+            class:hover:text-ctp-text={activeTab !== "guide"}
+            onclick={() => (activeTab = "guide")}
+          >
+            README.md
+            {#if activeTab === "guide"}
+              <div
+                class="absolute bottom-0 left-0 right-0 h-0.5 bg-ctp-blue"
+              ></div>
+            {/if}
+          </button>
+          <div
+            class="absolute bottom-0 left-0 right-0 h-px bg-ctp-surface0/30"
+          ></div>
         </div>
 
-        <article
-          class="w-full md:w-[48rem] max-w-full mx-auto layer-fade-in"
-          class:maximized={isMaximized}
+        <div
+          class="p-4 sm:p-6 h-[220px] sm:h-[320px] overflow-y-scroll terminal-content box-border"
+          class:maximized-content={isMaximized}
         >
-          <div
-            class="bg-ctp-terminal-bg border-ctp-terminal-border overflow-hidden flex flex-col w-full box-border"
-            class:maximized-terminal={isMaximized}
-          >
-            <header
-              class="terminal-chrome-header grid grid-cols-3 items-center px-4 py-3"
-            >
-              <div class="flex space-x-2">
-                <div class="w-3 h-3 rounded-full bg-ctp-overlay0"></div>
-                <div class="w-3 h-3 rounded-full bg-ctp-overlay0"></div>
-                <button
-                  aria-label={isMaximized ? "Restore" : "Maximize"}
-                  type="button"
-                  onclick={toggleMaximize}
-                  class="w-3 h-3 rounded-full bg-ctp-blue cursor-pointer"
-                  title={isMaximized ? "Restore" : "Maximize"}
-                ></button>
-              </div>
-              <div
-                class="text-center text-xs text-ctp-subtext0 font-mono hidden sm:inline"
-              >
-                ~/tora
-              </div>
-              <div></div>
-            </header>
-
-            <div class="flex relative">
-              <button
-                type="button"
-                class="flex-1 px-4 py-3 text-xs font-mono relative transition-colors"
-                class:bg-ctp-surface0={activeTab === "start"}
-                class:text-ctp-text={activeTab === "start"}
-                class:text-ctp-subtext0={activeTab !== "start"}
-                class:hover:text-ctp-text={activeTab !== "start"}
-                onclick={() => (activeTab = "start")}
-              >
-                quick_start.py
-                {#if activeTab === "start"}
-                  <div
-                    class="absolute bottom-0 left-0 right-0 h-0.5 bg-ctp-blue"
-                  ></div>
-                {/if}
-              </button>
-              <button
-                type="button"
-                class="flex-1 px-4 py-3 text-xs font-mono relative transition-colors"
-                class:bg-ctp-surface0={activeTab === "guide"}
-                class:text-ctp-text={activeTab === "guide"}
-                class:text-ctp-subtext0={activeTab !== "guide"}
-                class:hover:text-ctp-text={activeTab !== "guide"}
-                onclick={() => (activeTab = "guide")}
-              >
-                README.md
-                {#if activeTab === "guide"}
-                  <div
-                    class="absolute bottom-0 left-0 right-0 h-0.5 bg-ctp-blue"
-                  ></div>
-                {/if}
-              </button>
-              <div
-                class="absolute bottom-0 left-0 right-0 h-px bg-ctp-surface0/30"
-              ></div>
-            </div>
-
+          {#if activeTab === "start"}
             <div
-              class="p-4 sm:p-6 h-[220px] sm:h-[320px] overflow-y-scroll terminal-content box-border"
-              class:maximized-content={isMaximized}
+              class="w-full text-xs sm:text-sm md:text-base leading-relaxed text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent [&_pre]:whitespace-pre-wrap [&_pre]:break-words"
             >
-              {#if activeTab === "start"}
-                <div
-                  class="w-full text-xs sm:text-sm md:text-base leading-relaxed text-left [&_pre]:!bg-transparent [&_code]:!bg-transparent [&_pre]:whitespace-pre-wrap [&_pre]:break-words"
-                >
-                  {@html highlightedCode}
-                </div>
-              {:else if activeTab === "guide"}
-                <div class="markdown-content break-words w-full">
-                  {@html marked(userGuide)}
-                </div>
-              {/if}
+              {@html highlightedCode}
             </div>
+          {:else if activeTab === "guide"}
+            <div class="markdown-content break-words w-full">
+              {@html marked(userGuide)}
+            </div>
+          {/if}
+        </div>
 
-            <footer
-              class="border-t border-ctp-surface0/30 flex flex-col sm:flex-row justify-between items-center p-4 gap-4"
-            >
-              <span class="text-xs text-ctp-subtext0 font-mono">
-                start anonymous • sign up to store experiments
-              </span>
-              <button
-                type="button"
-                onclick={() => goto("/signup")}
-                class="w-full sm:w-auto text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust font-mono text-sm flex items-center justify-center gap-2 px-6 py-2 border border-ctp-blue"
-              >
-                sign up
-              </button>
-            </footer>
-          </div>
-        </article>
+        <footer
+          class="border-t border-ctp-surface0/30 flex flex-col sm:flex-row justify-between items-center p-4 gap-4"
+        >
+          <span class="text-xs text-ctp-subtext0 font-mono">
+            start anonymous • sign up to store experiments
+          </span>
+          <button
+            type="button"
+            onclick={() => goto("/signup")}
+            class="w-full sm:w-auto text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust font-mono text-sm flex items-center justify-center gap-2 px-6 py-2 border border-ctp-blue"
+          >
+            sign up
+          </button>
+        </footer>
       </div>
-    </div>
+    </article>
   </div>
 </div>
 
 <style lang="postcss">
   @reference "tailwindcss";
-
-  :global(html) {
-    scrollbar-gutter: stable;
-  }
-
-  :global(body) {
-    overflow-y: scroll;
-  }
 
   .markdown-content {
     @apply text-xs sm:text-sm md:text-base leading-relaxed text-left;

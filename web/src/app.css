@@ -11,6 +11,23 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
   @root {
     font-family: Inter, sans-serif;
     font-feature-settings:
