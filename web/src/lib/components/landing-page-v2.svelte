@@ -79,7 +79,8 @@
   </div>
 </section>
 
-<style>
+<style lang="postcss">
+  @reference "tailwindcss";
   /* Ensure terminal content fits horizontally on small screens
      Applied to classes defined in this component */
   :global(.quick_start pre),
@@ -156,5 +157,90 @@
     :global(.readme code) {
       font-size: 0.9em;
     }
+  }
+
+  /* Man-page style layout for README (borrowed from landing-page.svelte) */
+  .readme {
+    @apply text-xs sm:text-sm md:text-base leading-relaxed text-left;
+    color: var(--color-ctp-text);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .readme :global(h1) {
+    @apply text-lg font-bold mb-4 font-mono;
+    color: var(--color-ctp-text);
+  }
+
+  .readme :global(h2) {
+    @apply text-base font-bold mb-3 mt-6 font-mono;
+    color: var(--color-ctp-blue);
+  }
+
+  .readme :global(h3) {
+    @apply text-sm font-bold mb-2 mt-4 font-mono;
+    color: var(--color-ctp-mauve);
+  }
+
+  .readme :global(p) {
+    @apply mb-3;
+    color: var(--color-ctp-text);
+  }
+
+  .readme :global(ul) {
+    @apply mb-3 pl-4;
+  }
+
+  .readme :global(li) {
+    @apply mb-1;
+    color: var(--color-ctp-text);
+  }
+
+  .readme :global(strong) {
+    @apply font-bold;
+    color: var(--color-ctp-text);
+  }
+
+  .readme :global(li strong:first-child) {
+    color: var(--color-ctp-mauve);
+  }
+
+  .readme :global(em) {
+    @apply italic;
+    color: var(--color-ctp-subtext1);
+  }
+
+  .readme :global(code) {
+    @apply px-1 py-0.5 rounded font-mono text-xs;
+    background-color: rgba(var(--color-ctp-surface0), 0.3);
+    color: var(--color-ctp-green);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .readme :global(pre) {
+    @apply font-mono text-xs p-3 rounded mb-3;
+    background-color: rgba(var(--color-ctp-surface0), 0.3);
+    color: var(--color-ctp-text);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .readme :global(pre code) {
+    @apply p-0;
+    background-color: transparent;
+    white-space: pre-wrap;
+  }
+
+  .readme :global(hr) {
+    @apply my-6;
+    border-color: var(--color-ctp-surface0);
+  }
+
+  .readme :global(blockquote) {
+    @apply border-l-2 pl-4 italic;
+    border-color: var(--color-ctp-blue);
+    color: var(--color-ctp-subtext1);
   }
 </style>
