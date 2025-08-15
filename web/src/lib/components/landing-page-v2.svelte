@@ -28,9 +28,9 @@
 
 <section aria-label="Terminal" class="min-h-0 min-w-0 flex flex-col">
   <header class="shrink-0 sticky top-0">
-    <div class="grid grid-cols-3 items-center">
+    <div class="grid grid-cols-[auto,1fr,auto] items-center">
       <button
-        class="flex flex-row space-x-1 items-center"
+        class="col-start-1 flex flex-row space-x-1 items-center"
         aria-label={isMaximized ? "minimized" : "maximize"}
         onclick={() => {
           isMaximized = !isMaximized;
@@ -40,8 +40,14 @@
         <div class="bg-ctp-overlay2 rounded-full w-2 h-2"></div>
         <div class="bg-ctp-blue rounded-full w-2 h-2"></div>
       </button>
-
-      <p class="text-center">~/tora</p>
+      <p class="col-start-2 justify-self-center text-center">~/tora</p>
+      <button
+        class="col-start-3 bg-ctp-blue/30 border border-ctp-blue text-ctp-text justify-self-end"
+        aria-label="signup"
+        onclick={() => {
+          goto("/signup");
+        }}>create account</button
+      >
     </div>
   </header>
 
