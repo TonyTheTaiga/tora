@@ -14,12 +14,12 @@
 </script>
 
 {#if showNavigation}
-  <div class="flex flex-col h-full">
+  <main class="flex flex-col h-full w-full overflow-hidden">
     <Header />
     {@render children()}
-  </div>
+  </main>
 {:else}
-  <main class="h-full w-full">
+  <main class="h-full w-full grid grid-rows-[auto,auto,1fr]">
     {@render children()}
   </main>
 {/if}

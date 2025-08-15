@@ -11,23 +11,6 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-  html,
-  body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: hidden;
-    box-sizing: border-box;
-  }
-
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
   @root {
     font-family: Inter, sans-serif;
     font-feature-settings:
@@ -171,7 +154,6 @@
     --color-ctp-flamingo: var(--color-dark-ctp-flamingo);
     --color-ctp-rosewater: var(--color-dark-ctp-rosewater);
 
-    /* Mixed colors for common UI patterns */
     --color-ctp-terminal-bg: color-mix(
       in srgb,
       var(--color-ctp-surface0) 15%,
@@ -224,18 +206,6 @@
       var(--color-ctp-surface0) 25%,
       transparent
     );
-  }
-
-  button {
-    cursor: pointer;
-  }
-
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
   }
 
   .line-clamp-2 {

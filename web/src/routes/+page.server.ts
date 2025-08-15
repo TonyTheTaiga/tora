@@ -4,7 +4,7 @@ import { fail } from "@sveltejs/kit";
 import { generateRequestId, startTimer } from "$lib/utils/timing";
 import type { ApiResponse, Workspace, HyperParam } from "$lib/types";
 import { gettingStartedContent, userGuide } from "$lib/content";
-import { createHighlighter } from "shiki";
+import { codeToHtml } from "shiki";
 import { marked } from "marked";
 
 interface FormDataResult {
@@ -47,16 +47,10 @@ function parseFormData(formData: FormData): FormDataResult {
 
 export const load: PageServerLoad = async () => {
   try {
-    // Create highlighter for syntax highlighting
-    const highlighter = await createHighlighter({
-      themes: ["catppuccin-mocha", "catppuccin-latte"],
-      langs: ["python"],
-    });
-
-    // Generate highlighted code for both themes
-    const highlightedCodeDark = highlighter.codeToHtml(gettingStartedContent, {
+    const highlightedCode = await codeToHtml(gettingStartedContent, {
       lang: "python",
-      theme: "catppuccin-mocha",
+      themes: { dark: "catppuccin-mocha", light: "catppuccin-latte" },
+      defaultColor: "light-dark()",
       transformers: [
         {
           line(node, line) {
@@ -65,31 +59,6 @@ export const load: PageServerLoad = async () => {
               tagName: "span",
               properties: {
                 class: "line-number",
-                style:
-                  "color: var(--color-ctp-overlay0); user-select: none; margin-right: 1em; display: inline-block; width: 2ch; text-align: right;",
-              },
-              children: [
-                { type: "text", value: line.toString().padStart(2, " ") },
-              ],
-            });
-          },
-        },
-      ],
-    });
-
-    const highlightedCodeLight = highlighter.codeToHtml(gettingStartedContent, {
-      lang: "python",
-      theme: "catppuccin-latte",
-      transformers: [
-        {
-          line(node, line) {
-            node.children.unshift({
-              type: "element",
-              tagName: "span",
-              properties: {
-                class: "line-number",
-                style:
-                  "color: var(--color-ctp-overlay0); user-select: none; margin-right: 1em; display: inline-block; width: 2ch; text-align: right;",
               },
               children: [
                 { type: "text", value: line.toString().padStart(2, " ") },
@@ -103,8 +72,7 @@ export const load: PageServerLoad = async () => {
     const processedUserGuide = marked(userGuide);
 
     return {
-      highlightedCodeDark,
-      highlightedCodeLight,
+      highlightedCode,
       processedUserGuide,
     };
   } catch (error) {
@@ -214,7 +182,7 @@ export const actions: Actions = {
     try {
       const data = await request.formData();
       const workspaceId = data.get("workspaceId") as string;
-      const response = await fetch(`/api/workspaces/${workspaceId}`, {
+      await fetch(`/api/workspaces/${workspaceId}`, {
         method: "DELETE",
       });
       return { success: true };
