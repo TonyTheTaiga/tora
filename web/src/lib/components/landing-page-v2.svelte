@@ -26,7 +26,7 @@
   <h1>{headline}</h1>
 </section>
 
-<section aria-label="Terminal" class="min-h-0 flex flex-col">
+<section aria-label="Terminal" class="min-h-0 min-w-0 flex flex-col">
   <header class="shrink-0 sticky top-0">
     <div class="grid grid-cols-3 items-center">
       <button
@@ -60,13 +60,13 @@
     >
   </div>
 
-  <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+  <div class="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden">
     {#if activeTab === "start"}
-      <div>
+      <div class="break-words w-full">
         {@html highlightedCode}
       </div>
     {:else if activeTab === "readme"}
-      <div>
+      <div class="break-words w-full">
         {@html processedUserGuide}
       </div>
     {/if}

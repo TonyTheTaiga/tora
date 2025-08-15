@@ -51,22 +51,6 @@ export const load: PageServerLoad = async () => {
       lang: "python",
       themes: { dark: "catppuccin-mocha", light: "catppuccin-latte" },
       defaultColor: "light-dark()",
-      transformers: [
-        {
-          line(node, line) {
-            node.children.unshift({
-              type: "element",
-              tagName: "span",
-              properties: {
-                class: "line-number",
-              },
-              children: [
-                { type: "text", value: line.toString().padStart(2, " ") },
-              ],
-            });
-          },
-        },
-      ],
     });
 
     const processedUserGuide = marked(userGuide);
