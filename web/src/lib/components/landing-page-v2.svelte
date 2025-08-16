@@ -1,7 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import Logo from "$lib/logo_assets/logo.svelte";
-  import { browser } from "$app/environment";
 
   interface Props {
     highlightedCode: string;
@@ -9,7 +8,6 @@
   }
 
   let { highlightedCode, processedUserGuide }: Props = $props();
-
   let activeTab: "start" | "readme" = $state<"start" | "readme">("readme");
   let isMaximized = $state(false);
   let windowControlHovered = $state(false);
@@ -27,11 +25,11 @@
   class:p-4={!isMaximized}
 >
   {#if !isMaximized}
-    <div class="fill-ctp-blue w-full max-w-2xs md:max-w-xs mx-auto">
+    <div class="fill-ctp-blue w-full max-w-2xs md:max-w-xl mx-auto mb-4">
       <Logo />
     </div>
 
-    <section class="font-mono text-center text-xl md:text-2xl">
+    <section class="font-mono text-center text-xl md:text-4xl mb-4">
       <h1>{headline}</h1>
     </section>
   {/if}
