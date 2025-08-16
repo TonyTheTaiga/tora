@@ -18,6 +18,7 @@
     );
   }
   const headline = "Pure Speed. Pure Insight.";
+  const subtitle = "A New Experiment Tracker";
 </script>
 
 <div
@@ -25,18 +26,21 @@
   class:p-4={!isMaximized}
 >
   {#if !isMaximized}
-    <div class="fill-ctp-blue w-full max-w-2xs md:max-w-xl mx-auto mb-4">
+    <div
+      class="fill-ctp-blue w-full max-w-2xs md:max-w-xl mx-auto mb-4 translate-x-[5.5%]"
+    >
       <Logo />
     </div>
 
-    <section class="font-mono text-center text-xl md:text-4xl mb-4">
-      <h1>{headline}</h1>
+    <section class="font-mono mb-4 text-center text-ctp-text">
+      <h1 class="text-xl md:text-4xl">{headline}</h1>
+      <h2 class="text-lg md:text-2xl">{subtitle}</h2>
     </section>
   {/if}
 
   <section
     aria-label="Terminal"
-    class="min-h-0 min-w-0 flex flex-col bg-ctp-base p-4"
+    class="min-h-0 min-w-0 flex flex-col bg-ctp-base p-4 rounded-md"
   >
     <header class="shrink-0 sticky top-0">
       <div class="grid grid-cols-[auto,1fr,auto] items-center">
