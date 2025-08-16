@@ -1,23 +1,59 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import { onMount } from "svelte";
+  import { gettingStartedContent, userGuide } from "$lib/content";
   import Logo from "$lib/logo_assets/logo.svelte";
 
-  interface Props {
-    highlightedCode: string;
-    processedUserGuide: string;
-  }
-
-  let { highlightedCode, processedUserGuide }: Props = $props();
+  let highlightedCode = $state<string>("");
+  let processedUserGuide = $state<string>("");
   let activeTab: "start" | "readme" = $state<"start" | "readme">("readme");
   let isMaximized = $state(false);
   let windowControlHovered = $state(false);
   function isUserOnMobile() {
+    if (typeof navigator === "undefined") return false;
     return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent,
     );
   }
   const headline = "Pure Speed. Pure Insight.";
   const subtitle = "A New Experiment Tracker";
+
+  onMount(async () => {
+    try {
+      const [{ codeToHtml }, { marked }] = await Promise.all([
+        import("shiki"),
+        import("marked"),
+      ]);
+
+      highlightedCode = await codeToHtml(gettingStartedContent, {
+        lang: "python",
+        themes: { dark: "catppuccin-mocha", light: "catppuccin-latte" },
+        defaultColor: "light-dark()",
+      });
+
+      processedUserGuide = await marked(userGuide);
+    } catch (error) {
+      console.error("Client-side content processing failed", error);
+      const lines = gettingStartedContent.trim().split("\n");
+      const fallbackCode = lines
+        .map((line, i) => {
+          const num = (i + 1).toString().padStart(2, " ");
+          return `<span class=\"text-ctp-overlay0 select-none\">${num}</span>  ${line}`;
+        })
+        .join("\n");
+      highlightedCode = `<pre class=\"text-ctp-text font-mono\"><code>${fallbackCode}</code></pre>`;
+
+      try {
+        const { marked } = await import("marked");
+        processedUserGuide = await marked(userGuide);
+      } catch {
+        processedUserGuide = `<pre class=\"text-ctp-text font-mono\"><code>${userGuide.replaceAll(
+          "<",
+          "&lt;",
+        )}</code></pre>`;
+      }
+    }
+  });
 </script>
 
 <div

@@ -3,9 +3,6 @@ import type { PageServerLoad } from "./$types";
 import { fail } from "@sveltejs/kit";
 import { generateRequestId, startTimer } from "$lib/utils/timing";
 import type { ApiResponse, Workspace, HyperParam } from "$lib/types";
-import { gettingStartedContent, userGuide } from "$lib/content";
-import { codeToHtml } from "shiki";
-import { marked } from "marked";
 
 interface FormDataResult {
   hyperparams: HyperParam[];
@@ -44,40 +41,6 @@ function parseFormData(formData: FormData): FormDataResult {
 
   return result;
 }
-
-export const load: PageServerLoad = async () => {
-  try {
-    const highlightedCode = await codeToHtml(gettingStartedContent, {
-      lang: "python",
-      themes: { dark: "catppuccin-mocha", light: "catppuccin-latte" },
-      defaultColor: "light-dark()",
-    });
-
-    const processedUserGuide = marked(userGuide);
-
-    return {
-      highlightedCode,
-      processedUserGuide,
-    };
-  } catch (error) {
-    console.error("Error processing content:", error);
-
-    const lines = gettingStartedContent.trim().split("\n");
-    const fallbackCode = lines
-      .map((line, i) => {
-        const num = (i + 1).toString().padStart(2, " ");
-        return `<span class="text-ctp-overlay0 select-none">${num}</span>  ${line}`;
-      })
-      .join("\n");
-    const fallbackHighlighted = `<pre class="text-ctp-text font-mono"><code>${fallbackCode}</code></pre>`;
-
-    return {
-      highlightedCodeDark: fallbackHighlighted,
-      highlightedCodeLight: fallbackHighlighted,
-      processedUserGuide: marked(userGuide),
-    };
-  }
-};
 
 export const actions: Actions = {
   createWorkspace: async ({ request, locals }) => {
