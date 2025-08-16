@@ -67,7 +67,7 @@ struct Workspace: Decodable, Identifiable, Equatable {
         case id
         case name
         case description
-        case createdAt = "created_at"
+        case createdAt
         case role
     }
 }
@@ -220,6 +220,12 @@ class WorkspaceService: ObservableObject {
                     httpResponse.statusCode,
                     errorMessage
                 )
+            }
+            // Log raw response body as UTF-8 string for debugging
+            if let body = String(data: data, encoding: .utf8) {
+                OSLog.workspace.debug("GET /workspaces response: \(body, privacy: .public)")
+            } else {
+                OSLog.workspace.debug("GET /workspaces response: <non-UTF8 \(data.count) bytes>")
             }
 
             do {
