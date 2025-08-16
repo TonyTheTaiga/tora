@@ -12,72 +12,104 @@
 
   let activeTab: "start" | "readme" = $state<"start" | "readme">("readme");
   let isMaximized = $state(false);
-  $inspect(isMaximized);
-  $inspect(activeTab);
+  let windowControlHovered = $state(false);
 
+  function isUserOnMobile() {
+    return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    );
+  }
   const headline = "Pure Speed. Pure Insight.";
 </script>
 
-<div class="fill-ctp-blue">
-  <Logo />
-</div>
+<div
+  class="h-full w-full grid grid-rows-[auto,auto,1fr]"
+  class:p-4={!isMaximized}
+>
+  {#if !isMaximized}
+    <div class="fill-ctp-blue w-full max-w-2xs md:max-w-xs mx-auto">
+      <Logo />
+    </div>
 
-<section class="font-mono">
-  <h1>{headline}</h1>
-</section>
+    <section class="font-mono text-center text-xl md:text-2xl">
+      <h1>{headline}</h1>
+    </section>
+  {/if}
 
-<section aria-label="Terminal" class="min-h-0 min-w-0 flex flex-col">
-  <header class="shrink-0 sticky top-0">
-    <div class="grid grid-cols-[auto,1fr,auto] items-center">
+  <section
+    aria-label="Terminal"
+    class="min-h-0 min-w-0 flex flex-col bg-ctp-base p-4"
+  >
+    <header class="shrink-0 sticky top-0">
+      <div class="grid grid-cols-[auto,1fr,auto] items-center">
+        <button
+          class="col-start-1 flex flex-row space-x-1 items-center"
+          aria-label={isMaximized ? "minimized" : "maximize"}
+          onclick={() => {
+            isMaximized = !isMaximized;
+          }}
+          onmouseenter={() => {
+            windowControlHovered = true;
+          }}
+          onmouseleave={() => {
+            windowControlHovered = false;
+          }}
+        >
+          <div
+            class="rounded-full w-3 h-3"
+            class:bg-ctp-blue={windowControlHovered || isUserOnMobile()}
+            class:bg-ctp-overlay2={!windowControlHovered && !isUserOnMobile()}
+          ></div>
+          <div
+            class="rounded-full w-3 h-3"
+            class:bg-ctp-blue={windowControlHovered || isUserOnMobile()}
+            class:bg-ctp-overlay2={!windowControlHovered && !isUserOnMobile()}
+          ></div>
+          <div
+            class="rounded-full w-3 h-3"
+            class:bg-ctp-blue={windowControlHovered || isUserOnMobile()}
+            class:bg-ctp-overlay2={!windowControlHovered && !isUserOnMobile()}
+          ></div>
+        </button>
+        <p class="col-start-2 justify-self-center text-center">~/tora</p>
+        <button
+          class="col-start-3 bg-ctp-blue/30 border border-ctp-blue text-ctp-text justify-self-end"
+          aria-label="signup"
+          onclick={() => {
+            goto("/login");
+          }}>sign in</button
+        >
+      </div>
+    </header>
+
+    <div class="shrink-0 sticky top-0 grid grid-cols-2">
       <button
-        class="col-start-1 flex flex-row space-x-1 items-center"
-        aria-label={isMaximized ? "minimized" : "maximize"}
+        class="text-center"
         onclick={() => {
-          isMaximized = !isMaximized;
-        }}
+          activeTab = "start";
+        }}>quick_start.txt</button
       >
-        <div class="bg-ctp-overlay2 rounded-full w-2 h-2"></div>
-        <div class="bg-ctp-overlay2 rounded-full w-2 h-2"></div>
-        <div class="bg-ctp-blue rounded-full w-2 h-2"></div>
-      </button>
-      <p class="col-start-2 justify-self-center text-center">~/tora</p>
       <button
-        class="col-start-3 bg-ctp-blue/30 border border-ctp-blue text-ctp-text justify-self-end"
-        aria-label="signup"
+        class="text-center"
         onclick={() => {
-          goto("/signup");
-        }}>create account</button
+          activeTab = "readme";
+        }}>README.md</button
       >
     </div>
-  </header>
 
-  <div class="shrink-0 sticky top-0 grid grid-cols-2">
-    <button
-      class="text-center"
-      onclick={() => {
-        activeTab = "start";
-      }}>quick_start.txt</button
-    >
-    <button
-      class="text-center"
-      onclick={() => {
-        activeTab = "readme";
-      }}>README.md</button
-    >
-  </div>
-
-  <div class="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden">
-    {#if activeTab === "start"}
-      <div class="quick_start">
-        {@html highlightedCode}
-      </div>
-    {:else if activeTab === "readme"}
-      <div class="readme">
-        {@html processedUserGuide}
-      </div>
-    {/if}
-  </div>
-</section>
+    <div class="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden">
+      {#if activeTab === "start"}
+        <div class="quick_start">
+          {@html highlightedCode}
+        </div>
+      {:else if activeTab === "readme"}
+        <div class="readme">
+          {@html processedUserGuide}
+        </div>
+      {/if}
+    </div>
+  </section>
+</div>
 
 <style lang="postcss">
   @reference "tailwindcss";

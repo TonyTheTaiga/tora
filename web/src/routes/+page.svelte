@@ -1,5 +1,4 @@
 <script lang="ts">
-  import LandingPage from "$lib/components/landing-page.svelte";
   import LandingPageV2 from "$lib/components/landing-page-v2.svelte";
 
   interface PageData {

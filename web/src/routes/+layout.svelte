@@ -19,7 +19,7 @@
     {@render children()}
   </main>
 {:else}
-  <main class="h-full w-full grid grid-rows-[auto,auto,1fr] min-w-0">
+  <main class="h-full w-full">
     {@render children()}
   </main>
 {/if}
