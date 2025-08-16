@@ -44,6 +44,10 @@ function applyThemeToDOM(theme: Theme) {
   const html = document.documentElement;
   html.classList.remove("light", "dark");
   html.classList.add(theme);
+  // Inform CSS functions like light-dark() of the active scheme
+  // so client-side highlighted code (Shiki) renders correct colors.
+  // Supported by modern browsers; harmless fallback otherwise.
+  (html.style as any).colorScheme = theme;
 }
 
 function initializeTheme() {
