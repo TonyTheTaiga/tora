@@ -1,5 +1,5 @@
 <script lang="ts">
-  import LandingPageV2 from "$lib/components/landing-page-v2.svelte";
+  import { LandingPageV2 } from "$lib/components";
 
   interface PageData {
     highlightedCode: string;
