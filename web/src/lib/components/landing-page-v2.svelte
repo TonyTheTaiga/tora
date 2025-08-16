@@ -11,7 +11,6 @@
   let activeTab: "start" | "readme" = $state<"start" | "readme">("readme");
   let isMaximized = $state(false);
   let windowControlHovered = $state(false);
-
   function isUserOnMobile() {
     return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent,
@@ -40,12 +39,14 @@
 
   <section
     aria-label="Terminal"
-    class="min-h-0 min-w-0 flex flex-col bg-ctp-base p-4 rounded-md"
+    class="min-h-0 min-w-0 flex flex-col bg-ctp-base border border-ctp-surface0/60 rounded-xl shadow-lg overflow-hidden mx-auto w-full max-w-5xl"
   >
-    <header class="shrink-0 sticky top-0">
-      <div class="grid grid-cols-[auto,1fr,auto] items-center">
+    <header class="shrink-0 sticky top-0 z-10">
+      <div
+        class="grid grid-cols-[auto,1fr,auto] items-center h-9 px-3 border-b border-ctp-surface0/60 bg-ctp-mantle/80 backdrop-blur"
+      >
         <button
-          class="col-start-1 flex flex-row space-x-1 items-center"
+          class="col-start-1 flex flex-row items-center gap-2"
           aria-label={isMaximized ? "minimized" : "maximize"}
           onclick={() => {
             isMaximized = !isMaximized;
@@ -73,10 +74,14 @@
             class:bg-ctp-overlay2={!windowControlHovered && !isUserOnMobile()}
           ></div>
         </button>
-        <p class="col-start-2 justify-self-center text-center">~/tora</p>
+        <p
+          class="col-start-2 justify-self-center text-center text-xs text-ctp-subtext1"
+        >
+          ~/tora
+        </p>
         <button
-          class="col-start-3 bg-ctp-blue/30 border border-ctp-blue text-ctp-text justify-self-end"
-          aria-label="signup"
+          class="col-start-3 justify-self-end text-xs px-2 py-1 rounded border border-ctp-blue/60 bg-ctp-blue/20 text-ctp-text hover:bg-ctp-blue/30"
+          aria-label="signin"
           onclick={() => {
             goto("/login");
           }}>sign in</button
@@ -84,22 +89,30 @@
       </div>
     </header>
 
-    <div class="shrink-0 sticky top-0 grid grid-cols-2">
+    <div
+      class="shrink-0 sticky top-9 z-10 bg-ctp-base/95 backdrop-blur border-b border-ctp-surface0/60 flex"
+    >
       <button
-        class="text-center"
+        class="px-4 py-2 text-xs font-mono text-ctp-subtext1 hover:text-ctp-text"
+        class:text-ctp-text={activeTab === "start"}
+        class:border-ctp-blue={activeTab === "start"}
+        class:border-b-2={activeTab === "start"}
         onclick={() => {
           activeTab = "start";
         }}>quick_start.txt</button
       >
       <button
-        class="text-center"
+        class="px-4 py-2 text-xs font-mono text-ctp-subtext1 hover:text-ctp-text"
+        class:text-ctp-text={activeTab === "readme"}
+        class:border-ctp-blue={activeTab === "readme"}
+        class:border-b-2={activeTab === "readme"}
         onclick={() => {
           activeTab = "readme";
         }}>README.md</button
       >
     </div>
 
-    <div class="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden">
+    <div class="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden p-4">
       {#if activeTab === "start"}
         <div class="quick_start">
           {@html highlightedCode}
