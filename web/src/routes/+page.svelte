@@ -1,17 +1,5 @@
 <script lang="ts">
-  import LandingPage from "$lib/components/landing-page.svelte";
-
-  interface PageData {
-    highlightedCodeDark: string;
-    highlightedCodeLight: string;
-    processedUserGuide: string;
-  }
-
-  let { data }: { data: PageData } = $props();
+  import { LandingPageV2 } from "$lib/components";
 </script>
 
-<LandingPage
-  highlightedCodeDark={data.highlightedCodeDark}
-  highlightedCodeLight={data.highlightedCodeLight}
-  processedUserGuide={data.processedUserGuide}
-/>
+<LandingPageV2 />

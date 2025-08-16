@@ -50,7 +50,7 @@
   });
 </script>
 
-<main
+<div
   class="min-h-0 grow grid grid-cols-[25%_25%_50%] overflow-hidden p-4 space-x-2"
 >
   <!-- Workspace Column -->
@@ -85,4 +85,4 @@
       </div>
     {/if}
   </section>
-</main>
+</div>
