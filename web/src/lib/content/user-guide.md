@@ -46,23 +46,23 @@ def setup(
         Prints the experiment URL to the console on creation.
     """
 
-    def create_workspace(
-        name: str,
-        description: str | None = None,
-        api_key: str | None = None,
-        server_url: str | None = None,
-    ) -> dict:
-        """Create a new workspace.
+def create_workspace(
+    name: str,
+    description: str | None = None,
+    api_key: str | None = None,
+    server_url: str | None = None,
+) -> dict:
+    """Create a new workspace.
 
-        Args:
-            name: Workspace name (max 255 chars).
-            description: Workspace description (max 1000 chars).
-            api_key: Authentication key.
-            server_url: Custom server URL.
+    Args:
+        name: Workspace name (max 255 chars).
+        description: Workspace description (max 1000 chars).
+        api_key: Authentication key.
+        server_url: Custom server URL.
 
-        Returns:
-            dict: Workspace data including id, name, and description.
-        """
+    Returns:
+        dict: Workspace data including id, name, and description.
+    """
 
 def tlog(
     name: str,
