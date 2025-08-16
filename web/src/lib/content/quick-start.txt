@@ -1,7 +1,7 @@
 # Install Tora SDK
 $ pip install tora
 
-# Simple Global API
+# Global API
 import tora
 
 tora.setup(
@@ -11,8 +11,9 @@ tora.setup(
 
 tora.tlog("accuracy", 0.95, step=100)
 tora.tlog("loss", 0.05, step=100)
+tora.tresult("best_accuracy", 0.97)
 
-# Advanced Client API
+# Client API
 client = tora.Tora.create_experiment(
     name="my-ml-experiment",
     workspace_id="your-workspace-id",
@@ -39,6 +40,3 @@ workspace = tora.create_workspace(
     name="My ML Project",
     description="Experiments for the new model"
 )
-
-# Environment Variables
-export TORA_API_KEY="your-api-key"

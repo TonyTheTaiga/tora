@@ -11,10 +11,12 @@ Track metrics, hyperparameters, and experiment metadata with just 2 lines of cod
 - setup: Initialize a global experiment session.
 - create_workspace: Create a new workspace.
 - tlog: Log a single metric.
+- tresult: Log a result value.
 - flush: Send buffered metrics immediately.
 - shutdown: Flush remaining metrics and close the client.
 - is_initialized: Check whether the global client is initialized.
 - get_experiment_id: Return the current experiment ID.
+- get_experiment_url: Return the current experiment URL.
 
 ```python
 def setup(
@@ -79,7 +81,18 @@ def tlog(
         metadata: Optional metadata dictionary (max 10KB).
 
     Raises:
-        RuntimeError: If called before :func:`setup`.
+        ToraError: If called before :func:`setup`.
+    """
+
+def tresult(
+    name: str,
+    value: float | int,
+) -> None:
+    """Log a result using the global experiment session.
+
+    Args:
+        name: Result name.
+        value: Result value (int or float).
     """
 
 def flush() -> None:
@@ -93,6 +106,9 @@ def is_initialized() -> bool:
 
 def get_experiment_id() -> str | None:
     """Return the current experiment ID, if available."""
+
+def get_experiment_url() -> str | None:
+    """Return the current experiment URL, if available."""
 ```
 
 ## Classes
@@ -163,6 +179,18 @@ class Tora:
             value: Metric value (int or float).
             step: Optional step number.
             metadata: Optional metadata dictionary (max 10KB).
+        """
+
+    def result(
+        self,
+        name: str,
+        value: float | int,
+    ) -> None:
+        """Log a result value with buffering.
+
+        Args:
+            name: Result name.
+            value: Result value (int or float).
         """
 
     def log_metrics(
