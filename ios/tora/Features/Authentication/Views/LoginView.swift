@@ -121,17 +121,44 @@ struct LoginView: View {
                     .renderingMode(.template)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: geometry.size.width * 0.6)
+                    .frame(width: geometry.size.width * 0.68)
                     .foregroundColor(Color.custom.ctpBlue)
 
                 Spacer()
-                    .frame(height: geometry.size.height * 0.05)
+                    .frame(height: geometry.size.height * 0.04)
 
-                ScrollingSubtitle()
-                    .frame(height: 30)
+                VStack(spacing: 8) {
+                    Text("Pure Speed. Pure Insight.")
+                        .font(
+                            .system(
+                                // Size tuned to prefer single-line fit
+                                size: min(max(geometry.size.width * 0.070, 18), 34),
+                                weight: .bold,
+                                design: .monospaced
+                            )
+                        )
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(Color.custom.ctpText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                        .allowsTightening(true)
+                        .tracking(-0.5)
+
+                    Text("A New Experiment Tracker")
+                        .font(
+                            .system(
+                                size: min(max(geometry.size.width * 0.045, 18), 24),
+                                weight: .regular,
+                                design: .monospaced
+                            )
+                        )
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(Color.custom.ctpSubtext1)
+                }
+                .padding(.horizontal, 8)
 
                 Spacer()
-                    .frame(height: geometry.size.height * 0.05)
+                    .frame(height: geometry.size.height * 0.04)
 
                 Button("Login") {
                     loginSheetShown = true
@@ -144,86 +171,6 @@ struct LoginView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.horizontal, 20)
-        }
-    }
-}
-
-// MARK: - Scrolling Subtitle
-
-struct ScrollingSubtitle: View {
-    // MARK: - Properties
-
-    @State private var offset: CGFloat = 0
-    @State private var textWidth: CGFloat = 0
-
-    private let text = "A Modern Experiment Tracker • "
-    private let spacing: CGFloat = 0
-    private let scrollSpeed: CGFloat = 40  // pixels per second
-
-    // MARK: - Body
-
-    var body: some View {
-        GeometryReader { geometry in
-            let dynamicFontSize = min(max(geometry.size.width * 0.045, 16), 28)
-
-            HStack(spacing: spacing) {
-                ForEach(
-                    0..<max(
-                        2,
-                        textWidth > 0
-                            ? Int(ceil(geometry.size.width / textWidth)) + 1 : 3
-                    ),
-                    id: \.self
-                ) { _ in
-                    Text(text)
-                        .font(
-                            .system(
-                                size: dynamicFontSize,
-                                weight: .bold,
-                                design: .default
-                            )
-                        )
-                        .foregroundColor(.secondary)
-                        .fixedSize()
-                        .background(
-                            GeometryReader { textGeometry in
-                                Color.clear.onAppear {
-                                    if textWidth == 0 {
-                                        textWidth = textGeometry.size.width
-                                    }
-                                }
-                            }
-                        )
-                }
-            }
-            .offset(x: offset)
-            .clipped()
-            .onAppear {
-                startScrolling()
-            }
-            .onChange(of: dynamicFontSize) {
-                textWidth = 0
-                offset = 0
-            }
-        }
-    }
-
-    // MARK: - Private Methods
-
-    private func startScrolling() {
-        guard textWidth > 0 else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                startScrolling()
-            }
-            return
-        }
-
-        withAnimation(
-            .linear(duration: textWidth / scrollSpeed).repeatForever(
-                autoreverses: false
-            )
-        ) {
-            offset = -textWidth
         }
     }
 }
