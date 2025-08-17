@@ -11,13 +11,8 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-  @root {
+  :root {
     font-family: Inter, sans-serif;
-    font-feature-settings:
-      "liga" 1,
-      "calt" 1; /* fix for Chrome */
-    font-size: 16px;
-    line-height: 1.5;
   }
   @supports (font-variation-settings: normal) {
     :root {
