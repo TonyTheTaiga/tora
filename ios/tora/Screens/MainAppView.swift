@@ -37,6 +37,7 @@ struct MainAppView: View {
                 SettingsView()
             }
         }
-        .accentColor(.blue)
+        .tint(Color.custom.ctpBlue)
+        .tabBarMinimizeBehavior(.onScrollDown)
     }
 }
