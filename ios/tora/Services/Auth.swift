@@ -151,7 +151,32 @@ class AuthService: ObservableObject {
         }
     }
 
+    //    func refreshUserSession() async throws {
+    //        guard let currentUser else {
+    //            throw AuthErrors.authFailure("No user session available.")
+    //        }
+    //
+    //        do {
+    //            let refreshedUserSession = try await refreshSession(
+    //            )
+    //            try storeSessionInKeychain(refreshedUserSession)
+    //        }
+    //    }
+
     // MARK: - Private Methods
+
+    //    private func refreshSession() async throws -> UserSession {
+    //        guard let url = URL(string: "\(backendUrl)/api/refresh") else {
+    //            throw AuthErrors.invalidURL
+    //        }
+    //
+    //        var request = URLRequest(url: url)
+    //        request.httpMethod = "POST"
+    //        request.setValue(
+    //            "application/json",
+    //            forHTTPHeaderField: "Content-Type"
+    //        )
+    //    }
 
     private func checkAuthenticationStatus() {
         isAuthenticated = false

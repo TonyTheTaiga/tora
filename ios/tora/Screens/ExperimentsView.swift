@@ -38,6 +38,8 @@ struct ExperimentSelectorView: View {
                     selectedExperiment?.id == experiment.id ? Color.blue.opacity(0.1) : Color.clear
                 )
             }
+            .scrollContentBackground(.hidden)
+            .scrollContentBackground(.hidden)
             .navigationTitle("Select Experiment")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -244,6 +246,7 @@ struct ExperimentContentView: View {
             }
             .padding()
         }
+        .scrollContentBackground(.hidden)
     }
 
     // MARK: - Private Methods

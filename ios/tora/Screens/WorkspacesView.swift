@@ -80,6 +80,7 @@ struct WorkspacesView: View {
                                 }
                             }
                             .listStyle(.plain)
+                            .scrollContentBackground(.hidden)
                         }
                         Spacer(minLength: 0)
                     }

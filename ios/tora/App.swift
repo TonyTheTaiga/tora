@@ -35,7 +35,6 @@ struct Tora: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .background(Color.custom.ctpBase)
                 .environmentObject(authService)
                 .environmentObject(workspaceService)
                 .environmentObject(experimentService)
