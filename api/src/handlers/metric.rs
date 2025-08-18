@@ -18,7 +18,6 @@ pub async fn get_metrics(
     let user_uuid = parse_uuid(&user.id, "user_id")?;
     let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
 
-    // Check if user has access to this experiment
     let access_check = sqlx::query_as::<_, (i64,)>(
         r#"
         SELECT COUNT(*) FROM experiment e
@@ -67,7 +66,6 @@ pub async fn get_metrics(
     .into_response())
 }
 
-// Create single metric
 pub async fn create_metric(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
@@ -77,7 +75,6 @@ pub async fn create_metric(
     let user_uuid = parse_uuid(&user.id, "user_id")?;
     let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
 
-    // Check if user has access to this experiment
     let access_check = sqlx::query_as::<_, (i64,)>(
         r#"
         SELECT COUNT(*) FROM experiment e

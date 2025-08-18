@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     info!("Connecting to database...");
     let db_pool = PgPoolOptions::new()
-        .max_connections(20) // Increase based on load
+        .max_connections(20)
         .min_connections(5)
         .acquire_timeout(Duration::from_secs(30))
         .connect(&settings.database_url)

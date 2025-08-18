@@ -1,6 +1,10 @@
 import SwiftUI
 
+// MARK: - Font Extension
+
 extension Font {
+    // MARK: - Static Methods
+
     static func inter(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
         .system(size: size, weight: weight)
     }

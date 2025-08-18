@@ -1,10 +1,16 @@
 import SwiftUI
 
+// MARK: - Experiment Selector View
+
 struct ExperimentSelectorView: View {
+    // MARK: - Properties
+
     let experiments: [Experiment]
     let selectedExperiment: Experiment?
     let onExperimentSelected: (Experiment) -> Void
     @Environment(\.dismiss) private var dismiss
+
+    // MARK: - Body
 
     var body: some View {
         NavigationView {
@@ -45,19 +51,26 @@ struct ExperimentSelectorView: View {
     }
 }
 
+// MARK: - Experiments View
+
 struct ExperimentsView: View {
+    // MARK: - Properties
+
     let initialExperimentId: String?
     @EnvironmentObject private var experimentService: ExperimentService
-    @State private var allExperiments: [Experiment] = []
     @State private var selectedExperiment: Experiment?
     @State private var isLoadingExperiments = true
     @State private var isLoadingExperiment = false
     @State private var errorMessage: String?
     @State private var showingExperimentSelector = false
 
+    // MARK: - Initializer
+
     init(experimentId: String? = nil) {
         self.initialExperimentId = experimentId
     }
+
+    // MARK: - Body
 
     var body: some View {
         Group {
@@ -73,7 +86,7 @@ struct ExperimentsView: View {
                         fetchAllExperiments()
                     }
                 }
-            } else if allExperiments.isEmpty {
+            } else if experimentService.experiments.isEmpty {
                 Text("No Experiments")
             } else if let selectedExperiment = selectedExperiment {
                 ExperimentContentView(experiment: selectedExperiment, isLoading: isLoadingExperiment)
@@ -87,7 +100,7 @@ struct ExperimentsView: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                if !allExperiments.isEmpty {
+                if !experimentService.experiments.isEmpty {
                     Button(
                         action: {
                             showingExperimentSelector = true
@@ -121,7 +134,7 @@ struct ExperimentsView: View {
         }
         .sheet(isPresented: $showingExperimentSelector) {
             ExperimentSelectorView(
-                experiments: allExperiments,
+                experiments: experimentService.experiments,
                 selectedExperiment: selectedExperiment,
                 onExperimentSelected: { experiment in
                     selectExperiment(experiment)
@@ -130,18 +143,19 @@ struct ExperimentsView: View {
         }
     }
 
+    // MARK: - Private Methods
+
     private func fetchAllExperiments() {
         isLoadingExperiments = true
         errorMessage = nil
         Task {
             do {
-                let experiments = try await experimentService.listAll()
+                try await experimentService.listAll()
                 await MainActor.run {
-                    self.allExperiments = experiments
                     self.isLoadingExperiments = false
 
                     if let initialId = initialExperimentId,
-                        let experiment = experiments.first(where: { $0.id == initialId })
+                        let experiment = experimentService.experiments.first(where: { $0.id == initialId })
                     {
                         selectExperiment(experiment)
                     }
@@ -178,9 +192,15 @@ struct ExperimentsView: View {
     }
 }
 
+// MARK: - Experiment Content View
+
 struct ExperimentContentView: View {
+    // MARK: - Properties
+
     let experiment: Experiment
     let isLoading: Bool
+
+    // MARK: - Body
 
     var body: some View {
         ScrollView {
@@ -226,6 +246,8 @@ struct ExperimentContentView: View {
         }
     }
 
+    // MARK: - Private Methods
+
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -233,6 +255,8 @@ struct ExperimentContentView: View {
         return formatter.string(from: date)
     }
 }
+
+// MARK: - String Extension
 
 extension String {
     func truncated(to length: Int) -> String {
@@ -243,6 +267,8 @@ extension String {
         }
     }
 }
+
+// MARK: - Preview
 
 #Preview {
     ExperimentsView()

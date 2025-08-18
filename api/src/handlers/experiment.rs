@@ -2,7 +2,8 @@ use crate::handlers::{AppError, AppResult, parse_uuid};
 use crate::middleware::auth::AuthenticatedUser;
 use crate::state::AppState;
 use crate::types::{
-    CreateExperimentRequest, Experiment, ListExperimentsQuery, Response, UpdateExperimentRequest,
+    BatchGetExperimentsRequest, CreateExperimentRequest, Experiment, ListExperimentsQuery,
+    Response, UpdateExperimentRequest,
 };
 use axum::{
     Extension, Json,
@@ -95,7 +96,6 @@ pub async fn list_experiments(
     let result = if let Some(workspace_id) = &query.workspace {
         let workspace_uuid = parse_uuid(workspace_id, "workspace_id")?;
 
-        // List experiments for a specific workspace with metrics summary
         sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String, Option<Vec<String>>)>(
             r#"
             SELECT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text,
@@ -175,7 +175,6 @@ pub async fn list_experiments(
     }
 }
 
-// Get single experiment
 pub async fn get_experiment(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
@@ -240,6 +239,109 @@ pub async fn get_experiment(
     }
 }
 
+pub async fn get_experiments_batch(
+    Extension(user): Extension<AuthenticatedUser>,
+    State(app_state): State<AppState>,
+    Json(request): Json<BatchGetExperimentsRequest>,
+) -> impl IntoResponse {
+    let user_uuid = match Uuid::parse_str(&user.id) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(Response {
+                    status: 400,
+                    data: Some("Invalid user ID".to_string()),
+                }),
+            )
+                .into_response();
+        }
+    };
+
+    let mut experiment_ids: Vec<Uuid> = Vec::new();
+    for raw_id in &request.ids {
+        let experiment_uuid = match Uuid::parse_str(raw_id) {
+            Ok(uuid) => uuid,
+            Err(_) => {
+                return (
+                    StatusCode::BAD_REQUEST,
+                    Json(Response {
+                        status: 400,
+                        data: Some("Invalid experiment ID".to_string()),
+                    }),
+                )
+                    .into_response();
+            }
+        };
+        experiment_ids.push(experiment_uuid);
+    }
+
+    let results= sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String, Option<Vec<String>>)>(
+        r#"
+        select e.id::text, e.name, e.description, e.hyperparam, e.tags, e.created_at, e.updated_at, we.workspace_id::text, ARRAY_AGG(DISTINCT m.name) FILTER (WHERE m.name IS NOT NULL)
+        from experiment e
+        JOIN workspace_experiments we ON e.id = we.experiment_id
+        JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
+        LEFT JOIN metric m ON e.id = m.experiment_id
+        WHERE e.id = ANY($1::uuid[]) AND uw.user_id = $2
+        GROUP BY e.id, e.name, e.description, e.hyperparam, e.tags, e.created_at, e.updated_at, uw.workspace_id
+        "#,
+    )
+    .bind(experiment_ids)
+    .bind(user_uuid)
+    .fetch_all(&app_state.db_pool)
+    .await;
+
+    let frontend_url = app_state.settings.frontend_url;
+    match results {
+        Ok(experiments) => {
+            let experiment_results: Vec<Experiment> = experiments
+                .into_iter()
+                .map(|e| Experiment {
+                    id: e.0.clone(),
+                    name: e.1,
+                    description: e.2,
+                    hyperparams: e.3.unwrap_or_default(),
+                    tags: e.4.unwrap_or_default(),
+                    created_at: e.5,
+                    updated_at: e.6,
+                    workspace_id: Some(e.7),
+                    available_metrics: e.8.unwrap_or_default(),
+                    url: format!("{}/experiments/{}", frontend_url, e.0.clone()),
+                })
+                .collect();
+
+            (
+                StatusCode::OK,
+                Json(Response {
+                    status: 200,
+                    data: Some(experiment_results),
+                }),
+            )
+                .into_response()
+        }
+        Err(sqlx::Error::RowNotFound) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(Response {
+                status: 500,
+                data: Some("Some of the experiment were not found!".to_string()),
+            }),
+        )
+            .into_response(),
+        Err(e) => {
+            eprintln!("Database error: {e}");
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(Response {
+                    status: 500,
+                    data: Some("Failed to fetch experiment".to_string()),
+                }),
+            )
+                .into_response()
+        }
+    }
+}
+
 pub async fn update_experiment(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
@@ -249,7 +351,6 @@ pub async fn update_experiment(
     let user_uuid = parse_uuid(&user.id, "user_id")?;
     let experiment_uuid = parse_uuid(&id, "experiment_id")?;
 
-    // Check if user has access to this experiment
     let access_check = sqlx::query_as::<_, (i64,)>(
         r#"
         SELECT COUNT(*) FROM experiment e
@@ -299,7 +400,6 @@ pub async fn update_experiment(
     .into_response())
 }
 
-// Delete experiment
 pub async fn delete_experiment(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
@@ -308,7 +408,6 @@ pub async fn delete_experiment(
     let user_uuid = parse_uuid(&user.id, "user_id")?;
     let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
 
-    // Check if user has owner/admin access to this experiment
     let access_check = sqlx::query_as::<_, (i64,)>(
         r#"
         SELECT COUNT(*) FROM experiment e
@@ -346,7 +445,6 @@ pub async fn delete_experiment(
         .into_response())
 }
 
-// List experiments for a specific workspace
 pub async fn list_workspace_experiments(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
@@ -355,7 +453,6 @@ pub async fn list_workspace_experiments(
     let user_uuid = parse_uuid(&user.id, "user_id")?;
     let workspace_uuid = parse_uuid(&workspace_id, "workspace_id")?;
 
-    // Check if user has access to the workspace
     let access_check = sqlx::query_as::<_, (i64,)>(
         "SELECT COUNT(*) FROM user_workspaces WHERE workspace_id = $1 AND user_id = $2",
     )
@@ -369,7 +466,6 @@ pub async fn list_workspace_experiments(
         ));
     }
 
-    // List experiments for the workspace with metrics summary
     let result = sqlx::query_as::<
         _,
         (
