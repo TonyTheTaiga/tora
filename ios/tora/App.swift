@@ -35,12 +35,44 @@ struct Tora: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .background(Color.white)
+                .background(Color.custom.ctpBase)
                 .environmentObject(authService)
                 .environmentObject(workspaceService)
                 .environmentObject(experimentService)
+                .applyAppTheme()
         }
     }
+}
+
+// MARK: - Theme Application
+
+private struct AppThemeKey: EnvironmentKey {
+    static let defaultValue: AppTheme = .system
+}
+
+extension EnvironmentValues {
+    var appTheme: AppTheme {
+        get { self[AppThemeKey.self] }
+        set { self[AppThemeKey.self] = newValue }
+    }
+}
+
+private struct AppThemeModifier: ViewModifier {
+    @AppStorage("appTheme") private var selectedThemeRaw: String = AppTheme.system.rawValue
+
+    private var selectedTheme: AppTheme {
+        AppTheme(rawValue: selectedThemeRaw) ?? .system
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .environment(\.appTheme, selectedTheme)
+            .preferredColorScheme(selectedTheme.colorScheme)
+    }
+}
+
+extension View {
+    fileprivate func applyAppTheme() -> some View { modifier(AppThemeModifier()) }
 }
 
 // MARK: - Preview

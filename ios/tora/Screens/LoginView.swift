@@ -132,15 +132,15 @@ struct LoginFormSheet: View {
 
                             ToraButton(
                                 "sign in",
-                                loadingTitle: "signing in...",
-                                systemImage: isLoading ? nil : "arrow.right",
                                 size: .medium,
-                                variant: .tinted,
-                                fullWidth: true,
-                                accent: Color.custom.ctpBlue,
+                                backgroundColor: Color.custom.ctpBlue.opacity(0.20),
+                                borderColor: Color.custom.ctpBlue.opacity(0.60),
                                 textColor: Color.custom.ctpBlue,
                                 cornerRadius: 8,
+                                fullWidth: true,
                                 isLoading: isLoading,
+                                loadingTitle: "signing in...",
+                                systemImage: isLoading ? nil : "arrow.right",
                                 action: { signIn() }
                             )
                             .disabled(isLoading || email.isEmpty || password.isEmpty)
@@ -258,9 +258,8 @@ struct LoginView: View {
                 ToraButton(
                     "sign in",
                     size: .small,
-                    variant: .tinted,
-                    fullWidth: false,
-                    accent: Color.custom.ctpBlue,
+                    backgroundColor: Color.custom.ctpBlue.opacity(0.20),
+                    borderColor: Color.custom.ctpBlue.opacity(0.60),
                     textColor: Color.custom.ctpText
                 ) {
                     loginSheetShown = true
