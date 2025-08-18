@@ -214,6 +214,23 @@ struct LoginView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
+                // Header with sign in on the right (matches Settings layout)
+                HStack(spacing: 12) {
+                    Spacer()
+                    ToraButton(
+                        "sign in",
+                        size: .small,
+                        backgroundColor: Color.custom.ctpSurface0.opacity(0.20),
+                        borderColor: Color.custom.ctpSurface0.opacity(0.30),
+                        textColor: Color.custom.ctpBlue,
+                        systemImage: "arrow.right"
+                    ) {
+                        loginSheetShown = true
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+
                 Spacer()
 
                 Image("ToraLogo")
@@ -255,23 +272,13 @@ struct LoginView: View {
                 Spacer()
                     .frame(height: geometry.size.height * 0.04)
 
-                ToraButton(
-                    "sign in",
-                    size: .small,
-                    backgroundColor: Color.custom.ctpBlue.opacity(0.20),
-                    borderColor: Color.custom.ctpBlue.opacity(0.60),
-                    textColor: Color.custom.ctpText
-                ) {
-                    loginSheetShown = true
-                }
-                .sheet(isPresented: $loginSheetShown) {
-                    LoginFormSheet()
-                }
-
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.horizontal, 20)
+            .sheet(isPresented: $loginSheetShown) {
+                LoginFormSheet()
+            }
         }
     }
 }
