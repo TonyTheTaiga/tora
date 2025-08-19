@@ -3,6 +3,23 @@ import Foundation
 import SwiftUI
 import os
 
+// MARK: - Auth State
+
+enum AuthState {
+    case authenticating
+    case authenticated(UserSession)
+    case unauthenticated(String? = nil)
+}
+
+extension AuthState {
+    var userSession: UserSession? {
+        if case let .authenticated(userSession) = self {
+            return userSession
+        }
+        return nil
+    }
+}
+
 // MARK: - Private Data Structures
 
 struct Credentials {
@@ -25,6 +42,10 @@ private struct TokenData: Decodable {
 }
 
 private struct LoginResponse: Decodable {
+    let data: TokenData
+}
+
+private struct RefreshRespose: Decodable {
     let data: TokenData
 }
 
@@ -63,6 +84,7 @@ class UserSession: Encodable, Decodable {
 enum AuthErrors: Error, LocalizedError {
     case invalidURL
     case authFailure(String)
+    case refreshFailure(String)
     case dataError(String)
     case responseError(String)
     case requestError(Int, String)
@@ -77,6 +99,8 @@ enum AuthErrors: Error, LocalizedError {
             return "Invalid URL configuration"
         case .authFailure(let message):
             return "Authentication failed: \(message)"
+        case .refreshFailure(let message):
+            return "Refresh failed: \(message)"
         case .dataError(let message):
             return "Data processing error: \(message)"
         case .responseError(let message):
@@ -110,8 +134,7 @@ enum KeychainError: Error {
 class AuthService: ObservableObject {
     // MARK: - Properties
 
-    @Published var isAuthenticated = false
-    @Published var currentUser: UserSession?
+    @Published private(set) var state: AuthState = .unauthenticated(nil)
 
     private let serviceName = "tora-tracker"
     private let backendUrl: String = Config.baseURL
@@ -120,78 +143,61 @@ class AuthService: ObservableObject {
     // MARK: - Constructor
 
     private init() {
-        checkAuthenticationStatus()
+        do {
+            if try checkSessionInKeychain() {
+                let userSession = try retrieveSessionFromKeychain()
+                self.state = .authenticated(userSession)
+            }
+        } catch {
+            self.state = .unauthenticated(error.localizedDescription)
+        }
     }
 
     // MARK: - Public Methods
 
     func logout() throws {
         try deleteUserSessionFromKeychain()
-        isAuthenticated = false
-        currentUser = nil
+        self.state = .unauthenticated(nil)
     }
 
     func login(email: String, password: String) async throws {
+        self.state = .authenticating
+
         do {
             let userSession = try await loginWithEmailAndPassword(
                 email: email,
                 password: password
             )
+            self.state = .authenticated(userSession)
             try storeSessionInKeychain(userSession)
-            self.isAuthenticated = true
-            self.currentUser = userSession
         } catch let authError as AuthErrors {
+            self.state = .unauthenticated(authError.localizedDescription)
             throw authError
         } catch let keychainError as KeychainError {
+            self.state = .unauthenticated(keychainError.localizedDescription)
             throw keychainError
         } catch {
+            self.state = .unauthenticated(error.localizedDescription)
             throw AuthErrors.authFailure(
                 "Unexpected error: \(error.localizedDescription)"
             )
         }
     }
 
-    //    func refreshUserSession() async throws {
-    //        guard let currentUser else {
-    //            throw AuthErrors.authFailure("No user session available.")
-    //        }
-    //
-    //        do {
-    //            let refreshedUserSession = try await refreshSession(
-    //            )
-    //            try storeSessionInKeychain(refreshedUserSession)
-    //        }
-    //    }
+    func refreshUserSession() async {
+        if let userSession = self.state.userSession {
+            do {
+                let newUserSession = try await refreshSession(userSession.refreshToken)
+                self.state = .authenticated(newUserSession)
+                try storeSessionInKeychain(newUserSession)
+            } catch {
+                self.state = .unauthenticated(error.localizedDescription)
+            }
+        }
+
+    }
 
     // MARK: - Private Methods
-
-    //    private func refreshSession() async throws -> UserSession {
-    //        guard let url = URL(string: "\(backendUrl)/api/refresh") else {
-    //            throw AuthErrors.invalidURL
-    //        }
-    //
-    //        var request = URLRequest(url: url)
-    //        request.httpMethod = "POST"
-    //        request.setValue(
-    //            "application/json",
-    //            forHTTPHeaderField: "Content-Type"
-    //        )
-    //    }
-
-    private func checkAuthenticationStatus() {
-        isAuthenticated = false
-        currentUser = nil
-
-        do {
-            if try checkSessionInKeychain() {
-                currentUser = try retrieveSessionFromKeychain()
-                isAuthenticated = true
-            }
-        } catch {
-            print("Keychain error: \(error)")
-            isAuthenticated = false
-        }
-    }
 
     private func jsonSerialize(_ userSession: UserSession) throws -> Data {
         return try JSONEncoder().encode(userSession)
@@ -200,6 +206,8 @@ class AuthService: ObservableObject {
     private func jsonDeserialize(_ input: Data) throws -> UserSession {
         return try JSONDecoder().decode(UserSession.self, from: input)
     }
+
+    // MARK: - KeyChain Methods
 
     private func storeSessionInKeychain(_ userSession: UserSession) throws {
         let serialized = try jsonSerialize(userSession)
@@ -361,5 +369,80 @@ class AuthService: ObservableObject {
                 throw AuthErrors.jsonParsingError(error)
             }
         }
+    }
+
+    private func refreshSession(_ refreshToken: String) async throws -> UserSession {
+        guard let url = URL(string: "\(backendUrl)/api/refresh") else {
+            throw AuthErrors.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(
+            "application/json",
+            forHTTPHeaderField: "Content-Type"
+        )
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: [
+                "refresh_token": refreshToken
+            ])
+        } catch {
+            throw AuthErrors.dataError(
+                "Failed to serialize login credentials: \(error.localizedDescription)"
+            )
+        }
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await URLSession.shared.data(
+                for: request
+            )
+        } catch {
+            throw AuthErrors.networkError(error)
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AuthErrors.invalidResponse
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            let errorMessage = HTTPURLResponse.localizedString(
+                forStatusCode: httpResponse.statusCode
+            )
+            throw AuthErrors.requestError(
+                httpResponse.statusCode,
+                errorMessage
+            )
+        }
+
+        do {
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            decoder.dateDecodingStrategy = .iso8601
+            let refreshResponse = try decoder.decode(
+                RefreshRespose.self,
+                from: data
+            )
+            let tokenData = refreshResponse.data
+            let expiresInDate = Date(
+                timeIntervalSince1970: TimeInterval(tokenData.expiresIn)
+            )
+            let expiresAtDate = Date(
+                timeIntervalSince1970: TimeInterval(tokenData.expiresAt)
+            )
+            let session = UserSession(
+                id: tokenData.user.id,
+                email: tokenData.user.email,
+                authToken: tokenData.accessToken,
+                refreshToken: tokenData.refreshToken,
+                expiresIn: expiresInDate,
+                expiresAt: expiresAtDate,
+                tokenType: tokenData.tokenType
+            )
+
+            return session
+        } catch {
+            throw AuthErrors.jsonParsingError(error)
+        }
+
     }
 }

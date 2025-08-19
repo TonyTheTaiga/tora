@@ -11,10 +11,20 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if authService.isAuthenticated {
+            switch authService.state {
+            case .authenticated(_):
                 MainAppView()
-            } else {
-                LoginView()
+            case .unauthenticated(let message):
+                if let message, !message.isEmpty {
+                    VStack(spacing: 12) {
+                        Text(message).foregroundStyle(.red)
+                        LoginView()
+                    }
+                } else {
+                    LoginView()
+                }
+            case .authenticating:
+                Text("logging in")
             }
         }
     }
@@ -39,6 +49,11 @@ struct Tora: App {
                 .environmentObject(workspaceService)
                 .environmentObject(experimentService)
                 .applyAppTheme()
+                .task {
+                    if let userSession = authService.state.userSession, userSession.expiresIn < Date() {
+                        await authService.refreshUserSession()
+                    }
+                }
         }
     }
 }
