@@ -6,7 +6,6 @@ struct ContentView: View {
     // MARK: - Properties
 
     @EnvironmentObject var authService: AuthService
-    @State private var error: String = ""
 
     // MARK: - Body
 
@@ -14,18 +13,8 @@ struct ContentView: View {
         Group {
             if authService.isAuthenticated {
                 MainAppView()
-            } else if !error.isEmpty {
-                Text(error)
             } else {
                 LoginView()
-            }
-        }.task {
-            do {
-                if let user = authService.currentUser, user.expiresIn < Date() {
-                    try await authService.refreshUserSession()
-                }
-            } catch {
-                self.error = "Failed to refresh session: \(error.localizedDescription)"
             }
         }
     }
@@ -50,6 +39,16 @@ struct Tora: App {
                 .environmentObject(workspaceService)
                 .environmentObject(experimentService)
                 .applyAppTheme()
+                .task {
+                    do {
+                        if let user = authService.currentUser, user.expiresIn < Date() {
+                            try await authService.refreshUserSession()
+                        }
+                    } catch {
+                        // TODO: fix this, maybe manage the state inside auth service so that the caller never has to handle it.
+                        print("Failed to refresh session: \(error.localizedDescription)")
+                    }
+                }
         }
     }
 }

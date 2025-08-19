@@ -28,6 +28,10 @@ private struct LoginResponse: Decodable {
     let data: TokenData
 }
 
+private struct RefreshRespose: Decodable {
+    let data: TokenData
+}
+
 // MARK: - User Session Model
 
 class UserSession: Encodable, Decodable {
@@ -202,8 +206,6 @@ class AuthService: ObservableObject {
             throw AuthErrors.invalidResponse
         }
 
-        print(httpResponse)
-
         guard httpResponse.statusCode == 200 else {
             let errorMessage = HTTPURLResponse.localizedString(
                 forStatusCode: httpResponse.statusCode
@@ -218,11 +220,11 @@ class AuthService: ObservableObject {
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             decoder.dateDecodingStrategy = .iso8601
-            let loginResponse = try decoder.decode(
-                LoginResponse.self,
+            let refreshResponse = try decoder.decode(
+                RefreshRespose.self,
                 from: data
             )
-            let tokenData = loginResponse.data
+            let tokenData = refreshResponse.data
             let expiresInDate = Date(
                 timeIntervalSince1970: TimeInterval(tokenData.expiresIn)
             )
