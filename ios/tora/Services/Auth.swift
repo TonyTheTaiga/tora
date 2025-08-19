@@ -184,7 +184,7 @@ class AuthService: ObservableObject {
         }
     }
 
-    func refreshUserSession() async throws {
+    func refreshUserSession() async {
         if let userSession = self.state.userSession {
             do {
                 let newUserSession = try await refreshSession(userSession.refreshToken)
@@ -192,8 +192,6 @@ class AuthService: ObservableObject {
                 try storeSessionInKeychain(newUserSession)
             } catch {
                 self.state = .unauthenticated(error.localizedDescription)
-                throw AuthErrors.refreshFailure("Failed to refresh session: \(error.localizedDescription)")
-
             }
         }
 

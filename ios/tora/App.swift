@@ -49,6 +49,11 @@ struct Tora: App {
                 .environmentObject(workspaceService)
                 .environmentObject(experimentService)
                 .applyAppTheme()
+                .task {
+                    if let userSession = authService.state.userSession, userSession.expiresIn < Date() {
+                        await authService.refreshUserSession()
+                    }
+                }
         }
     }
 }
