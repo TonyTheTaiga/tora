@@ -183,7 +183,7 @@ class WorkspaceService: ObservableObject {
                 throw WorkspaceErrors.invalidURL
             }
 
-            guard let token = authService.currentUser?.authToken else {
+            guard let token = authService.state.userSession?.authToken else {
                 throw WorkspaceErrors.unauthenticated
             }
 
@@ -247,7 +247,7 @@ class WorkspaceService: ObservableObject {
                 throw WorkspaceErrors.invalidURL
             }
 
-            guard let token = authService.currentUser?.authToken else {
+            guard let token = authService.state.userSession?.authToken else {
                 throw WorkspaceErrors.unauthenticated
             }
 
@@ -327,7 +327,7 @@ class ExperimentService: ObservableObject {
                 throw WorkspaceErrors.invalidURL
             }
 
-            guard let token = authService.currentUser?.authToken else {
+            guard let token = authService.state.userSession?.authToken else {
                 throw WorkspaceErrors.unauthenticated
             }
 
@@ -387,7 +387,7 @@ class ExperimentService: ObservableObject {
                 throw WorkspaceErrors.invalidURL
             }
 
-            guard let token = authService.currentUser?.authToken else {
+            guard let token = authService.state.userSession?.authToken else {
                 throw WorkspaceErrors.unauthenticated
             }
 
