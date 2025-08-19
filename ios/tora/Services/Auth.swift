@@ -8,7 +8,7 @@ import os
 enum AuthState {
     case authenticating
     case authenticated(UserSession)
-    case unauthenticated
+    case unauthenticated(String? = nil)
 }
 
 extension AuthState {
@@ -134,7 +134,7 @@ enum KeychainError: Error {
 class AuthService: ObservableObject {
     // MARK: - Properties
 
-    @Published private(set) var state: AuthState = .unauthenticated
+    @Published private(set) var state: AuthState = .unauthenticated(nil)
 
     private let serviceName = "tora-tracker"
     private let backendUrl: String = Config.baseURL
@@ -149,8 +149,7 @@ class AuthService: ObservableObject {
                 self.state = .authenticated(userSession)
             }
         } catch {
-            print("Keychain error: \(error)")
-            self.state = .unauthenticated
+            self.state = .unauthenticated(error.localizedDescription)
         }
     }
 
@@ -158,7 +157,7 @@ class AuthService: ObservableObject {
 
     func logout() throws {
         try deleteUserSessionFromKeychain()
-        self.state = .unauthenticated
+        self.state = .unauthenticated(nil)
     }
 
     func login(email: String, password: String) async throws {
@@ -172,13 +171,13 @@ class AuthService: ObservableObject {
             self.state = .authenticated(userSession)
             try storeSessionInKeychain(userSession)
         } catch let authError as AuthErrors {
-            self.state = .unauthenticated
+            self.state = .unauthenticated(authError.localizedDescription)
             throw authError
         } catch let keychainError as KeychainError {
-            self.state = .unauthenticated
+            self.state = .unauthenticated(keychainError.localizedDescription)
             throw keychainError
         } catch {
-            self.state = .unauthenticated
+            self.state = .unauthenticated(error.localizedDescription)
             throw AuthErrors.authFailure(
                 "Unexpected error: \(error.localizedDescription)"
             )
@@ -192,8 +191,7 @@ class AuthService: ObservableObject {
                 self.state = .authenticated(newUserSession)
                 try storeSessionInKeychain(newUserSession)
             } catch {
-                self.state = .unauthenticated
-                OSLog.auth.error("Failed to refresh session: \(error.localizedDescription)")
+                self.state = .unauthenticated(error.localizedDescription)
                 throw AuthErrors.refreshFailure("Failed to refresh session: \(error.localizedDescription)")
 
             }

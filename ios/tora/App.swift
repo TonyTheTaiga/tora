@@ -14,8 +14,15 @@ struct ContentView: View {
             switch authService.state {
             case .authenticated(_):
                 MainAppView()
-            case .unauthenticated:
-                LoginView()
+            case .unauthenticated(let message):
+                if let message, !message.isEmpty {
+                    VStack(spacing: 12) {
+                        Text(message).foregroundStyle(.red)
+                        LoginView()
+                    }
+                } else {
+                    LoginView()
+                }
             case .authenticating:
                 Text("logging in")
             }
