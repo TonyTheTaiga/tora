@@ -151,32 +151,100 @@ class AuthService: ObservableObject {
         }
     }
 
-    //    func refreshUserSession() async throws {
-    //        guard let currentUser else {
-    //            throw AuthErrors.authFailure("No user session available.")
-    //        }
-    //
-    //        do {
-    //            let refreshedUserSession = try await refreshSession(
-    //            )
-    //            try storeSessionInKeychain(refreshedUserSession)
-    //        }
-    //    }
+    func refreshUserSession() async throws {
+        guard currentUser != nil else {
+            throw AuthErrors.authFailure("No user session available.")
+        }
+
+        do {
+            let refreshedUserSession = try await refreshSession()
+            //            let data = try JSONEncoder().encode(refreshedUserSession)
+            //            if let jsonString = String(data: data, encoding: .utf8) {
+            //                OSLog.auth.debug("Refreshed User: \(jsonString, privacy: .private)")
+            //            }
+            self.currentUser = refreshedUserSession
+            try storeSessionInKeychain(refreshedUserSession)
+        }
+    }
 
     // MARK: - Private Methods
 
-    //    private func refreshSession() async throws -> UserSession {
-    //        guard let url = URL(string: "\(backendUrl)/api/refresh") else {
-    //            throw AuthErrors.invalidURL
-    //        }
-    //
-    //        var request = URLRequest(url: url)
-    //        request.httpMethod = "POST"
-    //        request.setValue(
-    //            "application/json",
-    //            forHTTPHeaderField: "Content-Type"
-    //        )
-    //    }
+    private func refreshSession() async throws -> UserSession {
+        guard let url = URL(string: "\(backendUrl)/api/refresh") else {
+            throw AuthErrors.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(
+            "application/json",
+            forHTTPHeaderField: "Content-Type"
+        )
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: [
+                "refresh_token": currentUser?.refreshToken
+            ])
+        } catch {
+            throw AuthErrors.dataError(
+                "Failed to serialize login credentials: \(error.localizedDescription)"
+            )
+        }
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await URLSession.shared.data(
+                for: request
+            )
+        } catch {
+            throw AuthErrors.networkError(error)
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AuthErrors.invalidResponse
+        }
+
+        print(httpResponse)
+
+        guard httpResponse.statusCode == 200 else {
+            let errorMessage = HTTPURLResponse.localizedString(
+                forStatusCode: httpResponse.statusCode
+            )
+            throw AuthErrors.requestError(
+                httpResponse.statusCode,
+                errorMessage
+            )
+        }
+
+        do {
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            decoder.dateDecodingStrategy = .iso8601
+            let loginResponse = try decoder.decode(
+                LoginResponse.self,
+                from: data
+            )
+            let tokenData = loginResponse.data
+            let expiresInDate = Date(
+                timeIntervalSince1970: TimeInterval(tokenData.expiresIn)
+            )
+            let expiresAtDate = Date(
+                timeIntervalSince1970: TimeInterval(tokenData.expiresAt)
+            )
+            let session = UserSession(
+                id: tokenData.user.id,
+                email: tokenData.user.email,
+                authToken: tokenData.accessToken,
+                refreshToken: tokenData.refreshToken,
+                expiresIn: expiresInDate,
+                expiresAt: expiresAtDate,
+                tokenType: tokenData.tokenType
+            )
+
+            return session
+        } catch {
+            throw AuthErrors.jsonParsingError(error)
+        }
+
+    }
 
     private func checkAuthenticationStatus() {
         isAuthenticated = false

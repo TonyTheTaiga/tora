@@ -6,6 +6,7 @@ struct ContentView: View {
     // MARK: - Properties
 
     @EnvironmentObject var authService: AuthService
+    @State private var error: String = ""
 
     // MARK: - Body
 
@@ -13,8 +14,18 @@ struct ContentView: View {
         Group {
             if authService.isAuthenticated {
                 MainAppView()
+            } else if !error.isEmpty {
+                Text(error)
             } else {
                 LoginView()
+            }
+        }.task {
+            do {
+                if let user = authService.currentUser, user.expiresIn < Date() {
+                    try await authService.refreshUserSession()
+                }
+            } catch {
+                self.error = "Failed to refresh session: \(error.localizedDescription)"
             }
         }
     }
