@@ -160,7 +160,7 @@ class AuthService: ObservableObject {
         self.state = .unauthenticated(nil)
     }
 
-    func login(email: String, password: String) async throws {
+    func login(email: String, password: String) async {
         self.state = .authenticating
 
         do {
@@ -172,15 +172,15 @@ class AuthService: ObservableObject {
             try storeSessionInKeychain(userSession)
         } catch let authError as AuthErrors {
             self.state = .unauthenticated(authError.localizedDescription)
-            throw authError
+            //            throw authError
         } catch let keychainError as KeychainError {
             self.state = .unauthenticated(keychainError.localizedDescription)
-            throw keychainError
+            //            throw keychainError
         } catch {
             self.state = .unauthenticated(error.localizedDescription)
-            throw AuthErrors.authFailure(
-                "Unexpected error: \(error.localizedDescription)"
-            )
+            //            throw AuthErrors.authFailure(
+            //                "Unexpected error: \(error.localizedDescription)"
+            //            )
         }
     }
 

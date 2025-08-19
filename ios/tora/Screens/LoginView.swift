@@ -172,20 +172,21 @@ struct LoginFormSheet: View {
             }
 
             do {
-                try await authService.login(
+                await authService.login(
                     email: email,
                     password: password
                 )
                 dismiss()
-            } catch {
-                if let authError = error as? LocalizedError {
-                    errorMessage =
-                        authError.errorDescription ?? "Authentication failed"
-                } else {
-                    errorMessage =
-                        "An unexpected error occurred. Please try again."
-                }
             }
+            //            catch {
+            //                if let authError = error as? LocalizedError {
+            //                    errorMessage =
+            //                        authError.errorDescription ?? "Authentication failed"
+            //                } else {
+            //                    errorMessage =
+            //                        "An unexpected error occurred. Please try again."
+            //                }
+            //            }
 
         }
 
