@@ -3,7 +3,6 @@ import SwiftUI
 struct WorkspacesView: View {
     // MARK: - Properties
 
-    let onExperimentSelected: ((String) -> Void)
     @EnvironmentObject private var workspaceService: WorkspaceService
     @EnvironmentObject private var experimentService: ExperimentService
     @State private var isLoading = true
@@ -64,7 +63,7 @@ struct WorkspacesView: View {
                                 .padding(.horizontal)
                         } else if selectedWorkspace != nil {
                             List(experiments) { experiment in
-                                Button(action: { onExperimentSelected(experiment.id) }) {
+                                NavigationLink(destination: ExperimentsView(experimentId: experiment.id)) {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(experiment.name)
                                             .font(.headline)
