@@ -226,7 +226,7 @@ class TestToraLogging:
         test_url = "https://test-frontend.example.com/experiments/exp-123"
         tora = Tora("exp-123", url=test_url, max_buffer_len=5, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
-        tora.log("accuracy", 0.95, step=100)
+        tora._log("accuracy", 0.95, step=100)
 
         assert tora.buffer_size == 1
         assert tora._buffer[0]["name"] == "accuracy"
@@ -238,13 +238,13 @@ class TestToraLogging:
         tora = Tora("exp-123", url=test_url, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
         with pytest.raises(ToraValidationError):
-            tora.log("", 0.95)
+            tora._log("", 0.95)
 
         with pytest.raises(ToraValidationError):
-            tora.log("accuracy", float("nan"))
+            tora._log("accuracy", float("nan"))
 
         with pytest.raises(ToraValidationError):
-            tora.log("accuracy", 0.95, step=-1)
+            tora._log("accuracy", 0.95, step=-1)
 
     def test_log_metric_closed_client(self):
         test_url = "https://test-frontend.example.com/experiments/exp-123"
@@ -252,17 +252,17 @@ class TestToraLogging:
         tora.shutdown()
 
         with pytest.raises(ToraMetricError, match="closed Tora client"):
-            tora.log("accuracy", 0.95)
+            tora._log("accuracy", 0.95)
 
     @patch("tora._client.Tora._write_logs")
     def test_log_metric_auto_flush(self, mock_write_logs):
         test_url = "https://test-frontend.example.com/experiments/exp-123"
         tora = Tora("exp-123", url=test_url, max_buffer_len=2, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
 
-        tora.log("metric1", 1.0)
+        tora._log("metric1", 1.0)
         assert mock_write_logs.call_count == 0
 
-        tora.log("metric2", 2.0)
+        tora._log("metric2", 2.0)
         assert mock_write_logs.call_count == 1
 
     def test_log_metric_with_metadata(self):
@@ -270,7 +270,7 @@ class TestToraLogging:
         tora = Tora("exp-123", url=test_url, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
         metadata = {"epoch": 1, "batch": 10}
 
-        tora.log("loss", 0.5, metadata=metadata)
+        tora._log("loss", 0.5, metadata=metadata)
 
         assert tora._buffer[0]["metadata"] == metadata
 
@@ -282,7 +282,7 @@ class TestToraLogging:
             pass
 
         with pytest.raises(ToraValidationError, match="must be JSON serializable"):
-            tora.log("loss", 0.5, metadata={"obj": NonSerializable()})
+            tora._log("loss", 0.5, metadata={"obj": NonSerializable()})
 
 
 class TestToraResult:
@@ -297,7 +297,7 @@ class TestToraResult:
         assert entry["name"] == "best_accuracy"
         assert entry["value"] == 0.97
         assert entry["step"] is None
-        assert entry["metadata"] == {"result": True}
+        assert entry["metadata"] == {"type": "result"}
 
     def test_result_closed_client(self):
         test_url = "https://test-frontend.example.com/experiments/exp-123"
@@ -313,7 +313,7 @@ class TestToraFlushAndShutdown:
     def test_flush(self, mock_write_logs):
         test_url = "https://test-frontend.example.com/experiments/exp-123"
         tora = Tora("exp-123", url=test_url, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
-        tora.log("accuracy", 0.95)
+        tora._log("accuracy", 0.95)
 
         tora.flush()
         mock_write_logs.assert_called_once()
@@ -330,7 +330,7 @@ class TestToraFlushAndShutdown:
     def test_shutdown(self, mock_write_logs):
         test_url = "https://test-frontend.example.com/experiments/exp-123"
         tora = Tora("exp-123", url=test_url, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
-        tora.log("accuracy", 0.95)
+        tora._log("accuracy", 0.95)
 
         tora.shutdown()
 
@@ -350,7 +350,7 @@ class TestToraFlushAndShutdown:
     def test_context_manager(self, mock_write_logs):
         test_url = "https://test-frontend.example.com/experiments/exp-123"
         with Tora("exp-123", url=test_url, api_key=TEST_API_KEY, server_url=TEST_BASE_URL) as tora:
-            tora.log("accuracy", 0.95)
+            tora._log("accuracy", 0.95)
 
         assert tora.is_closed
         mock_write_logs.assert_called_once()
@@ -391,7 +391,7 @@ class TestToraProperties:
         tora = Tora("exp-123", url=test_url, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
         assert tora.buffer_size == 0
 
-        tora.log("metric", 1.0)
+        tora._log("metric", 1.0)
         assert tora.buffer_size == 1
 
     def test_is_closed_property(self):

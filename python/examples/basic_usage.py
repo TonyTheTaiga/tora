@@ -63,12 +63,12 @@ def example_basic_usage():
         print("Starting training simulation...")
         for epoch, metrics in simulate_training():
             for metric_name, value in metrics.items():
-                client.log(metric_name, value, step=epoch)
+                client._log(metric_name, value, step=epoch)
 
             print(f"Epoch {epoch}: {metrics}")
 
         # Log some final metrics with metadata
-        client.log(
+        client._log(
             "final_score",
             0.95,
             metadata={
@@ -109,8 +109,8 @@ def example_context_manager():
                 accuracy = 0.6 + (i * 0.08) + random.uniform(-0.02, 0.02)
                 loss = 0.8 - (i * 0.12) + random.uniform(-0.05, 0.05)
 
-                client.log("accuracy", accuracy, step=i)
-                client.log("loss", max(0.01, loss), step=i)
+                client._log("accuracy", accuracy, step=i)
+                client._log("loss", max(0.01, loss), step=i)
 
                 print(f"Step {i}: accuracy={accuracy:.3f}, loss={loss:.3f}")
                 time.sleep(0.1)
@@ -182,7 +182,7 @@ def example_error_handling():
     # Example 2: Invalid metric value
     try:
         client = tora.Tora.create_experiment("error-example")
-        client.log("invalid_metric", float("nan"))  # NaN should fail
+        client._log("invalid_metric", float("nan"))  # NaN should fail
     except tora.ToraValidationError as e:
         print(f"Validation error (expected): {e}")
         client.shutdown()

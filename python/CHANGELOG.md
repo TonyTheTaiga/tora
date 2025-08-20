@@ -5,6 +5,19 @@ All notable changes to the Tora Python SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.8] - 2025-08-20
+
+### Added
+- `tmetric(name, value, step=None)` wrapper in `tora._wrapper` for logging training metrics.
+
+### Changed
+- Public API: `tlog` removed from exports in favor of `tmetric`.
+- Result logging metadata standardized to `{"type": "result"}`.
+
+### Migration
+- Replace calls to `tlog(name, value, step, metadata)` with `tmetric(name, value, step)`.
+- For results, use `tresult(name, value)`; result metadata is handled internally.
+
 ## [0.0.5] - 2024-01-XX
 
 ### Added

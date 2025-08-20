@@ -172,7 +172,7 @@ def pytorch_training_example():
             val_loader = MockDataLoader(dataset_size=10000, batch_size=hyperparams["batch_size"])
 
             # Log model information
-            tora_client.log(
+            tora_client._log(
                 "model_parameters",
                 model.parameters_count,
                 metadata={
@@ -202,17 +202,17 @@ def pytorch_training_example():
                 # Log epoch-level metrics
                 all_metrics = {**train_metrics, **val_metrics}
                 for metric_name, value in all_metrics.items():
-                    tora_client.log(metric_name, value, step=epoch)
+                    tora_client._log(metric_name, value, step=epoch)
 
                 # Log learning rate (in real PyTorch, you might have a scheduler)
                 current_lr = optimizer.lr * (0.95**epoch)  # Simulate decay
-                tora_client.log("learning_rate", current_lr, step=epoch)
+                tora_client._log("learning_rate", current_lr, step=epoch)
 
                 # Check for best model
                 val_acc = val_metrics["val_accuracy"]
                 if val_acc > best_val_acc:
                     best_val_acc = val_acc
-                    tora_client.log("best_val_accuracy", best_val_acc, step=epoch)
+                    tora_client._log("best_val_accuracy", best_val_acc, step=epoch)
                     print(f"New best validation accuracy: {best_val_acc:.4f}")
 
                     # In real PyTorch, you would save the model here
@@ -225,7 +225,7 @@ def pytorch_training_example():
                 print(f"Val Loss: {val_metrics['val_loss']:.4f}, Val Acc: {val_metrics['val_accuracy']:.4f}")
 
             # Log final results
-            tora_client.log(
+            tora_client._log(
                 "final_results",
                 best_val_acc,
                 metadata={
@@ -261,22 +261,22 @@ def pytorch_callback_example():
             """Called at the end of each batch."""
             if self.step % self.log_frequency == 0:
                 for name, value in metrics.items():
-                    self.tora.log(f"batch_{name}", value, step=self.step)
+                    self.tora._log(f"batch_{name}", value, step=self.step)
             self.step += 1
 
         def on_epoch_end(self, epoch: int, metrics: dict[str, float]):
             """Called at the end of each epoch."""
             for name, value in metrics.items():
-                self.tora.log(name, value, step=epoch)
+                self.tora._log(name, value, step=epoch)
 
         def on_training_end(self, final_metrics: dict[str, Any]):
             """Called when training is complete."""
             for name, value in final_metrics.items():
                 if isinstance(value, int | float):
-                    self.tora.log(f"final_{name}", value)
+                    self.tora._log(f"final_{name}", value)
                 else:
                     # Log as metadata for non-numeric values
-                    self.tora.log("training_summary", 1.0, metadata={name: value})
+                    self.tora._log("training_summary", 1.0, metadata={name: value})
 
     # Example usage of the callback
     try:

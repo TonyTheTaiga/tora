@@ -415,14 +415,14 @@ class Tora:
             server_url=server_url,
         )
 
-    def log(
+    def _log(
         self,
         name: str,
         value: int | float,
         step: int | None = None,
         metadata: MetricMetadata | None = None,
     ) -> None:
-        """Log a metric value.
+        """Log a value.
 
         Logs are buffered and sent in batches when the buffer reaches max_buffer_len.
         Call flush() or shutdown() to send remaining buffered metrics immediately.
@@ -436,7 +436,6 @@ class Tora:
         Raises:
             ToraValidationError: If input validation fails
             ToraMetricError: If the client is closed
-
         """
         if self._closed:
             raise ToraMetricError("Cannot log metrics on a closed Tora client")
@@ -468,6 +467,29 @@ class Tora:
         if len(self._buffer) >= self._max_buffer_len:
             self._write_logs()
 
+    def metric(
+        self,
+        name: str,
+        value: int | float,
+        step: int | None = None,
+    ) -> None:
+        """Log a metric value.
+
+        Metrics are buffered and sent in batches when the buffer reaches max_buffer_len.
+        Call flush() or shutdown() to send remaining buffered metrics immediately.
+
+        Args:
+            name: Name of the metric
+            value: Numeric value of the metric
+            step: Step number of the metric
+            metadata: Additional metadata for the metric
+
+        Raises:
+            ToraValidationError: If input validation fails
+            ToraMetricError: If the client is closed
+        """
+        self._log(name=name, value=value, step=step, metadata={"type": "metric"})
+
     def result(self, name: str, value: int | float):
         """Log a experiment result.
 
@@ -482,7 +504,7 @@ class Tora:
             ToraValidationError: If input validation fails
             ToraMetricError: If the client is closed
         """
-        self.log(name=name, value=value, step=None, metadata={"result": True})
+        self._log(name=name, value=value, step=None, metadata={"type": "result"})
 
     def _write_logs(self) -> None:
         """Write buffered metrics to the API.
@@ -613,7 +635,7 @@ class Tora:
 
         """
         for name, value in metrics.items():
-            self.log(name, value, step=step)
+            self._log(name, value, step=step)
 
     def __repr__(self) -> str:
         """Return string representation of the Tora client."""

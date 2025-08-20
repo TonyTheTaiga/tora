@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 import tora._wrapper
-from tora import flush, get_experiment_id, is_initialized, setup, shutdown, tlog
+from tora import flush, get_experiment_id, is_initialized, setup, shutdown, tmetric
 from tora._wrapper import tresult
 from tora._exceptions import ToraError, ToraValidationError
 
@@ -64,28 +64,28 @@ class TestSetup:
         mock_atexit.assert_called_once_with(shutdown)
 
 
-class TestTlog:
-    def test_tlog_success(self):
+class TestTmetric:
+    def test_tmetric_success(self):
         mock_client = Mock()
         tora._wrapper._INSTANCE = mock_client
 
-        tlog("accuracy", 0.95, step=100, metadata={"epoch": 1})
+        tmetric("accuracy", 0.95, step=100)
 
-        mock_client.log.assert_called_once_with("accuracy", 0.95, 100, {"epoch": 1})
+        mock_client.metric.assert_called_once_with("accuracy", 0.95, 100)
 
-    def test_tlog_no_client(self):
+    def test_tmetric_no_client(self):
         tora._wrapper._INSTANCE = None
 
         with pytest.raises(ToraError, match="not initialized"):
-            tlog("accuracy", 0.95)
+            tmetric("accuracy", 0.95)
 
-    def test_tlog_minimal_args(self):
+    def test_tmetric_minimal_args(self):
         mock_client = Mock()
         tora._wrapper._INSTANCE = mock_client
 
-        tlog("loss", 0.5)
+        tmetric("loss", 0.5)
 
-        mock_client.log.assert_called_once_with("loss", 0.5, None, None)
+        mock_client.metric.assert_called_once_with("loss", 0.5, None)
 
 
 class TestFlush:
@@ -201,16 +201,16 @@ class TestIntegration:
         assert experiment_id == "exp-123"
         assert is_initialized()
 
-        tlog("accuracy", 0.95, step=1)
-        tlog("loss", 0.05, step=1)
+        tmetric("accuracy", 0.95, step=1)
+        tmetric("loss", 0.05, step=1)
 
         flush()
 
         shutdown()
         assert not is_initialized()
 
-        mock_client.log.assert_any_call("accuracy", 0.95, 1, None)
-        mock_client.log.assert_any_call("loss", 0.05, 1, None)
+        mock_client.metric.assert_any_call("accuracy", 0.95, 1)
+        mock_client.metric.assert_any_call("loss", 0.05, 1)
         mock_client.flush.assert_called_once()
         mock_client.shutdown.assert_called_once()
 
@@ -229,8 +229,8 @@ class TestIntegration:
 
         setup("test-experiment-2", api_key="test-key")
 
-    def test_tlog_before_setup(self):
+    def test_tmetric_before_setup(self):
         assert not is_initialized()
 
         with pytest.raises(ToraError, match="not initialized"):
-            tlog("accuracy", 0.95)
+            tmetric("accuracy", 0.95)

@@ -18,11 +18,11 @@ from ._wrapper import (
     is_initialized,
     setup,
     shutdown,
-    tlog,
+    tmetric,
     tresult,
 )
 
-__version__ = "0.0.7"
+__version__ = "0.0.8"
 
 __all__ = [
     "Tora",
@@ -43,6 +43,6 @@ __all__ = [
     "is_initialized",
     "setup",
     "shutdown",
-    "tlog",
+    "tmetric",
     "tresult",
 ]

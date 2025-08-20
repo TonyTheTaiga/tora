@@ -3,7 +3,7 @@ import logging
 
 from ._client import Tora
 from ._exceptions import ToraError
-from ._types import HPValue, MetricMetadata
+from ._types import HPValue
 
 __all__ = [
     "flush",
@@ -12,7 +12,7 @@ __all__ = [
     "is_initialized",
     "setup",
     "shutdown",
-    "tlog",
+    "tmetric",
     "tresult",
 ]
 
@@ -40,7 +40,7 @@ def setup(
     """Set up the global Tora client with a new experiment.
 
     This creates a new experiment and initializes the global client.
-    After calling this function, you can use tlog() to log metrics.
+    After calling this function, you can use tmetric() to log metrics.
 
     Args:
         name: Name of the experiment
@@ -91,19 +91,13 @@ def setup(
         raise
 
 
-def tlog(
-    name: str,
-    value: int | float,
-    step: int | None = None,
-    metadata: MetricMetadata | None = None,
-) -> None:
-    """Log a metric using the global Tora client.
+def tmetric(name: str, value: int | float, step: int | None = None) -> None:
+    """Log a training metric using the global Tora client.
 
     Args:
         name: Name of the metric
         value: Numeric value of the metric
         step: Optional step number for the metric
-        metadata: Optional metadata dictionary for the metric
 
     Raises:
         ToraError: If the global client is not initialized
@@ -112,7 +106,7 @@ def tlog(
 
     """
     client = _get_client()
-    client.log(name, value, step, metadata)
+    client.metric(name, value, step)
 
 
 def tresult(name: str, value: int | float) -> None:

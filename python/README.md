@@ -1,267 +1,107 @@
-# Tora Python SDK
+# Tora Python SDK — Developer Guide
 
-A Python SDK for the Tora ML experiment tracking platform.
+Private repository for the Tora Python SDK. This document describes how to set up the development environment, run tests, and contribute changes.
 
-## Features
+## Prerequisites
 
-- 🚀 **Easy to use**: Simple API for logging metrics and managing experiments
-- 📊 **Comprehensive tracking**: Log metrics, hyperparameters, tags, and metadata
-- 🔄 **Buffered logging**: Efficient batched metric logging for better performance
-- 🛡️ **Type safe**: Full type hints and validation for better development experience
-- 🌐 **Web dashboard**: Beautiful web interface for visualizing experiments
-- 🔧 **Flexible**: Works with any ML framework (PyTorch, TensorFlow, scikit-learn, etc.)
+- Python 3.11–3.13
+- A virtual environment tool (venv/pyenv)
+- Optional: `pre-commit` installed locally
 
-## Installation
+## Setup
 
 ```bash
-pip install tora
+# Create and activate a virtualenv
+python -m venv .venv
+source .venv/bin/activate
+
+# Install dev dependencies
+pip install -e ".[dev]"
+
+# (Optional) enable pre-commit hooks
+pre-commit install
 ```
 
-## Quick Start
+## Fast Iteration
 
-### 1. Set up your environment
+- Run full test suite: `pytest -q`
+- Run a single file: `pytest tests/test_wrapper.py -q`
+- Lint and autofix: `ruff check . --fix`
+- Clean artifacts: `make clean`
 
-```bash
-export TORA_API_KEY="your-api-key"
-```
+Coverage reports are written to `htmlcov/` and `coverage.xml`.
 
-### 2. Basic usage
+## Project Structure
+
+- `tora/_client.py`: Core client (experiment create/load, logging, buffering)
+- `tora/_wrapper.py`: Global convenience API (e.g., `setup`, `tmetric`, `tresult`)
+- `tora/_http.py`: Minimal HTTP client and exceptions
+- `tora/_validation.py`: Input validators
+- `tora/_types.py`: Typed aliases and small data types
+- `tora/__init__.py`: Public exports and `__version__`
+- `tests/`: Unit tests (HTTP calls are mocked; no network required)
+
+## Development Notes
+
+- Public metric API:
+  - Use `Tora.metric(name, value, step=None)` for training metrics.
+  - Use `Tora.result(name, value)` for final results (metadata handled internally).
+  - The global wrapper exposes `tmetric(...)` and `tresult(...)`. `tlog` is internal only.
+- Input validation must go through validators in `tora/_validation.py`.
+- Keep changes small and focused; update or add tests alongside code.
+- Avoid adding new dependencies unless necessary.
+
+## Versioning and Changelog
+
+- Bump version in `tora/__init__.py` (`__version__`).
+- Document changes in `CHANGELOG.md` using Keep a Changelog format.
+
+Release checklist (internal):
+- Update README and examples as needed.
+- Ensure `pytest -q` passes locally.
+- Ensure `ruff check .` is clean (or run with `--fix`).
+- Build wheel: `python -m build --wheel`
+- Optionally validate: `twine check dist/*`
+- Publish (internal/private): `twine upload dist/*` or use `make pub-wheel`.
+
+## Environment Variables (for manual runs)
+
+- `TORA_API_KEY`: API key if talking to a live backend.
+- `TORA_BASE_URL`: API base URL (defaults to the configured value in `_config.py`).
+
+Tests mock the HTTP layer; neither variable is required to run tests.
+
+## Examples
+
+Lightweight sanity check snippet (no network; just validates shape):
 
 ```python
-import tora
+from tora import Tora
 
-# Create an experiment
-client = tora.Tora.create_experiment(
-    name="my-ml-experiment",
-    workspace_id="your-workspace-id",
-    description="Testing the new model architecture",
-    hyperparams={
-        "learning_rate": 0.001,
-        "batch_size": 32,
-        "epochs": 100,
-    },
-    tags=["pytorch", "cnn", "image-classification"]
-)
-
-# Log metrics during training
-for epoch in range(100):
-    # ... your training code ...
-
-    client.log("train_loss", train_loss, step=epoch)
-    client.log("train_accuracy", train_acc, step=epoch)
-    client.log("val_loss", val_loss, step=epoch)
-    client.log("val_accuracy", val_acc, step=epoch)
-
-# Ensure all metrics are sent
-client.shutdown()
+t = Tora("exp-local", url="https://example/exp-local")
+t.metric("accuracy", 0.95, step=1)
+t.result("best_accuracy", 0.95)
+t.flush()
+t.shutdown()
 ```
 
-### 3. Using the global API (simpler for single experiments)
+For a real run against an API instance, prefer using the wrapper:
 
 ```python
-import tora
+from tora import setup, tmetric, tresult, shutdown
 
-# Set up global experiment
-tora.setup(
-    name="my-experiment",
-    workspace_id="your-workspace-id",
-    hyperparams={"lr": 0.001, "batch_size": 32}
-)
-
-# Log metrics anywhere in your code
-tora.tlog("accuracy", 0.95, step=100)
-tora.tlog("loss", 0.05, step=100)
-
-# Cleanup (optional - happens automatically)
-tora.shutdown()
+setup("dev-experiment", api_key="...", workspace_id="...")
+tmetric("loss", 0.5, step=1)
+tresult("best_acc", 0.95)
+shutdown()
 ```
 
-## Advanced Usage
+## Makefile
 
-### Context Manager
+- `make help` — list available targets
+- `make build-wheel` — build wheel in `dist/`
+- `make publish-test` — upload to TestPyPI
+- `make publish` — upload to PyPI
+- `make pub-wheel` — build, check, publish, clean
 
-```python
-import tora
-
-with tora.Tora.create_experiment("my-experiment", workspace_id="ws-123") as client:
-    client.log("metric", 1.0)
-    # Automatically flushes and closes on exit
-```
-
-### Custom Configuration
-
-```python
-import tora
-
-client = tora.Tora.create_experiment(
-    name="custom-experiment",
-    workspace_id="ws-123",
-    max_buffer_len=50,  # Buffer up to 50 metrics before sending
-    api_key="custom-api-key",
-    server_url="https://custom-tora-instance.com/api"
-)
-```
-
-### Loading Existing Experiments
-
-```python
-import tora
-
-# Load an existing experiment
-client = tora.Tora.load_experiment(
-    experiment_id="exp-123",
-    api_key="your-api-key"
-)
-
-# Continue logging to the existing experiment
-client.log("new_metric", 42.0)
-```
-
-### Error Handling
-
-```python
-import tora
-from tora import ToraError, ToraValidationError, ToraNetworkError
-
-try:
-    client = tora.Tora.create_experiment("test", workspace_id="ws-123")
-    client.log("metric", 1.0)
-except ToraValidationError as e:
-    print(f"Validation error: {e}")
-except ToraNetworkError as e:
-    print(f"Network error: {e}")
-except ToraError as e:
-    print(f"General Tora error: {e}")
-```
-
-## Framework Integration
-
-### PyTorch
-
-```python
-import torch
-import torch.nn as nn
-import tora
-
-# Set up experiment
-client = tora.Tora.create_experiment(
-    name="pytorch-training",
-    workspace_id="ws-123",
-    hyperparams={
-        "learning_rate": 0.001,
-        "batch_size": 32,
-        "model": "ResNet18"
-    }
-)
-
-model = nn.Sequential(...)
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-
-for epoch in range(num_epochs):
-    for batch_idx, (data, target) in enumerate(train_loader):
-        optimizer.zero_grad()
-        output = model(data)
-        loss = nn.functional.cross_entropy(output, target)
-        loss.backward()
-        optimizer.step()
-
-        # Log every 100 batches
-        if batch_idx % 100 == 0:
-            step = epoch * len(train_loader) + batch_idx
-            client.log("train_loss", loss.item(), step=step)
-
-client.shutdown()
-```
-
-### Hugging Face Transformers
-
-```python
-from transformers import Trainer, TrainingArguments
-import tora
-
-class ToraCallback:
-    def __init__(self, tora_client):
-        self.tora = tora_client
-
-    def on_log(self, args, state, control, logs=None, **kwargs):
-        if logs:
-            for key, value in logs.items():
-                if isinstance(value, (int, float)):
-                    self.tora.log(key, value, step=state.global_step)
-
-# Set up experiment
-client = tora.Tora.create_experiment("transformer-training", workspace_id="ws-123")
-
-# Add to trainer
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=train_dataset,
-    callbacks=[ToraCallback(client)]
-)
-
-trainer.train()
-client.shutdown()
-```
-
-## API Reference
-
-### Main Classes
-
-#### `Tora`
-
-The main client class for experiment tracking.
-
-**Methods:**
-- `create_experiment(name, workspace_id=None, ...)` - Create a new experiment
-- `load_experiment(experiment_id, ...)` - Load an existing experiment
-- `log(name, value, step=None, metadata=None)` - Log a metric
-- `flush()` - Send all buffered metrics immediately
-- `shutdown()` - Flush metrics and close the client
-
-**Properties:**
-- `experiment_id` - The experiment ID
-- `max_buffer_len` - Maximum metrics to buffer before sending
-- `buffer_size` - Current number of buffered metrics
-- `is_closed` - Whether the client is closed
-
-#### Global Functions
-
-- `setup(name, workspace_id=None, ...)` - Set up global experiment
-- `tlog(name, value, step=None, metadata=None)` - Log metric globally
-- `flush()` - Flush global client
-- `shutdown()` - Shutdown global client
-- `is_initialized()` - Check if global client is initialized
-
-### Exception Classes
-
-- `ToraError` - Base exception class
-- `ToraValidationError` - Input validation errors
-- `ToraNetworkError` - Network-related errors
-- `ToraAPIError` - API response errors
-- `ToraAuthenticationError` - Authentication errors
-- `ToraConfigurationError` - Configuration errors
-- `ToraExperimentError` - Experiment-related errors
-- `ToraMetricError` - Metric logging errors
-
-## Configuration
-
-### Environment Variables
-
-- `TORA_API_KEY` - Your Tora API key
-- `TORA_BASE_URL` - Base URL for the Tora API (default: https://tora-1030250455947.us-central1.run.app/api)
-
-### Workspace Management
-
-```python
-import tora
-
-# Create a new workspace
-workspace = tora.create_workspace(
-    name="My ML Project",
-    description="Experiments for the new model",
-    api_key="your-api-key"
-)
-
-print(f"Created workspace: {workspace['id']}")
-```
+This is a private repo; use publish targets only for internal registries.
