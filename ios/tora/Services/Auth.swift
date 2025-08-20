@@ -172,15 +172,10 @@ class AuthService: ObservableObject {
             try storeSessionInKeychain(userSession)
         } catch let authError as AuthErrors {
             self.state = .unauthenticated(authError.localizedDescription)
-            //            throw authError
         } catch let keychainError as KeychainError {
             self.state = .unauthenticated(keychainError.localizedDescription)
-            //            throw keychainError
         } catch {
             self.state = .unauthenticated(error.localizedDescription)
-            //            throw AuthErrors.authFailure(
-            //                "Unexpected error: \(error.localizedDescription)"
-            //            )
         }
     }
 
@@ -291,6 +286,38 @@ class AuthService: ObservableObject {
         return try jsonDeserialize(userSessionData)
     }
 
+    private func decodeUserSession(_ data: Data) throws -> UserSession {
+        do {
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            decoder.dateDecodingStrategy = .iso8601
+            let loginResponse = try decoder.decode(
+                LoginResponse.self,
+                from: data
+            )
+            let tokenData = loginResponse.data
+            let expiresInDate = Date(
+                timeIntervalSince1970: TimeInterval(tokenData.expiresIn)
+            )
+            let expiresAtDate = Date(
+                timeIntervalSince1970: TimeInterval(tokenData.expiresAt)
+            )
+            let session = UserSession(
+                id: tokenData.user.id,
+                email: tokenData.user.email,
+                authToken: tokenData.accessToken,
+                refreshToken: tokenData.refreshToken,
+                expiresIn: expiresInDate,
+                expiresAt: expiresAtDate,
+                tokenType: tokenData.tokenType
+            )
+
+            return session
+        } catch {
+            throw AuthErrors.jsonParsingError(error)
+        }
+    }
+
     private func loginWithEmailAndPassword(email: String, password: String)
         async throws -> UserSession
     {
@@ -340,33 +367,10 @@ class AuthService: ObservableObject {
             }
 
             do {
-                let decoder = JSONDecoder()
-                decoder.keyDecodingStrategy = .convertFromSnakeCase
-                decoder.dateDecodingStrategy = .iso8601
-                let loginResponse = try decoder.decode(
-                    LoginResponse.self,
-                    from: data
-                )
-                let tokenData = loginResponse.data
-                let expiresInDate = Date(
-                    timeIntervalSince1970: TimeInterval(tokenData.expiresIn)
-                )
-                let expiresAtDate = Date(
-                    timeIntervalSince1970: TimeInterval(tokenData.expiresAt)
-                )
-                let session = UserSession(
-                    id: tokenData.user.id,
-                    email: tokenData.user.email,
-                    authToken: tokenData.accessToken,
-                    refreshToken: tokenData.refreshToken,
-                    expiresIn: expiresInDate,
-                    expiresAt: expiresAtDate,
-                    tokenType: tokenData.tokenType
-                )
-
+                let session = try decodeUserSession(data)
                 return session
             } catch {
-                throw AuthErrors.jsonParsingError(error)
+                throw error
             }
         }
     }
@@ -415,34 +419,10 @@ class AuthService: ObservableObject {
         }
 
         do {
-            let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            decoder.dateDecodingStrategy = .iso8601
-            let refreshResponse = try decoder.decode(
-                RefreshRespose.self,
-                from: data
-            )
-            let tokenData = refreshResponse.data
-            let expiresInDate = Date(
-                timeIntervalSince1970: TimeInterval(tokenData.expiresIn)
-            )
-            let expiresAtDate = Date(
-                timeIntervalSince1970: TimeInterval(tokenData.expiresAt)
-            )
-            let session = UserSession(
-                id: tokenData.user.id,
-                email: tokenData.user.email,
-                authToken: tokenData.accessToken,
-                refreshToken: tokenData.refreshToken,
-                expiresIn: expiresInDate,
-                expiresAt: expiresAtDate,
-                tokenType: tokenData.tokenType
-            )
-
+            let session = try decodeUserSession(data)
             return session
         } catch {
-            throw AuthErrors.jsonParsingError(error)
+            throw error
         }
-
     }
 }
