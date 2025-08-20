@@ -4,10 +4,9 @@ import os
 func measure<T>(
     _ logger: Logger,
     name: String,
-    work: () async throws -> T  // Swifts training closure syntax at play
+    work: () async throws -> T
 ) async throws -> T {
     let startTime = DispatchTime.now()
-    //    logger.debug("Executing \(name)...")
     do {
         let result = try await work()
         let endTime = DispatchTime.now()

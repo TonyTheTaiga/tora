@@ -183,10 +183,7 @@ class WorkspaceService: ObservableObject {
                 throw WorkspaceErrors.invalidURL
             }
 
-            guard let token = authService.state.userSession?.authToken else {
-                throw WorkspaceErrors.unauthenticated
-            }
-
+            let token = try await authService.getAuthToken()
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
             request.setValue(
@@ -247,10 +244,7 @@ class WorkspaceService: ObservableObject {
                 throw WorkspaceErrors.invalidURL
             }
 
-            guard let token = authService.state.userSession?.authToken else {
-                throw WorkspaceErrors.unauthenticated
-            }
-
+            let token = try await authService.getAuthToken()
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
             request.setValue(
@@ -326,10 +320,7 @@ class ExperimentService: ObservableObject {
             guard let url = URL(string: "\(baseUrl)/experiments") else {
                 throw WorkspaceErrors.invalidURL
             }
-
-            guard let token = authService.state.userSession?.authToken else {
-                throw WorkspaceErrors.unauthenticated
-            }
+            let token = try await authService.getAuthToken()
 
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
@@ -387,9 +378,7 @@ class ExperimentService: ObservableObject {
                 throw WorkspaceErrors.invalidURL
             }
 
-            guard let token = authService.state.userSession?.authToken else {
-                throw WorkspaceErrors.unauthenticated
-            }
+            let token = try await authService.getAuthToken()
 
             var request = URLRequest(url: url)
             request.httpMethod = "GET"

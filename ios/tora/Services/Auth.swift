@@ -186,7 +186,19 @@ class AuthService: ObservableObject {
                 self.state = .unauthenticated(error.localizedDescription)
             }
         }
+    }
 
+    func getAuthToken(skew: TimeInterval = 60) async throws -> String {
+        if var userSession = state.userSession {
+            if userSession.expiresIn <= Date().addingTimeInterval(skew) {
+                await refreshUserSession()
+                userSession = try retrieveSessionFromKeychain()
+            }
+
+            return userSession.authToken
+        } else {
+            throw AuthErrors.authFailure("Not Signed In")
+        }
     }
 
     // MARK: - Private Methods
