@@ -4,6 +4,24 @@ import os
 
 // MARK: - Experiment Models
 
+struct Metric: Decodable, Identifiable, Equatable {
+    var id: Int
+    var experimentId: String
+    var name: String
+    var value: Double
+    var step: Int?
+    var createdAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case experimentId = "experiment_id"
+        case name
+        case value
+        case step
+        case createdAt = "created_at"
+    }
+}
+
 struct HyperParam: Codable, Equatable {
     let key: String
     let value: HyperParamValue
@@ -224,6 +242,46 @@ class ExperimentService: ObservableObject {
                     )
                 }
                 return experiment
+            } catch {
+                throw WorkspaceErrors.jsonParsingError(error)
+            }
+        }
+    }
+
+    public func getMetrics(experimentId: String) async throws -> [Metric] {
+        try await measure(OSLog.workspace, name: "getExperimentMetrics") {
+            guard let url = URL(string: "\(baseUrl)/experiments/\(experimentId)/metrics") else {
+                throw WorkspaceErrors.invalidURL
+            }
+
+            let token = try await authService.getAuthToken()
+
+            var request = URLRequest(url: url)
+            request.httpMethod = "GET"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+            let (data, response): (Data, URLResponse)
+            do {
+                (data, response) = try await URLSession.shared.data(for: request)
+            } catch {
+                throw WorkspaceErrors.networkError(error)
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw WorkspaceErrors.invalidResponse
+            }
+
+            guard (200...299).contains(httpResponse.statusCode) else {
+                let errorMessage = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
+                throw WorkspaceErrors.requestError(httpResponse.statusCode, errorMessage)
+            }
+
+            do {
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                let apiResponse = try decoder.decode(ApiResponse<[Metric]>.self, from: data)
+                return apiResponse.data ?? []
             } catch {
                 throw WorkspaceErrors.jsonParsingError(error)
             }
