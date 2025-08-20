@@ -201,6 +201,11 @@ class AuthService: ObservableObject {
         }
     }
 
+    // Convenience alias matching intended API name
+    func getUserToken(skew: TimeInterval = 60) async throws -> String {
+        try await getAuthToken(skew: skew)
+    }
+
     // MARK: - Private Methods
 
     private func jsonSerialize(_ userSession: UserSession) throws -> Data {

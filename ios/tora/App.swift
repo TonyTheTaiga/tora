@@ -37,6 +37,7 @@ struct Tora: App {
     @StateObject private var authService = AuthService.shared
     @StateObject private var workspaceService = WorkspaceService(authService: AuthService.shared)
     @StateObject private var experimentService = ExperimentService(authService: AuthService.shared)
+    @Environment(\.scenePhase) private var scenePhase
 
     // MARK: - Body
 
@@ -52,6 +53,13 @@ struct Tora: App {
                         userSession.expiresIn < Date().addingTimeInterval(60)
                     {
                         await authService.refreshUserSession()
+                    }
+                }
+                .onChange(of: scenePhase == .active) { oldValue, newValue in
+                    if newValue {
+                        Task {
+                            _ = try? await authService.getUserToken(skew: 180)
+                        }
                     }
                 }
         }
