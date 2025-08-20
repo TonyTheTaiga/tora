@@ -178,18 +178,7 @@ struct LoginFormSheet: View {
                 )
                 dismiss()
             }
-            //            catch {
-            //                if let authError = error as? LocalizedError {
-            //                    errorMessage =
-            //                        authError.errorDescription ?? "Authentication failed"
-            //                } else {
-            //                    errorMessage =
-            //                        "An unexpected error occurred. Please try again."
-            //                }
-            //            }
-
         }
-
     }
 }
 

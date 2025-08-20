@@ -4,7 +4,6 @@ struct WorkspacesView: View {
     // MARK: - Properties
 
     @EnvironmentObject private var workspaceService: WorkspaceService
-    @EnvironmentObject private var experimentService: ExperimentService
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var workspaceExperiments: [String: [Experiment]] = [:]
@@ -12,6 +11,10 @@ struct WorkspacesView: View {
     @State private var isLoadingExperiments = false
     @State private var experiments: [Experiment] = []
     @State private var showingWorkspaceModal = false
+
+    enum Route: Hashable {
+        case experiment(String)
+    }
 
     // MARK: - Body
 
@@ -39,17 +42,6 @@ struct WorkspacesView: View {
                                 onOpenPicker: { showingWorkspaceModal = true }
                             )
                             Spacer()
-                            Button(action: {
-                                if let ws = selectedWorkspace {
-                                    fetchExperiments(for: ws)
-                                } else {
-                                    fetchWorkspaces()
-                                }
-                            }) {
-                                Image(systemName: "arrow.clockwise")
-                                    .font(.body)
-                            }
-                            .disabled(isLoading || isLoadingExperiments)
                         }
                         .padding(.horizontal)
 
@@ -62,24 +54,29 @@ struct WorkspacesView: View {
                                 .foregroundStyle(.secondary)
                                 .padding(.horizontal)
                         } else if selectedWorkspace != nil {
-                            List(experiments) { experiment in
-                                NavigationLink(destination: ExperimentsView(experimentId: experiment.id)) {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(experiment.name)
-                                            .font(.headline)
-                                            .foregroundStyle(Color.custom.ctpText)
-                                        if let desc = experiment.description, !desc.isEmpty {
-                                            Text(desc)
-                                                .font(.caption)
-                                                .foregroundStyle(.secondary)
-                                                .lineLimit(2)
+                            List {
+                                ForEach(experiments) { experiment in
+                                    NavigationLink(value: Route.experiment(experiment.id)) {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(experiment.name)
+                                                .font(.headline)
+                                                .foregroundStyle(Color.custom.ctpText)
+                                            if let desc = experiment.description, !desc.isEmpty {
+                                                Text(desc)
+                                                    .font(.caption)
+                                                    .foregroundStyle(.secondary)
+                                                    .lineLimit(2)
+                                            }
                                         }
+                                        .padding(.vertical, 4)
                                     }
-                                    .padding(.vertical, 4)
                                 }
                             }
                             .listStyle(.plain)
                             .scrollContentBackground(.hidden)
+                            .refreshable {
+                                await refreshData()
+                            }
                         }
                         Spacer(minLength: 0)
                     }
@@ -87,7 +84,6 @@ struct WorkspacesView: View {
                 }
             }
 
-            // True modal overlay
             if showingWorkspaceModal {
                 Color.custom.ctpCrust.opacity(0.45)
                     .ignoresSafeArea()
@@ -104,6 +100,17 @@ struct WorkspacesView: View {
         }
         .navigationTitle("Workspaces")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(for: Route.self) { route in
+            switch route {
+            case .experiment(let id):
+                if let idx = experiments.firstIndex(where: { $0.id == id }) {
+                    ExperimentsView(experiment: $experiments[idx])
+                } else {
+                    Text("Experiment not found")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
         .toolbar {}
         .onAppear(perform: {
             fetchWorkspaces()
@@ -151,6 +158,26 @@ struct WorkspacesView: View {
                     self.errorMessage = error.localizedDescription
                     self.isLoadingExperiments = false
                 }
+            }
+        }
+    }
+
+    private func refreshData() async {
+        if let ws = selectedWorkspace {
+            do {
+                let exps = try await workspaceService.listExperiments(for: ws.id)
+                await MainActor.run {
+                    self.workspaceExperiments[ws.id] = exps
+                    self.experiments = exps
+                }
+            } catch {
+                // keep existing experiments; optionally set errorMessage
+            }
+        } else {
+            do {
+                try await workspaceService.list()
+            } catch {
+                // ignore in refresh context
             }
         }
     }
