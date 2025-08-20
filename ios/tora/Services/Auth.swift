@@ -6,7 +6,6 @@ import os
 // MARK: - Auth State
 
 enum AuthState {
-    case authenticating
     case authenticated(UserSession)
     case unauthenticated(String? = nil)
 }
@@ -161,8 +160,6 @@ class AuthService: ObservableObject {
     }
 
     func login(email: String, password: String) async {
-        self.state = .authenticating
-
         do {
             let userSession = try await loginWithEmailAndPassword(
                 email: email,
@@ -296,9 +293,7 @@ class AuthService: ObservableObject {
                 from: data
             )
             let tokenData = loginResponse.data
-            let expiresInDate = Date(
-                timeIntervalSince1970: TimeInterval(tokenData.expiresIn)
-            )
+            let expiresInDate = Date().addingTimeInterval(TimeInterval(tokenData.expiresIn))
             let expiresAtDate = Date(
                 timeIntervalSince1970: TimeInterval(tokenData.expiresAt)
             )

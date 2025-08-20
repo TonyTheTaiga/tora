@@ -23,8 +23,6 @@ struct ContentView: View {
                 } else {
                     LoginView()
                 }
-            case .authenticating:
-                Text("logging in")
             }
         }
     }
@@ -50,7 +48,9 @@ struct Tora: App {
                 .environmentObject(experimentService)
                 .applyAppTheme()
                 .task {
-                    if let userSession = authService.state.userSession, userSession.expiresIn < Date() {
+                    if let userSession = authService.state.userSession,
+                        userSession.expiresIn < Date().addingTimeInterval(60)
+                    {
                         await authService.refreshUserSession()
                     }
                 }
