@@ -49,11 +49,7 @@ struct Tora: App {
                 .environmentObject(experimentService)
                 .applyAppTheme()
                 .task {
-                    if let userSession = authService.state.userSession,
-                        userSession.expiresIn < Date().addingTimeInterval(60)
-                    {
-                        await authService.refreshUserSession()
-                    }
+                    _ = try? await authService.getUserToken(skew: 180)
                 }
                 .onChange(of: scenePhase == .active) { oldValue, newValue in
                     if newValue {
