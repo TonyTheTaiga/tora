@@ -67,7 +67,9 @@ struct ExperimentContentView: View {
                 if !experiment.tags.isEmpty { TagsSectionView(tags: experiment.tags) }
 
                 // Hyperparameters
-                if !experiment.hyperparams.isEmpty { HyperparamsSectionView(hyperparams: experiment.hyperparams) }
+                if !experiment.hyperparams.isEmpty {
+                    HyperparamsSectionView(hyperparams: experiment.hyperparams)
+                }
 
                 // Results
                 if !results.isEmpty { ResultsSectionView(results: results) }
@@ -241,14 +243,17 @@ private struct HyperparamsSectionView: View {
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 8)
-                    .background(index % 2 == 0 ? Color.custom.ctpSurface0.opacity(0.06) : Color.clear)
+                    .background(
+                        index % 2 == 0 ? Color.custom.ctpSurface0.opacity(0.06) : Color.clear)
                     if index != hyperparams.count - 1 {
                         Divider().overlay(Color.custom.ctpSurface0.opacity(0.20))
                     }
                 }
             }
             .background(RoundedRectangle(cornerRadius: 8).fill(Color.custom.ctpMantle))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.custom.ctpSurface0.opacity(0.30), lineWidth: 1))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8).stroke(
+                    Color.custom.ctpSurface0.opacity(0.30), lineWidth: 1))
         }
     }
 }
@@ -280,14 +285,17 @@ private struct ResultsSectionView: View {
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 8)
-                    .background(index % 2 == 0 ? Color.custom.ctpSurface0.opacity(0.06) : Color.clear)
+                    .background(
+                        index % 2 == 0 ? Color.custom.ctpSurface0.opacity(0.06) : Color.clear)
                     if index != results.count - 1 {
                         Divider().overlay(Color.custom.ctpSurface0.opacity(0.20))
                     }
                 }
             }
             .background(RoundedRectangle(cornerRadius: 8).fill(Color.custom.ctpMantle))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.custom.ctpSurface0.opacity(0.30), lineWidth: 1))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8).stroke(
+                    Color.custom.ctpSurface0.opacity(0.30), lineWidth: 1))
         }
     }
 }
@@ -305,22 +313,34 @@ private struct MetricsChartSectionView: View {
                     .foregroundStyle(Color.custom.ctpSubtext0)
             }
             Chart {
-                ForEach(series.keys.sorted(), id: \.self) { name in
-                    if let points = series[name] {
-                        ForEach(points, id: \.id) { m in
-                            if let step = m.step {
-                                LineMark(
-                                    x: .value("Step", step),
-                                    y: .value("Value", m.value)
-                                )
-                                .foregroundStyle(by: .value("Metric", name))
-                                .interpolationMethod(.linear)
-                            }
-                        }
-                    }
-                }
+                LinePlot(
+                    chartPoints,
+                    x: .value("Step", \.step),
+                    y: .value("Value", \.value),
+                    series: .value("Metric", \.name)
+                )
+                .foregroundStyle(by: .value("Metric", \.name))
             }
             .chartLegend(.visible)
+        }
+    }
+}
+
+extension MetricsChartSectionView {
+    fileprivate struct ChartPoint: Identifiable {
+        let id: Int
+        let step: Int
+        let value: Double
+        let name: String
+    }
+
+    fileprivate var chartPoints: [ChartPoint] {
+        // Flatten pre-sorted series into a single array for LinePlot
+        series.keys.sorted().flatMap { name in
+            (series[name] ?? []).compactMap { m in
+                guard let step = m.step else { return nil }
+                return ChartPoint(id: m.id, step: step, value: m.value, name: name)
+            }
         }
     }
 }
