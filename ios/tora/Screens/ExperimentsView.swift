@@ -1,5 +1,5 @@
+import Charts
 import SwiftUI
-import UIKit
 
 // MARK: - Experiment Detail View
 
@@ -64,142 +64,16 @@ struct ExperimentContentView: View {
                 }
 
                 // Tags
-                if !experiment.tags.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 6) {
-                            Text("Tags")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(Color.custom.ctpText)
-                            Text("[\(experiment.tags.count)]")
-                                .font(.subheadline)
-                                .foregroundStyle(Color.custom.ctpSubtext0)
-                        }
-                        // Wrap tags using adaptive grid
-                        LazyVGrid(
-                            columns: [
-                                GridItem(.adaptive(minimum: 48), spacing: 2, alignment: .leading)
-                            ],
-                            alignment: .leading,
-                            spacing: 2
-                        ) {
-                            ForEach(experiment.tags, id: \.self) { tag in
-                                Text(tag)
-                                    .font(.caption2)
-                                    .lineLimit(1)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 3)
-                                    .background(Color.custom.ctpBlue.opacity(0.20))
-                                    .foregroundStyle(Color.custom.ctpBlue)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(
-                                                Color.custom.ctpBlue.opacity(0.40), lineWidth: 1)
-                                    )
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                            }
-                        }
-                    }
-                }
+                if !experiment.tags.isEmpty { TagsSectionView(tags: experiment.tags) }
 
                 // Hyperparameters
-                if !experiment.hyperparams.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 6) {
-                            Text("Hyperparameters")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(Color.custom.ctpText)
-                            Text("[\(experiment.hyperparams.count)]")
-                                .font(.subheadline)
-                                .foregroundStyle(Color.custom.ctpSubtext0)
-                        }
-                        VStack(spacing: 0) {
-                            ForEach(Array(experiment.hyperparams.enumerated()), id: \.offset) {
-                                index, param in
-                                HStack(alignment: .center) {
-                                    Text(param.key)
-                                        .font(.caption)
-                                        .foregroundStyle(Color.custom.ctpSubtext0)
-                                        .lineLimit(1)
-                                    Spacer(minLength: 8)
-                                    Text(param.value.displayValue)
-                                        .font(.caption)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(Color.custom.ctpSurface0.opacity(0.20))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 6)
-                                                .stroke(
-                                                    Color.custom.ctpSurface0.opacity(0.30),
-                                                    lineWidth: 1)
-                                        )
-                                        .clipShape(RoundedRectangle(cornerRadius: 6))
-                                }
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 8)
-                                .background(
-                                    index % 2 == 0
-                                        ? Color.custom.ctpSurface0.opacity(0.06) : Color.clear)
-                                if index != experiment.hyperparams.count - 1 {
-                                    Divider()
-                                        .overlay(Color.custom.ctpSurface0.opacity(0.20))
-                                }
-                            }
-                        }
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.custom.ctpMantle)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.custom.ctpSurface0.opacity(0.30), lineWidth: 1)
-                        )
-                    }
-                }
+                if !experiment.hyperparams.isEmpty { HyperparamsSectionView(hyperparams: experiment.hyperparams) }
 
                 // Results
-                if !results.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 6) {
-                            Text("Results")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(Color.custom.ctpText)
-                            Text("[\(results.count)]")
-                                .font(.subheadline)
-                                .foregroundStyle(Color.custom.ctpSubtext0)
-                        }
-                        VStack(spacing: 0) {
-                            ForEach(Array(results.enumerated()), id: \.offset) { index, item in
-                                HStack {
-                                    Circle().fill(Color.custom.ctpGreen).frame(width: 6, height: 6)
-                                    Text(item.name)
-                                        .font(.caption)
-                                        .foregroundStyle(Color.custom.ctpText)
-                                        .lineLimit(1)
-                                    Spacer()
-                                    Text(String(format: "%.4f", item.value))
-                                        .font(.caption)
-                                        .foregroundStyle(Color.custom.ctpBlue)
-                                }
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 8)
-                                .background(
-                                    index % 2 == 0
-                                        ? Color.custom.ctpSurface0.opacity(0.06) : Color.clear)
-                                if index != results.count - 1 {
-                                    Divider()
-                                        .overlay(Color.custom.ctpSurface0.opacity(0.20))
-                                }
-                            }
-                        }
-                        .background(
-                            RoundedRectangle(cornerRadius: 8).fill(Color.custom.ctpMantle)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8).stroke(
-                                Color.custom.ctpSurface0.opacity(0.30), lineWidth: 1)
-                        )
-                    }
-                }
+                if !results.isEmpty { ResultsSectionView(results: results) }
+
+                // Metrics Chart
+                if !metricsByName.isEmpty { MetricsChartSectionView(series: metricsByName) }
 
                 // Metadata
                 VStack(alignment: .leading, spacing: 4) {
@@ -296,6 +170,212 @@ extension ExperimentContentView {
     }
 }
 
+// MARK: - Subviews
+
+private struct TagsSectionView: View {
+    let tags: [String]
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Text("Tags")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.custom.ctpText)
+                Text("[\(tags.count)]")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.custom.ctpSubtext0)
+            }
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: 48), spacing: 2, alignment: .leading)],
+                alignment: .leading,
+                spacing: 2
+            ) {
+                ForEach(tags, id: \.self) { tag in
+                    Text(tag)
+                        .font(.caption2)
+                        .lineLimit(1)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(Color.custom.ctpBlue.opacity(0.20))
+                        .foregroundStyle(Color.custom.ctpBlue)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.custom.ctpBlue.opacity(0.40), lineWidth: 1)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+            }
+        }
+    }
+}
+
+private struct HyperparamsSectionView: View {
+    let hyperparams: [HyperParam]
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Text("Hyperparameters")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.custom.ctpText)
+                Text("[\(hyperparams.count)]")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.custom.ctpSubtext0)
+            }
+            VStack(spacing: 0) {
+                ForEach(Array(hyperparams.enumerated()), id: \.offset) { index, param in
+                    HStack(alignment: .center) {
+                        Text(param.key)
+                            .font(.caption)
+                            .foregroundStyle(Color.custom.ctpSubtext0)
+                            .lineLimit(1)
+                        Spacer(minLength: 8)
+                        Text(param.value.displayValue)
+                            .font(.caption)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.custom.ctpSurface0.opacity(0.20))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.custom.ctpSurface0.opacity(0.30), lineWidth: 1)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 8)
+                    .background(index % 2 == 0 ? Color.custom.ctpSurface0.opacity(0.06) : Color.clear)
+                    if index != hyperparams.count - 1 {
+                        Divider().overlay(Color.custom.ctpSurface0.opacity(0.20))
+                    }
+                }
+            }
+            .background(RoundedRectangle(cornerRadius: 8).fill(Color.custom.ctpMantle))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.custom.ctpSurface0.opacity(0.30), lineWidth: 1))
+        }
+    }
+}
+
+private struct ResultsSectionView: View {
+    let results: [(name: String, value: Double)]
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Text("Results")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.custom.ctpText)
+                Text("[\(results.count)]")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.custom.ctpSubtext0)
+            }
+            VStack(spacing: 0) {
+                ForEach(Array(results.enumerated()), id: \.offset) { index, item in
+                    HStack {
+                        Circle().fill(Color.custom.ctpGreen).frame(width: 6, height: 6)
+                        Text(item.name)
+                            .font(.caption)
+                            .foregroundStyle(Color.custom.ctpText)
+                            .lineLimit(1)
+                        Spacer()
+                        Text(String(format: "%.4f", item.value))
+                            .font(.caption)
+                            .foregroundStyle(Color.custom.ctpBlue)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 8)
+                    .background(index % 2 == 0 ? Color.custom.ctpSurface0.opacity(0.06) : Color.clear)
+                    if index != results.count - 1 {
+                        Divider().overlay(Color.custom.ctpSurface0.opacity(0.20))
+                    }
+                }
+            }
+            .background(RoundedRectangle(cornerRadius: 8).fill(Color.custom.ctpMantle))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.custom.ctpSurface0.opacity(0.30), lineWidth: 1))
+        }
+    }
+}
+
+private struct MetricsChartSectionView: View {
+    let series: [String: [Metric]]
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Text("Metrics")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.custom.ctpText)
+                Text("[\(series.count)]")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.custom.ctpSubtext0)
+            }
+            Chart {
+                ForEach(series.keys.sorted(), id: \.self) { name in
+                    if let points = series[name] {
+                        ForEach(points, id: \.id) { m in
+                            if let step = m.step {
+                                LineMark(
+                                    x: .value("Step", step),
+                                    y: .value("Value", m.value)
+                                )
+                                .foregroundStyle(by: .value("Metric", name))
+                                .interpolationMethod(.linear)
+                            }
+                        }
+                    }
+                }
+            }
+            .chartLegend(.visible)
+        }
+    }
+}
+
+private struct MetadataSectionView: View {
+    let createdAt: Date
+    let updatedAt: Date
+    let experimentId: String
+    let workspaceId: String?
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Metadata")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.custom.ctpText)
+            HStack {
+                Text("Created:")
+                    .font(.caption)
+                    .foregroundStyle(Color.custom.ctpSubtext0)
+                Text(dateString(createdAt))
+                    .font(.caption)
+                    .foregroundStyle(Color.custom.ctpText)
+            }
+            HStack {
+                Text("Updated:")
+                    .font(.caption)
+                    .foregroundStyle(Color.custom.ctpSubtext0)
+                Text(dateString(updatedAt))
+                    .font(.caption)
+                    .foregroundStyle(Color.custom.ctpText)
+            }
+            HStack {
+                Text("Experiment ID:")
+                    .font(.caption)
+                    .foregroundStyle(Color.custom.ctpSubtext0)
+                Text(experimentId)
+                    .font(.caption)
+                    .foregroundStyle(Color.custom.ctpText)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+            if let workspaceId {
+                HStack {
+                    Text("Workspace ID:")
+                        .font(.caption)
+                        .foregroundStyle(Color.custom.ctpSubtext0)
+                    Text(workspaceId)
+                        .font(.caption)
+                        .foregroundStyle(Color.custom.ctpText)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+            }
+        }
+    }
+}
 // MARK: - Preview
 
 #Preview {
