@@ -48,18 +48,14 @@ struct ExperimentContentView: View {
     let experiment: Experiment
     let onRefresh: () async -> Void
     @EnvironmentObject private var experimentService: ExperimentService
-    @State private var scalarMetrics: [(name: String, value: Double)] = []
+    @State private var results: [(name: String, value: Double)] = []
+    @State private var metricsByName: [String: [Metric]] = [:]
 
     // MARK: - Body
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                // Title
-                //                Text(experiment.name)
-                //                    .font(.title2)
-                //                    .bold()
-
                 // Description
                 if let description = experiment.description, !description.isEmpty {
                     Text(description)
@@ -80,21 +76,24 @@ struct ExperimentContentView: View {
                         }
                         // Wrap tags using adaptive grid
                         LazyVGrid(
-                            columns: [GridItem(.adaptive(minimum: 90), spacing: 8, alignment: .leading)],
+                            columns: [
+                                GridItem(.adaptive(minimum: 48), spacing: 2, alignment: .leading)
+                            ],
                             alignment: .leading,
-                            spacing: 8
+                            spacing: 2
                         ) {
                             ForEach(experiment.tags, id: \.self) { tag in
                                 Text(tag)
-                                    .font(.caption)
+                                    .font(.caption2)
                                     .lineLimit(1)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 3)
                                     .background(Color.custom.ctpBlue.opacity(0.20))
                                     .foregroundStyle(Color.custom.ctpBlue)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color.custom.ctpBlue.opacity(0.40), lineWidth: 1)
+                                            .stroke(
+                                                Color.custom.ctpBlue.opacity(0.40), lineWidth: 1)
                                     )
                                     .clipShape(RoundedRectangle(cornerRadius: 8))
                             }
@@ -114,7 +113,8 @@ struct ExperimentContentView: View {
                                 .foregroundStyle(Color.custom.ctpSubtext0)
                         }
                         VStack(spacing: 0) {
-                            ForEach(Array(experiment.hyperparams.enumerated()), id: \.offset) { index, param in
+                            ForEach(Array(experiment.hyperparams.enumerated()), id: \.offset) {
+                                index, param in
                                 HStack(alignment: .center) {
                                     Text(param.key)
                                         .font(.caption)
@@ -128,13 +128,17 @@ struct ExperimentContentView: View {
                                         .background(Color.custom.ctpSurface0.opacity(0.20))
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 6)
-                                                .stroke(Color.custom.ctpSurface0.opacity(0.30), lineWidth: 1)
+                                                .stroke(
+                                                    Color.custom.ctpSurface0.opacity(0.30),
+                                                    lineWidth: 1)
                                         )
                                         .clipShape(RoundedRectangle(cornerRadius: 6))
                                 }
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 8)
-                                .background(index % 2 == 0 ? Color.custom.ctpSurface0.opacity(0.06) : Color.clear)
+                                .background(
+                                    index % 2 == 0
+                                        ? Color.custom.ctpSurface0.opacity(0.06) : Color.clear)
                                 if index != experiment.hyperparams.count - 1 {
                                     Divider()
                                         .overlay(Color.custom.ctpSurface0.opacity(0.20))
@@ -152,19 +156,19 @@ struct ExperimentContentView: View {
                     }
                 }
 
-                // Results (scalar metrics)
-                if !scalarMetrics.isEmpty {
+                // Results
+                if !results.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 6) {
                             Text("Results")
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(Color.custom.ctpText)
-                            Text("[\(scalarMetrics.count)]")
+                            Text("[\(results.count)]")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.custom.ctpSubtext0)
                         }
                         VStack(spacing: 0) {
-                            ForEach(Array(scalarMetrics.enumerated()), id: \.offset) { index, item in
+                            ForEach(Array(results.enumerated()), id: \.offset) { index, item in
                                 HStack {
                                     Circle().fill(Color.custom.ctpGreen).frame(width: 6, height: 6)
                                     Text(item.name)
@@ -178,8 +182,10 @@ struct ExperimentContentView: View {
                                 }
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 8)
-                                .background(index % 2 == 0 ? Color.custom.ctpSurface0.opacity(0.06) : Color.clear)
-                                if index != scalarMetrics.count - 1 {
+                                .background(
+                                    index % 2 == 0
+                                        ? Color.custom.ctpSurface0.opacity(0.06) : Color.clear)
+                                if index != results.count - 1 {
                                     Divider()
                                         .overlay(Color.custom.ctpSurface0.opacity(0.20))
                                 }
@@ -261,16 +267,28 @@ private func dateString(_ date: Date) -> String {
 
 extension ExperimentContentView {
     func loadMetrics(force: Bool = false) async {
-        // Only compute scalar results now
         do {
-            let rows = try await experimentService.getMetrics(experimentId: experiment.id)
+            let rows = try await experimentService.getLogs(experimentId: experiment.id)
             await MainActor.run {
-                let grouped = Dictionary(grouping: rows, by: { $0.name })
-                let scalars = grouped.compactMap { (name, list) -> (String, Double)? in
-                    guard list.count == 1, let v = list.first?.value else { return nil }
-                    return (name, v)
+                // Results: metadata.type == "result"; assume single entry per key
+                let resultRows = rows.filter { $0.metadata?.type?.lowercased() == "result" }
+                let groupedResults = Dictionary(grouping: resultRows, by: { $0.name })
+                self.results = groupedResults.compactMap { (name, list) -> (String, Double)? in
+                    guard let value = list.first?.value else { return nil }
+                    return (name, value)
                 }.sorted { $0.0 < $1.0 }
-                self.scalarMetrics = scalars
+
+                // Metrics for chart: metadata.type == "metric"; sort by step ascending within each series
+                let metricRows = rows.filter { $0.metadata?.type?.lowercased() == "metric" }
+                var groupedMetrics = Dictionary(grouping: metricRows, by: { $0.name })
+                for (key, series) in groupedMetrics {
+                    groupedMetrics[key] = series.sorted { (a, b) in
+                        let sa = a.step ?? Int.min
+                        let sb = b.step ?? Int.min
+                        return sa < sb
+                    }
+                }
+                self.metricsByName = groupedMetrics
             }
         } catch {
             // ignore errors
@@ -294,7 +312,6 @@ extension ExperimentContentView {
         tags: ["demo", "ios", "preview"],
         createdAt: Date(),
         updatedAt: Date(),
-        availableMetrics: ["accuracy", "loss"],
         workspaceId: nil,
         url: "https://example.com/exp_123"
     )

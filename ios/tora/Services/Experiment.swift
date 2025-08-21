@@ -5,11 +5,16 @@ import os
 // MARK: - Experiment Models
 
 struct Metric: Decodable, Identifiable, Equatable {
+    struct Metadata: Decodable, Equatable {
+        let type: String?
+    }
+
     var id: Int
     var experimentId: String
     var name: String
     var value: Double
     var step: Int?
+    var metadata: Metadata?
     var createdAt: Date
 
     enum CodingKeys: String, CodingKey {
@@ -18,6 +23,7 @@ struct Metric: Decodable, Identifiable, Equatable {
         case name
         case value
         case step
+        case metadata
         case createdAt = "created_at"
     }
 }
@@ -91,7 +97,6 @@ struct Experiment: Decodable, Identifiable, Equatable {
     var tags: [String]
     var createdAt: Date
     var updatedAt: Date
-    var availableMetrics: [String]
     var workspaceId: String?
     var url: String
 
@@ -103,7 +108,6 @@ struct Experiment: Decodable, Identifiable, Equatable {
         case tags
         case createdAt = "created_at"
         case updatedAt = "updated_at"
-        case availableMetrics = "available_metrics"
         case workspaceId = "workspace_id"
         case url
     }
@@ -248,9 +252,9 @@ class ExperimentService: ObservableObject {
         }
     }
 
-    public func getMetrics(experimentId: String) async throws -> [Metric] {
-        try await measure(OSLog.workspace, name: "getExperimentMetrics") {
-            guard let url = URL(string: "\(baseUrl)/experiments/\(experimentId)/metrics") else {
+    public func getLogs(experimentId: String) async throws -> [Metric] {
+        try await measure(OSLog.workspace, name: "getExperimentLogs") {
+            guard let url = URL(string: "\(baseUrl)/experiments/\(experimentId)/logs") else {
                 throw WorkspaceErrors.invalidURL
             }
 

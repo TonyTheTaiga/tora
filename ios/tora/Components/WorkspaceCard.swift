@@ -117,7 +117,6 @@ struct WorkspaceCard: View {
                 tags: ["image-classification", "cnn", "pytorch"],
                 createdAt: Date(),
                 updatedAt: Date(),
-                availableMetrics: ["accuracy", "loss", "validation_loss"],
                 workspaceId: "preview-id",
                 url: "https://example.com/exp-1"
             ),
@@ -137,7 +136,6 @@ struct WorkspaceCard: View {
                 tags: ["nlp", "sentiment", "bert", "transformers"],
                 createdAt: Date(),
                 updatedAt: Date(),
-                availableMetrics: ["f1_score", "precision", "recall"],
                 workspaceId: "preview-id",
                 url: "https://example.com/exp-2"
             ),
