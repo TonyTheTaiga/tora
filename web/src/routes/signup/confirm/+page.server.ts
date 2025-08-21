@@ -4,17 +4,10 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
   const tokenHash = url.searchParams.get("token_hash");
   const confirmType = url.searchParams.get("confirm_type");
 
-  if (!tokenHash) {
+  if (!tokenHash || !confirmType) {
     return {
       success: false,
-      message: "Missing confirmation token. Please check your email link.",
-    };
-  }
-
-  if (!confirmType) {
-    return {
-      success: false,
-      message: "Missing confirmation type. Please check your email link.",
+      message: "Malformed confirmation link!",
     };
   }
 
