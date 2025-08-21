@@ -103,19 +103,10 @@
       </div>
     {:else}
       <div class="space-y-6">
-        {#if experiment.availableMetrics.length > 0}
-          <div class="space-y-2">
-            <ExperimentChart
-              metricData={experiment.metricData}
-              availableMetrics={experiment.availableMetrics}
-            />
-          </div>
-        {/if}
-
         {#if scalarMetrics.length > 0}
           <div class="space-y-2">
             <div class="flex items-center gap-2">
-              <div class="text-sm text-ctp-text">scalar metrics</div>
+              <div class="text-sm text-ctp-text">results</div>
               <div class="text-sm text-ctp-subtext0">
                 [{scalarMetrics.length}]
               </div>
@@ -146,6 +137,15 @@
                 </div>
               {/each}
             </div>
+          </div>
+        {/if}
+
+        {#if experiment.availableMetrics.length > 0}
+          <div class="space-y-2">
+            <ExperimentChart
+              metricData={experiment.metricData}
+              availableMetrics={experiment.availableMetrics}
+            />
           </div>
         {/if}
 
