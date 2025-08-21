@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import math
 import os
 import random
 import string
@@ -91,21 +92,41 @@ def run_one_experiment(spec: ExperimentSpec, index: int, verbose: bool = False) 
         if verbose:
             logging.info("Created experiment %s (%s)", tora.experiment_id, tora.url)
 
-        # Emit intra-training metrics: train_loss and val_loss
+        # Emit intra-training metrics with a DNN-like pattern
+        # Train loss decays exponentially towards an asymptote with small noise/spikes
+        # Validation loss follows train loss with an early shrinking gap and a mild overfitting tail
         best_val_loss = float("inf")
         final_train_loss: float | None = None
         final_val_loss: float | None = None
-        for step in range(1, spec.metrics_per_experiment + 1):
-            # Simulate decaying losses with noise
-            train_loss = max(0.0, random.gauss(0.6 * (0.98**step), 0.02))
-            val_loss = max(0.0, random.gauss(0.7 * (0.985**step), 0.025))
+
+        steps = max(1, spec.metrics_per_experiment)
+        train_start = 2.0
+        train_asym = 0.05
+        decay = 5.0 / steps
+        gap_initial = 0.3
+        gap_decay = gap_initial / (0.6 * steps)
+        overfit_amp = 0.15
+        overfit_start = 0.6 * steps
+        overfit_width = max(1.0, 0.1 * steps)
+
+        for step in range(1, steps + 1):
+            base_train = train_asym + (train_start - train_asym) * math.exp(-decay * step)
+            noise = random.gauss(0.0, 0.015)
+            spike = random.uniform(0.03, 0.08) if random.random() < 0.02 else 0.0
+            train_loss = max(0.0, base_train + noise + spike)
+
+            gap_linear = max(0.0, gap_initial - gap_decay * step)
+            overfit_phase = 1.0 / (1.0 + math.exp(-(step - overfit_start) / overfit_width))
+            gap_overfit = overfit_amp * overfit_phase
+            val_noise = random.gauss(0.0, 0.02)
+            val_loss = max(0.0, train_loss + gap_linear + gap_overfit + val_noise)
 
             final_train_loss = train_loss
             final_val_loss = val_loss
             best_val_loss = min(best_val_loss, val_loss)
 
-            tora.metric("train_loss", round(train_loss, 6), step=step)
-            tora.metric("val_loss", round(val_loss, 6), step=step)
+            tora.metric("train_loss", round(train_loss, 6), step_or_epoch=step)
+            tora.metric("val_loss", round(val_loss, 6), step_or_epoch=step)
 
         # Log final results
         if final_train_loss is not None:
@@ -114,6 +135,22 @@ def run_one_experiment(spec: ExperimentSpec, index: int, verbose: bool = False) 
             tora.result("final_val_loss", round(final_val_loss, 6))
         if best_val_loss != float("inf"):
             tora.result("best_val_loss", round(best_val_loss, 6))
+
+        # Mock classification metrics derived from final validation loss
+        if final_val_loss is not None:
+            # Map loss to a quality score in [0, 1]
+            # Lower loss -> higher quality; add slight noise
+            quality = 1.0 - (final_val_loss / (final_val_loss + 1.0))
+            quality = max(0.0, min(1.0, quality + random.gauss(0.0, 0.01)))
+
+            # Sample precision/recall around quality with small, correlated noise
+            recall = max(0.0, min(1.0, quality + random.gauss(0.0, 0.02)))
+            precision = max(0.0, min(1.0, quality + random.gauss(0.005, 0.02)))
+            f1 = 2 * precision * recall / (precision + recall) if precision + recall > 0 else 0.0
+
+            tora.result("precision", round(precision, 6))
+            tora.result("recall", round(recall, 6))
+            tora.result("f1", round(f1, 6))
 
         tora.flush()
         tora.shutdown()

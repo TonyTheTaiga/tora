@@ -5,6 +5,12 @@ All notable changes to the Tora Python SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.9] - 2025-08-21
+
+### Changed
+- BREAKING: `Tora.metric` signature updated to `metric(name, value, step_or_epoch: int)`; `step_or_epoch` is now required and replaces the former optional `step` parameter.
+- Any wrapper/utilities that call `Tora.metric` should pass `step_or_epoch` explicitly.
+
 ## [0.0.8] - 2025-08-20
 
 ### Added

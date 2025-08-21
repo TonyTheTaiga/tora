@@ -471,7 +471,7 @@ class Tora:
         self,
         name: str,
         value: int | float,
-        step: int | None = None,
+        step_or_epoch: int,
     ) -> None:
         """Log a metric value.
 
@@ -481,14 +481,17 @@ class Tora:
         Args:
             name: Name of the metric
             value: Numeric value of the metric
-            step: Step number of the metric
+            step_or_epoch: Step number or epoch of the metric
             metadata: Additional metadata for the metric
 
         Raises:
             ToraValidationError: If input validation fails
             ToraMetricError: If the client is closed
         """
-        self._log(name=name, value=value, step=step, metadata={"type": "metric"})
+        if step_or_epoch is None:
+            raise ToraValidationError("step_or_epoch cannot be None")
+
+        self._log(name=name, value=value, step=step_or_epoch, metadata={"type": "metric"})
 
     def result(self, name: str, value: int | float):
         """Log a experiment result.
