@@ -83,12 +83,8 @@ CREATE TABLE IF NOT EXISTS public.experiment_references (
   created_at timestamp DEFAULT current_timestamp,
   CONSTRAINT experiment_references_check CHECK (from_experiment <> to_experiment),
   CONSTRAINT experiment_references_from_to_uniq UNIQUE (from_experiment, to_experiment)
-);
 
--- Note:
--- - This script intentionally omits extensions, triggers, RLS policies, grants, and indexes.
--- - Run separately any needed seeds (e.g., insert default workspace roles).
---   Example:
---     INSERT INTO public.workspace_role (name)
---     VALUES ('OWNER'), ('ADMIN'), ('EDITOR'), ('VIEWER')
---     ON CONFLICT (name) DO NOTHING;
+);
+INSERT INTO public.workspace_role (name)
+VALUES ('OWNER'), ('VIEWER')
+ON CONFLICT (name) DO NOTHING;
