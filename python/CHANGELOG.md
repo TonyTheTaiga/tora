@@ -5,6 +5,12 @@ All notable changes to the Tora Python SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.10] - 2025-08-21
+
+### Changed
+- BREAKING: Client now posts logs to `/experiments/{id}/logs/batch` (renamed from `/metrics/batch`). Aligns with backend route/table rename from `metric` to `log`.
+- No behavior change to `Tora.metric`/`Tora.result` beyond the endpoint path.
+
 ## [0.0.9] - 2025-08-21
 
 ### Changed

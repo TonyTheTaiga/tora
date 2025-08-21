@@ -13,7 +13,7 @@ use tower_http::trace::TraceLayer;
 mod api_key;
 mod experiment;
 mod invitation;
-mod metric;
+mod log;
 pub mod result;
 mod role;
 mod user;
@@ -75,20 +75,20 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
             protected_route(post(experiment::get_experiments_batch), app_state),
         )
         .route(
-            "/experiments/{id}/metrics",
-            protected_route(get(metric::get_metrics), app_state),
+            "/experiments/{id}/logs",
+            protected_route(get(log::get_metrics), app_state),
         )
         .route(
-            "/experiments/{id}/metrics",
-            protected_route(post(metric::create_metric), app_state),
+            "/experiments/{id}/logs",
+            protected_route(post(log::create_metric), app_state),
         )
         .route(
-            "/experiments/{experiment_id}/metrics/batch",
-            protected_route(post(metric::batch_create_metrics), app_state),
+            "/experiments/{experiment_id}/logs/batch",
+            protected_route(post(log::batch_create_metrics), app_state),
         )
         .route(
-            "/experiments/{id}/metrics/csv",
-            protected_route(get(metric::export_metrics_csv), app_state),
+            "/experiments/{id}/logs/csv",
+            protected_route(get(log::export_metrics_csv), app_state),
         )
         // Settings and user management
         .route(

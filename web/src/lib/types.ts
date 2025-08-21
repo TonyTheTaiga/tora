@@ -6,7 +6,6 @@ export interface Experiment {
   tags: string[];
   createdAt: Date;
   updatedAt: Date;
-  availableMetrics: string[];
   workspaceId?: string;
   metricData?: Record<string, number[]>;
 }
@@ -40,7 +39,7 @@ export interface ExperimentAnalysis {
 
 export interface WorkspaceRole {
   id: string;
-  name: "VIEWER" | "EDITOR" | "ADMIN" | "OWNER";
+  name: "VIEWER" | "OWNER";
 }
 
 export interface Workspace {

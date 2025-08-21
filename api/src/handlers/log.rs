@@ -38,7 +38,7 @@ pub async fn get_metrics(
     }
 
     let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-        "SELECT id, experiment_id::text, name, value::float8, step::float8, metadata, created_at FROM metric WHERE experiment_id = $1 ORDER BY created_at DESC",
+        "SELECT id, experiment_id::text, name, value::float8, step::float8, metadata, created_at FROM log WHERE experiment_id = $1 ORDER BY created_at DESC",
     )
     .bind(experiment_uuid)
     .fetch_all(&app_state.db_pool)
@@ -95,7 +95,7 @@ pub async fn create_metric(
     }
 
     let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-        "INSERT INTO metric (experiment_id, name, value, step, metadata) VALUES ($1, $2, $3, $4, $5) RETURNING id, experiment_id::text, name, value::float8, step::float8, metadata, created_at",
+        "INSERT INTO log (experiment_id, name, value, step, metadata) VALUES ($1, $2, $3, $4, $5) RETURNING id, experiment_id::text, name, value::float8, step::float8, metadata, created_at",
     )
     .bind(experiment_uuid)
     .bind(&request.name)
@@ -185,7 +185,7 @@ pub async fn batch_create_metrics(
         request.metrics.iter().map(|m| m.metadata.clone()).collect();
     let result = sqlx::query(
         r#"
-        INSERT INTO metric (experiment_id, name, value, step, metadata)
+        INSERT INTO log (experiment_id, name, value, step, metadata)
         SELECT $1, unnest($2::text[]), unnest($3::float8[]), unnest($4::float8[]), unnest($5::jsonb[])
         "#,
     )
@@ -245,7 +245,7 @@ pub async fn export_metrics_csv(
     }
 
     let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-        "SELECT id, experiment_id::text, name, value::float8, step::float8, metadata, created_at FROM metric WHERE experiment_id = $1 ORDER BY created_at ASC",
+        "SELECT id, experiment_id::text, name, value::float8, step::float8, metadata, created_at FROM log WHERE experiment_id = $1 ORDER BY created_at ASC",
     )
     .bind(experiment_uuid)
     .fetch_all(&app_state.db_pool)

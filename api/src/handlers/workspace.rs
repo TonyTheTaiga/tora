@@ -97,7 +97,6 @@ pub async fn create_workspace(
             .await?;
 
     let (owner_role_id,) = owner_role_result;
-
     let user_uuid = parse_uuid(&user.id, "user_id")?;
 
     sqlx::query("INSERT INTO user_workspaces (user_id, workspace_id, role_id) VALUES ($1, $2, $3)")

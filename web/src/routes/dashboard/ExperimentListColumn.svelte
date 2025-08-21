@@ -42,7 +42,6 @@
         tags: exp.tags || [],
         createdAt: new Date(exp.created_at),
         updatedAt: new Date(exp.updated_at),
-        availableMetrics: exp.available_metrics || [],
         workspaceId: workspace.id,
       }));
     } catch (error) {

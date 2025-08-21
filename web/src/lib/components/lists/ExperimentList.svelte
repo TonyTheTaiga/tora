@@ -121,18 +121,6 @@
                 : ""}
             </span>
           {/if}
-
-          {#if experiment.availableMetrics && experiment.availableMetrics.length > 0}
-            {#if experiment.hyperparams && experiment.hyperparams.length > 0}
-              <span>•</span>
-            {/if}
-            <span>
-              {experiment.availableMetrics.length} metric{experiment
-                .availableMetrics.length !== 1
-                ? "s"
-                : ""}
-            </span>
-          {/if}
         </div>
       </div>
     {/snippet}

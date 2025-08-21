@@ -71,7 +71,6 @@ pub async fn create_experiment(
         tags: tags.unwrap_or_default(),
         created_at,
         updated_at,
-        available_metrics: vec![],
         workspace_id: Some(request.workspace_id),
         url: format!("{frontend_url}/experiments/{experiment_id}"),
     };
@@ -96,14 +95,13 @@ pub async fn list_experiments(
     let result = if let Some(workspace_id) = &query.workspace {
         let workspace_uuid = parse_uuid(workspace_id, "workspace_id")?;
 
-        sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String, Option<Vec<String>>)>(
+        sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String)>(
             r#"
-            SELECT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text,
-                   ARRAY_AGG(DISTINCT m.name) FILTER (WHERE m.name IS NOT NULL) as available_metrics
+            SELECT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text
             FROM experiment e
             JOIN workspace_experiments we ON e.id = we.experiment_id
             JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
-            LEFT JOIN metric m ON e.id = m.experiment_id
+            LEFT JOIN log l ON e.id = l.experiment_id
             WHERE we.workspace_id = $1 AND uw.user_id = $2
             GROUP BY e.id, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id
             ORDER BY e.created_at DESC
@@ -114,14 +112,13 @@ pub async fn list_experiments(
         .fetch_all(&app_state.db_pool)
         .await
     } else {
-        sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String, Option<Vec<String>>)>(
+        sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String)>(
             r#"
-            SELECT DISTINCT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text,
-                   ARRAY_AGG(DISTINCT m.name) FILTER (WHERE m.name IS NOT NULL) as available_metrics
+            SELECT DISTINCT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text
             FROM experiment e
             JOIN workspace_experiments we ON e.id = we.experiment_id
             JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
-            LEFT JOIN metric m ON e.id = m.experiment_id
+            LEFT JOIN log l ON e.id = l.experiment_id
             WHERE uw.user_id = $1
             GROUP BY e.id, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id
             ORDER BY e.created_at DESC
@@ -147,7 +144,6 @@ pub async fn list_experiments(
                         created_at,
                         updated_at,
                         workspace_id,
-                        available_metrics,
                     )| {
                         Experiment {
                             id: id.to_string(),
@@ -157,7 +153,6 @@ pub async fn list_experiments(
                             tags: tags.unwrap_or_default(),
                             created_at,
                             updated_at,
-                            available_metrics: available_metrics.unwrap_or_default(),
                             workspace_id: Some(workspace_id),
                             url: format!("{frontend_url}/experiments/{id}"),
                         }
@@ -183,14 +178,12 @@ pub async fn get_experiment(
     let user_uuid = parse_uuid(&user.id, "user_id")?;
     let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
 
-    let result = sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String, Option<Vec<String>>)>(
+    let result = sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String)>(
         r#"
-        SELECT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text,
-               ARRAY_AGG(DISTINCT m.name) FILTER (WHERE m.name IS NOT NULL) as available_metrics
+        SELECT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text
         FROM experiment e
         JOIN workspace_experiments we ON e.id = we.experiment_id
         JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
-        LEFT JOIN metric m ON e.id = m.experiment_id
         WHERE e.id = $1 AND uw.user_id = $2
         GROUP BY e.id, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id
         "#,
@@ -202,17 +195,7 @@ pub async fn get_experiment(
 
     let frontend_url = app_state.settings.frontend_url;
     match result {
-        Ok((
-            id,
-            name,
-            description,
-            hyperparams,
-            tags,
-            created_at,
-            updated_at,
-            workspace_id,
-            available_metrics,
-        )) => {
+        Ok((id, name, description, hyperparams, tags, created_at, updated_at, workspace_id)) => {
             let experiment = Experiment {
                 id: id.to_string(),
                 name,
@@ -221,7 +204,6 @@ pub async fn get_experiment(
                 tags: tags.unwrap_or_default(),
                 created_at,
                 updated_at,
-                available_metrics: available_metrics.unwrap_or_default(),
                 workspace_id: Some(workspace_id),
                 url: format!("{frontend_url}/experiments/{id}"),
             };
@@ -276,13 +258,12 @@ pub async fn get_experiments_batch(
         experiment_ids.push(experiment_uuid);
     }
 
-    let results= sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String, Option<Vec<String>>)>(
+    let results= sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String)>(
         r#"
-        select e.id::text, e.name, e.description, e.hyperparam, e.tags, e.created_at, e.updated_at, we.workspace_id::text, ARRAY_AGG(DISTINCT m.name) FILTER (WHERE m.name IS NOT NULL)
+        select e.id::text, e.name, e.description, e.hyperparam, e.tags, e.created_at, e.updated_at, we.workspace_id::text
         from experiment e
         JOIN workspace_experiments we ON e.id = we.experiment_id
         JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
-        LEFT JOIN metric m ON e.id = m.experiment_id
         WHERE e.id = ANY($1::uuid[]) AND uw.user_id = $2
         GROUP BY e.id, e.name, e.description, e.hyperparam, e.tags, e.created_at, e.updated_at, uw.workspace_id
         "#,
@@ -306,7 +287,6 @@ pub async fn get_experiments_batch(
                     created_at: e.5,
                     updated_at: e.6,
                     workspace_id: Some(e.7),
-                    available_metrics: e.8.unwrap_or_default(),
                     url: format!("{}/experiments/{}", frontend_url, e.0.clone()),
                 })
                 .collect();
@@ -388,7 +368,6 @@ pub async fn update_experiment(
         tags: tags.unwrap_or_default(),
         created_at,
         updated_at,
-        available_metrics: vec![],
         workspace_id: None,
         url: format!("{frontend_url}/experiments/{id}"),
     };
@@ -476,15 +455,12 @@ pub async fn list_workspace_experiments(
             Option<Vec<String>>,
             chrono::DateTime<chrono::Utc>,
             chrono::DateTime<chrono::Utc>,
-            Option<Vec<String>>,
         ),
     >(
         r#"
-        SELECT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at,
-               ARRAY_AGG(DISTINCT m.name) FILTER (WHERE m.name IS NOT NULL) as available_metrics
+        SELECT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at
         FROM experiment e
         JOIN workspace_experiments we ON e.id = we.experiment_id
-        LEFT JOIN metric m ON e.id = m.experiment_id
         WHERE we.workspace_id = $1
         GROUP BY e.id, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at
         ORDER BY e.created_at DESC
@@ -500,16 +476,7 @@ pub async fn list_workspace_experiments(
             let experiments: Vec<Experiment> = rows
                 .into_iter()
                 .map(
-                    |(
-                        id,
-                        name,
-                        description,
-                        hyperparams,
-                        tags,
-                        created_at,
-                        updated_at,
-                        available_metrics,
-                    )| {
+                    |(id, name, description, hyperparams, tags, created_at, updated_at)| {
                         Experiment {
                             id: id.to_string(),
                             name,
@@ -518,7 +485,6 @@ pub async fn list_workspace_experiments(
                             tags: tags.unwrap_or_default(),
                             created_at,
                             updated_at,
-                            available_metrics: available_metrics.unwrap_or_default(),
                             workspace_id: Some(workspace_id.clone()),
                             url: format!("{frontend_url}/experiments/{id}"),
                         }

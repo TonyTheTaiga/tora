@@ -42,14 +42,12 @@ pub async fn get_dashboard_overview(
     .fetch_all(&app_state.db_pool)
     .await;
 
-    let experiments_result = sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String, Option<Vec<String>>)>(
+    let experiments_result = sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String)>(
         r#"
-        SELECT DISTINCT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text,
-               ARRAY_AGG(DISTINCT m.name) FILTER (WHERE m.name IS NOT NULL) as available_metrics
+        SELECT DISTINCT e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text
         FROM user_workspaces uw
         JOIN workspace_experiments we ON uw.workspace_id = we.workspace_id
         JOIN experiment e ON we.experiment_id = e.id
-        LEFT JOIN metric m ON e.id = m.experiment_id
         WHERE uw.user_id = $1
         GROUP BY e.id, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id
         ORDER BY e.created_at DESC
@@ -100,7 +98,6 @@ pub async fn get_dashboard_overview(
                         created_at,
                         updated_at,
                         workspace_id,
-                        available_metrics,
                     )| {
                         Experiment {
                             id: id.to_string(),
@@ -110,7 +107,6 @@ pub async fn get_dashboard_overview(
                             tags: tags.unwrap_or_default(),
                             created_at,
                             updated_at,
-                            available_metrics: available_metrics.unwrap_or_default(),
                             workspace_id: Some(workspace_id),
                             url: format!("{frontend_url:?}/experiments/{id:?}"),
                         }

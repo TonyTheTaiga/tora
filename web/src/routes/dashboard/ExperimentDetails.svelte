@@ -5,13 +5,14 @@
   import { loading, errors } from "./state.svelte";
 
   let { experiment } = $props();
-  let scalarMetrics = $state<any[]>([]);
+  let results = $state<any[]>([]);
+  let metricData = $state<Record<string, number[]>>({});
 
   async function loadExperimentDetails(experiment: Experiment) {
     try {
       loading.experimentDetails = true;
       errors.experimentDetails = null;
-      const response = await fetch(`/api/experiments/${experiment.id}/metrics`);
+      const response = await fetch(`/api/experiments/${experiment.id}/logs`);
       if (!response.ok)
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       const apiResponse = await response.json();
@@ -19,33 +20,30 @@
       if (!metrics || !Array.isArray(metrics))
         throw new Error("Invalid response structure from metrics API");
 
-      const metricsByName = new Map<string, any[]>();
-      metrics.forEach((metric: any) => {
-        if (!metricsByName.has(metric.name)) {
-          metricsByName.set(metric.name, []);
+      const resultsByName = new Map<string, any>();
+      const seriesByName = new Map<string, any[]>();
+
+      metrics.forEach((m: any) => {
+        const mType = m?.metadata?.type ?? "metric";
+        if (mType === "result") {
+          resultsByName.set(m.name, m);
+        } else {
+          if (!seriesByName.has(m.name)) seriesByName.set(m.name, []);
+          seriesByName.get(m.name)!.push(m);
         }
-        metricsByName.get(metric.name)!.push(metric);
       });
 
-      const scalarMetricsList: any[] = [];
-      const timeSeriesNames: string[] = [];
-      const metricData: Record<string, number[]> = {};
+      const scalarMetricsList: any[] = Array.from(resultsByName.values());
+      const computedMetricData: Record<string, number[]> = {};
 
-      metricsByName.forEach((metricList, name) => {
-        if (metricList.length === 1) {
-          scalarMetricsList.push(metricList[0]);
-        } else {
-          timeSeriesNames.push(name);
-        }
-
-        metricData[name] = metricList
+      seriesByName.forEach((metricList, name) => {
+        computedMetricData[name] = metricList
           .sort((a, b) => (a.step || 0) - (b.step || 0))
           .map((m) => m.value);
       });
 
-      experiment.availableMetrics = timeSeriesNames;
-      experiment.metricData = metricData;
-      scalarMetrics = scalarMetricsList;
+      results = scalarMetricsList;
+      metricData = computedMetricData;
     } catch (error) {
       errors.experimentDetails =
         error instanceof Error
@@ -103,19 +101,19 @@
       </div>
     {:else}
       <div class="space-y-6">
-        {#if scalarMetrics.length > 0}
+        {#if results.length > 0}
           <div class="space-y-2">
             <div class="flex items-center gap-2">
               <div class="text-sm text-ctp-text">results</div>
               <div class="text-sm text-ctp-subtext0">
-                [{scalarMetrics.length}]
+                [{results.length}]
               </div>
             </div>
             <div class="bg-ctp-terminal-bg border-ctp-terminal-border">
-              {#each scalarMetrics as metric, index}
+              {#each results as metric, index}
                 <div
                   class="flex text-sm hover:bg-ctp-surface0/20 p-3 {index !==
-                  experiment.availableMetrics.length - 1
+                  results.length - 1
                     ? 'border-b border-ctp-surface0/20'
                     : ''} {index % 2 === 0 ? 'bg-ctp-surface0/5' : ''}"
                 >
@@ -140,12 +138,9 @@
           </div>
         {/if}
 
-        {#if experiment.availableMetrics.length > 0}
+        {#if Object.keys(metricData).length > 0}
           <div class="space-y-2">
-            <ExperimentChart
-              metricData={experiment.metricData}
-              availableMetrics={experiment.availableMetrics}
-            />
+            <ExperimentChart {metricData} />
           </div>
         {/if}
 

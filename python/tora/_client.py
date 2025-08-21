@@ -524,7 +524,7 @@ class Tora:
         try:
             logger.debug(f"Sending {len(metrics_to_send)} metrics for experiment {self._experiment_id}")
             response = self._http_client.post(
-                f"/experiments/{self._experiment_id}/metrics/batch",
+                f"/experiments/{self._experiment_id}/logs/batch",
                 json={"metrics": metrics_to_send},
                 timeout=120,
             )

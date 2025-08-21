@@ -21,9 +21,6 @@
     name: experiment.name,
     description: experiment.description,
     tags: experiment.tags ? [...experiment.tags] : [],
-    availableMetrics: experiment.availableMetrics
-      ? [...experiment.availableMetrics]
-      : [],
     hyperparams: experiment.hyperparams ? [...experiment.hyperparams] : [],
     createdAt: experiment.createdAt,
     updatedAt: experiment.updatedAt,

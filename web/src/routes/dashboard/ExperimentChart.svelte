@@ -22,7 +22,8 @@
     "maroon",
   ];
 
-  let { metricData, availableMetrics } = $props();
+  let { metricData } = $props();
+  const metricNames = $derived(Object.keys(metricData || {}));
   let chartInstance: Chart | null = null;
   let chartCanvas: HTMLCanvasElement | null = $state(null);
   let selectedMetrics = $state<string[]>([]);
@@ -253,10 +254,10 @@
 
 <div class="w-full">
   <!-- Metric Selector -->
-  {#if availableMetrics.length > 0}
+  {#if metricNames.length > 0}
     <div class="mb-4">
       <SearchDropdown
-        items={availableMetrics}
+        items={metricNames}
         bind:selectedItems={selectedMetrics}
         bind:searchQuery={searchFilter}
         getItemText={(metric) => metric}
@@ -282,7 +283,7 @@
       </button>
     </div>
     <!-- Empty State -->
-  {:else if availableMetrics && availableMetrics.length > 0}
+  {:else if metricNames && metricNames.length > 0}
     <div
       class="flex flex-col items-center justify-center h-80 w-full border border-ctp-surface0/20"
     >
