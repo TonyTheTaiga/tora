@@ -2,9 +2,7 @@ import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ url, fetch }) => {
   const tokenHash = url.searchParams.get("token_hash");
-  const confirmType =
-    url.searchParams.get("confirm_type") || url.searchParams.get("type");
-  const redirectTo = url.searchParams.get("redirect_to");
+  const confirmType = url.searchParams.get("confirm_type");
 
   if (!tokenHash) {
     return {
@@ -13,20 +11,18 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
     };
   }
 
+  if (!confirmType) {
+    return {
+      success: false,
+      message: "Missing confirmation type. Please check your email link.",
+    };
+  }
+
   try {
     const apiUrl = new URL("/api/signup/confirm", url.origin);
     apiUrl.searchParams.set("token_hash", tokenHash);
-    if (confirmType) {
-      apiUrl.searchParams.set("confirm_type", confirmType);
-    }
-    if (redirectTo) {
-      apiUrl.searchParams.set("redirect_to", redirectTo);
-    }
-    for (const [key, value] of url.searchParams) {
-      if (!apiUrl.searchParams.has(key)) {
-        apiUrl.searchParams.set(key, value);
-      }
-    }
+    apiUrl.searchParams.set("confirm_type", confirmType);
+
     const response = await fetch(apiUrl.toString());
 
     if (response.ok) {
@@ -37,13 +33,9 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
         data: result,
       };
     } else {
-      // Handle API errors
-      const errorData = await response.json().catch(() => ({}));
       return {
         success: false,
-        message:
-          errorData.message ||
-          "Confirmation failed. The link may be invalid or expired.",
+        message: "Confirmation failed. The link may be invalid or expired.",
       };
     }
   } catch (err) {
