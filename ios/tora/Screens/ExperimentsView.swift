@@ -63,64 +63,25 @@ struct ExperimentContentView: View {
                         .foregroundStyle(Color.custom.ctpSubtext0)
                 }
 
-                // Tags
-                if !experiment.tags.isEmpty { TagsSectionView(tags: experiment.tags) }
+                // Metrics Chart — front and center
+                if !metricsByName.isEmpty { MetricsChartSectionView(series: metricsByName) }
 
-                // Hyperparameters
+                // Results (compact)
+                if !results.isEmpty { ResultsSectionView(results: results) }
+
+                // Hyperparameters (compact)
                 if !experiment.hyperparams.isEmpty {
                     HyperparamsSectionView(hyperparams: experiment.hyperparams)
                 }
 
-                // Results
-                if !results.isEmpty { ResultsSectionView(results: results) }
-
-                // Metrics Chart
-                if !metricsByName.isEmpty { MetricsChartSectionView(series: metricsByName) }
-
                 // Metadata
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Metadata")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color.custom.ctpText)
-                    HStack {
-                        Text("Created:")
-                            .font(.caption)
-                            .foregroundStyle(Color.custom.ctpSubtext0)
-                        Text(dateString(experiment.createdAt))
-                            .font(.caption)
-                            .foregroundStyle(Color.custom.ctpText)
-                    }
-                    HStack {
-                        Text("Updated:")
-                            .font(.caption)
-                            .foregroundStyle(Color.custom.ctpSubtext0)
-                        Text(dateString(experiment.updatedAt))
-                            .font(.caption)
-                            .foregroundStyle(Color.custom.ctpText)
-                    }
-                    HStack {
-                        Text("Experiment ID:")
-                            .font(.caption)
-                            .foregroundStyle(Color.custom.ctpSubtext0)
-                        Text(experiment.id)
-                            .font(.caption)
-                            .foregroundStyle(Color.custom.ctpText)
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                    }
-                    if let workspaceId = experiment.workspaceId {
-                        HStack {
-                            Text("Workspace ID:")
-                                .font(.caption)
-                                .foregroundStyle(Color.custom.ctpSubtext0)
-                            Text(workspaceId)
-                                .font(.caption)
-                                .foregroundStyle(Color.custom.ctpText)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                        }
-                    }
-                }
+                MetadataSectionView(
+                    createdAt: experiment.createdAt,
+                    updatedAt: experiment.updatedAt,
+                    experimentId: experiment.id,
+                    workspaceId: experiment.workspaceId,
+                    tags: experiment.tags
+                )
             }
             .padding()
         }
@@ -174,42 +135,6 @@ extension ExperimentContentView {
 
 // MARK: - Subviews
 
-private struct TagsSectionView: View {
-    let tags: [String]
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Text("Tags")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.custom.ctpText)
-                Text("[\(tags.count)]")
-                    .font(.subheadline)
-                    .foregroundStyle(Color.custom.ctpSubtext0)
-            }
-            LazyVGrid(
-                columns: [GridItem(.adaptive(minimum: 48), spacing: 2, alignment: .leading)],
-                alignment: .leading,
-                spacing: 2
-            ) {
-                ForEach(tags, id: \.self) { tag in
-                    Text(tag)
-                        .font(.caption2)
-                        .lineLimit(1)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 3)
-                        .background(Color.custom.ctpBlue.opacity(0.20))
-                        .foregroundStyle(Color.custom.ctpBlue)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.custom.ctpBlue.opacity(0.40), lineWidth: 1)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                }
-            }
-        }
-    }
-}
-
 private struct HyperparamsSectionView: View {
     let hyperparams: [HyperParam]
     var body: some View {
@@ -222,38 +147,25 @@ private struct HyperparamsSectionView: View {
                     .font(.subheadline)
                     .foregroundStyle(Color.custom.ctpSubtext0)
             }
-            VStack(spacing: 0) {
-                ForEach(Array(hyperparams.enumerated()), id: \.offset) { index, param in
-                    HStack(alignment: .center) {
+
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.flexible(), spacing: 12, alignment: .leading), count: 3),
+                alignment: .leading,
+                spacing: 12
+            ) {
+                ForEach(Array(hyperparams.enumerated()), id: \.offset) { _, param in
+                    VStack(alignment: .leading, spacing: 2) {
                         Text(param.key)
-                            .font(.caption)
+                            .font(.caption2)
                             .foregroundStyle(Color.custom.ctpSubtext0)
                             .lineLimit(1)
-                        Spacer(minLength: 8)
                         Text(param.value.displayValue)
-                            .font(.caption)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.custom.ctpSurface0.opacity(0.20))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color.custom.ctpSurface0.opacity(0.30), lineWidth: 1)
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 8)
-                    .background(
-                        index % 2 == 0 ? Color.custom.ctpSurface0.opacity(0.06) : Color.clear)
-                    if index != hyperparams.count - 1 {
-                        Divider().overlay(Color.custom.ctpSurface0.opacity(0.20))
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(Color.custom.ctpText)
+                            .lineLimit(1)
                     }
                 }
             }
-            .background(RoundedRectangle(cornerRadius: 8).fill(Color.custom.ctpMantle))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8).stroke(
-                    Color.custom.ctpSurface0.opacity(0.30), lineWidth: 1))
         }
     }
 }
@@ -270,47 +182,49 @@ private struct ResultsSectionView: View {
                     .font(.subheadline)
                     .foregroundStyle(Color.custom.ctpSubtext0)
             }
-            VStack(spacing: 0) {
-                ForEach(Array(results.enumerated()), id: \.offset) { index, item in
-                    HStack {
-                        Circle().fill(Color.custom.ctpGreen).frame(width: 6, height: 6)
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.flexible(), spacing: 12, alignment: .leading), count: 3),
+                alignment: .leading,
+                spacing: 12
+            ) {
+                ForEach(Array(results.enumerated()), id: \.offset) { _, item in
+                    VStack(alignment: .leading, spacing: 2) {
                         Text(item.name)
-                            .font(.caption)
+                            .font(.caption2)
+                            .foregroundStyle(Color.custom.ctpSubtext0)
+                            .lineLimit(1)
+                        Text(String(format: "%.4f", item.value))
+                            .font(.footnote.weight(.semibold))
+                            .monospacedDigit()
                             .foregroundStyle(Color.custom.ctpText)
                             .lineLimit(1)
-                        Spacer()
-                        Text(String(format: "%.4f", item.value))
-                            .font(.caption)
-                            .foregroundStyle(Color.custom.ctpBlue)
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 8)
-                    .background(
-                        index % 2 == 0 ? Color.custom.ctpSurface0.opacity(0.06) : Color.clear)
-                    if index != results.count - 1 {
-                        Divider().overlay(Color.custom.ctpSurface0.opacity(0.20))
                     }
                 }
             }
-            .background(RoundedRectangle(cornerRadius: 8).fill(Color.custom.ctpMantle))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8).stroke(
-                    Color.custom.ctpSurface0.opacity(0.30), lineWidth: 1))
         }
     }
 }
 
 private struct MetricsChartSectionView: View {
     let series: [String: [Metric]]
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @State private var yScaleMode: YScaleMode = .linear
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
                 Text("Metrics")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.headline.weight(.semibold))
                     .foregroundStyle(Color.custom.ctpText)
                 Text("[\(series.count)]")
                     .font(.subheadline)
                     .foregroundStyle(Color.custom.ctpSubtext0)
+                Spacer()
+                Picker("Scale", selection: $yScaleMode) {
+                    Text("Linear").tag(YScaleMode.linear)
+                    Text("Log").tag(YScaleMode.log)
+                }
+                .pickerStyle(.segmented)
+                .frame(maxWidth: 220)
             }
             Chart {
                 LinePlot(
@@ -322,6 +236,88 @@ private struct MetricsChartSectionView: View {
                 .foregroundStyle(by: .value("Metric", \.name))
             }
             .chartLegend(.visible)
+            .chartYAxis {
+                AxisMarks(position: .leading) { value in
+                    AxisGridLine()
+                    AxisTick()
+                    AxisValueLabel {
+                        if let v = value.as(Double.self) {
+                            Text(v, format: .number.precision(.fractionLength(2)))
+                        }
+                    }
+                }
+            }
+            .applyYAxisScale(mode: effectiveScale, domain: yAxisDomain(for: effectiveScale))
+            .frame(height: chartHeight)
+
+            if yScaleMode == .log && hasNonPositiveValues {
+                Text("Log scale requires positive values; showing linear scale.")
+                    .font(.caption2)
+                    .foregroundStyle(Color.custom.ctpSubtext0)
+            }
+        }
+    }
+
+    private var chartHeight: CGFloat {
+        switch horizontalSizeClass {
+        case .regular: return 360
+        default: return 280
+        }
+    }
+
+    fileprivate enum YScaleMode: Hashable { case linear, log }
+
+    private var hasNonPositiveValues: Bool {
+        chartPoints.contains { $0.value <= 0 }
+    }
+
+    private var effectiveScale: YScaleMode {
+        (yScaleMode == .log && hasNonPositiveValues) ? .linear : yScaleMode
+    }
+
+    private func yAxisDomain(for mode: YScaleMode) -> ClosedRange<Double> {
+        let values = chartPoints.map { $0.value }
+        guard let minVal = values.min(), let maxVal = values.max() else {
+            return 0...1
+        }
+        switch mode {
+        case .linear:
+            if minVal == maxVal {
+                let pad = max(abs(minVal) * 0.1, 0.1)
+                return (minVal - pad)...(maxVal + pad)
+            }
+            let span = maxVal - minVal
+            let pad = span * 0.05
+            return (minVal - pad)...(maxVal + pad)
+        case .log:
+            // Ensure strictly positive bounds
+            let positives = values.filter { $0 > 0 }
+            guard let minPos = positives.min(), let maxPos = positives.max() else {
+                return 0.1...1
+            }
+            // Multiplicative padding of ~10%
+            let lower = minPos * 0.9
+            let upper = maxPos * 1.1
+            return max(lower, .leastNonzeroMagnitude)...max(upper, .leastNonzeroMagnitude)
+        }
+    }
+}
+
+// MARK: - Chart scale helper
+
+extension View {
+    @ViewBuilder
+    fileprivate func applyYAxisScale(mode: MetricsChartSectionView.YScaleMode, domain: ClosedRange<Double>) -> some View
+    {
+        if #available(iOS 17.0, *) {
+            switch mode {
+            case .linear:
+                self.chartYScale(domain: domain, type: .linear)
+            case .log:
+                self.chartYScale(domain: domain, type: .log)
+            }
+        } else {
+            self.chartYScale(domain: domain)
         }
     }
 }
@@ -350,8 +346,9 @@ private struct MetadataSectionView: View {
     let updatedAt: Date
     let experimentId: String
     let workspaceId: String?
+    let tags: [String]
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 8) {
             Text("Metadata")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Color.custom.ctpText)
@@ -391,6 +388,31 @@ private struct MetadataSectionView: View {
                         .foregroundStyle(Color.custom.ctpText)
                         .lineLimit(1)
                         .truncationMode(.middle)
+                }
+            }
+            if !tags.isEmpty {
+                HStack(alignment: .center, spacing: 8) {
+                    Text("Tags:")
+                        .font(.caption)
+                        .foregroundStyle(Color.custom.ctpSubtext0)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(tags, id: \.self) { tag in
+                                Text(tag)
+                                    .font(.caption2)
+                                    .foregroundStyle(Color.custom.ctpText)
+                                    .lineLimit(1)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .fill(Color.custom.ctpSurface0.opacity(0.28))
+                                    )
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
         }
