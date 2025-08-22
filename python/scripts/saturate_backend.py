@@ -188,11 +188,10 @@ def main(argv: Iterable[str] | None = None) -> int:
 
     api_key = ns.api_key or os.getenv("TORA_API_KEY")
     server_url = ns.server_url or os.getenv("TORA_BASE_URL")
+    print(server_url)
 
-    # No dry-run: immediately execute against API
-
-    # Create workspace if requested
     workspace_id = ns.workspace_id
+
     if ns.workspace_name and not workspace_id:
         try:
             ws = create_workspace(

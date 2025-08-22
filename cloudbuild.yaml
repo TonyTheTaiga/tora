@@ -73,7 +73,7 @@ steps:
           --min-instances 0 \
           --max-instances 5 \
           --set-secrets DATABASE_URL=DATABASE_URL:latest,SUPABASE_URL=SUPABASE_URL:latest,SUPABASE_API_KEY=SUPABASE_KEY:latest,SUPABASE_JWT_SECRET=SUPABASE_JWT_SECRET:latest \
-          --set-env-vars FRONTEND_URL=https://tora-web.vercel.app,RUST_LOG=error
+          --set-env-vars FRONTEND_URL=https://toracker.com,RUST_LOG=info
 
   # Deploy Web (no longer needs separate push step)
   # - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
