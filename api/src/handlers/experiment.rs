@@ -393,7 +393,7 @@ pub async fn delete_experiment(
         JOIN workspace_experiments we ON e.id = we.experiment_id
         JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
         JOIN workspace_role wr ON uw.role_id = wr.id
-        WHERE e.id = $1 AND uw.user_id = $2 AND wr.name IN ('OWNER', 'ADMIN')
+        WHERE e.id = $1 AND uw.user_id = $2 AND wr.name = 'OWNER'
         "#,
     )
     .bind(experiment_uuid)

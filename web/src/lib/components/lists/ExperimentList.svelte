@@ -22,9 +22,7 @@
     });
   }
 
-  let canDeleteExperiment = $derived(
-    ["OWNER", "ADMIN"].includes(workspace.role),
-  );
+  let canDeleteExperiment = $derived(["OWNER"].includes(workspace.role));
 
   let filteredExperiments = $derived(
     experiments
