@@ -16,8 +16,6 @@ struct ExperimentsView: View {
         ExperimentContentView(experiment: experiment) {
             await refreshExperiment()
         }
-        .navigationTitle("")
-        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Text(experiment.name)
