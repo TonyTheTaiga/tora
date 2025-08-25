@@ -105,35 +105,31 @@
           <div class="space-y-2">
             <div class="flex items-center gap-2">
               <div class="text-sm text-ctp-text">results</div>
-              <div class="text-sm text-ctp-subtext0">
-                [{results.length}]
-              </div>
+              <div class="text-sm text-ctp-subtext0">[{results.length}]</div>
             </div>
-            <div class="bg-ctp-terminal-bg border-ctp-terminal-border">
-              {#each results as metric, index}
-                <div
-                  class="flex text-sm hover:bg-ctp-surface0/20 p-3 {index !==
-                  results.length - 1
-                    ? 'border-b border-ctp-surface0/20'
-                    : ''} {index % 2 === 0 ? 'bg-ctp-surface0/5' : ''}"
-                >
-                  <div class="w-4 text-ctp-green">•</div>
-                  <div
-                    class="flex-1 text-ctp-text truncate"
-                    title={metric.name}
-                  >
-                    {metric.name}
+            <div class="border-ctp-terminal-border p-2">
+              <div
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
+              >
+                {#each results as metric}
+                  <div class="flex flex-col gap-1 p-2 hover:bg-ctp-surface0/20">
+                    <div
+                      class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate"
+                      title={metric.name}
+                    >
+                      {metric.name}
+                    </div>
+                    <div
+                      class="text-ctp-text font-semibold tabular-nums font-mono truncate"
+                      title={String(metric.value)}
+                    >
+                      {typeof metric.value === "number"
+                        ? metric.value.toFixed(4)
+                        : metric.value}
+                    </div>
                   </div>
-                  <div
-                    class="w-24 text-right text-ctp-blue"
-                    title={String(metric.value)}
-                  >
-                    {typeof metric.value === "number"
-                      ? metric.value.toFixed(4)
-                      : metric.value}
-                  </div>
-                </div>
-              {/each}
+                {/each}
+              </div>
             </div>
           </div>
         {/if}
@@ -171,20 +167,26 @@
                 [{experiment.hyperparams.length}]
               </div>
             </div>
-            <div class="bg-ctp-terminal-bg border-ctp-terminal-border">
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
-                {#each experiment.hyperparams as param, index}
-                  <div
-                    class="flex flex-row items-center justify-between hover:bg-ctp-surface0/20 px-3 py-2 text-sm gap-2 {index !==
-                    experiment.hyperparams.length - 1
-                      ? 'border-b border-ctp-surface0/20'
-                      : ''} {index % 2 === 0 ? 'bg-ctp-surface0/5' : ''}"
-                  >
-                    <span class="text-ctp-subtext0 truncate">{param.key}</span>
-                    <span
-                      class="text-ctp-blue bg-ctp-surface0/20 border border-ctp-surface0/30 px-2 py-1 max-w-32 truncate text-xs"
-                      title={String(param.value)}>{param.value}</span
+            <div class="border-ctp-terminal-border p-3">
+              <div
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
+              >
+                {#each experiment.hyperparams as param}
+                  <div class="flex flex-col gap-1 p-2 hover:bg-ctp-surface0/20">
+                    <div
+                      class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate"
+                      title={param.key}
                     >
+                      {param.key}
+                    </div>
+                    <div
+                      class="text-ctp-text font-semibold tabular-nums font-mono truncate"
+                      title={String(param.value)}
+                    >
+                      {typeof param.value === "number"
+                        ? String(param.value)
+                        : String(param.value)}
+                    </div>
                   </div>
                 {/each}
               </div>
