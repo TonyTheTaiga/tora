@@ -3,10 +3,69 @@
   import type { Experiment } from "$lib/types";
   import { copyToClipboard } from "$lib/utils/common";
   import { loading, errors } from "./state.svelte";
+  import { ChevronDown, ChevronRight, Pin } from "@lucide/svelte";
 
   let { experiment } = $props();
   let results = $state<any[]>([]);
   let metricData = $state<Record<string, number[]>>({});
+  let showHyperparams = $state(false);
+  let pinnedNames = $state<string[]>([]);
+  let showResults = $state(true);
+
+  let pinnedResults = $derived(
+    pinnedNames
+      .map((name) => results.find((r) => r.name === name))
+      .filter((m): m is any => Boolean(m)),
+  );
+
+  function storageKey(expId: string) {
+    return `tora:pinnedResults:${expId}`;
+  }
+
+  function loadPinned() {
+    try {
+      if (typeof localStorage === "undefined") {
+        pinnedNames = [];
+        return;
+      }
+      const raw = localStorage.getItem(storageKey(experiment.id));
+      if (!raw) {
+        pinnedNames = [];
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        pinnedNames = parsed.filter((x) => typeof x === "string");
+      } else {
+        pinnedNames = [];
+      }
+    } catch (e) {
+      pinnedNames = [];
+    }
+  }
+
+  function savePinned() {
+    try {
+      if (typeof localStorage === "undefined") return;
+      localStorage.setItem(
+        storageKey(experiment.id),
+        JSON.stringify(pinnedNames),
+      );
+    } catch (e) {}
+  }
+
+  function isPinned(name: string): boolean {
+    return pinnedNames.includes(name);
+  }
+
+  function togglePin(name: string) {
+    if (isPinned(name)) {
+      pinnedNames = pinnedNames.filter((n) => n !== name);
+    } else {
+      pinnedNames = [...pinnedNames, name];
+    }
+    savePinned();
+  }
 
   async function loadExperimentDetails(experiment: Experiment) {
     try {
@@ -57,6 +116,20 @@
   $effect(() => {
     loadExperimentDetails(experiment);
   });
+
+  $effect(() => {
+    loadPinned();
+  });
+
+  $effect(() => {
+    if (!results || results.length === 0) return;
+    const available = new Set(results.map((r) => r.name));
+    const pruned = pinnedNames.filter((n) => available.has(n));
+    if (pruned.length !== pinnedNames.length) {
+      pinnedNames = pruned;
+      savePinned();
+    }
+  });
 </script>
 
 <div class="flex flex-col">
@@ -71,6 +144,16 @@
         <p class="text-ctp-subtext0 line-clamp-2 mb-3 text-sm">
           {experiment.description}
         </p>
+      {/if}
+      {#if experiment.tags?.length}
+        <div class="flex flex-wrap gap-1 mb-2">
+          {#each experiment.tags as tag}
+            <span
+              class="text-xs bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-2 py-1"
+              >{tag}</span
+            >
+          {/each}
+        </div>
       {/if}
       <button
         class="text-xs text-ctp-overlay0 hover:text-ctp-blue"
@@ -101,35 +184,45 @@
       </div>
     {:else}
       <div class="space-y-6">
-        {#if results.length > 0}
+        {#if pinnedResults.length > 0}
           <div class="space-y-2">
             <div class="flex items-center gap-2">
-              <div class="text-sm text-ctp-text">results</div>
-              <div class="text-sm text-ctp-subtext0">[{results.length}]</div>
-            </div>
-            <div class="border-ctp-terminal-border p-2">
-              <div
-                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
-              >
-                {#each results as metric}
-                  <div class="flex flex-col gap-1 p-2 hover:bg-ctp-surface0/20">
-                    <div
-                      class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate"
-                      title={metric.name}
-                    >
-                      {metric.name}
-                    </div>
-                    <div
-                      class="text-ctp-text font-semibold tabular-nums font-mono truncate"
-                      title={String(metric.value)}
-                    >
-                      {typeof metric.value === "number"
-                        ? metric.value.toFixed(4)
-                        : metric.value}
-                    </div>
-                  </div>
-                {/each}
+              <div class="text-sm text-ctp-text">pinned results</div>
+              <div class="text-sm text-ctp-subtext0">
+                [{pinnedResults.length}]
               </div>
+            </div>
+            <div
+              class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
+            >
+              {#each pinnedResults as metric}
+                <div
+                  class="relative flex flex-col gap-1 p-3 border-ctp-terminal-border hover:bg-ctp-surface0/20"
+                >
+                  <button
+                    class="absolute top-2 right-2 text-ctp-overlay0 hover:text-ctp-yellow"
+                    title="unpin result"
+                    aria-label="unpin result"
+                    onclick={() => togglePin(metric.name)}
+                  >
+                    <Pin size={14} />
+                  </button>
+                  <div
+                    class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate pr-6"
+                    title={metric.name}
+                  >
+                    {metric.name}
+                  </div>
+                  <div
+                    class="text-ctp-text font-semibold tabular-nums font-mono text-lg truncate"
+                    title={String(metric.value)}
+                  >
+                    {typeof metric.value === "number"
+                      ? metric.value.toFixed(4)
+                      : metric.value}
+                  </div>
+                </div>
+              {/each}
             </div>
           </div>
         {/if}
@@ -140,57 +233,113 @@
           </div>
         {/if}
 
-        {#if experiment.tags?.length}
+        {#if results.length > 0}
           <div class="space-y-2">
-            <div class="flex items-center gap-2">
-              <div class="text-sm text-ctp-text">tags</div>
-              <div class="text-sm text-ctp-subtext0">
-                [{experiment.tags.length}]
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-1">
-              {#each experiment.tags as tag}
-                <span
-                  class="text-xs bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-2 py-1"
-                  >{tag}</span
+            <button
+              class="flex items-center gap-2 text-sm text-ctp-text hover:text-ctp-blue"
+              onclick={() => (showResults = !showResults)}
+              aria-expanded={showResults}
+              aria-controls="results-section"
+            >
+              {#if showResults}
+                <ChevronDown size={14} />
+              {:else}
+                <ChevronRight size={14} />
+              {/if}
+              <span>results</span>
+              <span class="text-ctp-subtext0">[{results.length}]</span>
+            </button>
+            {#if showResults}
+              <div id="results-section" class="border-ctp-terminal-border p-2">
+                <div
+                  class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
                 >
-              {/each}
-            </div>
+                  {#each results as metric}
+                    <div
+                      class="relative flex flex-col gap-1 p-2 hover:bg-ctp-surface0/20"
+                    >
+                      <button
+                        class="absolute top-2 right-2 text-ctp-overlay0 hover:text-ctp-yellow"
+                        title={isPinned(metric.name) ? "unpin" : "pin"}
+                        aria-pressed={isPinned(metric.name)}
+                        onclick={() => togglePin(metric.name)}
+                      >
+                        <Pin
+                          size={14}
+                          class={isPinned(metric.name) ? "text-ctp-yellow" : ""}
+                        />
+                      </button>
+                      <div
+                        class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate"
+                        title={metric.name}
+                      >
+                        {metric.name}
+                      </div>
+                      <div
+                        class="text-ctp-text font-semibold tabular-nums font-mono truncate"
+                        title={String(metric.value)}
+                      >
+                        {typeof metric.value === "number"
+                          ? metric.value.toFixed(4)
+                          : metric.value}
+                      </div>
+                    </div>
+                  {/each}
+                </div>
+              </div>
+            {/if}
           </div>
         {/if}
 
         {#if experiment.hyperparams?.length}
           <div class="space-y-2">
-            <div class="flex items-center gap-2">
-              <div class="text-sm text-ctp-text">hyperparameters</div>
-              <div class="text-sm text-ctp-subtext0">
-                [{experiment.hyperparams.length}]
-              </div>
-            </div>
-            <div class="border-ctp-terminal-border p-3">
-              <div
-                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
+            <button
+              class="flex items-center gap-2 text-sm text-ctp-text hover:text-ctp-blue"
+              onclick={() => (showHyperparams = !showHyperparams)}
+              aria-expanded={showHyperparams}
+              aria-controls="hyperparams-section"
+            >
+              {#if showHyperparams}
+                <ChevronDown size={14} />
+              {:else}
+                <ChevronRight size={14} />
+              {/if}
+              <span>hyperparameters</span>
+              <span class="text-ctp-subtext0"
+                >[{experiment.hyperparams.length}]</span
               >
-                {#each experiment.hyperparams as param}
-                  <div class="flex flex-col gap-1 p-2 hover:bg-ctp-surface0/20">
+            </button>
+            {#if showHyperparams}
+              <div
+                id="hyperparams-section"
+                class="border-ctp-terminal-border p-3"
+              >
+                <div
+                  class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
+                >
+                  {#each experiment.hyperparams as param}
                     <div
-                      class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate"
-                      title={param.key}
+                      class="flex flex-col gap-1 p-2 hover:bg-ctp-surface0/20"
                     >
-                      {param.key}
+                      <div
+                        class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate"
+                        title={param.key}
+                      >
+                        {param.key}
+                      </div>
+                      <div
+                        class="text-ctp-text font-semibold tabular-nums font-mono truncate"
+                        title={String(param.value)}
+                      >
+                        {typeof param.value === "number"
+                          ? String(param.value)
+                          : String(param.value)}
+                      </div>
                     </div>
-                    <div
-                      class="text-ctp-text font-semibold tabular-nums font-mono truncate"
-                      title={String(param.value)}
-                    >
-                      {typeof param.value === "number"
-                        ? String(param.value)
-                        : String(param.value)}
-                    </div>
-                  </div>
-                {/each}
+                  {/each}
+                </div>
               </div>
-            </div>
+            {/if}
           </div>
         {/if}
       </div>
