@@ -8,9 +8,17 @@
   let { experiment } = $props();
   let results = $state<any[]>([]);
   let metricData = $state<Record<string, number[]>>({});
-  let showHyperparams = $state(false);
+  // hyperparameters are always visible within header when header is expanded
   let pinnedNames = $state<string[]>([]);
   let showResults = $state(true);
+  let showHeader = $state(true);
+  let showAllHyperparams = $state(false);
+
+  let sortedHyperparams = $derived(
+    experiment.hyperparams
+      ?.slice()
+      .sort((a, b) => a.key.localeCompare(b.key)) ?? [],
+  );
 
   let pinnedResults = $derived(
     pinnedNames
@@ -20,6 +28,10 @@
 
   function storageKey(expId: string) {
     return `tora:pinnedResults:${expId}`;
+  }
+
+  function headerExpandedKey(expId: string) {
+    return `tora:headerExpanded:${expId}`;
   }
 
   function loadPinned() {
@@ -65,6 +77,29 @@
       pinnedNames = [...pinnedNames, name];
     }
     savePinned();
+  }
+
+  function displayHPValue(v: string | number): string {
+    const s = String(v);
+    return s.length > 16 ? s.slice(0, 16) + "…" : s;
+  }
+
+  function loadHeaderExpanded() {
+    try {
+      if (typeof localStorage === "undefined") return;
+      const raw = localStorage.getItem(headerExpandedKey(experiment.id));
+      showHeader = raw === null ? true : raw === "true";
+    } catch (e) {}
+  }
+
+  function saveHeaderExpanded() {
+    try {
+      if (typeof localStorage === "undefined") return;
+      localStorage.setItem(
+        headerExpandedKey(experiment.id),
+        String(showHeader),
+      );
+    } catch (e) {}
   }
 
   async function loadExperimentDetails(experiment: Experiment) {
@@ -119,6 +154,7 @@
 
   $effect(() => {
     loadPinned();
+    loadHeaderExpanded();
   });
 
   $effect(() => {
@@ -130,39 +166,92 @@
       savePinned();
     }
   });
+
+  $effect(() => {
+    const _h = showHeader;
+    saveHeaderExpanded();
+  });
 </script>
 
 <div class="flex flex-col">
   <div
     class="sticky top-0 z-10 surface-elevated border-b border-ctp-surface0/30 p-4"
   >
-    <div class="mb-3">
-      <h2 class="text-ctp-text font-medium text-lg mb-2">
-        {experiment.name}
-      </h2>
-      {#if experiment.description}
-        <p class="text-ctp-subtext0 line-clamp-2 mb-3 text-sm">
-          {experiment.description}
-        </p>
-      {/if}
-      {#if experiment.tags?.length}
-        <div class="flex flex-wrap gap-1 mb-2">
-          {#each experiment.tags as tag}
-            <span
-              class="text-xs bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-2 py-1"
-              >{tag}</span
-            >
-          {/each}
-        </div>
-      {/if}
+    <div class="mb-1">
       <button
-        class="text-xs text-ctp-overlay0 hover:text-ctp-blue"
-        onclick={() => copyToClipboard(experiment.id)}
-        title="click to copy experiment id"
+        class="flex items-center gap-2 text-ctp-text font-medium text-base hover:text-ctp-blue"
+        onclick={() => (showHeader = !showHeader)}
+        aria-expanded={showHeader}
+        aria-controls="experiment-header-details"
       >
-        experiment id: {experiment.id}
+        {#if showHeader}
+          <ChevronDown size={16} />
+        {:else}
+          <ChevronRight size={16} />
+        {/if}
+        <span class="truncate">{experiment.name}</span>
       </button>
     </div>
+    {#if showHeader}
+      <div id="experiment-header-details" class="mt-2">
+        {#if experiment.description}
+          <p class="text-ctp-subtext0 mb-2 text-sm">
+            {experiment.description}
+          </p>
+        {/if}
+        {#if experiment.tags?.length}
+          <div class="flex flex-wrap gap-1 mb-2">
+            {#each experiment.tags as tag}
+              <span
+                class="text-xs bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-2 py-1"
+                >{tag}</span
+              >
+            {/each}
+          </div>
+        {/if}
+
+        {#if experiment.hyperparams?.length}
+          <div
+            id="hyperparams-header-section"
+            class="border-ctp-terminal-border"
+          >
+            <div class="flex flex-wrap gap-1">
+              {#each showAllHyperparams ? sortedHyperparams : sortedHyperparams.slice(0, 12) as param}
+                <span
+                  class="text-[11px] rounded-sm bg-ctp-surface0/30 border border-ctp-surface0/40 text-ctp-subtext0 font-mono px-2 py-0.5"
+                  title={`${param.key}=${String(param.value)}`}
+                >
+                  {param.key}={displayHPValue(param.value)}
+                </span>
+              {/each}
+              {#if !showAllHyperparams && sortedHyperparams.length > 12}
+                <button
+                  class="text-[11px] text-ctp-blue px-2 py-0.5"
+                  onclick={() => (showAllHyperparams = true)}
+                >
+                  +{sortedHyperparams.length - 12} more
+                </button>
+              {:else if showAllHyperparams && sortedHyperparams.length > 12}
+                <button
+                  class="text-[11px] text-ctp-blue px-2 py-0.5"
+                  onclick={() => (showAllHyperparams = false)}
+                >
+                  show less
+                </button>
+              {/if}
+            </div>
+          </div>
+        {/if}
+      </div>
+    {/if}
+
+    <button
+      class="text-xs text-ctp-overlay0 hover:text-ctp-blue mb-2"
+      onclick={() => copyToClipboard(experiment.id)}
+      title="click to copy experiment id"
+    >
+      experiment id: {experiment.id}
+    </button>
   </div>
 
   <div class="p-4">
@@ -282,58 +371,6 @@
                         {typeof metric.value === "number"
                           ? metric.value.toFixed(4)
                           : metric.value}
-                      </div>
-                    </div>
-                  {/each}
-                </div>
-              </div>
-            {/if}
-          </div>
-        {/if}
-
-        {#if experiment.hyperparams?.length}
-          <div class="space-y-2">
-            <button
-              class="flex items-center gap-2 text-sm text-ctp-text hover:text-ctp-blue"
-              onclick={() => (showHyperparams = !showHyperparams)}
-              aria-expanded={showHyperparams}
-              aria-controls="hyperparams-section"
-            >
-              {#if showHyperparams}
-                <ChevronDown size={14} />
-              {:else}
-                <ChevronRight size={14} />
-              {/if}
-              <span>hyperparameters</span>
-              <span class="text-ctp-subtext0"
-                >[{experiment.hyperparams.length}]</span
-              >
-            </button>
-            {#if showHyperparams}
-              <div
-                id="hyperparams-section"
-                class="border-ctp-terminal-border p-3"
-              >
-                <div
-                  class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
-                >
-                  {#each experiment.hyperparams as param}
-                    <div
-                      class="flex flex-col gap-1 p-2 hover:bg-ctp-surface0/20"
-                    >
-                      <div
-                        class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate"
-                        title={param.key}
-                      >
-                        {param.key}
-                      </div>
-                      <div
-                        class="text-ctp-text font-semibold tabular-nums font-mono truncate"
-                        title={String(param.value)}
-                      >
-                        {typeof param.value === "number"
-                          ? String(param.value)
-                          : String(param.value)}
                       </div>
                     </div>
                   {/each}
