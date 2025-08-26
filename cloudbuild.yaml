@@ -68,6 +68,7 @@ steps:
           --region us-central1 \
           --platform managed \
           --allow-unauthenticated \
+          --session-affinity \
           --cpu 1.0 \
           --memory 512Mi \
           --min-instances 0 \
