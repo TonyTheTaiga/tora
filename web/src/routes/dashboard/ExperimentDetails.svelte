@@ -286,7 +286,7 @@
             >
               {#each pinnedResults as metric}
                 <div
-                  class="relative flex flex-col gap-1 p-3 border-ctp-terminal-border hover:bg-ctp-surface0/20"
+                  class="relative flex flex-col gap-1 p-3 border-ctp-terminal-border hover:bg-ctp-surface0/20 min-w-0"
                 >
                   <button
                     class="absolute top-2 right-2 text-ctp-overlay0 hover:text-ctp-yellow"
@@ -345,7 +345,7 @@
                 >
                   {#each results as metric}
                     <div
-                      class="relative flex flex-col gap-1 p-2 hover:bg-ctp-surface0/20"
+                      class="relative flex flex-col gap-1 p-2 hover:bg-ctp-surface0/20 min-w-0"
                     >
                       <button
                         class="absolute top-2 right-2 text-ctp-overlay0 hover:text-ctp-yellow"
@@ -359,13 +359,13 @@
                         />
                       </button>
                       <div
-                        class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate"
+                        class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate pr-6"
                         title={metric.name}
                       >
                         {metric.name}
                       </div>
                       <div
-                        class="text-ctp-text font-semibold tabular-nums font-mono truncate"
+                        class="text-ctp-text font-semibold tabular-nums font-mono truncate pr-6"
                         title={String(metric.value)}
                       >
                         {typeof metric.value === "number"
