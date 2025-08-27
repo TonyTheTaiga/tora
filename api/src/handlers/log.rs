@@ -37,8 +37,8 @@ pub async fn get_logs(
         ));
     }
 
-    let result = sqlx::query_as::<_, (i64, String, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-        "SELECT id, experiment_id::text, msg_id::text, name, value::float8, step::float8, metadata, created_at FROM log WHERE experiment_id = $1 ORDER BY created_at DESC",
+    let result = sqlx::query_as::<_, (i64, String, String, String, f64, Option<i64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
+        "SELECT id, experiment_id::text, msg_id::text, name, value::float8, step::int8, metadata, created_at FROM log WHERE experiment_id = $1 ORDER BY created_at DESC",
     )
     .bind(experiment_uuid)
     .fetch_all(&app_state.db_pool)
@@ -53,7 +53,7 @@ pub async fn get_logs(
                 msg_id,
                 name,
                 value,
-                step: step.map(|s| s as i64),
+                step,
                 metadata,
                 created_at,
             },
@@ -96,13 +96,13 @@ pub async fn create_log(
     }
 
     let result = sqlx::query_as::<_, (i64, String, String, String, f64, Option<i64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-        "INSERT INTO log (experiment_id, msg_id, name, value, step, metadata) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, experiment_id::text, msg_id::text, name, value::float8, step::float8, metadata, created_at",
+        "INSERT INTO log (experiment_id, msg_id, name, value, step, metadata) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, experiment_id::text, msg_id::text, name, value::float8, step::int8, metadata, created_at",
     )
     .bind(experiment_uuid)
     .bind(uuid::Uuid::try_parse(&request.msg_id).expect("Failed to parse UUID"))
     .bind(&request.name)
     .bind(request.value)
-    .bind(request.step.map(|s| s as i64))
+    .bind(request.step)
     .bind(&request.metadata)
     .fetch_one(&app_state.db_pool)
     .await?;
@@ -184,11 +184,7 @@ pub async fn batch_create_logs(
         .map(|m| uuid::Uuid::try_parse(&m.msg_id).expect("Invalid message ID"))
         .collect();
     let values: Vec<f64> = request.logs.iter().map(|m| m.value).collect();
-    let steps: Vec<Option<f64>> = request
-        .logs
-        .iter()
-        .map(|m| m.step.map(|s| s as f64))
-        .collect();
+    let steps: Vec<Option<i64>> = request.logs.iter().map(|m| m.step).collect();
     let metadata_values: Vec<Option<serde_json::Value>> =
         request.logs.iter().map(|m| m.metadata.clone()).collect();
 
@@ -201,7 +197,7 @@ pub async fn batch_create_logs(
               $2::uuid[],      -- msg_ids
               $3::text[],      -- names
               $4::float8[],    -- values
-              $5::float8[],    -- steps
+              $5::int8[],      -- steps
               $6::jsonb[]      -- metadata
             ) AS t(msg_id, name, value, step, metadata)
             "#,
@@ -262,8 +258,8 @@ pub async fn export_logs_csv(
         ));
     }
 
-    let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-        "SELECT id, experiment_id::text, name, value::float8, step::float8, metadata, created_at FROM log WHERE experiment_id = $1 ORDER BY created_at ASC",
+    let result = sqlx::query_as::<_, (i64, String, String, f64, Option<i64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
+        "SELECT id, experiment_id::text, name, value::float8, step::int8, metadata, created_at FROM log WHERE experiment_id = $1 ORDER BY created_at ASC",
     )
     .bind(experiment_uuid)
     .fetch_all(&app_state.db_pool)
