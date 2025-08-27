@@ -1,6 +1,6 @@
 <script lang="ts">
   import ExperimentChart from "./ExperimentChart.svelte";
-  import type { Experiment } from "$lib/types";
+  import type { Experiment, HyperParam } from "$lib/types";
   import { copyToClipboard } from "$lib/utils/common";
   import { loading, errors } from "./state.svelte";
   import { ChevronDown, ChevronRight, Pin } from "@lucide/svelte";
@@ -16,7 +16,7 @@
   let sortedHyperparams = $derived(
     experiment.hyperparams
       ?.slice()
-      .sort((a, b) => a.key.localeCompare(b.key)) ?? [],
+      .sort((a: HyperParam, b: HyperParam) => a.key.localeCompare(b.key)) ?? [],
   );
 
   let pinnedResults = $derived(
