@@ -10,7 +10,7 @@ use axum::{
 };
 use tracing::{debug, info};
 
-pub async fn get_metrics(
+pub async fn get_logs(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
@@ -66,7 +66,7 @@ pub async fn get_metrics(
     .into_response())
 }
 
-pub async fn create_metric(
+pub async fn create_log(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
@@ -126,7 +126,7 @@ pub async fn create_metric(
         .into_response())
 }
 
-pub async fn batch_create_metrics(
+pub async fn batch_create_logs(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
@@ -215,7 +215,7 @@ pub async fn batch_create_metrics(
         .into_response())
 }
 
-pub async fn export_metrics_csv(
+pub async fn export_logs_csv(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
