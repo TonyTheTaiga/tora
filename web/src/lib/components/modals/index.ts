@@ -9,3 +9,4 @@ export { default as CreateWorkspaceModal } from "./create-workspace-modal.svelte
 export { default as WorkspaceInviteModal } from "./workspace-invite-modal.svelte";
 export { default as DeleteWorkspaceModal } from "./delete-workspace-modal.svelte";
 export { default as DeleteExperimentModal } from "./delete-experiment-modal.svelte";
+export { default as RevokeApiKeyModal } from "./revoke-api-key-modal.svelte";

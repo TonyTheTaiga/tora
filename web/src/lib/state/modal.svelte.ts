@@ -1,4 +1,4 @@
-import type { Experiment, Workspace } from "$lib/types";
+import type { Experiment, Workspace, ApiKey } from "$lib/types";
 
 interface ModalState {
   createExperiment: boolean;
@@ -6,9 +6,9 @@ interface ModalState {
   deleteExperiment: Experiment | null;
   selectedExperiment: Experiment | null;
   createWorkspace: boolean;
-  // workspace-centric modals (coarse-grained)
   deleteWorkspace?: Workspace | null;
   inviteWorkspace?: Workspace | null;
+  revokeApiKey?: ApiKey | null;
 }
 
 interface AppState {
@@ -24,6 +24,7 @@ const state = $state<AppState>({
     createWorkspace: false,
     deleteWorkspace: null,
     inviteWorkspace: null,
+    revokeApiKey: null,
   },
 });
 
@@ -106,4 +107,17 @@ export function resetWorkspaceToInvite() {
 
 export function getWorkspaceToInvite() {
   return state.modals.inviteWorkspace;
+}
+
+// Settings: API key revocation
+export function setApiKeyToRevoke(apiKey: ApiKey) {
+  state.modals.revokeApiKey = apiKey;
+}
+
+export function resetApiKeyToRevoke() {
+  state.modals.revokeApiKey = null;
+}
+
+export function getApiKeyToRevoke() {
+  return state.modals.revokeApiKey;
 }
