@@ -8,7 +8,6 @@
   let { experiment } = $props();
   let results = $state<any[]>([]);
   let metricData = $state<Record<string, number[]>>({});
-  // hyperparameters are always visible within header when header is expanded
   let pinnedNames = $state<string[]>([]);
   let showResults = $state(true);
   let showHeader = $state(true);

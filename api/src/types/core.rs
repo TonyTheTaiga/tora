@@ -70,9 +70,10 @@ pub struct Hyperparam {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Metric {
+pub struct Log {
     pub id: i64,
     pub experiment_id: String,
+    pub msg_id: String,
     pub name: String,
     pub value: f64,
     pub step: Option<i64>,

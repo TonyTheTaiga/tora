@@ -1,7 +1,7 @@
 use crate::handlers::{AppError, AppResult, parse_uuid};
 use crate::middleware::auth::AuthenticatedUser;
 use crate::state::AppState;
-use crate::types::{BatchCreateMetricsRequest, CreateMetricRequest, Metric, Response};
+use crate::types::{BatchCreateLogsRequest, CreateLogRequest, Log, Response};
 use axum::{
     Extension, Json,
     extract::{Path, State},
@@ -37,19 +37,20 @@ pub async fn get_logs(
         ));
     }
 
-    let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-        "SELECT id, experiment_id::text, name, value::float8, step::float8, metadata, created_at FROM log WHERE experiment_id = $1 ORDER BY created_at DESC",
+    let result = sqlx::query_as::<_, (i64, String, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
+        "SELECT id, experiment_id::text, msg_id::text, name, value::float8, step::float8, metadata, created_at FROM log WHERE experiment_id = $1 ORDER BY created_at DESC",
     )
     .bind(experiment_uuid)
     .fetch_all(&app_state.db_pool)
     .await?;
 
-    let metrics: Vec<Metric> = result
+    let metrics: Vec<Log> = result
         .into_iter()
         .map(
-            |(id, experiment_id, name, value, step, metadata, created_at)| Metric {
+            |(id, experiment_id, msg_id, name, value, step, metadata, created_at)| Log {
                 id,
                 experiment_id,
+                msg_id,
                 name,
                 value,
                 step: step.map(|s| s as i64),
@@ -70,7 +71,7 @@ pub async fn create_log(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
-    Json(request): Json<CreateMetricRequest>,
+    Json(request): Json<CreateLogRequest>,
 ) -> AppResult<impl IntoResponse> {
     let user_uuid = parse_uuid(&user.id, "user_id")?;
     let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
@@ -94,24 +95,26 @@ pub async fn create_log(
         ));
     }
 
-    let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-        "INSERT INTO log (experiment_id, name, value, step, metadata) VALUES ($1, $2, $3, $4, $5) RETURNING id, experiment_id::text, name, value::float8, step::float8, metadata, created_at",
+    let result = sqlx::query_as::<_, (i64, String, String, String, f64, Option<i64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
+        "INSERT INTO log (experiment_id, msg_id, name, value, step, metadata) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, experiment_id::text, msg_id::text, name, value::float8, step::float8, metadata, created_at",
     )
     .bind(experiment_uuid)
+    .bind(uuid::Uuid::try_parse(&request.msg_id).expect("Failed to parse UUID"))
     .bind(&request.name)
     .bind(request.value)
-    .bind(request.step.map(|s| s as f64))
+    .bind(request.step.map(|s| s as i64))
     .bind(&request.metadata)
     .fetch_one(&app_state.db_pool)
     .await?;
 
-    let (id, experiment_id, name, value, step, metadata, created_at) = result;
-    let metric = Metric {
+    let (id, experiment_id, msg_id, name, value, step, metadata, created_at) = result;
+    let metric = Log {
         id,
         experiment_id,
+        msg_id,
         name,
         value,
-        step: step.map(|s| s as i64),
+        step,
         metadata,
         created_at,
     };
@@ -130,16 +133,16 @@ pub async fn batch_create_logs(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
-    Json(request): Json<BatchCreateMetricsRequest>,
+    Json(request): Json<BatchCreateLogsRequest>,
 ) -> impl IntoResponse {
     info!(
         "Batch creating {} metrics for experiment {} by user: {}",
-        request.metrics.len(),
+        request.logs.len(),
         experiment_id,
         user.email
     );
     debug!("Batch metrics request: {:?}", request);
-    if request.metrics.is_empty() {
+    if request.logs.is_empty() {
         return Ok((
             StatusCode::CREATED,
             Json(Response::<String> {
@@ -174,22 +177,37 @@ pub async fn batch_create_logs(
 
     let mut tx = app_state.db_pool.begin().await?;
 
-    let names: Vec<String> = request.metrics.iter().map(|m| m.name.clone()).collect();
-    let values: Vec<f64> = request.metrics.iter().map(|m| m.value).collect();
+    let names: Vec<String> = request.logs.iter().map(|m| m.name.clone()).collect();
+    let msg_ids: Vec<uuid::Uuid> = request
+        .logs
+        .iter()
+        .map(|m| uuid::Uuid::try_parse(&m.msg_id).expect("Invalid message ID"))
+        .collect();
+    let values: Vec<f64> = request.logs.iter().map(|m| m.value).collect();
     let steps: Vec<Option<f64>> = request
-        .metrics
+        .logs
         .iter()
         .map(|m| m.step.map(|s| s as f64))
         .collect();
     let metadata_values: Vec<Option<serde_json::Value>> =
-        request.metrics.iter().map(|m| m.metadata.clone()).collect();
+        request.logs.iter().map(|m| m.metadata.clone()).collect();
+
     let result = sqlx::query(
         r#"
-        INSERT INTO log (experiment_id, name, value, step, metadata)
-        SELECT $1, unnest($2::text[]), unnest($3::float8[]), unnest($4::float8[]), unnest($5::jsonb[])
-        "#,
+            INSERT INTO public.log (experiment_id, msg_id, name, value, step, metadata)
+            SELECT
+              $1, t.msg_id, t.name, t.value, t.step, t.metadata
+            FROM unnest(
+              $2::uuid[],      -- msg_ids
+              $3::text[],      -- names
+              $4::float8[],    -- values
+              $5::float8[],    -- steps
+              $6::jsonb[]      -- metadata
+            ) AS t(msg_id, name, value, step, metadata)
+            "#,
     )
     .bind(experiment_uuid)
+    .bind(&msg_ids)
     .bind(&names)
     .bind(&values)
     .bind(&steps)
@@ -201,7 +219,7 @@ pub async fn batch_create_logs(
     tx.commit().await?;
     info!(
         "Successfully committed {} metrics for experiment {}",
-        request.metrics.len(),
+        request.logs.len(),
         experiment_id
     );
 

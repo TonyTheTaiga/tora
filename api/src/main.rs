@@ -1,4 +1,9 @@
 use axum::Router;
+use fred::{
+    interfaces::ClientLike,
+    prelude::{Config, EventInterface, TcpConfig},
+    types::Builder,
+};
 use sqlx::postgres::PgPoolOptions;
 use std::time::Duration;
 use tokio::signal;
@@ -42,7 +47,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     info!("Database connection established successfully");
 
-    let app_state = state::AppState { db_pool, settings };
+    info!("Creating Valkey Client");
+    let vk_config = Config::from_url("redis://localhost:6379/1")?;
+    let vk_client = Builder::from_config(vk_config)
+        .with_connection_config(|config| {
+            config.connection_timeout = Duration::from_secs(5);
+            config.tcp = TcpConfig {
+                nodelay: Some(true),
+                ..Default::default()
+            };
+        })
+        .build()?;
+
+    vk_client.init().await?;
+    vk_client.on_error(|(error, server)| async move {
+        println!("{server:?}: connection error: {error:?}");
+        Ok(())
+    });
+
+    info!("Valkey client created!");
+
+    let app_state = state::AppState {
+        db_pool,
+        settings,
+        vk_client,
+    };
     let api_routes = handlers::api_routes(&app_state);
     let app = Router::new().nest("/api", api_routes).with_state(app_state);
 

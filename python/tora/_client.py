@@ -1,6 +1,7 @@
 import logging
 from collections.abc import Mapping
 from typing import Any
+from uuid import uuid4
 
 from ._config import TORA_API_KEY, TORA_BASE_URL
 from ._exceptions import (
@@ -456,6 +457,7 @@ class Tora:
 
         log_entry = {
             "name": name,
+            "msg_id": str(uuid4()),
             "value": value,
             "step": step,
             "metadata": metadata,
@@ -519,18 +521,18 @@ class Tora:
         if not self._buffer or self._closed:
             return
 
-        metrics_to_send = self._buffer.copy()
+        logs = self._buffer.copy()
 
         try:
-            logger.debug(f"Sending {len(metrics_to_send)} metrics for experiment {self._experiment_id}")
+            logger.debug(f"Sending {len(logs)} metrics for experiment {self._experiment_id}")
             response = self._http_client.post(
                 f"/experiments/{self._experiment_id}/logs/batch",
-                json={"metrics": metrics_to_send},
+                json={"logs": logs},
                 timeout=120,
             )
             response.raise_for_status()
             self._buffer = []
-            logger.debug(f"Successfully sent {len(metrics_to_send)} metrics")
+            logger.debug(f"Successfully sent {len(logs)} metrics")
 
         except HTTPStatusError as e:
             error_msg = f"Failed to write metrics (HTTP {e.status_code})"
