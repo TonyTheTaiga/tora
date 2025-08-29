@@ -6,7 +6,7 @@ use fred::{
 };
 use sqlx::postgres::PgPoolOptions;
 use std::time::Duration;
-use tokio::signal;
+use tokio::{signal, task};
 use tracing::{info, warn};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -15,6 +15,7 @@ mod middleware;
 mod settings;
 mod state;
 mod types;
+mod worker;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -72,13 +73,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         settings,
         vk_client,
     };
+
+    task::spawn(worker::outbox_worker::run_worker(app_state.clone()));
+
     let api_routes = handlers::api_routes(&app_state);
     let app = Router::new().nest("/api", api_routes).with_state(app_state);
-
     info!("Starting server on 0.0.0.0:8080");
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
     info!("Server listening on 0.0.0.0:8080");
-
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await?;
