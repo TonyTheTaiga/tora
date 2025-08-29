@@ -95,11 +95,52 @@ pub async fn create_log(
         ));
     }
 
-    let result = sqlx::query_as::<_, (i64, String, String, String, f64, Option<i64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-        "INSERT INTO log (experiment_id, msg_id, name, value, step, metadata) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, experiment_id::text, msg_id::text, name, value::float8, step::int8, metadata, created_at",
+    let msg_uuid = uuid::Uuid::try_parse(&request.msg_id).expect("Failed to parse UUID");
+    let (id, experiment_id, msg_id, name, value, step, metadata, created_at) = sqlx::query_as::<
+        _,
+        (
+            i64,
+            String,
+            String,
+            String,
+            f64,
+            Option<i64>,
+            Option<serde_json::Value>,
+            chrono::DateTime<chrono::Utc>,
+        ),
+    >(
+        r#"
+        WITH ins AS (
+          INSERT INTO public.log (experiment_id, msg_id, name, value, step, metadata)
+          VALUES ($1, $2, $3, $4, $5, $6)
+          RETURNING id, experiment_id, msg_id, name, value, step, metadata, created_at
+        ), outbox_ins AS (
+          INSERT INTO public.log_outbox (experiment_id, msg_id, payload)
+          SELECT
+            i.experiment_id,
+            i.msg_id,
+            jsonb_build_object(
+              'name', i.name,
+              'step', i.step,
+              'type', i.metadata->>'type'
+            )
+          FROM ins i
+          ON CONFLICT (msg_id) DO NOTHING
+          RETURNING 1
+        )
+        SELECT id,
+               experiment_id::text,
+               msg_id::text,
+               name,
+               value::float8,
+               step::int8,
+               metadata,
+               created_at
+        FROM ins
+        "#,
     )
     .bind(experiment_uuid)
-    .bind(uuid::Uuid::try_parse(&request.msg_id).expect("Failed to parse UUID"))
+    .bind(msg_uuid)
     .bind(&request.name)
     .bind(request.value)
     .bind(request.step)
@@ -107,7 +148,6 @@ pub async fn create_log(
     .fetch_one(&app_state.db_pool)
     .await?;
 
-    let (id, experiment_id, msg_id, name, value, step, metadata, created_at) = result;
     let metric = Log {
         id,
         experiment_id,
@@ -175,8 +215,6 @@ pub async fn batch_create_logs(
         ));
     }
 
-    let mut tx = app_state.db_pool.begin().await?;
-
     let names: Vec<String> = request.logs.iter().map(|m| m.name.clone()).collect();
     let msg_ids: Vec<uuid::Uuid> = request
         .logs
@@ -188,31 +226,47 @@ pub async fn batch_create_logs(
     let metadata_values: Vec<Option<serde_json::Value>> =
         request.logs.iter().map(|m| m.metadata.clone()).collect();
 
-    let result = sqlx::query(
+    let inserted_count = sqlx::query_scalar::<_, i64>(
         r#"
-            INSERT INTO public.log (experiment_id, msg_id, name, value, step, metadata)
-            SELECT
-              $1, t.msg_id, t.name, t.value, t.step, t.metadata
-            FROM unnest(
-              $2::uuid[],      -- msg_ids
-              $3::text[],      -- names
-              $4::float8[],    -- values
-              $5::int8[],      -- steps
-              $6::jsonb[]      -- metadata
-            ) AS t(msg_id, name, value, step, metadata)
-            "#,
+        WITH t AS (
+          SELECT * FROM unnest(
+            $1::uuid[],
+            $2::text[],
+            $3::float8[],
+            $4::int8[],
+            $5::jsonb[]
+          ) AS u(msg_id, name, value, step, metadata)
+        ), ins AS (
+          INSERT INTO public.log (experiment_id, msg_id, name, value, step, metadata)
+          SELECT $6, t.msg_id, t.name, t.value, t.step, t.metadata FROM t
+          RETURNING experiment_id, msg_id, name, step, metadata
+        ), outbox AS (
+          INSERT INTO public.log_outbox (experiment_id, msg_id, payload)
+          SELECT
+            $6,
+            i.msg_id,
+            jsonb_build_object(
+              'name', i.name,
+              'step', i.step,
+              'type', i.metadata->>'type'
+            )
+          FROM ins i
+          ON CONFLICT (msg_id) DO NOTHING
+          RETURNING 1
+        )
+        SELECT COUNT(*) FROM ins
+        "#,
     )
-    .bind(experiment_uuid)
     .bind(&msg_ids)
     .bind(&names)
     .bind(&values)
     .bind(&steps)
     .bind(&metadata_values)
-    .execute(&mut *tx)
+    .bind(experiment_uuid)
+    .fetch_one(&app_state.db_pool)
     .await?;
 
-    debug!("Successfully inserted {} metrics", result.rows_affected());
-    tx.commit().await?;
+    debug!("Successfully inserted {} metrics", inserted_count);
     info!(
         "Successfully committed {} metrics for experiment {}",
         request.logs.len(),

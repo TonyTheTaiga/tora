@@ -1,4 +1,3 @@
-use chrono;
 use serde::{Deserialize, Serialize};
 use sqlx;
 
@@ -67,6 +66,18 @@ pub enum HyperparamValue {
 pub struct Hyperparam {
     pub key: String,
     pub value: HyperparamValue,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct OutLog {
+    pub id: i64,
+    pub experiment_id: String,
+    pub msg_id: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub payload: serde_json::Value,
+    pub attempt_count: i8,
+    pub next_attemp_at: chrono::DateTime<chrono::Utc>,
+    pub processed_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
