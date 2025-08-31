@@ -92,7 +92,7 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
             protected_route(get(log::export_logs_csv), app_state),
         )
         .route(
-            "experiments/{experiment_id}/logs/stream",
+            "/experiments/{experiment_id}/logs/stream",
             protected_route(any(stream::stream_logs), app_state),
         )
         // Settings and user management

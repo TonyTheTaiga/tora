@@ -26,13 +26,6 @@ impl std::error::Error for PublishError {
 async fn get_unpublished_rows(db_pool: &PgPool) -> Vec<OutLog> {
     sqlx::query_as::<_, OutLog>(
         r#"
-        with ranked as (
-            select
-                lo.*,
-                row_number() over (partition by lo.experiment_id order by lo.id asc) as rn
-            from public.log_outbox lo
-            where lo.processed_at is null
-        )
         select 
             id,
             experiment_id::text,
@@ -42,8 +35,9 @@ async fn get_unpublished_rows(db_pool: &PgPool) -> Vec<OutLog> {
             attempt_count,
             next_attempt_at,
             processed_at 
-        from ranked 
-        where rn = 1 and next_attempt_at <= now()
+        from public.log_outbox 
+        where processed_at is null
+        order by id asc
         "#,
     )
     .fetch_all(db_pool)
@@ -119,6 +113,7 @@ async fn report_failed_logs(
 pub async fn run_worker(state: AppState) {
     loop {
         let rows = get_unpublished_rows(&state.db_pool).await;
+        println!("{rows:?}");
         println!("got {:?} rows", rows.len());
 
         let client = state.vk_pool.next_connected();
