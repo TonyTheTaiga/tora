@@ -1,7 +1,7 @@
 use axum::Router;
 use fred::{
     interfaces::ClientLike,
-    prelude::{Config, EventInterface, TcpConfig},
+    prelude::{Config, TcpConfig},
     types::Builder,
 };
 use sqlx::postgres::PgPoolOptions;
@@ -50,7 +50,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     info!("Creating Valkey Client");
     let vk_config = Config::from_url("redis://localhost:6379/1")?;
-    let vk_client = Builder::from_config(vk_config)
+    let vk_pool = Builder::from_config(vk_config)
         .with_connection_config(|config| {
             config.connection_timeout = Duration::from_secs(5);
             config.tcp = TcpConfig {
@@ -58,20 +58,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 ..Default::default()
             };
         })
-        .build()?;
+        .with_performance_config(|config| config.broadcast_channel_capacity = 64)
+        .build_pool(8)
+        .expect("Failed to create valkey pool");
 
-    vk_client.init().await?;
-    vk_client.on_error(|(error, server)| async move {
-        println!("{server:?}: connection error: {error:?}");
-        Ok(())
-    });
+    vk_pool
+        .init()
+        .await
+        .expect("Failed to connect to valkey instance");
 
     info!("Valkey client created!");
 
     let app_state = state::AppState {
         db_pool,
         settings,
-        vk_client,
+        vk_pool,
     };
 
     task::spawn(worker::outbox_worker::run_worker(app_state.clone()));
