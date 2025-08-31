@@ -230,3 +230,4 @@ xcuserdata
 
 seed.sql
 test_ws.py
+test_redis.py
