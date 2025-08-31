@@ -132,16 +132,9 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
         .route("/login", post(user::login))
         .route("/refresh", post(user::refresh_token));
 
-    let ws_routes: Router<AppState> = Router::new().route(
-        "/stream-logs",
-        // protected_route(any(stream::stream_logs), app_state),
-        any(stream::stream_logs),
-    );
-
     Router::new()
         .merge(protected_routes)
         .merge(public_routes)
-        .merge(ws_routes)
         .layer(
             ServiceBuilder::new()
                 .layer(
