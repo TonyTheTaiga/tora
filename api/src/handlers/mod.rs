@@ -93,7 +93,8 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
         )
         .route(
             "/experiments/{experiment_id}/logs/stream",
-            protected_route(any(stream::stream_logs), app_state),
+            // protected_route(any(stream::stream_logs), app_state),
+            any(stream::stream_logs),
         )
         // Settings and user management
         .route(

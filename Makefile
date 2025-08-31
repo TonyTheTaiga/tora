@@ -9,3 +9,6 @@ dump:
 
 reset-db:
 	supabase db reset
+
+db:
+	psql postgresql://postgres:postgres@127.0.0.1:54322/postgres

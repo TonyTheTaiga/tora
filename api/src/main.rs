@@ -49,7 +49,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("Database connection established successfully");
 
     info!("Creating Valkey Client");
-    let vk_config = Config::from_url("redis://localhost:6379/1")?;
+    let vk_config = Config::from_url("redis://localhost:6379")?;
     let vk_pool = Builder::from_config(vk_config)
         .with_connection_config(|config| {
             config.connection_timeout = Duration::from_secs(5);

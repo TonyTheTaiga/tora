@@ -675,6 +675,7 @@ dependencies = [
  "rustls",
  "rustls-native-certs",
  "semver",
+ "serde_json",
  "socket2",
  "tokio",
  "tokio-rustls",

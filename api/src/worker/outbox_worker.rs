@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use crate::{state::AppState, types::OutLog};
 
-const LOOP_TIMER: Duration = Duration::from_secs(15);
+const LOOP_TIMER: Duration = Duration::from_secs(5);
 
 #[derive(Debug)]
 struct PublishError {
@@ -37,6 +37,7 @@ async fn get_unpublished_rows(db_pool: &PgPool) -> Vec<OutLog> {
             processed_at 
         from public.log_outbox 
         where processed_at is null
+        and next_attempt_at <= now() - interval '30 seconds'
         order by id asc
         "#,
     )
@@ -51,7 +52,11 @@ async fn publish_outlog(
 ) -> std::result::Result<i64, PublishError> {
     let experiment_id = log.experiment_id;
     let channel = format!("log:exp:{experiment_id}");
-    let payload = Value::String(log.payload.to_string().into());
+    let payload = serde_json::to_string(&log.payload).map_err(|e| PublishError {
+        log_id: log.id,
+        source: e.into(),
+    })?;
+
     let _: i64 = publisher_client
         .publish(channel, payload)
         .await
@@ -113,7 +118,6 @@ async fn report_failed_logs(
 pub async fn run_worker(state: AppState) {
     loop {
         let rows = get_unpublished_rows(&state.db_pool).await;
-        println!("{rows:?}");
         println!("got {:?} rows", rows.len());
 
         let client = state.vk_pool.next_connected();
@@ -126,13 +130,14 @@ pub async fn run_worker(state: AppState) {
             }
         }
 
-        if !published_ids.is_empty() {
-            if let Err(e) = report_published_logs(&state.db_pool, &published_ids).await {
-                eprintln!("failed to mark published logs as processed: {e}");
-            }
-        }
+        // if !published_ids.is_empty() {
+        //     if let Err(e) = report_published_logs(&state.db_pool, &published_ids).await {
+        //         eprintln!("failed to mark published logs as processed: {e}");
+        //     }
+        // }
 
         if !failed_ids.is_empty() {
+            println!("failed to publish {:?} logs", failed_ids.len());
             if let Err(e) = report_failed_logs(&state.db_pool, &failed_ids).await {
                 eprintln!("failed to mark failed logs: {e}");
             }

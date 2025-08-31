@@ -121,10 +121,12 @@ pub async fn create_log(
             i.msg_id,
             jsonb_build_object(
               'name', i.name,
+              'value', i.value,
               'step', i.step,
               'type', i.metadata->>'type'
             )
           FROM ins i
+          WHERE i.metadata->>'type' = 'metric'
           ON CONFLICT (msg_id) DO NOTHING
           RETURNING 1
         )
@@ -239,7 +241,7 @@ pub async fn batch_create_logs(
         ), ins AS (
           INSERT INTO public.log (experiment_id, msg_id, name, value, step, metadata)
           SELECT $6, t.msg_id, t.name, t.value, t.step, t.metadata FROM t
-          RETURNING experiment_id, msg_id, name, step, metadata
+          RETURNING experiment_id, msg_id, name, value, step, metadata
         ), outbox AS (
           INSERT INTO public.log_outbox (experiment_id, msg_id, payload)
           SELECT
@@ -247,10 +249,12 @@ pub async fn batch_create_logs(
             i.msg_id,
             jsonb_build_object(
               'name', i.name,
+              'value', i.value,
               'step', i.step,
               'type', i.metadata->>'type'
             )
           FROM ins i
+          WHERE i.metadata->>'type' = 'metric'
           ON CONFLICT (msg_id) DO NOTHING
           RETURNING 1
         )
