@@ -1,9 +1,10 @@
 use axum::{
+    extract::Path,
     extract::ws::{WebSocket, WebSocketUpgrade},
     response::Response,
 };
 
-pub async fn stream_logs(ws: WebSocketUpgrade) -> Response {
+pub async fn stream_logs(Path(experiment_id): Path<String>, ws: WebSocketUpgrade) -> Response {
     ws.on_upgrade(handle_socket)
 }
 
