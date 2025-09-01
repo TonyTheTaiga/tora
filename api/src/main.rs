@@ -1,4 +1,3 @@
-use axum::Router;
 use fred::{
     interfaces::ClientLike,
     prelude::{Config, TcpConfig},
@@ -79,12 +78,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ));
 
     let api_routes = handlers::api_routes(&app_state);
-    let app = Router::new().nest("/api", api_routes).with_state(app_state);
-    let port: u16 = std::env::var("PORT")
-        .ok()
-        .and_then(|p| p.parse().ok())
-        .unwrap_or(3000);
-    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], port));
+    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], app_state.settings.http_port));
+    let app = api_routes.with_state(app_state);
     let listener = tokio::net::TcpListener::bind(addr).await?;
 
     info!("Server listening on {addr:?}");

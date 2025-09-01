@@ -2,6 +2,7 @@ use std::env;
 
 #[derive(Debug, Clone)]
 pub struct Settings {
+    pub http_port: u16,
     pub frontend_url: String,
     pub database_url: String,
     pub supabase_url: String,
@@ -23,6 +24,11 @@ fn load_env_value(env_name: String) -> Result<String, Box<dyn std::error::Error>
 
 impl Settings {
     pub fn from_env() -> Settings {
+        let http_port: u16 = match load_env_value("PORT".into()) {
+            Ok(s) => s.parse::<u16>().expect("PORT should be integer"),
+            Err(_) => 8080,
+        };
+
         let database_url =
             load_env_value("DATABASE_URL".to_string()).expect("DATABASE_URL not set!");
 
@@ -47,6 +53,7 @@ impl Settings {
         };
 
         Settings {
+            http_port,
             frontend_url,
             database_url,
             supabase_url,
