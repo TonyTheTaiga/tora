@@ -79,9 +79,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let api_routes = handlers::api_routes(&app_state);
     let app = Router::new().nest("/api", api_routes).with_state(app_state);
-    info!("Starting server on 0.0.0.0:8080");
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
-    info!("Server listening on 0.0.0.0:8080");
+    let port: u16 = std::env::var("PORT")
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(3000);
+    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], port));
+    let listener = tokio::net::TcpListener::bind(addr).await?;
+
+    info!("Server listening on {addr:?}");
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await?;
