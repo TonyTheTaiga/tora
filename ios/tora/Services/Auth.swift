@@ -334,7 +334,7 @@ class AuthService: ObservableObject {
         async throws -> UserSession
     {
         try await measure(OSLog.auth, name: "_login_with_email_and_password") {
-            guard let url = URL(string: "\(backendUrl)/api/login") else {
+            guard let url = URL(string: "\(backendUrl)/login") else {
                 throw AuthErrors.invalidURL
             }
 
@@ -388,7 +388,7 @@ class AuthService: ObservableObject {
     }
 
     private func refreshSession(_ refreshToken: String) async throws -> UserSession {
-        guard let url = URL(string: "\(backendUrl)/api/refresh") else {
+        guard let url = URL(string: "\(backendUrl)/refresh") else {
             throw AuthErrors.invalidURL
         }
 

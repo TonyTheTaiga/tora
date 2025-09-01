@@ -120,7 +120,7 @@ class ExperimentService: ObservableObject {
     // MARK: - Properties
 
     @Published var experiments: [Experiment] = []
-    private var baseUrl = Config.baseURL + "/api"
+    private var baseUrl = Config.baseURL
     private let authService: AuthService
     static let shared: ExperimentService = .init(
         authService: AuthService.shared

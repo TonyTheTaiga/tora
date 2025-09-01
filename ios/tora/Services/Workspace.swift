@@ -78,7 +78,7 @@ class WorkspaceService: ObservableObject {
     // MARK: - Properties
 
     @Published var workspaces: [Workspace] = []
-    private var baseUrl = Config.baseURL + "/api"
+    private var baseUrl = Config.baseURL
     private let authService: AuthService
     static let shared: WorkspaceService = .init(authService: AuthService.shared)
 
