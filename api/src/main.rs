@@ -73,7 +73,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         vk_pool,
     };
 
-    task::spawn(worker::outbox_worker::run_worker(app_state.clone()));
+    task::spawn(worker::outbox_worker::run_worker(
+        app_state.clone(),
+        Duration::from_secs(app_state.settings.outbox_polling_interval),
+    ));
 
     let api_routes = handlers::api_routes(&app_state);
     let app = Router::new().nest("/api", api_routes).with_state(app_state);

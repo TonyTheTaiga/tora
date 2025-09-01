@@ -5,8 +5,6 @@ use std::time::Duration;
 
 use crate::{state::AppState, types::OutLog};
 
-const LOOP_TIMER: Duration = Duration::from_secs(1);
-
 #[derive(Debug)]
 struct PublishError {
     log_id: i64,
@@ -115,7 +113,7 @@ async fn report_failed_logs(
     Ok(())
 }
 
-pub async fn run_worker(state: AppState) {
+pub async fn run_worker(state: AppState, polling_interval: Duration) {
     loop {
         let rows = get_unpublished_rows(&state.db_pool).await;
         println!("got {:?} rows", rows.len());
@@ -143,6 +141,6 @@ pub async fn run_worker(state: AppState) {
             }
         }
 
-        tokio::time::sleep(LOOP_TIMER).await;
+        tokio::time::sleep(polling_interval).await;
     }
 }
