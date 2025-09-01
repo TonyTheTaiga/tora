@@ -13,6 +13,7 @@
   let showResults = $state(true);
   let showHeader = $state(true);
   let showAllHyperparams = $state(false);
+  let chartRef: any = $state(null);
 
   let sortedHyperparams = $derived(
     experiment.hyperparams
@@ -119,7 +120,7 @@
     const scheme = base.startsWith("https") ? "wss" : "ws";
     return (
       base.replace(/^http(s)?:/, `${scheme}:`) +
-      `/api/experiments/${id}/logs/stream?token=${encodeURIComponent(token)}`
+      `/experiments/${id}/logs/stream?token=${encodeURIComponent(token)}`
     );
   }
 
