@@ -116,8 +116,6 @@ async fn report_failed_logs(
 pub async fn run_worker(state: AppState, polling_interval: Duration) {
     loop {
         let rows = get_unpublished_rows(&state.db_pool).await;
-        println!("got {:?} rows", rows.len());
-
         let client = state.vk_pool.next_connected();
         let mut published_ids: Vec<i64> = vec![];
         let mut failed_ids: Vec<i64> = vec![];
