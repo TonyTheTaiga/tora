@@ -4,7 +4,7 @@ import { fail, error } from "@sveltejs/kit";
 import { generateRequestId, startTimer } from "$lib/utils/timing";
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ locals, fetch }) => {
+export const load: PageServerLoad = async ({ locals }) => {
   if (!locals.session) {
     error(401, "Authentication required");
   }
@@ -16,8 +16,8 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
   try {
     const requestId = generateRequestId();
     const timer = startTimer("dashboard.page.load", { requestId });
-    const response = await fetch("/api/workspaces");
-    const apiResponse: ApiResponse<Workspace[]> = await response.json();
+    const apiResponse =
+      await locals.apiClient.get<ApiResponse<Workspace[]>>("/workspaces");
     const workspaces = apiResponse.data.map((workspace: any) => ({
       id: workspace.id,
       name: workspace.name,

@@ -69,7 +69,7 @@ export const actions: Actions = {
       }
 
       const response = await locals.apiClient.post<ApiResponse<Workspace>>(
-        "/api/workspaces",
+        "/workspaces",
         {
           name: name.trim(),
           description: description?.trim() || null,
@@ -129,9 +129,7 @@ export const actions: Actions = {
     try {
       const data = await request.formData();
       const workspaceId = data.get("workspaceId") as string;
-      await fetch(`/api/workspaces/${workspaceId}`, {
-        method: "DELETE",
-      });
+      await locals.apiClient.delete(`/workspaces/${workspaceId}`);
       return { success: true };
     } catch (err) {
       console.error("failed to delete workspace", err);
@@ -159,7 +157,7 @@ export const actions: Actions = {
       payload["workspaceId"] = workspaceId;
     }
 
-    await locals.apiClient.post("/api/experiments", payload);
+    await locals.apiClient.post("/experiments", payload);
     return { success: true };
   },
 
@@ -170,7 +168,7 @@ export const actions: Actions = {
       "experiment-description": description,
       tags,
     } = parseFormData(await request.formData());
-    await locals.apiClient.put(`/api/experiments/${id}`, {
+    await locals.apiClient.put(`/experiments/${id}`, {
       name: name,
       description: description || "",
       tags,
@@ -188,7 +186,7 @@ export const actions: Actions = {
         message: "A valid ID is required",
       });
     }
-    await locals.apiClient.delete<null>(`/api/experiments/${id}`);
+    await locals.apiClient.delete<null>(`/experiments/${id}`);
     return { success: true };
   },
 
@@ -203,7 +201,7 @@ export const actions: Actions = {
 
     try {
       await locals.apiClient.put(
-        `/api/workspaces/any/invitations?invitationId=${invitationId}&action=${action}`,
+        `/workspaces/any/invitations?invitationId=${invitationId}&action=${action}`,
       );
       return { success: true };
     } catch (error) {
@@ -221,7 +219,7 @@ export const actions: Actions = {
     }
 
     try {
-      await locals.apiClient.post(`/api/workspaces/${workspaceId}/leave`);
+      await locals.apiClient.post(`/workspaces/${workspaceId}/leave`);
       return { success: true };
     } catch (error) {
       console.error("Failed to leave workspace:", error);
@@ -240,7 +238,7 @@ export const actions: Actions = {
     }
 
     try {
-      await locals.apiClient.post("/api/workspace-invitations", {
+      await locals.apiClient.post("/workspace-invitations", {
         workspaceId,
         email,
         roleId,

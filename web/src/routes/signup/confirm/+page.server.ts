@@ -1,6 +1,6 @@
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ url, fetch }) => {
+export const load: PageServerLoad = async ({ url, locals }) => {
   const tokenHash = url.searchParams.get("token_hash");
   const confirmType = url.searchParams.get("confirm_type");
 
@@ -12,25 +12,14 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
   }
 
   try {
-    const apiUrl = new URL("/api/signup/confirm", url.origin);
-    apiUrl.searchParams.set("token_hash", tokenHash);
-    apiUrl.searchParams.set("confirm_type", confirmType);
-
-    const response = await fetch(apiUrl.toString());
-
-    if (response.ok) {
-      const result = await response.json();
-      return {
-        success: true,
-        message: "Email confirmed successfully! Redirecting to dashboard...",
-        data: result,
-      };
-    } else {
-      return {
-        success: false,
-        message: "Confirmation failed. The link may be invalid or expired.",
-      };
-    }
+    const result = await locals.apiClient.get<any>(
+      `/signup/confirm?token_hash=${encodeURIComponent(tokenHash)}&confirm_type=${encodeURIComponent(confirmType)}`,
+    );
+    return {
+      success: true,
+      message: "Email confirmed successfully! Redirecting to dashboard...",
+      data: result,
+    };
   } catch (err) {
     console.error("Signup confirmation error:", err);
     return {

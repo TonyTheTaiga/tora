@@ -21,7 +21,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     } else {
       apiClient = new ApiClient();
       try {
-        const response = await apiClient.post<RefreshResponse>("/api/refresh", {
+        const response = await apiClient.post<RefreshResponse>("/refresh", {
           refresh_token: sessionData.refresh_token,
         });
         if (response.status === 200) {

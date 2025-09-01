@@ -6,7 +6,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     const settingsData = await locals.apiClient.get<{
       user: any;
       apiKeys: any[];
-    }>("/api/settings");
+    }>("/settings");
 
     return {
       user: settingsData.user,
@@ -34,7 +34,7 @@ export const actions: Actions = {
 
     try {
       const result = await locals.apiClient.post<{ data: { key: string } }>(
-        "/api/api-keys",
+        "/api-keys",
         {
           name,
         },
@@ -55,7 +55,7 @@ export const actions: Actions = {
     }
 
     try {
-      await locals.apiClient.delete(`/api/api-keys/${keyId}`);
+      await locals.apiClient.delete(`/api-keys/${keyId}`);
       return { success: true };
     } catch (error) {
       console.error("Failed to revoke API key:", error);

@@ -14,7 +14,7 @@ export const actions: Actions = {
     }
 
     try {
-      await locals.apiClient.post("/api/signup", {
+      await locals.apiClient.post("/signup", {
         email,
         password,
       });
