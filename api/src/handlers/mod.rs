@@ -96,6 +96,10 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
             // protected_route(any(stream::stream_logs), app_state),
             any(stream::stream_logs),
         )
+        .route(
+            "/experiments/{id}/logs/stream-token",
+            protected_route(post(stream::create_stream_token), app_state),
+        )
         // Settings and user management
         .route(
             "/settings",
