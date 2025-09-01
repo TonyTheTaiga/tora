@@ -7,6 +7,7 @@ pub struct Settings {
     pub supabase_url: String,
     pub supabase_api_key: String,
     pub supabase_jwt_secret: String,
+    pub redis_url: String,
 }
 
 fn load_env_value(env_name: String) -> Result<String, Box<dyn std::error::Error>> {
@@ -36,12 +37,15 @@ impl Settings {
         let supabase_jwt_secret = load_env_value("SUPABASE_JWT_SECRET".to_string())
             .expect("SUPABASE_JWT_SECRET not set!");
 
+        let redis_url = load_env_value("REDIS_URL".to_string()).expect("REDIS_URL not set!");
+
         Settings {
             frontend_url,
             database_url,
             supabase_url,
             supabase_api_key,
             supabase_jwt_secret,
+            redis_url,
         }
     }
 }

@@ -35,10 +35,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     info!("Starting Tora API server");
     let settings = settings::Settings::from_env();
-    info!(
-        "Loaded settings: database_url configured, frontend_url: {}",
-        settings.frontend_url
-    );
+    info!("Settings loaded!");
+
     info!("Connecting to database...");
     let db_pool = PgPoolOptions::new()
         .max_connections(20)
@@ -49,7 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("Database connection established successfully");
 
     info!("Creating Valkey Client");
-    let vk_config = Config::from_url("redis://localhost:6379")?;
+    let vk_config = Config::from_url(&settings.redis_url)?;
     let vk_pool = Builder::from_config(vk_config)
         .with_connection_config(|config| {
             config.connection_timeout = Duration::from_secs(5);
