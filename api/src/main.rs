@@ -1,7 +1,12 @@
 use axum::Router;
+use fred::{
+    interfaces::ClientLike,
+    prelude::{Config, TcpConfig},
+    types::Builder,
+};
 use sqlx::postgres::PgPoolOptions;
 use std::time::Duration;
-use tokio::signal;
+use tokio::{signal, task};
 use tracing::{info, warn};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -10,6 +15,7 @@ mod middleware;
 mod settings;
 mod state;
 mod types;
+mod worker;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -29,10 +35,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     info!("Starting Tora API server");
     let settings = settings::Settings::from_env();
-    info!(
-        "Loaded settings: database_url configured, frontend_url: {}",
-        settings.frontend_url
-    );
+    info!("Settings loaded!");
+
     info!("Connecting to database...");
     let db_pool = PgPoolOptions::new()
         .max_connections(20)
@@ -42,14 +46,48 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     info!("Database connection established successfully");
 
-    let app_state = state::AppState { db_pool, settings };
+    info!("Creating Valkey Client");
+    let vk_config = Config::from_url(&settings.redis_url)?;
+    let vk_pool = Builder::from_config(vk_config)
+        .with_connection_config(|config| {
+            config.connection_timeout = Duration::from_secs(5);
+            config.tcp = TcpConfig {
+                nodelay: Some(true),
+                ..Default::default()
+            };
+        })
+        .with_performance_config(|config| config.broadcast_channel_capacity = 64)
+        .build_pool(8)
+        .expect("Failed to create valkey pool");
+
+    vk_pool
+        .init()
+        .await
+        .expect("Failed to connect to valkey instance");
+
+    info!("Valkey client created!");
+
+    let app_state = state::AppState {
+        db_pool,
+        settings,
+        vk_pool,
+    };
+
+    task::spawn(worker::outbox_worker::run_worker(
+        app_state.clone(),
+        Duration::from_secs(app_state.settings.outbox_polling_interval),
+    ));
+
     let api_routes = handlers::api_routes(&app_state);
     let app = Router::new().nest("/api", api_routes).with_state(app_state);
+    let port: u16 = std::env::var("PORT")
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(3000);
+    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], port));
+    let listener = tokio::net::TcpListener::bind(addr).await?;
 
-    info!("Starting server on 0.0.0.0:8080");
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
-    info!("Server listening on 0.0.0.0:8080");
-
+    info!("Server listening on {addr:?}");
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await?;

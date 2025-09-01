@@ -28,13 +28,18 @@ CREATE TABLE IF NOT EXISTS public.experiment (
 
 -- Log entries (metrics/results)
 CREATE TABLE IF NOT EXISTS public.log (
-  id bigserial PRIMARY KEY,
-  experiment_id uuid REFERENCES public.experiment(id) ON UPDATE CASCADE ON DELETE CASCADE,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  name text NOT NULL,
-  value numeric NOT NULL,
-  step numeric,
-  metadata jsonb
+  id            bigserial PRIMARY KEY,
+  experiment_id uuid NOT NULL
+    REFERENCES public.experiment(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  msg_id        uuid NOT NULL,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  name          text NOT NULL,
+  value         numeric NOT NULL,
+  step          numeric,
+  metadata      jsonb,
+  CONSTRAINT log_unique_exp_msg UNIQUE (experiment_id, msg_id)
 );
 
 -- Workspace <-> Experiment mapping

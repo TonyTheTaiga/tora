@@ -51,18 +51,18 @@
 </script>
 
 <div
-  class="min-h-0 grow grid grid-cols-[25%_25%_50%] overflow-hidden p-4 space-x-2"
+  class="min-h-0 min-w-0 grow grid grid-cols-[25%_25%_50%] overflow-hidden p-4 space-x-2"
 >
   <!-- Workspace Column -->
   <section
-    class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 overflow-y-auto"
+    class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 min-w-0 overflow-y-auto overflow-x-hidden"
   >
     <WorkspaceColumn {workspaces} {workspaceRoles} {workspaceInvitations} />
   </section>
 
   <!-- Experiment List Column -->
   <section
-    class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 overflow-y-auto"
+    class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 min-w-0 overflow-y-auto overflow-x-hidden"
   >
     {#if selectedWorkspace}
       <ExperimentListColumn workspace={selectedWorkspace} />
@@ -75,7 +75,7 @@
 
   <!-- Experiment Details Column -->
   <section
-    class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 overflow-y-auto"
+    class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 min-w-0 overflow-y-auto overflow-x-hidden"
   >
     {#if selectedExperiment}
       <ExperimentDetails experiment={selectedExperiment} />

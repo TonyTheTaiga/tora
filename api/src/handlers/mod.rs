@@ -3,7 +3,7 @@ use crate::state::AppState;
 use axum::{
     Router,
     http::{HeaderValue, Method},
-    routing::{delete, get, post, put},
+    routing::{any, delete, get, post, put},
 };
 use http::header::{AUTHORIZATION, CONTENT_TYPE};
 use tower::ServiceBuilder;
@@ -16,12 +16,13 @@ mod invitation;
 mod log;
 pub mod result;
 mod role;
+mod stream;
 mod user;
 mod workspace;
 pub use result::{AppError, AppResult, parse_uuid};
 
 pub fn api_routes(app_state: &AppState) -> Router<AppState> {
-    let protected_routes = Router::new()
+    let protected_routes: Router<AppState> = Router::new()
         .route(
             "/workspaces",
             protected_route(get(workspace::list_workspaces), app_state),
@@ -76,19 +77,28 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
         )
         .route(
             "/experiments/{id}/logs",
-            protected_route(get(log::get_metrics), app_state),
+            protected_route(get(log::get_logs), app_state),
         )
         .route(
             "/experiments/{id}/logs",
-            protected_route(post(log::create_metric), app_state),
+            protected_route(post(log::create_log), app_state),
         )
         .route(
             "/experiments/{experiment_id}/logs/batch",
-            protected_route(post(log::batch_create_metrics), app_state),
+            protected_route(post(log::batch_create_logs), app_state),
         )
         .route(
             "/experiments/{id}/logs/csv",
-            protected_route(get(log::export_metrics_csv), app_state),
+            protected_route(get(log::export_logs_csv), app_state),
+        )
+        .route(
+            "/experiments/{experiment_id}/logs/stream",
+            // protected_route(any(stream::stream_logs), app_state),
+            any(stream::stream_logs),
+        )
+        .route(
+            "/experiments/{id}/logs/stream-token",
+            protected_route(post(stream::create_stream_token), app_state),
         )
         // Settings and user management
         .route(
@@ -121,7 +131,7 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
             protected_route(put(invitation::respond_to_invitation), app_state),
         );
 
-    let public_routes = Router::new()
+    let public_routes: Router<AppState> = Router::new()
         .route("/signup", post(user::create_user))
         .route("/signup/confirm", get(user::confirm_create))
         .route("/login", post(user::login))

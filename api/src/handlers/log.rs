@@ -1,7 +1,7 @@
 use crate::handlers::{AppError, AppResult, parse_uuid};
 use crate::middleware::auth::AuthenticatedUser;
 use crate::state::AppState;
-use crate::types::{BatchCreateMetricsRequest, CreateMetricRequest, Metric, Response};
+use crate::types::{BatchCreateLogsRequest, CreateLogRequest, Log, Response};
 use axum::{
     Extension, Json,
     extract::{Path, State},
@@ -10,7 +10,7 @@ use axum::{
 };
 use tracing::{debug, info};
 
-pub async fn get_metrics(
+pub async fn get_logs(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
@@ -37,22 +37,23 @@ pub async fn get_metrics(
         ));
     }
 
-    let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-        "SELECT id, experiment_id::text, name, value::float8, step::float8, metadata, created_at FROM log WHERE experiment_id = $1 ORDER BY created_at DESC",
+    let result = sqlx::query_as::<_, (i64, String, String, String, f64, Option<i64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
+        "SELECT id, experiment_id::text, msg_id::text, name, value::float8, step::int8, metadata, created_at FROM log WHERE experiment_id = $1 ORDER BY created_at DESC",
     )
     .bind(experiment_uuid)
     .fetch_all(&app_state.db_pool)
     .await?;
 
-    let metrics: Vec<Metric> = result
+    let metrics: Vec<Log> = result
         .into_iter()
         .map(
-            |(id, experiment_id, name, value, step, metadata, created_at)| Metric {
+            |(id, experiment_id, msg_id, name, value, step, metadata, created_at)| Log {
                 id,
                 experiment_id,
+                msg_id,
                 name,
                 value,
-                step: step.map(|s| s as i64),
+                step,
                 metadata,
                 created_at,
             },
@@ -66,11 +67,11 @@ pub async fn get_metrics(
     .into_response())
 }
 
-pub async fn create_metric(
+pub async fn create_log(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
-    Json(request): Json<CreateMetricRequest>,
+    Json(request): Json<CreateLogRequest>,
 ) -> AppResult<impl IntoResponse> {
     let user_uuid = parse_uuid(&user.id, "user_id")?;
     let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
@@ -94,24 +95,68 @@ pub async fn create_metric(
         ));
     }
 
-    let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-        "INSERT INTO log (experiment_id, name, value, step, metadata) VALUES ($1, $2, $3, $4, $5) RETURNING id, experiment_id::text, name, value::float8, step::float8, metadata, created_at",
+    let msg_uuid = uuid::Uuid::try_parse(&request.msg_id).expect("Failed to parse UUID");
+    let (id, experiment_id, msg_id, name, value, step, metadata, created_at) = sqlx::query_as::<
+        _,
+        (
+            i64,
+            String,
+            String,
+            String,
+            f64,
+            Option<i64>,
+            Option<serde_json::Value>,
+            chrono::DateTime<chrono::Utc>,
+        ),
+    >(
+        r#"
+        WITH ins AS (
+          INSERT INTO public.log (experiment_id, msg_id, name, value, step, metadata)
+          VALUES ($1, $2, $3, $4, $5, $6)
+          RETURNING id, experiment_id, msg_id, name, value, step, metadata, created_at
+        ), outbox_ins AS (
+          INSERT INTO public.log_outbox (experiment_id, msg_id, payload)
+          SELECT
+            i.experiment_id,
+            i.msg_id,
+            jsonb_build_object(
+              'name', i.name,
+              'value', i.value,
+              'step', i.step,
+              'type', i.metadata->>'type'
+            )
+          FROM ins i
+          WHERE i.metadata->>'type' = 'metric'
+          ON CONFLICT (msg_id) DO NOTHING
+          RETURNING 1
+        )
+        SELECT id,
+               experiment_id::text,
+               msg_id::text,
+               name,
+               value::float8,
+               step::int8,
+               metadata,
+               created_at
+        FROM ins
+        "#,
     )
     .bind(experiment_uuid)
+    .bind(msg_uuid)
     .bind(&request.name)
     .bind(request.value)
-    .bind(request.step.map(|s| s as f64))
+    .bind(request.step)
     .bind(&request.metadata)
     .fetch_one(&app_state.db_pool)
     .await?;
 
-    let (id, experiment_id, name, value, step, metadata, created_at) = result;
-    let metric = Metric {
+    let metric = Log {
         id,
         experiment_id,
+        msg_id,
         name,
         value,
-        step: step.map(|s| s as i64),
+        step,
         metadata,
         created_at,
     };
@@ -126,20 +171,20 @@ pub async fn create_metric(
         .into_response())
 }
 
-pub async fn batch_create_metrics(
+pub async fn batch_create_logs(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
-    Json(request): Json<BatchCreateMetricsRequest>,
+    Json(request): Json<BatchCreateLogsRequest>,
 ) -> impl IntoResponse {
     info!(
         "Batch creating {} metrics for experiment {} by user: {}",
-        request.metrics.len(),
+        request.logs.len(),
         experiment_id,
         user.email
     );
     debug!("Batch metrics request: {:?}", request);
-    if request.metrics.is_empty() {
+    if request.logs.is_empty() {
         return Ok((
             StatusCode::CREATED,
             Json(Response::<String> {
@@ -172,36 +217,63 @@ pub async fn batch_create_metrics(
         ));
     }
 
-    let mut tx = app_state.db_pool.begin().await?;
-
-    let names: Vec<String> = request.metrics.iter().map(|m| m.name.clone()).collect();
-    let values: Vec<f64> = request.metrics.iter().map(|m| m.value).collect();
-    let steps: Vec<Option<f64>> = request
-        .metrics
+    let names: Vec<String> = request.logs.iter().map(|m| m.name.clone()).collect();
+    let msg_ids: Vec<uuid::Uuid> = request
+        .logs
         .iter()
-        .map(|m| m.step.map(|s| s as f64))
+        .map(|m| uuid::Uuid::try_parse(&m.msg_id).expect("Invalid message ID"))
         .collect();
+    let values: Vec<f64> = request.logs.iter().map(|m| m.value).collect();
+    let steps: Vec<Option<i64>> = request.logs.iter().map(|m| m.step).collect();
     let metadata_values: Vec<Option<serde_json::Value>> =
-        request.metrics.iter().map(|m| m.metadata.clone()).collect();
-    let result = sqlx::query(
+        request.logs.iter().map(|m| m.metadata.clone()).collect();
+
+    let inserted_count = sqlx::query_scalar::<_, i64>(
         r#"
-        INSERT INTO log (experiment_id, name, value, step, metadata)
-        SELECT $1, unnest($2::text[]), unnest($3::float8[]), unnest($4::float8[]), unnest($5::jsonb[])
+        WITH t AS (
+          SELECT * FROM unnest(
+            $1::uuid[],
+            $2::text[],
+            $3::float8[],
+            $4::int8[],
+            $5::jsonb[]
+          ) AS u(msg_id, name, value, step, metadata)
+        ), ins AS (
+          INSERT INTO public.log (experiment_id, msg_id, name, value, step, metadata)
+          SELECT $6, t.msg_id, t.name, t.value, t.step, t.metadata FROM t
+          RETURNING experiment_id, msg_id, name, value, step, metadata
+        ), outbox AS (
+          INSERT INTO public.log_outbox (experiment_id, msg_id, payload)
+          SELECT
+            $6,
+            i.msg_id,
+            jsonb_build_object(
+              'name', i.name,
+              'value', i.value,
+              'step', i.step,
+              'type', i.metadata->>'type'
+            )
+          FROM ins i
+          WHERE i.metadata->>'type' = 'metric'
+          ON CONFLICT (msg_id) DO NOTHING
+          RETURNING 1
+        )
+        SELECT COUNT(*) FROM ins
         "#,
     )
-    .bind(experiment_uuid)
+    .bind(&msg_ids)
     .bind(&names)
     .bind(&values)
     .bind(&steps)
     .bind(&metadata_values)
-    .execute(&mut *tx)
+    .bind(experiment_uuid)
+    .fetch_one(&app_state.db_pool)
     .await?;
 
-    debug!("Successfully inserted {} metrics", result.rows_affected());
-    tx.commit().await?;
+    debug!("Successfully inserted {} metrics", inserted_count);
     info!(
         "Successfully committed {} metrics for experiment {}",
-        request.metrics.len(),
+        request.logs.len(),
         experiment_id
     );
 
@@ -215,7 +287,7 @@ pub async fn batch_create_metrics(
         .into_response())
 }
 
-pub async fn export_metrics_csv(
+pub async fn export_logs_csv(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
@@ -244,8 +316,8 @@ pub async fn export_metrics_csv(
         ));
     }
 
-    let result = sqlx::query_as::<_, (i64, String, String, f64, Option<f64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-        "SELECT id, experiment_id::text, name, value::float8, step::float8, metadata, created_at FROM log WHERE experiment_id = $1 ORDER BY created_at ASC",
+    let result = sqlx::query_as::<_, (i64, String, String, f64, Option<i64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
+        "SELECT id, experiment_id::text, name, value::float8, step::int8, metadata, created_at FROM log WHERE experiment_id = $1 ORDER BY created_at ASC",
     )
     .bind(experiment_uuid)
     .fetch_all(&app_state.db_pool)

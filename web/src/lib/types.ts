@@ -13,6 +13,7 @@ export interface Experiment {
 export interface Metric {
   id: number;
   experiment_id: string;
+  msg_id: string;
   name: string;
   value: number;
   step?: number;

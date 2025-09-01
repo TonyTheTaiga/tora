@@ -27,6 +27,8 @@
   let chartInstance: Chart | null = null;
   let chartCanvas: HTMLCanvasElement | null = $state(null);
   let selectedMetrics = $state<string[]>([]);
+  // Track datasets by name for fast append
+  let datasetIndexByName: Record<string, number> = {};
 
   let searchFilter = $state<string>("");
 
@@ -161,7 +163,7 @@
               )
             : rawDataPoints;
 
-        return {
+        const ds = {
           label: metric,
           data,
           borderColor: color,
@@ -171,7 +173,9 @@
           pointHoverRadius: 0,
           borderWidth: 2,
           tension: 0.2,
-        };
+        } as any;
+        datasetIndexByName[metric] = index;
+        return ds;
       });
 
       if (chartInstance) {
@@ -192,6 +196,47 @@
         error: error instanceof Error ? error.message : "Unknown error",
       });
     }
+  }
+
+  // Imperative append API to avoid full rerenders during streaming
+  export function appendPoint(name: string, x: number, y: number) {
+    if (!chartInstance) return;
+    const idx = chartInstance.data.datasets.findIndex(
+      (d: any) => d.label === name,
+    );
+    if (idx === -1) {
+      // Only create on-the-fly if user selected this metric
+      if (!selectedMetrics.includes(name)) return;
+      const index = chartInstance.data.datasets.length;
+      const color = chartTheme.colors[index % chartTheme.colors.length];
+      chartInstance.data.datasets.push({
+        label: name,
+        data: [],
+        borderColor: color,
+        backgroundColor: color + "30",
+        fill: true,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        borderWidth: 2,
+        tension: 0.2,
+      } as any);
+    }
+    const dsIndex = chartInstance.data.datasets.findIndex(
+      (d: any) => d.label === name,
+    );
+    if (dsIndex === -1) return;
+    const ds: any = chartInstance.data.datasets[dsIndex];
+    const point = { x, y: y > 0 ? y : 1e-9 };
+    ds.data.push(point);
+    // Cap the number of points for perf
+    if (Array.isArray(ds.data) && ds.data.length > MAX_DATA_POINTS_TO_RENDER) {
+      const excess = ds.data.length - MAX_DATA_POINTS_TO_RENDER;
+      ds.data.splice(0, excess);
+    }
+    // Fast update without animation/layout thrash
+    try {
+      chartInstance.update("none");
+    } catch (_) {}
   }
 
   function destroyChart() {

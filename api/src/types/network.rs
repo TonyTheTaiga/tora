@@ -76,7 +76,8 @@ pub struct ListExperimentsQuery {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct CreateMetricRequest {
+pub struct CreateLogRequest {
+    pub msg_id: String,
     pub name: String,
     pub value: f64,
     pub step: Option<i64>,
@@ -84,8 +85,8 @@ pub struct CreateMetricRequest {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct BatchCreateMetricsRequest {
-    pub metrics: Vec<CreateMetricRequest>,
+pub struct BatchCreateLogsRequest {
+    pub logs: Vec<CreateLogRequest>,
 }
 
 #[derive(Deserialize)]

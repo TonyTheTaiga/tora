@@ -1,6 +1,5 @@
-use chrono;
 use serde::{Deserialize, Serialize};
-use sqlx;
+use sqlx::{self, prelude::FromRow};
 
 #[derive(Serialize)]
 pub struct UserInfo {
@@ -69,10 +68,23 @@ pub struct Hyperparam {
     pub value: HyperparamValue,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Metric {
+#[derive(Serialize, Deserialize, Debug, FromRow)]
+pub struct OutLog {
     pub id: i64,
     pub experiment_id: String,
+    pub msg_id: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub payload: serde_json::Value,
+    pub attempt_count: i32,
+    pub next_attempt_at: chrono::DateTime<chrono::Utc>,
+    pub processed_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Log {
+    pub id: i64,
+    pub experiment_id: String,
+    pub msg_id: String,
     pub name: String,
     pub value: f64,
     pub step: Option<i64>,

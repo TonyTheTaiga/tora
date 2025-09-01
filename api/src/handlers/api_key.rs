@@ -7,8 +7,7 @@ use axum::{
     extract::{Path, State},
     response::IntoResponse,
 };
-use rand::distributions::Alphanumeric;
-use rand::{Rng, thread_rng};
+use rand::{Rng, distr::Alphanumeric, rng};
 use sha2::{Digest, Sha256};
 
 pub async fn create_api_key(
@@ -16,7 +15,7 @@ pub async fn create_api_key(
     State(app_state): State<AppState>,
     Json(request): Json<CreateApiKeyRequest>,
 ) -> AppResult<impl IntoResponse> {
-    let key_value: String = thread_rng()
+    let key_value: String = rng()
         .sample_iter(&Alphanumeric)
         .take(32)
         .map(char::from)

@@ -1,14 +1,14 @@
 <script lang="ts">
   import ExperimentChart from "./ExperimentChart.svelte";
-  import type { Experiment } from "$lib/types";
+  import type { Experiment, HyperParam } from "$lib/types";
   import { copyToClipboard } from "$lib/utils/common";
   import { loading, errors } from "./state.svelte";
   import { ChevronDown, ChevronRight, Pin } from "@lucide/svelte";
+  import { env } from "$env/dynamic/public";
 
   let { experiment } = $props();
   let results = $state<any[]>([]);
   let metricData = $state<Record<string, number[]>>({});
-  // hyperparameters are always visible within header when header is expanded
   let pinnedNames = $state<string[]>([]);
   let showResults = $state(true);
   let showHeader = $state(true);
@@ -17,7 +17,7 @@
   let sortedHyperparams = $derived(
     experiment.hyperparams
       ?.slice()
-      .sort((a, b) => a.key.localeCompare(b.key)) ?? [],
+      .sort((a: HyperParam, b: HyperParam) => a.key.localeCompare(b.key)) ?? [],
   );
 
   let pinnedResults = $derived(
@@ -102,6 +102,145 @@
     } catch (e) {}
   }
 
+  // --- Live stream (WebSocket) ---
+  let ws: WebSocket | null = null;
+  let reconnectDelayMs = 500;
+  let closing = false;
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  let liveStreaming = $state(false);
+  let wsStatus = $state<"idle" | "connecting" | "open" | "closed" | "error">(
+    "idle",
+  );
+
+  function wsUrlForExperiment(id: string, token: string): string {
+    const base =
+      env.PUBLIC_API_BASE_URL ||
+      (typeof window !== "undefined" ? window.location.origin : "");
+    const scheme = base.startsWith("https") ? "wss" : "ws";
+    return (
+      base.replace(/^http(s)?:/, `${scheme}:`) +
+      `/api/experiments/${id}/logs/stream?token=${encodeURIComponent(token)}`
+    );
+  }
+
+  async function fetchStreamToken(id: string): Promise<string | null> {
+    try {
+      const res = await fetch(`/api/experiments/${id}/logs/stream-token`, {
+        method: "POST",
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data?.token || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function scheduleReconnect() {
+    if (reconnectTimer) clearTimeout(reconnectTimer);
+    if (!liveStreaming) return; // only reconnect if user wants streaming
+    const delay = Math.min(reconnectDelayMs, 10000);
+    reconnectTimer = setTimeout(() => {
+      if (!liveStreaming) return;
+      reconnectDelayMs = Math.min(reconnectDelayMs * 2, 10000);
+      connectStream();
+    }, delay);
+  }
+
+  function closeStream() {
+    closing = true;
+    try {
+      ws?.close();
+    } catch (_) {}
+    ws = null;
+    closing = false;
+    if (reconnectTimer) clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+    wsStatus = "closed";
+  }
+
+  async function connectStream() {
+    if (typeof window === "undefined" || !experiment?.id) return;
+    if (ws && ws.readyState === WebSocket.OPEN) return;
+    wsStatus = "connecting";
+    const token = await fetchStreamToken(experiment.id);
+    if (!token) {
+      // No token, no live updates (user may not be authorized)
+      wsStatus = "error";
+      return;
+    }
+
+    const url = wsUrlForExperiment(experiment.id, token);
+    try {
+      ws = new WebSocket(url);
+    } catch (e) {
+      wsStatus = "error";
+      scheduleReconnect();
+      return;
+    }
+
+    ws.onopen = () => {
+      reconnectDelayMs = 500;
+      wsStatus = "open";
+    };
+
+    ws.onmessage = (ev: MessageEvent) => {
+      try {
+        const text =
+          typeof ev.data === "string"
+            ? ev.data
+            : new TextDecoder().decode(ev.data as ArrayBuffer);
+        const msg = JSON.parse(text);
+        if (
+          msg?.type === "metric" &&
+          typeof msg.name === "string" &&
+          typeof msg.value === "number"
+        ) {
+          const name = msg.name;
+          const val = Number.isFinite(msg.value) ? msg.value : 0;
+          const step = typeof msg.step === "number" ? msg.step : undefined;
+          // Prefer imperative append to avoid rerendering
+          try {
+            chartRef?.appendPoint?.(name, step ?? 0, val);
+          } catch (_) {
+            // Fallback: minimal state bump (may rerender)
+            const next = { ...metricData } as Record<string, number[]>;
+            const series = next[name] ? next[name].slice() : [];
+            series.push(val);
+            next[name] = series;
+            metricData = next;
+          }
+        }
+      } catch (_) {
+        // ignore parse errors
+      }
+    };
+
+    ws.onerror = () => {
+      wsStatus = "error";
+      // let onclose decide about reconnect
+    };
+
+    ws.onclose = () => {
+      wsStatus = "closed";
+      if (!closing && liveStreaming) scheduleReconnect();
+    };
+  }
+
+  async function toggleLiveStream() {
+    if (liveStreaming) {
+      liveStreaming = false;
+      closeStream();
+    } else {
+      liveStreaming = true;
+      // Reload historical data to avoid gaps before starting the live stream
+      try {
+        await loadExperimentDetails(experiment);
+      } catch (_) {}
+      await connectStream();
+    }
+  }
+
   async function loadExperimentDetails(experiment: Experiment) {
     try {
       loading.experimentDetails = true;
@@ -150,6 +289,16 @@
 
   $effect(() => {
     loadExperimentDetails(experiment);
+  });
+
+  // Reconnect WS when experiment changes if streaming is enabled; cleanup on unmount
+  $effect(() => {
+    if (!experiment?.id) return;
+    if (liveStreaming) {
+      closeStream();
+      connectStream();
+    }
+    return () => closeStream();
   });
 
   $effect(() => {
@@ -245,13 +394,28 @@
       </div>
     {/if}
 
-    <button
-      class="text-xs text-ctp-overlay0 hover:text-ctp-blue mb-2"
-      onclick={() => copyToClipboard(experiment.id)}
-      title="click to copy experiment id"
-    >
-      experiment id: {experiment.id}
-    </button>
+    <div class="flex items-center gap-3 mb-2">
+      <button
+        class="text-xs text-ctp-overlay0 hover:text-ctp-blue"
+        onclick={() => copyToClipboard(experiment.id)}
+        title="click to copy experiment id"
+      >
+        experiment id: {experiment.id}
+      </button>
+
+      <button
+        class="text-xs border border-ctp-surface0/40 px-2 py-1 hover:text-ctp-blue"
+        onclick={toggleLiveStream}
+        aria-pressed={liveStreaming}
+        title={liveStreaming ? "stop live stream" : "start live stream"}
+      >
+        {liveStreaming ? "stop live stream" : "start live stream"}
+      </button>
+
+      <span class="text-[11px] text-ctp-subtext0">
+        live: {wsStatus}
+      </span>
+    </div>
   </div>
 
   <div class="p-4">
@@ -286,7 +450,7 @@
             >
               {#each pinnedResults as metric}
                 <div
-                  class="relative flex flex-col gap-1 p-3 border-ctp-terminal-border hover:bg-ctp-surface0/20"
+                  class="relative flex flex-col gap-1 p-3 border-ctp-terminal-border hover:bg-ctp-surface0/20 min-w-0"
                 >
                   <button
                     class="absolute top-2 right-2 text-ctp-overlay0 hover:text-ctp-yellow"
@@ -318,7 +482,7 @@
 
         {#if Object.keys(metricData).length > 0}
           <div class="space-y-2">
-            <ExperimentChart {metricData} />
+            <ExperimentChart bind:this={chartRef} {metricData} />
           </div>
         {/if}
 
@@ -345,7 +509,7 @@
                 >
                   {#each results as metric}
                     <div
-                      class="relative flex flex-col gap-1 p-2 hover:bg-ctp-surface0/20"
+                      class="relative flex flex-col gap-1 p-2 hover:bg-ctp-surface0/20 min-w-0"
                     >
                       <button
                         class="absolute top-2 right-2 text-ctp-overlay0 hover:text-ctp-yellow"
@@ -359,13 +523,13 @@
                         />
                       </button>
                       <div
-                        class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate"
+                        class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate pr-6"
                         title={metric.name}
                       >
                         {metric.name}
                       </div>
                       <div
-                        class="text-ctp-text font-semibold tabular-nums font-mono truncate"
+                        class="text-ctp-text font-semibold tabular-nums font-mono truncate pr-6"
                         title={String(metric.value)}
                       >
                         {typeof metric.value === "number"

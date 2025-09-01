@@ -49,12 +49,6 @@ cleanup() {
 # Set up signal handlers
 trap cleanup SIGINT SIGTERM
 
-# Check if we're in the correct directory
-if [ ! -f "docker-compose.yaml" ]; then
-	print_error "This script must be run from the project root directory"
-	exit 1
-fi
-
 # Check if required tools are installed
 print_info "Checking required tools..."
 
@@ -101,11 +95,10 @@ print_success "Dependencies check complete"
 print_info "Setting up environment..."
 
 # Check for environment variables (optional for dev mode)
-if [ -z "$SUPABASE_PASSWORD" ] || [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_API_KEY" ] || [ -z "$SUPABASE_JWT_SECRET" ]; then
+if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_API_KEY" ] || [ -z "$SUPABASE_JWT_SECRET" ]; then
 	print_warning "Some Supabase environment variables are not set."
 	print_warning "The API will run in development mode without database connection."
 	print_warning "Set the following environment variables if you need database access:"
-	print_warning "  - SUPABASE_PASSWORD"
 	print_warning "  - SUPABASE_URL"
 	print_warning "  - SUPABASE_API_KEY"
 	print_warning "  - SUPABASE_JWT_SECRET"

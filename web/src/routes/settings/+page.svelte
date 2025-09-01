@@ -1,26 +1,15 @@
 <script lang="ts">
   import { Plus, LogOut, Trash2 } from "@lucide/svelte";
   import { enhance } from "$app/forms";
+  import { RevokeApiKeyModal } from "$lib/components/modals";
+  import {
+    setApiKeyToRevoke,
+    getApiKeyToRevoke,
+  } from "$lib/state/modal.svelte.js";
 
   let { data } = $props();
   let createdKey: string = $state("");
-
-  function revokeApiKey(keyId: string) {
-    if (!confirm("Are you sure you want to revoke this API key?")) return;
-
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "?/revokeApiKey";
-
-    const keyIdInput = document.createElement("input");
-    keyIdInput.type = "hidden";
-    keyIdInput.name = "keyId";
-    keyIdInput.value = keyId;
-    form.appendChild(keyIdInput);
-
-    document.body.appendChild(form);
-    form.submit();
-  }
+  let apiKeyToRevoke = $derived(getApiKeyToRevoke());
 </script>
 
 <div class="font-mono">
@@ -64,7 +53,7 @@
               if (result.type === "success" && result.data?.key) {
                 createdKey = result.data.key as string;
               }
-              await update({ reset: true });
+              await update();
             };
           }}
           class="space-y-3"
@@ -137,7 +126,7 @@
                   type="button"
                   class="text-ctp-subtext0 hover:text-ctp-red hover:bg-ctp-surface0/30 p-1 transition-all"
                   title="Revoke API key"
-                  onclick={() => revokeApiKey(apiKey.id)}
+                  onclick={() => setApiKeyToRevoke(apiKey)}
                 >
                   <Trash2 size={10} />
                 </button>
@@ -149,3 +138,7 @@
     </div>
   </div>
 </div>
+
+{#if apiKeyToRevoke}
+  <RevokeApiKeyModal bind:apiKey={apiKeyToRevoke} />
+{/if}
