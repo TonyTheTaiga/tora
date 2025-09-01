@@ -57,7 +57,7 @@ async function proxyRequest(
   cookies: Cookies,
 ) {
   const url = new URL(request.url);
-  const rustBackendUrl = `${RUST_API_BASE_URL}/api/${path}${url.search}`;
+  const rustBackendUrl = `${RUST_API_BASE_URL}/${path}${url.search}`;
 
   const headers = new Headers(request.headers);
   headers.delete("host");
