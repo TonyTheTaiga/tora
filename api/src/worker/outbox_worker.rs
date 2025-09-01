@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use crate::{state::AppState, types::OutLog};
 
-const LOOP_TIMER: Duration = Duration::from_secs(5);
+const LOOP_TIMER: Duration = Duration::from_secs(1);
 
 #[derive(Debug)]
 struct PublishError {
@@ -26,7 +26,7 @@ impl std::error::Error for PublishError {
 async fn get_unpublished_rows(db_pool: &PgPool) -> Vec<OutLog> {
     sqlx::query_as::<_, OutLog>(
         r#"
-        select 
+        select
             id,
             experiment_id::text,
             msg_id::text,
@@ -34,10 +34,10 @@ async fn get_unpublished_rows(db_pool: &PgPool) -> Vec<OutLog> {
             payload,
             attempt_count,
             next_attempt_at,
-            processed_at 
-        from public.log_outbox 
+            processed_at
+        from public.log_outbox
         where processed_at is null
-        and next_attempt_at <= now() - interval '30 seconds'
+        and next_attempt_at <= now()
         order by id asc
         "#,
     )
@@ -130,11 +130,11 @@ pub async fn run_worker(state: AppState) {
             }
         }
 
-        // if !published_ids.is_empty() {
-        //     if let Err(e) = report_published_logs(&state.db_pool, &published_ids).await {
-        //         eprintln!("failed to mark published logs as processed: {e}");
-        //     }
-        // }
+        if !published_ids.is_empty() {
+            if let Err(e) = report_published_logs(&state.db_pool, &published_ids).await {
+                eprintln!("failed to mark published logs as processed: {e}");
+            }
+        }
 
         if !failed_ids.is_empty() {
             println!("failed to publish {:?} logs", failed_ids.len());
