@@ -9,6 +9,7 @@ axum-extra = { version = "0.10", features = ["cookie"] }
 fred = { version = "10.1.0", features = [
   "enable-rustls",
   "i-pubsub",
+  "i-keys",
   "serde-json",
 ] }
 serde = { version = "1.0", features = ["derive"] }
