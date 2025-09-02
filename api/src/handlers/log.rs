@@ -118,6 +118,7 @@ pub async fn create_log(
               'name', i.name,
               'value', i.value,
               'step', i.step,
+              'msg_id', i.msg_id::text,
               'type', i.metadata->>'type'
             )
           FROM ins i
@@ -246,6 +247,7 @@ pub async fn batch_create_logs(
               'name', i.name,
               'value', i.value,
               'step', i.step,
+              'msg_id', i.msg_id::text,
               'type', i.metadata->>'type'
             )
           FROM ins i
