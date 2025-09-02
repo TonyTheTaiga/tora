@@ -57,7 +57,7 @@ trap 'cleanup 0' SIGINT SIGTERM
 
 # Wait helper for backend readiness
 wait_for_backend() {
-	local url="$1"        # e.g., http://127.0.0.1:8080/
+	local url="$1" # e.g., http://127.0.0.1:8080/
 	local timeout="${2:-60}"
 	local start_ts
 	start_ts=$(date +%s)
@@ -100,7 +100,7 @@ wait_for_backend() {
 
 		local now elapsed
 		now=$(date +%s)
-		elapsed=$(( now - start_ts ))
+		elapsed=$((now - start_ts))
 		if [ "$elapsed" -ge "$timeout" ]; then
 			print_error "Timed out after ${timeout}s waiting for backend at $url"
 			return 1
@@ -166,7 +166,7 @@ fi
 
 # Export environment variables for the API
 # export RUST_LOG=api::handlers::metric=debug
-export RUST_LOG=info
+export RUST_LOG=error
 export RUST_BACKTRACE=1
 export RUST_ENV=dev
 export PUBLIC_API_BASE_URL=http://localhost:8080
