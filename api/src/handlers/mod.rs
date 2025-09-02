@@ -12,6 +12,7 @@ use tower_http::trace::TraceLayer;
 
 mod api_key;
 mod experiment;
+mod health;
 mod invitation;
 mod log;
 pub mod result;
@@ -132,6 +133,7 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
         );
 
     let public_routes: Router<AppState> = Router::new()
+        .route("/health", get(health::health))
         .route("/signup", post(user::create_user))
         .route("/signup/confirm", get(user::confirm_create))
         .route("/login", post(user::login))
