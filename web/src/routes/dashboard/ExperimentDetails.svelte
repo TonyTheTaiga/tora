@@ -1,19 +1,22 @@
 <script lang="ts">
-  import ExperimentChart from "./ExperimentChart.svelte";
+  import StaticChart from "./StaticChart.svelte";
+  import StreamingChart from "./StreamingChart.svelte";
   import type { Experiment, HyperParam } from "$lib/types";
   import { copyToClipboard } from "$lib/utils/common";
   import { loading, errors } from "./state.svelte";
   import { ChevronDown, ChevronRight, Pin } from "@lucide/svelte";
-  import { env } from "$env/dynamic/public";
 
   let { experiment } = $props();
   let results = $state<any[]>([]);
-  let metricData = $state<Record<string, number[]>>({});
+  // chart mode + ws status
+  let isStreamingChart = $state(false);
+  let wsStatus = $state<"idle" | "connecting" | "open" | "closed" | "error">(
+    "idle",
+  );
   let pinnedNames = $state<string[]>([]);
   let showResults = $state(true);
   let showHeader = $state(true);
   let showAllHyperparams = $state(false);
-  let chartRef: any = $state(null);
 
   let sortedHyperparams = $derived(
     experiment.hyperparams
@@ -103,142 +106,14 @@
     } catch (e) {}
   }
 
-  // --- Live stream (WebSocket) ---
-  let ws: WebSocket | null = null;
-  let reconnectDelayMs = 500;
-  let closing = false;
-  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-  let liveStreaming = $state(false);
-  let wsStatus = $state<"idle" | "connecting" | "open" | "closed" | "error">(
-    "idle",
-  );
-
-  function wsUrlForExperiment(id: string, token: string): string {
-    const base =
-      env.PUBLIC_API_BASE_URL ||
-      (typeof window !== "undefined" ? window.location.origin : "");
-    const scheme = base.startsWith("https") ? "wss" : "ws";
-    return (
-      base.replace(/^http(s)?:/, `${scheme}:`) +
-      `/experiments/${id}/logs/stream?token=${encodeURIComponent(token)}`
-    );
-  }
-
-  async function fetchStreamToken(id: string): Promise<string | null> {
-    try {
-      const res = await fetch(`/api/experiments/${id}/logs/stream-token`, {
-        method: "POST",
-      });
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data?.token || null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function scheduleReconnect() {
-    if (reconnectTimer) clearTimeout(reconnectTimer);
-    if (!liveStreaming) return; // only reconnect if user wants streaming
-    const delay = Math.min(reconnectDelayMs, 10000);
-    reconnectTimer = setTimeout(() => {
-      if (!liveStreaming) return;
-      reconnectDelayMs = Math.min(reconnectDelayMs * 2, 10000);
-      connectStream();
-    }, delay);
-  }
-
-  function closeStream() {
-    closing = true;
-    try {
-      ws?.close();
-    } catch (_) {}
-    ws = null;
-    closing = false;
-    if (reconnectTimer) clearTimeout(reconnectTimer);
-    reconnectTimer = null;
-    wsStatus = "closed";
-  }
-
-  async function connectStream() {
-    if (typeof window === "undefined" || !experiment?.id) return;
-    if (ws && ws.readyState === WebSocket.OPEN) return;
-    wsStatus = "connecting";
-    const token = await fetchStreamToken(experiment.id);
-    if (!token) {
-      // No token, no live updates (user may not be authorized)
-      wsStatus = "error";
-      return;
-    }
-
-    const url = wsUrlForExperiment(experiment.id, token);
-    try {
-      ws = new WebSocket(url);
-    } catch (e) {
-      wsStatus = "error";
-      scheduleReconnect();
-      return;
-    }
-
-    ws.onopen = () => {
-      reconnectDelayMs = 500;
-      wsStatus = "open";
-    };
-
-    ws.onmessage = (ev: MessageEvent) => {
-      try {
-        const text =
-          typeof ev.data === "string"
-            ? ev.data
-            : new TextDecoder().decode(ev.data as ArrayBuffer);
-        const msg = JSON.parse(text);
-        if (
-          msg?.type === "metric" &&
-          typeof msg.name === "string" &&
-          typeof msg.value === "number"
-        ) {
-          const name = msg.name;
-          const val = Number.isFinite(msg.value) ? msg.value : 0;
-          const step = typeof msg.step === "number" ? msg.step : undefined;
-          // Prefer imperative append to avoid rerendering
-          try {
-            chartRef?.appendPoint?.(name, step ?? 0, val);
-          } catch (_) {
-            // Fallback: minimal state bump (may rerender)
-            const next = { ...metricData } as Record<string, number[]>;
-            const series = next[name] ? next[name].slice() : [];
-            series.push(val);
-            next[name] = series;
-            metricData = next;
-          }
-        }
-      } catch (_) {
-        // ignore parse errors
-      }
-    };
-
-    ws.onerror = () => {
-      wsStatus = "error";
-      // let onclose decide about reconnect
-    };
-
-    ws.onclose = () => {
-      wsStatus = "closed";
-      if (!closing && liveStreaming) scheduleReconnect();
-    };
-  }
-
-  async function toggleLiveStream() {
-    if (liveStreaming) {
-      liveStreaming = false;
-      closeStream();
+  // streaming toggle
+  function toggleLiveStream() {
+    if (isStreamingChart) {
+      isStreamingChart = false;
+      wsStatus = "idle";
     } else {
-      liveStreaming = true;
-      // Reload historical data to avoid gaps before starting the live stream
-      try {
-        await loadExperimentDetails(experiment);
-      } catch (_) {}
-      await connectStream();
+      isStreamingChart = true;
+      wsStatus = "connecting";
     }
   }
 
@@ -246,7 +121,8 @@
     try {
       loading.experimentDetails = true;
       errors.experimentDetails = null;
-      const response = await fetch(`/api/experiments/${experiment.id}/logs`);
+      // Fetch only scalar results; metrics stream over WS
+      const response = await fetch(`/api/experiments/${experiment.id}/results`);
       if (!response.ok)
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       const apiResponse = await response.json();
@@ -254,30 +130,16 @@
       if (!metrics || !Array.isArray(metrics))
         throw new Error("Invalid response structure from metrics API");
 
-      const resultsByName = new Map<string, any>();
-      const seriesByName = new Map<string, any[]>();
-
-      metrics.forEach((m: any) => {
-        const mType = m?.metadata?.type ?? "metric";
-        if (mType === "result") {
-          resultsByName.set(m.name, m);
-        } else {
-          if (!seriesByName.has(m.name)) seriesByName.set(m.name, []);
-          seriesByName.get(m.name)!.push(m);
+      // Deduplicate by latest per name (API is DESC created_at)
+      const seen = new Set<string>();
+      const list: any[] = [];
+      for (const m of metrics) {
+        if (!seen.has(m.name)) {
+          list.push(m);
+          seen.add(m.name);
         }
-      });
-
-      const scalarMetricsList: any[] = Array.from(resultsByName.values());
-      const computedMetricData: Record<string, number[]> = {};
-
-      seriesByName.forEach((metricList, name) => {
-        computedMetricData[name] = metricList
-          .sort((a, b) => (a.step || 0) - (b.step || 0))
-          .map((m) => m.value);
-      });
-
-      results = scalarMetricsList;
-      metricData = computedMetricData;
+      }
+      results = list;
     } catch (error) {
       errors.experimentDetails =
         error instanceof Error
@@ -289,17 +151,8 @@
   }
 
   $effect(() => {
+    // Initial fetch for non-streamed details (results)
     loadExperimentDetails(experiment);
-  });
-
-  // Reconnect WS when experiment changes if streaming is enabled; cleanup on unmount
-  $effect(() => {
-    if (!experiment?.id) return;
-    if (liveStreaming) {
-      closeStream();
-      connectStream();
-    }
-    return () => closeStream();
   });
 
   $effect(() => {
@@ -407,10 +260,10 @@
       <button
         class="text-xs border border-ctp-surface0/40 px-2 py-1 hover:text-ctp-blue"
         onclick={toggleLiveStream}
-        aria-pressed={liveStreaming}
-        title={liveStreaming ? "stop live stream" : "start live stream"}
+        aria-pressed={isStreamingChart}
+        title={isStreamingChart ? "stop live stream" : "start live stream"}
       >
-        {liveStreaming ? "stop live stream" : "start live stream"}
+        {isStreamingChart ? "stop live stream" : "start live stream"}
       </button>
 
       <span class="text-[11px] text-ctp-subtext0">
@@ -434,7 +287,6 @@
         <div class="text-ctp-subtext0 mb-4 text-xs">
           {errors.experimentDetails}
         </div>
-        >
       </div>
     {:else}
       <div class="space-y-6">
@@ -481,11 +333,16 @@
           </div>
         {/if}
 
-        {#if Object.keys(metricData).length > 0}
-          <div class="space-y-2">
-            <ExperimentChart bind:this={chartRef} {metricData} />
-          </div>
-        {/if}
+        <div class="space-y-2">
+          {#if isStreamingChart}
+            <StreamingChart
+              experimentId={experiment.id}
+              bind:status={wsStatus}
+            />
+          {:else}
+            <StaticChart experimentId={experiment.id} />
+          {/if}
+        </div>
 
         {#if results.length > 0}
           <div class="space-y-2">

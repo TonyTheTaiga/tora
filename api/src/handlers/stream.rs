@@ -15,11 +15,10 @@ use fred::types::Expiration;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 struct LogMessage {
     name: String,
-    #[serde(rename = "type")]
-    kind: String,
+    msg_id: String,
     step: Option<i64>,
     value: f64,
 }
@@ -27,6 +26,8 @@ struct LogMessage {
 #[derive(Deserialize)]
 pub struct StreamQuery {
     pub token: String,
+    #[serde(default)]
+    pub backfill: bool,
 }
 
 pub async fn stream_logs(
@@ -64,6 +65,39 @@ async fn handle_socket(
             .await;
         return;
     }
+
+    let experiment_uuid = match Uuid::parse_str(&experiment_id) {
+        Ok(e) => e,
+        Err(_) => {
+            eprintln!("failed to convert this experiment id into uuid format {experiment_id:?}");
+            return;
+        }
+    };
+
+    if params.backfill {
+        let backfill_logs: Vec<sqlx::types::Json<LogMessage>> = sqlx::query_scalar(
+            r#"
+                select
+                    payload
+                from public.log_outbox
+                where processed_at is not null
+                and experiment_id = $1
+                order by id asc
+                "#,
+        )
+        .bind(experiment_uuid)
+        .fetch_all(&app_state.db_pool)
+        .await
+        .expect("Fucked around and found out!");
+        for row in backfill_logs {
+            let json = serde_json::to_string(&row).expect("failed to convert to json string");
+            socket
+                .send(WsMessage::Text(json.into()))
+                .await
+                .expect("failed to send a backfill row");
+        }
+    }
+
     let subscriber = app_state.vk_pool.next_connected();
     subscriber
         .subscribe(format!("log:exp:{experiment_id}"))
@@ -191,7 +225,7 @@ pub async fn create_stream_token(
                 .into_response();
         }
     };
-    let exp_uuid = match Uuid::parse_str(&experiment_id) {
+    let experiment_uuid = match Uuid::parse_str(&experiment_id) {
         Ok(e) => e,
         Err(_) => {
             return (
@@ -210,7 +244,7 @@ pub async fn create_stream_token(
         WHERE e.id = $1 AND uw.user_id = $2
         "#,
     )
-    .bind(exp_uuid)
+    .bind(experiment_uuid)
     .bind(user_uuid)
     .fetch_one(&app_state.db_pool)
     .await;

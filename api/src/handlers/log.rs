@@ -37,32 +37,82 @@ pub async fn get_logs(
         ));
     }
 
-    let result = sqlx::query_as::<_, (i64, String, String, String, f64, Option<i64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-        "SELECT id, experiment_id::text, msg_id::text, name, value::float8, step::int8, metadata, created_at FROM log WHERE experiment_id = $1 ORDER BY created_at DESC",
+    let metrics = sqlx::query_as::<_, Log>(
+        r#"
+            SELECT
+                id,
+                experiment_id::text,
+                msg_id::text,
+                name, value::float8,
+                step::int8,
+                metadata,
+                created_at
+            FROM log 
+            WHERE experiment_id = $1 
+            ORDER BY created_at DESC"#,
     )
     .bind(experiment_uuid)
     .fetch_all(&app_state.db_pool)
     .await?;
 
-    let metrics: Vec<Log> = result
-        .into_iter()
-        .map(
-            |(id, experiment_id, msg_id, name, value, step, metadata, created_at)| Log {
-                id,
-                experiment_id,
-                msg_id,
-                name,
-                value,
-                step,
-                metadata,
-                created_at,
-            },
-        )
-        .collect();
-
     Ok(Json(Response {
         status: 200,
         data: Some(metrics),
+    })
+    .into_response())
+}
+
+pub async fn get_results(
+    Extension(user): Extension<AuthenticatedUser>,
+    State(app_state): State<AppState>,
+    Path(experiment_id): Path<String>,
+) -> AppResult<impl IntoResponse> {
+    let user_uuid = parse_uuid(&user.id, "user_id")?;
+    let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
+
+    let access_check = sqlx::query_as::<_, (i64,)>(
+        r#"
+        SELECT COUNT(*) FROM experiment e
+        JOIN workspace_experiments we ON e.id = we.experiment_id
+        JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
+        WHERE e.id = $1 AND uw.user_id = $2
+        "#,
+    )
+    .bind(experiment_uuid)
+    .bind(user_uuid)
+    .fetch_one(&app_state.db_pool)
+    .await?;
+
+    if access_check.0 == 0 {
+        return Err(AppError::Forbidden(
+            "Access denied to experiment".to_string(),
+        ));
+    }
+
+    let results = sqlx::query_as::<_, Log>(
+        r#"
+            SELECT
+                id,
+                experiment_id::text,
+                msg_id::text,
+                name,
+                value::float8,
+                step::int8,
+                metadata,
+                created_at
+            FROM log
+            WHERE experiment_id = $1
+              AND metadata->>'type' = 'result'
+            ORDER BY created_at DESC
+        "#,
+    )
+    .bind(experiment_uuid)
+    .fetch_all(&app_state.db_pool)
+    .await?;
+
+    Ok(Json(Response {
+        status: 200,
+        data: Some(results),
     })
     .into_response())
 }
@@ -123,6 +173,7 @@ pub async fn create_log(
               'name', i.name,
               'value', i.value,
               'step', i.step,
+              'msg_id', i.msg_id::text,
               'type', i.metadata->>'type'
             )
           FROM ins i
@@ -251,6 +302,7 @@ pub async fn batch_create_logs(
               'name', i.name,
               'value', i.value,
               'step', i.step,
+              'msg_id', i.msg_id::text,
               'type', i.metadata->>'type'
             )
           FROM ins i

@@ -32,6 +32,8 @@ print_error() {
 
 # Function to cleanup background processes
 cleanup() {
+	# Optional first arg: exit code (default 0)
+	local code=${1:-0}
 	print_info "Shutting down development servers..."
 	if [ ! -z "$API_PID" ]; then
 		kill $API_PID 2>/dev/null || true
@@ -42,12 +44,70 @@ cleanup() {
 	# Kill any remaining processes
 	pkill -f "cargo-watch" 2>/dev/null || true
 	pkill -f "vite dev" 2>/dev/null || true
-	print_success "Development servers stopped"
-	exit 0
+	if [ "$code" -eq 0 ]; then
+		print_success "Development servers stopped"
+	else
+		print_error "Development servers stopped due to an error (exit $code)"
+	fi
+	exit $code
 }
 
 # Set up signal handlers
-trap cleanup SIGINT SIGTERM
+trap 'cleanup 0' SIGINT SIGTERM
+
+# Wait helper for backend readiness
+wait_for_backend() {
+	local url="$1" # e.g., http://127.0.0.1:8080/
+	local timeout="${2:-60}"
+	local start_ts
+	start_ts=$(date +%s)
+
+	print_info "Waiting for backend at $url (timeout ${timeout}s)..."
+
+	# Prefer curl if available, otherwise try nc; as a last resort, simple TCP check via bash
+	while true; do
+		# If cargo-watch died, abort early
+		if [ -n "$API_PID" ] && ! kill -0 "$API_PID" 2>/dev/null; then
+			print_error "Backend process exited unexpectedly. See logs above."
+			return 1
+		fi
+
+		if command -v curl >/dev/null 2>&1; then
+			# Any HTTP response (even 404) means server is responding
+			if curl -sS -o /dev/null "$url"; then
+				print_success "Backend is responding at $url"
+				return 0
+			fi
+		elif command -v nc >/dev/null 2>&1; then
+			# Try a quick TCP connect to the host:port
+			local host port
+			host=$(echo "$url" | sed -E 's#^https?://([^/:]+).*$#\1#')
+			port=$(echo "$url" | sed -E 's#^https?://[^/:]+:([0-9]+).*$#\1#')
+			if [ -n "$host" ] && [ -n "$port" ] && nc -z -w 1 "$host" "$port" 2>/dev/null; then
+				print_success "Backend TCP port open at $host:$port"
+				return 0
+			fi
+		else
+			# Fallback: bash TCP check (may not be available everywhere)
+			local host port
+			host=$(echo "$url" | sed -E 's#^https?://([^/:]+).*$#\1#')
+			port=$(echo "$url" | sed -E 's#^https?://[^/:]+:([0-9]+).*$#\1#')
+			if bash -c "</dev/tcp/$host/$port" 2>/dev/null; then
+				print_success "Backend TCP port open at $host:$port"
+				return 0
+			fi
+		fi
+
+		local now elapsed
+		now=$(date +%s)
+		elapsed=$((now - start_ts))
+		if [ "$elapsed" -ge "$timeout" ]; then
+			print_error "Timed out after ${timeout}s waiting for backend at $url"
+			return 1
+		fi
+		sleep 1
+	done
+}
 
 # Check if required tools are installed
 print_info "Checking required tools..."
@@ -106,7 +166,7 @@ fi
 
 # Export environment variables for the API
 # export RUST_LOG=api::handlers::metric=debug
-export RUST_LOG=info
+export RUST_LOG=error
 export RUST_BACKTRACE=1
 export RUST_ENV=dev
 export PUBLIC_API_BASE_URL=http://localhost:8080
@@ -121,8 +181,17 @@ cargo-watch -x 'run' &
 API_PID=$!
 cd ..
 
-# Give the API a moment to start
-sleep 2
+# Determine API URL to wait on
+API_PORT="${PORT:-8080}"
+API_HOST="127.0.0.1"
+API_WAIT_PATH="${API_HEALTH_PATH:-/health}"
+API_URL="http://${API_HOST}:${API_PORT}${API_WAIT_PATH}"
+
+# Wait for the API to become responsive before starting the frontend
+if ! wait_for_backend "$API_URL" "${API_STARTUP_TIMEOUT:-90}"; then
+	print_error "Backend failed to start. Not launching frontend."
+	cleanup 1
+fi
 
 # Start the web server with hot reloading
 print_info "Starting SvelteKit web server on port 5173..."
