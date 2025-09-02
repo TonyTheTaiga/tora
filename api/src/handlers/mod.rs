@@ -81,6 +81,10 @@ pub fn api_routes(app_state: &AppState) -> Router<AppState> {
             protected_route(get(log::get_logs), app_state),
         )
         .route(
+            "/experiments/{id}/results",
+            protected_route(get(log::get_results), app_state),
+        )
+        .route(
             "/experiments/{id}/logs",
             protected_route(post(log::create_log), app_state),
         )
