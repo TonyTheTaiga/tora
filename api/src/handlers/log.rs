@@ -37,28 +37,23 @@ pub async fn get_logs(
         ));
     }
 
-    let result = sqlx::query_as::<_, (i64, String, String, String, f64, Option<i64>, Option<serde_json::Value>, chrono::DateTime<chrono::Utc>)>(
-        "SELECT id, experiment_id::text, msg_id::text, name, value::float8, step::int8, metadata, created_at FROM log WHERE experiment_id = $1 ORDER BY created_at DESC",
+    let metrics = sqlx::query_as::<_, Log>(
+        r#"
+            SELECT
+                id,
+                experiment_id::text,
+                msg_id::text,
+                name, value::float8,
+                step::int8,
+                metadata,
+                created_at
+            FROM log 
+            WHERE experiment_id = $1 
+            ORDER BY created_at DESC"#,
     )
     .bind(experiment_uuid)
     .fetch_all(&app_state.db_pool)
     .await?;
-
-    let metrics: Vec<Log> = result
-        .into_iter()
-        .map(
-            |(id, experiment_id, msg_id, name, value, step, metadata, created_at)| Log {
-                id,
-                experiment_id,
-                msg_id,
-                name,
-                value,
-                step,
-                metadata,
-                created_at,
-            },
-        )
-        .collect();
 
     Ok(Json(Response {
         status: 200,

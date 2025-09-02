@@ -80,7 +80,7 @@ pub struct OutLog {
     pub processed_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, FromRow)]
 pub struct Log {
     pub id: i64,
     pub experiment_id: String,
