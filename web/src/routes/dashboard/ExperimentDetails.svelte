@@ -160,6 +160,7 @@
   });
 
   $effect(() => {
+    if (!results || results.length === 0) return;
     const available = new Set(results.map((r) => r.name));
     const pruned = pinnedNames.filter((n) => available.has(n));
     if (pruned.length !== pinnedNames.length) {
