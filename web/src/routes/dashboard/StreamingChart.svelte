@@ -113,24 +113,7 @@
         textStyle: { color: chartTheme.text },
       },
       legend: { top: 0, textStyle: { color: chartTheme.text } },
-      dataZoom: [
-        { type: "inside", xAxisIndex: 0 },
-        {
-          type: "slider",
-          xAxisIndex: 0,
-          height: 18,
-          bottom: 8,
-          textStyle: { color: chartTheme.axisTicks },
-          borderColor: chartTheme.terminalBorder || chartTheme.overlay0 + "33",
-          backgroundColor: (chartTheme.terminalBg || chartTheme.mantle) + "cc",
-          fillerColor: chartTheme.sky + "33",
-          handleStyle: { color: chartTheme.sky },
-          dataBackground: {
-            lineStyle: { color: chartTheme.overlay0 + "55" },
-            areaStyle: { color: chartTheme.overlay0 + "22" },
-          },
-        },
-      ],
+      dataZoom: [{ type: "inside", xAxisIndex: 0 }],
       xAxis: {
         type: "value",
         name: "step",
