@@ -49,18 +49,19 @@
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   const CHART_COLOR_KEYS = [
-    "red",
     "blue",
-    "green",
-    "yellow",
-    "mauve",
-    "pink",
-    "peach",
-    "teal",
-    "sky",
-    "sapphire",
     "lavender",
+    "sky",
+    "green",
+    "teal",
+    "mauve",
+    "peach",
+    "yellow",
+    "pink",
+    "sapphire",
     "maroon",
+    "red",
+    "rosewater",
   ];
 
   function getTheme() {
@@ -87,6 +88,8 @@
       sky: cs.getPropertyValue("--color-ctp-sky").trim(),
       fadedGridLines: cs.getPropertyValue("--color-ctp-surface1").trim() + "33",
       axisTicks: cs.getPropertyValue("--color-ctp-subtext0").trim(),
+      terminalBg: cs.getPropertyValue("--color-ctp-terminal-bg").trim(),
+      terminalBorder: cs.getPropertyValue("--color-ctp-terminal-border").trim(),
     } as const;
   }
 
@@ -105,8 +108,8 @@
           typeof v === "number" && Number.isFinite(v)
             ? v.toFixed(4)
             : String(v ?? ""),
-        backgroundColor: chartTheme.mantle + "cc",
-        borderColor: chartTheme.overlay0 + "33",
+        backgroundColor: (chartTheme.terminalBg || chartTheme.mantle) + "ee",
+        borderColor: chartTheme.terminalBorder || chartTheme.overlay0 + "44",
         textStyle: { color: chartTheme.text },
       },
       legend: { top: 0, textStyle: { color: chartTheme.text } },
@@ -118,8 +121,8 @@
           height: 18,
           bottom: 8,
           textStyle: { color: chartTheme.axisTicks },
-          borderColor: chartTheme.overlay0 + "33",
-          backgroundColor: chartTheme.mantle + "22",
+          borderColor: chartTheme.terminalBorder || chartTheme.overlay0 + "33",
+          backgroundColor: (chartTheme.terminalBg || chartTheme.mantle) + "cc",
           fillerColor: chartTheme.sky + "33",
           handleStyle: { color: chartTheme.sky },
           dataBackground: {
@@ -363,8 +366,8 @@
         textStyle: { color: chartTheme.text },
         legend: { textStyle: { color: chartTheme.text } },
         tooltip: {
-          backgroundColor: chartTheme.mantle + "cc",
-          borderColor: chartTheme.overlay0 + "33",
+          backgroundColor: (chartTheme.terminalBg || chartTheme.mantle) + "ee",
+          borderColor: chartTheme.terminalBorder || chartTheme.overlay0 + "44",
           textStyle: { color: chartTheme.text },
         },
         series: updates,
@@ -449,13 +452,13 @@
 </script>
 
 <div
-  class="relative h-80 w-full border border-ctp-surface0/20 bg-transparent overflow-hidden"
+  class="relative h-80 w-full bg-transparent border border-ctp-surface0/20 overflow-hidden rounded-sm"
 >
   <div class="absolute inset-0" bind:this={chartEl}></div>
   <div class="absolute top-1 right-1 flex items-center gap-2 z-10">
     <span class="text-[10px] text-ctp-subtext0">live: {status}</span>
     <button
-      class="text-[10px] leading-none border border-ctp-surface0/40 px-1.5 py-0.5 bg-ctp-mantle/70 hover:text-ctp-blue"
+      class="text-[10px] leading-none floating-element px-1.5 py-0.5 rounded-sm hover:text-ctp-blue"
       onclick={toggleScale}
       title="toggle Y axis scale between log and linear"
     >
