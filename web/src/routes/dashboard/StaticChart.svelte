@@ -21,17 +21,25 @@
   ]);
 
   let { experimentId } = $props<{ experimentId: string }>();
+  let yScale = $state<"log" | "linear">("log");
+  function toggleScale() {
+    yScale = yScale === "log" ? "linear" : "log";
+    // apply immediately on toggle to avoid extra effects
+    applyTheme();
+  }
 
   let chartEl: HTMLDivElement | null = $state(null);
   let chart: EChartsType | null = null;
   let loading = $state(false);
   let error: string | null = $state(null);
   let hasMetrics = $state(false);
+  let seriesRaw: Record<string, Array<[number, number]>> = $state({});
+  let seriesNames: string[] = $state([]);
 
   type LogRow = {
     name: string;
     value: number;
-    step?: number | null;
+    step: number;
     metadata?: Record<string, any> | null;
     created_at?: string;
   };
@@ -148,10 +156,12 @@
         },
       },
       yAxis: {
-        type: "log",
+        type: yScale === "log" ? "log" : "value",
         name: "value",
         minorTick: { show: true },
-        min: 1e-9,
+        min: "dataMin",
+        max: "dataMax",
+        scale: true,
         axisLabel: { color: chartTheme.axisTicks },
         axisLine: { lineStyle: { color: chartTheme.overlay0 } },
         splitLine: {
@@ -163,43 +173,55 @@
     };
   }
 
+  function dataForScale(raw: Record<string, Array<[number, number]>>) {
+    const out: Record<string, Array<[number, number | null]>> = {};
+    for (const n of Object.keys(raw)) {
+      const arr = raw[n];
+      if (yScale === "log") {
+        out[n] = arr.map(([x, y]) => [x, y > 0 ? y : null]);
+      } else {
+        out[n] = arr.map(([x, y]) => [x, Number.isFinite(y) ? y : null]);
+      }
+    }
+    return out;
+  }
+
   async function loadStaticData() {
     if (!experimentId) return;
     loading = true;
     error = null;
     hasMetrics = false;
     try {
-      const resp = await fetch(`/api/experiments/${experimentId}/logs`);
+      const resp = await fetch(`/api/experiments/${experimentId}/metrics`);
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const json = await resp.json();
-      const rows = (json?.data ?? []) as LogRow[];
-      // Filter only metrics
-      const metrics = rows.filter(
-        (r) => (r?.metadata as any)?.type === "metric",
-      );
-      // The API is DESC created_at; reverse to ASC
-      metrics.reverse();
-      // Group by name
-      const byName: Record<string, Array<[number, number]>> = {};
-      const counters: Record<string, number> = {};
+      const metrics = (json?.data ?? []) as LogRow[];
+      // Group by name into raw numeric series (preserve API order)
+      const byNameRaw: Record<string, Array<[number, number]>> = {};
       for (const r of metrics) {
         const name = String(r.name);
-        const y = Number.isFinite(r.value) ? r.value : 0;
-        const step =
-          typeof r.step === "number" ? r.step : (counters[name] ?? 0);
-        counters[name] = (counters[name] ?? 0) + 1;
-        if (!byName[name]) byName[name] = [];
-        byName[name].push([step, y > 0 ? y : 1e-9]);
+        const y =
+          typeof r.value === "number" && Number.isFinite(r.value)
+            ? r.value
+            : NaN;
+        const step = r.step as number;
+        if (!byNameRaw[name]) byNameRaw[name] = [];
+        byNameRaw[name].push([step, y]);
       }
 
-      const names = Object.keys(byName);
+      const names = Object.keys(byNameRaw);
+      seriesRaw = byNameRaw;
+      seriesNames = names;
       hasMetrics = names.length > 0;
+      const byScale = dataForScale(seriesRaw);
       const series = names.map((n) => ({
+        id: n,
         name: n,
         type: "line",
         showSymbol: false,
         smooth: 0.15,
-        data: byName[n],
+        connectNulls: true,
+        data: byScale[n],
         emphasis: { focus: "series" },
       }));
 
@@ -219,6 +241,8 @@
   }
 
   function applyTheme() {
+    const byScale = dataForScale(seriesRaw);
+    const updates = seriesNames.map((n) => ({ id: n, data: byScale[n] }));
     chart?.setOption(
       {
         color: chartTheme.colors as any,
@@ -229,6 +253,7 @@
           borderColor: chartTheme.overlay0 + "33",
           textStyle: { color: chartTheme.text },
         },
+        series: updates,
         xAxis: [
           {
             axisLabel: { color: chartTheme.axisTicks },
@@ -241,6 +266,10 @@
         ],
         yAxis: [
           {
+            type: yScale === "log" ? "log" : "value",
+            min: "dataMin",
+            max: "dataMax",
+            scale: true,
             axisLabel: { color: chartTheme.axisTicks },
             axisLine: { lineStyle: { color: chartTheme.overlay0 } },
             splitLine: {
@@ -253,11 +282,9 @@
       { notMerge: false },
     );
   }
-
-  $effect(() => {
+  import { onMount } from "svelte";
+  onMount(() => {
     initChart();
-    loadStaticData();
-    // Theme change listeners
     const handleThemeChange = () => {
       chartTheme = getTheme();
       applyTheme();
@@ -290,9 +317,10 @@
     };
   });
 
-  // Reload if experimentId changes
+  // Fetch when experiment changes
   $effect(() => {
-    const _id = experimentId;
+    const id = experimentId;
+    if (!id) return;
     loadStaticData();
   });
 </script>
@@ -301,6 +329,15 @@
   class="relative h-80 w-full border border-ctp-surface0/20 bg-transparent overflow-hidden"
 >
   <div class="absolute inset-0" bind:this={chartEl}></div>
+  <div class="absolute top-1 right-1 flex gap-1 z-10">
+    <button
+      class="text-[10px] leading-none border border-ctp-surface0/40 px-1.5 py-0.5 bg-ctp-mantle/70 hover:text-ctp-blue"
+      onclick={toggleScale}
+      title="toggle Y axis scale between log and linear"
+    >
+      y: {yScale}
+    </button>
+  </div>
   {#if loading}
     <div class="absolute inset-0 flex items-center justify-center">
       <div class="text-ctp-subtext0 text-xs">loading chart…</div>

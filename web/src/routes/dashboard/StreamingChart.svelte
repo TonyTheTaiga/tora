@@ -21,21 +21,23 @@
     CanvasRenderer,
   ]);
 
-  let {
-    experimentId,
-    status = $bindable<"idle" | "connecting" | "open" | "closed" | "error">(
-      "idle",
-    ),
-  } = $props<{
-    experimentId: string;
-    status?: "idle" | "connecting" | "open" | "closed" | "error";
-  }>();
+  let { experimentId } = $props<{ experimentId: string }>();
+  let status = $state<"idle" | "connecting" | "open" | "closed" | "error">(
+    "idle",
+  );
+  let yScale = $state<"log" | "linear">("log");
+  function toggleScale() {
+    yScale = yScale === "log" ? "linear" : "log";
+    // apply immediately on toggle to avoid extra effects
+    applyTheme();
+  }
 
   let chartEl: HTMLDivElement | null = $state(null);
   let chart: EChartsType | null = null;
   let seriesData: Record<string, Array<[number, number]>> = {};
   let pending: Record<string, Array<[number, number]>> = {};
   let updateScheduled = false;
+  let seenMsgIds: Set<string> = new Set();
 
   let ws: WebSocket | null = null;
   let reconnectDelayMs = 500;
@@ -135,10 +137,12 @@
         },
       },
       yAxis: {
-        type: "log",
+        type: yScale === "log" ? "log" : "value",
         name: "value",
         minorTick: { show: true },
-        min: 1e-9,
+        min: "dataMin",
+        max: "dataMax",
+        scale: true,
         axisLabel: { color: chartTheme.axisTicks },
         axisLine: { lineStyle: { color: chartTheme.overlay0 } },
         splitLine: {
@@ -174,11 +178,16 @@
       seriesData[name] = [];
       const names = Object.keys(seriesData);
       const newSeries = names.map((n) => ({
+        id: n,
         name: n,
         type: "line",
         showSymbol: false,
         smooth: 0.15,
-        data: seriesData[n],
+        connectNulls: true,
+        data:
+          yScale === "log"
+            ? seriesData[n].map(([x, y]) => [x, y > 0 ? y : null])
+            : seriesData[n].map(([x, y]) => [x, Number.isFinite(y) ? y : null]),
         emphasis: { focus: "series" },
       }));
       chart?.setOption(
@@ -190,7 +199,7 @@
 
   function enqueue(name: string, step: number, value: number) {
     if (!pending[name]) pending[name] = [];
-    pending[name].push([step, value > 0 ? value : 1e-9]);
+    pending[name].push([step, value]);
     if (!updateScheduled) {
       updateScheduled = true;
       requestAnimationFrame(flush);
@@ -208,10 +217,21 @@
       delete pending[name];
       const arr = seriesData[name];
       for (let i = 0; i < items.length; i++) arr.push(items[i]);
+      // Sort by step to ensure continuous lines; no step-based dedupe
+      seriesData[name] = arr.slice().sort((a, b) => a[0] - b[0]);
     }
     const updates = Object.keys(seriesData).map((n) => ({
+      id: n,
       name: n,
-      data: seriesData[n],
+      type: "line",
+      showSymbol: false,
+      smooth: 0.15,
+      connectNulls: true,
+      emphasis: { focus: "series" },
+      data:
+        yScale === "log"
+          ? seriesData[n].map(([x, y]) => [x, y > 0 ? y : null])
+          : seriesData[n].map(([x, y]) => [x, Number.isFinite(y) ? y : null]),
     }));
     chart.setOption(
       { series: updates, legend: { data: Object.keys(seriesData) } },
@@ -295,13 +315,21 @@
             : new TextDecoder().decode(ev.data as ArrayBuffer);
         const msg = JSON.parse(text);
         if (msg?.type && msg.type !== "metric") return;
+        // Deduplicate by message id, if provided
+        const _md: any = (msg as any)?.metadata;
+        const msgId: unknown =
+          (msg as any)?.msg_id ?? _md?.msg_id ?? _md?.message_id;
+        if (typeof msgId === "string") {
+          if (seenMsgIds.has(msgId)) return;
+          seenMsgIds.add(msgId);
+        }
         if (typeof msg?.name === "string" && typeof msg?.value === "number") {
           const name = msg.name as string;
           const val = Number.isFinite(msg.value) ? (msg.value as number) : 0;
           const step =
             typeof msg.step === "number" ? (msg.step as number) : undefined;
           const fallbackIndex = seriesData[name]?.length ?? 0;
-          initChart();
+          if (!chart) initChart();
           enqueue(name, step ?? fallbackIndex, val);
         }
       } catch (_) {}
@@ -318,6 +346,13 @@
   }
 
   function applyTheme() {
+    const updates = Object.keys(seriesData).map((n) => ({
+      id: n,
+      data:
+        yScale === "log"
+          ? seriesData[n].map(([x, y]) => [x, y > 0 ? y : null])
+          : seriesData[n].map(([x, y]) => [x, Number.isFinite(y) ? y : null]),
+    }));
     chart?.setOption(
       {
         color: chartTheme.colors as any,
@@ -328,6 +363,7 @@
           borderColor: chartTheme.overlay0 + "33",
           textStyle: { color: chartTheme.text },
         },
+        series: updates,
         xAxis: [
           {
             axisLabel: { color: chartTheme.axisTicks },
@@ -340,6 +376,10 @@
         ],
         yAxis: [
           {
+            type: yScale === "log" ? "log" : "value",
+            min: "dataMin",
+            max: "dataMax",
+            scale: true,
             axisLabel: { color: chartTheme.axisTicks },
             axisLine: { lineStyle: { color: chartTheme.overlay0 } },
             splitLine: {
@@ -353,9 +393,9 @@
     );
   }
 
-  $effect(() => {
+  import { onMount } from "svelte";
+  onMount(() => {
     initChart();
-    connect();
     const handleThemeChange = () => {
       chartTheme = getTheme();
       applyTheme();
@@ -389,12 +429,14 @@
     };
   });
 
-  // Reconnect if experimentId changes
+  // Reconnect/reset when experiment changes
   $effect(() => {
-    const _id = experimentId;
+    const id = experimentId;
+    if (!id) return;
     // reset series/state on experiment change
     seriesData = {};
     pending = {};
+    seenMsgIds = new Set();
     // reapply base axes/dataZoom to avoid index errors
     chart?.setOption(getBaseOptions(), { notMerge: true });
     close();
@@ -406,4 +448,14 @@
   class="relative h-80 w-full border border-ctp-surface0/20 bg-transparent overflow-hidden"
 >
   <div class="absolute inset-0" bind:this={chartEl}></div>
+  <div class="absolute top-1 right-1 flex items-center gap-2 z-10">
+    <span class="text-[10px] text-ctp-subtext0">live: {status}</span>
+    <button
+      class="text-[10px] leading-none border border-ctp-surface0/40 px-1.5 py-0.5 bg-ctp-mantle/70 hover:text-ctp-blue"
+      onclick={toggleScale}
+      title="toggle Y axis scale between log and linear"
+    >
+      y: {yScale}
+    </button>
+  </div>
 </div>

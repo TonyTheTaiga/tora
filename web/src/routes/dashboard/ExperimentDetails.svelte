@@ -8,11 +8,7 @@
 
   let { experiment } = $props();
   let results = $state<any[]>([]);
-  // chart mode + ws status
   let isStreamingChart = $state(false);
-  let wsStatus = $state<"idle" | "connecting" | "open" | "closed" | "error">(
-    "idle",
-  );
   let pinnedNames = $state<string[]>([]);
   let showResults = $state(true);
   let showHeader = $state(true);
@@ -106,14 +102,11 @@
     } catch (e) {}
   }
 
-  // streaming toggle
   function toggleLiveStream() {
     if (isStreamingChart) {
       isStreamingChart = false;
-      wsStatus = "idle";
     } else {
       isStreamingChart = true;
-      wsStatus = "connecting";
     }
   }
 
@@ -121,8 +114,12 @@
     try {
       loading.experimentDetails = true;
       errors.experimentDetails = null;
-      // Fetch only scalar results; metrics stream over WS
-      const response = await fetch(`/api/experiments/${experiment.id}/results`);
+      const response = await fetch(
+        `/api/experiments/${experiment.id}/results`,
+        {
+          signal: detailsAbort?.signal,
+        },
+      );
       if (!response.ok)
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       const apiResponse = await response.json();
@@ -130,7 +127,6 @@
       if (!metrics || !Array.isArray(metrics))
         throw new Error("Invalid response structure from metrics API");
 
-      // Deduplicate by latest per name (API is DESC created_at)
       const seen = new Set<string>();
       const list: any[] = [];
       for (const m of metrics) {
@@ -150,18 +146,20 @@
     }
   }
 
+  let detailsAbort: AbortController | null = null;
   $effect(() => {
-    // Initial fetch for non-streamed details (results)
-    loadExperimentDetails(experiment);
-  });
-
-  $effect(() => {
+    const exp = experiment;
+    if (!exp) return;
+    try {
+      detailsAbort?.abort();
+    } catch {}
+    detailsAbort = new AbortController();
+    loadExperimentDetails(exp);
     loadPinned();
     loadHeaderExpanded();
   });
 
   $effect(() => {
-    if (!results || results.length === 0) return;
     const available = new Set(results.map((r) => r.name));
     const pruned = pinnedNames.filter((n) => available.has(n));
     if (pruned.length !== pinnedNames.length) {
@@ -170,10 +168,10 @@
     }
   });
 
-  $effect(() => {
-    const _h = showHeader;
+  function toggleHeader() {
+    showHeader = !showHeader;
     saveHeaderExpanded();
-  });
+  }
 </script>
 
 <div class="flex flex-col">
@@ -183,7 +181,7 @@
     <div class="mb-1">
       <button
         class="flex items-center gap-2 text-ctp-text font-medium text-base hover:text-ctp-blue"
-        onclick={() => (showHeader = !showHeader)}
+        onclick={toggleHeader}
         aria-expanded={showHeader}
         aria-controls="experiment-header-details"
       >
@@ -265,10 +263,6 @@
       >
         {isStreamingChart ? "stop live stream" : "start live stream"}
       </button>
-
-      <span class="text-[11px] text-ctp-subtext0">
-        live: {wsStatus}
-      </span>
     </div>
   </div>
 
@@ -335,10 +329,7 @@
 
         <div class="space-y-2">
           {#if isStreamingChart}
-            <StreamingChart
-              experimentId={experiment.id}
-              bind:status={wsStatus}
-            />
+            <StreamingChart experimentId={experiment.id} />
           {:else}
             <StaticChart experimentId={experiment.id} />
           {/if}
