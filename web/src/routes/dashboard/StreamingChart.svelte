@@ -11,6 +11,7 @@
   import { CanvasRenderer } from "echarts/renderers";
   import { browser } from "$app/environment";
   import { env } from "$env/dynamic/public";
+  import type { Snippet } from "svelte";
 
   echarts.use([
     LineChart,
@@ -21,7 +22,10 @@
     CanvasRenderer,
   ]);
 
-  let { experimentId } = $props<{ experimentId: string }>();
+  let { experimentId, toggleStreaming } = $props<{
+    experimentId: string;
+    toggleStreaming?: Snippet;
+  }>();
   let status = $state<"idle" | "connecting" | "open" | "closed" | "error">(
     "idle",
   );
@@ -457,5 +461,6 @@
     >
       y: {yScale}
     </button>
+    {@render toggleStreaming?.()}
   </div>
 </div>

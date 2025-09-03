@@ -255,15 +255,6 @@
       >
         experiment id: {experiment.id}
       </button>
-
-      <button
-        class="text-xs border border-ctp-surface0/40 px-2 py-1 hover:text-ctp-blue"
-        onclick={toggleLiveStream}
-        aria-pressed={isStreamingChart}
-        title={isStreamingChart ? "stop live stream" : "start live stream"}
-      >
-        {isStreamingChart ? "stop live stream" : "start live stream"}
-      </button>
     </div>
   </div>
 
@@ -330,9 +321,31 @@
 
         <div class="space-y-2">
           {#if isStreamingChart}
-            <StreamingChart experimentId={experiment.id} />
+            <StreamingChart experimentId={experiment.id}>
+              {#snippet toggleStreaming()}
+                <button
+                  class="text-[10px] leading-none border border-ctp-surface0/40 px-1.5 py-0.5 bg-ctp-mantle/70 hover:text-ctp-yellow"
+                  onclick={toggleLiveStream}
+                  aria-pressed={true}
+                  title="stop live stream"
+                >
+                  stop live
+                </button>
+              {/snippet}
+            </StreamingChart>
           {:else}
-            <StaticChart experimentId={experiment.id} />
+            <StaticChart experimentId={experiment.id}>
+              {#snippet toggleStreaming()}
+                <button
+                  class="text-[10px] leading-none border border-ctp-surface0/40 px-1.5 py-0.5 bg-ctp-mantle/70 hover:text-ctp-blue"
+                  onclick={toggleLiveStream}
+                  aria-pressed={false}
+                  title="start live stream"
+                >
+                  start live
+                </button>
+              {/snippet}
+            </StaticChart>
           {/if}
         </div>
 

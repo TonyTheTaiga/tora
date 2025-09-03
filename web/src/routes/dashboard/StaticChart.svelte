@@ -10,6 +10,7 @@
   } from "echarts/components";
   import { CanvasRenderer } from "echarts/renderers";
   import { browser } from "$app/environment";
+  import type { Snippet } from "svelte";
 
   echarts.use([
     LineChart,
@@ -20,7 +21,10 @@
     CanvasRenderer,
   ]);
 
-  let { experimentId } = $props<{ experimentId: string }>();
+  let { experimentId, toggleStreaming } = $props<{
+    experimentId: string;
+    toggleStreaming?: Snippet;
+  }>();
   let yScale = $state<"log" | "linear">("log");
   function toggleScale() {
     yScale = yScale === "log" ? "linear" : "log";
@@ -337,6 +341,7 @@
     >
       y: {yScale}
     </button>
+    {@render toggleStreaming?.()}
   </div>
   {#if loading}
     <div class="absolute inset-0 flex items-center justify-center">
