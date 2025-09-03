@@ -50,9 +50,12 @@ async fn publish_outlog(
 ) -> std::result::Result<i64, PublishError> {
     let experiment_id = log.experiment_id;
     let channel = format!("log:exp:{experiment_id}");
-    let payload = serde_json::to_string(&log.payload).map_err(|e| PublishError {
-        log_id: log.id,
-        source: e.into(),
+    let payload = serde_json::to_string(&log.payload).map_err(|e| {
+        println!("{:?}", log.payload);
+        PublishError {
+            log_id: log.id,
+            source: e.into(),
+        }
     })?;
 
     let _: i64 = publisher_client
@@ -118,11 +121,11 @@ pub async fn run_worker(state: AppState, polling_interval: Duration) {
         let rows = get_unpublished_rows(&state.db_pool).await;
         let client = state.vk_pool.next_connected();
         let mut published_ids: Vec<i64> = vec![];
-        let mut failed_ids: Vec<i64> = vec![];
+        let mut failures: Vec<PublishError> = vec![];
         for log in rows {
             match publish_outlog(client, log).await {
                 Ok(log_id) => published_ids.push(log_id),
-                Err(e) => failed_ids.push(e.log_id),
+                Err(e) => failures.push(e),
             }
         }
 
@@ -132,8 +135,8 @@ pub async fn run_worker(state: AppState, polling_interval: Duration) {
             }
         }
 
-        if !failed_ids.is_empty() {
-            println!("failed to publish {:?} logs", failed_ids.len());
+        if !failures.is_empty() {
+            let failed_ids: Vec<i64> = failures.iter().map(|e| e.log_id).collect();
             if let Err(e) = report_failed_logs(&state.db_pool, &failed_ids).await {
                 eprintln!("failed to mark failed logs: {e}");
             }
