@@ -5,8 +5,10 @@
   import { copyToClipboard } from "$lib/utils/common";
   import { loading, errors } from "./state.svelte";
   import { ChevronDown, ChevronRight, Pin } from "@lucide/svelte";
+  import { onMount } from "svelte";
 
   let { experiment } = $props();
+  const detailsInstanceId = Math.random().toString(36).slice(2);
   let results = $state<any[]>([]);
   let isStreamingChart = $state(false);
   let pinnedNames = $state<string[]>([]);
@@ -148,17 +150,26 @@
 
   let detailsAbort: AbortController | null = null;
 
-  $effect(() => {
+  onMount(() => {
     const exp = experiment;
-    if (!exp) return;
-    try {
-      detailsAbort?.abort();
-    } catch {}
-    detailsAbort = new AbortController();
-    loadExperimentDetails(exp);
-    loadPinned();
-    loadHeaderExpanded();
+    if (exp) {
+      try {
+        detailsAbort?.abort();
+      } catch {}
+      detailsAbort = new AbortController();
+      loadExperimentDetails(exp);
+      loadPinned();
+      loadHeaderExpanded();
+    }
+    return () => {
+      try {
+        detailsAbort?.abort();
+      } catch {}
+      detailsAbort = null;
+    };
   });
+
+  // No id-change guard: parent remounts this component on selection.
 
   $effect(() => {
     if (!results || results.length === 0) return;
@@ -260,154 +271,150 @@
   </div>
 
   <div class="p-4">
-    {#if loading.experimentDetails}
-      <div class="text-center py-12">
-        <div class="text-ctp-subtext0 text-sm">
-          loading experiment details...
-        </div>
-      </div>
-    {:else if errors.experimentDetails}
-      <div class="surface-layer-2 p-4">
-        <div class="text-ctp-red font-medium text-sm mb-3">
-          error loading experiment details
-        </div>
-        <div class="text-ctp-subtext0 mb-4 text-xs">
-          {errors.experimentDetails}
-        </div>
-      </div>
-    {:else}
-      <div class="space-y-6">
-        {#if pinnedResults.length > 0}
-          <div class="space-y-2">
-            <div class="flex items-center gap-2">
-              <div class="text-sm text-ctp-text">pinned results</div>
-              <div class="text-sm text-ctp-subtext0">
-                [{pinnedResults.length}]
-              </div>
-            </div>
-            <div
-              class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
-            >
-              {#each pinnedResults as metric}
-                <div
-                  class="relative flex flex-col gap-1 p-3 border-ctp-terminal-border hover:bg-ctp-surface0/20 min-w-0"
-                >
-                  <button
-                    class="absolute top-2 right-2 text-ctp-overlay0 hover:text-ctp-yellow"
-                    title="unpin result"
-                    aria-label="unpin result"
-                    onclick={() => togglePin(metric.name)}
-                  >
-                    <Pin size={14} />
-                  </button>
-                  <div
-                    class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate pr-6"
-                    title={metric.name}
-                  >
-                    {metric.name}
-                  </div>
-                  <div
-                    class="text-ctp-text font-semibold tabular-nums font-mono text-lg truncate"
-                    title={String(metric.value)}
-                  >
-                    {typeof metric.value === "number"
-                      ? metric.value.toFixed(4)
-                      : metric.value}
-                  </div>
-                </div>
-              {/each}
+    <div class="space-y-6">
+      {#if pinnedResults.length > 0}
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <div class="text-sm text-ctp-text">pinned results</div>
+            <div class="text-sm text-ctp-subtext0">
+              [{pinnedResults.length}]
             </div>
           </div>
-        {/if}
-
-        <div class="space-y-2">
-          {#if isStreamingChart}
-            <StreamingChart experimentId={experiment.id}>
-              {#snippet toggleStreaming()}
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
+          >
+            {#each pinnedResults as metric}
+              <div
+                class="relative flex flex-col gap-1 p-3 border-ctp-terminal-border hover:bg-ctp-surface0/20 min-w-0"
+              >
                 <button
-                  class="text-[10px] leading-none border border-ctp-surface0/40 px-1.5 py-0.5 bg-ctp-mantle/70 hover:text-ctp-yellow"
-                  onclick={toggleLiveStream}
-                  aria-pressed={true}
-                  title="stop live stream"
+                  class="absolute top-2 right-2 text-ctp-overlay0 hover:text-ctp-yellow"
+                  title="unpin result"
+                  aria-label="unpin result"
+                  onclick={() => togglePin(metric.name)}
                 >
-                  stop live
+                  <Pin size={14} />
                 </button>
-              {/snippet}
-            </StreamingChart>
-          {:else}
-            <StaticChart experimentId={experiment.id}>
-              {#snippet toggleStreaming()}
-                <button
-                  class="text-[10px] leading-none border border-ctp-surface0/40 px-1.5 py-0.5 bg-ctp-mantle/70 hover:text-ctp-blue"
-                  onclick={toggleLiveStream}
-                  aria-pressed={false}
-                  title="start live stream"
-                >
-                  start live
-                </button>
-              {/snippet}
-            </StaticChart>
-          {/if}
-        </div>
-
-        {#if results.length > 0}
-          <div class="space-y-2">
-            <button
-              class="flex items-center gap-2 text-sm text-ctp-text hover:text-ctp-blue"
-              onclick={() => (showResults = !showResults)}
-              aria-expanded={showResults}
-              aria-controls="results-section"
-            >
-              {#if showResults}
-                <ChevronDown size={14} />
-              {:else}
-                <ChevronRight size={14} />
-              {/if}
-              <span>results</span>
-              <span class="text-ctp-subtext0">[{results.length}]</span>
-            </button>
-            {#if showResults}
-              <div id="results-section" class="border-ctp-terminal-border p-2">
                 <div
-                  class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
+                  class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate pr-6"
+                  title={metric.name}
                 >
-                  {#each results as metric}
-                    <div
-                      class="relative flex flex-col gap-1 p-2 hover:bg-ctp-surface0/20 min-w-0"
-                    >
-                      <button
-                        class="absolute top-2 right-2 text-ctp-overlay0 hover:text-ctp-yellow"
-                        title={isPinned(metric.name) ? "unpin" : "pin"}
-                        aria-pressed={isPinned(metric.name)}
-                        onclick={() => togglePin(metric.name)}
-                      >
-                        <Pin
-                          size={14}
-                          class={isPinned(metric.name) ? "text-ctp-yellow" : ""}
-                        />
-                      </button>
-                      <div
-                        class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate pr-6"
-                        title={metric.name}
-                      >
-                        {metric.name}
-                      </div>
-                      <div
-                        class="text-ctp-text font-semibold tabular-nums font-mono truncate pr-6"
-                        title={String(metric.value)}
-                      >
-                        {typeof metric.value === "number"
-                          ? metric.value.toFixed(4)
-                          : metric.value}
-                      </div>
-                    </div>
-                  {/each}
+                  {metric.name}
                 </div>
+                <div
+                  class="text-ctp-text font-semibold tabular-nums font-mono text-lg truncate"
+                  title={String(metric.value)}
+                >
+                  {typeof metric.value === "number"
+                    ? metric.value.toFixed(4)
+                    : metric.value}
+                </div>
+              </div>
+            {/each}
+          </div>
+        </div>
+      {/if}
+
+      <div class="space-y-2">
+        {#if isStreamingChart}
+          <StreamingChart experimentId={experiment.id}>
+            {#snippet toggleStreaming()}
+              <button
+                class="text-[10px] leading-none border border-ctp-surface0/40 px-1.5 py-0.5 bg-ctp-mantle/70 hover:text-ctp-yellow"
+                onclick={toggleLiveStream}
+                aria-pressed={true}
+                title="stop live stream"
+              >
+                stop live
+              </button>
+            {/snippet}
+          </StreamingChart>
+        {:else}
+          <StaticChart experimentId={experiment.id}>
+            {#snippet toggleStreaming()}
+              <button
+                class="text-[10px] leading-none border border-ctp-surface0/40 px-1.5 py-0.5 bg-ctp-mantle/70 hover:text-ctp-blue"
+                onclick={toggleLiveStream}
+                aria-pressed={false}
+                title="start live stream"
+              >
+                start live
+              </button>
+            {/snippet}
+          </StaticChart>
+        {/if}
+      </div>
+
+      <div class="space-y-2">
+        <button
+          class="flex items-center gap-2 text-sm text-ctp-text hover:text-ctp-blue"
+          onclick={() => (showResults = !showResults)}
+          aria-expanded={showResults}
+          aria-controls="results-section"
+        >
+          {#if showResults}
+            <ChevronDown size={14} />
+          {:else}
+            <ChevronRight size={14} />
+          {/if}
+          <span>results</span>
+          <span class="text-ctp-subtext0">[{results.length}]</span>
+        </button>
+        {#if showResults}
+          <div id="results-section" class="border-ctp-terminal-border p-2">
+            {#if loading.experimentDetails}
+              <div class="text-center py-8 text-ctp-subtext0 text-sm">
+                loading experiment details...
+              </div>
+            {:else if errors.experimentDetails}
+              <div class="surface-layer-2 p-4">
+                <div class="text-ctp-red font-medium text-sm mb-3">
+                  error loading experiment details
+                </div>
+                <div class="text-ctp-subtext0 mb-4 text-xs">
+                  {errors.experimentDetails}
+                </div>
+              </div>
+            {:else if results.length > 0}
+              <div
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
+              >
+                {#each results as metric}
+                  <div
+                    class="relative flex flex-col gap-1 p-2 hover:bg-ctp-surface0/20 min-w-0"
+                  >
+                    <button
+                      class="absolute top-2 right-2 text-ctp-overlay0 hover:text-ctp-yellow"
+                      title={isPinned(metric.name) ? "unpin" : "pin"}
+                      aria-pressed={isPinned(metric.name)}
+                      onclick={() => togglePin(metric.name)}
+                    >
+                      <Pin
+                        size={14}
+                        class={isPinned(metric.name) ? "text-ctp-yellow" : ""}
+                      />
+                    </button>
+                    <div
+                      class="text-ctp-subtext0 text-[11px] uppercase tracking-wide truncate pr-6"
+                      title={metric.name}
+                    >
+                      {metric.name}
+                    </div>
+                    <div
+                      class="text-ctp-text font-semibold tabular-nums font-mono truncate pr-6"
+                      title={String(metric.value)}
+                    >
+                      {typeof metric.value === "number"
+                        ? metric.value.toFixed(4)
+                        : metric.value}
+                    </div>
+                  </div>
+                {/each}
               </div>
             {/if}
           </div>
         {/if}
       </div>
-    {/if}
+    </div>
   </div>
 </div>
