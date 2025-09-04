@@ -5,11 +5,49 @@ export function generateRequestId(): string {
   );
 }
 
-export function startTimer(_action?: string, _metadata?: any) {
+type TimingMetadata = Record<string, unknown> | undefined;
+
+export function startTimer(action?: string, metadata?: TimingMetadata) {
   const start = performance.now();
+  const label = action || "timer";
+  const baseMeta = metadata || {};
+
+  function nowMs() {
+    return performance.now();
+  }
+
+  function safeLog(kind: "info" | "error", message: string, meta?: any) {
+    try {
+      if (kind === "info") {
+        if (meta && Object.keys(meta).length) {
+          console.info(message, meta);
+        } else {
+          console.info(message);
+        }
+      } else {
+        if (meta && Object.keys(meta).length) {
+          console.error(message, meta);
+        } else {
+          console.error(message);
+        }
+      }
+    } catch {
+      // never throw from logging
+    }
+  }
+
   return {
-    stop: () => performance.now() - start,
-    elapsed: () => performance.now() - start,
-    end: (_endMetadata?: any) => performance.now() - start,
+    stop: () => nowMs() - start,
+    elapsed: () => nowMs() - start,
+    end: (endMetadata?: TimingMetadata) => {
+      const elapsed = nowMs() - start;
+      const meta = { ...baseMeta, ...(endMetadata || {}) } as Record<
+        string,
+        unknown
+      >;
+      const msg = `[timing] ${label} in ${elapsed.toFixed(1)}ms`;
+      safeLog("info", msg, meta);
+      return elapsed;
+    },
   };
 }

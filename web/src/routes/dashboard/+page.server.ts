@@ -1,6 +1,5 @@
-import type { Actions } from "@sveltejs/kit";
 import type { ApiResponse, Workspace } from "$lib/types";
-import { fail, error } from "@sveltejs/kit";
+import { error } from "@sveltejs/kit";
 import { generateRequestId, startTimer } from "$lib/utils/timing";
 import type { PageServerLoad } from "./$types";
 
@@ -13,9 +12,9 @@ export const load: PageServerLoad = async ({ locals }) => {
     error(500, "API client not available");
   }
 
+  const requestId = generateRequestId();
+  const timer = startTimer("dashboard.page.load", { requestId });
   try {
-    const requestId = generateRequestId();
-    const timer = startTimer("dashboard.page.load", { requestId });
     const apiResponse =
       await locals.apiClient.get<ApiResponse<Workspace[]>>("/workspaces");
     const workspaces = apiResponse.data.map((workspace: any) => ({
@@ -33,6 +32,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 
     return { workspaces };
   } catch (err) {
+    // best-effort timing log on error
+    timer.end({ error: err instanceof Error ? err.message : String(err) });
     if (err instanceof Error && "status" in err) {
       throw err;
     }

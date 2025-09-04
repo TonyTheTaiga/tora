@@ -4,7 +4,7 @@
   let { children } = $props();
 
   function isUserOnMobile() {
-    if (!browser) return false; // avoid accessing navigator during SSR
+    if (!browser) return false;
     return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent,
     );

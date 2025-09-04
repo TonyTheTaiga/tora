@@ -93,8 +93,18 @@ async function proxyRequest(
     body: body,
   };
 
+  const startedAt = Date.now();
   try {
     const response = await fetch(rustBackendUrl, options);
+    const elapsedMs = Date.now() - startedAt;
+    try {
+      // Example: [proxy] GET /v1/things -> 200 in 87ms
+      console.info(
+        `[proxy] ${request.method} /${path}${url.search} -> ${response.status} in ${elapsedMs}ms`,
+      );
+    } catch (_) {
+      // best-effort logging
+    }
     const proxyResponse = new Response(response.body, {
       status: response.status,
       statusText: response.statusText,
@@ -103,7 +113,8 @@ async function proxyRequest(
 
     return proxyResponse;
   } catch (e) {
-    console.error(`Proxy error for ${rustBackendUrl}:`, e);
+    const elapsedMs = Date.now() - startedAt;
+    console.error(`Proxy error for ${rustBackendUrl} in ${elapsedMs}ms:`, e);
     error(
       500,
       `Failed to proxy request to backend: ${e instanceof Error ? e.message : String(e)}`,

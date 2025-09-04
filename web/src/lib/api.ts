@@ -34,7 +34,33 @@ export class ApiClient {
       headers,
     };
 
-    const response = await fetch(url, { ...defaultOptions, ...options });
+    const startedAt = Date.now();
+    const method = (options.method || "GET").toString().toUpperCase();
+    let response: Response;
+    try {
+      response = await fetch(url, { ...defaultOptions, ...options });
+    } catch (err) {
+      const elapsedMs = Date.now() - startedAt;
+      try {
+        console.error(
+          `[api] ${method} ${endpoint} -> error in ${elapsedMs}ms: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      } catch (_) {
+        // best-effort logging
+      }
+      throw err;
+    }
+
+    const elapsedMs = Date.now() - startedAt;
+    try {
+      // Log a concise line for latency monitoring
+      // Example: [api] GET /workspaces -> 200 in 123ms
+      console.info(
+        `[api] ${method} ${endpoint} -> ${response.status} in ${elapsedMs}ms`,
+      );
+    } catch (_) {
+      // best-effort logging; never fail the request because of logging
+    }
 
     if (!response.ok) {
       throw new Error(
