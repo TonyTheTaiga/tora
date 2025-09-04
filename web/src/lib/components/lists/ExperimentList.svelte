@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Experiment } from "$lib/types";
+  import type { Experiment, Workspace } from "$lib/types";
   import {
     setExperimentToEdit,
     setExperimentToDelete,
@@ -11,7 +11,21 @@
   import ListActionsMenu, { type MenuItem } from "./ListActionsMenu.svelte";
   import { DeleteExperimentModal } from "$lib/components/modals";
 
-  let { workspace, experiments, searchQuery, onItemClick } = $props();
+  interface Props {
+    workspace: Workspace;
+    experiments: Experiment[];
+    searchQuery: string;
+    onItemClick?: (experiment: Experiment) => void;
+    onExperimentsChange?: (list: Experiment[]) => void;
+  }
+
+  let {
+    workspace,
+    experiments,
+    searchQuery,
+    onItemClick,
+    onExperimentsChange = (list: Experiment[]) => {},
+  }: Props = $props();
 
   function formatDate(date: Date) {
     return date.toLocaleDateString("en-US", {
@@ -150,5 +164,9 @@
 {/if}
 
 {#if experimentToDelete}
-  <DeleteExperimentModal experiment={experimentToDelete} bind:experiments />
+  <DeleteExperimentModal
+    experiment={experimentToDelete}
+    bind:experiments
+    onChange={onExperimentsChange}
+  />
 {/if}

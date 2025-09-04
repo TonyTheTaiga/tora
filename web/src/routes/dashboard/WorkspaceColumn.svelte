@@ -6,13 +6,39 @@
   import { setSelectedWorkspace } from "./state.svelte";
   import WorkspaceList from "$lib/components/lists/WorkspaceList.svelte";
   import CreateWorkspaceModal from "$lib/components/modals/create-workspace-modal.svelte";
-  import { Mail, FolderPlus } from "@lucide/svelte";
+  import { Mail, FolderPlus, RefreshCw } from "@lucide/svelte";
+  import type { Workspace } from "$lib/types";
   import InvitationsModal from "./invitations-modal.svelte";
 
   let { workspaces, workspaceRoles, workspaceInvitations } = $props();
   let workspaceSearchQuery = $state("");
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
   let openInvitationModal = $state<boolean>(false);
+
+  let isRefreshing = $state(false);
+  let workspacesLocal = $state<Workspace[]>(workspaces);
+
+  async function refreshWorkspaces() {
+    try {
+      isRefreshing = true;
+      const response = await fetch(`/api/workspaces`);
+      if (!response.ok)
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      const apiResponse = await response.json();
+      const data = apiResponse.data as any[];
+      workspacesLocal = (data || []).map((w: any) => ({
+        id: w.id,
+        name: w.name,
+        description: w.description || "",
+        createdAt: new Date(w.createdAt ?? w.created_at),
+        role: w.role,
+      }));
+    } catch (err) {
+      console.error("Failed to refresh workspaces:", err);
+    } finally {
+      isRefreshing = false;
+    }
+  }
 </script>
 
 {#if createWorkspaceModal}
@@ -34,7 +60,16 @@
   >
     <div class="flex items-center justify-between mb-3">
       <h2 class="text-ctp-text font-medium text-base">Workspaces</h2>
-      <div class="flex gap-2">
+      <div class="flex gap-2 items-center">
+        <button
+          class="inline-flex items-center gap-1 text-xs bg-transparent border border-ctp-surface0/40 hover:border-ctp-surface0/60 text-ctp-overlay0 hover:text-ctp-text px-2 py-1 transition-colors disabled:opacity-50"
+          onclick={refreshWorkspaces}
+          disabled={isRefreshing}
+          title="refresh workspaces"
+        >
+          <RefreshCw class="w-3.5 h-3.5" />
+          refresh
+        </button>
         <button
           aria-label="create-workspace"
           onclick={() => openCreateWorkspaceModal()}
@@ -72,13 +107,13 @@
 
   <!-- Content Area -->
   <div class="p-4">
-    {#if workspaces.length === 0}
+    {#if workspacesLocal.length === 0}
       <div class="text-center py-8 text-ctp-subtext0 text-sm">
         no workspaces found
       </div>
     {:else}
       <WorkspaceList
-        {workspaces}
+        workspaces={workspacesLocal}
         searchQuery={workspaceSearchQuery}
         onItemClick={setSelectedWorkspace}
         {workspaceRoles}

@@ -8,7 +8,12 @@
   let {
     experiment,
     experiments = $bindable(),
-  }: { experiment: Experiment; experiments: Experiment[] } = $props();
+    onChange = (list: Experiment[]) => {},
+  }: {
+    experiment: Experiment;
+    experiments: Experiment[];
+    onChange?: (list: Experiment[]) => void;
+  } = $props();
 
   let isDeleting = $state(false);
 
@@ -56,6 +61,7 @@
             experiments = experiments.filter(
               (experiment) => experiment.id !== experimentId,
             );
+            onChange?.(experiments);
             closeModal();
             await update();
           } else {

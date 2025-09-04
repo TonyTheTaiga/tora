@@ -5,6 +5,7 @@
   import type { Workspace, Experiment } from "$lib/types";
   import { onMount } from "svelte";
   import { copyToClipboard } from "$lib/utils/common";
+  import { RefreshCw } from "@lucide/svelte";
   import {
     setSelectedExperiment,
     loading,
@@ -13,22 +14,35 @@
     setCachedExperiments,
     isWorkspaceLoaded,
   } from "./state.svelte";
+  import {
+    loadExperimentsFromStorage,
+    saveExperimentsToStorage,
+    getExperimentsTimestamp,
+  } from "$lib/utils/persistentCache";
 
   let { workspace }: { workspace: Workspace } = $props();
   let experimentSearchQuery = $state("");
   let experiments: Experiment[] = $state([]);
   let experimentToEdit = $derived(getExperimentToEdit());
 
+  function handleExperimentsChange(updated: Experiment[]) {
+    experiments = updated;
+    setCachedExperiments(workspace.id, updated);
+    saveExperimentsToStorage(workspace.id, updated);
+  }
+
+  type LoadOpts = { signal?: AbortSignal; silent?: boolean };
+
   async function loadExperiments(
     workspace: Workspace,
-    signal?: AbortSignal,
+    opts: LoadOpts = {},
   ): Promise<Experiment[] | undefined> {
     try {
-      loading.experiments = true;
+      if (!opts.silent) loading.experiments = true;
       errors.experiments = null;
       const response = await fetch(
         `/api/workspaces/${workspace.id}/experiments`,
-        { signal },
+        { signal: opts.signal },
       );
       if (!response.ok)
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -53,23 +67,56 @@
       errors.experiments =
         error instanceof Error ? error.message : "Failed to load experiments";
     } finally {
-      loading.experiments = false;
+      if (!opts.silent) loading.experiments = false;
     }
   }
 
   let abortController: AbortController | null = null;
 
+  const REVALIDATE_AGE_MS = 2 * 60 * 1000; // 2 minutes
+
   onMount(() => {
+    let hadCached = false;
     const cached = getCachedExperiments(workspace.id);
     if (cached) {
       experiments = cached;
-    } else if (!isWorkspaceLoaded(workspace.id)) {
+      hadCached = true;
+    } else {
+      const persisted = loadExperimentsFromStorage(workspace.id);
+      if (persisted) {
+        experiments = persisted;
+        setCachedExperiments(workspace.id, persisted);
+        hadCached = true;
+      }
+    }
+
+    if (!isWorkspaceLoaded(workspace.id)) {
       abortController?.abort();
       abortController = new AbortController();
-      loadExperiments(workspace, abortController.signal).then((results) => {
+      loadExperiments(workspace, { signal: abortController.signal }).then(
+        (results) => {
+          if (results) {
+            experiments = results;
+            setCachedExperiments(workspace.id, results);
+            saveExperimentsToStorage(workspace.id, results);
+          }
+        },
+      );
+    }
+
+    // SWR background revalidation based on stored timestamp age
+    const ts = getExperimentsTimestamp(workspace.id);
+    const age = ts ? Date.now() - ts : Number.POSITIVE_INFINITY;
+    if (hadCached && age > REVALIDATE_AGE_MS) {
+      const swrController = new AbortController();
+      loadExperiments(workspace, {
+        signal: swrController.signal,
+        silent: true,
+      }).then((results) => {
         if (results) {
           experiments = results;
           setCachedExperiments(workspace.id, results);
+          saveExperimentsToStorage(workspace.id, results);
         }
       });
     }
@@ -78,6 +125,26 @@
       abortController?.abort();
     };
   });
+
+  async function refreshExperiments() {
+    try {
+      errors.experiments = null;
+      loading.experiments = true;
+      abortController?.abort();
+      abortController = new AbortController();
+      const results = await loadExperiments(workspace, {
+        signal: abortController.signal,
+        silent: false,
+      });
+      if (results) {
+        experiments = results;
+        setCachedExperiments(workspace.id, results);
+        saveExperimentsToStorage(workspace.id, results);
+      }
+    } finally {
+      loading.experiments = false;
+    }
+  }
 </script>
 
 {#if experimentToEdit}
@@ -90,6 +157,15 @@
   >
     <div class="flex items-center justify-between mb-3">
       <h2 class="text-ctp-text font-medium text-base">Experiments</h2>
+      <button
+        class="inline-flex items-center gap-1 text-xs bg-transparent border border-ctp-surface0/40 hover:border-ctp-surface0/60 text-ctp-overlay0 hover:text-ctp-text px-2 py-1 transition-colors disabled:opacity-50"
+        onclick={refreshExperiments}
+        disabled={loading.experiments}
+        title="refresh experiments"
+      >
+        <RefreshCw class="w-3.5 h-3.5" />
+        refresh
+      </button>
     </div>
     <div class="mb-3">
       <button
@@ -140,6 +216,7 @@
         {experiments}
         {workspace}
         searchQuery={experimentSearchQuery}
+        onExperimentsChange={handleExperimentsChange}
         onItemClick={setSelectedExperiment}
       />
     {/if}

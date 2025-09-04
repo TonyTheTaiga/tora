@@ -4,7 +4,7 @@
   import type { Experiment, HyperParam } from "$lib/types";
   import { copyToClipboard } from "$lib/utils/common";
   import { loading, errors } from "./state.svelte";
-  import { ChevronDown, ChevronRight, Pin } from "@lucide/svelte";
+  import { ChevronDown, ChevronRight, Pin, RefreshCw } from "@lucide/svelte";
   import {
     loadPins,
     togglePin as togglePinGlobal,
@@ -147,6 +147,19 @@
     };
   });
 
+  async function refreshDetails() {
+    try {
+      errors.experimentDetails = null;
+      try {
+        detailsAbort?.abort();
+      } catch {}
+      detailsAbort = new AbortController();
+      await loadExperimentDetails(experiment);
+    } catch (_) {
+      // errors handled inside loadExperimentDetails
+    }
+  }
+
   function toggleHeader() {
     showHeader = !showHeader;
     saveHeaderExpanded();
@@ -166,7 +179,7 @@
   <div
     class="sticky top-0 z-10 surface-elevated border-b border-ctp-surface0/30 p-4"
   >
-    <div class="mb-1">
+    <div class="flex items-center justify-between mb-2">
       <button
         class="flex items-center gap-2 text-ctp-text font-medium text-base hover:text-ctp-blue"
         onclick={toggleHeader}
@@ -179,6 +192,15 @@
           <ChevronRight size={16} />
         {/if}
         <span class="truncate">{experiment.name}</span>
+      </button>
+      <button
+        class="inline-flex items-center gap-1 text-xs bg-transparent border border-ctp-surface0/40 hover:border-ctp-surface0/60 text-ctp-overlay0 hover:text-ctp-text px-2 py-1 transition-colors disabled:opacity-50"
+        onclick={refreshDetails}
+        disabled={loading.experimentDetails}
+        title="refresh experiment details"
+      >
+        <RefreshCw class="w-3.5 h-3.5" />
+        refresh
       </button>
     </div>
     {#if showHeader}

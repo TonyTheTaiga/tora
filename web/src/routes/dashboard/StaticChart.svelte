@@ -11,6 +11,7 @@
   import { CanvasRenderer } from "echarts/renderers";
   import { browser } from "$app/environment";
   import type { Snippet } from "svelte";
+  import { RefreshCw } from "@lucide/svelte";
 
   echarts.use([
     LineChart,
@@ -258,6 +259,14 @@
     })();
   }
 
+  function refreshChart() {
+    try {
+      metricsAbort?.abort();
+    } catch {}
+    metricsAbort = new AbortController();
+    loadStaticData(metricsAbort);
+  }
+
   onMount(() => {
     initChart();
     const handleThemeChange = () => {
@@ -341,6 +350,14 @@
       title="toggle Y axis scale between log and linear"
     >
       y: {yScale}
+    </button>
+    <button
+      class="text-[10px] leading-none floating-element px-1.5 py-0.5 rounded-sm hover:text-ctp-text"
+      onclick={refreshChart}
+      disabled={loading}
+      title="refresh chart data"
+    >
+      <RefreshCw class="w-3.5 h-3.5 inline align-middle" />
     </button>
     {@render toggleStreaming?.()}
   </div>
