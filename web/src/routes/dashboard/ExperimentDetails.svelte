@@ -5,16 +5,20 @@
   import { copyToClipboard } from "$lib/utils/common";
   import { loading, errors } from "./state.svelte";
   import { ChevronDown, ChevronRight, Pin } from "@lucide/svelte";
+  import {
+    loadPins,
+    togglePin as togglePinGlobal,
+    isPinned as isPinnedGlobal,
+  } from "./pins.svelte";
   import { onMount } from "svelte";
 
   let { experiment } = $props();
-  const detailsInstanceId = Math.random().toString(36).slice(2);
   let results = $state<any[]>([]);
   let isStreamingChart = $state(false);
-  let pinnedNames = $state<string[]>([]);
   let showResults = $state(true);
   let showHeader = $state(true);
   let showAllHyperparams = $state(false);
+  let pinnedResults = $state<any[]>([]);
 
   let sortedHyperparams = $derived(
     experiment.hyperparams
@@ -22,70 +26,36 @@
       .sort((a: HyperParam, b: HyperParam) => a.key.localeCompare(b.key)) ?? [],
   );
 
-  let pinnedResults = $state<any[]>([]);
-
-  function storageKey(expId: string) {
-    return `tora:pinnedResults:${expId}`;
-  }
-
   function headerExpandedKey(expId: string) {
     return `tora:headerExpanded:${expId}`;
   }
 
-  function loadPinned() {
+  function storageKey(expId: string) {
+    return `tora:pinnedResults:${expId}`;
+  }
+  function loadPinnedResults() {
     try {
       if (typeof localStorage === "undefined") {
-        pinnedNames = [];
+        pinnedResults = [];
         return;
       }
       const raw = localStorage.getItem(storageKey(experiment.id));
       if (!raw) {
-        pinnedNames = [];
+        pinnedResults = [];
         return;
       }
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        pinnedNames = parsed.filter((x) => typeof x === "string");
-      } else {
-        pinnedNames = [];
+      const names = JSON.parse(raw);
+      if (!Array.isArray(names)) {
+        pinnedResults = [];
+        return;
       }
-    } catch (e) {
-      pinnedNames = [];
-    }
-  }
-
-  function savePinned() {
-    try {
-      if (typeof localStorage === "undefined") return;
-      localStorage.setItem(
-        storageKey(experiment.id),
-        JSON.stringify(pinnedNames),
+      const allow = new Set(
+        names.filter((n: unknown) => typeof n === "string") as string[],
       );
-    } catch (e) {}
-  }
-
-  function isPinned(name: string): boolean {
-    return pinnedNames.includes(name);
-  }
-
-  function addPinnedResult(name: string) {
-    if (isPinned(name)) return;
-    pinnedNames = [...pinnedNames, name];
-    const match = results.find((r: any) => r?.name === name);
-    if (match) pinnedResults = [...pinnedResults, match];
-    savePinned();
-  }
-
-  function removePinnedResult(name: string) {
-    if (!isPinned(name)) return;
-    pinnedNames = pinnedNames.filter((n) => n !== name);
-    pinnedResults = pinnedResults.filter((r: any) => r?.name !== name);
-    savePinned();
-  }
-
-  function togglePin(name: string) {
-    if (isPinned(name)) removePinnedResult(name);
-    else addPinnedResult(name);
+      pinnedResults = results.filter((r: any) => allow.has(r?.name));
+    } catch (_) {
+      pinnedResults = [];
+    }
   }
 
   function displayHPValue(v: string | number): string {
@@ -145,15 +115,7 @@
         }
       }
       results = list;
-      const available = new Set(list.map((r: any) => r?.name));
-      const pruned = pinnedNames.filter((n) => available.has(n));
-      if (pruned.length !== pinnedNames.length) {
-        pinnedNames = pruned;
-        savePinned();
-      }
-      pinnedResults = pruned
-        .map((name) => list.find((r: any) => r?.name === name))
-        .filter((m): m is any => Boolean(m));
+      loadPinnedResults();
     } catch (error) {
       errors.experimentDetails =
         error instanceof Error
@@ -173,12 +135,9 @@
         detailsAbort?.abort();
       } catch {}
       detailsAbort = new AbortController();
+      loadPins(exp.id);
       loadExperimentDetails(exp);
-      loadPinned();
       loadHeaderExpanded();
-      pinnedResults = pinnedNames
-        .map((name) => results.find((r) => r.name === name))
-        .filter((m): m is any => Boolean(m));
     }
     return () => {
       try {
@@ -191,6 +150,15 @@
   function toggleHeader() {
     showHeader = !showHeader;
     saveHeaderExpanded();
+  }
+
+  function isPinned(name: string): boolean {
+    return isPinnedGlobal(experiment.id, name);
+  }
+
+  function togglePin(name: string) {
+    togglePinGlobal(experiment.id, name);
+    loadPinnedResults();
   }
 </script>
 
@@ -321,7 +289,6 @@
           </div>
         </div>
       {/if}
-
       <div class="space-y-2">
         {#if isStreamingChart}
           <StreamingChart experimentId={experiment.id}>
