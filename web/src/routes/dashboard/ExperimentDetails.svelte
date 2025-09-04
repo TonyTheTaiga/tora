@@ -22,11 +22,7 @@
       .sort((a: HyperParam, b: HyperParam) => a.key.localeCompare(b.key)) ?? [],
   );
 
-  let pinnedResults = $derived(
-    pinnedNames
-      .map((name) => results.find((r) => r.name === name))
-      .filter((m): m is any => Boolean(m)),
-  );
+  let pinnedResults = $state<any[]>([]);
 
   function storageKey(expId: string) {
     return `tora:pinnedResults:${expId}`;
@@ -72,13 +68,24 @@
     return pinnedNames.includes(name);
   }
 
-  function togglePin(name: string) {
-    if (isPinned(name)) {
-      pinnedNames = pinnedNames.filter((n) => n !== name);
-    } else {
-      pinnedNames = [...pinnedNames, name];
-    }
+  function addPinnedResult(name: string) {
+    if (isPinned(name)) return;
+    pinnedNames = [...pinnedNames, name];
+    const match = results.find((r: any) => r?.name === name);
+    if (match) pinnedResults = [...pinnedResults, match];
     savePinned();
+  }
+
+  function removePinnedResult(name: string) {
+    if (!isPinned(name)) return;
+    pinnedNames = pinnedNames.filter((n) => n !== name);
+    pinnedResults = pinnedResults.filter((r: any) => r?.name !== name);
+    savePinned();
+  }
+
+  function togglePin(name: string) {
+    if (isPinned(name)) removePinnedResult(name);
+    else addPinnedResult(name);
   }
 
   function displayHPValue(v: string | number): string {
@@ -138,6 +145,15 @@
         }
       }
       results = list;
+      const available = new Set(list.map((r: any) => r?.name));
+      const pruned = pinnedNames.filter((n) => available.has(n));
+      if (pruned.length !== pinnedNames.length) {
+        pinnedNames = pruned;
+        savePinned();
+      }
+      pinnedResults = pruned
+        .map((name) => list.find((r: any) => r?.name === name))
+        .filter((m): m is any => Boolean(m));
     } catch (error) {
       errors.experimentDetails =
         error instanceof Error
@@ -160,6 +176,9 @@
       loadExperimentDetails(exp);
       loadPinned();
       loadHeaderExpanded();
+      pinnedResults = pinnedNames
+        .map((name) => results.find((r) => r.name === name))
+        .filter((m): m is any => Boolean(m));
     }
     return () => {
       try {
@@ -167,18 +186,6 @@
       } catch {}
       detailsAbort = null;
     };
-  });
-
-  // No id-change guard: parent remounts this component on selection.
-
-  $effect(() => {
-    if (!results || results.length === 0) return;
-    const available = new Set(results.map((r) => r.name));
-    const pruned = pinnedNames.filter((n) => available.has(n));
-    if (pruned.length !== pinnedNames.length) {
-      pinnedNames = pruned;
-      savePinned();
-    }
   });
 
   function toggleHeader() {
