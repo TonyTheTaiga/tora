@@ -97,11 +97,26 @@ async function proxyRequest(
   try {
     const response = await fetch(rustBackendUrl, options);
     const elapsedMs = Date.now() - startedAt;
+    let refererPath: string | null = null;
+    try {
+      const ref = request.headers.get("referer");
+      if (ref) {
+        try {
+          const u = new URL(ref);
+          refererPath = u.pathname + u.search;
+        } catch (_) {
+          refererPath = ref;
+        }
+      }
+    } catch (_) {}
     try {
       // Example: [proxy] GET /v1/things -> 200 in 87ms
-      console.info(
-        `[proxy] ${request.method} /${path}${url.search} -> ${response.status} in ${elapsedMs}ms`,
-      );
+      const base = `[proxy] ${request.method} /${path}${url.search} -> ${response.status} in ${elapsedMs}ms`;
+      if (refererPath) {
+        console.info(`${base} (referer: ${refererPath})`);
+      } else {
+        console.info(base);
+      }
     } catch (_) {
       // best-effort logging
     }

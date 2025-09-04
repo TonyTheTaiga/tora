@@ -78,7 +78,9 @@
     class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 min-w-0 overflow-y-auto overflow-x-hidden"
   >
     {#if selectedExperiment}
-      <ExperimentDetails experiment={selectedExperiment} />
+      {#key selectedExperiment.id}
+        <ExperimentDetails experiment={selectedExperiment} />
+      {/key}
     {:else}
       <div class="h-full flex items-center justify-center">
         <EmptyState message="select a experiment to view details" />

@@ -28,7 +28,6 @@
   let yScale = $state<"log" | "linear">("log");
   function toggleScale() {
     yScale = yScale === "log" ? "linear" : "log";
-    // apply immediately on toggle to avoid extra effects
     applyTheme();
   }
 
@@ -36,9 +35,9 @@
   let chart: EChartsType | null = null;
   let loading = $state(false);
   let error: string | null = $state(null);
-  let hasMetrics = $state(false);
   let seriesRaw: Record<string, Array<[number, number]>> = $state({});
-  let seriesNames: string[] = $state([]);
+  let seriesNames = $derived(Object.keys(seriesRaw || {}));
+  let hasMetrics = $derived(seriesNames.length > 0);
 
   type LogRow = {
     name: string;
@@ -49,7 +48,6 @@
   };
 
   const CHART_COLOR_KEYS = [
-    // prefer brand-friendly accents first
     "blue",
     "lavender",
     "sky",
@@ -177,60 +175,6 @@
     return out;
   }
 
-  async function loadStaticData() {
-    if (!experimentId) return;
-    loading = true;
-    error = null;
-    hasMetrics = false;
-    try {
-      const resp = await fetch(`/api/experiments/${experimentId}/metrics`);
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const json = await resp.json();
-      const metrics = (json?.data ?? []) as LogRow[];
-      // Group by name into raw numeric series (preserve API order)
-      const byNameRaw: Record<string, Array<[number, number]>> = {};
-      for (const r of metrics) {
-        const name = String(r.name);
-        const y =
-          typeof r.value === "number" && Number.isFinite(r.value)
-            ? r.value
-            : NaN;
-        const step = r.step as number;
-        if (!byNameRaw[name]) byNameRaw[name] = [];
-        byNameRaw[name].push([step, y]);
-      }
-
-      const names = Object.keys(byNameRaw);
-      seriesRaw = byNameRaw;
-      seriesNames = names;
-      hasMetrics = names.length > 0;
-      const byScale = dataForScale(seriesRaw);
-      const series = names.map((n) => ({
-        id: n,
-        name: n,
-        type: "line",
-        showSymbol: false,
-        smooth: 0.15,
-        connectNulls: true,
-        data: byScale[n],
-        emphasis: { focus: "series" },
-      }));
-
-      initChart();
-      chart?.setOption(
-        {
-          series,
-          legend: { data: names },
-        },
-        { notMerge: false },
-      );
-    } catch (e) {
-      error = e instanceof Error ? e.message : "Failed to load chart data";
-    } finally {
-      loading = false;
-    }
-  }
-
   function applyTheme() {
     const byScale = dataForScale(seriesRaw);
     const updates = seriesNames.map((n) => ({ id: n, data: byScale[n] }));
@@ -274,6 +218,46 @@
     );
   }
   import { onMount } from "svelte";
+  let metricsAbort: AbortController | null = null;
+  function loadStaticData(controller: AbortController) {
+    if (!experimentId) return;
+    loading = true;
+    error = null;
+    (async () => {
+      try {
+        const resp = await fetch(`/api/experiments/${experimentId}/metrics`, {
+          signal: controller.signal,
+        });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const json = await resp.json();
+        const metrics = (json?.data ?? []) as LogRow[];
+        const byNameRaw: Record<string, Array<[number, number]>> = {};
+        for (const r of metrics) {
+          const name = String(r.name);
+          const y =
+            typeof r.value === "number" && Number.isFinite(r.value)
+              ? r.value
+              : NaN;
+          const step = r.step as number;
+          if (!byNameRaw[name]) byNameRaw[name] = [];
+          byNameRaw[name].push([step, y]);
+        }
+        if (metricsAbort === controller) {
+          seriesRaw = byNameRaw;
+        }
+      } catch (e) {
+        if (metricsAbort === controller) {
+          error = e instanceof Error ? e.message : "Failed to load chart data";
+          seriesRaw = {};
+        }
+      } finally {
+        if (metricsAbort === controller) {
+          loading = false;
+        }
+      }
+    })();
+  }
+
   onMount(() => {
     initChart();
     const handleThemeChange = () => {
@@ -300,20 +284,50 @@
         attributeFilter: ["class"],
       });
     }
+    // Fetch metrics on mount only
+    metricsAbort = new AbortController();
+    loadStaticData(metricsAbort);
+
     return () => {
       if (mediaQuery)
         mediaQuery.removeEventListener("change", handleThemeChange);
       if (observer) observer.disconnect();
+      try {
+        metricsAbort?.abort();
+      } catch {}
+      metricsAbort = null;
       disposeChart();
     };
   });
 
-  // Fetch when experiment changes
+  // Update the chart when data or scale changes
   $effect(() => {
-    const id = experimentId;
-    if (!id) return;
-    loadStaticData();
+    const names = seriesNames;
+    const raw = seriesRaw;
+    const scale = yScale; // track scale changes
+    if (!names || names.length === 0) return;
+    initChart();
+    const byScale = dataForScale(raw);
+    const series = names.map((n) => ({
+      id: n,
+      name: n,
+      type: "line",
+      showSymbol: false,
+      smooth: 0.15,
+      connectNulls: true,
+      data: byScale[n],
+      emphasis: { focus: "series" },
+    }));
+    chart?.setOption(
+      {
+        series,
+        legend: { data: names },
+      },
+      { notMerge: false },
+    );
   });
+
+  // Fetching is handled on mount; parent remounts this component on id change
 </script>
 
 <div

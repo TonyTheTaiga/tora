@@ -147,6 +147,7 @@
   }
 
   let detailsAbort: AbortController | null = null;
+
   $effect(() => {
     const exp = experiment;
     if (!exp) return;
