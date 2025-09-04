@@ -51,12 +51,15 @@ pub async fn create_experiment(
     .bind(request.hyperparams)
     .fetch_one(&mut *tx)
     .await?;
+
     let (experiment_id, name, description, hyperparams, tags, created_at, updated_at) =
         experiment_result;
 
+    let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")?;
+
     sqlx::query("INSERT INTO workspace_experiments (workspace_id, experiment_id) VALUES ($1, $2)")
         .bind(workspace_uuid)
-        .bind(Uuid::parse_str(&experiment_id).unwrap())
+        .bind(experiment_uuid)
         .execute(&mut *tx)
         .await?;
 
@@ -226,7 +229,7 @@ pub async fn get_experiments_batch(
     State(app_state): State<AppState>,
     Json(request): Json<BatchGetExperimentsRequest>,
 ) -> impl IntoResponse {
-    let user_uuid = match Uuid::parse_str(&user.id) {
+    let user_uuid = match parse_uuid(&user.id, "user_id") {
         Ok(uuid) => uuid,
         Err(_) => {
             return (
@@ -242,7 +245,7 @@ pub async fn get_experiments_batch(
 
     let mut experiment_ids: Vec<Uuid> = Vec::new();
     for raw_id in &request.ids {
-        let experiment_uuid = match Uuid::parse_str(raw_id) {
+        let experiment_uuid = match parse_uuid(raw_id, "experiment_id") {
             Ok(uuid) => uuid,
             Err(_) => {
                 return (

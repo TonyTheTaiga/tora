@@ -1,3 +1,4 @@
+use crate::handlers::parse_uuid;
 use crate::middleware::auth::AuthenticatedUser;
 use crate::state::AppState;
 use axum::body::Bytes;
@@ -13,7 +14,6 @@ use fred::interfaces::KeysInterface;
 use fred::prelude::{EventInterface, PubsubInterface};
 use fred::types::Expiration;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 struct LogMessage {
@@ -66,13 +66,8 @@ async fn handle_socket(
         return;
     }
 
-    let experiment_uuid = match Uuid::parse_str(&experiment_id) {
-        Ok(e) => e,
-        Err(_) => {
-            eprintln!("failed to convert this experiment id into uuid format {experiment_id:?}");
-            return;
-        }
-    };
+    let experiment_uuid = parse_uuid(&experiment_id, "experiment_id")
+        .expect("Failed to convert experiment id into UUID");
 
     if params.backfill {
         let backfill_logs: Vec<sqlx::types::Json<LogMessage>> = sqlx::query_scalar(
@@ -204,7 +199,9 @@ async fn validate_ws_token(
     if data.experiment_id != path_experiment_id {
         return Err("token experiment mismatch".into());
     }
-    if Uuid::parse_str(&data.experiment_id).is_err() || Uuid::parse_str(&data.user_id).is_err() {
+    if parse_uuid(&data.experiment_id, "experiment_id").is_err()
+        || parse_uuid(&data.user_id, "user_id").is_err()
+    {
         return Err("invalid ids in token".into());
     }
     Ok(())
@@ -215,7 +212,7 @@ pub async fn create_stream_token(
     State(app_state): State<AppState>,
     Path(experiment_id): Path<String>,
 ) -> impl IntoResponse {
-    let user_uuid = match Uuid::parse_str(&user.id) {
+    let user_uuid = match parse_uuid(&user.id, "user_id") {
         Ok(u) => u,
         Err(_) => {
             return (
@@ -225,7 +222,7 @@ pub async fn create_stream_token(
                 .into_response();
         }
     };
-    let experiment_uuid = match Uuid::parse_str(&experiment_id) {
+    let experiment_uuid = match parse_uuid(&experiment_id, "experiment_id") {
         Ok(e) => e,
         Err(_) => {
             return (
