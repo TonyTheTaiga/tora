@@ -3,6 +3,7 @@
   import ExperimentList from "$lib/components/lists/ExperimentList.svelte";
   import EditExperimentModal from "$lib/components/modals/edit-experiment-modal.svelte";
   import type { Workspace, Experiment } from "$lib/types";
+  import { onMount } from "svelte";
   import { copyToClipboard } from "$lib/utils/common";
   import {
     setSelectedExperiment,
@@ -20,12 +21,14 @@
 
   async function loadExperiments(
     workspace: Workspace,
+    signal?: AbortSignal,
   ): Promise<Experiment[] | undefined> {
     try {
       loading.experiments = true;
       errors.experiments = null;
       const response = await fetch(
         `/api/workspaces/${workspace.id}/experiments`,
+        { signal },
       );
       if (!response.ok)
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -45,6 +48,7 @@
         workspaceId: workspace.id,
       }));
     } catch (error) {
+      if ((error as any)?.name === "AbortError") return; // ignore aborts
       console.error("Failed to load experiments:", error);
       errors.experiments =
         error instanceof Error ? error.message : "Failed to load experiments";
@@ -53,21 +57,26 @@
     }
   }
 
-  $effect(() => {
+  let abortController: AbortController | null = null;
+
+  onMount(() => {
     const cached = getCachedExperiments(workspace.id);
     if (cached) {
       experiments = cached;
-      return;
-    }
-
-    if (!isWorkspaceLoaded(workspace.id)) {
-      loadExperiments(workspace).then((results) => {
+    } else if (!isWorkspaceLoaded(workspace.id)) {
+      abortController?.abort();
+      abortController = new AbortController();
+      loadExperiments(workspace, abortController.signal).then((results) => {
         if (results) {
           experiments = results;
           setCachedExperiments(workspace.id, results);
         }
       });
     }
+
+    return () => {
+      abortController?.abort();
+    };
   });
 </script>
 

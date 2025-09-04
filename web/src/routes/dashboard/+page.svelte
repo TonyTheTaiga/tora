@@ -65,7 +65,9 @@
     class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 min-w-0 overflow-y-auto overflow-x-hidden"
   >
     {#if selectedWorkspace}
-      <ExperimentListColumn workspace={selectedWorkspace} />
+      {#key selectedWorkspace.id}
+        <ExperimentListColumn workspace={selectedWorkspace} />
+      {/key}
     {:else}
       <div class="h-full flex items-center justify-center">
         <EmptyState message="select a workspace to view experiments" />
