@@ -1,11 +1,18 @@
+use axum::Router;
+use axum::middleware::from_fn_with_state;
 use fred::{
     interfaces::ClientLike,
     prelude::{Config, TcpConfig},
     types::Builder,
 };
+use http::header::{AUTHORIZATION, CONTENT_TYPE};
+use http::{HeaderValue, Method};
 use sqlx::postgres::PgPoolOptions;
 use std::time::Duration;
 use tokio::{signal, task};
+use tower::ServiceBuilder;
+use tower_http::cors::CorsLayer;
+use tower_http::trace::TraceLayer;
 use tracing::{info, warn};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -77,12 +84,47 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Duration::from_secs(app_state.settings.outbox_polling_interval),
     ));
 
-    let api_routes = handlers::api_routes(&app_state);
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], app_state.settings.http_port));
-    let app = api_routes.with_state(app_state);
+    let router = Router::new().merge(handlers::build_public_routes()).merge(
+        handlers::build_private_routes().route_layer(from_fn_with_state(
+            app_state.clone(),
+            crate::middleware::auth::auth_middleware,
+        )),
+    );
+    let trace_layer = TraceLayer::new_for_http()
+        .make_span_with(|request: &axum::extract::Request| {
+            tracing::info_span!(
+                "http",
+                method = %request.method(),
+                uri = %request.uri(),
+            )
+        })
+        .on_response(
+            |response: &axum::response::Response,
+             latency: std::time::Duration,
+             span: &tracing::Span| {
+                span.in_scope(|| {
+                    tracing::info!(status = %response.status(), latency_ms = latency.as_millis());
+                });
+            },
+        );
+    let cors_layer = CorsLayer::new()
+        .allow_origin(
+            app_state
+                .settings
+                .frontend_url
+                .parse::<HeaderValue>()
+                .unwrap(),
+        )
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
+        .allow_headers([AUTHORIZATION, CONTENT_TYPE])
+        .allow_credentials(true);
+    let app = router
+        .layer(ServiceBuilder::new().layer(trace_layer).layer(cors_layer))
+        .with_state(app_state);
     let listener = tokio::net::TcpListener::bind(addr).await?;
-
     info!("Server listening on {addr:?}");
+
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await?;

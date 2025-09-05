@@ -4,9 +4,8 @@ use axum::{
     Json,
     extract::{Request, State},
     http::{HeaderMap, StatusCode},
-    middleware::{self, Next},
+    middleware::Next,
     response::{IntoResponse, Response},
-    routing::MethodRouter,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -36,19 +35,6 @@ impl IntoResponse for AuthError {
         });
         (self.status_code, body).into_response()
     }
-}
-
-pub fn protected_route<T>(
-    method_router: MethodRouter<T>,
-    app_state: &state::AppState,
-) -> MethodRouter<T>
-where
-    T: Clone + Send + Sync + 'static,
-{
-    method_router.layer(middleware::from_fn_with_state(
-        app_state.clone(),
-        auth_middleware,
-    ))
 }
 
 pub async fn auth_middleware(

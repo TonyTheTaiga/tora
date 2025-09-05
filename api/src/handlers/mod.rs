@@ -1,14 +1,8 @@
-use crate::middleware::auth::protected_route;
 use crate::state::AppState;
 use axum::{
     Router,
-    http::{HeaderValue, Method},
     routing::{any, delete, get, post, put},
 };
-use http::header::{AUTHORIZATION, CONTENT_TYPE};
-use tower::ServiceBuilder;
-use tower_http::cors::CorsLayer;
-use tower_http::trace::TraceLayer;
 
 mod api_key;
 mod experiment;
@@ -22,170 +16,72 @@ mod user;
 mod workspace;
 pub use result::{AppError, AppResult, parse_uuid};
 
-pub fn api_routes(app_state: &AppState) -> Router<AppState> {
-    let protected_routes: Router<AppState> = Router::new()
-        .route(
-            "/workspaces",
-            protected_route(get(workspace::list_workspaces), app_state),
-        )
-        .route(
-            "/workspaces",
-            protected_route(post(workspace::create_workspace), app_state),
-        )
-        .route(
-            "/workspaces/{id}",
-            protected_route(get(workspace::get_workspace), app_state),
-        )
-        .route(
-            "/workspaces/{id}",
-            protected_route(delete(workspace::delete_workspace), app_state),
-        )
-        .route(
-            "/workspaces/{id}/leave",
-            protected_route(post(workspace::leave_workspace), app_state),
-        )
-        .route(
-            "/workspaces/{id}/members",
-            protected_route(get(workspace::get_workspace_members), app_state),
-        )
-        .route(
-            "/workspaces/{id}/experiments",
-            protected_route(get(experiment::list_workspace_experiments), app_state),
-        )
-        .route(
-            "/experiments",
-            protected_route(get(experiment::list_experiments), app_state),
-        )
-        .route(
-            "/experiments",
-            protected_route(post(experiment::create_experiment), app_state),
-        )
-        .route(
-            "/experiments/{id}",
-            protected_route(get(experiment::get_experiment), app_state),
-        )
-        .route(
-            "/experiments/{id}",
-            protected_route(put(experiment::update_experiment), app_state),
-        )
-        .route(
-            "/experiments/{id}",
-            protected_route(delete(experiment::delete_experiment), app_state),
-        )
-        .route(
-            "/experiments/batch",
-            protected_route(post(experiment::get_experiments_batch), app_state),
-        )
-        .route(
-            "/experiments/{id}/logs",
-            protected_route(get(log::get_logs), app_state),
-        )
-        .route(
-            "/experiments/{id}/metrics",
-            protected_route(get(log::get_metrics), app_state),
-        )
-        .route(
-            "/experiments/{id}/results",
-            protected_route(get(log::get_results), app_state),
-        )
-        .route(
-            "/experiments/{id}/logs",
-            protected_route(post(log::create_log), app_state),
-        )
-        .route(
-            "/experiments/{experiment_id}/logs/batch",
-            protected_route(post(log::batch_create_logs), app_state),
-        )
-        .route(
-            "/experiments/{id}/logs/csv",
-            protected_route(get(log::export_logs_csv), app_state),
-        )
-        .route(
-            "/experiments/{experiment_id}/logs/stream",
-            // protected_route(any(stream::stream_logs), app_state),
-            any(stream::stream_logs),
-        )
-        .route(
-            "/experiments/{id}/logs/stream-token",
-            protected_route(post(stream::create_stream_token), app_state),
-        )
-        // Settings and user management
-        .route(
-            "/settings",
-            protected_route(get(user::get_settings), app_state),
-        )
-        .route("/workspace-roles", get(role::list_workspace_roles))
-        .route(
-            "/api-keys",
-            protected_route(get(api_key::list_api_keys), app_state),
-        )
-        .route(
-            "/api-keys",
-            protected_route(post(api_key::create_api_key), app_state),
-        )
-        .route(
-            "/api-keys/{id}",
-            protected_route(delete(api_key::revoke_api_key), app_state),
-        )
-        .route(
-            "/workspace-invitations",
-            protected_route(post(invitation::create_invitation), app_state),
-        )
-        .route(
-            "/workspace-invitations",
-            protected_route(get(invitation::list_invitations), app_state),
-        )
-        .route(
-            "/workspaces/any/invitations",
-            protected_route(put(invitation::respond_to_invitation), app_state),
-        );
-
-    let public_routes: Router<AppState> = Router::new()
+pub fn build_public_routes() -> Router<AppState> {
+    Router::new()
         .route("/health", get(health::health))
         .route("/signup", post(user::create_user))
         .route("/signup/confirm", get(user::confirm_create))
         .route("/login", post(user::login))
-        .route("/refresh", post(user::refresh_token));
+        .route("/refresh", post(user::refresh_token))
+        .route("/workspace-roles", get(role::list_workspace_roles))
+        .route(
+            "/experiments/{experiment_id}/logs/stream",
+            // Streaming is validated via token + origin check
+            any(stream::stream_logs),
+        )
+}
+
+pub fn build_private_routes() -> Router<AppState> {
+    let workspaces = Router::new()
+        .route(
+            "/",
+            get(workspace::list_workspaces).post(workspace::create_workspace),
+        )
+        .route(
+            "/{id}",
+            get(workspace::get_workspace).delete(workspace::delete_workspace),
+        )
+        .route("/{id}/leave", post(workspace::leave_workspace))
+        .route("/{id}/members", get(workspace::get_workspace_members))
+        .route(
+            "/{id}/experiments",
+            get(experiment::list_workspace_experiments),
+        );
+
+    let experiments = Router::new()
+        .route(
+            "/",
+            get(experiment::list_experiments).post(experiment::create_experiment),
+        )
+        .route("/batch", post(experiment::get_experiments_batch))
+        .route(
+            "/{id}",
+            get(experiment::get_experiment)
+                .put(experiment::update_experiment)
+                .delete(experiment::delete_experiment),
+        )
+        .route("/{id}/logs", get(log::get_logs).post(log::create_log))
+        .route("/{experiment_id}/logs/batch", post(log::batch_create_logs))
+        .route("/{id}/metrics", get(log::get_metrics))
+        .route("/{id}/results", get(log::get_results))
+        .route("/{id}/logs/csv", get(log::export_logs_csv))
+        .route("/{id}/logs/stream-token", post(stream::create_stream_token));
 
     Router::new()
-        .merge(protected_routes)
-        .merge(public_routes)
-        .layer(
-            ServiceBuilder::new()
-                .layer(
-                    TraceLayer::new_for_http()
-                        .make_span_with(|request: &axum::extract::Request| {
-                            tracing::info_span!(
-                                "http",
-                                method = %request.method(),
-                                uri = %request.uri(),
-                            )
-                        })
-                        .on_response(
-                            |response: &axum::response::Response,
-                             latency: std::time::Duration,
-                             span: &tracing::Span| {
-                                span.in_scope(|| {
-                                    tracing::info!(
-                                        status = %response.status(),
-                                        latency_ms = latency.as_millis(),
-                                    );
-                                });
-                            },
-                        ),
-                )
-                .layer(
-                    CorsLayer::new()
-                        .allow_origin(
-                            app_state
-                                .settings
-                                .frontend_url
-                                .parse::<HeaderValue>()
-                                .unwrap(),
-                        )
-                        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
-                        .allow_headers([AUTHORIZATION, CONTENT_TYPE])
-                        .allow_credentials(true),
-                ),
+        .nest("/workspaces", workspaces)
+        .nest("/experiments", experiments)
+        .route(
+            "/api-keys",
+            get(api_key::list_api_keys).post(api_key::create_api_key),
         )
+        .route("/api-keys/{id}", delete(api_key::revoke_api_key))
+        .route(
+            "/workspace-invitations",
+            get(invitation::list_invitations).post(invitation::create_invitation),
+        )
+        .route(
+            "/workspaces/any/invitations",
+            put(invitation::respond_to_invitation),
+        )
+        .route("/settings", get(user::get_settings))
 }
