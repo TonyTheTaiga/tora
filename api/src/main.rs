@@ -116,7 +116,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .parse::<HeaderValue>()
                 .unwrap(),
         )
-        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::PUT,
+            Method::DELETE,
+            Method::HEAD,
+            Method::OPTIONS,
+        ])
         .allow_headers([AUTHORIZATION, CONTENT_TYPE])
         .allow_credentials(true);
     let app = router

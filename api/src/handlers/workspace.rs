@@ -98,11 +98,13 @@ pub async fn create_workspace(
 
     let (owner_role_id,) = owner_role_result;
     let user_uuid = parse_uuid(&user.id, "user_id")?;
+    let workspace_uuid = parse_uuid(&workspace_id, "workspace_id")?;
+    let owner_role_uuid = parse_uuid(&owner_role_id, "owner_role_id")?;
 
     sqlx::query("INSERT INTO user_workspaces (user_id, workspace_id, role_id) VALUES ($1, $2, $3)")
         .bind(user_uuid)
-        .bind(Uuid::parse_str(&workspace_id).unwrap())
-        .bind(Uuid::parse_str(&owner_role_id).unwrap())
+        .bind(workspace_uuid)
+        .bind(owner_role_uuid)
         .execute(&mut *tx)
         .await?;
 
@@ -188,7 +190,7 @@ pub async fn get_workspace_members(
         "SELECT COUNT(*) FROM user_workspaces WHERE workspace_id = $1 AND user_id = $2",
     )
     .bind(workspace_uuid)
-    .bind(Uuid::parse_str(&user.id).unwrap())
+    .bind(parse_uuid(&user.id, "user_id")?)
     .fetch_one(&app_state.db_pool)
     .await?;
 
@@ -244,7 +246,7 @@ pub async fn delete_workspace(
         "#,
     )
     .bind(workspace_uuid)
-    .bind(Uuid::parse_str(&user.id).unwrap())
+    .bind(parse_uuid(&user.id, "user_id")?)
     .fetch_one(&app_state.db_pool)
     .await?;
 
@@ -310,7 +312,7 @@ pub async fn leave_workspace(
     let delete_result =
         sqlx::query("DELETE FROM user_workspaces WHERE workspace_id = $1 AND user_id = $2")
             .bind(workspace_uuid)
-            .bind(Uuid::parse_str(&user.id).unwrap())
+            .bind(parse_uuid(&user.id, "user_id")?)
             .execute(&app_state.db_pool)
             .await?;
 

@@ -3,6 +3,8 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
+use http::HeaderValue;
+use http::header::WWW_AUTHENTICATE;
 use serde::Serialize;
 use std::fmt;
 
@@ -133,7 +135,14 @@ impl IntoResponse for AppError {
             details,
         };
 
-        (status, Json(error_response)).into_response()
+        let mut res = (status, Json(error_response)).into_response();
+        if status == StatusCode::UNAUTHORIZED {
+            res.headers_mut().insert(
+                WWW_AUTHENTICATE,
+                HeaderValue::from_static("Bearer realm=\"api\""),
+            );
+        }
+        res
     }
 }
 

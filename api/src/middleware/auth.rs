@@ -3,10 +3,12 @@ use crate::types;
 use axum::{
     Json,
     extract::{Request, State},
-    http::{HeaderMap, StatusCode},
+    http::{HeaderMap, Method, StatusCode},
     middleware::Next,
     response::{IntoResponse, Response},
 };
+use http::HeaderValue;
+use http::header::WWW_AUTHENTICATE;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use supabase_auth::models::AuthClient;
@@ -33,7 +35,15 @@ impl IntoResponse for AuthError {
                 "message": self.message
             })),
         });
-        (self.status_code, body).into_response()
+        let mut res = (self.status_code, body).into_response();
+        if self.status_code == StatusCode::UNAUTHORIZED {
+            // Instruct clients about the required auth scheme
+            res.headers_mut().insert(
+                WWW_AUTHENTICATE,
+                HeaderValue::from_static("Bearer realm=\"api\""),
+            );
+        }
+        res
     }
 }
 
@@ -47,72 +57,46 @@ pub async fn auth_middleware(
     let method = req.method().clone();
     debug!("Auth middleware: {} {}", method, uri);
 
+    if should_skip_auth(&method) {
+        debug!("Skipping auth for {} {}", method, uri);
+        return Ok(next.run(req).await);
+    }
+
     /*
     First check for API key
     */
-    if let Some(api_key) = extract_api_key(&headers) {
-        debug!("Found API key in request headers");
-        match validate_api_key(app_state.db_pool, &api_key).await {
-            Ok(authenticated_user) => {
-                info!(
-                    "API key authentication successful for user: {}",
-                    authenticated_user.email
-                );
-                req.extensions_mut().insert(authenticated_user);
-                return Ok(next.run(req).await);
-            }
-            Err(e) => {
-                warn!("API key authentication failed: {}", e.message);
-                return Err(e);
-            }
-        }
+    if let Some(api_user) = authenticate_api_key(&app_state.db_pool, &headers).await? {
+        req.extensions_mut().insert(api_user);
+        return Ok(next.run(req).await);
     }
 
     /*
     Then check for access token
     */
-    if let Some(auth_header) = headers.get("authorization") {
-        debug!("Found authorization header");
-        if let Ok(auth_str) = auth_header.to_str() {
-            if let Some(token) = auth_str.strip_prefix("Bearer ") {
-                debug!("Extracted bearer token from authorization header");
-                let auth_client = AuthClient::new_from_env().map_err(|e| {
-                    error!("Failed to create auth client: {}", e);
-                    AuthError {
-                        message: format!("Failed to create auth client: {e}"),
-                        status_code: StatusCode::INTERNAL_SERVER_ERROR,
-                    }
-                })?;
+    if let Some(token) = bearer_token_from_headers(&headers) {
+        let auth_client = make_auth_client()?;
 
-                match auth_client.get_user(token).await {
-                    Ok(user) => {
-                        let authenticated_user = AuthenticatedUser {
-                            id: user.id.to_string(),
-                            email: user.email.clone(),
-                        };
-                        info!(
-                            "Bearer token authentication successful for user: {}",
-                            user.email
-                        );
-                        req.extensions_mut().insert(authenticated_user);
-                        return Ok(next.run(req).await);
-                    }
-                    Err(e) => {
-                        warn!("Bearer token authentication failed: {}", e);
-                        return Err(AuthError {
-                            message: "Invalid access token".to_string(),
-                            status_code: StatusCode::UNAUTHORIZED,
-                        });
-                    }
-                }
-            } else {
-                debug!("Authorization header does not contain Bearer token");
+        match auth_client.get_user(&token).await {
+            Ok(user) => {
+                let authenticated_user = AuthenticatedUser {
+                    id: user.id.to_string(),
+                    email: user.email.clone(),
+                };
+                info!(
+                    "Bearer token authentication successful for user: {}",
+                    user.email
+                );
+                req.extensions_mut().insert(authenticated_user);
+                return Ok(next.run(req).await);
             }
-        } else {
-            warn!("Authorization header contains invalid UTF-8");
+            Err(e) => {
+                warn!("Bearer token authentication failed: {}", e);
+                return Err(AuthError {
+                    message: "Invalid access token".to_string(),
+                    status_code: StatusCode::UNAUTHORIZED,
+                });
+            }
         }
-    } else {
-        debug!("No authorization header found");
     }
 
     warn!(
@@ -133,6 +117,68 @@ fn extract_api_key(headers: &HeaderMap) -> Option<String> {
     }
 
     None
+}
+
+fn should_skip_auth(method: &Method) -> bool {
+    *method == Method::OPTIONS || *method == Method::HEAD
+}
+
+fn bearer_token_from_headers(headers: &HeaderMap) -> Option<String> {
+    if let Some(auth_header) = headers.get("authorization") {
+        debug!("Found authorization header");
+        match auth_header.to_str() {
+            Ok(auth_str) => {
+                let mut parts = auth_str.split_whitespace();
+                let scheme = parts.next();
+                let token = parts.next();
+                if matches!(scheme, Some(s) if s.eq_ignore_ascii_case("Bearer")) && token.is_some()
+                {
+                    debug!("Extracted bearer token from authorization header");
+                    return Some(token.unwrap().to_string());
+                } else {
+                    debug!("Authorization header does not contain Bearer token");
+                }
+            }
+            Err(_) => warn!("Authorization header contains invalid UTF-8"),
+        }
+    } else {
+        debug!("No authorization header found");
+    }
+    None
+}
+
+fn make_auth_client() -> Result<AuthClient, AuthError> {
+    AuthClient::new_from_env().map_err(|e| {
+        error!("Failed to create auth client: {}", e);
+        AuthError {
+            message: format!("Failed to create auth client: {e}"),
+            status_code: StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    })
+}
+
+async fn authenticate_api_key(
+    pool: &sqlx::PgPool,
+    headers: &HeaderMap,
+) -> Result<Option<AuthenticatedUser>, AuthError> {
+    if let Some(api_key) = extract_api_key(headers) {
+        debug!("Found API key in request headers");
+        match validate_api_key(pool.clone(), &api_key).await {
+            Ok(authenticated_user) => {
+                info!(
+                    "API key authentication successful for user: {}",
+                    authenticated_user.email
+                );
+                Ok(Some(authenticated_user))
+            }
+            Err(e) => {
+                warn!("API key authentication failed: {}", e.message);
+                Err(e)
+            }
+        }
+    } else {
+        Ok(None)
+    }
 }
 
 async fn validate_api_key(
@@ -177,15 +223,17 @@ async fn validate_api_key(
                 "API key found in database for user: {}",
                 api_key_record.user_email
             );
-            let update_result = sqlx::query("UPDATE api_keys SET last_used = NOW() WHERE id = $1")
-                .bind(uuid::Uuid::parse_str(&api_key_record.id).unwrap())
-                .execute(&pool)
-                .await;
-
-            if let Err(e) = update_result {
-                warn!("Failed to update API key last_used timestamp: {}", e);
+            if let Ok(id_uuid) = uuid::Uuid::parse_str(&api_key_record.id) {
+                match sqlx::query("UPDATE api_keys SET last_used = NOW() WHERE id = $1")
+                    .bind(id_uuid)
+                    .execute(&pool)
+                    .await
+                {
+                    Ok(_) => debug!("Updated last_used timestamp for API key"),
+                    Err(e) => warn!("Failed to update API key last_used timestamp: {}", e),
+                }
             } else {
-                debug!("Updated last_used timestamp for API key");
+                warn!("Invalid UUID in api_keys.id when updating last_used");
             }
 
             Ok(AuthenticatedUser {
