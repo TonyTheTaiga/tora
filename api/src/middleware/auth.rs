@@ -20,6 +20,8 @@ use std::time::{Duration, Instant};
 use tokio::sync::RwLock;
 use tracing::{debug, error, info, warn};
 
+const JWKS_TTL_SECS: u64 = 600;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AuthenticatedUser {
     pub id: String,
@@ -271,70 +273,66 @@ async fn verify_jwt(
 }
 
 async fn get_jwk_key(supabase_url: &str, kid: Option<&str>) -> Result<Arc<DecodingKey>, AuthError> {
-    // Try cache first if we have a kid
-    if let Some(k) = kid {
-        let cache = JWKS_CACHE.read().await;
-        if let Some(entry) = cache.keys.get(k) {
-            info!("Using cached JWK for kid={}", k);
-            return Ok(entry.clone());
-        }
-    }
-
-    // Refresh cache if stale (>10 minutes) or missing requested kid
-    let mut needs_refresh = true;
     {
         let cache = JWKS_CACHE.read().await;
-        if let Some(t) = cache.fetched_at {
-            if t.elapsed() < Duration::from_secs(600) {
-                // Fresh cache but kid might not be present
-                if let Some(k) = kid {
-                    if cache.keys.contains_key(k) {
-                        if let Some(entry) = cache.keys.get(k) {
-                            return Ok(entry.clone());
-                        }
-                    }
+        let fresh = cache
+            .fetched_at
+            .map(|t| t.elapsed() < Duration::from_secs(JWKS_TTL_SECS))
+            .unwrap_or(false);
+
+        if fresh {
+            if let Some(k) = kid {
+                if let Some(entry) = cache.keys.get(k) {
+                    info!("Using cached JWK for kid={}", k);
+                    return Ok(entry.clone());
                 }
-                needs_refresh = false;
+            } else if cache.keys.len() == 1 {
+                let dk = cache.keys.values().next().unwrap().clone();
+                info!("Using single cached JWK (no kid)");
+                return Ok(dk);
             }
         }
     }
 
-    if needs_refresh {
-        let jwks_url = format!("{}/auth/v1/jwks", supabase_url.trim_end_matches('/'));
-        info!("Fetching JWKS: {}", jwks_url);
-        let resp = HTTP.get(&jwks_url).send().await.map_err(|e| AuthError {
-            message: format!("Failed to fetch JWKS: {e}"),
+    // Cache is stale or missing the requested kid; refresh JWKS
+    let jwks_url = format!("{}/auth/v1/jwks", supabase_url.trim_end_matches('/'));
+    info!("Fetching JWKS: {}", jwks_url);
+    let resp = HTTP.get(&jwks_url).send().await.map_err(|e| AuthError {
+        message: format!("Failed to fetch JWKS: {e}"),
+        status_code: StatusCode::INTERNAL_SERVER_ERROR,
+    })?;
+    if !resp.status().is_success() {
+        return Err(AuthError {
+            message: format!("JWKS HTTP error: {}", resp.status()),
             status_code: StatusCode::INTERNAL_SERVER_ERROR,
-        })?;
-        if !resp.status().is_success() {
-            return Err(AuthError {
-                message: format!("JWKS HTTP error: {}", resp.status()),
-                status_code: StatusCode::INTERNAL_SERVER_ERROR,
-            });
-        }
-        let jwks: Jwks = resp.json().await.map_err(|e| AuthError {
-            message: format!("Invalid JWKS payload: {e}"),
-            status_code: StatusCode::INTERNAL_SERVER_ERROR,
-        })?;
+        });
+    }
+    let jwks: Jwks = resp.json().await.map_err(|e| AuthError {
+        message: format!("Invalid JWKS payload: {e}"),
+        status_code: StatusCode::INTERNAL_SERVER_ERROR,
+    })?;
 
-        let mut map: HashMap<String, Arc<DecodingKey>> = HashMap::new();
-        for k in jwks.keys.into_iter() {
-            if k.kty == "RSA" {
-                if let (Some(n), Some(e)) = (k.n.clone(), k.e.clone()) {
-                    if let Some(kid) = k.kid.clone() {
-                        match DecodingKey::from_rsa_components(&n, &e) {
-                            Ok(dk) => {
-                                map.insert(kid, Arc::new(dk));
-                            }
-                            Err(err) => {
-                                warn!("Skipping invalid JWK '{}': {}", kid, err);
-                            }
-                        }
-                    }
+    let map: HashMap<String, Arc<DecodingKey>> = jwks
+        .keys
+        .into_iter()
+        .filter_map(|k| {
+            if k.kty != "RSA" {
+                return None;
+            }
+            let (Some(n), Some(e), Some(kid)) = (k.n, k.e, k.kid) else {
+                return None;
+            };
+            match DecodingKey::from_rsa_components(&n, &e) {
+                Ok(dk) => Some((kid, Arc::new(dk))),
+                Err(err) => {
+                    warn!("Skipping invalid JWK '{}': {}", kid, err);
+                    None
                 }
             }
-        }
+        })
+        .collect();
 
+    {
         let mut cache = JWKS_CACHE.write().await;
         let count = map.len();
         cache.keys = map;
@@ -342,15 +340,15 @@ async fn get_jwk_key(supabase_url: &str, kid: Option<&str>) -> Result<Arc<Decodi
         info!("JWKS cache updated: {} keys", count);
     }
 
-    // Try again to find requested kid, or fallback to single key if only 1 exists
+    // Return the requested key (or single) from the refreshed cache
     let cache = JWKS_CACHE.read().await;
     if let Some(k) = kid {
         if let Some(entry) = cache.keys.get(k) {
-            info!("Using cached JWK after refresh for kid={}", k);
+            info!("Using refreshed JWK for kid={}", k);
             return Ok(entry.clone());
         }
         return Err(AuthError {
-            message: format!("Requested JWK kid '{}' not found", k),
+            message: format!("Requested JWK kid '{k}' not found"),
             status_code: StatusCode::UNAUTHORIZED,
         });
     }
@@ -359,6 +357,7 @@ async fn get_jwk_key(supabase_url: &str, kid: Option<&str>) -> Result<Arc<Decodi
         info!("Using the single JWK from cache (no kid)");
         return Ok(dk);
     }
+
     Err(AuthError {
         message: "No suitable JWK found".to_string(),
         status_code: StatusCode::UNAUTHORIZED,
