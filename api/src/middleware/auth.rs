@@ -9,9 +9,15 @@ use axum::{
 };
 use http::HeaderValue;
 use http::header::WWW_AUTHENTICATE;
+use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
+use once_cell::sync::Lazy;
+use reqwest::Client as HttpClient;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use supabase_auth::models::AuthClient;
+use std::collections::HashMap;
+use std::sync::Arc;
+use std::time::{Duration, Instant};
+use tokio::sync::RwLock;
 use tracing::{debug, error, info, warn};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -47,6 +53,51 @@ impl IntoResponse for AuthError {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct JwtClaims {
+    sub: String,
+    #[serde(default)]
+    email: Option<String>,
+    #[allow(dead_code)]
+    #[serde(default)]
+    exp: Option<u64>,
+    #[serde(default)]
+    iss: Option<String>,
+    #[serde(default)]
+    aud: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+struct Jwk {
+    kid: Option<String>,
+    kty: String,
+    // #[serde(default)]
+    // alg: Option<String>,
+    #[serde(default)]
+    n: Option<String>,
+    #[serde(default)]
+    e: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+struct Jwks {
+    keys: Vec<Jwk>,
+}
+
+#[derive(Default)]
+struct JwksCache {
+    fetched_at: Option<Instant>,
+    keys: HashMap<String, Arc<DecodingKey>>,
+}
+
+static JWKS_CACHE: Lazy<RwLock<JwksCache>> = Lazy::new(|| RwLock::new(JwksCache::default()));
+static HTTP: Lazy<HttpClient> = Lazy::new(|| {
+    HttpClient::builder()
+        .timeout(Duration::from_secs(5))
+        .build()
+        .expect("http client")
+});
+
 pub async fn auth_middleware(
     headers: HeaderMap,
     State(app_state): State<state::AppState>,
@@ -74,27 +125,18 @@ pub async fn auth_middleware(
     Then check for access token
     */
     if let Some(token) = bearer_token_from_headers(&headers) {
-        let auth_client = make_auth_client()?;
-
-        match auth_client.get_user(&token).await {
-            Ok(user) => {
-                let authenticated_user = AuthenticatedUser {
-                    id: user.id.to_string(),
-                    email: user.email.clone(),
-                };
+        match verify_jwt(&token, &app_state.settings).await {
+            Ok(authenticated_user) => {
                 info!(
-                    "Bearer token authentication successful for user: {}",
-                    user.email
+                    "JWT authentication successful for user: {}",
+                    authenticated_user.email
                 );
                 req.extensions_mut().insert(authenticated_user);
                 return Ok(next.run(req).await);
             }
             Err(e) => {
-                warn!("Bearer token authentication failed: {}", e);
-                return Err(AuthError {
-                    message: "Invalid access token".to_string(),
-                    status_code: StatusCode::UNAUTHORIZED,
-                });
+                warn!("JWT authentication failed: {}", e.message);
+                return Err(e);
             }
         }
     }
@@ -147,13 +189,179 @@ fn bearer_token_from_headers(headers: &HeaderMap) -> Option<String> {
     None
 }
 
-fn make_auth_client() -> Result<AuthClient, AuthError> {
-    AuthClient::new_from_env().map_err(|e| {
-        error!("Failed to create auth client: {}", e);
-        AuthError {
-            message: format!("Failed to create auth client: {e}"),
-            status_code: StatusCode::INTERNAL_SERVER_ERROR,
+async fn verify_jwt(
+    token: &str,
+    settings: &crate::settings::Settings,
+) -> Result<AuthenticatedUser, AuthError> {
+    let header = decode_header(token).map_err(|e| AuthError {
+        message: format!("Invalid token header: {e}"),
+        status_code: StatusCode::UNAUTHORIZED,
+    })?;
+
+    info!("JWT header alg={:?} kid={:?}", header.alg, header.kid);
+    match header.alg {
+        Algorithm::HS256 => {
+            let mut validation = Validation::new(Algorithm::HS256);
+            validation.validate_aud = false; // don't enforce audience
+            let _ = validation.required_spec_claims.remove("aud");
+            let token_data = decode::<JwtClaims>(
+                token,
+                &DecodingKey::from_secret(settings.supabase_jwt_secret.as_bytes()),
+                &validation,
+            )
+            .map_err(|e| {
+                error!("JWT decode failed: {}", e);
+                AuthError {
+                    message: "Invalid access token".to_string(),
+                    status_code: StatusCode::UNAUTHORIZED,
+                }
+            })?;
+            let JwtClaims {
+                sub,
+                email,
+                iss,
+                aud,
+                ..
+            } = token_data.claims;
+            info!(
+                "JWT claims verified (HS256): sub={}, iss={:?}, aud={:?}",
+                sub, iss, aud
+            );
+            let email = email.ok_or(AuthError {
+                message: "Token missing required email claim".to_string(),
+                status_code: StatusCode::UNAUTHORIZED,
+            })?;
+            Ok(AuthenticatedUser { id: sub, email })
         }
+        Algorithm::RS256 => {
+            let kid = header.kid.as_deref();
+            let key = get_jwk_key(settings.supabase_url.as_str(), kid).await?;
+            let mut validation = Validation::new(Algorithm::RS256);
+            validation.validate_aud = false; // don't enforce audience
+            let _ = validation.required_spec_claims.remove("aud");
+            let token_data = decode::<JwtClaims>(token, &key, &validation).map_err(|e| {
+                error!("JWT decode failed: {}", e);
+                AuthError {
+                    message: "Invalid access token".to_string(),
+                    status_code: StatusCode::UNAUTHORIZED,
+                }
+            })?;
+            let JwtClaims {
+                sub,
+                email,
+                iss,
+                aud,
+                ..
+            } = token_data.claims;
+            info!(
+                "JWT claims verified (RS256): sub={}, iss={:?}, aud={:?}",
+                sub, iss, aud
+            );
+            let email = email.ok_or(AuthError {
+                message: "Token missing required email claim".to_string(),
+                status_code: StatusCode::UNAUTHORIZED,
+            })?;
+            Ok(AuthenticatedUser { id: sub, email })
+        }
+        other => Err(AuthError {
+            message: format!("Unsupported JWT algorithm: {other:?}"),
+            status_code: StatusCode::UNAUTHORIZED,
+        }),
+    }
+}
+
+async fn get_jwk_key(supabase_url: &str, kid: Option<&str>) -> Result<Arc<DecodingKey>, AuthError> {
+    // Try cache first if we have a kid
+    if let Some(k) = kid {
+        let cache = JWKS_CACHE.read().await;
+        if let Some(entry) = cache.keys.get(k) {
+            info!("Using cached JWK for kid={}", k);
+            return Ok(entry.clone());
+        }
+    }
+
+    // Refresh cache if stale (>10 minutes) or missing requested kid
+    let mut needs_refresh = true;
+    {
+        let cache = JWKS_CACHE.read().await;
+        if let Some(t) = cache.fetched_at {
+            if t.elapsed() < Duration::from_secs(600) {
+                // Fresh cache but kid might not be present
+                if let Some(k) = kid {
+                    if cache.keys.contains_key(k) {
+                        if let Some(entry) = cache.keys.get(k) {
+                            return Ok(entry.clone());
+                        }
+                    }
+                }
+                needs_refresh = false;
+            }
+        }
+    }
+
+    if needs_refresh {
+        let jwks_url = format!("{}/auth/v1/jwks", supabase_url.trim_end_matches('/'));
+        info!("Fetching JWKS: {}", jwks_url);
+        let resp = HTTP.get(&jwks_url).send().await.map_err(|e| AuthError {
+            message: format!("Failed to fetch JWKS: {e}"),
+            status_code: StatusCode::INTERNAL_SERVER_ERROR,
+        })?;
+        if !resp.status().is_success() {
+            return Err(AuthError {
+                message: format!("JWKS HTTP error: {}", resp.status()),
+                status_code: StatusCode::INTERNAL_SERVER_ERROR,
+            });
+        }
+        let jwks: Jwks = resp.json().await.map_err(|e| AuthError {
+            message: format!("Invalid JWKS payload: {e}"),
+            status_code: StatusCode::INTERNAL_SERVER_ERROR,
+        })?;
+
+        let mut map: HashMap<String, Arc<DecodingKey>> = HashMap::new();
+        for k in jwks.keys.into_iter() {
+            if k.kty == "RSA" {
+                if let (Some(n), Some(e)) = (k.n.clone(), k.e.clone()) {
+                    if let Some(kid) = k.kid.clone() {
+                        match DecodingKey::from_rsa_components(&n, &e) {
+                            Ok(dk) => {
+                                map.insert(kid, Arc::new(dk));
+                            }
+                            Err(err) => {
+                                warn!("Skipping invalid JWK '{}': {}", kid, err);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        let mut cache = JWKS_CACHE.write().await;
+        let count = map.len();
+        cache.keys = map;
+        cache.fetched_at = Some(Instant::now());
+        info!("JWKS cache updated: {} keys", count);
+    }
+
+    // Try again to find requested kid, or fallback to single key if only 1 exists
+    let cache = JWKS_CACHE.read().await;
+    if let Some(k) = kid {
+        if let Some(entry) = cache.keys.get(k) {
+            info!("Using cached JWK after refresh for kid={}", k);
+            return Ok(entry.clone());
+        }
+        return Err(AuthError {
+            message: format!("Requested JWK kid '{}' not found", k),
+            status_code: StatusCode::UNAUTHORIZED,
+        });
+    }
+    if cache.keys.len() == 1 {
+        let dk = cache.keys.values().next().unwrap().clone();
+        info!("Using the single JWK from cache (no kid)");
+        return Ok(dk);
+    }
+    Err(AuthError {
+        message: "No suitable JWK found".to_string(),
+        status_code: StatusCode::UNAUTHORIZED,
     })
 }
 
