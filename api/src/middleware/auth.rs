@@ -294,7 +294,6 @@ async fn get_jwk_key(supabase_url: &str, kid: Option<&str>) -> Result<Arc<Decodi
         }
     }
 
-    // Cache is stale or missing the requested kid; refresh JWKS
     let jwks_url = format!("{}/auth/v1/jwks", supabase_url.trim_end_matches('/'));
     info!("Fetching JWKS: {}", jwks_url);
     let resp = HTTP.get(&jwks_url).send().await.map_err(|e| AuthError {
@@ -340,7 +339,6 @@ async fn get_jwk_key(supabase_url: &str, kid: Option<&str>) -> Result<Arc<Decodi
         info!("JWKS cache updated: {} keys", count);
     }
 
-    // Return the requested key (or single) from the refreshed cache
     let cache = JWKS_CACHE.read().await;
     if let Some(k) = kid {
         if let Some(entry) = cache.keys.get(k) {
