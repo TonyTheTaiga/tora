@@ -13,7 +13,4 @@
     ></div>
   </div>
   <p class="text-ctp-subtext0 text-sm font-medium">{message}</p>
-  <div class="text-xs text-ctp-subtext0/60 max-w-xs">
-    Make a selection from the previous column to continue
-  </div>
 </div>

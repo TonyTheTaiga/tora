@@ -5,7 +5,7 @@
   import type { Workspace, Experiment } from "$lib/types";
   import { onMount } from "svelte";
   import { copyToClipboard } from "$lib/utils/common";
-  import { RefreshCw } from "@lucide/svelte";
+  import { RefreshCw, ChevronLeft, PanelLeftClose } from "@lucide/svelte";
   import {
     setSelectedExperiment,
     loading,
@@ -14,13 +14,17 @@
     setCachedExperiments,
     isWorkspaceLoaded,
   } from "./state.svelte";
+  import { setSelectedWorkspace, clearWorkspaceCache } from "./state.svelte";
   import {
     loadExperimentsFromStorage,
     saveExperimentsToStorage,
     getExperimentsTimestamp,
   } from "$lib/utils/persistentCache";
 
-  let { workspace }: { workspace: Workspace } = $props();
+  let {
+    workspace,
+    collapseNav,
+  }: { workspace: Workspace; collapseNav?: () => void } = $props();
   let experimentSearchQuery = $state("");
   let experiments: Experiment[] = $state([]);
   let experimentToEdit = $derived(getExperimentToEdit());
@@ -145,6 +149,10 @@
       loading.experiments = false;
     }
   }
+
+  function handleSelectExperiment(exp: Experiment) {
+    setSelectedExperiment(exp);
+  }
 </script>
 
 {#if experimentToEdit}
@@ -156,16 +164,41 @@
     class="sticky top-0 z-10 surface-elevated border-b border-ctp-surface0/30 p-4 min-w-0"
   >
     <div class="flex items-center justify-between mb-3">
-      <h2 class="text-ctp-text font-medium text-base">Experiments</h2>
-      <button
-        class="inline-flex items-center gap-1 text-xs bg-transparent border border-ctp-surface0/40 hover:border-ctp-surface0/60 text-ctp-overlay0 hover:text-ctp-text px-2 py-1 transition-colors disabled:opacity-50"
-        onclick={refreshExperiments}
-        disabled={loading.experiments}
-        title="refresh experiments"
-      >
-        <RefreshCw class="w-3.5 h-3.5" />
-        refresh
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          class="floating-element p-2 rounded-md"
+          onclick={() => {
+            try {
+              clearWorkspaceCache(workspace.id);
+            } catch {}
+            setSelectedWorkspace(null);
+          }}
+          title="back to workspaces"
+          aria-label="back to workspaces"
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <h2 class="text-ctp-text font-medium text-base">Experiments</h2>
+      </div>
+      <div class="flex gap-2 items-center">
+        <button
+          class="floating-element p-2 rounded-md"
+          onclick={() => collapseNav?.()}
+          title="collapse navigator"
+          aria-label="collapse navigator"
+        >
+          <PanelLeftClose size={16} />
+        </button>
+        <button
+          class="floating-element p-2 rounded-md disabled:opacity-50"
+          onclick={refreshExperiments}
+          disabled={loading.experiments}
+          title="refresh experiments"
+          aria-label="refresh experiments"
+        >
+          <RefreshCw size={16} />
+        </button>
+      </div>
     </div>
     <div class="mb-3">
       <button
@@ -217,7 +250,7 @@
         {workspace}
         searchQuery={experimentSearchQuery}
         onExperimentsChange={handleExperimentsChange}
-        onItemClick={setSelectedExperiment}
+        onItemClick={handleSelectExperiment}
       />
     {/if}
   </div>

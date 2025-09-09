@@ -6,11 +6,21 @@
   import { setSelectedWorkspace } from "./state.svelte";
   import WorkspaceList from "$lib/components/lists/WorkspaceList.svelte";
   import CreateWorkspaceModal from "$lib/components/modals/create-workspace-modal.svelte";
-  import { Mail, FolderPlus, RefreshCw } from "@lucide/svelte";
+  import { Mail, FolderPlus, RefreshCw, PanelLeftClose } from "@lucide/svelte";
   import type { Workspace } from "$lib/types";
   import InvitationsModal from "./invitations-modal.svelte";
 
-  let { workspaces, workspaceRoles, workspaceInvitations } = $props();
+  let {
+    workspaces,
+    workspaceRoles,
+    workspaceInvitations,
+    collapseNav,
+  }: {
+    workspaces: Workspace[];
+    workspaceRoles: any;
+    workspaceInvitations: any;
+    collapseNav?: () => void;
+  } = $props();
   let workspaceSearchQuery = $state("");
   let createWorkspaceModal = $derived(getCreateWorkspaceModal());
   let openInvitationModal = $state<boolean>(false);
@@ -62,13 +72,21 @@
       <h2 class="text-ctp-text font-medium text-base">Workspaces</h2>
       <div class="flex gap-2 items-center">
         <button
-          class="inline-flex items-center gap-1 text-xs bg-transparent border border-ctp-surface0/40 hover:border-ctp-surface0/60 text-ctp-overlay0 hover:text-ctp-text px-2 py-1 transition-colors disabled:opacity-50"
+          class="floating-element p-2 rounded-md"
+          onclick={() => collapseNav?.()}
+          title="collapse navigator"
+          aria-label="collapse navigator"
+        >
+          <PanelLeftClose size={16} />
+        </button>
+        <button
+          class="floating-element p-2 rounded-md disabled:opacity-50"
           onclick={refreshWorkspaces}
           disabled={isRefreshing}
           title="refresh workspaces"
+          aria-label="refresh workspaces"
         >
-          <RefreshCw class="w-3.5 h-3.5" />
-          refresh
+          <RefreshCw size={16} />
         </button>
         <button
           aria-label="create-workspace"

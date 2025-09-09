@@ -10,6 +10,7 @@
   } from "$lib/types";
   import { getSelectedWorkspace, getSelectedExperiment } from "./state.svelte";
   import { onMount } from "svelte";
+  import { PanelLeftOpen } from "@lucide/svelte";
 
   let { data } = $props();
   let workspaces = $derived(data.workspaces);
@@ -17,6 +18,19 @@
   let selectedExperiment = $derived(getSelectedExperiment());
   let workspaceRoles = $state<WorkspaceRole[]>([]);
   let workspaceInvitations = $state<PendingInvitation[]>([]);
+
+  let navCollapsed = $state(false);
+  function openNav() {
+    navCollapsed = false;
+  }
+
+  function collapseNav() {
+    navCollapsed = true;
+  }
+
+  const navExpanded = "25%";
+  const navCollapsedWidth = "3rem";
+  const navTrack = $derived(navCollapsed ? navCollapsedWidth : navExpanded);
 
   async function loadWorkspaceRoles() {
     try {
@@ -51,41 +65,58 @@
 </script>
 
 <div
-  class="min-h-0 min-w-0 grow grid grid-cols-[25%_25%_50%] overflow-hidden p-4 space-x-2"
+  class="min-h-0 min-w-0 grow grid overflow-hidden p-4 gap-2"
+  style={`grid-template-columns: ${navTrack} 1fr; transition: grid-template-columns 200ms ease;`}
 >
-  <!-- Workspace Column -->
+  <!-- Navigation Column: Workspaces -> Experiments, collapses after picking an experiment -->
   <section
-    class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 min-w-0 overflow-y-auto overflow-x-hidden"
+    class={`${navCollapsed ? "bg-ctp-surface0/35" : "bg-ctp-surface0/12"} relative shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 min-w-0 overflow-y-auto overflow-x-hidden`}
+    role="group"
+    aria-label="Navigation column"
   >
-    <WorkspaceColumn {workspaces} {workspaceRoles} {workspaceInvitations} />
-  </section>
-
-  <!-- Experiment List Column -->
-  <section
-    class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 min-w-0 overflow-y-auto overflow-x-hidden"
-  >
-    {#if selectedWorkspace}
-      {#key selectedWorkspace.id}
-        <ExperimentListColumn workspace={selectedWorkspace} />
-      {/key}
-    {:else}
-      <div class="h-full flex items-center justify-center">
-        <EmptyState message="select a workspace to view experiments" />
+    {#if navCollapsed}
+      <!-- Collapsed rail; expand control lives here -->
+      <div
+        class="h-full w-full select-none flex items-start justify-center p-2"
+      >
+        <button
+          class="floating-element p-2 rounded-md"
+          onclick={openNav}
+          title="show navigator"
+          aria-label="show navigator"
+        >
+          <PanelLeftOpen size={16} />
+        </button>
       </div>
+    {:else if !selectedWorkspace}
+      <WorkspaceColumn
+        {workspaces}
+        {workspaceRoles}
+        {workspaceInvitations}
+        {collapseNav}
+      />
+    {:else}
+      {#key selectedWorkspace.id}
+        <ExperimentListColumn workspace={selectedWorkspace} {collapseNav} />
+      {/key}
     {/if}
   </section>
 
   <!-- Experiment Details Column -->
   <section
-    class="bg-ctp-surface0/15 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 min-w-0 overflow-y-auto overflow-x-hidden"
+    class="bg-ctp-surface0/18 shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 min-w-0 overflow-y-auto overflow-x-hidden"
   >
     {#if selectedExperiment}
       {#key selectedExperiment.id}
         <ExperimentDetails experiment={selectedExperiment} />
       {/key}
+    {:else if selectedWorkspace}
+      <div class="h-full flex items-center justify-center">
+        <EmptyState message="select an experiment to view details" />
+      </div>
     {:else}
       <div class="h-full flex items-center justify-center">
-        <EmptyState message="select a experiment to view details" />
+        <EmptyState message="select a workspace to get started" />
       </div>
     {/if}
   </section>

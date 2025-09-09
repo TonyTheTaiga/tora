@@ -12,7 +12,7 @@
   } from "./pins.svelte";
   import { onMount } from "svelte";
 
-  let { experiment } = $props();
+  let { experiment }: { experiment: Experiment } = $props();
   let results = $state<any[]>([]);
   let isStreamingChart = $state(false);
   let showResults = $state(true);
@@ -193,15 +193,17 @@
         {/if}
         <span class="truncate">{experiment.name}</span>
       </button>
-      <button
-        class="inline-flex items-center gap-1 text-xs bg-transparent border border-ctp-surface0/40 hover:border-ctp-surface0/60 text-ctp-overlay0 hover:text-ctp-text px-2 py-1 transition-colors disabled:opacity-50"
-        onclick={refreshDetails}
-        disabled={loading.experimentDetails}
-        title="refresh experiment details"
-      >
-        <RefreshCw class="w-3.5 h-3.5" />
-        refresh
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          class="floating-element p-2 rounded-md disabled:opacity-50"
+          onclick={refreshDetails}
+          disabled={loading.experimentDetails}
+          title="refresh experiment details"
+          aria-label="refresh experiment details"
+        >
+          <RefreshCw size={16} />
+        </button>
+      </div>
     </div>
     {#if showHeader}
       <div id="experiment-header-details" class="mt-2">
