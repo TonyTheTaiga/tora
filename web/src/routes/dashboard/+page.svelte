@@ -68,14 +68,12 @@
   class="min-h-0 min-w-0 grow grid overflow-hidden p-4 gap-2"
   style={`grid-template-columns: ${navTrack} 1fr; transition: grid-template-columns 200ms ease;`}
 >
-  <!-- Navigation Column: Workspaces -> Experiments, collapses after picking an experiment -->
   <section
     class={`${navCollapsed ? "bg-ctp-surface0/35" : "bg-ctp-surface0/12"} relative shadow-lg shadow-ctp-crust/20 backdrop-blur-sm min-h-0 min-w-0 overflow-y-auto overflow-x-hidden`}
     role="group"
     aria-label="Navigation column"
   >
     {#if navCollapsed}
-      <!-- Collapsed rail; expand control lives here -->
       <div
         class="h-full w-full select-none flex items-start justify-center p-2"
       >
