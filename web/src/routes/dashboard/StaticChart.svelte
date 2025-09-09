@@ -10,8 +10,7 @@
   } from "echarts/components";
   import { CanvasRenderer } from "echarts/renderers";
   import { browser } from "$app/environment";
-  import type { Snippet } from "svelte";
-  import { RefreshCw } from "@lucide/svelte";
+  // icons removed from internal overlay; toolbar handles controls
 
   echarts.use([
     LineChart,
@@ -22,12 +21,11 @@
     CanvasRenderer,
   ]);
 
-  let { experimentId, toggleStreaming } = $props<{
+  let { experimentId } = $props<{
     experimentId: string;
-    toggleStreaming?: Snippet;
   }>();
   let yScale = $state<"log" | "linear">("log");
-  function toggleScale() {
+  export function toggleScale() {
     yScale = yScale === "log" ? "linear" : "log";
     applyTheme();
   }
@@ -259,7 +257,7 @@
     })();
   }
 
-  function refreshChart() {
+  export function refreshChart() {
     try {
       metricsAbort?.abort();
     } catch {}
@@ -340,27 +338,9 @@
 </script>
 
 <div
-  class="relative h-80 w-full bg-transparent border border-ctp-surface0/20 overflow-hidden rounded-sm"
+  class="relative h-80 w-full bg-transparent border border-ctp-surface0/20 overflow-hidden"
 >
   <div class="absolute inset-0" bind:this={chartEl}></div>
-  <div class="absolute top-1 right-1 flex gap-1 z-10">
-    <button
-      class="text-[10px] leading-none floating-element px-1.5 py-0.5 rounded-sm hover:text-ctp-blue"
-      onclick={toggleScale}
-      title="toggle Y axis scale between log and linear"
-    >
-      y: {yScale}
-    </button>
-    <button
-      class="text-[10px] leading-none floating-element px-1.5 py-0.5 rounded-sm hover:text-ctp-text"
-      onclick={refreshChart}
-      disabled={loading}
-      title="refresh chart data"
-    >
-      <RefreshCw class="w-3.5 h-3.5 inline align-middle" />
-    </button>
-    {@render toggleStreaming?.()}
-  </div>
   {#if loading}
     <div class="absolute inset-0 flex items-center justify-center">
       <div class="text-ctp-subtext0 text-xs">loading chart…</div>

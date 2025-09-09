@@ -1,6 +1,7 @@
 <script lang="ts">
   import StaticChart from "./StaticChart.svelte";
   import StreamingChart from "./StreamingChart.svelte";
+  import ChartToolbar from "$lib/components/ChartToolbar.svelte";
   import type { Experiment, HyperParam } from "$lib/types";
   import { copyToClipboard } from "$lib/utils/common";
   import { loading, errors } from "./state.svelte";
@@ -10,11 +11,14 @@
     togglePin as togglePinGlobal,
     isPinned as isPinnedGlobal,
   } from "./pins.svelte";
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
 
   let { experiment }: { experiment: Experiment } = $props();
   let results = $state<any[]>([]);
   let isStreamingChart = $state(false);
+  let yScale = $state<"log" | "linear">("log");
+  let staticChartRef = $state<any>(null);
+  let streamingChartRef = $state<any>(null);
   let showResults = $state(true);
   let showHeader = $state(true);
   let showAllHyperparams = $state(false);
@@ -81,11 +85,29 @@
     } catch (e) {}
   }
 
-  function toggleLiveStream() {
+  async function toggleLiveStream() {
+    isStreamingChart = !isStreamingChart;
+    await tick();
+    const ref = isStreamingChart ? streamingChartRef : staticChartRef;
+    if (ref && yScale === "linear") {
+      ref.toggleScale?.();
+    }
+  }
+
+  function refreshChart() {
     if (isStreamingChart) {
-      isStreamingChart = false;
+      streamingChartRef?.refreshChart?.();
     } else {
-      isStreamingChart = true;
+      staticChartRef?.refreshChart?.();
+    }
+  }
+
+  function toggleScaleFromToolbar() {
+    yScale = yScale === "log" ? "linear" : "log";
+    if (isStreamingChart) {
+      streamingChartRef?.toggleScale?.();
+    } else {
+      staticChartRef?.toggleScale?.();
     }
   }
 
@@ -313,33 +335,24 @@
           </div>
         </div>
       {/if}
-      <div class="space-y-2">
+      <div>
+        <ChartToolbar
+          {yScale}
+          streaming={isStreamingChart}
+          onRefresh={refreshChart}
+          onToggleScale={toggleScaleFromToolbar}
+          onToggleStreaming={toggleLiveStream}
+        />
         {#if isStreamingChart}
-          <StreamingChart experimentId={experiment.id}>
-            {#snippet toggleStreaming()}
-              <button
-                class="text-[10px] leading-none border border-ctp-surface0/40 px-1.5 py-0.5 bg-ctp-mantle/70 hover:text-ctp-yellow"
-                onclick={toggleLiveStream}
-                aria-pressed={true}
-                title="stop live stream"
-              >
-                stop live
-              </button>
-            {/snippet}
-          </StreamingChart>
+          <StreamingChart
+            bind:this={streamingChartRef}
+            experimentId={experiment.id}
+          />
         {:else}
-          <StaticChart experimentId={experiment.id}>
-            {#snippet toggleStreaming()}
-              <button
-                class="text-[10px] leading-none border border-ctp-surface0/40 px-1.5 py-0.5 bg-ctp-mantle/70 hover:text-ctp-blue"
-                onclick={toggleLiveStream}
-                aria-pressed={false}
-                title="start live stream"
-              >
-                start live
-              </button>
-            {/snippet}
-          </StaticChart>
+          <StaticChart
+            bind:this={staticChartRef}
+            experimentId={experiment.id}
+          />
         {/if}
       </div>
 

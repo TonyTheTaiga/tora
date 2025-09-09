@@ -11,7 +11,7 @@
   import { CanvasRenderer } from "echarts/renderers";
   import { browser } from "$app/environment";
   import { env } from "$env/dynamic/public";
-  import type { Snippet } from "svelte";
+  import type {} from "svelte";
 
   echarts.use([
     LineChart,
@@ -22,15 +22,14 @@
     CanvasRenderer,
   ]);
 
-  let { experimentId, toggleStreaming } = $props<{
+  let { experimentId } = $props<{
     experimentId: string;
-    toggleStreaming?: Snippet;
   }>();
   let status = $state<"idle" | "connecting" | "open" | "closed" | "error">(
     "idle",
   );
   let yScale = $state<"log" | "linear">("log");
-  function toggleScale() {
+  export function toggleScale() {
     yScale = yScale === "log" ? "linear" : "log";
     // apply immediately on toggle to avoid extra effects
     applyTheme();
@@ -274,6 +273,16 @@
     status = "closed";
   }
 
+  export function refreshChart() {
+    // Reset series/state and reconnect
+    seriesData = {};
+    pending = {};
+    seenMsgIds = new Set();
+    chart?.setOption(getBaseOptions(), { notMerge: true });
+    close();
+    connect();
+  }
+
   async function connect() {
     if (!experimentId) return;
     if (ws && ws.readyState === WebSocket.OPEN) return;
@@ -435,18 +444,7 @@
 </script>
 
 <div
-  class="relative h-80 w-full bg-transparent border border-ctp-surface0/20 overflow-hidden rounded-sm"
+  class="relative h-80 w-full bg-transparent border border-ctp-surface0/20 overflow-hidden"
 >
   <div class="absolute inset-0" bind:this={chartEl}></div>
-  <div class="absolute top-1 right-1 flex items-center gap-2 z-10">
-    <span class="text-[10px] text-ctp-subtext0">live: {status}</span>
-    <button
-      class="text-[10px] leading-none floating-element px-1.5 py-0.5 rounded-sm hover:text-ctp-blue"
-      onclick={toggleScale}
-      title="toggle Y axis scale between log and linear"
-    >
-      y: {yScale}
-    </button>
-    {@render toggleStreaming?.()}
-  </div>
 </div>
