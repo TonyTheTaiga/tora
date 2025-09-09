@@ -37,6 +37,7 @@
 
   let chartEl: HTMLDivElement | null = $state(null);
   let chart: EChartsType | null = null;
+  let ro: ResizeObserver | null = null;
   let seriesData: Record<string, Array<[number, number]>> = {};
   let pending: Record<string, Array<[number, number]>> = {};
   let updateScheduled = false;
@@ -99,7 +100,7 @@
       animation: true,
       color: chartTheme.colors as any,
       textStyle: { color: chartTheme.text },
-      grid: { left: 40, right: 20, top: 24, bottom: 40 },
+      grid: { left: 56, right: 20, top: 24, bottom: 40 },
       tooltip: {
         trigger: "axis",
         axisPointer: { type: "line" },
@@ -132,7 +133,12 @@
         min: "dataMin",
         max: "dataMax",
         scale: true,
-        axisLabel: { color: chartTheme.axisTicks },
+        axisLabel: {
+          color: chartTheme.axisTicks,
+          width: 56,
+          overflow: "truncate",
+          align: "right",
+        },
         axisLine: { lineStyle: { color: chartTheme.overlay0 } },
         splitLine: {
           show: true,
@@ -379,7 +385,12 @@
             min: "dataMin",
             max: "dataMax",
             scale: true,
-            axisLabel: { color: chartTheme.axisTicks },
+            axisLabel: {
+              color: chartTheme.axisTicks,
+              width: 56,
+              overflow: "truncate",
+              align: "right",
+            },
             axisLine: { lineStyle: { color: chartTheme.overlay0 } },
             splitLine: {
               show: true,
@@ -395,6 +406,11 @@
   import { onMount } from "svelte";
   onMount(() => {
     initChart();
+    // Resize with container changes (e.g., sidebar collapse/expand)
+    if (chartEl && typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(() => chart?.resize());
+      ro.observe(chartEl);
+    }
     const handleThemeChange = () => {
       chartTheme = getTheme();
       applyTheme();
@@ -423,6 +439,12 @@
       if (mediaQuery)
         mediaQuery.removeEventListener("change", handleThemeChange);
       if (observer) observer.disconnect();
+      if (ro) {
+        try {
+          ro.disconnect();
+        } catch {}
+        ro = null;
+      }
       close();
       disposeChart();
     };

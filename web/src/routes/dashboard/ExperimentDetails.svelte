@@ -335,7 +335,7 @@
           </div>
         </div>
       {/if}
-      <div>
+      <div class="w-full">
         <ChartToolbar
           {yScale}
           streaming={isStreamingChart}

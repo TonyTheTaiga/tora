@@ -20,7 +20,7 @@
 </script>
 
 <Toolbar.Root
-  class="chart-toolbar w-full border border-b-0 border-ctp-surface0/35 bg-ctp-surface0/18 shadow-sm h-10 min-w-max px-[4px] py-0 gap-2 flex items-center justify-end"
+  class="chart-toolbar w-full border border-b-0 border-ctp-surface0/35 bg-ctp-surface0/18 shadow-sm h-10 px-[4px] py-0 gap-2 flex items-center justify-end"
 >
   <button
     class="toolbar-btn"
