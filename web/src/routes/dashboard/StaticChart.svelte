@@ -10,7 +10,7 @@
   } from "echarts/components";
   import { CanvasRenderer } from "echarts/renderers";
   import { browser } from "$app/environment";
-  // icons removed from internal overlay; toolbar handles controls
+  import { onMount } from "svelte";
 
   echarts.use([
     LineChart,
@@ -20,24 +20,6 @@
     DataZoomComponent,
     CanvasRenderer,
   ]);
-
-  let { experimentId } = $props<{
-    experimentId: string;
-  }>();
-  let yScale = $state<"log" | "linear">("log");
-  export function toggleScale() {
-    yScale = yScale === "log" ? "linear" : "log";
-    applyTheme();
-  }
-
-  let chartEl: HTMLDivElement | null = $state(null);
-  let chart: EChartsType | null = null;
-  let ro: ResizeObserver | null = null;
-  let loading = $state(false);
-  let error: string | null = $state(null);
-  let seriesRaw: Record<string, Array<[number, number]>> = $state({});
-  let seriesNames = $derived(Object.keys(seriesRaw || {}));
-  let hasMetrics = $derived(seriesNames.length > 0);
 
   type LogRow = {
     name: string;
@@ -62,6 +44,26 @@
     "red",
     "rosewater",
   ];
+
+  let { experimentId } = $props<{
+    experimentId: string;
+  }>();
+  let yScale = $state<"log" | "linear">("log");
+  let chartEl: HTMLDivElement | null = $state(null);
+  let chart: EChartsType | null = null;
+  let ro: ResizeObserver | null = null;
+  let loading = $state(false);
+  let error: string | null = $state(null);
+  let seriesRaw: Record<string, Array<[number, number]>> = $state({});
+  let seriesNames = $derived(Object.keys(seriesRaw || {}));
+  let hasMetrics = $derived(seriesNames.length > 0);
+  let chartTheme = $state(getTheme());
+  let ac: AbortController | null = null;
+
+  export function toggleScale() {
+    yScale = yScale === "log" ? "linear" : "log";
+    applyTheme();
+  }
 
   function getTheme() {
     if (!browser) {
@@ -91,8 +93,6 @@
       terminalBorder: cs.getPropertyValue("--color-ctp-terminal-border").trim(),
     } as const;
   }
-
-  let chartTheme = $state(getTheme());
 
   function initChart() {
     if (chart || !chartEl) return;
@@ -227,8 +227,31 @@
       { notMerge: false },
     );
   }
-  import { onMount } from "svelte";
-  let metricsAbort: AbortController | null = null;
+
+  function updateSeries() {
+    if (!chart) return;
+    const names = Object.keys(seriesRaw);
+    if (names.length === 0) return;
+    const byScale = dataForScale(seriesRaw);
+    const series = names.map((n) => ({
+      id: n,
+      name: n,
+      type: "line",
+      showSymbol: false,
+      smooth: 0.15,
+      connectNulls: true,
+      data: byScale[n],
+      emphasis: { focus: "series" },
+    }));
+    chart.setOption(
+      {
+        series,
+        legend: { data: names },
+      },
+      { notMerge: false },
+    );
+  }
+
   function loadStaticData(controller: AbortController) {
     if (!experimentId) return;
     loading = true;
@@ -252,16 +275,18 @@
           if (!byNameRaw[name]) byNameRaw[name] = [];
           byNameRaw[name].push([step, y]);
         }
-        if (metricsAbort === controller) {
+        if (ac === controller) {
           seriesRaw = byNameRaw;
+          initChart();
+          updateSeries();
         }
       } catch (e) {
-        if (metricsAbort === controller) {
+        if (ac === controller) {
           error = e instanceof Error ? e.message : "Failed to load chart data";
           seriesRaw = {};
         }
       } finally {
-        if (metricsAbort === controller) {
+        if (ac === controller) {
           loading = false;
         }
       }
@@ -270,10 +295,10 @@
 
   export function refreshChart() {
     try {
-      metricsAbort?.abort();
+      ac?.abort();
     } catch {}
-    metricsAbort = new AbortController();
-    loadStaticData(metricsAbort);
+    ac = new AbortController();
+    loadStaticData(ac);
   }
 
   onMount(() => {
@@ -306,10 +331,11 @@
         attributeFilter: ["class"],
       });
     }
-    metricsAbort = new AbortController();
-    loadStaticData(metricsAbort);
 
-    return () => {
+    ac = new AbortController();
+    loadStaticData(ac);
+
+    return async () => {
       if (mediaQuery)
         mediaQuery.removeEventListener("change", handleThemeChange);
       if (observer) observer.disconnect();
@@ -320,36 +346,13 @@
         ro = null;
       }
       try {
-        metricsAbort?.abort();
+        ac?.abort();
       } catch {}
-      metricsAbort = null;
+      ac = null;
+      // Allow a frame for any pending chart operations to settle
+      await Promise.resolve();
       disposeChart();
     };
-  });
-
-  $effect(() => {
-    const names = seriesNames;
-    const raw = seriesRaw;
-    if (!names || names.length === 0) return;
-    initChart();
-    const byScale = dataForScale(raw);
-    const series = names.map((n) => ({
-      id: n,
-      name: n,
-      type: "line",
-      showSymbol: false,
-      smooth: 0.15,
-      connectNulls: true,
-      data: byScale[n],
-      emphasis: { focus: "series" },
-    }));
-    chart?.setOption(
-      {
-        series,
-        legend: { data: names },
-      },
-      { notMerge: false },
-    );
   });
 </script>
 

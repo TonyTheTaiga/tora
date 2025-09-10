@@ -11,6 +11,7 @@
   import { CanvasRenderer } from "echarts/renderers";
   import { browser } from "$app/environment";
   import { env } from "$env/dynamic/public";
+  import { onMount } from "svelte";
   import type {} from "svelte";
 
   echarts.use([
@@ -21,31 +22,6 @@
     DataZoomComponent,
     CanvasRenderer,
   ]);
-
-  let { experimentId } = $props<{
-    experimentId: string;
-  }>();
-  let status = $state<"idle" | "connecting" | "open" | "closed" | "error">(
-    "idle",
-  );
-  let yScale = $state<"log" | "linear">("log");
-  export function toggleScale() {
-    yScale = yScale === "log" ? "linear" : "log";
-    applyTheme();
-  }
-
-  let chartEl: HTMLDivElement | null = $state(null);
-  let chart: EChartsType | null = null;
-  let ro: ResizeObserver | null = null;
-  let seriesData: Record<string, Array<[number, number]>> = {};
-  let pending: Record<string, Array<[number, number]>> = {};
-  let updateScheduled = false;
-  let seenMsgIds: Set<string> = new Set();
-
-  let ws: WebSocket | null = null;
-  let reconnectDelayMs = 500;
-  let closing = false;
-  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   const CHART_COLOR_KEYS = [
     "blue",
@@ -62,6 +38,35 @@
     "red",
     "rosewater",
   ];
+
+  let { experimentId } = $props<{
+    experimentId: string;
+  }>();
+  let status = $state<"idle" | "connecting" | "open" | "closed" | "error">(
+    "idle",
+  );
+  let yScale = $state<"log" | "linear">("log");
+  let chartEl: HTMLDivElement | null = $state(null);
+  let chart: EChartsType | null = null;
+  let ro: ResizeObserver | null = null;
+  let seriesData: Record<string, Array<[number, number]>> = {};
+  let pending: Record<string, Array<[number, number]>> = {};
+  let updateScheduled = false;
+  let seenMsgIds: Set<string> = new Set();
+
+  let ws: WebSocket | null = null;
+  let reconnectDelayMs = 500;
+  let closing = false;
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
+  let ac: AbortController | null = null;
+
+  let chartTheme = $state(getTheme());
+
+  export function toggleScale() {
+    yScale = yScale === "log" ? "linear" : "log";
+    applyTheme();
+  }
 
   function getTheme() {
     if (!browser) {
@@ -91,8 +96,6 @@
       terminalBorder: cs.getPropertyValue("--color-ctp-terminal-border").trim(),
     } as const;
   }
-
-  let chartTheme = $state(getTheme());
 
   function getBaseOptions(): EChartsCoreOption {
     return {
@@ -244,10 +247,14 @@
     );
   }
 
-  async function fetchStreamToken(id: string): Promise<string | null> {
+  async function fetchStreamToken(
+    id: string,
+    signal?: AbortSignal,
+  ): Promise<string | null> {
     try {
       const res = await fetch(`/api/experiments/${id}/logs/stream-token`, {
         method: "POST",
+        signal,
       });
       if (!res.ok) return null;
       const data = await res.json();
@@ -258,9 +265,11 @@
   }
 
   function scheduleReconnect() {
+    if (ac?.signal.aborted) return;
     if (reconnectTimer) clearTimeout(reconnectTimer);
     const delay = Math.min(reconnectDelayMs, 10000);
     reconnectTimer = setTimeout(() => {
+      if (ac?.signal.aborted) return;
       reconnectDelayMs = Math.min(reconnectDelayMs * 2, 10000);
       connect();
     }, delay);
@@ -279,7 +288,10 @@
   }
 
   export function refreshChart() {
-    // Reset series/state and reconnect
+    try {
+      ac?.abort();
+    } catch {}
+    ac = new AbortController();
     seriesData = {};
     pending = {};
     seenMsgIds = new Set();
@@ -290,9 +302,10 @@
 
   async function connect() {
     if (!experimentId) return;
+    if (ac?.signal.aborted) return;
     if (ws && ws.readyState === WebSocket.OPEN) return;
     status = "connecting";
-    const token = await fetchStreamToken(experimentId);
+    const token = await fetchStreamToken(experimentId, ac?.signal);
     if (!token) {
       status = "error";
       return;
@@ -319,7 +332,6 @@
             : new TextDecoder().decode(ev.data as ArrayBuffer);
         const msg = JSON.parse(text);
         if (msg?.type && msg.type !== "metric") return;
-        // Deduplicate by message id, if provided
         const _md: any = (msg as any)?.metadata;
         const msgId: unknown =
           (msg as any)?.msg_id ?? _md?.msg_id ?? _md?.message_id;
@@ -402,8 +414,8 @@
     );
   }
 
-  import { onMount } from "svelte";
   onMount(() => {
+    ac = new AbortController();
     initChart();
     // Resize with container changes (e.g., sidebar collapse/expand)
     if (chartEl && typeof ResizeObserver !== "undefined") {
@@ -434,7 +446,13 @@
         attributeFilter: ["class"],
       });
     }
-    return () => {
+    connect();
+
+    return async () => {
+      try {
+        ac?.abort();
+      } catch {}
+      ac = null;
       if (mediaQuery)
         mediaQuery.removeEventListener("change", handleThemeChange);
       if (observer) observer.disconnect();
@@ -444,23 +462,25 @@
         } catch {}
         ro = null;
       }
-      close();
-      disposeChart();
+      const waitForClose = () =>
+        new Promise<void>((resolve) => {
+          if (!ws || ws.readyState === WebSocket.CLOSED) return resolve();
+          try {
+            const handler = () => resolve();
+            ws.addEventListener("close", handler, { once: true });
+            ws.close();
+          } catch (_) {
+            resolve();
+          }
+        });
+      try {
+        await waitForClose();
+      } finally {
+        close();
+        await Promise.resolve();
+        disposeChart();
+      }
     };
-  });
-
-  // Reconnect/reset when experiment changes
-  $effect(() => {
-    const id = experimentId;
-    if (!id) return;
-    // reset series/state on experiment change
-    seriesData = {};
-    pending = {};
-    seenMsgIds = new Set();
-    // reapply base axes/dataZoom to avoid index errors
-    chart?.setOption(getBaseOptions(), { notMerge: true });
-    close();
-    connect();
   });
 </script>
 
