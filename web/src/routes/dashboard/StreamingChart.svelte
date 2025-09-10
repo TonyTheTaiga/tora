@@ -31,7 +31,6 @@
   let yScale = $state<"log" | "linear">("log");
   export function toggleScale() {
     yScale = yScale === "log" ? "linear" : "log";
-    // apply immediately on toggle to avoid extra effects
     applyTheme();
   }
 

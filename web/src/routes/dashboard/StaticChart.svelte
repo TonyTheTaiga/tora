@@ -278,7 +278,6 @@
 
   onMount(() => {
     initChart();
-    // Resize with container changes (e.g., sidebar collapse/expand)
     if (chartEl && typeof ResizeObserver !== "undefined") {
       ro = new ResizeObserver(() => chart?.resize());
       ro.observe(chartEl);
@@ -307,7 +306,6 @@
         attributeFilter: ["class"],
       });
     }
-    // Fetch metrics on mount only
     metricsAbort = new AbortController();
     loadStaticData(metricsAbort);
 
@@ -329,11 +327,9 @@
     };
   });
 
-  // Update the chart when data or scale changes
   $effect(() => {
     const names = seriesNames;
     const raw = seriesRaw;
-    const scale = yScale; // track scale changes
     if (!names || names.length === 0) return;
     initChart();
     const byScale = dataForScale(raw);
@@ -355,8 +351,6 @@
       { notMerge: false },
     );
   });
-
-  // Fetching is handled on mount; parent remounts this component on id change
 </script>
 
 <div

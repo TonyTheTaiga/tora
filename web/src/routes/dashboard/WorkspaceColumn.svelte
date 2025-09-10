@@ -91,14 +91,14 @@
         <button
           aria-label="create-workspace"
           onclick={() => openCreateWorkspaceModal()}
-          class="floating-element p-2"
+          class="floating-element p-2 rounded-md"
         >
           <FolderPlus size={16} />
         </button>
 
         <button
           aria-label="pending-invitations"
-          class="floating-element p-2 relative"
+          class="floating-element p-2 rounded-md relative"
           onclick={() => (openInvitationModal = true)}
         >
           <Mail size={16} />
