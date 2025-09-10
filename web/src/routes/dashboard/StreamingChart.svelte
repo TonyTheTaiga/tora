@@ -214,7 +214,6 @@
       delete pending[name];
       const arr = seriesData[name];
       for (let i = 0; i < items.length; i++) arr.push(items[i]);
-      // Sort by step to ensure continuous lines; no step-based dedupe
       seriesData[name] = arr.slice().sort((a, b) => a[0] - b[0]);
     }
     const updates = Object.keys(seriesData).map((n) => ({
