@@ -33,7 +33,7 @@ struct ExperimentsView: View {
             let updated = try await experimentService.get(experimentId: experiment.id)
             await MainActor.run { self.experiment = updated }
         } catch {
-            // ignore errors on pull-to-refresh; keep last value
+            // Intentionally ignore on pull-to-refresh; preserve last good value
         }
     }
 }
@@ -45,8 +45,10 @@ struct ExperimentContentView: View {
 
     let experiment: Experiment
     let onRefresh: () async -> Void
+
     @EnvironmentObject private var experimentService: ExperimentService
-    @State private var results: [(name: String, value: Double)] = []
+
+    @State private var results: [ResultItem] = []
     @State private var metricsByName: [String: [Metric]] = [:]
 
     // MARK: - Body
@@ -54,25 +56,24 @@ struct ExperimentContentView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                // Description
                 if let description = experiment.description, !description.isEmpty {
                     Text(description)
                         .font(.body)
                         .foregroundStyle(Color.custom.ctpSubtext0)
                 }
 
-                // Metrics Chart — front and center
-                if !metricsByName.isEmpty { MetricsChartSectionView(series: metricsByName) }
+                if !metricsByName.isEmpty {
+                    MetricsChartSectionView(series: metricsByName)
+                }
 
-                // Results (compact)
-                if !results.isEmpty { ResultsSectionView(results: results) }
+                if !results.isEmpty {
+                    ResultsSectionView(results: results)
+                }
 
-                // Hyperparameters (compact)
                 if !experiment.hyperparams.isEmpty {
                     HyperparamsSectionView(hyperparams: experiment.hyperparams)
                 }
 
-                // Metadata
                 MetadataSectionView(
                     createdAt: experiment.createdAt,
                     updatedAt: experiment.updatedAt,
@@ -86,48 +87,57 @@ struct ExperimentContentView: View {
         .task { await loadMetrics() }
         .refreshable {
             await onRefresh()
-            await loadMetrics(force: true)
+            await loadMetrics()
         }
     }
 }
 
 // MARK: - Helpers
 
-private func dateString(_ date: Date) -> String {
-    let fmt = DateFormatter()
-    fmt.dateStyle = .medium
-    fmt.timeStyle = .short
-    return fmt.string(from: date)
+private typealias ResultItem = (name: String, value: Double)
+
+extension Date {
+    fileprivate var conciseString: String { formatted(date: .abbreviated, time: .shortened) }
 }
 
 extension ExperimentContentView {
-    func loadMetrics(force: Bool = false) async {
+    func loadMetrics() async {
         do {
-            let rows = try await experimentService.getLogs(experimentId: experiment.id)
+            let logs = try await experimentService.getLogs(experimentId: experiment.id)
             await MainActor.run {
-                // Results: metadata.type == "result"; assume single entry per key
-                let resultRows = rows.filter { $0.metadata?.type?.lowercased() == "result" }
-                let groupedResults = Dictionary(grouping: resultRows, by: { $0.name })
-                self.results = groupedResults.compactMap { (name, list) -> (String, Double)? in
-                    guard let value = list.first?.value else { return nil }
-                    return (name, value)
-                }.sorted { $0.0 < $1.0 }
-
-                // Metrics for chart: metadata.type == "metric"; sort by step ascending within each series
-                let metricRows = rows.filter { $0.metadata?.type?.lowercased() == "metric" }
-                var groupedMetrics = Dictionary(grouping: metricRows, by: { $0.name })
-                for (key, series) in groupedMetrics {
-                    groupedMetrics[key] = series.sorted { (a, b) in
-                        let sa = a.step ?? Int.min
-                        let sb = b.step ?? Int.min
-                        return sa < sb
-                    }
-                }
-                self.metricsByName = groupedMetrics
+                let parsed = Self.parseLogs(logs)
+                self.results = parsed.results
+                self.metricsByName = parsed.metricsByName
             }
         } catch {
-            // ignore errors
+            // Ignore load errors; keep previous values
         }
+    }
+
+    fileprivate static func parseLogs(_ rows: [Metric]) -> (results: [ResultItem], metricsByName: [String: [Metric]]) {
+        // Results: first value per unique name
+        let resultRows = rows.filter { $0.metadata?.type?.lowercased() == "result" }
+        let groupedResults = Dictionary(grouping: resultRows, by: { $0.name })
+        let results: [ResultItem] =
+            groupedResults
+            .compactMap { name, list in
+                guard let value = list.first?.value else { return nil }
+                return (name, value)
+            }
+            .sorted { $0.name < $1.name }
+
+        // Metrics: group by series name, sort by step
+        let metricRows = rows.filter { $0.metadata?.type?.lowercased() == "metric" }
+        var groupedMetrics = Dictionary(grouping: metricRows, by: { $0.name })
+        for (key, series) in groupedMetrics {
+            groupedMetrics[key] = series.sorted { (a, b) in
+                let sa = a.step ?? .min
+                let sb = b.step ?? .min
+                return sa < sb
+            }
+        }
+
+        return (results, groupedMetrics)
     }
 }
 
@@ -135,23 +145,15 @@ extension ExperimentContentView {
 
 private struct HyperparamsSectionView: View {
     let hyperparams: [HyperParam]
+
+    private var grid: [GridItem] { [GridItem(.adaptive(minimum: 140), spacing: 12, alignment: .leading)] }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Text("Hyperparameters")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.custom.ctpText)
-                Text("[\(hyperparams.count)]")
-                    .font(.subheadline)
-                    .foregroundStyle(Color.custom.ctpSubtext0)
-            }
+            SectionHeader(title: "Hyperparameters")
 
-            LazyVGrid(
-                columns: Array(repeating: GridItem(.flexible(), spacing: 12, alignment: .leading), count: 3),
-                alignment: .leading,
-                spacing: 12
-            ) {
-                ForEach(Array(hyperparams.enumerated()), id: \.offset) { _, param in
+            LazyVGrid(columns: grid, alignment: .leading, spacing: 12) {
+                ForEach(hyperparams, id: \.key) { param in
                     VStack(alignment: .leading, spacing: 2) {
                         Text(param.key)
                             .font(.caption2)
@@ -169,29 +171,21 @@ private struct HyperparamsSectionView: View {
 }
 
 private struct ResultsSectionView: View {
-    let results: [(name: String, value: Double)]
+    let results: [ResultItem]
+
+    private var grid: [GridItem] { [GridItem(.adaptive(minimum: 140), spacing: 12, alignment: .leading)] }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Text("Results")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.custom.ctpText)
-                Text("[\(results.count)]")
-                    .font(.subheadline)
-                    .foregroundStyle(Color.custom.ctpSubtext0)
-            }
-            LazyVGrid(
-                columns: Array(repeating: GridItem(.flexible(), spacing: 12, alignment: .leading), count: 3),
-                alignment: .leading,
-                spacing: 12
-            ) {
-                ForEach(Array(results.enumerated()), id: \.offset) { _, item in
+            SectionHeader(title: "Results")
+            LazyVGrid(columns: grid, alignment: .leading, spacing: 12) {
+                ForEach(results, id: \.name) { item in
                     VStack(alignment: .leading, spacing: 2) {
                         Text(item.name)
                             .font(.caption2)
                             .foregroundStyle(Color.custom.ctpSubtext0)
                             .lineLimit(1)
-                        Text(String(format: "%.4f", item.value))
+                        Text(item.value, format: .number.precision(.fractionLength(4)))
                             .font(.footnote.weight(.semibold))
                             .monospacedDigit()
                             .foregroundStyle(Color.custom.ctpText)
@@ -207,15 +201,11 @@ private struct MetricsChartSectionView: View {
     let series: [String: [Metric]]
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var yScaleMode: YScaleMode = .linear
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
-                Text("Metrics")
-                    .font(.headline.weight(.semibold))
-                    .foregroundStyle(Color.custom.ctpText)
-                Text("[\(series.count)]")
-                    .font(.subheadline)
-                    .foregroundStyle(Color.custom.ctpSubtext0)
+                SectionHeader(title: "Metrics")
                 Spacer()
                 Picker("Scale", selection: $yScaleMode) {
                     Text("Linear").tag(YScaleMode.linear)
@@ -224,6 +214,7 @@ private struct MetricsChartSectionView: View {
                 .pickerStyle(.segmented)
                 .frame(maxWidth: 220)
             }
+
             Chart {
                 LinePlot(
                     chartPoints,
@@ -265,9 +256,7 @@ private struct MetricsChartSectionView: View {
 
     fileprivate enum YScaleMode: Hashable { case linear, log }
 
-    private var hasNonPositiveValues: Bool {
-        chartPoints.contains { $0.value <= 0 }
-    }
+    private var hasNonPositiveValues: Bool { chartPoints.contains { $0.value <= 0 } }
 
     private var effectiveScale: YScaleMode {
         (yScaleMode == .log && hasNonPositiveValues) ? .linear : yScaleMode
@@ -275,9 +264,7 @@ private struct MetricsChartSectionView: View {
 
     private func yAxisDomain(for mode: YScaleMode) -> ClosedRange<Double> {
         let values = chartPoints.map { $0.value }
-        guard let minVal = values.min(), let maxVal = values.max() else {
-            return 0...1
-        }
+        guard let minVal = values.min(), let maxVal = values.max() else { return 0...1 }
         switch mode {
         case .linear:
             if minVal == maxVal {
@@ -288,12 +275,8 @@ private struct MetricsChartSectionView: View {
             let pad = span * 0.05
             return (minVal - pad)...(maxVal + pad)
         case .log:
-            // Ensure strictly positive bounds
             let positives = values.filter { $0 > 0 }
-            guard let minPos = positives.min(), let maxPos = positives.max() else {
-                return 0.1...1
-            }
-            // Multiplicative padding of ~10%
+            guard let minPos = positives.min(), let maxPos = positives.max() else { return 0.1...1 }
             let lower = minPos * 0.9
             let upper = maxPos * 1.1
             return max(lower, .leastNonzeroMagnitude)...max(upper, .leastNonzeroMagnitude)
@@ -307,15 +290,9 @@ extension View {
     @ViewBuilder
     fileprivate func applyYAxisScale(mode: MetricsChartSectionView.YScaleMode, domain: ClosedRange<Double>) -> some View
     {
-        if #available(iOS 17.0, *) {
-            switch mode {
-            case .linear:
-                self.chartYScale(domain: domain, type: .linear)
-            case .log:
-                self.chartYScale(domain: domain, type: .log)
-            }
-        } else {
-            self.chartYScale(domain: domain)
+        switch mode {
+        case .linear: self.chartYScale(domain: domain, type: .linear)
+        case .log: self.chartYScale(domain: domain, type: .log)
         }
     }
 }
@@ -345,16 +322,18 @@ private struct MetadataSectionView: View {
     let experimentId: String
     let workspaceId: String?
     let tags: [String]
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Metadata")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Color.custom.ctpText)
+
             HStack {
                 Text("Created:")
                     .font(.caption)
                     .foregroundStyle(Color.custom.ctpSubtext0)
-                Text(dateString(createdAt))
+                Text(createdAt.conciseString)
                     .font(.caption)
                     .foregroundStyle(Color.custom.ctpText)
             }
@@ -362,7 +341,7 @@ private struct MetadataSectionView: View {
                 Text("Updated:")
                     .font(.caption)
                     .foregroundStyle(Color.custom.ctpSubtext0)
-                Text(dateString(updatedAt))
+                Text(updatedAt.conciseString)
                     .font(.caption)
                     .foregroundStyle(Color.custom.ctpText)
             }
@@ -388,6 +367,7 @@ private struct MetadataSectionView: View {
                         .truncationMode(.middle)
                 }
             }
+
             if !tags.isEmpty {
                 HStack(alignment: .center, spacing: 8) {
                     Text("Tags:")
@@ -416,6 +396,23 @@ private struct MetadataSectionView: View {
         }
     }
 }
+
+// MARK: - Reusable UI
+
+private struct SectionHeader: View {
+    let title: String
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.custom.ctpText)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text(title))
+    }
+}
+
 // MARK: - Preview
 
 #Preview {
