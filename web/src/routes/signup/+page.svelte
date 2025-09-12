@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { User, Mail, Lock, LogIn, Loader2 } from "@lucide/svelte";
-  import { enhance } from "$app/forms";
+  import { enhance, applyAction } from "$app/forms";
 
   let { form } = $props();
 
@@ -31,10 +31,15 @@
         class="p-6 space-y-5"
         use:enhance={() => {
           submitting = true;
-          return async ({ update }) => {
+          return async ({ update, result }) => {
             submitting = false;
-            // Let SvelteKit handle redirects and form updates
             await update();
+
+            if (result.type === "redirect") {
+              goto(result.location);
+            } else {
+              await applyAction(result);
+            }
           };
         }}
       >
