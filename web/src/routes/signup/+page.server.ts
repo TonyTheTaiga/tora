@@ -21,45 +21,47 @@ export const actions: Actions = {
     }
 
     try {
-      await locals.apiClient.post("/signup", {
-        email,
-        password,
-      });
-
-      const response = await locals.apiClient.post<LoginResponse>("/login", {
-        email,
-        password,
-      });
-
-      const sessionData: SessionData = {
-        access_token: response.data.access_token,
-        refresh_token: response.data.refresh_token,
-        expires_in: response.data.expires_in,
-        expires_at: response.data.expires_at,
-        user: {
-          id: response.data.user.id,
-          email: response.data.user.email,
-        },
-      };
-
-      const sessionJson = JSON.stringify(sessionData);
-      const sessionBase64 = btoa(sessionJson);
-      const THIRTY_DAYS = 60 * 60 * 24 * 30;
-
-      cookies.set("tora_auth_token", sessionBase64, {
-        path: "/",
-        httpOnly: true,
-        secure: !dev,
-        sameSite: "strict",
-        maxAge: THIRTY_DAYS,
-      });
-
-      redirect(303, "/dashboard");
+      await locals.apiClient.post("/signup", { email, password });
     } catch (error: any) {
       console.error("Signup error:", error);
-      return fail(400, {
-        error: error.message || "Network error",
-      });
+      return fail(400, { error: error?.message || "Network error" });
     }
+
+    let response: LoginResponse;
+    try {
+      response = await locals.apiClient.post<LoginResponse>("/login", {
+        email,
+        password,
+      });
+    } catch (error: any) {
+      console.error("Auto-login after signup failed:", error);
+      return fail(400, { error: error?.message || "Network error" });
+    }
+
+    // 3) Persist session and redirect (outside any try/catch)
+    const sessionData: SessionData = {
+      access_token: response.data.access_token,
+      refresh_token: response.data.refresh_token,
+      expires_in: response.data.expires_in,
+      expires_at: response.data.expires_at,
+      user: {
+        id: response.data.user.id,
+        email: response.data.user.email,
+      },
+    };
+
+    const sessionJson = JSON.stringify(sessionData);
+    const sessionBase64 = btoa(sessionJson);
+    const THIRTY_DAYS = 60 * 60 * 24 * 30;
+
+    cookies.set("tora_auth_token", sessionBase64, {
+      path: "/",
+      httpOnly: true,
+      secure: !dev,
+      sameSite: "strict",
+      maxAge: THIRTY_DAYS,
+    });
+
+    redirect(303, "/dashboard");
   },
 };
