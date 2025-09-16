@@ -5,6 +5,6 @@ import Foundation
 enum Config {
     // MARK: - Properties
 
-    static let baseURL = "https://api.toracker.com"
-    //    static let baseURL = "http://localhost:8080"
+    //    static let baseURL = "https://api.toracker.com"
+    static let baseURL = "http://localhost:8080"
 }

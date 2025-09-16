@@ -33,7 +33,7 @@ struct ExperimentsView: View {
             let updated = try await experimentService.get(experimentId: experiment.id)
             await MainActor.run { self.experiment = updated }
         } catch {
-            // Intentionally ignore on pull-to-refresh; preserve last good value
+            // Intentionally ignore on pull-to-refresh errors
         }
     }
 }
@@ -103,12 +103,16 @@ extension Date {
 extension ExperimentContentView {
     func loadMetrics() async {
         do {
-            let logs = try await experimentService.getLogs(experimentId: experiment.id)
-            await MainActor.run {
-                let parsed = Self.parseLogs(logs)
-                self.results = parsed.results
-                self.metricsByName = parsed.metricsByName
-            }
+            //            let logs = try await experimentService.getLogs(experimentId: experiment.id)
+            //            await MainActor.run {
+            //                let parsed = Self.parseLogs(logs)
+            //                self.results = parsed.results
+            //                self.metricsByName = parsed.metricsByName
+            //            }
+
+            self.results = try await experimentService.getResults(experimentId: experiment.id)
+            let metrics
+
         } catch {
             // Ignore load errors; keep previous values
         }
