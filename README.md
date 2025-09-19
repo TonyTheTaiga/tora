@@ -1,4 +1,4 @@
-# Tora: ML Experiment Management Tool
+# Tora
 
 A lightweight ML experiment tracking platform designed for speed and simplicity
 
