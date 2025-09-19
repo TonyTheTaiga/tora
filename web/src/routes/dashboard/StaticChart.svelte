@@ -35,9 +35,14 @@
     created_at?: string;
   };
 
-  let { experimentId, yScale } = $props<{
+  let {
+    experimentId,
+    yScale,
+    refreshKey = 0,
+  } = $props<{
     experimentId: string;
     yScale: "log" | "linear";
+    refreshKey?: number;
   }>();
   let chartEl: HTMLDivElement | null = null;
   let chart: EChartsType | null = null;
@@ -49,6 +54,7 @@
   let hasMetrics = $derived(seriesNames.length > 0);
   let chartTheme = $state(getChartTheme());
   let ac: AbortController | null = null;
+  let lastRefreshKey = $state<number | null>(null);
 
   $effect(() => {
     void yScale;
@@ -107,6 +113,7 @@
       try {
         const resp = await fetch(`/api/experiments/${experimentId}/metrics`, {
           signal: controller.signal,
+          cache: "no-store",
         });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const json = await resp.json();
@@ -190,6 +197,21 @@
       await Promise.resolve();
       disposeChart();
     };
+  });
+
+  $effect(() => {
+    void refreshKey;
+    if (lastRefreshKey === null) {
+      lastRefreshKey = refreshKey;
+      return;
+    }
+    if (refreshKey === lastRefreshKey) return;
+    lastRefreshKey = refreshKey;
+    try {
+      ac?.abort();
+    } catch {}
+    ac = new AbortController();
+    loadStaticData(ac);
   });
 </script>
 

@@ -17,6 +17,7 @@
   let results = $state<any[]>([]);
   let isStreamingChart = $state(false);
   let yScale = $state<"log" | "linear">("log");
+  let staticRefreshKey = $state(0);
   let showResults = $state(true);
   let showHeader = $state(true);
   let showAllHyperparams = $state(false);
@@ -89,6 +90,10 @@
 
   function toggleScaleFromToolbar() {
     yScale = yScale === "log" ? "linear" : "log";
+  }
+
+  function refreshStaticChart() {
+    staticRefreshKey += 1;
   }
 
   async function loadExperimentDetails(experiment: Experiment) {
@@ -319,11 +324,16 @@
           streaming={isStreamingChart}
           onToggleScale={toggleScaleFromToolbar}
           onToggleStreaming={toggleLiveStream}
+          onRefresh={refreshStaticChart}
         />
         {#if isStreamingChart}
           <StreamingChart experimentId={experiment.id} {yScale} />
         {:else}
-          <StaticChart experimentId={experiment.id} {yScale} />
+          <StaticChart
+            experimentId={experiment.id}
+            {yScale}
+            refreshKey={staticRefreshKey}
+          />
         {/if}
       </div>
 

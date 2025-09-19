@@ -7,14 +7,34 @@
     streaming: boolean;
     onToggleScale: () => void;
     onToggleStreaming: () => void;
+    onRefresh?: () => void;
   }
 
-  let { yScale, streaming, onToggleScale, onToggleStreaming }: Props = $props();
+  let {
+    yScale,
+    streaming,
+    onToggleScale,
+    onToggleStreaming,
+    onRefresh,
+  }: Props = $props();
 </script>
 
 <Toolbar.Root
   class="chart-toolbar w-full border border-b-0 border-ctp-surface0/35 bg-ctp-surface0/18 shadow-sm h-10 px-[4px] py-0 gap-2 flex items-center justify-end"
 >
+  {#if !streaming}
+    <button
+      class="toolbar-btn"
+      onclick={() => onRefresh?.()}
+      aria-label="refresh metrics"
+      title="refresh static metrics"
+      type="button"
+    >
+      <RefreshCw class="icon" />
+      <span class="label">refresh</span>
+    </button>
+  {/if}
+
   <button
     class="toolbar-btn"
     onclick={() => onToggleScale?.()}
