@@ -8,41 +8,34 @@ Tora consists of the following components and data flows:
 
 ```mermaid
 flowchart LR
-  %% Clients
   subgraph Clients
     PY[Python SDK]
-    WEB[Web App (SvelteKit)]
-    IOS[iOS App (SwiftUI)]
+    WEB[Web App - SvelteKit]
+    IOS[iOS App - SwiftUI]
   end
 
-  %% Backend
   subgraph Backend
-    API[[Rust API (Axum)]]
+    API[[Rust API - Axum]]
     WORKER[(Outbox Worker)]
   end
 
-  %% Infrastructure
-  subgraph Infrastructure
-    DB[(PostgreSQL\nvia Supabase)]
+  subgraph Infra
+    DB[(PostgreSQL<br/>via Supabase)]
     AUTH[(Supabase Auth)]
-    VALKEY[(Valkey / Redis)]
+    VALKEY[(Valkey/Redis)]
   end
 
-  %% Request/response (HTTP)
-  PY -->|HTTP / JSON| API
-  WEB -->|HTTP / JSON| API
-  IOS -->|HTTP / JSON| API
+  PY -->|HTTP+JSON| API
+  WEB -->|HTTP+JSON| API
+  IOS -->|HTTP+JSON| API
 
-  %% Live updates (WebSocket via API)
-  WEB -.->|WebSocket: stream metrics| API
-  IOS -.->|WebSocket: stream metrics| API
+  WEB -.->|WebSocket| API
+  IOS -.->|WebSocket| API
 
-  %% Backend integrations
   API -->|SQLx| DB
   API -->|JWT verify| AUTH
-  API -->|Pub/Sub + WS tokens| VALKEY
+  API -->|PubSub + WS tokens| VALKEY
 
-  %% Outbox pattern for reliable streaming
   API -->|write outbox| DB
   WORKER -->|read outbox| DB
   WORKER -->|publish events| VALKEY
