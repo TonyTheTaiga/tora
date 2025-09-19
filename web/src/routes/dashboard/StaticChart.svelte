@@ -359,7 +359,7 @@
 <div
   class="relative h-80 w-full bg-transparent border border-ctp-surface0/20 overflow-hidden"
 >
-  <div class="absolute inset-0" bind:this={chartEl}></div>
+  <div class="absolute inset-0 py-2" bind:this={chartEl}></div>
   {#if loading}
     <div class="absolute inset-0 flex items-center justify-center">
       <div class="text-ctp-subtext0 text-xs">loading chart…</div>
