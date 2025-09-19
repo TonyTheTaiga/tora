@@ -94,14 +94,6 @@
     }
   }
 
-  function refreshChart() {
-    if (isStreamingChart) {
-      streamingChartRef?.refreshChart?.();
-    } else {
-      staticChartRef?.refreshChart?.();
-    }
-  }
-
   function toggleScaleFromToolbar() {
     yScale = yScale === "log" ? "linear" : "log";
     if (isStreamingChart) {
@@ -339,7 +331,6 @@
         <ChartToolbar
           {yScale}
           streaming={isStreamingChart}
-          onRefresh={refreshChart}
           onToggleScale={toggleScaleFromToolbar}
           onToggleStreaming={toggleLiveStream}
         />

@@ -293,14 +293,6 @@
     })();
   }
 
-  export function refreshChart() {
-    try {
-      ac?.abort();
-    } catch {}
-    ac = new AbortController();
-    loadStaticData(ac);
-  }
-
   onMount(() => {
     initChart();
     if (chartEl && typeof ResizeObserver !== "undefined") {

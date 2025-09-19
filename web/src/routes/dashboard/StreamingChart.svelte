@@ -286,19 +286,6 @@
     status = "closed";
   }
 
-  export function refreshChart() {
-    try {
-      ac?.abort();
-    } catch {}
-    ac = new AbortController();
-    seriesData = {};
-    pending = {};
-    seenMsgIds = new Set();
-    chart?.setOption(getBaseOptions(), { notMerge: true });
-    close();
-    connect();
-  }
-
   async function connect() {
     if (!experimentId) return;
     if (ac?.signal.aborted) return;
