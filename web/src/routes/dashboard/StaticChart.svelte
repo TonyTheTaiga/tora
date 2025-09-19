@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as echarts from "echarts/core";
-  import type { EChartsType, EChartsCoreOption } from "echarts/core";
+  import type { EChartsType } from "echarts/core";
   import { LineChart } from "echarts/charts";
   import {
     GridComponent,
@@ -9,8 +9,14 @@
     DataZoomComponent,
   } from "echarts/components";
   import { CanvasRenderer } from "echarts/renderers";
-  import { browser } from "$app/environment";
   import { onMount } from "svelte";
+  import { getChartTheme } from "$lib/chart/theme";
+  import {
+    baseOptions,
+    themeAxisUpdate,
+    transformForScale,
+    lineSeriesFrom,
+  } from "$lib/chart/options";
 
   echarts.use([
     LineChart,
@@ -29,27 +35,11 @@
     created_at?: string;
   };
 
-  const CHART_COLOR_KEYS = [
-    "blue",
-    "lavender",
-    "sky",
-    "green",
-    "teal",
-    "mauve",
-    "peach",
-    "yellow",
-    "pink",
-    "sapphire",
-    "maroon",
-    "red",
-    "rosewater",
-  ];
-
-  let { experimentId } = $props<{
+  let { experimentId, yScale } = $props<{
     experimentId: string;
+    yScale: "log" | "linear";
   }>();
-  let yScale = $state<"log" | "linear">("log");
-  let chartEl: HTMLDivElement | null = $state(null);
+  let chartEl: HTMLDivElement | null = null;
   let chart: EChartsType | null = null;
   let ro: ResizeObserver | null = null;
   let loading = $state(false);
@@ -57,47 +47,19 @@
   let seriesRaw: Record<string, Array<[number, number]>> = $state({});
   let seriesNames = $derived(Object.keys(seriesRaw || {}));
   let hasMetrics = $derived(seriesNames.length > 0);
-  let chartTheme = $state(getTheme());
+  let chartTheme = $state(getChartTheme());
   let ac: AbortController | null = null;
 
-  export function toggleScale() {
-    yScale = yScale === "log" ? "linear" : "log";
-    applyTheme();
-  }
-
-  function getTheme() {
-    if (!browser) {
-      return {
-        colors: ["#4e79a7", "#f28e2b", "#e15759", "#76b7b2", "#59a14f"],
-        text: "#111",
-        mantle: "#fff",
-        overlay0: "#888",
-        sky: "#2aa1ff",
-        fadedGridLines: "#ddd",
-        axisTicks: "#666",
-      } as const;
-    }
-    const cs = getComputedStyle(document.documentElement);
-    const colors = CHART_COLOR_KEYS.map((k) =>
-      cs.getPropertyValue(`--color-ctp-${k}`).trim(),
-    ).filter(Boolean);
-    return {
-      colors: colors.length ? colors : ["#4e79a7", "#f28e2b", "#e15759"],
-      text: cs.getPropertyValue("--color-ctp-text").trim(),
-      mantle: cs.getPropertyValue("--color-ctp-mantle").trim(),
-      overlay0: cs.getPropertyValue("--color-ctp-overlay0").trim(),
-      sky: cs.getPropertyValue("--color-ctp-sky").trim(),
-      fadedGridLines: cs.getPropertyValue("--color-ctp-surface1").trim() + "33",
-      axisTicks: cs.getPropertyValue("--color-ctp-subtext0").trim(),
-      terminalBg: cs.getPropertyValue("--color-ctp-terminal-bg").trim(),
-      terminalBorder: cs.getPropertyValue("--color-ctp-terminal-border").trim(),
-    } as const;
-  }
+  $effect(() => {
+    void yScale;
+    void chartTheme;
+    if (chart) applyTheme();
+  });
 
   function initChart() {
     if (chart || !chartEl) return;
     chart = echarts.init(chartEl, undefined, { renderer: "canvas" });
-    chart.setOption(getBaseOptions(), { notMerge: true });
+    chart.setOption(baseOptions(chartTheme, yScale), { notMerge: true });
     window.addEventListener("resize", handleResize);
   }
 
@@ -113,136 +75,21 @@
     chart?.resize();
   }
 
-  function getBaseOptions(): EChartsCoreOption {
-    return {
-      animation: true,
-      color: chartTheme.colors as any,
-      textStyle: { color: chartTheme.text },
-      grid: { left: 56, right: 20, top: 24, bottom: 40 },
-      tooltip: {
-        trigger: "axis",
-        axisPointer: { type: "line" },
-        valueFormatter: (v: number | string) =>
-          typeof v === "number" && Number.isFinite(v)
-            ? v.toFixed(4)
-            : String(v ?? ""),
-        backgroundColor: (chartTheme.terminalBg || chartTheme.mantle) + "ee",
-        borderColor: chartTheme.terminalBorder || chartTheme.overlay0 + "44",
-        textStyle: { color: chartTheme.text },
-      },
-      legend: { top: 0, textStyle: { color: chartTheme.text } },
-      dataZoom: [{ type: "inside", xAxisIndex: 0 }],
-      xAxis: {
-        type: "value",
-        name: "step",
-        nameGap: 14,
-        boundaryGap: [0, 0],
-        axisLabel: { color: chartTheme.axisTicks },
-        axisLine: { lineStyle: { color: chartTheme.overlay0 } },
-        splitLine: {
-          show: true,
-          lineStyle: { color: chartTheme.fadedGridLines },
-        },
-      },
-      yAxis: {
-        type: yScale === "log" ? "log" : "value",
-        name: "value",
-        minorTick: { show: true },
-        min: "dataMin",
-        max: "dataMax",
-        scale: true,
-        axisLabel: {
-          color: chartTheme.axisTicks,
-          width: 56,
-          overflow: "truncate",
-          align: "right",
-        },
-        axisLine: { lineStyle: { color: chartTheme.overlay0 } },
-        splitLine: {
-          show: true,
-          lineStyle: { color: chartTheme.fadedGridLines },
-        },
-      },
-      series: [],
-    };
-  }
-
-  function dataForScale(raw: Record<string, Array<[number, number]>>) {
-    const out: Record<string, Array<[number, number | null]>> = {};
-    for (const n of Object.keys(raw)) {
-      const arr = raw[n];
-      if (yScale === "log") {
-        out[n] = arr.map(([x, y]) => [x, y > 0 ? y : null]);
-      } else {
-        out[n] = arr.map(([x, y]) => [x, Number.isFinite(y) ? y : null]);
-      }
-    }
-    return out;
-  }
-
   function applyTheme() {
-    const byScale = dataForScale(seriesRaw);
+    const byScale = transformForScale(seriesRaw, yScale);
     const updates = seriesNames.map((n) => ({ id: n, data: byScale[n] }));
     chart?.setOption(
-      {
-        color: chartTheme.colors as any,
-        textStyle: { color: chartTheme.text },
-        legend: { textStyle: { color: chartTheme.text } },
-        tooltip: {
-          backgroundColor: (chartTheme.terminalBg || chartTheme.mantle) + "ee",
-          borderColor: chartTheme.terminalBorder || chartTheme.overlay0 + "44",
-          textStyle: { color: chartTheme.text },
-        },
-        series: updates,
-        xAxis: [
-          {
-            axisLabel: { color: chartTheme.axisTicks },
-            axisLine: { lineStyle: { color: chartTheme.overlay0 } },
-            splitLine: {
-              show: true,
-              lineStyle: { color: chartTheme.fadedGridLines },
-            },
-          },
-        ],
-        yAxis: [
-          {
-            type: yScale === "log" ? "log" : "value",
-            min: "dataMin",
-            max: "dataMax",
-            scale: true,
-            axisLabel: {
-              color: chartTheme.axisTicks,
-              width: 56,
-              overflow: "truncate",
-              align: "right",
-            },
-            axisLine: { lineStyle: { color: chartTheme.overlay0 } },
-            splitLine: {
-              show: true,
-              lineStyle: { color: chartTheme.fadedGridLines },
-            },
-          },
-        ],
-      },
+      { ...themeAxisUpdate(chartTheme, yScale), series: updates },
       { notMerge: false },
     );
   }
 
   function updateSeries() {
     if (!chart) return;
-    const names = Object.keys(seriesRaw);
+    const names = seriesNames;
     if (names.length === 0) return;
-    const byScale = dataForScale(seriesRaw);
-    const series = names.map((n) => ({
-      id: n,
-      name: n,
-      type: "line",
-      showSymbol: false,
-      smooth: 0.15,
-      connectNulls: true,
-      data: byScale[n],
-      emphasis: { focus: "series" },
-    }));
+    const byScale = transformForScale(seriesRaw, yScale);
+    const series = lineSeriesFrom(byScale);
     chart.setOption(
       {
         series,
@@ -300,8 +147,7 @@
       ro.observe(chartEl);
     }
     const handleThemeChange = () => {
-      chartTheme = getTheme();
-      applyTheme();
+      chartTheme = getChartTheme();
     };
     let mediaQuery: MediaQueryList | null = null;
     let observer: MutationObserver | null = null;
@@ -341,7 +187,6 @@
         ac?.abort();
       } catch {}
       ac = null;
-      // Allow a frame for any pending chart operations to settle
       await Promise.resolve();
       disposeChart();
     };

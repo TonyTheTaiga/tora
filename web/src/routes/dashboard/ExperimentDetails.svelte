@@ -11,14 +11,12 @@
     togglePin as togglePinGlobal,
     isPinned as isPinnedGlobal,
   } from "./pins.svelte";
-  import { onMount, tick } from "svelte";
+  import { onMount } from "svelte";
 
   let { experiment }: { experiment: Experiment } = $props();
   let results = $state<any[]>([]);
   let isStreamingChart = $state(false);
   let yScale = $state<"log" | "linear">("log");
-  let staticChartRef = $state<any>(null);
-  let streamingChartRef = $state<any>(null);
   let showResults = $state(true);
   let showHeader = $state(true);
   let showAllHyperparams = $state(false);
@@ -85,22 +83,12 @@
     } catch (e) {}
   }
 
-  async function toggleLiveStream() {
+  function toggleLiveStream() {
     isStreamingChart = !isStreamingChart;
-    await tick();
-    const ref = isStreamingChart ? streamingChartRef : staticChartRef;
-    if (ref && yScale === "linear") {
-      ref.toggleScale?.();
-    }
   }
 
   function toggleScaleFromToolbar() {
     yScale = yScale === "log" ? "linear" : "log";
-    if (isStreamingChart) {
-      streamingChartRef?.toggleScale?.();
-    } else {
-      staticChartRef?.toggleScale?.();
-    }
   }
 
   async function loadExperimentDetails(experiment: Experiment) {
@@ -169,9 +157,7 @@
       } catch {}
       detailsAbort = new AbortController();
       await loadExperimentDetails(experiment);
-    } catch (_) {
-      // errors handled inside loadExperimentDetails
-    }
+    } catch (_) {}
   }
 
   function toggleHeader() {
@@ -335,15 +321,9 @@
           onToggleStreaming={toggleLiveStream}
         />
         {#if isStreamingChart}
-          <StreamingChart
-            bind:this={streamingChartRef}
-            experimentId={experiment.id}
-          />
+          <StreamingChart experimentId={experiment.id} {yScale} />
         {:else}
-          <StaticChart
-            bind:this={staticChartRef}
-            experimentId={experiment.id}
-          />
+          <StaticChart experimentId={experiment.id} {yScale} />
         {/if}
       </div>
 
