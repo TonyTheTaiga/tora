@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as echarts from "echarts/core";
-  import type { EChartsType, EChartsCoreOption } from "echarts/core";
+  import type { EChartsType } from "echarts/core";
   import { LineChart } from "echarts/charts";
   import {
     GridComponent,
@@ -9,10 +9,15 @@
     DataZoomComponent,
   } from "echarts/components";
   import { CanvasRenderer } from "echarts/renderers";
-  import { browser } from "$app/environment";
   import { env } from "$env/dynamic/public";
   import { onMount } from "svelte";
-  import type {} from "svelte";
+  import { getChartTheme } from "$lib/chart/theme";
+  import {
+    baseOptions,
+    themeAxisUpdate,
+    transformForScale,
+    lineSeriesFrom,
+  } from "$lib/chart/options";
 
   echarts.use([
     LineChart,
@@ -23,30 +28,14 @@
     CanvasRenderer,
   ]);
 
-  const CHART_COLOR_KEYS = [
-    "blue",
-    "lavender",
-    "sky",
-    "green",
-    "teal",
-    "mauve",
-    "peach",
-    "yellow",
-    "pink",
-    "sapphire",
-    "maroon",
-    "red",
-    "rosewater",
-  ];
-
-  let { experimentId } = $props<{
+  let { experimentId, yScale } = $props<{
     experimentId: string;
+    yScale: "log" | "linear";
   }>();
   let status = $state<"idle" | "connecting" | "open" | "closed" | "error">(
     "idle",
   );
-  let yScale = $state<"log" | "linear">("log");
-  let chartEl: HTMLDivElement | null = $state(null);
+  let chartEl: HTMLDivElement | null = null;
   let chart: EChartsType | null = null;
   let ro: ResizeObserver | null = null;
   let seriesData: Record<string, Array<[number, number]>> = {};
@@ -58,103 +47,19 @@
   let reconnectDelayMs = 500;
   let closing = false;
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-
   let ac: AbortController | null = null;
+  let chartTheme = $state(getChartTheme());
 
-  let chartTheme = $state(getTheme());
-
-  export function toggleScale() {
-    yScale = yScale === "log" ? "linear" : "log";
-    applyTheme();
-  }
-
-  function getTheme() {
-    if (!browser) {
-      return {
-        colors: ["#4e79a7", "#f28e2b", "#e15759", "#76b7b2", "#59a14f"],
-        text: "#111",
-        mantle: "#fff",
-        overlay0: "#888",
-        sky: "#2aa1ff",
-        fadedGridLines: "#ddd",
-        axisTicks: "#666",
-      } as const;
-    }
-    const cs = getComputedStyle(document.documentElement);
-    const colors = CHART_COLOR_KEYS.map((k) =>
-      cs.getPropertyValue(`--color-ctp-${k}`).trim(),
-    ).filter(Boolean);
-    return {
-      colors: colors.length ? colors : ["#4e79a7", "#f28e2b", "#e15759"],
-      text: cs.getPropertyValue("--color-ctp-text").trim(),
-      mantle: cs.getPropertyValue("--color-ctp-mantle").trim(),
-      overlay0: cs.getPropertyValue("--color-ctp-overlay0").trim(),
-      sky: cs.getPropertyValue("--color-ctp-sky").trim(),
-      fadedGridLines: cs.getPropertyValue("--color-ctp-surface1").trim() + "33",
-      axisTicks: cs.getPropertyValue("--color-ctp-subtext0").trim(),
-      terminalBg: cs.getPropertyValue("--color-ctp-terminal-bg").trim(),
-      terminalBorder: cs.getPropertyValue("--color-ctp-terminal-border").trim(),
-    } as const;
-  }
-
-  function getBaseOptions(): EChartsCoreOption {
-    return {
-      animation: true,
-      color: chartTheme.colors as any,
-      textStyle: { color: chartTheme.text },
-      grid: { left: 56, right: 20, top: 24, bottom: 40 },
-      tooltip: {
-        trigger: "axis",
-        axisPointer: { type: "line" },
-        valueFormatter: (v: number | string) =>
-          typeof v === "number" && Number.isFinite(v)
-            ? v.toFixed(4)
-            : String(v ?? ""),
-        backgroundColor: (chartTheme.terminalBg || chartTheme.mantle) + "ee",
-        borderColor: chartTheme.terminalBorder || chartTheme.overlay0 + "44",
-        textStyle: { color: chartTheme.text },
-      },
-      legend: { top: 0, textStyle: { color: chartTheme.text } },
-      dataZoom: [{ type: "inside", xAxisIndex: 0 }],
-      xAxis: {
-        type: "value",
-        name: "step",
-        nameGap: 14,
-        boundaryGap: [0, 0],
-        axisLabel: { color: chartTheme.axisTicks },
-        axisLine: { lineStyle: { color: chartTheme.overlay0 } },
-        splitLine: {
-          show: true,
-          lineStyle: { color: chartTheme.fadedGridLines },
-        },
-      },
-      yAxis: {
-        type: yScale === "log" ? "log" : "value",
-        name: "value",
-        minorTick: { show: true },
-        min: "dataMin",
-        max: "dataMax",
-        scale: true,
-        axisLabel: {
-          color: chartTheme.axisTicks,
-          width: 56,
-          overflow: "truncate",
-          align: "right",
-        },
-        axisLine: { lineStyle: { color: chartTheme.overlay0 } },
-        splitLine: {
-          show: true,
-          lineStyle: { color: chartTheme.fadedGridLines },
-        },
-      },
-      series: [],
-    };
-  }
+  $effect(() => {
+    void yScale;
+    void chartTheme;
+    if (chart) applyTheme();
+  });
 
   function initChart() {
     if (chart || !chartEl) return;
     chart = echarts.init(chartEl, undefined, { renderer: "canvas" });
-    chart.setOption(getBaseOptions(), { notMerge: true });
+    chart.setOption(baseOptions(chartTheme, yScale), { notMerge: true });
     window.addEventListener("resize", handleResize);
   }
 
@@ -174,19 +79,7 @@
     if (!seriesData[name]) {
       seriesData[name] = [];
       const names = Object.keys(seriesData);
-      const newSeries = names.map((n) => ({
-        id: n,
-        name: n,
-        type: "line",
-        showSymbol: false,
-        smooth: 0.15,
-        connectNulls: true,
-        data:
-          yScale === "log"
-            ? seriesData[n].map(([x, y]) => [x, y > 0 ? y : null])
-            : seriesData[n].map(([x, y]) => [x, Number.isFinite(y) ? y : null]),
-        emphasis: { focus: "series" },
-      }));
+      const newSeries = lineSeriesFrom(transformForScale(seriesData, yScale));
       chart?.setOption(
         { series: newSeries, legend: { data: names } },
         { notMerge: false },
@@ -216,19 +109,7 @@
       for (let i = 0; i < items.length; i++) arr.push(items[i]);
       seriesData[name] = arr.slice().sort((a, b) => a[0] - b[0]);
     }
-    const updates = Object.keys(seriesData).map((n) => ({
-      id: n,
-      name: n,
-      type: "line",
-      showSymbol: false,
-      smooth: 0.15,
-      connectNulls: true,
-      emphasis: { focus: "series" },
-      data:
-        yScale === "log"
-          ? seriesData[n].map(([x, y]) => [x, y > 0 ? y : null])
-          : seriesData[n].map(([x, y]) => [x, Number.isFinite(y) ? y : null]),
-    }));
+    const updates = lineSeriesFrom(transformForScale(seriesData, yScale));
     chart.setOption(
       { series: updates, legend: { data: Object.keys(seriesData) } },
       { notMerge: false },
@@ -284,19 +165,6 @@
     if (reconnectTimer) clearTimeout(reconnectTimer);
     reconnectTimer = null;
     status = "closed";
-  }
-
-  export function refreshChart() {
-    try {
-      ac?.abort();
-    } catch {}
-    ac = new AbortController();
-    seriesData = {};
-    pending = {};
-    seenMsgIds = new Set();
-    chart?.setOption(getBaseOptions(), { notMerge: true });
-    close();
-    connect();
   }
 
   async function connect() {
@@ -363,52 +231,10 @@
   function applyTheme() {
     const updates = Object.keys(seriesData).map((n) => ({
       id: n,
-      data:
-        yScale === "log"
-          ? seriesData[n].map(([x, y]) => [x, y > 0 ? y : null])
-          : seriesData[n].map(([x, y]) => [x, Number.isFinite(y) ? y : null]),
+      data: transformForScale(seriesData, yScale)[n],
     }));
     chart?.setOption(
-      {
-        color: chartTheme.colors as any,
-        textStyle: { color: chartTheme.text },
-        legend: { textStyle: { color: chartTheme.text } },
-        tooltip: {
-          backgroundColor: (chartTheme.terminalBg || chartTheme.mantle) + "ee",
-          borderColor: chartTheme.terminalBorder || chartTheme.overlay0 + "44",
-          textStyle: { color: chartTheme.text },
-        },
-        series: updates,
-        xAxis: [
-          {
-            axisLabel: { color: chartTheme.axisTicks },
-            axisLine: { lineStyle: { color: chartTheme.overlay0 } },
-            splitLine: {
-              show: true,
-              lineStyle: { color: chartTheme.fadedGridLines },
-            },
-          },
-        ],
-        yAxis: [
-          {
-            type: yScale === "log" ? "log" : "value",
-            min: "dataMin",
-            max: "dataMax",
-            scale: true,
-            axisLabel: {
-              color: chartTheme.axisTicks,
-              width: 56,
-              overflow: "truncate",
-              align: "right",
-            },
-            axisLine: { lineStyle: { color: chartTheme.overlay0 } },
-            splitLine: {
-              show: true,
-              lineStyle: { color: chartTheme.fadedGridLines },
-            },
-          },
-        ],
-      },
+      { ...themeAxisUpdate(chartTheme, yScale), series: updates },
       { notMerge: false },
     );
   }
@@ -416,14 +242,12 @@
   onMount(() => {
     ac = new AbortController();
     initChart();
-    // Resize with container changes (e.g., sidebar collapse/expand)
     if (chartEl && typeof ResizeObserver !== "undefined") {
       ro = new ResizeObserver(() => chart?.resize());
       ro.observe(chartEl);
     }
     const handleThemeChange = () => {
-      chartTheme = getTheme();
-      applyTheme();
+      chartTheme = getChartTheme();
     };
     let mediaQuery: MediaQueryList | null = null;
     let observer: MutationObserver | null = null;
@@ -486,5 +310,5 @@
 <div
   class="relative h-80 w-full bg-transparent border border-ctp-surface0/20 overflow-hidden"
 >
-  <div class="absolute inset-0" bind:this={chartEl}></div>
+  <div class="absolute inset-0 py-2" bind:this={chartEl}></div>
 </div>
