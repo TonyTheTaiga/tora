@@ -12,7 +12,7 @@ enum AuthState {
 
 extension AuthState {
     var userSession: UserSession? {
-        if case let .authenticated(userSession) = self {
+        if case .authenticated(let userSession) = self {
             return userSession
         }
         return nil
@@ -127,25 +127,47 @@ enum KeychainError: Error {
     case invalidData
 }
 
+extension KeychainError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .noPassword:
+            return "No stored credentials found."
+        case .unexpectedPasswordData:
+            return "Stored credentials are in an unexpected format."
+        case .unhandledError(let status):
+            let message =
+                SecCopyErrorMessageString(status, nil) as String?
+                ?? "Unknown keychain error"
+            return "Keychain error (\(status)): \(message)"
+        case .invalidData:
+            return "Failed to read stored credentials."
+        }
+    }
+}
+
 // MARK: - Authentication Service
 
 @MainActor
-class AuthService: ObservableObject {
+final class AuthService: ObservableObject {
     // MARK: - Properties
 
     @Published private(set) var state: AuthState = .unauthenticated(nil)
 
     private let serviceName = "tora-tracker"
     private let backendUrl: String = Config.baseURL
-    static let shared: AuthService = .init()
-
     // MARK: - Constructor
 
-    private init() {
+    init() {
         do {
             if try checkSessionInKeychain() {
                 let userSession = try retrieveSessionFromKeychain()
                 self.state = .authenticated(userSession)
+            }
+        } catch let keychainError as KeychainError {
+            if case .noPassword = keychainError {
+                self.state = .unauthenticated(nil)
+            } else {
+                self.state = .unauthenticated(keychainError.localizedDescription)
             }
         } catch {
             self.state = .unauthenticated(error.localizedDescription)
@@ -256,7 +278,10 @@ class AuthService: ObservableObject {
             kSecAttrService as String: serviceName,
         ]
         let status = SecItemDelete(query as CFDictionary)
-        if status != errSecSuccess {
+        switch status {
+        case errSecSuccess, errSecItemNotFound:
+            return
+        default:
             let errorMessage =
                 SecCopyErrorMessageString(status, nil) as String?
                 ?? "Unknown error"
@@ -272,14 +297,18 @@ class AuthService: ObservableObject {
         ]
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
-        if status != errSecSuccess {
+        switch status {
+        case errSecSuccess:
+            return true
+        case errSecItemNotFound:
+            return false
+        default:
             let errorMessage =
                 SecCopyErrorMessageString(status, nil) as String?
                 ?? "Unknown error"
             print("updating keychain failed: \(errorMessage) (\(status))")
             throw KeychainError.unhandledError(status: status)
         }
-        return status == errSecSuccess
     }
 
     private func retrieveSessionFromKeychain() throws -> UserSession {
@@ -291,7 +320,12 @@ class AuthService: ObservableObject {
         ]
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
-        guard status == errSecSuccess else {
+        switch status {
+        case errSecSuccess:
+            break
+        case errSecItemNotFound:
+            throw KeychainError.noPassword
+        default:
             throw KeychainError.unhandledError(status: status)
         }
         guard let userSessionData = result as? Data else {
