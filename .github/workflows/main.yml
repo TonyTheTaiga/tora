@@ -15,7 +15,6 @@ jobs:
   python-tests:
     name: "Python SDK Tests"
     uses: ./.github/workflows/python-tests.yml
-    needs: precommit
 
   ci-summary:
     name: "CI Summary"
