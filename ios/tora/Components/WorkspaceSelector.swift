@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Workspace Picker Modal (Centered)
+// MARK: - Workspace Picker Sheet
 
 struct WorkspacePickerModal: View {
     let workspaces: [Workspace]
@@ -23,84 +23,84 @@ struct WorkspacePickerModal: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack {
-                Text("Select Workspace")
-                    .font(.headline)
-                Spacer()
-                Button(action: onClose) {
-                    Image(systemName: "xmark")
-                        .foregroundStyle(.secondary)
+        NavigationStack {
+            VStack(spacing: 16) {
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(Color.custom.ctpSubtext0)
+                    TextField("Search workspaces", text: $query)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled(true)
                 }
-                .keyboardShortcut(.cancelAction)
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 14)
-            .padding(.bottom, 8)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.custom.ctpSurface0)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.custom.ctpOverlay1, lineWidth: 1)
+                )
 
-            // Search field
-            HStack(spacing: 8) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(Color.custom.ctpSubtext0)
-                TextField("Search workspaces", text: $query)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled(true)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.custom.ctpSurface0)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.custom.ctpOverlay1, lineWidth: 1)
-            )
-            .padding(.horizontal, 16)
-            .padding(.bottom, 10)
-
-            Divider()
-
-            // List
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 0) {
-                    ForEach(ordered) { ws in
-                        Button(action: {
-                            onWorkspaceSelected(ws)
-                            onClose()
-                        }) {
-                            HStack {
-                                Text(ws.name)
-                                    .font(.body)
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                                    .foregroundStyle(Color.custom.ctpText)
-                                Spacer()
-                                if ws.id == selectedWorkspace?.id {
-                                    Image(systemName: "checkmark")
-                                        .foregroundStyle(Color.custom.ctpBlue)
-                                }
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .contentShape(Rectangle())
-                        }
-                        Divider()
+                if ordered.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass")
+                            .imageScale(.large)
+                            .foregroundStyle(Color.custom.ctpSubtext0)
+                        Text("No workspaces match your search")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.custom.ctpSubtext0)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List {
+                        ForEach(ordered) { ws in
+                            Button {
+                                onWorkspaceSelected(ws)
+                                onClose()
+                            } label: {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(ws.name)
+                                            .font(.body)
+                                            .foregroundStyle(Color.custom.ctpText)
+                                            .lineLimit(1)
+
+                                        if let description = ws.description, !description.isEmpty {
+                                            Text(description)
+                                                .font(.caption)
+                                                .foregroundStyle(Color.custom.ctpSubtext0)
+                                                .lineLimit(2)
+                                        }
+                                    }
+                                    Spacer()
+                                    if ws.id == selectedWorkspace?.id {
+                                        Image(systemName: "checkmark")
+                                            .foregroundStyle(Color.custom.ctpBlue)
+                                    }
+                                }
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .listStyle(.insetGrouped)
+                    .scrollContentBackground(.hidden)
                 }
             }
-            .frame(maxHeight: 360)
+            .padding(.horizontal)
+            .padding(.top, 20)
+            .padding(.bottom, 12)
+            .background(Color.custom.ctpSheetBackground.ignoresSafeArea())
+            .navigationTitle("Select Workspace")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { onClose() }
+                }
+            }
         }
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.custom.ctpMantle)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.custom.ctpOverlay2.opacity(0.7), lineWidth: 1)
-        )
-        .frame(maxWidth: 520)
     }
 }
 

@@ -9,6 +9,7 @@ struct ExperimentsView: View {
     @Binding var experiment: Experiment
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @EnvironmentObject private var experimentService: ExperimentService
+    @State private var isInfoPresented = false
 
     // MARK: - Body
 
@@ -18,13 +19,31 @@ struct ExperimentsView: View {
         }
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text(experiment.name)
-                    .font(.headline)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(horizontalSizeClass == .regular ? 2 : 1)
-                    .truncationMode(horizontalSizeClass == .regular ? .tail : .middle)
-                    .minimumScaleFactor(0.9)
+                HStack(spacing: 8) {
+                    Text(experiment.name)
+                        .font(.headline)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(horizontalSizeClass == .regular ? 2 : 1)
+                        .truncationMode(horizontalSizeClass == .regular ? .tail : .middle)
+                        .minimumScaleFactor(0.9)
+
+                    Button {
+                        isInfoPresented = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .imageScale(.medium)
+                    }
+                    .accessibilityLabel("Show experiment information")
+                }
             }
+        }
+        .sheet(isPresented: $isInfoPresented) {
+            ExperimentInfoPanel(
+                experiment: experiment,
+                isPresented: $isInfoPresented
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
     }
 
@@ -73,14 +92,6 @@ struct ExperimentContentView: View {
                 if !experiment.hyperparams.isEmpty {
                     HyperparamsSectionView(hyperparams: experiment.hyperparams)
                 }
-
-                MetadataSectionView(
-                    createdAt: experiment.createdAt,
-                    updatedAt: experiment.updatedAt,
-                    experimentId: experiment.id,
-                    workspaceId: experiment.workspaceId,
-                    tags: experiment.tags
-                )
             }
             .padding()
         }
@@ -320,84 +331,94 @@ extension MetricsChartSectionView {
     }
 }
 
-private struct MetadataSectionView: View {
-    let createdAt: Date
-    let updatedAt: Date
-    let experimentId: String
-    let workspaceId: String?
-    let tags: [String]
+private struct ExperimentInfoPanel: View {
+    let experiment: Experiment
+    @Binding var isPresented: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Metadata")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Color.custom.ctpText)
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Created")
+                            .font(.caption)
+                            .foregroundStyle(Color.custom.ctpSubtext0)
+                        Text(experiment.createdAt.conciseString)
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(Color.custom.ctpText)
+                    }
 
-            HStack {
-                Text("Created:")
-                    .font(.caption)
-                    .foregroundStyle(Color.custom.ctpSubtext0)
-                Text(createdAt.conciseString)
-                    .font(.caption)
-                    .foregroundStyle(Color.custom.ctpText)
-            }
-            HStack {
-                Text("Updated:")
-                    .font(.caption)
-                    .foregroundStyle(Color.custom.ctpSubtext0)
-                Text(updatedAt.conciseString)
-                    .font(.caption)
-                    .foregroundStyle(Color.custom.ctpText)
-            }
-            HStack {
-                Text("Experiment ID:")
-                    .font(.caption)
-                    .foregroundStyle(Color.custom.ctpSubtext0)
-                Text(experimentId)
-                    .font(.caption)
-                    .foregroundStyle(Color.custom.ctpText)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-            }
-            if let workspaceId {
-                HStack {
-                    Text("Workspace ID:")
-                        .font(.caption)
-                        .foregroundStyle(Color.custom.ctpSubtext0)
-                    Text(workspaceId)
-                        .font(.caption)
-                        .foregroundStyle(Color.custom.ctpText)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                }
-            }
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Updated")
+                            .font(.caption)
+                            .foregroundStyle(Color.custom.ctpSubtext0)
+                        Text(experiment.updatedAt.conciseString)
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(Color.custom.ctpText)
+                    }
 
-            if !tags.isEmpty {
-                HStack(alignment: .center, spacing: 8) {
-                    Text("Tags:")
-                        .font(.caption)
-                        .foregroundStyle(Color.custom.ctpSubtext0)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(tags, id: \.self) { tag in
-                                Text(tag)
-                                    .font(.caption2)
-                                    .foregroundStyle(Color.custom.ctpText)
-                                    .lineLimit(1)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 6)
-                                            .fill(Color.custom.ctpSurface0.opacity(0.28))
-                                    )
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Experiment ID")
+                            .font(.caption)
+                            .foregroundStyle(Color.custom.ctpSubtext0)
+                        Text(experiment.id)
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(Color.custom.ctpText)
+                            .lineLimit(2)
+                            .truncationMode(.middle)
+                    }
+
+                    if let workspaceId = experiment.workspaceId {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Workspace ID")
+                                .font(.caption)
+                                .foregroundStyle(Color.custom.ctpSubtext0)
+                            Text(workspaceId)
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(Color.custom.ctpText)
+                                .lineLimit(2)
+                                .truncationMode(.middle)
+                        }
+                    }
+
+                    if !experiment.tags.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Tags")
+                                .font(.caption)
+                                .foregroundStyle(Color.custom.ctpSubtext0)
+
+                            LazyVGrid(columns: tagColumns, alignment: .leading, spacing: 8) {
+                                ForEach(experiment.tags, id: \.self) { tag in
+                                    Text(tag)
+                                        .font(.caption2.weight(.semibold))
+                                        .foregroundStyle(Color.custom.ctpText)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(
+                                            Capsule()
+                                                .fill(Color.custom.ctpSurface0.opacity(0.2))
+                                        )
+                                }
                             }
                         }
-                        .padding(.vertical, 2)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(.vertical, 16)
+            }
+            .padding(.horizontal)
+            .background(Color.custom.ctpSheetBackground.ignoresSafeArea())
+            .navigationTitle("Information")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { isPresented = false }
                 }
             }
         }
+    }
+
+    private var tagColumns: [GridItem] {
+        [GridItem(.adaptive(minimum: 96), spacing: 8, alignment: .leading)]
     }
 }
 

@@ -29,6 +29,7 @@ struct ColorPalette {
     let ctpPink = Color(light: "#ea76cb", dark: "#f5c2e7")
     let ctpFlamingo = Color(light: "#dd7878", dark: "#f2cdcd")
     let ctpRosewater = Color(light: "#dc8a78", dark: "#f5e0dc")
+    let ctpSheetBackground = Color(light: "#eff1f5", dark: "#1e1e2e")
 }
 
 // MARK: - Color Extension

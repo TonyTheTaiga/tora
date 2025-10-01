@@ -84,19 +84,6 @@ struct WorkspacesView: View {
                 }
             }
 
-            if showingWorkspaceModal {
-                Color.custom.ctpCrust.opacity(0.45)
-                    .ignoresSafeArea()
-                    .onTapGesture { showingWorkspaceModal = false }
-
-                WorkspacePickerModal(
-                    workspaces: workspaceService.workspaces,
-                    selectedWorkspace: selectedWorkspace,
-                    onWorkspaceSelected: { ws in selectWorkspace(ws) },
-                    onClose: { showingWorkspaceModal = false }
-                )
-                .padding(24)
-            }
         }
         .navigationTitle("Workspaces")
         .navigationBarTitleDisplayMode(.inline)
@@ -112,6 +99,16 @@ struct WorkspacesView: View {
             }
         }
         .toolbar {}
+        .sheet(isPresented: $showingWorkspaceModal) {
+            WorkspacePickerModal(
+                workspaces: workspaceService.workspaces,
+                selectedWorkspace: selectedWorkspace,
+                onWorkspaceSelected: { ws in selectWorkspace(ws) },
+                onClose: { showingWorkspaceModal = false }
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
         .onAppear(perform: {
             fetchWorkspaces()
         })
@@ -123,12 +120,17 @@ struct WorkspacesView: View {
         isLoading = true
         errorMessage = nil
         Task {
-            defer { isLoading = false }
-
             do {
                 try await workspaceService.list()
+                await MainActor.run {
+                    isLoading = false
+                    maybePresentWorkspacePicker()
+                }
             } catch {
-                self.errorMessage = error.localizedDescription
+                await MainActor.run {
+                    self.errorMessage = error.localizedDescription
+                    self.isLoading = false
+                }
             }
         }
     }
@@ -176,9 +178,19 @@ struct WorkspacesView: View {
         } else {
             do {
                 try await workspaceService.list()
+                await MainActor.run {
+                    maybePresentWorkspacePicker()
+                }
             } catch {
                 // ignore in refresh context
             }
+        }
+    }
+
+    @MainActor
+    private func maybePresentWorkspacePicker() {
+        if selectedWorkspace == nil && !workspaceService.workspaces.isEmpty {
+            showingWorkspaceModal = true
         }
     }
 }
