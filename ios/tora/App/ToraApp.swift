@@ -1,38 +1,42 @@
+import Combine
 import SwiftUI
 
-@main
-struct ToraApp: App {
-    @StateObject private var authService: AuthService
-    @StateObject private var workspaceService: WorkspaceService
-    @StateObject private var experimentService: ExperimentService
-    @Environment(\.scenePhase) private var scenePhase
+final class AppServices: ObservableObject {
+    let authService: AuthService
+    let workspaceService: WorkspaceService
+    let experimentService: ExperimentService
 
     init() {
         let authService = AuthService()
-        let workspaceService = WorkspaceService(authService: authService)
-        let experimentService = ExperimentService(authService: authService)
-
-        _authService = StateObject(wrappedValue: authService)
-        _workspaceService = StateObject(wrappedValue: workspaceService)
-        _experimentService = StateObject(wrappedValue: experimentService)
+        self.authService = authService
+        self.workspaceService = WorkspaceService(authService: authService)
+        self.experimentService = ExperimentService(authService: authService)
     }
+}
+
+@main
+struct ToraApp: App {
+    @StateObject private var services = AppServices()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
             AppRootView()
-                .environmentObject(authService)
-                .environmentObject(workspaceService)
-                .environmentObject(experimentService)
+                .environmentObject(services.authService)
+                .environmentObject(services.workspaceService)
+                .environmentObject(services.experimentService)
                 .applyAppTheme()
                 .task {
-                    _ = try? await authService.getUserToken(skew: 180)
+                    await refreshAuthTokenIfNeeded()
                 }
-                .onChange(of: scenePhase == .active) { _, isActive in
-                    guard isActive else { return }
-                    Task {
-                        _ = try? await authService.getUserToken(skew: 180)
-                    }
+                .onChange(of: scenePhase) {
+                    guard scenePhase == .active else { return }
+                    Task { await refreshAuthTokenIfNeeded() }
                 }
         }
+    }
+
+    private func refreshAuthTokenIfNeeded() async {
+        _ = try? await services.authService.getUserToken(skew: 180)
     }
 }
