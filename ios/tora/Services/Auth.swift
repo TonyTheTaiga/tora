@@ -12,7 +12,7 @@ enum AuthState {
 
 extension AuthState {
     var userSession: UserSession? {
-        if case let .authenticated(userSession) = self {
+        if case .authenticated(let userSession) = self {
             return userSession
         }
         return nil

@@ -103,15 +103,14 @@ extension Date {
 extension ExperimentContentView {
     func loadMetrics() async {
         do {
-            //            let logs = try await experimentService.getLogs(experimentId: experiment.id)
-            //            await MainActor.run {
-            //                let parsed = Self.parseLogs(logs)
-            //                self.results = parsed.results
-            //                self.metricsByName = parsed.metricsByName
-            //            }
+            let resultRows = try await experimentService.getResults(experimentId: experiment.id)
+            let metricRows = try await experimentService.getMetrics(experimentId: experiment.id)
+            let parsed = Self.parseLogs(resultRows + metricRows)
 
-            self.results = try await experimentService.getResults(experimentId: experiment.id)
-            let metrics
+            await MainActor.run {
+                self.results = parsed.results
+                self.metricsByName = parsed.metricsByName
+            }
 
         } catch {
             // Ignore load errors; keep previous values
@@ -119,7 +118,6 @@ extension ExperimentContentView {
     }
 
     fileprivate static func parseLogs(_ rows: [Metric]) -> (results: [ResultItem], metricsByName: [String: [Metric]]) {
-        // Results: first value per unique name
         let resultRows = rows.filter { $0.metadata?.type?.lowercased() == "result" }
         let groupedResults = Dictionary(grouping: resultRows, by: { $0.name })
         let results: [ResultItem] =
@@ -130,13 +128,15 @@ extension ExperimentContentView {
             }
             .sorted { $0.name < $1.name }
 
-        // Metrics: group by series name, sort by step
         let metricRows = rows.filter { $0.metadata?.type?.lowercased() == "metric" }
         var groupedMetrics = Dictionary(grouping: metricRows, by: { $0.name })
         for (key, series) in groupedMetrics {
             groupedMetrics[key] = series.sorted { (a, b) in
                 let sa = a.step ?? .min
                 let sb = b.step ?? .min
+                if sa == sb {
+                    return a.createdAt < b.createdAt
+                }
                 return sa < sb
             }
         }
