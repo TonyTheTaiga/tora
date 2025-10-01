@@ -1,10 +1,15 @@
 import Foundation
 
-// MARK: - Configuration
-
 enum Config {
-    // MARK: - Properties
+    static let baseURL: String = {
+        let process = ProcessInfo.processInfo
 
-    //    static let baseURL = "https://api.toracker.com"
-    static let baseURL = "http://localhost:8080"
+        if let trimmed = process.environment["API_BASE_URL"]?.trimmingCharacters(in: .whitespacesAndNewlines),
+            !trimmed.isEmpty
+        {
+            return trimmed
+        }
+
+        fatalError("API_BASE_URL is not configured. Set it in the environment before launching.")
+    }()
 }
