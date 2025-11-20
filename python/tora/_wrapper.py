@@ -91,13 +91,13 @@ def setup(
         raise
 
 
-def tmetric(name: str, value: int | float, step: int | None = None) -> None:
+def tmetric(name: str, value: int | float, step: int) -> None:
     """Log a training metric using the global Tora client.
 
     Args:
         name: Name of the metric
         value: Numeric value of the metric
-        step: Optional step number for the metric
+        step: Step number for the metric
 
     Raises:
         ToraError: If the global client is not initialized
