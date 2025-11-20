@@ -2,28 +2,35 @@ name: Pre-commit Checks
 on:
   workflow_call:
   workflow_dispatch:
+
 jobs:
-  precommit:
+  common-checks:
+    name: Common Checks (Linux)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 8
+
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
+
       - name: Cache pre-commit
         uses: actions/cache@v4
         with:
@@ -31,6 +38,7 @@ jobs:
           key: ${{ runner.os }}-precommit-${{ hashFiles('.pre-commit-config.yaml') }}
           restore-keys: |
             ${{ runner.os }}-precommit-
+
       - name: Cache pnpm dependencies
         uses: actions/cache@v4
         with:
@@ -38,6 +46,7 @@ jobs:
           key: ${{ runner.os }}-pnpm-${{ hashFiles('web/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
+
       - name: Cache Rust dependencies
         uses: actions/cache@v4
         with:
@@ -50,27 +59,56 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('api/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-      - name: Cache Swift dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/org.swift.swiftpm
-            swift-format/.build
-          key: ${{ runner.os }}-swift-${{ hashFiles('**/Package.resolved') }}
-          restore-keys: |
-            ${{ runner.os }}-swift-
+
       - name: Install Python dependencies
         working-directory: ./python
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
+
       - name: Install web dependencies
         working-directory: ./web
         run: |
           pnpm install
+
       - name: Install pre-commit
         run: |
           pip install pre-commit
-      - name: Run pre-commit
+
+      - name: Run pre-commit (Common)
+        # Skips the swift-format-ios hook which requires macOS
         run: |
-          pre-commit run --all-files --show-diff-on-failure
+          SKIP=swift-format-ios pre-commit run --all-files --show-diff-on-failure
+
+  ios-checks:
+    name: iOS Checks (macOS)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache swift-format
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/Cellar/swift-format
+          key: ${{ runner.os }}-brew-swift-format
+          restore-keys: |
+            ${{ runner.os }}-brew-swift-format
+
+      - name: Install swift-format
+        run: |
+          brew install swift-format
+
+      - name: Install pre-commit
+        run: |
+          pip install pre-commit
+
+      - name: Run pre-commit (iOS only)
+        # Runs ONLY the swift-format-ios hook
+        run: |
+          pre-commit run swift-format-ios --all-files --show-diff-on-failure
