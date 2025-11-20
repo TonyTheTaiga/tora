@@ -9,8 +9,8 @@ tora.setup(
     hyperparams={"lr": 0.001, "batch_size": 32}
 )
 
-tora.tlog("accuracy", 0.95, step=100)
-tora.tlog("loss", 0.05, step=100)
+tora.tmetric("accuracy", 0.95, step=100)
+tora.tmetric("loss", 0.05, step=100)
 tora.tresult("best_accuracy", 0.97)
 
 # Client API
@@ -22,18 +22,22 @@ client = tora.Tora.create_experiment(
 )
 
 for epoch in range(100):
-    client.log("train_loss", train_loss, step=epoch)
-    client.log("val_accuracy", val_acc, step=epoch)
+    # Simulate metrics
+    train_loss = 0.5
+    val_acc = 0.9
+
+    client.metric("train_loss", train_loss, step_or_epoch=epoch)
+    client.metric("val_accuracy", val_acc, step_or_epoch=epoch)
 
 client.shutdown()
 
 # Context Manager
 with tora.Tora.create_experiment("my-experiment") as client:
-    client.log("metric", 1.0)
+    client.metric("metric", 1.0, step_or_epoch=0)
 
 # Load Existing Experiment
 client = tora.Tora.load_experiment("exp-abc123")
-client.log("new_metric", 42.0)
+client.metric("new_metric", 42.0, step_or_epoch=1)
 
 # Create Workspace
 workspace = tora.create_workspace(
