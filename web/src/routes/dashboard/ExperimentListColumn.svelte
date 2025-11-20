@@ -5,7 +5,13 @@
   import type { Workspace, Experiment } from "$lib/types";
   import { onMount } from "svelte";
   import { copyToClipboard } from "$lib/utils/common";
-  import { RefreshCw, ChevronLeft, PanelLeftClose } from "@lucide/svelte";
+  import {
+    RefreshCw,
+    ChevronLeft,
+    PanelLeftClose,
+    MoreHorizontal,
+  } from "@lucide/svelte";
+  import { DropdownMenu } from "bits-ui";
   import {
     setSelectedExperiment,
     loading,
@@ -166,7 +172,7 @@
     <div class="flex items-center justify-between mb-3">
       <div class="flex items-center gap-2">
         <button
-          class="floating-element p-2 rounded-md"
+          class="floating-element p-2 rounded-none"
           onclick={() => {
             try {
               clearWorkspaceCache(workspace.id);
@@ -182,22 +188,37 @@
       </div>
       <div class="flex gap-2 items-center">
         <button
-          class="floating-element p-2 rounded-md"
+          class="menu-trigger floating-element p-2 rounded-none"
           onclick={() => collapseNav?.()}
           title="collapse navigator"
           aria-label="collapse navigator"
         >
           <PanelLeftClose size={16} />
         </button>
-        <button
-          class="floating-element p-2 rounded-md disabled:opacity-50"
-          onclick={refreshExperiments}
-          disabled={loading.experiments}
-          title="refresh experiments"
-          aria-label="refresh experiments"
-        >
-          <RefreshCw size={16} />
-        </button>
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger
+            class="menu-trigger floating-element p-2 rounded-none"
+          >
+            <MoreHorizontal size={16} />
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content align="end" class="menu-content text-sm">
+              <DropdownMenu.Group>
+                <DropdownMenu.Item
+                  class="menu-item flex items-center gap-2"
+                  onSelect={refreshExperiments}
+                  disabled={loading.experiments}
+                >
+                  <RefreshCw
+                    size={16}
+                    class={loading.experiments ? "animate-spin" : ""}
+                  />
+                  <span>Refresh</span>
+                </DropdownMenu.Item>
+              </DropdownMenu.Group>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
       </div>
     </div>
     <div class="mb-3">
@@ -255,3 +276,71 @@
     {/if}
   </div>
 </div>
+
+<style>
+  :global(.menu-content) {
+    background: var(--color-ctp-base);
+    border: 1px solid var(--color-ctp-surface0);
+    backdrop-filter: blur(12px);
+    color: var(--color-ctp-text);
+    min-width: 12rem;
+    outline: none;
+    padding: 0.25rem;
+    border-radius: 0;
+    box-shadow:
+      0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
+    z-index: 50;
+  }
+
+  :global(.menu-content:focus),
+  :global(.menu-content:focus-visible) {
+    outline: none;
+    box-shadow:
+      0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
+
+  :global(.menu-item) {
+    color: var(--color-ctp-text);
+    padding: 0.5rem 0.625rem;
+    transition:
+      background-color 0.25s ease,
+      color 0.25s ease;
+    border: none;
+    outline: none;
+    border-radius: 0;
+    cursor: pointer;
+  }
+
+  :global(.menu-item:hover) {
+    background: var(--color-ctp-surface0);
+    color: var(--color-ctp-text);
+  }
+
+  :global(.menu-item:focus),
+  :global(.menu-item:focus-visible) {
+    outline: none;
+    box-shadow: none;
+    background: var(--color-ctp-surface0);
+    color: var(--color-ctp-text);
+  }
+
+  :global(.menu-item[data-disabled]) {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  :global(.menu-trigger) {
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+  }
+
+  :global(.menu-trigger:focus),
+  :global(.menu-trigger:focus-visible) {
+    outline: none;
+    box-shadow: none;
+  }
+</style>

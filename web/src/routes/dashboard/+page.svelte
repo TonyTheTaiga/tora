@@ -78,7 +78,7 @@
         class="h-full w-full select-none flex items-start justify-center p-2"
       >
         <button
-          class="floating-element p-2 rounded-md"
+          class="floating-element p-2 rounded-none border-none"
           onclick={openNav}
           title="show navigator"
           aria-label="show navigator"
