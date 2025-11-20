@@ -29,6 +29,8 @@ for epoch in range(100):
     client.metric("train_loss", train_loss, step_or_epoch=epoch)
     client.metric("val_accuracy", val_acc, step_or_epoch=epoch)
 
+client.result("best_val_accuracy", 0.98)
+
 client.shutdown()
 
 # Context Manager
