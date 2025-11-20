@@ -77,15 +77,7 @@ class TestTmetric:
         tora._wrapper._INSTANCE = None
 
         with pytest.raises(ToraError, match="not initialized"):
-            tmetric("accuracy", 0.95)
-
-    def test_tmetric_minimal_args(self):
-        mock_client = Mock()
-        tora._wrapper._INSTANCE = mock_client
-
-        tmetric("loss", 0.5)
-
-        mock_client.metric.assert_called_once_with("loss", 0.5, None)
+            tmetric("accuracy", 0.95, step=1)
 
 
 class TestFlush:
@@ -233,4 +225,4 @@ class TestIntegration:
         assert not is_initialized()
 
         with pytest.raises(ToraError, match="not initialized"):
-            tmetric("accuracy", 0.95)
+            tmetric("accuracy", 0.95, step=1)

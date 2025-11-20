@@ -44,7 +44,7 @@ class TestCreateWorkspace:
         )
 
     def test_create_workspace_no_api_key(self, monkeypatch):
-        monkeypatch.delenv("TORA_API_KEY", raising=False)
+        monkeypatch.setattr("tora._client.TORA_API_KEY", None)
         monkeypatch.setenv("TORA_BASE_URL", TEST_BASE_URL)
 
         with pytest.raises(ToraAuthenticationError, match="API key is required"):
@@ -283,6 +283,48 @@ class TestToraLogging:
 
         with pytest.raises(ToraValidationError, match="must be JSON serializable"):
             tora._log("loss", 0.5, metadata={"obj": NonSerializable()})
+
+    def test_log_metrics_success(self):
+        test_url = "https://test-frontend.example.com/experiments/exp-123"
+        tora = Tora("exp-123", url=test_url, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
+
+        metrics = {"acc": 0.9, "loss": 0.1}
+        tora.log_metrics(metrics, step=5)
+
+        assert tora.buffer_size == 2
+
+        entry1 = tora._buffer[0]
+        assert entry1["name"] == "acc"
+        assert entry1["value"] == 0.9
+        assert entry1["step"] == 5
+
+        entry2 = tora._buffer[1]
+        assert entry2["name"] == "loss"
+        assert entry2["value"] == 0.1
+        assert entry2["step"] == 5
+
+
+class TestToraMetric:
+    def test_metric_logs_with_metric_metadata(self):
+        test_url = "https://test-frontend.example.com/experiments/exp-123"
+        tora = Tora("exp-123", url=test_url, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
+
+        tora.metric("accuracy", 0.95, step_or_epoch=10)
+
+        assert tora.buffer_size == 1
+        entry = tora._buffer[0]
+        assert entry["name"] == "accuracy"
+        assert entry["value"] == 0.95
+        assert entry["step"] == 10
+        assert entry["metadata"] == {"type": "metric"}
+
+    def test_metric_closed_client(self):
+        test_url = "https://test-frontend.example.com/experiments/exp-123"
+        tora = Tora("exp-123", url=test_url, api_key=TEST_API_KEY, server_url=TEST_BASE_URL)
+        tora.shutdown()
+
+        with pytest.raises(ToraMetricError, match="closed Tora client"):
+            tora.metric("score", 1.0, step_or_epoch=1)
 
 
 class TestToraResult:
