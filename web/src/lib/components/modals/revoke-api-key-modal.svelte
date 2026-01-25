@@ -15,7 +15,11 @@
   }
 </script>
 
-<BaseModal title="Revoke API Key?" onClose={closeModal}>
+<BaseModal
+  title="Revoke API Key?"
+  onClose={closeModal}
+  closeDisabled={isRevoking}
+>
   <div class="space-y-4">
     <div class="border border-ctp-surface0/20 p-3 mb-4">
       <div class="flex items-start gap-3">

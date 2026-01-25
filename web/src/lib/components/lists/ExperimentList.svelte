@@ -86,19 +86,11 @@
 {:else}
   <ListCard items={filteredExperiments} {onItemClick}>
     {#snippet children(experiment)}
-      <div class="flex items-center justify-between gap-3 mb-2">
-        <h3
-          class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate"
-        >
-          {experiment.name}
-        </h3>
-        <div class="flex items-center gap-2 text-xs text-ctp-lavender">
-          <span>{formatDate(experiment.createdAt)}</span>
-          <span class="text-ctp-lavender/80"
-            >{formatTime(experiment.createdAt)}</span
-          >
-        </div>
-      </div>
+      <h3
+        class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate mb-1"
+      >
+        {experiment.name}
+      </h3>
 
       {#if experiment.description}
         <p class="text-ctp-subtext1 text-sm mb-2">
@@ -106,34 +98,35 @@
         </p>
       {/if}
 
-      <div class="flex items-center gap-2 text-xs">
-        {#if experiment.tags && experiment.tags.length > 0}
-          <div class="flex items-center gap-1.5 flex-wrap">
-            {#each experiment.tags.slice(0, 3) as tag}
-              <span
-                class="bg-ctp-surface0/30 text-ctp-subtext0 border border-ctp-surface0/40 rounded-sm px-2 py-0.5 text-[10px]"
-              >
-                {tag}
-              </span>
-            {/each}
-            {#if experiment.tags.length > 3}
-              <span class="text-ctp-subtext1 text-[10px]">
-                +{experiment.tags.length - 3}
-              </span>
-            {/if}
-          </div>
-        {/if}
-
-        <div class="flex items-center gap-2 text-ctp-lavender">
-          {#if experiment.hyperparams && experiment.hyperparams.length > 0}
-            <span>
-              {experiment.hyperparams.length} param{experiment.hyperparams
-                .length !== 1
-                ? "s"
-                : ""}
+      {#if experiment.tags && experiment.tags.length > 0}
+        <div class="flex items-center gap-2 flex-wrap mb-2">
+          {#each experiment.tags.slice(0, 3) as tag}
+            <span
+              class="text-[11px] font-mono text-ctp-subtext1 before:content-['#'] before:text-ctp-blue/60"
+              >{tag}</span
+            >
+          {/each}
+          {#if experiment.tags.length > 3}
+            <span class="text-[11px] font-mono text-ctp-overlay0">
+              +{experiment.tags.length - 3}
             </span>
           {/if}
         </div>
+      {/if}
+
+      <div class="flex items-center gap-3 text-[11px] font-mono">
+        {#if experiment.hyperparams && experiment.hyperparams.length > 0}
+          <span class="text-ctp-subtext0">
+            <span class="text-ctp-overlay0">params:</span>{experiment
+              .hyperparams.length}
+          </span>
+        {/if}
+        <span class="text-ctp-subtext0">
+          <span class="text-ctp-overlay0">created:</span>{formatDate(
+            experiment.createdAt,
+          )}
+          {formatTime(experiment.createdAt)}
+        </span>
       </div>
     {/snippet}
 

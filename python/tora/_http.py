@@ -18,6 +18,7 @@ class HttpResponse:
     """A wrapper for http.client.HTTPResponse with enhanced error handling."""
 
     def __init__(self, raw_response: http.client.HTTPResponse, data: bytes, url: str) -> None:
+        """Wrap the raw response with cached body and request URL metadata."""
         self._raw_response = raw_response
         self.status_code = raw_response.status
         self.reason = raw_response.reason
@@ -75,11 +76,7 @@ class HttpResponse:
 
 
 class HttpClient:
-    """A simple HTTP client that wraps http.client with enhanced error handling.
-
-    Provides an interface similar to requests or httpx with better error handling,
-    timeout support, and connection management.
-    """
+    """HTTP client wrapper with request-like API, timeouts, and better errors."""
 
     def __init__(
         self,
@@ -87,6 +84,7 @@ class HttpClient:
         headers: dict[str, str] | None = None,
         timeout: int | None = None,
     ) -> None:
+        """Create an HTTP client bound to a base URL with optional defaults."""
         parsed_url = urlparse(base_url)
 
         if not parsed_url.scheme or not parsed_url.netloc:

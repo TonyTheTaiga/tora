@@ -35,6 +35,10 @@
   let isRefreshing = $state(false);
   let workspacesLocal = $state<Workspace[]>(workspaces);
 
+  $effect(() => {
+    workspacesLocal = workspaces;
+  });
+
   async function refreshWorkspaces() {
     try {
       isRefreshing = true;
@@ -132,7 +136,8 @@
                   </div>
                   <span>Invitations</span>
                   {#if workspaceInvitations.length > 0}
-                    <span class="ml-auto text-xs text-ctp-subtext0"
+                    <span
+                      class="ml-auto text-[11px] font-mono text-ctp-overlay0"
                       >{workspaceInvitations.length}</span
                     >
                   {/if}

@@ -53,6 +53,11 @@ function applyThemeToDOM(theme: Theme) {
 function initializeTheme() {
   if (!browser) return;
 
+  const html = document.documentElement;
+
+  // Disable transitions on initial load to prevent flash
+  html.classList.add("no-transitions");
+
   const storedTheme = getStoredTheme();
   const systemTheme = getSystemTheme();
 
@@ -67,6 +72,13 @@ function initializeTheme() {
   }
 
   applyThemeToDOM(state.theme);
+
+  // Remove no-transitions after initial paint
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      html.classList.remove("no-transitions");
+    });
+  });
 
   const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
   mediaQuery.addEventListener("change", (e) => {

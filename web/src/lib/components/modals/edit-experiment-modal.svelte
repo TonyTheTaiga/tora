@@ -96,16 +96,16 @@
             {#each experimentCopy.tags as tag, i}
               <input type="hidden" value={tag} name="tags.{i}" />
               <span
-                class="inline-flex items-center px-2 py-1 text-sm bg-ctp-blue/10 text-ctp-blue border border-ctp-blue/30"
+                class="inline-flex items-center gap-1.5 text-[11px] font-mono text-ctp-subtext1"
               >
-                {tag}
+                <span class="text-ctp-overlay0">#</span>{tag}
                 <button
                   type="button"
-                  class="text-ctp-blue/70 hover:text-ctp-red transition-colors ml-1.5"
+                  class="text-ctp-overlay0 hover:text-ctp-red transition-colors"
                   onclick={() => experimentCopy.tags?.splice(i, 1)}
                   aria-label="Remove tag"
                 >
-                  <X size={12} />
+                  <X size={11} />
                 </button>
               </span>
             {/each}

@@ -2,14 +2,14 @@
   import { goto } from "$app/navigation";
   import Logo from "$lib/logo_assets/logo.svelte";
   import { getTheme, toggleTheme } from "$lib/state/theme.svelte";
-  import { Cog, Moon, Sun, House, Globe, Menu } from "@lucide/svelte";
+  import { Cog, Moon, Sun, House, Globe, Menu, BookOpen } from "@lucide/svelte";
   import { DropdownMenu } from "bits-ui";
   let theme = $derived(getTheme());
 </script>
 
 <header class="shrink-0 sticky top-0 z-30 surface-glass-elevated">
   <nav class="px-6 py-4 flex flex-row justify-between items-center">
-    <a href="/dashboard" class="w-32 text-ctp-blue fill-current block">
+    <a href="/" class="w-32 text-ctp-blue fill-current block">
       <Logo />
     </a>
 
@@ -33,6 +33,14 @@
               </DropdownMenu.Item>
 
               <DropdownMenu.Item
+                class="menu-item flex items-center gap-2"
+                onSelect={() => goto("/api-docs/")}
+              >
+                <BookOpen size={16} />
+                <span>User Guide</span>
+              </DropdownMenu.Item>
+
+              <DropdownMenu.Item
                 class="menu-item flex items-center gap-2 justify-between"
                 disabled
               >
@@ -40,11 +48,8 @@
                   <Globe size={16} />
                   <span>Globe</span>
                 </div>
-                <span
-                  class="text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-sm bg-ctp-surface0 text-ctp-subtext0"
+                <span class="text-[11px] font-mono text-ctp-overlay0">soon</span
                 >
-                  Soon
-                </span>
               </DropdownMenu.Item>
 
               <DropdownMenu.Item

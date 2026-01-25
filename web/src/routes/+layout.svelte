@@ -1,6 +1,7 @@
 <script lang="ts">
   import "../app.css";
   import Header from "$lib/components/header.svelte";
+  import ToastContainer from "$lib/components/ToastContainer.svelte";
   import { page } from "$app/state";
 
   let { children } = $props();
@@ -12,6 +13,8 @@
       !page.url.pathname.startsWith("/signup/"),
   );
 </script>
+
+<ToastContainer />
 
 {#if showNavigation}
   <main class="flex flex-col h-full w-full overflow-hidden">

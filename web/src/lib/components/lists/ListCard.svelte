@@ -15,7 +15,7 @@
   }
 </script>
 
-<div role="list" class="font-mono divide-y divide-ctp-surface0/30">
+<div role="list" class="divide-y divide-ctp-surface0/20">
   {#each items as item}
     <div role="listitem" class="group layer-slide-up">
       <div class="flex items-start justify-between gap-4 px-2 py-3">

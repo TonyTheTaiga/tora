@@ -111,17 +111,7 @@ def create_workspace(
 
 
 class Tora:
-    """Main client for interacting with Tora experiment tracking.
-
-    This class provides methods for logging metrics, managing experiments,
-    and interacting with the Tora API. It supports both buffered and immediate
-    metric logging for optimal performance.
-
-    Example:
-        >>> tora = Tora.create_experiment("my-experiment", workspace_id="workspace-123")
-        >>> tora.log("accuracy", 0.95, step=100)
-        >>> tora.shutdown()
-    """
+    """Client for creating experiments and logging metrics to Tora."""
 
     def __init__(
         self,
@@ -423,10 +413,7 @@ class Tora:
         step: int | None = None,
         metadata: MetricMetadata | None = None,
     ) -> None:
-        """Log a value.
-
-        Logs are buffered and sent in batches when the buffer reaches max_buffer_len.
-        Call flush() or shutdown() to send remaining buffered metrics immediately.
+        """Buffer a log value and flush automatically when the buffer is full.
 
         Args:
             name: Name of the log
@@ -475,16 +462,12 @@ class Tora:
         value: int | float,
         step_or_epoch: int,
     ) -> None:
-        """Log a metric value.
-
-        Metrics are buffered and sent in batches when the buffer reaches max_buffer_len.
-        Call flush() or shutdown() to send remaining buffered metrics immediately.
+        """Log a metric value using the buffered writer.
 
         Args:
             name: Name of the metric
             value: Numeric value of the metric
             step_or_epoch: Step number or epoch of the metric
-            metadata: Additional metadata for the metric
 
         Raises:
             ToraValidationError: If input validation fails
@@ -496,10 +479,7 @@ class Tora:
         self._log(name=name, value=value, step=step_or_epoch, metadata={"type": "metric"})
 
     def result(self, name: str, value: int | float):
-        """Log a experiment result.
-
-        Results are buffered and sent in batches when the buffer reaches max_buffer_len.
-        Call flush() or shutdown() to send remaining buffered metrics immediately.
+        """Log an experiment result using the buffered writer.
 
         Args:
             name: Name of the result
@@ -512,12 +492,7 @@ class Tora:
         self._log(name=name, value=value, step=None, metadata={"type": "result"})
 
     def _write_logs(self) -> None:
-        """Write buffered metrics to the API.
-
-        This method is called automatically when the buffer is full or during
-        shutdown.
-        It handles errors gracefully and logs them without raising exceptions.
-        """
+        """Send buffered metrics to the API while swallowing network errors."""
         if not self._buffer or self._closed:
             return
 
@@ -547,11 +522,7 @@ class Tora:
             logger.error(f"Unexpected error writing metrics: {e}")
 
     def flush(self) -> None:
-        """Immediately send all buffered metrics to the API.
-
-        This method forces sending of buffered metrics without waiting for
-        the buffer to fill up. Useful for ensuring metrics are sent at
-        specific points in your code.
+        """Immediately send buffered metrics without waiting for the buffer limit.
 
         Raises:
             ToraMetricError: If the client is closed
@@ -565,12 +536,7 @@ class Tora:
             self._write_logs()
 
     def shutdown(self) -> None:
-        """Flush all buffered metrics and close the client.
-
-        This method should be called when you're done with the Tora client
-        to ensure all metrics are sent and resources are cleaned up.
-        After calling shutdown(), the client cannot be used for logging.
-        """
+        """Flush remaining metrics, close the HTTP client, and mark as closed."""
         if self._closed:
             return
 
@@ -606,7 +572,7 @@ class Tora:
 
     @property
     def url(self) -> str:
-        """Returns the experiment url"""
+        """Get the experiment URL."""
         return self._url
 
     @property

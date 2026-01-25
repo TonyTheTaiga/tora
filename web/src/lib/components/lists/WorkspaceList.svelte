@@ -100,19 +100,11 @@
 {:else}
   <ListCard items={filteredWorkspaces} {onItemClick}>
     {#snippet children(workspace)}
-      <div class="flex items-center justify-between gap-3 mb-2">
-        <h3
-          class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate"
-        >
-          {workspace.name}
-        </h3>
-        <div class="flex items-center gap-2 text-xs text-ctp-lavender">
-          <span>{formatDate(workspace.createdAt)}</span>
-          <span class="text-ctp-lavender/80"
-            >{formatTime(workspace.createdAt)}</span
-          >
-        </div>
-      </div>
+      <h3
+        class="text-ctp-text group-hover:text-ctp-blue transition-colors font-medium truncate mb-1"
+      >
+        {workspace.name}
+      </h3>
 
       {#if workspace.description}
         <p class="text-ctp-subtext1 text-sm mb-2">
@@ -120,8 +112,14 @@
         </p>
       {/if}
 
-      <div class="text-xs">
+      <div class="flex items-center gap-3 text-[11px] font-mono">
         <WorkspaceRoleBadge role={workspace.role || "VIEWER"} />
+        <span class="text-ctp-subtext0">
+          <span class="text-ctp-overlay0">created:</span>{formatDate(
+            workspace.createdAt,
+          )}
+          {formatTime(workspace.createdAt)}
+        </span>
       </div>
     {/snippet}
 

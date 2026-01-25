@@ -5,11 +5,13 @@ class ToraError(Exception):
     """Base exception class for all Tora SDK errors."""
 
     def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
+        """Initialize the exception with a message and optional details."""
         super().__init__(message)
         self.message = message
         self.details = details or {}
 
     def __str__(self) -> str:
+        """Return a formatted error message with optional details."""
         if self.details:
             return f"{self.message} (Details: {self.details})"
         return self.message
@@ -37,11 +39,13 @@ class ToraNetworkError(ToraError):
         response_text: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
+        """Initialize a network error with HTTP context when available."""
         super().__init__(message, details)
         self.status_code = status_code
         self.response_text = response_text
 
     def __str__(self) -> str:
+        """Return a formatted message that includes HTTP context if present."""
         parts = [self.message]
         if self.status_code:
             parts.append(f"Status: {self.status_code}")
@@ -76,6 +80,7 @@ class HTTPStatusError(ToraNetworkError):
     """Legacy exception for HTTP errors. Use ToraNetworkError instead."""
 
     def __init__(self, message: str, response: Any) -> None:
+        """Initialize with a full HTTP response for backward compatibility."""
         status_code = getattr(response, "status_code", None)
         response_text = getattr(response, "text", None)
 

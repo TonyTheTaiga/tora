@@ -184,7 +184,7 @@
   <div
     class="sticky top-0 z-10 surface-elevated border-b border-ctp-surface0/30 p-4"
   >
-    <div class="flex items-center justify-between mb-2">
+    <div class="flex items-center justify-between mb-3">
       <button
         class="flex items-center gap-2 text-ctp-text font-medium text-base hover:text-ctp-blue"
         onclick={toggleHeader}
@@ -200,7 +200,7 @@
       </button>
       <div class="flex items-center gap-2">
         <button
-          class="floating-element p-2 rounded-md disabled:opacity-50"
+          class="floating-element p-2 rounded-none disabled:opacity-50"
           onclick={refreshDetails}
           disabled={loading.experimentDetails}
           title="refresh experiment details"
@@ -221,7 +221,7 @@
           <div class="flex flex-wrap gap-1 mb-2">
             {#each experiment.tags as tag}
               <span
-                class="text-xs bg-ctp-blue/20 text-ctp-blue border border-ctp-blue/30 px-2 py-1"
+                class="text-[11px] font-mono text-ctp-subtext1 before:content-['#'] before:text-ctp-blue/60"
                 >{tag}</span
               >
             {/each}
@@ -229,32 +229,31 @@
         {/if}
 
         {#if experiment.hyperparams?.length}
-          <div
-            id="hyperparams-header-section"
-            class="border-ctp-terminal-border"
-          >
-            <div class="flex flex-wrap gap-1">
+          <div id="hyperparams-header-section">
+            <div class="flex flex-wrap gap-x-3 gap-y-0.5">
               {#each showAllHyperparams ? sortedHyperparams : sortedHyperparams.slice(0, 12) as param}
                 <span
-                  class="text-[11px] rounded-sm bg-ctp-surface0/30 border border-ctp-surface0/40 text-ctp-subtext0 font-mono px-2 py-0.5"
+                  class="text-[11px] text-ctp-subtext0 font-mono"
                   title={`${param.key}=${String(param.value)}`}
                 >
-                  {param.key}={displayHPValue(param.value)}
+                  <span class="text-ctp-overlay0">{param.key}</span><span
+                    class="text-ctp-overlay1">=</span
+                  >{displayHPValue(param.value)}
                 </span>
               {/each}
               {#if !showAllHyperparams && sortedHyperparams.length > 12}
                 <button
-                  class="text-[11px] text-ctp-blue px-2 py-0.5"
+                  class="text-[11px] text-ctp-overlay0 hover:text-ctp-text font-mono"
                   onclick={() => (showAllHyperparams = true)}
                 >
-                  +{sortedHyperparams.length - 12} more
+                  +{sortedHyperparams.length - 12}
                 </button>
               {:else if showAllHyperparams && sortedHyperparams.length > 12}
                 <button
-                  class="text-[11px] text-ctp-blue px-2 py-0.5"
+                  class="text-[11px] text-ctp-overlay0 hover:text-ctp-text font-mono"
                   onclick={() => (showAllHyperparams = false)}
                 >
-                  show less
+                  −
                 </button>
               {/if}
             </div>
@@ -263,13 +262,14 @@
       </div>
     {/if}
 
-    <div class="flex items-center gap-3 mb-2">
+    <div class="mb-3">
       <button
-        class="text-xs text-ctp-overlay0 hover:text-ctp-blue"
+        class="text-[11px] font-mono text-ctp-overlay0 hover:text-ctp-text"
         onclick={() => copyToClipboard(experiment.id)}
         title="click to copy experiment id"
       >
-        experiment id: {experiment.id}
+        <span class="text-ctp-overlay1">id:</span>
+        {experiment.id}
       </button>
     </div>
   </div>
@@ -280,9 +280,9 @@
         <div class="space-y-2">
           <div class="flex items-center gap-2">
             <div class="text-sm text-ctp-text">pinned results</div>
-            <div class="text-sm text-ctp-subtext0">
-              [{pinnedResults.length}]
-            </div>
+            <span class="text-[11px] font-mono text-ctp-overlay0"
+              >[{pinnedResults.length}]</span
+            >
           </div>
           <div
             class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
@@ -350,7 +350,9 @@
             <ChevronRight size={14} />
           {/if}
           <span>results</span>
-          <span class="text-ctp-subtext0">[{results.length}]</span>
+          <span class="text-[11px] font-mono text-ctp-overlay0"
+            >[{results.length}]</span
+          >
         </button>
         {#if showResults}
           <div id="results-section" class="border-ctp-terminal-border p-2">

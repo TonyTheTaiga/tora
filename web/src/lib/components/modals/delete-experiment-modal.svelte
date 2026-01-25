@@ -23,7 +23,11 @@
   }
 </script>
 
-<BaseModal title="Delete Experiment?" onClose={closeModal}>
+<BaseModal
+  title="Delete Experiment?"
+  onClose={closeModal}
+  closeDisabled={isDeleting}
+>
   <div class="space-y-4">
     <div class="border border-ctp-surface0/20 p-3 mb-4">
       <div class="flex items-start gap-3">

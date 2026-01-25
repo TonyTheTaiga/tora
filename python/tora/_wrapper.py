@@ -37,10 +37,7 @@ def setup(
     server_url: str | None = None,
     max_buffer_len: int = 1,
 ) -> str:
-    """Set up the global Tora client with a new experiment.
-
-    This creates a new experiment and initializes the global client.
-    After calling this function, you can use tmetric() to log metrics.
+    """Create a new experiment and initialize the global Tora client.
 
     Args:
         name: Name of the experiment
@@ -138,11 +135,7 @@ def flush() -> None:
 
 
 def shutdown() -> None:
-    """Shutdown the global Tora client and flush all metrics.
-
-    After calling this function, you need to call setup() again
-    to reinitialize the client.
-    """
+    """Shutdown the global Tora client and flush all metrics."""
     global _INSTANCE
     if _INSTANCE is not None:
         try:

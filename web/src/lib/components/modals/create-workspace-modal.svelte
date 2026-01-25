@@ -44,9 +44,8 @@
             name="description"
             type="textarea"
             rows={2}
-            placeholder="description"
+            placeholder="description (optional)"
             bind:value={description}
-            required
           />
         </div>
       </ModalFormSection>

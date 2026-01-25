@@ -10,7 +10,7 @@ Track metrics, hyperparameters, and experiment metadata with just 2 lines of cod
 
 - setup: Initialize a global experiment session.
 - create_workspace: Create a new workspace.
-- tlog: Log a single metric.
+- tmetric: Log a single metric with a step value.
 - tresult: Log a result value.
 - flush: Send buffered metrics immediately.
 - shutdown: Flush remaining metrics and close the client.
@@ -66,19 +66,17 @@ def create_workspace(
         dict: Workspace data including id, name, and description.
     """
 
-def tlog(
+def tmetric(
     name: str,
     value: float | int,
-    step: int | None = None,
-    metadata: dict | None = None,
+    step: int,
 ) -> None:
     """Log a metric using the global experiment session.
 
     Args:
         name: Metric name.
         value: Metric value (int or float).
-        step: Optional step number.
-        metadata: Optional metadata dictionary (max 10KB).
+        step: Step number or epoch identifier.
 
     Raises:
         ToraError: If called before :func:`setup`.
@@ -165,20 +163,18 @@ class Tora:
             Tora: A client instance for the existing experiment.
         """
 
-    def log(
+    def metric(
         self,
         name: str,
         value: float | int,
-        step: int | None = None,
-        metadata: dict | None = None,
+        step_or_epoch: int,
     ) -> None:
         """Log a single metric with buffering.
 
         Args:
             name: Metric name.
             value: Metric value (int or float).
-            step: Optional step number.
-            metadata: Optional metadata dictionary (max 10KB).
+            step_or_epoch: Step or epoch identifier assigned to the metric.
         """
 
     def result(
@@ -195,7 +191,7 @@ class Tora:
 
     def log_metrics(
         self,
-        metrics: dict[str, float | int],
+        metrics: dict[str, int | float],
         step: int | None = None,
     ) -> None:
         """Log multiple metrics at once.
@@ -256,7 +252,7 @@ class Tora:
 
 ```python
 with Tora.create_experiment("name") as client:
-    client.log("metric", 1.0)
+    client.metric("metric", 1.0, step_or_epoch=1)
 ```
 
 ---

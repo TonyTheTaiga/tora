@@ -1,0 +1,321 @@
+{
+  "overview": {
+    "title": "Tora Python SDK",
+    "tagline": "Experiment tracking built for speed and simplicity.",
+    "highlights": [
+      "Track metrics, hyperparameters, tags, and metadata with minimal setup.",
+      "Buffered logging keeps training loops fast while still streaming results.",
+      "Experiments stay linked to workspaces with ergonomic auth defaults."
+    ]
+  },
+  "globalFunctions": [
+    {
+      "name": "setup",
+      "summary": "Initialize a global experiment session and return its id.",
+      "signature": "setup(name, workspace_id=None, description=None, hyperparams=None, tags=None, api_key=None, server_url=None, max_buffer_len=1) -> str",
+      "parameters": [
+        { "name": "name", "type": "str", "description": "Experiment name." },
+        {
+          "name": "workspace_id",
+          "type": "str | None",
+          "description": "Workspace to attach the experiment to."
+        },
+        {
+          "name": "description",
+          "type": "str | None",
+          "description": "Experiment description."
+        },
+        {
+          "name": "hyperparams",
+          "type": "dict | None",
+          "description": "Hyperparameter dictionary."
+        },
+        {
+          "name": "tags",
+          "type": "list[str] | None",
+          "description": "List of experiment tags."
+        },
+        {
+          "name": "api_key",
+          "type": "str | None",
+          "description": "Authentication key (falls back to env by default)."
+        },
+        {
+          "name": "server_url",
+          "type": "str | None",
+          "description": "Custom server URL."
+        },
+        {
+          "name": "max_buffer_len",
+          "type": "int",
+          "description": "Buffer size before flush. Defaults to 1."
+        }
+      ],
+      "returns": "str: Experiment ID.",
+      "notes": ["Prints the experiment URL to the console on creation."]
+    },
+    {
+      "name": "create_workspace",
+      "summary": "Create a workspace and return its data.",
+      "signature": "create_workspace(name, description=None, api_key=None, server_url=None) -> dict",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "str",
+          "description": "Workspace name (<= 255 chars)."
+        },
+        {
+          "name": "description",
+          "type": "str | None",
+          "description": "Workspace description (<= 1000 chars)."
+        },
+        {
+          "name": "api_key",
+          "type": "str | None",
+          "description": "Authentication key."
+        },
+        {
+          "name": "server_url",
+          "type": "str | None",
+          "description": "Custom server URL."
+        }
+      ],
+      "returns": "dict: Workspace data including id, name, and description."
+    },
+    {
+      "name": "tmetric",
+      "summary": "Log a single metric using the global experiment session.",
+      "signature": "tmetric(name, value, step) -> None",
+      "parameters": [
+        { "name": "name", "type": "str", "description": "Metric name." },
+        {
+          "name": "value",
+          "type": "float | int",
+          "description": "Metric value."
+        },
+        {
+          "name": "step",
+          "type": "int",
+          "description": "Step or epoch identifier."
+        }
+      ],
+      "raises": "ToraError if called before setup."
+    },
+    {
+      "name": "tresult",
+      "summary": "Log a result value using the global experiment session.",
+      "signature": "tresult(name, value) -> None",
+      "parameters": [
+        { "name": "name", "type": "str", "description": "Result name." },
+        {
+          "name": "value",
+          "type": "float | int",
+          "description": "Result value."
+        }
+      ]
+    },
+    {
+      "name": "flush",
+      "summary": "Send all buffered metrics immediately.",
+      "signature": "flush() -> None"
+    },
+    {
+      "name": "shutdown",
+      "summary": "Flush remaining metrics and close the global client.",
+      "signature": "shutdown() -> None"
+    },
+    {
+      "name": "is_initialized",
+      "summary": "Return whether the global client is initialized.",
+      "signature": "is_initialized() -> bool"
+    },
+    {
+      "name": "get_experiment_id",
+      "summary": "Return the current experiment ID, if available.",
+      "signature": "get_experiment_id() -> str | None"
+    },
+    {
+      "name": "get_experiment_url",
+      "summary": "Return the current experiment URL, if available.",
+      "signature": "get_experiment_url() -> str | None"
+    }
+  ],
+  "class": {
+    "name": "Tora",
+    "summary": "Client for a single experiment with buffered logging.",
+    "factories": [
+      {
+        "name": "create_experiment",
+        "summary": "Create and return a new Tora client.",
+        "signature": "Tora.create_experiment(name, workspace_id=None, description=None, hyperparams=None, tags=None, max_buffer_len=25, api_key=None, server_url=None) -> Tora",
+        "parameters": [
+          { "name": "name", "type": "str", "description": "Experiment name." },
+          {
+            "name": "workspace_id",
+            "type": "str | None",
+            "description": "Target workspace ID."
+          },
+          {
+            "name": "description",
+            "type": "str | None",
+            "description": "Experiment description."
+          },
+          {
+            "name": "hyperparams",
+            "type": "dict | None",
+            "description": "Hyperparameter dictionary."
+          },
+          {
+            "name": "tags",
+            "type": "list[str] | None",
+            "description": "List of experiment tags."
+          },
+          {
+            "name": "max_buffer_len",
+            "type": "int",
+            "description": "Buffer size. Defaults to 25."
+          },
+          {
+            "name": "api_key",
+            "type": "str | None",
+            "description": "Authentication key."
+          },
+          {
+            "name": "server_url",
+            "type": "str | None",
+            "description": "Custom server URL."
+          }
+        ]
+      },
+      {
+        "name": "load_experiment",
+        "summary": "Load an existing experiment and return a Tora client.",
+        "signature": "Tora.load_experiment(experiment_id, max_buffer_len=25, api_key=None, server_url=None) -> Tora",
+        "parameters": [
+          {
+            "name": "experiment_id",
+            "type": "str",
+            "description": "Existing experiment ID."
+          },
+          {
+            "name": "max_buffer_len",
+            "type": "int",
+            "description": "Buffer size. Defaults to 25."
+          },
+          {
+            "name": "api_key",
+            "type": "str | None",
+            "description": "Authentication key."
+          },
+          {
+            "name": "server_url",
+            "type": "str | None",
+            "description": "Custom server URL."
+          }
+        ]
+      }
+    ],
+    "methods": [
+      {
+        "name": "metric",
+        "summary": "Log a single metric with buffering.",
+        "signature": "metric(name, value, step_or_epoch) -> None",
+        "parameters": [
+          { "name": "name", "type": "str", "description": "Metric name." },
+          {
+            "name": "value",
+            "type": "float | int",
+            "description": "Metric value."
+          },
+          {
+            "name": "step_or_epoch",
+            "type": "int",
+            "description": "Step or epoch identifier."
+          }
+        ]
+      },
+      {
+        "name": "result",
+        "summary": "Log a result value with buffering.",
+        "signature": "result(name, value) -> None",
+        "parameters": [
+          { "name": "name", "type": "str", "description": "Result name." },
+          {
+            "name": "value",
+            "type": "float | int",
+            "description": "Result value."
+          }
+        ]
+      },
+      {
+        "name": "log_metrics",
+        "summary": "Log multiple metrics at once.",
+        "signature": "log_metrics(metrics, step=None) -> None",
+        "parameters": [
+          {
+            "name": "metrics",
+            "type": "dict[str, int | float]",
+            "description": "Mapping of metric names to values."
+          },
+          {
+            "name": "step",
+            "type": "int | None",
+            "description": "Optional step number applied to all metrics."
+          }
+        ]
+      },
+      {
+        "name": "flush",
+        "summary": "Send all buffered metrics immediately.",
+        "signature": "flush() -> None"
+      },
+      {
+        "name": "shutdown",
+        "summary": "Flush all metrics and close the client.",
+        "signature": "shutdown() -> None"
+      }
+    ],
+    "properties": [
+      {
+        "name": "experiment_id",
+        "type": "str",
+        "description": "Identifier for this experiment."
+      },
+      {
+        "name": "url",
+        "type": "str",
+        "description": "URL for viewing this experiment."
+      },
+      {
+        "name": "max_buffer_len",
+        "type": "int",
+        "description": "Maximum buffer size."
+      },
+      {
+        "name": "buffer_size",
+        "type": "int",
+        "description": "Current size of the buffer."
+      },
+      {
+        "name": "is_closed",
+        "type": "bool",
+        "description": "True if the client is closed."
+      }
+    ],
+    "examples": [
+      {
+        "title": "Context manager",
+        "code": "with Tora.create_experiment(\"demo\") as client:\\n    client.metric(\"accuracy\", 0.92, step_or_epoch=1)"
+      }
+    ]
+  },
+  "configuration": {
+    "authentication": {
+      "description": "Supply an API key wherever api_key is accepted:",
+      "options": [
+        "Set the TORA_API_KEY environment variable (recommended).",
+        "Pass api_key directly to functions and classmethods."
+      ]
+    }
+  }
+}

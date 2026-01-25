@@ -312,4 +312,22 @@
       transform: translateY(0);
     }
   }
+
+  /* Theme transitions */
+  *,
+  *::before,
+  *::after {
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.15s ease;
+  }
+
+  /* Disable transitions on page load to prevent flash */
+  html.no-transitions,
+  html.no-transitions *,
+  html.no-transitions *::before,
+  html.no-transitions *::after {
+    transition: none !important;
+  }
 }

@@ -8,9 +8,7 @@
   let submitting = $state(false);
 </script>
 
-<div
-  class="flex items-center justify-center min-h-[calc(100vh-2rem)] font-mono"
->
+<div class="flex items-center justify-center min-h-[calc(100vh-2rem)]">
   <div class="w-full max-w-md">
     <div
       class="bg-ctp-surface0/10 backdrop-blur-md border border-ctp-surface0/20 overflow-hidden"

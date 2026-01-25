@@ -2,6 +2,8 @@
   import { getExperimentToEdit } from "$lib/state/modal.svelte";
   import ExperimentList from "$lib/components/lists/ExperimentList.svelte";
   import EditExperimentModal from "$lib/components/modals/edit-experiment-modal.svelte";
+  import LiveRegion from "$lib/components/LiveRegion.svelte";
+  import SkeletonLoader from "$lib/components/SkeletonLoader.svelte";
   import type { Workspace, Experiment } from "$lib/types";
   import { onMount } from "svelte";
   import { copyToClipboard } from "$lib/utils/common";
@@ -159,11 +161,21 @@
   function handleSelectExperiment(exp: Experiment) {
     setSelectedExperiment(exp);
   }
+
+  let statusMessage = $derived(
+    loading.experiments
+      ? "Loading experiments"
+      : errors.experiments
+        ? `Error: ${errors.experiments}`
+        : `${experiments.length} experiments loaded`,
+  );
 </script>
 
 {#if experimentToEdit}
   <EditExperimentModal bind:experiment={experimentToEdit} />
 {/if}
+
+<LiveRegion message={statusMessage} />
 
 <div class="flex flex-col">
   <div
@@ -184,7 +196,7 @@
         >
           <ChevronLeft size={16} />
         </button>
-        <h2 class="text-ctp-text font-medium text-base">Experiments</h2>
+        <h2 class="text-ctp-text font-medium text-base">{workspace.name}</h2>
       </div>
       <div class="flex gap-2 items-center">
         <button
@@ -223,7 +235,7 @@
     </div>
     <div class="mb-3">
       <button
-        class="text-xs text-ctp-overlay0 hover:text-ctp-blue cursor-pointer"
+        class="text-[11px] font-mono text-ctp-overlay0 hover:text-ctp-text cursor-pointer"
         tabindex="0"
         onclick={(e) => {
           e.stopPropagation();
@@ -231,7 +243,8 @@
         }}
         title="click to copy workspace id"
       >
-        workspace id: {workspace.id}
+        <span class="text-ctp-overlay1">id:</span>
+        {workspace.id}
       </button>
     </div>
     <div
@@ -249,9 +262,7 @@
   <!-- Content Area -->
   <div class="p-4">
     {#if loading.experiments}
-      <div class="text-center py-8 text-ctp-subtext0 text-sm">
-        loading experiments...
-      </div>
+      <SkeletonLoader variant="list-item" count={5} />
     {:else if errors.experiments}
       <div class="surface-layer-2 p-4 m-2">
         <div class="text-ctp-red font-medium mb-2 text-sm">
