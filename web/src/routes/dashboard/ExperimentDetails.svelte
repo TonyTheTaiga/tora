@@ -19,7 +19,6 @@
   let yScale = $state<"log" | "linear">("log");
   let staticRefreshKey = $state(0);
   let showResults = $state(true);
-  let showHeader = $state(true);
   let showAllHyperparams = $state(false);
   let pinnedResults = $state<any[]>([]);
 
@@ -28,10 +27,6 @@
       ?.slice()
       .sort((a: HyperParam, b: HyperParam) => a.key.localeCompare(b.key)) ?? [],
   );
-
-  function headerExpandedKey(expId: string) {
-    return `tora:headerExpanded:${expId}`;
-  }
 
   function storageKey(expId: string) {
     return `tora:pinnedResults:${expId}`;
@@ -64,24 +59,6 @@
   function displayHPValue(v: string | number): string {
     const s = String(v);
     return s.length > 16 ? s.slice(0, 16) + "…" : s;
-  }
-
-  function loadHeaderExpanded() {
-    try {
-      if (typeof localStorage === "undefined") return;
-      const raw = localStorage.getItem(headerExpandedKey(experiment.id));
-      showHeader = raw === null ? true : raw === "true";
-    } catch (e) {}
-  }
-
-  function saveHeaderExpanded() {
-    try {
-      if (typeof localStorage === "undefined") return;
-      localStorage.setItem(
-        headerExpandedKey(experiment.id),
-        String(showHeader),
-      );
-    } catch (e) {}
   }
 
   function toggleLiveStream() {
@@ -144,7 +121,6 @@
       detailsAbort = new AbortController();
       loadPins(exp.id);
       loadExperimentDetails(exp);
-      loadHeaderExpanded();
     }
     return () => {
       try {
@@ -165,11 +141,6 @@
     } catch (_) {}
   }
 
-  function toggleHeader() {
-    showHeader = !showHeader;
-    saveHeaderExpanded();
-  }
-
   function isPinned(name: string): boolean {
     return isPinnedGlobal(experiment.id, name);
   }
@@ -181,37 +152,24 @@
 </script>
 
 <div class="flex flex-col">
-  <div
-    class="sticky top-0 z-10 surface-elevated border-b border-ctp-surface0/30 p-4"
-  >
-    <div class="flex items-center justify-between mb-3">
-      <button
-        class="flex items-center gap-2 text-ctp-text font-medium text-base hover:text-ctp-blue"
-        onclick={toggleHeader}
-        aria-expanded={showHeader}
-        aria-controls="experiment-header-details"
-      >
-        {#if showHeader}
-          <ChevronDown size={16} />
-        {:else}
-          <ChevronRight size={16} />
-        {/if}
-        <span class="truncate">{experiment.name}</span>
-      </button>
-      <div class="flex items-center gap-2">
-        <button
-          class="floating-element p-2 rounded-none disabled:opacity-50"
-          onclick={refreshDetails}
-          disabled={loading.experimentDetails}
-          title="refresh experiment details"
-          aria-label="refresh experiment details"
-        >
-          <RefreshCw size={16} />
-        </button>
-      </div>
-    </div>
-    {#if showHeader}
-      <div id="experiment-header-details" class="mt-2">
+  <div class="p-4">
+    <div class="space-y-6">
+      <!-- Experiment info -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-ctp-text font-medium text-base truncate">
+            {experiment.name}
+          </h2>
+          <button
+            class="floating-element p-2 rounded-none disabled:opacity-50 shrink-0"
+            onclick={refreshDetails}
+            disabled={loading.experimentDetails}
+            title="refresh experiment details"
+            aria-label="refresh experiment details"
+          >
+            <RefreshCw size={16} />
+          </button>
+        </div>
         {#if experiment.description}
           <p class="text-ctp-subtext0 mb-2 text-sm">
             {experiment.description}
@@ -227,55 +185,44 @@
             {/each}
           </div>
         {/if}
-
         {#if experiment.hyperparams?.length}
-          <div id="hyperparams-header-section">
-            <div class="flex flex-wrap gap-x-3 gap-y-0.5">
-              {#each showAllHyperparams ? sortedHyperparams : sortedHyperparams.slice(0, 12) as param}
-                <span
-                  class="text-[11px] text-ctp-subtext0 font-mono"
-                  title={`${param.key}=${String(param.value)}`}
-                >
-                  <span class="text-ctp-overlay0">{param.key}</span><span
-                    class="text-ctp-overlay1">=</span
-                  >{displayHPValue(param.value)}
-                </span>
-              {/each}
-              {#if !showAllHyperparams && sortedHyperparams.length > 12}
-                <button
-                  class="text-[11px] text-ctp-overlay0 hover:text-ctp-text font-mono"
-                  onclick={() => (showAllHyperparams = true)}
-                >
-                  +{sortedHyperparams.length - 12}
-                </button>
-              {:else if showAllHyperparams && sortedHyperparams.length > 12}
-                <button
-                  class="text-[11px] text-ctp-overlay0 hover:text-ctp-text font-mono"
-                  onclick={() => (showAllHyperparams = false)}
-                >
-                  −
-                </button>
-              {/if}
-            </div>
+          <div class="flex flex-wrap gap-x-3 gap-y-0.5 mb-2">
+            {#each showAllHyperparams ? sortedHyperparams : sortedHyperparams.slice(0, 12) as param}
+              <span
+                class="text-[11px] text-ctp-subtext0 font-mono"
+                title={`${param.key}=${String(param.value)}`}
+              >
+                <span class="text-ctp-overlay0">{param.key}</span><span
+                  class="text-ctp-overlay1">=</span
+                >{displayHPValue(param.value)}
+              </span>
+            {/each}
+            {#if !showAllHyperparams && sortedHyperparams.length > 12}
+              <button
+                class="text-[11px] text-ctp-overlay0 hover:text-ctp-text font-mono"
+                onclick={() => (showAllHyperparams = true)}
+              >
+                +{sortedHyperparams.length - 12}
+              </button>
+            {:else if showAllHyperparams && sortedHyperparams.length > 12}
+              <button
+                class="text-[11px] text-ctp-overlay0 hover:text-ctp-text font-mono"
+                onclick={() => (showAllHyperparams = false)}
+              >
+                −
+              </button>
+            {/if}
           </div>
         {/if}
+        <button
+          class="text-[11px] font-mono text-ctp-overlay0 hover:text-ctp-text"
+          onclick={() => copyToClipboard(experiment.id)}
+          title="click to copy experiment id"
+        >
+          <span class="text-ctp-overlay1">id:</span>
+          {experiment.id}
+        </button>
       </div>
-    {/if}
-
-    <div class="mb-3">
-      <button
-        class="text-[11px] font-mono text-ctp-overlay0 hover:text-ctp-text"
-        onclick={() => copyToClipboard(experiment.id)}
-        title="click to copy experiment id"
-      >
-        <span class="text-ctp-overlay1">id:</span>
-        {experiment.id}
-      </button>
-    </div>
-  </div>
-
-  <div class="p-4">
-    <div class="space-y-6">
       {#if pinnedResults.length > 0}
         <div class="space-y-2">
           <div class="flex items-center gap-2">
