@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Button } from "$lib/components";
+
   let {
     onCancel,
     cancelText = "cancel",
@@ -13,18 +15,10 @@
 </script>
 
 <div class="flex justify-end gap-2 pt-3 mt-3 border-t border-ctp-surface0/20">
-  <button
-    onclick={onCancel}
-    type="button"
-    class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text px-3 py-2 text-sm transition-all"
-  >
+  <Button onclick={onCancel} type="button">
     {cancelText}
-  </button>
-  <button
-    type="submit"
-    disabled={isSubmitting}
-    class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-  >
+  </Button>
+  <Button type="submit" variant="primary" loading={isSubmitting}>
     {submitText}
-  </button>
+  </Button>
 </div>

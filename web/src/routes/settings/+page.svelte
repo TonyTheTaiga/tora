@@ -15,6 +15,7 @@
     setApiKeyToRevoke,
     getApiKeyToRevoke,
   } from "$lib/state/modal.svelte.js";
+  import { Button } from "$lib/components";
 
   let { data } = $props();
   let createdKey: string = $state("");
@@ -123,13 +124,9 @@
             required
           />
         </div>
-        <button
-          type="submit"
-          class="floating-element p-2 rounded-none"
-          title="Create key"
-        >
+        <Button type="submit" variant="primary" size="icon" title="Create key">
           <Plus size={16} />
-        </button>
+        </Button>
       </form>
     </div>
 
@@ -141,10 +138,11 @@
             <span class="text-xs text-ctp-green font-medium"
               >new key created</span
             >
-            <button
+            <Button
               type="button"
+              variant="primary"
+              size="icon"
               onclick={copyKey}
-              class="floating-element p-1.5 rounded-none"
               title="Copy and dismiss"
             >
               {#if copied}
@@ -152,7 +150,7 @@
               {:else}
                 <Copy size={14} />
               {/if}
-            </button>
+            </Button>
           </div>
           <code
             class="text-[11px] font-mono text-ctp-blue break-all select-all block"
@@ -184,14 +182,16 @@
                 >{apiKey.createdAt}</span
               >
               {#if !apiKey.revoked}
-                <button
+                <Button
                   type="button"
-                  class="opacity-0 group-hover:opacity-100 p-1 text-ctp-overlay0 hover:text-ctp-red transition-all"
+                  variant="icon"
+                  size="sm"
+                  class="opacity-0 group-hover:opacity-100 text-ctp-overlay0 hover:text-ctp-red"
                   title="Revoke"
                   onclick={() => setApiKeyToRevoke(apiKey)}
                 >
                   <Trash2 size={12} />
-                </button>
+                </Button>
               {:else}
                 <span class="text-[10px] text-ctp-red">revoked</span>
               {/if}

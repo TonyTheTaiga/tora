@@ -1,9 +1,10 @@
 <script lang="ts">
   import type { ApiKey } from "$lib/types";
-  import { AlertTriangle, Loader2 } from "@lucide/svelte";
+  import { AlertTriangle } from "@lucide/svelte";
   import { enhance } from "$app/forms";
   import { BaseModal } from "$lib/components/modals";
   import { resetApiKeyToRevoke } from "$lib/state/modal.svelte.js";
+  import { Button } from "$lib/components";
 
   let { apiKey = $bindable() }: { apiKey: ApiKey } = $props();
 
@@ -64,28 +65,17 @@
       }}
     >
       <input type="hidden" name="keyId" value={apiKey.id} />
-      <button
-        onclick={closeModal}
-        type="button"
-        disabled={isRevoking}
-        class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text px-3 py-2 text-sm transition-all"
-      >
+      <Button onclick={closeModal} type="button" disabled={isRevoking}>
         cancel
-      </button>
-      <button
+      </Button>
+      <Button
         type="submit"
-        disabled={isRevoking}
-        class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 px-3 py-2 text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        variant="destructive"
+        loading={isRevoking}
+        loadingText="revoking..."
       >
-        {#if isRevoking}
-          <div class="flex items-center gap-2">
-            <Loader2 size={14} class="animate-spin" />
-            revoking...
-          </div>
-        {:else}
-          revoke
-        {/if}
-      </button>
+        revoke
+      </Button>
     </form>
   </div>
 </BaseModal>

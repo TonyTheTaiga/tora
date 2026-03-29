@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { LogIn, User, Lock, Mail, Loader2 } from "@lucide/svelte";
+  import { LogIn, User, Lock, Mail } from "@lucide/svelte";
   import type { PageProps } from "./$types";
   import { goto } from "$app/navigation";
   import { enhance } from "$app/forms";
+  import { Button } from "$lib/components";
 
   let { form }: PageProps = $props();
   let submitting = $state(false);
@@ -92,19 +93,17 @@
 
         <!-- Button actions -->
         <div class="pt-2">
-          <button
+          <Button
             type="submit"
-            class="w-full flex items-center justify-center gap-2 bg-ctp-blue/20 border border-ctp-blue/40 py-3 px-4 text-ctp-blue hover:bg-ctp-blue hover:text-ctp-crust transition-all font-mono disabled:opacity-50"
-            disabled={submitting}
+            variant="cta"
+            size="lg"
+            full
+            loading={submitting}
+            loadingText="signing in..."
           >
-            {#if submitting}
-              <Loader2 size={18} class="animate-spin" />
-              signing in...
-            {:else}
-              <LogIn size={18} />
-              sign in
-            {/if}
-          </button>
+            <LogIn size={18} />
+            sign in
+          </Button>
         </div>
       </form>
 
@@ -113,13 +112,9 @@
         class="flex justify-end gap-3 pt-2 pb-6 px-6 border-t border-ctp-surface0"
       >
         <p class="text-sm text-ctp-subtext0 pt-3">don't have an account?</p>
-        <button
-          type="button"
-          class="inline-flex items-center justify-center px-5 py-2.5 bg-transparent text-ctp-text hover:bg-ctp-surface0 transition-colors font-mono"
-          onclick={() => goto("/signup")}
-        >
+        <Button variant="ghost" size="lg" onclick={() => goto("/signup")}>
           sign up
-        </button>
+        </Button>
       </div>
     </div>
   </div>

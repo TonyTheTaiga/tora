@@ -1,15 +1,16 @@
 <script lang="ts">
   import { X } from "@lucide/svelte";
+  import { Button } from "$lib/components";
 
   let { onClose }: { onClose: () => void } = $props();
 </script>
 
-<button
+<Button
   onclick={onClose}
   type="button"
-  class="absolute top-6 right-6
-         text-ctp-subtext0 hover:text-ctp-text p-1 transition-colors"
+  variant="icon"
+  class="absolute top-6 right-6"
   aria-label="Close modal"
 >
   <X size={20} />
-</button>
+</Button>

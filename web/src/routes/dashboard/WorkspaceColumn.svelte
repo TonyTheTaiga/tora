@@ -16,6 +16,7 @@
   import { DropdownMenu } from "bits-ui";
   import type { Workspace } from "$lib/types";
   import InvitationsModal from "./invitations-modal.svelte";
+  import { Button } from "$lib/components";
 
   let {
     workspaces,

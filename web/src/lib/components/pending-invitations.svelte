@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Check, X } from "@lucide/svelte";
   import type { PendingInvitation } from "$lib/types";
+  import { Button } from "$lib/components";
 
   interface Props {
     invitations: PendingInvitation[];
@@ -48,24 +49,24 @@
           </div>
         </div>
         <div class="flex items-center gap-2 ml-4">
-          <button
-            type="button"
-            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-green transition-colors bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 hover:border-ctp-green/30 p-2"
+          <Button
+            size="sm"
+            class="text-ctp-subtext0 hover:text-ctp-green hover:border-ctp-green/30"
             title="Accept invitation"
             onclick={() => respondToInvitation(invitation.id, true)}
           >
             <Check class="w-3 h-3" />
             <span>Accept</span>
-          </button>
-          <button
-            type="button"
-            class="flex items-center gap-1 text-xs text-ctp-subtext0 hover:text-ctp-red transition-colors bg-ctp-surface0/20 backdrop-blur-md border border-ctp-surface0/30 hover:border-ctp-red/30 p-2"
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
             title="Decline invitation"
             onclick={() => respondToInvitation(invitation.id, false)}
           >
             <X class="w-3 h-3" />
             <span>Decline</span>
-          </button>
+          </Button>
         </div>
       </div>
     {/each}

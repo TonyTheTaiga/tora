@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Search, FolderOpen, FileQuestion, Plus } from "@lucide/svelte";
+  import { Button } from "$lib/components";
 
   interface Props {
     type: "search" | "empty";
@@ -47,13 +48,10 @@
       no {itemType} found
     </div>
     {#if actionText && onAction}
-      <button
-        onclick={onAction}
-        class="mt-4 flex items-center gap-2 text-ctp-blue hover:text-ctp-blue/80 transition-colors text-sm"
-      >
+      <Button variant="link" class="mt-4" onclick={onAction}>
         <Plus size={16} />
         {actionText}
-      </button>
+      </Button>
     {/if}
   </div>
 {/if}

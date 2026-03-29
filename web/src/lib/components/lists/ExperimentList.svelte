@@ -38,6 +38,30 @@
 
   let canDeleteExperiment = $derived(["OWNER"].includes(workspace.role));
 
+  function matchesHyperparams(
+    hyperparams: { key: string; value: string | number }[] | undefined,
+    term: string,
+  ): boolean {
+    if (!hyperparams || hyperparams.length === 0) return false;
+
+    // Check for key=value format
+    if (term.includes("=")) {
+      const [searchKey, searchValue] = term.split("=", 2);
+      return hyperparams.some(
+        (hp) =>
+          hp.key.toLowerCase() === searchKey &&
+          String(hp.value).toLowerCase() === searchValue,
+      );
+    }
+
+    // Otherwise match against key or value
+    return hyperparams.some(
+      (hp) =>
+        hp.key.toLowerCase().includes(term) ||
+        String(hp.value).toLowerCase().includes(term),
+    );
+  }
+
   let filteredExperiments = $derived(
     experiments
       .map((exp: Experiment) => ({
@@ -59,7 +83,8 @@
             (t: string) =>
               entry.name.includes(t) ||
               entry.desc.includes(t) ||
-              entry.tags.some((tag: string) => tag.includes(t)),
+              entry.tags.some((tag: string) => tag.includes(t)) ||
+              matchesHyperparams(entry.exp.hyperparams, t),
           );
         },
       )

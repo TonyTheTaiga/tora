@@ -1,9 +1,10 @@
 <script lang="ts">
   import type { Workspace } from "$lib/types";
-  import { AlertTriangle, Loader2 } from "@lucide/svelte";
+  import { AlertTriangle } from "@lucide/svelte";
   import { enhance } from "$app/forms";
   import { BaseModal } from "$lib/components/modals";
   import { resetWorkspaceToDelete } from "$lib/state/modal.svelte.js";
+  import { Button } from "$lib/components";
 
   let { workspace = $bindable() }: { workspace: Workspace } = $props();
 
@@ -65,28 +66,17 @@
       }}
     >
       <input type="hidden" name="workspaceId" value={workspace.id} />
-      <button
-        onclick={closeModal}
-        type="button"
-        disabled={isDeleting}
-        class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-subtext0 hover:bg-ctp-surface0/30 hover:text-ctp-text px-3 py-2 text-sm transition-all"
-      >
+      <Button onclick={closeModal} type="button" disabled={isDeleting}>
         cancel
-      </button>
-      <button
+      </Button>
+      <Button
         type="submit"
-        disabled={isDeleting}
-        class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-red hover:bg-ctp-red/10 hover:border-ctp-red/30 px-3 py-2 text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        variant="destructive"
+        loading={isDeleting}
+        loadingText="deleting..."
       >
-        {#if isDeleting}
-          <div class="flex items-center gap-2">
-            <Loader2 size={14} class="animate-spin" />
-            deleting...
-          </div>
-        {:else}
-          delete
-        {/if}
-      </button>
+        delete
+      </Button>
     </form>
   </div>
 </BaseModal>

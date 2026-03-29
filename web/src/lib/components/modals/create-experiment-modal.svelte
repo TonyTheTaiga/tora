@@ -9,6 +9,7 @@
     ModalInput,
     ModalButtons,
   } from "$lib/components/modals";
+  import { Button } from "$lib/components";
 
   let { workspace }: { workspace?: any } = $props();
 
@@ -98,28 +99,28 @@
                   }
                 }}
               />
-              <button
+              <Button
                 type="button"
+                variant="primary"
                 onclick={(event) => {
                   event.preventDefault();
                   addTag();
                 }}
-                class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all"
               >
                 <Plus size={14} />
-              </button>
+              </Button>
             </div>
           {:else}
-            <button
+            <Button
               type="button"
+              variant="primary"
               onclick={(event) => {
                 event.preventDefault();
                 addingNewTag = true;
               }}
-              class="bg-ctp-surface0/20 border border-ctp-surface0/30 text-ctp-blue hover:bg-ctp-blue/10 hover:border-ctp-blue/30 px-3 py-2 text-sm transition-all"
             >
               <Plus size={14} />
-            </button>
+            </Button>
           {/if}
         </div>
       </ModalFormSection>

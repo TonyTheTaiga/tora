@@ -17,7 +17,7 @@
 
 <div role="list" class="divide-y divide-ctp-surface0/20">
   {#each items as item}
-    <div role="listitem" class="group layer-slide-up">
+    <div role="listitem" class="group">
       <div class="flex items-start justify-between gap-4 px-2 py-3">
         <button
           onclick={() => handleItemClick(item)}
