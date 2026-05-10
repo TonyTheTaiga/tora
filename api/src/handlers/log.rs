@@ -47,9 +47,10 @@ pub async fn get_logs(
                 step::int8,
                 metadata,
                 created_at
-            FROM log 
-            WHERE experiment_id = $1 
+            FROM log
+            WHERE experiment_id = $1
             ORDER BY created_at DESC
+            LIMIT 50000
         "#,
     )
     .bind(experiment_uuid)
@@ -100,10 +101,11 @@ pub async fn get_metrics(
                 step::int8,
                 metadata,
                 created_at
-            FROM log 
-            WHERE experiment_id = $1 
+            FROM log
+            WHERE experiment_id = $1
             AND metadata->>'type' = 'metric'
             ORDER BY step asc
+            LIMIT 50000
         "#,
     )
     .bind(experiment_uuid)
@@ -159,6 +161,7 @@ pub async fn get_results(
             WHERE experiment_id = $1
               AND metadata->>'type' = 'result'
             ORDER BY created_at DESC
+            LIMIT 50000
         "#,
     )
     .bind(experiment_uuid)

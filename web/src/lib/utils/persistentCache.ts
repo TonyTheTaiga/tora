@@ -20,38 +20,35 @@ function keyFor(workspaceId: string) {
   return `${EXPERIMENTS_CACHE_PREFIX}${workspaceId}`;
 }
 
-export function loadExperimentsFromStorage(
-  workspaceId: string,
-  ttlMs: number = DEFAULT_TTL_MS,
-): Experiment[] | null {
+function readRecord(workspaceId: string): ExperimentsCacheRecord | null {
   if (!browser) return null;
   try {
     const raw = localStorage.getItem(keyFor(workspaceId));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as ExperimentsCacheRecord;
     if (parsed.v !== EXPERIMENTS_CACHE_VERSION) return null;
-    if (Date.now() - parsed.ts > ttlMs) return null;
-    return parsed.data.map((e) => ({
-      ...e,
-      createdAt: new Date(e.createdAt),
-      updatedAt: new Date(e.updatedAt),
-    }));
+    return parsed;
   } catch {
     return null;
   }
 }
 
+export function loadExperimentsFromStorage(
+  workspaceId: string,
+  ttlMs: number = DEFAULT_TTL_MS,
+): Experiment[] | null {
+  const record = readRecord(workspaceId);
+  if (!record) return null;
+  if (Date.now() - record.ts > ttlMs) return null;
+  return record.data.map((e) => ({
+    ...e,
+    createdAt: new Date(e.createdAt),
+    updatedAt: new Date(e.updatedAt),
+  }));
+}
+
 export function getExperimentsTimestamp(workspaceId: string): number | null {
-  if (!browser) return null;
-  try {
-    const raw = localStorage.getItem(keyFor(workspaceId));
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as ExperimentsCacheRecord;
-    if (parsed.v !== EXPERIMENTS_CACHE_VERSION) return null;
-    return parsed.ts ?? null;
-  } catch {
-    return null;
-  }
+  return readRecord(workspaceId)?.ts ?? null;
 }
 
 export function saveExperimentsToStorage(

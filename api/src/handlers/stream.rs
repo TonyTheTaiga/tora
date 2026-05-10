@@ -70,26 +70,38 @@ async fn handle_socket(
         .expect("Failed to convert experiment id into UUID");
 
     if params.backfill {
-        let backfill_logs: Vec<sqlx::types::Json<LogMessage>> = sqlx::query_scalar(
+        let backfill_logs: Vec<sqlx::types::Json<LogMessage>> = match sqlx::query_scalar(
             r#"
-                select
-                    payload
+                select payload
                 from public.log_outbox
                 where processed_at is not null
                 and experiment_id = $1
-                order by id asc
+                order by id desc
+                limit 10000
                 "#,
         )
         .bind(experiment_uuid)
         .fetch_all(&app_state.db_pool)
         .await
-        .expect("Fucked around and found out!");
-        for row in backfill_logs {
-            let json = serde_json::to_string(&row).expect("failed to convert to json string");
-            socket
-                .send(WsMessage::Text(json.into()))
-                .await
-                .expect("failed to send a backfill row");
+        {
+            Ok(rows) => rows,
+            Err(e) => {
+                tracing::error!("Backfill query failed: {e}");
+                vec![]
+            }
+        };
+        // Send in chronological order (query was desc for limit, reverse here)
+        for row in backfill_logs.into_iter().rev() {
+            let json = match serde_json::to_string(&row) {
+                Ok(j) => j,
+                Err(e) => {
+                    tracing::warn!("Failed to serialize backfill row: {e}");
+                    continue;
+                }
+            };
+            if socket.send(WsMessage::Text(json.into())).await.is_err() {
+                return; // client disconnected during backfill
+            }
         }
     }
 
@@ -108,37 +120,37 @@ async fn handle_socket(
                         let raw: Vec<u8> = match message.value.convert() {
                             Ok(v) => v,
                             Err(e) => {
-                                eprintln!("Failed to convert pubsub value to bytes: {e}");
+                                tracing::error!("Failed to convert pubsub value to bytes: {e}");
                                 break;
                             }
                         };
 
                         if let Err(e) = serde_json::from_slice::<LogMessage>(&raw) {
                             if let Ok(as_str) = std::str::from_utf8(&raw) {
-                                eprintln!("Invalid payload for LogMessage: {e}; raw={as_str}");
+                                tracing::warn!("Invalid payload for LogMessage: {e}; raw={as_str}");
                             } else {
-                                eprintln!("Invalid payload for LogMessage: {e}; raw=<non-utf8>");
+                            tracing::warn!("Invalid payload for LogMessage: {e}; raw=<non-utf8>");
                             }
                         }
 
                         match String::from_utf8(raw) {
                             Ok(s) => {
                                 if let Err(e) = socket.send(WsMessage::Text(s.into())).await {
-                                    eprintln!("WebSocket send error: {e}");
+                                    tracing::error!("WebSocket send error: {e}");
                                     break;
                                 }
                             }
                             Err(e) => {
                                 let bytes = Bytes::from(e.into_bytes());
                                 if let Err(e) = socket.send(WsMessage::Binary(bytes)).await {
-                                    eprintln!("WebSocket send error: {e}");
+                                    tracing::error!("WebSocket send error: {e}");
                                     break;
                                 }
                             }
                         }
                     }
                     Err(e) => {
-                        eprintln!("Redis message stream error: {e}");
+                        tracing::error!("Redis message stream error: {e}");
                         break;
                     }
                 }
@@ -154,7 +166,7 @@ async fn handle_socket(
                     }
                     Some(Ok(_)) => {}
                     Some(Err(e)) => {
-                        eprintln!("WebSocket recv error: {e}");
+                        tracing::error!("WebSocket recv error: {e}");
                         break;
                     }
                 }
@@ -166,7 +178,7 @@ async fn handle_socket(
         .unsubscribe(format!("log:exp:{experiment_id}"))
         .await
     {
-        eprintln!("Unsubscribe error: {e}");
+        tracing::error!("Unsubscribe error: {e}");
     }
 }
 

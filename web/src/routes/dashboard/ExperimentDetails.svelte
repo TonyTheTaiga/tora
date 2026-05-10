@@ -10,6 +10,7 @@
     loadPins,
     togglePin as togglePinGlobal,
     isPinned as isPinnedGlobal,
+    mapPinnedResults,
   } from "./pins.svelte";
   import { onMount } from "svelte";
 
@@ -20,41 +21,14 @@
   let staticRefreshKey = $state(0);
   let showResults = $state(true);
   let showAllHyperparams = $state(false);
-  let pinnedResults = $state<any[]>([]);
+
+  let pinnedResults = $derived(mapPinnedResults(experiment.id, results));
 
   let sortedHyperparams = $derived(
     experiment.hyperparams
       ?.slice()
       .sort((a: HyperParam, b: HyperParam) => a.key.localeCompare(b.key)) ?? [],
   );
-
-  function storageKey(expId: string) {
-    return `tora:pinnedResults:${expId}`;
-  }
-  function loadPinnedResults() {
-    try {
-      if (typeof localStorage === "undefined") {
-        pinnedResults = [];
-        return;
-      }
-      const raw = localStorage.getItem(storageKey(experiment.id));
-      if (!raw) {
-        pinnedResults = [];
-        return;
-      }
-      const names = JSON.parse(raw);
-      if (!Array.isArray(names)) {
-        pinnedResults = [];
-        return;
-      }
-      const allow = new Set(
-        names.filter((n: unknown) => typeof n === "string") as string[],
-      );
-      pinnedResults = results.filter((r: any) => allow.has(r?.name));
-    } catch (_) {
-      pinnedResults = [];
-    }
-  }
 
   function displayHPValue(v: string | number): string {
     const s = String(v);
@@ -99,7 +73,6 @@
         }
       }
       results = list;
-      loadPinnedResults();
     } catch (error) {
       errors.experimentDetails =
         error instanceof Error
@@ -147,7 +120,6 @@
 
   function togglePin(name: string) {
     togglePinGlobal(experiment.id, name);
-    loadPinnedResults();
   }
 </script>
 

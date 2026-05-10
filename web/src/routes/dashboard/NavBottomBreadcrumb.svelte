@@ -30,16 +30,27 @@
   let experimentQuery = $state("");
 
   let experiments = $state<Experiment[]>([]);
+  let fetchController: AbortController | null = null;
 
   $effect(() => {
+    fetchController?.abort();
+    fetchController = null;
+
     if (selectedWorkspace) {
       const cached = getCachedExperiments(selectedWorkspace.id);
       if (cached) {
         experiments = cached;
       } else {
-        fetch(`/api/workspaces/${selectedWorkspace.id}/experiments`)
-          .then((r) => r.json())
+        const wsId = selectedWorkspace.id;
+        const ac = new AbortController();
+        fetchController = ac;
+        fetch(`/api/workspaces/${wsId}/experiments`, { signal: ac.signal })
+          .then((r) => {
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+          })
           .then((res) => {
+            if (ac.signal.aborted) return;
             const data = (res.data || []).map((exp: any) => ({
               id: exp.id,
               name: exp.name,
@@ -48,10 +59,14 @@
               tags: exp.tags || [],
               createdAt: new Date(exp.created_at),
               updatedAt: new Date(exp.updated_at),
-              workspaceId: selectedWorkspace!.id,
+              workspaceId: wsId,
             }));
             experiments = data;
-            setCachedExperiments(selectedWorkspace!.id, data);
+            setCachedExperiments(wsId, data);
+          })
+          .catch((e) => {
+            if (e?.name === "AbortError") return;
+            console.error("Failed to load experiments:", e);
           });
       }
     } else {
