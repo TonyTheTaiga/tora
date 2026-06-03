@@ -429,16 +429,17 @@ async fn validate_api_key(
                 api_key_record.user_email
             );
             if let Ok(id_uuid) = uuid::Uuid::parse_str(&api_key_record.id) {
-                match sqlx::query("UPDATE api_keys SET last_used = NOW() WHERE id = $1")
-                    .bind(id_uuid)
-                    .execute(&pool)
-                    .await
-                {
-                    Ok(_) => debug!("Updated last_used timestamp for API key"),
-                    Err(e) => warn!("Failed to update API key last_used timestamp: {}", e),
-                }
-            } else {
-                warn!("Invalid UUID in api_keys.id when updating last_used");
+                let pool = pool.clone();
+                tokio::spawn(async move {
+                    if let Err(e) =
+                        sqlx::query("UPDATE api_keys SET last_used = NOW() WHERE id = $1")
+                            .bind(id_uuid)
+                            .execute(&pool)
+                            .await
+                    {
+                        warn!("Failed to update API key last_used timestamp: {}", e);
+                    }
+                });
             }
 
             Ok(AuthenticatedUser {

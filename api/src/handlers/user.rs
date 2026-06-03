@@ -1,11 +1,10 @@
-use crate::handlers::{AppError, AppResult, api_key, invitation, workspace};
+use crate::handlers::{AppError, AppResult, parse_uuid};
 use crate::middleware::auth::AuthenticatedUser;
 use crate::settings::Settings;
 use crate::state::AppState;
 use crate::types;
 use axum::{
     Extension, Json,
-    body::to_bytes,
     extract::{Query, State},
     response::IntoResponse,
 };
@@ -119,51 +118,80 @@ pub async fn get_settings(
     Extension(user): Extension<AuthenticatedUser>,
     State(app_state): State<AppState>,
 ) -> Json<types::SettingsData> {
-    let workspaces_response =
-        workspace::list_workspaces(Extension(user.clone()), State(app_state.clone()))
-            .await
-            .into_response();
-    let workspaces: Vec<types::Workspace> = if workspaces_response.status().is_success() {
-        let body = to_bytes(workspaces_response.into_body(), usize::MAX)
-            .await
-            .unwrap();
-        let response_data: types::Response<Vec<types::Workspace>> =
-            serde_json::from_slice(&body).unwrap();
-        response_data.data.unwrap_or_default()
-    } else {
-        vec![]
-    };
+    let user_uuid = parse_uuid(&user.id, "user_id").unwrap();
+    let pool = &app_state.db_pool;
 
-    let api_keys_response =
-        api_key::list_api_keys(Extension(user.clone()), State(app_state.clone()))
-            .await
-            .into_response();
-    let api_keys: Vec<types::ApiKey> = if api_keys_response.status().is_success() {
-        let body = to_bytes(api_keys_response.into_body(), usize::MAX)
-            .await
-            .unwrap();
-        let response_data: types::Response<Vec<types::ApiKey>> =
-            serde_json::from_slice(&body).unwrap();
-        response_data.data.unwrap_or_default()
-    } else {
-        vec![]
-    };
+    let (workspaces_result, api_keys_result, invitations_result) = tokio::join!(
+        sqlx::query_as::<
+            _,
+            (
+                String,
+                String,
+                Option<String>,
+                chrono::DateTime<chrono::Utc>,
+                String
+            ),
+        >(
+            r#"
+            SELECT w.id::text, w.name, w.description, w.created_at, wr.name as role
+            FROM workspace w
+            JOIN user_workspaces uw ON w.id = uw.workspace_id
+            JOIN workspace_role wr ON uw.role_id = wr.id
+            WHERE uw.user_id = $1
+            ORDER BY w.created_at DESC
+            "#,
+        )
+        .bind(user_uuid)
+        .fetch_all(pool),
+        sqlx::query_as::<_, types::ApiKey>(
+            r#"
+            SELECT id::text, name, created_at, revoked, NULL as key
+            FROM api_keys
+            WHERE user_id = $1
+            ORDER BY created_at DESC
+            "#,
+        )
+        .bind(user_uuid)
+        .fetch_all(pool),
+        sqlx::query_as::<_, types::WorkspaceInvitation>(
+            r#"
+            SELECT
+                wi.id::text,
+                w.id::text as workspace_id,
+                w.name as workspace_name,
+                u_to.email as email,
+                wr.name as role,
+                u_from.email as from,
+                wi.created_at
+            FROM workspace_invitations wi
+            JOIN workspace w ON wi.workspace_id = w.id
+            JOIN workspace_role wr ON wi.role_id = wr.id
+            JOIN auth.users u_to ON wi.to = u_to.id
+            JOIN auth.users u_from ON wi.from = u_from.id
+            WHERE wi.to = $1 AND wi.status = 'PENDING'
+            ORDER BY wi.created_at DESC
+            "#,
+        )
+        .bind(user_uuid)
+        .fetch_all(pool),
+    );
 
-    let invitations_response =
-        invitation::list_invitations(Extension(user.clone()), State(app_state.clone()))
-            .await
-            .into_response();
-    let invitations: Vec<types::WorkspaceInvitation> = if invitations_response.status().is_success()
-    {
-        let body = to_bytes(invitations_response.into_body(), usize::MAX)
-            .await
-            .unwrap();
-        let response_data: types::Response<Vec<types::WorkspaceInvitation>> =
-            serde_json::from_slice(&body).unwrap();
-        response_data.data.unwrap_or_default()
-    } else {
-        vec![]
-    };
+    let workspaces = workspaces_result
+        .unwrap_or_default()
+        .into_iter()
+        .map(
+            |(id, name, description, created_at, role)| types::Workspace {
+                id,
+                name,
+                description,
+                created_at,
+                role,
+            },
+        )
+        .collect();
+
+    let api_keys = api_keys_result.unwrap_or_default();
+    let invitations = invitations_result.unwrap_or_default();
 
     Json(types::SettingsData {
         user: types::UserInfo {

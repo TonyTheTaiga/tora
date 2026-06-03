@@ -1,15 +1,8 @@
 <script lang="ts">
   import * as echarts from "echarts/core";
   import type { EChartsType } from "echarts/core";
-  import { LineChart } from "echarts/charts";
-  import {
-    GridComponent,
-    TooltipComponent,
-    LegendComponent,
-    DataZoomComponent,
-  } from "echarts/components";
-  import { CanvasRenderer } from "echarts/renderers";
   import { onMount } from "svelte";
+  import { registerECharts } from "$lib/chart/init";
   import { getChartTheme } from "$lib/chart/theme";
   import {
     baseOptions,
@@ -18,14 +11,7 @@
     lineSeriesFrom,
   } from "$lib/chart/options";
 
-  echarts.use([
-    LineChart,
-    GridComponent,
-    TooltipComponent,
-    LegendComponent,
-    DataZoomComponent,
-    CanvasRenderer,
-  ]);
+  registerECharts();
 
   type LogRow = {
     name: string;
@@ -81,8 +67,15 @@
     chart?.resize();
   }
 
+  let cachedScaled: ReturnType<typeof transformForScale> = {};
+
+  function getScaled() {
+    cachedScaled = transformForScale(seriesRaw, yScale);
+    return cachedScaled;
+  }
+
   function applyTheme() {
-    const byScale = transformForScale(seriesRaw, yScale);
+    const byScale = getScaled();
     const updates = seriesNames.map((n) => ({ id: n, data: byScale[n] }));
     chart?.setOption(
       { ...themeAxisUpdate(chartTheme, yScale), series: updates },
@@ -94,7 +87,7 @@
     if (!chart) return;
     const names = seriesNames;
     if (names.length === 0) return;
-    const byScale = transformForScale(seriesRaw, yScale);
+    const byScale = getScaled();
     const series = lineSeriesFrom(byScale);
     chart.setOption(
       {

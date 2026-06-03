@@ -1,11 +1,11 @@
 schema-up:
-	supabase db pull --schema public,auth --password PZg5U2BPVZSQWMrt
+	supabase db pull --schema public,auth --password $(SUPABASE_DB_PASSWORD)
 
 schema-pull:
-	supabase db dump --schema public --password PZg5U2BPVZSQWMrt -f supabase/schema.sql
+	supabase db dump --schema public --password $(SUPABASE_DB_PASSWORD) -f supabase/schema.sql
 
 dump:
-	supabase db dump --data-only --schema public,auth --password PZg5U2BPVZSQWMrt -f supabase/seed.sql
+	supabase db dump --data-only --schema public,auth --password $(SUPABASE_DB_PASSWORD) -f supabase/seed.sql
 
 reset-db:
 	supabase db reset

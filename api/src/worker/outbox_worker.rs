@@ -2,6 +2,7 @@ use fred::prelude::*;
 use sqlx::{self, PgPool};
 use std::fmt;
 use std::time::Duration;
+use tracing::{error, warn};
 
 use crate::{state::AppState, types::OutLog};
 
@@ -51,7 +52,7 @@ async fn publish_outlog(
     let experiment_id = log.experiment_id;
     let channel = format!("log:exp:{experiment_id}");
     let payload = serde_json::to_string(&log.payload).map_err(|e| {
-        println!("{:?}", log.payload);
+        warn!("Invalid outbox payload: {:?}", log.payload);
         PublishError {
             log_id: log.id,
             source: e.into(),
@@ -131,14 +132,14 @@ pub async fn run_worker(state: AppState, polling_interval: Duration) {
 
         if !published_ids.is_empty() {
             if let Err(e) = report_published_logs(&state.db_pool, &published_ids).await {
-                eprintln!("failed to mark published logs as processed: {e}");
+                error!("failed to mark published logs as processed: {e}");
             }
         }
 
         if !failures.is_empty() {
             let failed_ids: Vec<i64> = failures.iter().map(|e| e.log_id).collect();
             if let Err(e) = report_failed_logs(&state.db_pool, &failed_ids).await {
-                eprintln!("failed to mark failed logs: {e}");
+                error!("failed to mark failed logs: {e}");
             }
         }
 

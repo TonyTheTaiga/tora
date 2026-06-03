@@ -1,60 +1,60 @@
 import { env } from "$env/dynamic/public";
-import { error, type Cookies } from "@sveltejs/kit";
+import { error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import type { SessionData } from "$lib/types";
 
 const RUST_API_BASE_URL = env.PUBLIC_API_BASE_URL;
 
-export const GET: RequestHandler = async ({
-  request,
-  params,
-  fetch,
-  cookies,
-}) => {
-  return proxyRequest(request, params.proxyPath, fetch, cookies);
+export const GET: RequestHandler = async (event) => {
+  return proxyRequest(
+    event.request,
+    event.params.proxyPath,
+    event.fetch,
+    event.locals.session,
+  );
 };
 
-export const POST: RequestHandler = async ({
-  request,
-  params,
-  fetch,
-  cookies,
-}) => {
-  return proxyRequest(request, params.proxyPath, fetch, cookies);
+export const POST: RequestHandler = async (event) => {
+  return proxyRequest(
+    event.request,
+    event.params.proxyPath,
+    event.fetch,
+    event.locals.session,
+  );
 };
 
-export const PUT: RequestHandler = async ({
-  request,
-  params,
-  fetch,
-  cookies,
-}) => {
-  return proxyRequest(request, params.proxyPath, fetch, cookies);
+export const PUT: RequestHandler = async (event) => {
+  return proxyRequest(
+    event.request,
+    event.params.proxyPath,
+    event.fetch,
+    event.locals.session,
+  );
 };
 
-export const DELETE: RequestHandler = async ({
-  request,
-  params,
-  fetch,
-  cookies,
-}) => {
-  return proxyRequest(request, params.proxyPath, fetch, cookies);
+export const DELETE: RequestHandler = async (event) => {
+  return proxyRequest(
+    event.request,
+    event.params.proxyPath,
+    event.fetch,
+    event.locals.session,
+  );
 };
 
-export const PATCH: RequestHandler = async ({
-  request,
-  params,
-  fetch,
-  cookies,
-}) => {
-  return proxyRequest(request, params.proxyPath, fetch, cookies);
+export const PATCH: RequestHandler = async (event) => {
+  return proxyRequest(
+    event.request,
+    event.params.proxyPath,
+    event.fetch,
+    event.locals.session,
+  );
 };
 
 async function proxyRequest(
   request: Request,
   path: string,
   fetch: typeof globalThis.fetch,
-  cookies: Cookies,
+  session: SessionData | null | undefined,
 ) {
   const url = new URL(request.url);
   const rustBackendUrl = `${RUST_API_BASE_URL}/${path}${url.search}`;
@@ -63,11 +63,8 @@ async function proxyRequest(
   headers.delete("host");
   headers.delete("cookie");
 
-  const auth_token = cookies.get("tora_auth_token");
-  if (auth_token) {
-    const sessionJson = atob(auth_token);
-    const sessionData: SessionData = JSON.parse(sessionJson);
-    headers.set("Authorization", `Bearer ${sessionData.access_token}`);
+  if (session?.access_token) {
+    headers.set("Authorization", `Bearer ${session.access_token}`);
   }
 
   let body: BodyInit | null = null;

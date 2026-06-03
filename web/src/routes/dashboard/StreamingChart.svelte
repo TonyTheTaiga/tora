@@ -1,16 +1,9 @@
 <script lang="ts">
   import * as echarts from "echarts/core";
   import type { EChartsType } from "echarts/core";
-  import { LineChart } from "echarts/charts";
-  import {
-    GridComponent,
-    TooltipComponent,
-    LegendComponent,
-    DataZoomComponent,
-  } from "echarts/components";
-  import { CanvasRenderer } from "echarts/renderers";
   import { env } from "$env/dynamic/public";
   import { onMount } from "svelte";
+  import { registerECharts } from "$lib/chart/init";
   import { getChartTheme } from "$lib/chart/theme";
   import {
     baseOptions,
@@ -19,14 +12,7 @@
     lineSeriesFrom,
   } from "$lib/chart/options";
 
-  echarts.use([
-    LineChart,
-    GridComponent,
-    TooltipComponent,
-    LegendComponent,
-    DataZoomComponent,
-    CanvasRenderer,
-  ]);
+  registerECharts();
 
   let { experimentId, yScale } = $props<{
     experimentId: string;
@@ -38,6 +24,9 @@
   let chartEl: HTMLDivElement | null = null;
   let chart: EChartsType | null = null;
   let ro: ResizeObserver | null = null;
+  const MAX_POINTS_PER_SERIES = 10_000;
+  const MAX_SEEN_IDS = 50_000;
+
   let seriesData: Record<string, Array<[number, number]>> = {};
   let pending: Record<string, Array<[number, number]>> = {};
   let updateScheduled = false;
@@ -87,6 +76,46 @@
     }
   }
 
+  function insertSorted(
+    arr: Array<[number, number]>,
+    items: Array<[number, number]>,
+  ) {
+    for (const item of items) {
+      // Fast path: append if in order (common for streaming)
+      if (arr.length === 0 || item[0] >= arr[arr.length - 1][0]) {
+        arr.push(item);
+      } else {
+        // Binary search for insert position
+        let lo = 0,
+          hi = arr.length;
+        while (lo < hi) {
+          const mid = (lo + hi) >>> 1;
+          if (arr[mid][0] < item[0]) lo = mid + 1;
+          else hi = mid;
+        }
+        arr.splice(lo, 0, item);
+      }
+    }
+  }
+
+  function trimSeries(arr: Array<[number, number]>) {
+    if (arr.length > MAX_POINTS_PER_SERIES) {
+      arr.splice(0, arr.length - MAX_POINTS_PER_SERIES);
+    }
+  }
+
+  function trimSeenIds() {
+    if (seenMsgIds.size > MAX_SEEN_IDS) {
+      const iter = seenMsgIds.values();
+      const toDelete = seenMsgIds.size - MAX_SEEN_IDS;
+      for (let i = 0; i < toDelete; i++) iter.next();
+      // Rebuild with recent entries only
+      const keep: string[] = [];
+      for (const id of seenMsgIds) keep.push(id);
+      seenMsgIds = new Set(keep.slice(toDelete));
+    }
+  }
+
   function enqueue(name: string, step: number, value: number) {
     if (!pending[name]) pending[name] = [];
     pending[name].push([step, value]);
@@ -99,21 +128,41 @@
   function flush() {
     updateScheduled = false;
     if (!chart) return;
-    const names = Object.keys(pending);
-    if (names.length === 0) return;
-    for (const name of names) {
+    const changedNames = Object.keys(pending);
+    if (changedNames.length === 0) return;
+
+    for (const name of changedNames) {
       ensureSeries(name);
       const items = pending[name];
       delete pending[name];
       const arr = seriesData[name];
-      for (let i = 0; i < items.length; i++) arr.push(items[i]);
-      seriesData[name] = arr.slice().sort((a, b) => a[0] - b[0]);
+      insertSorted(arr, items);
+      trimSeries(arr);
     }
-    const updates = lineSeriesFrom(transformForScale(seriesData, yScale));
+
+    // Only update changed series, not all of them
+    const allNames = Object.keys(seriesData);
+    const scaled = transformForScale(
+      Object.fromEntries(changedNames.map((n) => [n, seriesData[n]])),
+      yScale,
+    );
+    const updates = changedNames.map((n) => ({
+      id: n,
+      name: n,
+      type: "line" as const,
+      showSymbol: false,
+      smooth: 0.15,
+      connectNulls: true,
+      data: scaled[n],
+      symbolSize: 6,
+      emphasis: { focus: "series" as const, lineStyle: { width: 3 } },
+    }));
     chart.setOption(
-      { series: updates, legend: { data: Object.keys(seriesData) } },
+      { series: updates, legend: { data: allNames } },
       { notMerge: false },
     );
+
+    trimSeenIds();
   }
 
   function wsUrlForExperiment(id: string, token: string): string {

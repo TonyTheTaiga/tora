@@ -104,9 +104,7 @@ pub async fn list_experiments(
             FROM experiment e
             JOIN workspace_experiments we ON e.id = we.experiment_id
             JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
-            LEFT JOIN log l ON e.id = l.experiment_id
             WHERE we.workspace_id = $1 AND uw.user_id = $2
-            GROUP BY e.id, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id
             ORDER BY e.created_at DESC
             "#,
         )
@@ -121,9 +119,7 @@ pub async fn list_experiments(
             FROM experiment e
             JOIN workspace_experiments we ON e.id = we.experiment_id
             JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
-            LEFT JOIN log l ON e.id = l.experiment_id
             WHERE uw.user_id = $1
-            GROUP BY e.id, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id
             ORDER BY e.created_at DESC
             "#,
         )
@@ -263,12 +259,12 @@ pub async fn get_experiments_batch(
 
     let results= sqlx::query_as::<_, (String, String, Option<String>, Option<Vec<serde_json::Value>>, Option<Vec<String>>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>, String)>(
         r#"
-        select e.id::text, e.name, e.description, e.hyperparam, e.tags, e.created_at, e.updated_at, we.workspace_id::text
+        select e.id::text, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id::text
         from experiment e
         JOIN workspace_experiments we ON e.id = we.experiment_id
         JOIN user_workspaces uw ON we.workspace_id = uw.workspace_id
         WHERE e.id = ANY($1::uuid[]) AND uw.user_id = $2
-        GROUP BY e.id, e.name, e.description, e.hyperparam, e.tags, e.created_at, e.updated_at, uw.workspace_id
+        GROUP BY e.id, e.name, e.description, e.hyperparams, e.tags, e.created_at, e.updated_at, we.workspace_id
         "#,
     )
     .bind(experiment_ids)
@@ -312,7 +308,7 @@ pub async fn get_experiments_batch(
         )
             .into_response(),
         Err(e) => {
-            eprintln!("Database error: {e}");
+            tracing::error!("Database error: {e}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(Response {
